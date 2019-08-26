@@ -49,6 +49,7 @@ make_target() {
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro
+  mkdir -p $INSTALL/etc/
   cp $PKG_BUILD/skin.png $INSTALL/usr/lib/libretro/
   cp $PKG_BUILD/skin.png $INSTALL/etc/
   cp libretro/nestopiaCV_libretro.so $INSTALL/usr/lib/libretro/
