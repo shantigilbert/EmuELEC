@@ -35,6 +35,18 @@ PKG_LIBPATH="$PKG_BUILD/.armv8a-libreelec-linux-gnueabi/mt32emu/libmt32emu.a"
   make mt32d
   mkdir -p $INSTALL/usr/bin
   cp mt32d $INSTALL/usr/bin/mt32d
+  mkdir -p $INSTALL/usr/config/asound.conf
+  echo 'pcm.!default {
+          type hw
+	          card AMLM8AUDIO
+		          device 0
+			  }
+
+ctl.!default {
+        type hw
+	        card AMLM8AUDIO
+		        device 0
+			}' > $INSTALL/usr/config/asound.conf/asound.conf
 }
 
 
