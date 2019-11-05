@@ -26,11 +26,11 @@ if [ "${DEFE}" != "Custom" ]; then
     [ ! -z "${DEFE}" ] && echo "${DEFE}" > /sys/class/display/mode
 fi 
 
-if [ -s "/storage/.config/EE_VIDEO_MODE" ]; then
+if [ -f "/storage/.config/EE_VIDEO_MODE" ]; then
         echo $(cat /storage/.config/EE_VIDEO_MODE) > /sys/class/display/mode
-elif [ -s "/flash/EE_VIDEO_MODE" ]; then
+elif [ -f "/flash/EE_VIDEO_MODE" ]; then
         echo $(cat /flash/EE_VIDEO_MODE) > /sys/class/display/mode
-fi
+fi 
 
 # finally we correct the FB according to video mode
 /emuelec/scripts/setres.sh
