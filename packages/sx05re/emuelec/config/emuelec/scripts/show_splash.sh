@@ -45,17 +45,17 @@ SPLASH3="$SPLASHDIR/$PLATFORM/launching.png"
 SPLASHVID3="$SPLASHDIR/$PLATFORM/launching.mp4"
 	
 	if [ -f "$SPLASHVID1" ]; then
-		SPLASH=$SPLASHVID1
+		SPLASH="$SPLASHVID1"
 	elif [ -f "$SPLASH1" ]; then
-		SPLASH=$SPLASH1
+		SPLASH="$SPLASH1"
 	elif [ -f "$SPLASHVID2" ]; then
-		SPLASH=$SPLASHVID2
+		SPLASH="$SPLASHVID2"
 	elif [ -f "$SPLASH2" ]; then
-		SPLASH=$SPLASH2
+		SPLASH="$SPLASH2"
 	elif [ -f "$SPLASHVID3" ]; then
-		SPLASH=$SPLASHVID3
+		SPLASH="$SPLASHVID3"
 	elif [ -f "$SPLASH3" ]; then
-		SPLASH=$SPLASH3
+		SPLASH="$SPLASH3"
 	else
 		SPLASH=${GAMELOADINGSPLASH}
 	fi
@@ -66,14 +66,14 @@ fi
 if [[ -f "/storage/.config/emuelec/configs/novideo" ]] && [[ ${VIDEO} != "1" ]]; then
 	if [ "$PLATFORM" != "intro" ]; then
 	echo $SPLASH
-			mpv -fs $SPLASH > /dev/null 2>&1
+			mpv -fs "$SPLASH" > /dev/null 2>&1
 	fi 
 else
 # Show intro video
 	SPLASH=${VIDEOSPLASH}
 	set_audio alsa
 	[ -e /storage/.config/asound.conf ] && mv /storage/.config/asound.conf /storage/.config/asound.confs
-	mpv -fs $SPLASH > /dev/null 2>&1
+	mpv -fs "$SPLASH" > /dev/null 2>&1
 	touch "/storage/.config/emuelec/configs/novideo"
 	[ -e /storage/.config/asound.confs ] && mv /storage/.config/asound.confs /storage/.config/asound.conf
 fi
