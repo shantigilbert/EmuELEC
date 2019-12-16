@@ -71,17 +71,9 @@ fi
 
 # very WIP {
 BEZ=$(get_ee_setting ee_bezels.enabled)
-if [ "$BEZ" == "1" ] ; then
-	${TBASH} /emuelec/scripts/bezels.sh "$PLATFORM" "${ROMNAME}" 
-else
-	${TBASH} /emuelec/scripts/bezels.sh "default"
-fi
+[ "$BEZ" -eq "1" ] && ${TBASH} /emuelec/scripts/bezels.sh "$PLATFORM" "${ROMNAME}" || ${TBASH} /emuelec/scripts/bezels.sh "default"
 SPL=$(get_ee_setting ee_splash.enabled)
-if [ "$SPL" == "1" ]; then
-	${TBASH} /emuelec/scripts/show_splash.sh "$PLATFORM" "${ROMNAME}" 
-else
-	${TBASH} /emuelec/scripts/show_splash.sh "default" 
-fi
+[ "$SPL" -eq "1" ] && ${TBASH} /emuelec/scripts/show_splash.sh "$PLATFORM" "${ROMNAME}"
 # } very WIP 
 
 if [ -z ${LIBRETRO} ]; then
