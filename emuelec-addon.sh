@@ -798,7 +798,7 @@ read -d '' addon <<EOF
 		<import addon="xbmc.python" version="2.1.0"/>
 	</requires>
 	<extension point="xbmc.python.pluginsource" library="default.py">
-		<provides>executable</provides>
+		<provides>executable game</provides>
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<summary lang="en">EmuELEC addon. Provides binary, cores and basic settings to launch it</summary>
