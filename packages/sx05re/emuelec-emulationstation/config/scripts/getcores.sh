@@ -140,7 +140,7 @@ case "$1" in
 	CORES="fuse_libretro"
 	;;
 "gbc"|"gb"|"gbh"|"gbch")
-	CORES="gambatte_libretro,gearboy_libretro,tgbdual_libretro"
+	CORES="mgba_libretro,gambatte_libretro,gearboy_libretro,tgbdual_libretro"
 	;;
 "amiga"|"amigacd32")
 	CORES="AMIBERRY,puae_libretro,uae4arm_libretro"
