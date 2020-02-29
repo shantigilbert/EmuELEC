@@ -291,7 +291,7 @@ LIBRETRO_S922X_CORES="4do mesen-s virtualjaguar yabasanshiro quicknes"
 "Nintendo - Super Nintendo Entertainment System.lpl;"\
 "Nintendo - Virtual Boy.lpl;"\
 "Nintendo - Wii.lpl;"\
-"Nintendo - Pokemon Mini (PokeMini);"\
+"Nintendo - Pokemon Mini (PokeMini).lpl;"\
 "Quake.lpl;"\
 "ScummVM.lpl;"\
 "Sega - 32X.lpl;"\
