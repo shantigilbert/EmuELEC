@@ -73,6 +73,9 @@ case "$1" in
 "virtualboy")
 	CORES="mednafen_vb_libretro"
 	;;
+"pokemini")
+	CORES="pokemini_libretro"
+	;;
 "openbor")
 	CORES="OPENBOR"
 	;;
