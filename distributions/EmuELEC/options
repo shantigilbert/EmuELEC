@@ -236,7 +236,7 @@
   
 LAKKA_MIRROR="http://sources.lakka.tv"
 
-LIBRETRO_CORES="2048 81 atari800 beetle-lynx beetle-ngp beetle-pce beetle-pcfx beetle-supergrafx beetle-vb beetle-wswan bluemsx cannonball cap32 crocods daphne dinothawr dosbox-svn easyrpg fbalpha2012 fbneo fceumm flycast freeintv fuse-libretro gambatte gearboy gearsystem genesis-plus-gx gme gpsp gw-libretro handy hatari mame2003-plus mame2010 meowpc98 mgba mrboom mupen64plus neocd_libretro nestopia nxengine o2em parallel-n64 pcsx_rearmed picodrive ppsspp prboom prosystem puae px68k reminiscence sameboy scummvm snes9x snes9x2002 snes9x2005_plus stella tgbdual tyrquake xrick uae4arm uzem vba-next vbam vecx vice"
+LIBRETRO_CORES="2048 81 atari800 beetle-lynx beetle-ngp beetle-pce beetle-pcfx beetle-supergrafx beetle-vb beetle-wswan bluemsx cannonball cap32 crocods daphne dinothawr dosbox-svn easyrpg fbalpha2012 fbneo fceumm flycast freeintv fuse-libretro gambatte gearboy gearsystem genesis-plus-gx gme gpsp gw-libretro handy hatari mame2003-plus mame2010 meowpc98 mgba mrboom mupen64plus neocd_libretro nestopia nxengine o2em parallel-n64 pcsx_rearmed picodrive pokemini ppsspp prboom prosystem puae px68k reminiscence sameboy scummvm snes9x snes9x2002 snes9x2005_plus stella tgbdual tyrquake xrick uae4arm uzem vba-next vbam vecx vice"
 LIBRETRO_EXTRA_CORES="chailove desmume desmume-2015 lutro melonds mesen pocketcdg snes9x2005 snes9x2010 yabause"
 LIBRETRO_S922X_CORES="4do mesen-s virtualjaguar yabasanshiro quicknes"
 
@@ -291,6 +291,7 @@ LIBRETRO_S922X_CORES="4do mesen-s virtualjaguar yabasanshiro quicknes"
 "Nintendo - Super Nintendo Entertainment System.lpl;"\
 "Nintendo - Virtual Boy.lpl;"\
 "Nintendo - Wii.lpl;"\
+"Nintendo - Pokemon Mini (PokeMini);"\
 "Quake.lpl;"\
 "ScummVM.lpl;"\
 "Sega - 32X.lpl;"\
@@ -362,6 +363,7 @@ LIBRETRO_S922X_CORES="4do mesen-s virtualjaguar yabasanshiro quicknes"
 "/tmp/cores/snes9x2010_libretro.so;"\
 "/tmp/cores/mednafen_vb_libretro.so;"\
 "/tmp/cores/dolphin_libretro.so;"\
+"/tmp/cores/pokemini_libretro.so;"\
 "/tmp/cores/tyrquake_libretro.so;"\
 "/tmp/cores/scummvm_libretro.so;"\
 "/tmp/cores/picodrive_libretro.so;"\
