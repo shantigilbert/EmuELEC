@@ -37,7 +37,11 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 make_target() {
+  if [ "$DEVICE" == "OdroidGoAdvance" ];then 
+  make -f Makefile.libretro platform=goa_armv8_a35
+  else
   make -f Makefile.libretro
+  fi
 }
 
 makeinstall_target() {

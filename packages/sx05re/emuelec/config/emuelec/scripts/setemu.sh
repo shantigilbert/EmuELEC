@@ -13,8 +13,11 @@ case "$1" in
 "set")
 	PAT=$(echo "$2" | sed -e 's|\"|\\"|g' | sed -e 's|\[|\\\[|g' | sed -e 's|\]|\\\]|g')
 	sed -i "/$PAT/d" "${EE_CONF}"
-	if [ "$3" != "auto" ]; then
-		[ $3 == "disable" ] && echo "#${2}=" >> "${EE_CONF}" || echo "${2}=${3}" >> "${EE_CONF}"
+	S2=${2}
+	S3=${3}
+	shift 2
+	if [ "${S3}" != "auto" ]; then
+		[ ${S3} == "disable" ] && echo "#${S2}=" >> "${EE_CONF}" || echo "${S2}=${@}" >> "${EE_CONF}"
 	fi
 	;;
 "get")

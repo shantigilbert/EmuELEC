@@ -293,12 +293,14 @@ fi
 fi
 done
 EE_DEVICE=$(cat /ee_arch)
+get_setting "retroarch.menu_driver"
+
 if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
-	EES="rgui"
+[ "${EES}" == "false" ] || [ "${EES}" == "none" ] || [ "${EES}" == "0" ] && EES="xmb"
 else
-	get_setting "retroarch.menu_driver"
-fi
 [ "${EES}" == "false" ] || [ "${EES}" == "none" ] || [ "${EES}" == "0" ] && EES="ozone"
+fi
+
 sed -i "/menu_driver =/d" ${RACONF}
 echo "menu_driver = ${EES}" >> ${RACONF}
 

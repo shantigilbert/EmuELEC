@@ -13,9 +13,10 @@ remove_last_word() {
 }
 
 do_list() {
-    connmanctl services | while read -r line ; do
-        if [[ $line == *'wifi_'* ]]; then
-            echo $(remove_last_word $line)
+    connmanctl services | while read; do
+        if [[ $REPLY == *'wifi_'* ]]; then
+          WITHOUT_PREFIX=${REPLY:4}
+          echo $(remove_last_word $WITHOUT_PREFIX)
         fi
     done
 }

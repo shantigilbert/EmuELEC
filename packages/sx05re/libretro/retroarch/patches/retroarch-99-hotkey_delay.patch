@@ -12,7 +12,7 @@ diff --git a/retroarch.c b/retroarch.c
 index f9f1618b9a..9491654315 100644
 --- a/retroarch.c
 +++ b/retroarch.c
-@@ -1910,6 +1910,10 @@
+@@ -3542,6 +3542,10 @@
  #ifdef HAVE_HID
  static const void *hid_data                       = NULL;
  #endif
@@ -23,7 +23,7 @@ index f9f1618b9a..9491654315 100644
  
  #ifdef HAVE_THREADS
  #define video_driver_get_ptr_internal(force) ((video_driver_is_threaded_internal() && !force) ? video_thread_get_ptr(NULL) : video_driver_data)
-@@ -13143,11 +13147,18 @@
+@@ -15993,11 +15997,18 @@
                 && current_input->input_state(current_input_data, joypad_info,
                    &binds[0], port, RETRO_DEVICE_JOYPAD, 0, RARCH_ENABLE_HOTKEY))
           {
@@ -44,25 +44,26 @@ index f9f1618b9a..9491654315 100644
              input_driver_block_hotkey         = true;
              break;
           }
-@@ -13312,10 +13323,19 @@
-                   current_input_data, joypad_info,
-                   &binds, port,
-                   RETRO_DEVICE_JOYPAD, 0, RARCH_ENABLE_HOTKEY))
+@@ -16111,10 +16122,19 @@
+                current_input_data, joypad_info,
+                &binds, port,
+                RETRO_DEVICE_JOYPAD, 0, RARCH_ENABLE_HOTKEY))
+-         input_driver_block_libretro_input = true;
+-      else
 +       {
 +         if (hotkey_counter < HOTKEY_DELAY)
 +            hotkey_counter++;
 +         if (hotkey_counter >= HOTKEY_DELAY)
 +         {
-             input_driver_block_libretro_input = true;
--         else
--            input_driver_block_hotkey         = true;
++             input_driver_block_libretro_input = true;
 +         }
-       }
++       }
 +      else {
 +         hotkey_counter = 0;
-+         input_driver_block_hotkey         = true;
+          input_driver_block_hotkey         = true;
+-   }
 +      }
 +    }
  
-       if (binds[RARCH_GAME_FOCUS_TOGGLE].valid)
-       {
+    if (binds[RARCH_GAME_FOCUS_TOGGLE].valid)
+    {

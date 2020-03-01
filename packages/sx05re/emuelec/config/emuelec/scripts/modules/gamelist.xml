@@ -37,8 +37,17 @@
 		<image>./downloaded_images/reicast.png</image>
 	</game>
 	<game>
-		<path>./06 - Sselph's scraper.sh</path>
-		<name>06 - Sselph's scraper</name>
+		<path>./05 - install drastic.sh</path>
+		<name>05 - install drastic</name>
+		<desc>Download and install Drastic, internet is required!</desc>
+		<developer>shantigilbert </developer>
+		<publisher>Emuelec</publisher>
+		<genre>script</genre>
+		<image>./downloaded_images/drastic.png</image>
+	</game>
+	<game>
+		<path>./06 - Sselphs scraper.sh</path>
+		<name>06 - Sselphs scraper</name>
 		<desc>Alternative ROM Scraper. Configuration is required!</desc>
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
@@ -82,6 +91,15 @@
 		<image>./downloaded_images/update.png</image>
 	</game>
 	<game>
+		<path>./11 - Copy USB roms to device.sh</path>
+		<name>11 - Copy USB roms to device</name>
+		<desc>Easily copy ROMS from any external device to the SD/MMC where EmuELEC is installed</desc>
+		<developer>shantigilbert </developer>
+		<publisher>Emuelec</publisher>
+		<genre>script</genre>
+		<image>./downloaded_images/usb.png</image>
+	</game>
+	<game>
 		<path>./12 - Show last emuelec.log.sh</path>
 		<name>12 - Show last emuelec</name>
 		<desc>Display the last emuelec.log on screen to debug game launching problems</desc>
@@ -98,23 +116,5 @@
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
 		<image>./downloaded_images/terminal.png</image>
-	</game>
-	<game>
-		<path>./05 - install drastic.sh</path>
-		<name>05 - install drastic</name>
-		<desc>Download and install Drastic, internet is required!</desc>
-		<developer>shantigilbert </developer>
-		<publisher>Emuelec</publisher>
-		<genre>script</genre>
-		<image>./downloaded_images/drastic.png</image>
-	</game>
-	<game>
-		<path>./11 - Copy USB roms to device.sh</path>
-		<name>11 - Copy USB roms to device</name>
-		<desc>Easily copy ROMS from any external device to the SD/MMC where EmuELEC is installed</desc>
-		<developer>shantigilbert </developer>
-		<publisher>Emuelec</publisher>
-		<genre>script</genre>
-		<image>./downloaded_images/usb.png</image>
 	</game>
 </gameList>

@@ -1,0 +1,32 @@
+--- a/backends/graphics/surfacesdl/surfacesdl-graphics.cpp
++++ b/backends/graphics/surfacesdl/surfacesdl-graphics.cpp
+@@ -199,11 +199,16 @@
+ }
+ 
+ void SurfaceSdlGraphicsManager::updateScreen() {
++	static int W = 320;
++	static int H = 480;
++	static int r = -90;
+ 	SDL_Rect dstrect;
+-	dstrect.x = _gameRect.getTopLeft().getX();
+-	dstrect.y = _gameRect.getTopLeft().getY();
+-	dstrect.w = _gameRect.getWidth();
+-	dstrect.h = _gameRect.getHeight();
++	dstrect.x = (W - H) / 2 - 1;
++	dstrect.y = (H - W) / 2;
++	dstrect.w = H;
++	dstrect.h = W;
++	static SDL_Point x = {160, 160};
++	
+ 	SDL_BlitSurface(_subScreen, NULL, _screen, &dstrect);
+ 
+ 	if (_overlayVisible) {
+@@ -215,7 +220,7 @@
+ 	SDL_UpdateTexture(_screenTexture, nullptr, _screen->pixels, _screen->pitch);
+ 
+ 	SDL_RenderClear(_renderer);
+-	SDL_RenderCopy(_renderer, _screenTexture, nullptr, nullptr);
++	SDL_RenderCopyEx(_renderer, _screenTexture, NULL, &dstrect, r, &x, SDL_FLIP_NONE);
+ 	SDL_RenderPresent(_renderer);
+ #else
+ 	SDL_Flip(_screen);

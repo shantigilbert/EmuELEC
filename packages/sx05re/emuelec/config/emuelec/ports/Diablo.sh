@@ -6,13 +6,10 @@
 # Source predefined functions and variables
 . /etc/profile
 
-JSLISTENCONF="/emuelec/configs/jslisten.cfg"
-sed -i '/program=.*/d' ${JSLISTENCONF}
-echo "program=\"/usr/bin/killall devilutionx\"" >> ${JSLISTENCONF}
+PORT="devilutionx"
 
-# JSLISTEN setup so that we can kill devilutionx using hotkey+start
-/storage/.emulationstation/scripts/configscripts/z_getkillkeys.sh
-/emuelec/bin/jslisten &
+# init_port binary audio(alsa. pulseaudio, default)
+init_port ${PORT} alsa
 
 if [ ! -L /storage/.local/share/diasurgical/devilution/diabdat.mpq ]; then
 mkdir -p /storage/.local/share/diasurgical/devilution/
@@ -20,6 +17,6 @@ ln -sf /storage/roms/ports/diablo/diabdat.mpq /storage/.local/share/diasurgical/
 fi
 
 cd /emuelec/bin/
-./devilutionx
+./${PORT}
 
-killall jslisten
+end_port

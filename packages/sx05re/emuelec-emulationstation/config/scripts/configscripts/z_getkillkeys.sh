@@ -23,11 +23,8 @@ if [ $FOUND = 1 ]; then
 	EE_GAMEPAD="/tmp/joypads/$file2"
 	KEY1=$(cat "$EE_GAMEPAD" | grep -E 'hotkey_btn' | cut -d '"' -f2)
 	KEY2=$(cat "$EE_GAMEPAD" | grep -E 'input_exit_emulator_btn' | cut -d '"' -f2)
-	
-	sed -i '/button1=.*/d' ${EE_CFG}
-	sed -i '/button2=.*/d' ${EE_CFG}
-	echo "button1=${KEY1}" >> ${EE_CFG}	
-	echo "button2=${KEY2}" >> ${EE_CFG}	
+	sed -i "3s|button1=.*|button1=${KEY1}|" ${EE_CFG}	
+	sed -i "4s|button2=.*|button2=${KEY2}|" ${EE_CFG}	
 
 	DEVICE=$(cat "$EE_GAMEPAD" | grep -E 'input_device' | cut -d '"' -f2)
 	echo "Kill combo set to ${KEY1}+${KEY2} from $EE_GAMEPAD Dev: $EE_DEV"

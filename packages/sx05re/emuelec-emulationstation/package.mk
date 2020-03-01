@@ -2,12 +2,12 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="emuelec-emulationstation"
-PKG_VERSION="bcf6f851efe425beeb01104af5fdd949d1aee1c6"
+PKG_VERSION="4ead114858c85466d8eca9f2041a8c7bde8a4267"
 PKG_GIT_CLONE_BRANCH="EmuELEC"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
-PKG_SITE="https://github.com/shantigilbert/emuelec-emulationstation"
+PKG_SITE="https://github.com/EmuELEC/emuelec-emulationstation"
 PKG_URL="$PKG_SITE.git"
 PKG_DEPENDS_TARGET="toolchain SDL2-git freetype curl freeimage vlc bash rapidjson ${OPENGLES} SDL2_mixer fping pyyaml"
 PKG_SECTION="emuelec"
@@ -23,6 +23,8 @@ PKG_CMAKE_OPTS_TARGET=" -DENABLE_EMUELEC=1 -DDISABLE_KODI=1 -DENABLE_FILEMANAGER
 
 if [ "$DEVICE" == "OdroidGoAdvance" ]; then
 sed -i "s|ExecStart=.*|ExecStart=/usr/bin/emulationstation --log-path /storage/.config/emuelec/logs --screenrotate 3 --resolution 480 320|" $PKG_DIR/system.d/emustation.service
+else
+sed -i "s|ExecStart=.*|ExecStart=/usr/bin/emulationstation --log-path /storage/.config/emuelec/logs|" $PKG_DIR/system.d/emustation.service
 fi
 
 makeinstall_target() {
@@ -52,7 +54,7 @@ makeinstall_target() {
 	cp -rf $PKG_DIR/config/*.cfg $INSTALL/usr/config/emulationstation
 
 # Remove systems that are not compatible with S905
-	if [ ${PROJECT} = "Amlogic" ]; then 	
+	if [[ ${PROJECT} != "Amlogic-ng" ]]; then 	
 	xmlstarlet ed -L -P -d "/systemList/system[name='3do']" $INSTALL/usr/config/emulationstation/es_systems.cfg
 	xmlstarlet ed -L -P -d "/systemList/system[name='saturn']" $INSTALL/usr/config/emulationstation/es_systems.cfg
 	fi 
@@ -71,7 +73,5 @@ post_install() {
 	enable_service emustation.service
 	mkdir -p $INSTALL/usr/share
 	ln -sf /storage/.config/emuelec/configs/locale $INSTALL/usr/share/locale
-	if [ $DEVICE != "OdroidGoAdvance" ]; then
 	sed -i "s|ExecStart=.*|ExecStart=/usr/bin/emulationstation --log-path /storage/.config/emuelec/logs|" $PKG_DIR/system.d/emustation.service
-	fi
 }

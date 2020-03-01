@@ -1,0 +1,27 @@
+--- a/backends/graphics/surfacesdl/surfacesdl-graphics.cpp
++++ b/backends/graphics/surfacesdl/surfacesdl-graphics.cpp
+@@ -2756,14 +2756,17 @@
+ void SurfaceSdlGraphicsManager::SDL_UpdateRects(SDL_Surface *screen, int numrects, SDL_Rect *rects) {
+ 	SDL_UpdateTexture(_screenTexture, nullptr, screen->pixels, screen->pitch);
+ 
+-	SDL_Rect viewport;
+-	viewport.x = _activeArea.drawRect.left;
+-	viewport.y = _activeArea.drawRect.top;
+-	viewport.w = _activeArea.drawRect.width();
+-	viewport.h = _activeArea.drawRect.height();
+-
++	static int W = 320;
++	static int H = 480;
++	static int n = -90;
++	SDL_Rect dstrect;
++	dstrect.x = (W - H) / 2 - 1;
++	dstrect.y = (H - W) / 2;
++	dstrect.w = H;
++	dstrect.h = W;
++	
+ 	SDL_RenderClear(_renderer);
+-	SDL_RenderCopy(_renderer, _screenTexture, NULL, &viewport);
++	SDL_RenderCopyEx(_renderer, _screenTexture, NULL, &dstrect, n, NULL, SDL_FLIP_NONE);
+ 	SDL_RenderPresent(_renderer);
+ }
+ #endif // SDL_VERSION_ATLEAST(2, 0, 0)

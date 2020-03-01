@@ -16,11 +16,13 @@ case "$1" in
 [ -z "$2" ] && systemctl stop emustation
 	zip ${BACKUPFILE} /storage/.local/share/VVVVVV/* \
 	                  /storage/.cache/bluetooth/* \
+	                  /storage/.cache/connman* \
 	                  /emuelec/configs/emuoptions.conf \
 	                  /emuelec/configs/emuelec.conf \
 	                  /storage/.emulationstation/es_*.cfg \
 	                  /tmp/joypads/* \
 	                  /storage/.config/retroarch/*.cfg \
+	                  /storage/.config/ppsspp/* \
 	                  /storage/.config/retroarch/config/*
 sleep 3
 [ -z "$2" ] && systemctl start emustation

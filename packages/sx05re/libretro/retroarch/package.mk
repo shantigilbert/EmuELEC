@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="retroarch"
-PKG_VERSION="36cbcb12b25f12dcbdb93206adc9f429c60d04ad"
+PKG_VERSION="a10db7c2800779f6465ddb94f37839ec75914b94"
 PKG_SITE="https://github.com/libretro/RetroArch"
 PKG_URL="$PKG_SITE.git"
 PKG_LICENSE="GPLv3"
@@ -29,6 +29,10 @@ GET_HANDLER_SUPPORT="git"
 
 if [ ${PROJECT} = "Amlogic-ng" ]; then
   PKG_PATCH_DIRS="${PROJECT}"
+fi
+
+if [ "$DEVICE" == "OdroidGoAdvance" ]; then
+PKG_DEPENDS_TARGET+=" libdrm librga"
 fi
 
 # Pulseaudio Support
@@ -57,16 +61,13 @@ PKG_CONFIGURE_OPTS_TARGET="--enable-neon \
                            --enable-ffmpeg"
 
 if [ "$DEVICE" == "OdroidGoAdvance" ]; then
-PKG_DEPENDS_TARGET+=" libdrm libgo2"
-
 PKG_CONFIGURE_OPTS_TARGET+=" --enable-opengles3 \
                            --enable-kms \
-                           --disable-mali_fbdev"
-
+                           --disable-mali_fbdev \
+                           --enable-odroidgo2"
 else
 PKG_CONFIGURE_OPTS_TARGET+=" --disable-kms \
                            --enable-mali_fbdev"
-
 fi
 
 cd $PKG_BUILD
@@ -127,6 +128,12 @@ makeinstall_target() {
   sed -i -e "s/# video_filter_dir =/video_filter_dir =\/usr\/share\/video_filters/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# video_gpu_screenshot = true/video_gpu_screenshot = false/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# video_fullscreen = false/video_fullscreen = true/" $INSTALL/etc/retroarch.cfg
+
+if [ "$DEVICE" == "OdroidGoAdvance" ]; then
+    echo "xmb_layout = 2" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_widget_scale_auto = false" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_widget_scale_factor = 2.00" >> $INSTALL/etc/retroarch.cfg
+fi
 
   # Audio
   sed -i -e "s/# audio_driver =/audio_driver = \"alsathread\"/" $INSTALL/etc/retroarch.cfg

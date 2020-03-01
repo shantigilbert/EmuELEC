@@ -1,0 +1,20 @@
+--- a/src/pty.c
++++ b/src/pty.c
+@@ -45,6 +45,7 @@
+ #define LOG_SUBSYSTEM "pty"
+ 
+ #define KMSCON_NREAD 16384
++#define SIGUNUSED 31
+ 
+ struct kmscon_pty {
+ 	unsigned long ref;
+--- a/src/uterm_vt.c
++++ b/src/uterm_vt.c
+@@ -40,6 +40,7 @@
+ #include <sys/ioctl.h>
+ #include <sys/signalfd.h>
+ #include <sys/stat.h>
++#include <sys/sysmacros.h>
+ #include <termios.h>
+ #include <time.h>
+ #include <unistd.h>

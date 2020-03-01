@@ -1,0 +1,13 @@
+[Unit]
+Description=Odroid Go Advance headphone sense
+ConditionPathExists=/dev/input/event1
+Before=emuelec.target
+
+[Service]
+Environment=HOME=/storage
+EnvironmentFile=/storage/.config/emulationstation/scripts/es_env.sh
+ExecStart=/emuelec/scripts/headphone_sense.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
