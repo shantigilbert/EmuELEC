@@ -6,6 +6,10 @@
 # Source predefined functions and variables
 . /etc/profile
 
+# Switch to headphones if we have them already connected at boot
+GPIO=$(cat /sys/class/gpio/gpio86/value)
+[[ "$GPIO" == "1" ]] && set_ee_setting "audio.device" "headphones" || set_ee_setting "audio.device" "speakers"
+
 if [ -e "/emuelec/configs/emuelec.conf" ]; then
 /emuelec/scripts/odroidgoa_utils.sh setaudio $(get_ee_setting "audio.device")
 /emuelec/scripts/odroidgoa_utils.sh vol $(get_ee_setting "audio.volume")
