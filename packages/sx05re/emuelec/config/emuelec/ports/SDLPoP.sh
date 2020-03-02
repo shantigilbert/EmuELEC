@@ -6,17 +6,13 @@
 # Source predefined functions and variables
 . /etc/profile
 
-JSLISTENCONF="/emuelec/configs/jslisten.cfg"
-sed -i '/program=.*/d' ${JSLISTENCONF}
-echo "program=\"/usr/bin/killall sdlpop\"" >> ${JSLISTENCONF}
+PORT="prince"
 
-# JSLISTEN setup so that we can kill VVVVVV using hotkey+start
-/storage/.emulationstation/scripts/configscripts/z_getkillkeys.sh
-/emuelec/bin/jslisten &
+# init_port binary audio(alsa. pulseaudio, default)
+init_port ${PORT} alsa
 
-set_audio alsa
+# SDLPop will complain about a missing data and config files by showing a nice blank screen after the intro
 cd /storage/.config/emuelec/configs/SDLPoP
-prince
-set_audio default
+${PORT}
 
-killall jslisten
+end_port

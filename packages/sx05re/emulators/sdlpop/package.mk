@@ -4,7 +4,7 @@
 PKG_NAME="sdlpop"
 PKG_VERSION="12942c090ca653441c820b2abc8313ab748c0d24"
 PKG_ARCH="any"
-PKG_LICENSE="CUSTOM"
+PKG_LICENSE="GPL3"
 PKG_SITE="https://github.com/NagyD/SDLPoP"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain SDL2-git SDL2_image"
