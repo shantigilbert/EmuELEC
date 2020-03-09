@@ -16,6 +16,14 @@ GET_HANDLER_SUPPORT="git"
 PKG_CMAKE_OPTS_TARGET=" ./src"
 
 pre_configure_target() {
-mkdir -p $INSTALL/usr/share/daphne/
-ln -fs /storage/.config/emuelec/configs/daphne/hypinput.ini $INSTALL/usr/share/daphne/hypinput.ini
+mkdir -p $INSTALL/usr/config/emuelec/configs/hypseus
+ln -fs /storage/roms/daphne/roms $INSTALL/usr/config/emuelec/configs/hypseus/roms
+ln -fs /storage/roms/daphne/sound $INSTALL/usr/config/emuelec/configs/hypseus/sound
+ln -fs /usr/share/daphne/fonts $INSTALL/usr/config/emuelec/configs/hypseus/fonts
+ln -fs /usr/share/daphne/pics $INSTALL/usr/config/emuelec/configs/hypseus/pics
+cp $PKG_BUILD/doc/hypinput.ini $INSTALL/usr/config/emuelec/configs/hypseus/
+}
+
+post_makeinstall_target() {
+ln -fs /storage/.config/emuelec/configs/hypseus/hypinput.ini $INSTALL/usr/share/daphne/hypinput.ini
 }

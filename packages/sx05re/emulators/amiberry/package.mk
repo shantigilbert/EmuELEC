@@ -13,6 +13,10 @@ GET_HANDLER_SUPPORT="git"
 PKG_TOOLCHAIN="make"
 PKG_GIT_CLONE_BRANCH="master"
 
+if [ "$DEVICE" == "OdroidGoAdvance" ]; then
+PKG_PATCH_DIRS="OdroidGoAdvance"
+fi
+
 pre_configure_target() {
   cd ${PKG_BUILD}
   export SYSROOT_PREFIX=${SYSROOT_PREFIX}
@@ -61,5 +65,7 @@ makeinstall_target() {
   
   if [ "$DEVICE" == "OdroidGoAdvance" ]; then
   echo "rotation_angle=-90" >> ${INSTALL}/usr/config/amiberry/conf/adfdir.conf
+  UAE="${INSTALL}/usr/config/amiberry/conf/*.uae"
+  for i in $UAE; do echo -e "gfx_center_vertical=smart\ngfx_center_horizontal=smart" >> $i; done
   fi
 }

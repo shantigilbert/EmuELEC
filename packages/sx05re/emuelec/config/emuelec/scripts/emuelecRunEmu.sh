@@ -164,6 +164,12 @@ case ${PLATFORM} in
 		fi
 		fi
 		;;
+	"daphne")
+		if [ "$EMU" = "hypseus" ]; then
+		set_kill_keys "hypseus"
+		RUNTHIS='${TBASH} /storage/.config/emuelec/scripts/hypseus.start.sh "${ROMNAME}"'
+		fi
+		;;
 	"pc")
 		if [ "$EMU" = "DOSBOXSDL2" ]; then
 		set_kill_keys "dosbox"

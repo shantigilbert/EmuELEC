@@ -62,7 +62,7 @@ case "$1" in
 	CORES="bluemsx_libretro"
 	;;
 "daphne")
-	CORES="daphne_libretro"
+	CORES="hypseus,daphne_libretro"
 	;;
 "odyssey2"|"videopac")
 	CORES="o2em_libretro"
