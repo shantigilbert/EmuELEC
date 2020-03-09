@@ -13,10 +13,6 @@ GET_HANDLER_SUPPORT="git"
 PKG_TOOLCHAIN="make"
 PKG_GIT_CLONE_BRANCH="master"
 
-if [ "$DEVICE" == "OdroidGoAdvance" ]; then
-PKG_PATCH_DIRS="OdroidGoAdvance"
-fi
-
 pre_configure_target() {
   cd ${PKG_BUILD}
   export SYSROOT_PREFIX=${SYSROOT_PREFIX}
