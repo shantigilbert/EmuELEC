@@ -1,0 +1,52 @@
+*** a/drivers/hid/hid-sony.c	2019-11-07 15:09:43.000000000 -0700
+--- b/drivers/hid/hid-sony.c	2019-12-13 11:10:19.353325098 -0700
+***************
+*** 1061,1066 ****
+--- 1061,1076 ----
+  	u8 led_count;
+  };
+  
++ /*
++  * The ShanWan reports the same id as the Sony SixAxis, therefore
++  * it can't be added to sony_devices[], but we still need to know which one
++  * we're dealing with.
++  */
++ static int is_shanwan_gamepad(struct hid_device *hdev)
++ {
++    return strstr(hdev->name, "ShanWan") || strstr(hdev->name, "SHANWAN") ;
++ }
++ 
+  static inline void sony_schedule_work(struct sony_sc *sc)
+  {
+  	if (!sc->defer_initialization)
+***************
+*** 1134,1139 ****
+--- 1144,1157 ----
+  {
+  	struct sony_sc *sc = hid_get_drvdata(hdev);
+  
++     /*
++     * The ShanWan  gamepades when used over USB, times out when
++     * initialising reports, but it works just fine without init.
++     */
++         if((sc->quirks & SIXAXIS_CONTROLLER_USB) && is_shanwan_gamepad(hdev))
++            hdev->quirks |= HID_QUIRK_NO_INIT_REPORTS;
++ 
++ 
+  	if (sc->quirks & (SINO_LITE_CONTROLLER | FUTUREMAX_DANCE_MAT))
+  		return rdesc;
+  
+***************
+*** 1435,1441 ****
+--- 1453,1463 ----
+  	/*
+  	 * Some compatible controllers like the Speedlink Strike FX and
+  	 * Gasia need another query plus an USB interrupt to get operational.
++          * The ShanWan gamepads doesn't like these additional steps.
+  	 */
++         if(is_shanwan_gamepad(hdev))
++                 goto out;
++ 
+  	ret = hid_hw_raw_request(hdev, 0xf5, buf, SIXAXIS_REPORT_0xF5_SIZE,
+  				 HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
+  	if (ret < 0) {
