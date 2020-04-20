@@ -6,17 +6,18 @@ PKG_VERSION=""
 PKG_SHA256=""
 PKG_ARCH="any"
 PKG_LICENSE="OSS"
-PKG_DEPENDS_TARGET="toolchain rs97-commander-sdl2"
+PKG_DEPENDS_TARGET="toolchain rs97-commander-sdl2 python-evdev enable-oga-sleep"
 PKG_SITE=""
 PKG_URL=""
 PKG_LONGDESC="Support scripts for the ODROID-GO Advance"
 PKG_TOOLCHAIN="manual"
 
 makeinstall_target() {
-mkdir -p $INSTALL/usr/config/emuelec/scripts
-cp *.sh $INSTALL/usr/config/emuelec/scripts
+	mkdir -p $INSTALL/usr/config/emuelec/scripts
+	cp * $INSTALL/usr/config/emuelec/scripts
 }
 
 post_install() {  
-	enable_service odroidgoa-utils.service
+	enable_service odroidgoa-hotkeys.service
+	enable_service odroidgoa-headphones.service
 }

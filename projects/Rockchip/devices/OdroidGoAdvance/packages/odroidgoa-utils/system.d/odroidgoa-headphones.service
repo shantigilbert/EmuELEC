@@ -1,5 +1,5 @@
 [Unit]
-Description=Odroid Go Advance headphone sense
+Description=Odroid Go Advance Headphone Sense
 ConditionPathExists=/dev/input/event1
 Before=emuelec.target
 
