@@ -1,0 +1,14 @@
+[Unit]
+Description=Odroid Go Advance Hotkeys
+ConditionPathExists=/dev/input/event0
+ConditionPathExists=/dev/input/event2
+Before=emuelec.target
+
+[Service]
+Environment=HOME=/storage
+EnvironmentFile=/storage/.config/emulationstation/scripts/es_env.sh
+ExecStart=/emuelec/scripts/oga_events.py
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
