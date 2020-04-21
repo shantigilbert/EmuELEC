@@ -59,24 +59,29 @@
  	std::string systemName = system->getName();
 --- a/es-core/src/InputManager.cpp
 +++ b/es-core/src/InputManager.cpp
-@@ -319,18 +319,20 @@
+@@ -318,30 +318,13 @@
+ 		//}
  
  #ifdef _ENABLEEMUELEC
- 		/* use the POWER KEY to turn off EmuELEC, specially useful for GTKING-PRO and Odroid Go Advance*/
--        if(ev.key.keysym.sym == SDLK_POWER) {
--			SDL_Event *quit = new SDL_Event();
--			quit->type = SDL_QUIT | 0X4000;
--			SDL_PushEvent(quit);
--			return false;
+-    static int delayP = -1;
+-
+-        /* Use the POWER KEY (double tap) to turn off EmuELEC, specially useful for GTKING-PRO and Odroid Go Advance*/
+-    if(ev.key.keysym.sym == SDLK_POWER) 
+-		{
+-            int delay = SDL_GetTicks();
+-
+-    if (delayP > 0 && delay - delayP < 500) 
+-		{ 
+-	/* TODO: if possible call a script to either shutdown or enter sleep depening on configuration */
+-	// LOG(LogInfo) << "double click power button delay is: " << std::to_string(delay - delayP);
+-            SDL_Event *quit = new SDL_Event();
+-            quit->type = SDL_QUIT | 0X4000;
+-            SDL_PushEvent(quit);
+-            return false;
 -		}
-+        	// if(ev.key.keysym.sym == SDLK_POWER) {
-+			//SDL_Event *quit = new SDL_Event();
-+			//quit->type = SDL_QUIT | 0X4000;
-+			//SDL_PushEvent(quit);
-+			//return false;
-+			// Swallow power key press
-+			// return true;
-+		// }
+-    delayP = delay;
+-		}
++    // sleep and shutdown on power key is handled by /emuelec/scripts/oga_events.py script
  #endif
 -		window->input(getInputConfigByDevice(DEVICE_KEYBOARD), Input(DEVICE_KEYBOARD, TYPE_KEY, ev.key.keysym.sym, 1, false));
 +		if(ev.key.keysym.sym != SDLK_POWER) window->input(getInputConfigByDevice(DEVICE_KEYBOARD), Input(DEVICE_KEYBOARD, TYPE_KEY, ev.key.keysym.sym, 1, false));
