@@ -93,3 +93,14 @@
  		return true;
  
  	case SDL_TEXTINPUT:
+--- a/es-app/src/views/ViewController.cpp
++++ b/es-app/src/views/ViewController.cpp
+@@ -476,7 +476,7 @@
+ #ifdef _ENABLEEMUELEC
+ /* Detect unconfigured keyboad as well */
+         if(config->isConfigured() == false) {
+-			if(input.type == TYPE_BUTTON || input.type == TYPE_KEY) {
++			if(input.type == TYPE_BUTTON) {
+ 	    mWindow->pushGui(new GuiDetectDevice(mWindow, false, NULL));
+ 	    return true;
+ 	  }
