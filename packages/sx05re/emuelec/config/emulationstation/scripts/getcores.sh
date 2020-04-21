@@ -169,6 +169,9 @@ case "$1" in
 "setup")
 	CORES="SETUP"
 	;;
+"uzebox")
+	CORES="uzem_libretro"
+	;;
 esac
 
 [[ $2 == "default" ]] && CORES="$(echo ${CORES} | cut -d',' -f1)"

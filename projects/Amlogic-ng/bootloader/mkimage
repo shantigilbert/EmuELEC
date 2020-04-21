@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
-# copy amlogic autoscript files to part1 for all img except Odroid N2
-if [ "${SUBDEVICE}" != "Odroid_N2" ]; then
+# copy amlogic autoscript files to part1 for all img except Odroid N2/C4
+if [ "${SUBDEVICE}" != "Odroid_N2" -o "${SUBDEVICE}" == "Odroid_C4" ]; then
   for f in $RELEASE_DIR/3rdparty/bootloader/*autoscript; do
     [ -e "$f" ] && mcopy "$f" ::
   done
@@ -41,12 +41,9 @@ if [ "${SUBDEVICE}" != "Generic" ]; then
     mcopy "$LE_TMP/boot.ini" ::
   fi
 
-  if [ "${SUBDEVICE}" == "Odroid_N2" ]; then
-    if [ -f "$RELEASE_DIR/3rdparty/bootloader/boot-logo-1080.bmp.gz" ]; then
-      mcopy $RELEASE_DIR/3rdparty/bootloader/boot-logo-1080.bmp.gz ::
-    fi
-    if [ -f "$RELEASE_DIR/3rdparty/bootloader/timeout-logo-1080.bmp.gz" ]; then
-      mcopy $RELEASE_DIR/3rdparty/bootloader/timeout-logo-1080.bmp.gz ::
+  if [ "${SUBDEVICE}" == "Odroid_N2" -o "${SUBDEVICE}" == "Odroid_C4" ]; then
+    if [ -f "$RELEASE_DIR/3rdparty/bootloader/hk-boot-logo-1080.bmp.gz" ]; then
+      mcopy $RELEASE_DIR/3rdparty/bootloader/hk-boot-logo-1080.bmp.gz "::/boot-logo-1080.bmp.gz"
     fi
   fi
 fi

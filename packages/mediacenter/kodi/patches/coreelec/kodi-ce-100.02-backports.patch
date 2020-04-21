@@ -1,38 +1,72 @@
-From 97de7c8c8a534eb10ea26f04b9af1467084d5f12 Mon Sep 17 00:00:00 2001
-From: Arthur Liberman <arthur_liberman@hotmail.com>
-Date: Fri, 31 May 2019 01:50:13 +0300
-Subject: [PATCH] settings: add "Dark Grey" subtitles color option
+From c7a9307565c76fd793a6ee87b0442d37173cc087 Mon Sep 17 00:00:00 2001
+From: Kai Sommerfeld <kai.sommerfeld@gmx.com>
+Date: Sat, 1 Jun 2019 13:23:22 +0200
+Subject: [PATCH] [PVR] Fix deadlock on PVR shutdown.
 
 ---
- addons/resource.language.en_gb/resources/strings.po         | 6 +++++-
- system/settings/settings.xml                                | 1 +
- .../VideoPlayer/DVDCodecs/Overlay/DVDOverlayCodecTX3G.cpp   | 2 +-
- .../cores/VideoPlayer/VideoRenderers/OverlayRendererGUI.cpp | 5 +++--
- xbmc/utils/Color.h                                          | 1 +
- 5 files changed, 11 insertions(+), 4 deletions(-)
+ xbmc/pvr/PVRManager.cpp | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/xbmc/pvr/PVRManager.cpp b/xbmc/pvr/PVRManager.cpp
+index 6b9ea7ae2b3b..d61a8ec99fef 100644
+--- a/xbmc/pvr/PVRManager.cpp
++++ b/xbmc/pvr/PVRManager.cpp
+@@ -299,8 +299,6 @@ void CPVRManager::Start()
+   // lock here (m_startStopMutex), which only gets hold while starting/restarting pvr manager.
+   Stop();
+ 
+-  CSingleLock lock(m_critSection);
+-
+   if (!m_addons->HasCreatedClients())
+     return;
+ 
+@@ -339,8 +337,6 @@ void CPVRManager::Stop(void)
+ 
+   SetState(ManagerStateInterrupted);
+ 
+-  CSingleLock lock(m_critSection);
+-
+   UnloadComponents();
+   m_database->Close();
+ 
+From eb5c56891ef4739566898b9bc72914a9c8ba8be8 Mon Sep 17 00:00:00 2001
+From: Arthur Liberman <arthur_liberman@hotmail.com>
+Date: Fri, 31 May 2019 01:50:13 +0300
+Subject: [PATCH] settings: add "Dark Grey" subtitles color option This can be
+ useful when watching HDR content with subs, and "Grey" is still too bright.
+
+---
+ addons/resource.language.en_gb/resources/strings.po       | 8 ++++++--
+ system/settings/settings.xml                              | 1 +
+ .../VideoPlayer/DVDCodecs/Overlay/DVDOverlayCodecTX3G.cpp | 2 +-
+ .../VideoPlayer/VideoRenderers/OverlayRendererGUI.cpp     | 5 +++--
+ xbmc/utils/Color.h                                        | 1 +
+ 5 files changed, 12 insertions(+), 5 deletions(-)
 
 diff --git a/addons/resource.language.en_gb/resources/strings.po b/addons/resource.language.en_gb/resources/strings.po
-index cb98d8e2ff..4e8bdd6338 100644
+index 74c74a9c8353..eda5521614a1 100644
 --- a/addons/resource.language.en_gb/resources/strings.po
 +++ b/addons/resource.language.en_gb/resources/strings.po
-@@ -3452,7 +3452,11 @@ msgctxt "#767"
+@@ -3458,8 +3458,12 @@ msgctxt "#767"
  msgid "Grey"
  msgstr ""
  
 -#empty strings from id 768 to 769
+-#strings 768 and 769 reserved for more subtitle colours
 +msgctxt "#768"
 +msgid "Dark Grey"
 +msgstr ""
 +
-+#empty strings from id 769 to 769
- #strings 768 and 769 reserved for more subtitle colours
++#empty string id 769
++#string 769 reserved for more subtitle colours
  
  msgctxt "#770"
+ msgid "Error {0:d}: share not available"
 diff --git a/system/settings/settings.xml b/system/settings/settings.xml
-index dc33b41ecc..df628bc0c6 100755
+index 5a136982058b..5f858f1a27ec 100755
 --- a/system/settings/settings.xml
 +++ b/system/settings/settings.xml
-@@ -634,6 +634,7 @@
+@@ -553,6 +553,7 @@
                <option label="765">5</option> <!-- Cyan -->
                <option label="766">6</option> <!-- Light grey -->
                <option label="767">7</option> <!-- Grey -->
@@ -41,10 +75,10 @@ index dc33b41ecc..df628bc0c6 100755
            </constraints>
            <dependencies>
 diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Overlay/DVDOverlayCodecTX3G.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Overlay/DVDOverlayCodecTX3G.cpp
-index a0046c3140..b3518406d7 100644
+index 15f87cbbaf07..c89b7bfd8520 100644
 --- a/xbmc/cores/VideoPlayer/DVDCodecs/Overlay/DVDOverlayCodecTX3G.cpp
 +++ b/xbmc/cores/VideoPlayer/DVDCodecs/Overlay/DVDOverlayCodecTX3G.cpp
-@@ -60,7 +60,7 @@ CDVDOverlayCodecTX3G::CDVDOverlayCodecTX3G() : CDVDOverlayCodec("TX3G Subtitle D
+@@ -62,7 +62,7 @@ CDVDOverlayCodecTX3G::CDVDOverlayCodecTX3G() : CDVDOverlayCodec("TX3G Subtitle D
  {
    m_pOverlay = NULL;
    // stupid, this comes from a static global in GUIWindowFullScreen.cpp
@@ -54,10 +88,10 @@ index a0046c3140..b3518406d7 100644
  }
  
 diff --git a/xbmc/cores/VideoPlayer/VideoRenderers/OverlayRendererGUI.cpp b/xbmc/cores/VideoPlayer/VideoRenderers/OverlayRendererGUI.cpp
-index 3cce7ceec4..19d585199f 100644
+index 62da9b32e87b..47a18fb16d1a 100644
 --- a/xbmc/cores/VideoPlayer/VideoRenderers/OverlayRendererGUI.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoRenderers/OverlayRendererGUI.cpp
-@@ -24,14 +24,15 @@
+@@ -25,14 +25,15 @@
  
  using namespace OVERLAY;
  
@@ -73,10 +107,10 @@ index 3cce7ceec4..19d585199f 100644
 +                                  UTILS::COLOR::GREY,
 +                                  UTILS::COLOR::DARKGREY };
  
- CGUITextLayout* COverlayText::GetFontLayout(const std::string &font, int color, int height, int style,
+ CGUITextLayout* COverlayText::GetFontLayout(const std::string &font, int color, int opacity, int height, int style,
                                              const std::string &fontcache, const std::string &fontbordercache)
 diff --git a/xbmc/utils/Color.h b/xbmc/utils/Color.h
-index 8c813517f2..5036ccd2cb 100644
+index 8c813517f238..5036ccd2cbee 100644
 --- a/xbmc/utils/Color.h
 +++ b/xbmc/utils/Color.h
 @@ -27,5 +27,6 @@ namespace COLOR
@@ -86,6 +120,3 @@ index 8c813517f2..5036ccd2cb 100644
 +  static const Color DARKGREY = 0xFF808080;
  } // namespace COLOR
  } // namespace UTILS
--- 
-2.20.1.windows.1
-

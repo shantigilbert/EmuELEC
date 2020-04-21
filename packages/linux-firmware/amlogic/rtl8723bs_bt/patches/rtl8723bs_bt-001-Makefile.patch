@@ -1,0 +1,26 @@
+diff --git a/Makefile b/Makefile
+index 52506b9..fd196f3 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,12 +1,15 @@
+ rtk_hciattach:hciattach.c hciattach_rtk.o  
+-	cc -o rtk_hciattach hciattach.c hciattach_rtk.o  
++	$(CC) $(CFLAGS) $(LDFLAGS) -o rtk_hciattach hciattach.c hciattach_rtk.o  
+ 
+ hciattach_rtk.o:hciattach_rtk.c
+-	cc -c hciattach_rtk.c
++	$(CC) $(CFLAGS) $(LDFLAGS) -c hciattach_rtk.c
+ 
+-clean:
+-	rm -f *.o  rtk_hciattach
++all:
++	rtk_hciattach
+ 
+ install:
+-	mkdir -p /lib/firmware/rtl_bt
+-	cp -p rtlbt_* /lib/firmware/rtl_bt/.
++	mkdir -p $(DESTDIR)/usr/bin
++	cp -P rtk_hciattach $(DESTDIR)/usr/bin
++
++clean:
++	rm -f *.o rtk_hciattach

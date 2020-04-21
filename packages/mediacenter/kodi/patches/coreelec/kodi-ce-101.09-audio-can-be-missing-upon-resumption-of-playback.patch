@@ -2,7 +2,7 @@ From a237a00f134bed9072e5a0b2d9da6f307475ea5a Mon Sep 17 00:00:00 2001
 From: Portisch <hugo.portisch@yahoo.de>
 Date: Sun, 9 Feb 2020 19:58:52 +0100
 Subject: [PATCH] VideoPlayer: Audio can be missing upon resumption of playback
- #16390
+ https://github.com/xbmc/xbmc/issues/16390
 
 ---
  xbmc/cores/VideoPlayer/VideoPlayer.cpp | 3 ---

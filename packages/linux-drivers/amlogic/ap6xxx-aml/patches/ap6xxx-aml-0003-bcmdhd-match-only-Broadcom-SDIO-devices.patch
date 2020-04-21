@@ -1,4 +1,4 @@
-From 24affe6bf59dfd6fd9b62b3118e4b2b9e555181a Mon Sep 17 00:00:00 2001
+From 93aed9fb56d50ccadfaf8ed95d1fb87a26b905a1 Mon Sep 17 00:00:00 2001
 From: kszaq <kszaquitto@gmail.com>
 Date: Thu, 14 Sep 2017 21:21:18 +0200
 Subject: [PATCH 3/4] bcmdhd: match only Broadcom SDIO devices
@@ -8,7 +8,7 @@ Subject: [PATCH 3/4] bcmdhd: match only Broadcom SDIO devices
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/bcmdhd.1.363.59.144.x.cn/bcmsdh_sdmmc_linux.c b/bcmdhd.1.363.59.144.x.cn/bcmsdh_sdmmc_linux.c
-index f7d9a09..47ca535 100644
+index adb6c5e..c4fd55a 100644
 --- a/bcmdhd.1.363.59.144.x.cn/bcmsdh_sdmmc_linux.c
 +++ b/bcmdhd.1.363.59.144.x.cn/bcmsdh_sdmmc_linux.c
 @@ -229,7 +229,7 @@ static const struct sdio_device_id bcmsdh_sdmmc_ids[] = {
@@ -21,5 +21,5 @@ index f7d9a09..47ca535 100644
  };
  
 -- 
-2.7.4
+2.25.1
 

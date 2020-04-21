@@ -24,6 +24,9 @@ fi
 if [ -e /usr/lib/coreelec/check-bl301 ]; then
   /usr/lib/coreelec/check-bl301
   INSTALLED=${?}
+  if [ "$INSTALLED" = 1 ]; then
+    touch /tmp/bl301_injected
+  fi
 fi
 
 if [ -e /usr/sbin/inject_bl301 ] && [ "$INSTALLED" = 1 ]; then

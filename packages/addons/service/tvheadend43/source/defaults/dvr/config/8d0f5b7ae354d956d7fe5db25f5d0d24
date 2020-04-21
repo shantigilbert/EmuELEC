@@ -1,0 +1,18 @@
+{
+	"storage": "/storage/recordings",
+	"retention-days": 2147483646,
+	"removal-days": 2147483647,
+	"pre-extra-time": 0,
+	"post-extra-time": 0,
+	"day-dir": false,
+	"channel-dir": false,
+	"channel-in-title": true,
+	"date-in-title": true,
+	"time-in-title": true,
+	"whitespace-in-title": false,
+	"title-dir": true,
+	"episode-in-title": true,
+	"tag-files": true,
+	"windows-compatible-filenames": true,
+	"charset": "UTF-8"
+}

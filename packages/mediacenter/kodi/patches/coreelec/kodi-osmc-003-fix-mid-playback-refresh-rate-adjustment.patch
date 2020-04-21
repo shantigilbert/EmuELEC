@@ -1,0 +1,98 @@
+From d5d0d4cca779dc33786e1ddbb008d0f7821af63b Mon Sep 17 00:00:00 2001
+From: tanio99 <tanio99@wolke7.net>
+Date: Sun, 29 Mar 2020 12:05:20 +0200
+Subject: [PATCH 1/3] CDVDDemuxFFmpeg: also check for extradata_size change
+ before adding a disabled stream
+
+---
+ xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
+index b24eb92..4550bd4 100644
+--- a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
++++ b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
+@@ -1113,7 +1113,8 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
+     else if (stream->type == STREAM_VIDEO)
+     {
+       if (static_cast<CDemuxStreamVideo*>(stream)->iWidth != m_pFormatContext->streams[pPacket->iStreamId]->codecpar->width ||
+-          static_cast<CDemuxStreamVideo*>(stream)->iHeight != m_pFormatContext->streams[pPacket->iStreamId]->codecpar->height)
++          static_cast<CDemuxStreamVideo*>(stream)->iHeight != m_pFormatContext->streams[pPacket->iStreamId]->codecpar->height ||
++		  (stream->disabled && stream->ExtraSize != m_pFormatContext->streams[pPacket->iStreamId]->codecpar->extradata_size))
+       {
+         // content has changed
+         stream = AddStream(pPacket->iStreamId);
+-- 
+2.7.4
+
+
+From 41c88ffa263dcfd024e1df4bf1eaed21b154250b Mon Sep 17 00:00:00 2001
+From: tanio99 <tanio99@wolke7.net>
+Date: Fri, 3 Apr 2020 16:04:50 +0200
+Subject: [PATCH 2/3] CDVDDemuxFFmpeg: use real base framerate for mkv files if
+ avg frame rate seems to be nonsense
+
+---
+ xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
+index 4550bd4..c8e5607 100644
+--- a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
++++ b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
+@@ -1531,8 +1522,15 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
+
+         if (pStream->avg_frame_rate.den && pStream->avg_frame_rate.num)
+         {
+-          st->iFpsRate  = pStream->avg_frame_rate.num;
+-          st->iFpsScale = pStream->avg_frame_rate.den;
++          double fps = (double) pStream->avg_frame_rate.num / (double) pStream->avg_frame_rate.den;
++          if (fps > 500. && r_frame_rate.num > 0 && r_frame_rate.den > 0) {
++            // fps seems to be nonsense so we're use real base framerate instead
++            st->iFpsRate = r_frame_rate.num;
++            st->iFpsScale = r_frame_rate.den;
++          } else {
++            st->iFpsRate = pStream->avg_frame_rate.num;
++            st->iFpsScale = pStream->avg_frame_rate.den;
++          }
+         }
+         else if(r_frame_rate.den && r_frame_rate.num)
+         {
+-- 
+2.7.4
+
+
+From bb17f08c654a5f7a8ee286a9f805c9936ac13a39 Mon Sep 17 00:00:00 2001
+From: tanio99 <tanio99@wolke7.net>
+Date: Fri, 3 Apr 2020 16:06:31 +0200
+Subject: [PATCH 3/3] CDVDDemuxFFmpeg: don't close/reopen stream
+
+---
+ xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp | 10 ----------
+ 1 file changed, 10 deletions(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
+index c8e5607..b0aa8d3 100644
+--- a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
++++ b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
+@@ -598,16 +598,6 @@ bool CDVDDemuxFFmpeg::Open(std::shared_ptr<CDVDInputStream> pInput, bool streami
+   m_startTime = 0;
+   m_seekStream = -1;
+ 
+-  if (m_checkTransportStream && m_streaminfo)
+-  {
+-    int64_t duration = m_pFormatContext->duration;
+-    std::shared_ptr<CDVDInputStream> pInputStream = m_pInput;
+-    Dispose();
+-    if (!Open(pInputStream, false))
+-      return false;
+-    m_pFormatContext->duration = duration;
+-  }
+-
+   // seems to be a bug in ffmpeg, hls jumps back to start after a couple of seconds
+   // this cures the issue
+   if (m_pFormatContext->iformat && strcmp(m_pFormatContext->iformat->name, "hls,applehttp") == 0)
+-- 
+2.7.4
+
+

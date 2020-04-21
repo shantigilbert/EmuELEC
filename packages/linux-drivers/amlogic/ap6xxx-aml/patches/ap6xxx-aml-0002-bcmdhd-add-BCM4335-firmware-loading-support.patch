@@ -1,53 +1,46 @@
-From cd000f263d8433f2a1a29d7e722cd57e47b30fc5 Mon Sep 17 00:00:00 2001
+From fc4d17c35e98f212e8b43dfa8d907da10d663f34 Mon Sep 17 00:00:00 2001
 From: kszaq <kszaquitto@gmail.com>
 Date: Thu, 14 Sep 2017 21:20:55 +0200
 Subject: [PATCH 2/4] bcmdhd: add BCM4335 firmware loading support
 
 ---
- bcmdhd.1.363.59.144.x.cn/dhd_config.c | 10 ++++++++++
- bcmdhd.1.363.59.144.x.cn/dhd_config.h |  1 +
- 2 files changed, 11 insertions(+)
+ bcmdhd.1.363.59.144.x.cn/dhd_config.c | 3 +++
+ bcmdhd.1.363.59.144.x.cn/dhd_config.h | 1 +
+ 2 files changed, 4 insertions(+)
 
 diff --git a/bcmdhd.1.363.59.144.x.cn/dhd_config.c b/bcmdhd.1.363.59.144.x.cn/dhd_config.c
-index ff07d18..b668400 100644
+index 0683804..56f6eba 100644
 --- a/bcmdhd.1.363.59.144.x.cn/dhd_config.c
 +++ b/bcmdhd.1.363.59.144.x.cn/dhd_config.c
-@@ -141,6 +141,14 @@ const static char *bcm43241b4_ag_fw_name[] = {
- 	"fw_bcm43241b4_ag_mfg.bin"
- };
- 
-+const static char *bcm4335b0_ag_fw_name[] = {
-+	"fw_bcm4335b0_ag.bin",
-+	"fw_bcm4335b0_ag_apsta.bin",
-+	"fw_bcm4335b0_ag_p2p.bin",
-+	"fw_bcm4335b0_ag_es.bin",
-+	"fw_bcm4335b0_ag_mfg.bin"
-+};
-+
- const static char *bcm4339a0_ag_fw_name[] = {
- 	"fw_bcm4339a0_ag.bin",
- 	"fw_bcm4339a0_ag_apsta.bin",
-@@ -529,6 +537,8 @@ dhd_conf_set_fw_name_by_chip(dhd_pub_t *dhd, char *fw_path)
+@@ -84,6 +84,7 @@ uint config_msg_level = CONFIG_ERROR_LEVEL;
+ #define FW_BCM43012B0 "fw_bcm43012b0"
+ #define FW_BCM43341B1 "fw_bcm43341b0_ag"
+ #define FW_BCM43241B4 "fw_bcm43241b4_ag"
++#define FW_BCM4335B0 "fw_bcm4335b0_ag"
+ #define FW_BCM4339A0 "fw_bcm4339a0_ag"
+ #define FW_BCM43455C0 "fw_bcm43455c0_ag"
+ #define FW_BCM43456C5 "fw_bcm43456c5_ag"
+@@ -446,6 +447,8 @@ dhd_conf_set_fw_name_by_chip(dhd_pub_t *dhd, char *fw_path)
  		case BCM4335_CHIP_ID:
  			if (chiprev == BCM4335A0_CHIP_REV)
- 				strcpy(&fw_path[i+1], bcm4339a0_ag_fw_name[fw_type]);
+ 				strcpy(&fw_path[i+1], FW_BCM4339A0);
 +			else if (chiprev == BCM4335B0_CHIP_REV)
-+				strcpy(&fw_path[i+1], bcm4335b0_ag_fw_name[fw_type]);
++				strcpy(&fw_path[i+1], FW_BCM4335B0);
  			break;
- 		case BCM4345_CHIP_ID:
- 		case BCM43454_CHIP_ID:
+ 		case BCM4339_CHIP_ID:
+ 			if (chiprev == BCM4339A0_CHIP_REV)
 diff --git a/bcmdhd.1.363.59.144.x.cn/dhd_config.h b/bcmdhd.1.363.59.144.x.cn/dhd_config.h
-index cc76e8b..450df56 100644
+index a0e723a..37b5e66 100644
 --- a/bcmdhd.1.363.59.144.x.cn/dhd_config.h
 +++ b/bcmdhd.1.363.59.144.x.cn/dhd_config.h
-@@ -28,6 +28,7 @@ extern uint dhd_slpauto;
+@@ -29,6 +29,7 @@ extern uint dhd_slpauto;
  #define BCM43341B0_CHIP_REV     2
  #define BCM43241B4_CHIP_REV     5
  #define BCM4335A0_CHIP_REV      2
 +#define BCM4335B0_CHIP_REV      1
  #define BCM4339A0_CHIP_REV      1
  #define BCM43455C0_CHIP_REV     6
- #define BCM4354A1_CHIP_REV      1
+ #define BCM43456C5_CHIP_REV     9
 -- 
-2.7.4
+2.25.1
 

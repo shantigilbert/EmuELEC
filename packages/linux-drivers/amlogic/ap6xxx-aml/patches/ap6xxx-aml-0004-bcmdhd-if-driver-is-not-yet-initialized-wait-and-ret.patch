@@ -1,24 +1,24 @@
-From b9edf37b14f64a8bed5586898e3503322a5b8bfc Mon Sep 17 00:00:00 2001
+From 2a1869250e30748235f1a11d32619bf2a54a29d5 Mon Sep 17 00:00:00 2001
 From: kszaq <kszaquitto@gmail.com>
 Date: Thu, 5 Oct 2017 22:04:11 +0200
 Subject: [PATCH 4/4] bcmdhd: if driver is not yet initialized, wait and retry
 
 ---
- bcmdhd.1.363.59.144.x.cn/dhd_linux.c | 14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
+ bcmdhd.1.363.59.144.x.cn/dhd_linux.c | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
 
 diff --git a/bcmdhd.1.363.59.144.x.cn/dhd_linux.c b/bcmdhd.1.363.59.144.x.cn/dhd_linux.c
-index c64f851..1754fb7 100644
+index c04d185..4f3b45f 100644
 --- a/bcmdhd.1.363.59.144.x.cn/dhd_linux.c
 +++ b/bcmdhd.1.363.59.144.x.cn/dhd_linux.c
-@@ -6127,9 +6127,18 @@ dhd_open(struct net_device *net)
- 	int ifidx;
- 	int32 ret = 0;
+@@ -6167,9 +6167,18 @@ dhd_open(struct net_device *net)
+ 	wifi_adapter_info_t *adapter = NULL;
+ #endif
  
-+	int retry;
 -	if (!dhd_download_fw_on_driverload && !dhd_driver_init_done) {
 -		DHD_ERROR(("%s: WLAN driver is not initialized\n", __FUNCTION__));
 -		return -1;
++	int retry;
 +	for (retry = 0; ++retry; ) {
 +		if (!dhd_download_fw_on_driverload && !dhd_driver_init_done) {
 +			DHD_ERROR(("%s: WLAN driver is not initialized\n", __FUNCTION__));
@@ -34,5 +34,5 @@ index c64f851..1754fb7 100644
  
  	printf("%s: Enter %p\n", __FUNCTION__, net);
 -- 
-2.7.4
+2.25.1
 

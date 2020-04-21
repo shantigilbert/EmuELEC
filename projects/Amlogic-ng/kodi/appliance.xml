@@ -20,7 +20,7 @@
           <default>false</default>
         </setting>
         <setting id="audiooutput.audiodevice">
-          <default>ALSA:hdmi:CARD=AMLAUGESOUND,DEV=0</default>
+          <default>ALSA:surround71:CARD=AMLAUGESOUND,DEV=0</default>
         </setting>
       </group>
     </category>

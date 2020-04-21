@@ -1,0 +1,20 @@
+--- a/hciattach_rtk.c	2016-07-18 00:47:52.000000000 +0100
++++ b/hciattach_rtk.c	2017-12-15 04:27:39.481299996 +0000
+@@ -1419,7 +1419,7 @@
+ 	int ret = 0;
+ 	struct stat st;
+ 
+-	ret = sprintf(firmware_file_name, FIRMWARE_DIRECTORY"rtlbt_fw");
++	ret = sprintf(firmware_file_name, FIRMWARE_DIRECTORY"rtl8723b_fw");
+ 
+ 	return firmware_file_name;
+ }
+@@ -1504,7 +1504,7 @@
+ 	int ret = 0;
+ 	int i = 0;
+ 
+-	ret = sprintf(bt_config_file_name, BT_CONFIG_DIRECTORY"rtlbt_config"); 
++	ret = sprintf(bt_config_file_name, BT_CONFIG_DIRECTORY"rtl8723b_config");
+ 	if (stat(bt_config_file_name, &st) < 0) {
+ 		RS_ERR("can't access bt config file:%s, errno:%d\n", bt_config_file_name, errno);
+ 		return -1;

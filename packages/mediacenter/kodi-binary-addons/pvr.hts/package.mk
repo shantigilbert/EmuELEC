@@ -3,8 +3,8 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="pvr.hts"
-PKG_VERSION="4.4.20-Leia"
-PKG_SHA256="fcf2df3566b196addf99d8166fa5a8b77635ac905214c36071d9e778cc42978e"
+PKG_VERSION="4.4.21-Leia"
+PKG_SHA256="6958b91ca616554e4c068bc303c66388e9a2c3a68b5979d8918b4e0d7b6bb95c"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

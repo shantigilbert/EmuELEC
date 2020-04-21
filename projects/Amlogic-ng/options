@@ -110,9 +110,6 @@
   # KODI Player implementation to use (default / bcm2835-driver / libfslvpuwrap / libamcodec)
     KODIPLAYER_DRIVER="libamcodec"
 
-  # Modules to install in initramfs for early boot
-    INITRAMFS_MODULES="font softcursor bitblit fbcon quota_tree quota_v2"
-
   # additional drivers to install:
   # for a list of additinoal drivers see packages/linux-drivers
   # Space separated list is supported,
@@ -161,4 +158,4 @@
     ENTWARE_ARCH="aarch64-k3.10"
 
   # CoreELEC Subdevices
-    SUBDEVICES="Odroid_N2"
+    SUBDEVICES="Odroid_N2 Odroid_C4"

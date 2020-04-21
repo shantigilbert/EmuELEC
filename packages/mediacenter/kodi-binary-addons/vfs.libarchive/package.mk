@@ -2,8 +2,8 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="vfs.libarchive"
-PKG_VERSION="1.0.6-Leia"
-PKG_SHA256="a5b72a79c92e2bf217fd68e185e6814df914b4dc5ad3d10e7d6b706febd6294d"
+PKG_VERSION="1.0.7-Leia"
+PKG_SHA256="69ebeddbab2097f97cae46a2cabcea8e5f0d021ae44c9ba9366050ac17d3e4b4"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

@@ -13,18 +13,18 @@ PKG_PATCH_DIRS="$KODI_VENDOR"
 
 case $KODI_VENDOR in
   amlogic-3.14)
-    PKG_VERSION="c690c4082e52cc650d5126b31abe919efe19eeb1"
-    PKG_SHA256="c4e8559327c938cb6f36157c47c1cade38255d73f9527164d49f949bfbeda13f"
+    PKG_VERSION="6763f2b528974c6ab3a5fcc8b75f683db13c6bda"
+    PKG_SHA256="bbb2b5cd218078e0bdf2ce4850da1fa2a3f2ca4fc35b63ef4767c743e8ade1e8"
     PKG_URL="https://github.com/CoreELEC/xbmc/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="kodi-$PKG_VERSION.tar.gz"
-    PKG_PATCH_DIRS="default"
+    PKG_PATCH_DIRS="default coreelec"
     ;;
   amlogic-4.9)
-    PKG_VERSION="43e4abe97924f71f0c11c9dd957baf8467c2ed5b"
-    PKG_SHA256="e1bb657246c311098798d2fcb57aa1b9fefa9630314b1dda36e3ff1cc2187f61"
+    PKG_VERSION="ccf761beaceb2ec6d1e97227bb7d69b8ba2690b1"
+    PKG_SHA256="ae60791019e5ae5e5b3268d301fe62574cf0b0636c7aa1f3fcf9e681d004ebb9"
     PKG_URL="https://github.com/CoreELEC/xbmc/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="kodi-$PKG_VERSION.tar.gz"
-    PKG_PATCH_DIRS="default"
+    PKG_PATCH_DIRS="default coreelec"
     ;;
   raspberrypi)
     PKG_VERSION="newclock5_18.6-Leia"

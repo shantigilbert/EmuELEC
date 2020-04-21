@@ -1,0 +1,13 @@
+--- a/rtb_fwc.c
++++ b/rtb_fwc.c
+@@ -39,8 +39,8 @@
+ #define BT_CONFIG_DIRECTORY "/lib/firmware/rtlbt/"
+
+ #ifdef USE_CUSTOMER_ADDRESS
+-#define BT_ADDR_FROM_VENDOR_STORAGE
+-#define BT_ADDR_FILE        "/opt/bdaddr"
++//#define BT_ADDR_FROM_VENDOR_STORAGE
++#define BT_ADDR_FILE        "/storage/.config/btaddr"
+ static uint8_t customer_bdaddr = 0;
+ #endif
+

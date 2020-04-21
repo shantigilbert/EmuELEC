@@ -1,0 +1,31 @@
+<settings version="2">
+    <setting id="AVM_DEVICE" default="true"></setting>
+    <setting id="AVM_ETH" default="true">eth0</setting>
+    <setting id="AVM_IP1" default="true">192.168.178.201</setting>
+    <setting id="AVM_IP2" default="true">192.168.178.202</setting>
+    <setting id="AVM_IP3" default="true">192.168.178.203</setting>
+    <setting id="AVM_IP4" default="true">192.168.178.204</setting>
+    <setting id="AVM_ROUTER_FAKE_IP" default="true">192.168.178.254</setting>
+    <setting id="AVM_ROUTER_IP" default="true">192.168.178.2</setting>
+    <setting id="AVM_SATIP_SERVER" default="true">false</setting>
+    <setting id="CUSTOM_ARGS" default="true"></setting>
+    <setting id="CUSTOM_START" default="true">false</setting>
+    <setting id="DEBUG_LOG" default="true">false</setting>
+    <setting id="DEBUG_LOG_PATH" default="true">/storage/.kodi/userdata/addon_data/service.tvheadend43/debug.txt</setting>
+    <setting id="DEBUG_LOG_TRACE_1" default="true">NONE</setting>
+    <setting id="DEBUG_LOG_TRACE_2" default="true">NONE</setting>
+    <setting id="DEBUG_LOG_TRACE_3" default="true">NONE</setting>
+    <setting id="DEBUG_LOG_TRACE_4" default="true">NONE</setting>
+    <setting id="DEBUG_LOG_TRACE_5" default="true">NONE</setting>
+    <setting id="DOWNLOAD_SCAN_TABLES" default="true"></setting>
+    <setting id="NUM_ADAPTERS">1</setting>
+    <setting id="PRELOAD_CAPMT_CA" default="true">false</setting>
+    <setting id="REMOVE_MODULES" default="true"></setting>
+    <setting id="WAIT_FOR_FEINIT" default="true">false</setting>
+    <setting id="WORKAROUND_SLEEP" default="true">false</setting>
+    <setting id="WORKAROUND_SLEEP_TIME">1</setting>
+    <setting id="XMLTV_LOCATION_FILE" default="true"></setting>
+    <setting id="XMLTV_LOCATION_SCRIPT" default="true"></setting>
+    <setting id="XMLTV_LOCATION_WEB" default="true">http://</setting>
+    <setting id="XMLTV_TYPE" default="true">NONE</setting>
+</settings>

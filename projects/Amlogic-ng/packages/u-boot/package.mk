@@ -39,7 +39,7 @@ makeinstall_target() {
 
   for PKG_SUBDEVICE in $SUBDEVICES; do
     find_file_path bootloader/${PKG_SUBDEVICE}_boot.ini && cp -av ${FOUND_PATH} $INSTALL/usr/share/bootloader
-    if [ $PKG_SUBDEVICE = "Odroid_N2" ]; then
+    if [ $PKG_SUBDEVICE = "Odroid_N2" -o $PKG_SUBDEVICE = "Odroid_C4" ]; then
       PKG_UBOOTBIN=$(get_build_dir u-boot-${PKG_SUBDEVICE})/sd_fuse/u-boot.bin.sd.bin
     fi
     cp -av ${PKG_UBOOTBIN} $INSTALL/usr/share/bootloader/${PKG_SUBDEVICE}_u-boot
@@ -47,6 +47,6 @@ makeinstall_target() {
   find_file_path bootloader/config.ini && cp -av ${FOUND_PATH} $INSTALL/usr/share/bootloader
     sed -e "s/@PROJECT@/${PKG_CANUPDATE}/g" \
         -i $INSTALL/usr/share/bootloader/canupdate.sh
-  find_file_path splash/boot-logo-1080.bmp.gz && cp -av ${FOUND_PATH} $INSTALL/usr/share/bootloader
-  find_file_path splash/timeout-logo-1080.bmp.gz && cp -av ${FOUND_PATH} $INSTALL/usr/share/bootloader
+  # Copy Hardkernel boot logo
+  find_file_path splash/hk-boot-logo-1080.bmp.gz && cp -av ${FOUND_PATH} $INSTALL/usr/share/bootloader
 }

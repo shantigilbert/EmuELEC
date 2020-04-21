@@ -1,0 +1,9 @@
+################################################################################
+# udev rules file for loading rtl8723bs_bt-firmware
+################################################################################
+
+ACTION!="add", GOTO="end"
+SUBSYSTEMS=="sdio", ATTRS{vendor}=="0x024c", ATTRS{device}=="0xb723", TAG+="systemd", ENV{SYSTEMD_WANTS}+="rtl8723bs_bt-firmware.service"
+GOTO="end"
+
+LABEL="end"

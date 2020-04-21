@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+  <!-- HTS TVHEADEND -->
+  <category label="30000">
+    <setting label="30004" type="lsep"/>
+    <setting type="sep" />
+    <setting id="XMLTV_TYPE" type="labelenum" label="30005" values="NONE|FILE|SCRIPT|WEB" sort="yes" default="NONE"/>
+    <setting id="XMLTV_LOCATION_FILE" type="file" label="30006" default="" enable="eq(-1,0)"/>
+    <setting id="XMLTV_LOCATION_WEB" type="text" label="30007" default="http://" enable="eq(-2,3)"/>
+    <setting id="XMLTV_LOCATION_SCRIPT" type="file" label="30008" default="" enable="eq(-3,2)"/>
+  </category>
+  <category label="30001">
+    <setting label="30009" type="lsep"/>
+    <setting type="sep" />
+    <setting id="WAIT_FOR_FEINIT" type="bool" label="30011" default="false" />
+    <setting id="NUM_ADAPTERS" type="slider" range="1,16" option="int" label="30012" default="1" enable="eq(-1,true)" />
+    <setting id="REMOVE_MODULES" type="text" label="30010" values="" default=""/>
+    <setting id="PRELOAD_CAPMT_CA" type="bool" label="30013" default="false" />
+    <setting id="WORKAROUND_SLEEP" type="bool" label="30014" default="false" />
+    <setting id="WORKAROUND_SLEEP_TIME" type="slider" range="1,30" option="int" label="30015" default="1" enable="eq(-1,true)" />
+  </category>
+  <category label="30002">
+    <setting label="30027" type="lsep"/>
+    <setting type="sep" />
+    <setting id="DEBUG_LOG" type="bool" label="30029" default="false" />
+    <setting type="sep" />
+    <setting id="DEBUG_LOG_PATH" type="text" label="30028" default="/storage/.kodi/userdata/addon_data/service.tvheadend43/debug.txt" enable="eq(-2,true)"/>
+    <setting id="DEBUG_LOG_TRACE_1" type="select" default="NONE" visible="eq(-3,true)" enable="eq(-3,true)" label="30030" values="NONE|all|access|api|avahi|bat|bonjour|bouquet|caclient|capmt|channel|charset|config|CPU|cron|csa|cwc|dbus|descrambler|diseqc|dvb|dvbcam|dvr|epg|epgdb|epggrab|esfilter|fastscan|fsmonitor|globalheaders|gtimer|hevc|htsp|htsp-ans|htsp-req|htsp-sub|http|httpc|idnode|imagecache|iptv|iptv-pcr|libav|linuxdvb|lock|main|mkv|mpegts|mtimer|muxer|muxsched|opentv|parser|pass|pat|pmt|profile|psip|pyepg|rtsp|satip|satips|scanfile|service|service-mapper|settings|spawn|subscription|tbl|tbl-atsc|tbl-base|tbl-csa|tbl-eit|tbl-pass|tbl-satip|tbl-time|tcp|thread|time|timeshift|transcode|TS|tsfile|tsfix|tvhdhomerun|tvhpoll|upnp|url|uuid|webui|xmltv" />
+    <setting id="DEBUG_LOG_TRACE_2" type="select" default="NONE" visible="eq(-4,true)" enable="!eq(-1,NONE)+eq(-4,true)" label="30031" values="NONE|access|api|avahi|bat|bonjour|bouquet|caclient|capmt|channel|charset|config|CPU|cron|csa|cwc|dbus|descrambler|diseqc|dvb|dvbcam|dvr|epg|epgdb|epggrab|esfilter|fastscan|fsmonitor|globalheaders|gtimer|hevc|htsp|htsp-ans|htsp-req|htsp-sub|http|httpc|idnode|imagecache|iptv|iptv-pcr|libav|linuxdvb|lock|main|mkv|mpegts|mtimer|muxer|muxsched|opentv|parser|pass|pat|pmt|profile|psip|pyepg|rtsp|satip|satips|scanfile|service|service-mapper|settings|spawn|subscription|tbl|tbl-atsc|tbl-base|tbl-csa|tbl-eit|tbl-pass|tbl-satip|tbl-time|tcp|thread|time|timeshift|transcode|TS|tsfile|tsfix|tvhdhomerun|tvhpoll|upnp|url|uuid|webui|xmltv" />
+    <setting id="DEBUG_LOG_TRACE_3" type="select" default="NONE" visible="eq(-5,true)" enable="!eq(-1,NONE)+!eq(-2,NONE)+eq(-5,true)" label="30032" values="NONE|access|api|avahi|bat|bonjour|bouquet|caclient|capmt|channel|charset|config|CPU|cron|csa|cwc|dbus|descrambler|diseqc|dvb|dvbcam|dvr|epg|epgdb|epggrab|esfilter|fastscan|fsmonitor|globalheaders|gtimer|hevc|htsp|htsp-ans|htsp-req|htsp-sub|http|httpc|idnode|imagecache|iptv|iptv-pcr|libav|linuxdvb|lock|main|mkv|mpegts|mtimer|muxer|muxsched|opentv|parser|pass|pat|pmt|profile|psip|pyepg|rtsp|satip|satips|scanfile|service|service-mapper|settings|spawn|subscription|tbl|tbl-atsc|tbl-base|tbl-csa|tbl-eit|tbl-pass|tbl-satip|tbl-time|tcp|thread|time|timeshift|transcode|TS|tsfile|tsfix|tvhdhomerun|tvhpoll|upnp|url|uuid|webui|xmltv" />
+    <setting id="DEBUG_LOG_TRACE_4" type="select" default="NONE" visible="eq(-6,true)" enable="!eq(-1,NONE)+!eq(-2,NONE)+!eq(-3,NONE)+eq(-6,true)" label="30033" values="NONE|access|api|avahi|bat|bonjour|bouquet|caclient|capmt|channel|charset|config|CPU|cron|csa|cwc|dbus|descrambler|diseqc|dvb|dvbcam|dvr|epg|epgdb|epggrab|esfilter|fastscan|fsmonitor|globalheaders|gtimer|hevc|htsp|htsp-ans|htsp-req|htsp-sub|http|httpc|idnode|imagecache|iptv|iptv-pcr|libav|linuxdvb|lock|main|mkv|mpegts|mtimer|muxer|muxsched|opentv|parser|pass|pat|pmt|profile|psip|pyepg|rtsp|satip|satips|scanfile|service|service-mapper|settings|spawn|subscription|tbl|tbl-atsc|tbl-base|tbl-csa|tbl-eit|tbl-pass|tbl-satip|tbl-time|tcp|thread|time|timeshift|transcode|TS|tsfile|tsfix|tvhdhomerun|tvhpoll|upnp|url|uuid|webui|xmltv" />
+    <setting id="DEBUG_LOG_TRACE_5" type="select" default="NONE" visible="eq(-7,true)" enable="!eq(-1,NONE)+!eq(-2,NONE)+!eq(-3,NONE)+!eq(-4,NONE)+eq(-7,true)" label="30034" values="NONE|access|api|avahi|bat|bonjour|bouquet|caclient|capmt|channel|charset|config|CPU|cron|csa|cwc|dbus|descrambler|diseqc|dvb|dvbcam|dvr|epg|epgdb|epggrab|esfilter|fastscan|fsmonitor|globalheaders|gtimer|hevc|htsp|htsp-ans|htsp-req|htsp-sub|http|httpc|idnode|imagecache|iptv|iptv-pcr|libav|linuxdvb|lock|main|mkv|mpegts|mtimer|muxer|muxsched|opentv|parser|pass|pat|pmt|profile|psip|pyepg|rtsp|satip|satips|scanfile|service|service-mapper|settings|spawn|subscription|tbl|tbl-atsc|tbl-base|tbl-csa|tbl-eit|tbl-pass|tbl-satip|tbl-time|tcp|thread|time|timeshift|transcode|TS|tsfile|tsfix|tvhdhomerun|tvhpoll|upnp|url|uuid|webui|xmltv" />
+    <setting type="sep" />
+    <setting id="CUSTOM_START" type="bool" label="30016" default="false" />
+    <setting id="CUSTOM_ARGS" type="text" label="30017" default="" enable="eq(-1,true)" />
+  </category>
+  <category label="30003">
+    <setting label="30035" type="lsep"/>
+    <setting type="sep" />
+    <setting id="AVM_SATIP_SERVER" type="bool" label="30018" default="false"/>
+    <setting id="AVM_DEVICE" type="labelenum" label="30019" values="AVM_Repeater|AVM_6490" visible="eq(-1,true)"/>
+    <setting id="AVM_ROUTER_IP" type="ipaddress" label="30020" default="192.168.178.2" visible="eq(-2,true)+eq(-1,0)"/>
+    <setting id="AVM_ROUTER_FAKE_IP" type="ipaddress" label="30021" default="192.168.178.254" visible="eq(-3,true)+eq(-2,1)"/>
+    <setting id="AVM_ETH" type="labelenum" label="30022" default="eth0" visible="eq(-4,true)" values="eth0|wlan0|eth1|wlan1" />
+    <setting type="sep" visible="eq(-5,true)"/>
+    <setting id="AVM_IP1" type="ipaddress" label="30023" default="192.168.178.201" visible="eq(-6,true)"/>
+    <setting id="AVM_IP2" type="ipaddress" label="30024" default="192.168.178.202" visible="eq(-7,true)"/>
+    <setting id="AVM_IP3" type="ipaddress" label="30025" default="192.168.178.203" visible="eq(-8,true)+eq(-7,1)"/>
+    <setting id="AVM_IP4" type="ipaddress" label="30026" default="192.168.178.204" visible="eq(-9,true)+eq(-8,1)"/>
+  </category>
+  <category label="30036">
+    <setting label="30037" type="lsep"/>
+    <setting id="DOWNLOAD_SCAN_TABLES" type="action" label="30038" option="close" action="RunScript(service.tvheadend43,getscantables)"/>
+  </category>
+</settings>

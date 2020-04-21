@@ -1,0 +1,14 @@
+{
+	"wizard": "hello",
+	"uilevel": 1,
+	"uilevel_nochange": true,
+	"ui_quicktips": true,
+	"cookie_expires": 14,
+	"caclient_ui": true,
+	"epg_compress": true,
+	"prefer_picon": true,
+	"chiconpath": "file:///storage/picons/tvh/%C.png",
+	"chiconscheme": 2,
+	"piconpath": "file:///storage/picons/vdr/",
+	"piconscheme": 1
+}

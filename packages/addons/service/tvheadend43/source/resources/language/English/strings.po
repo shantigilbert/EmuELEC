@@ -1,0 +1,182 @@
+# Kodi Media Center language file
+# Addon Name: tvheadend43
+# Addon id: service.tvheadend43
+# Addon Provider: Team CoreELEC
+msgid ""
+msgstr ""
+
+msgctxt "#30000"
+msgid "XMLTV"
+msgstr ""
+
+msgctxt "#30001"
+msgid "DVB"
+msgstr ""
+
+msgctxt "#30002"
+msgid "DEBUG"
+msgstr ""
+
+msgctxt "#30003"
+msgid "FRITZ!Box Sat>IP"
+msgstr ""
+
+msgctxt "#30004"
+msgid "XMLTV Configuration"
+msgstr ""
+
+msgctxt "#30005"
+msgid "XMLTV source type"
+msgstr ""
+
+msgctxt "#30006"
+msgid "XMLTV File location"
+msgstr ""
+
+msgctxt "#30007"
+msgid "XMLTV Web location"
+msgstr ""
+
+msgctxt "#30008"
+msgid "XMLTV Script location"
+msgstr ""
+
+msgctxt "#30009"
+msgid "DVB Configuration"
+msgstr ""
+
+msgctxt "#30010"
+msgid "Unload DVB modules before suspend"
+msgstr ""
+
+msgctxt "#30011"
+msgid "Wait for frontend initialization"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Number of adapters to wait for"
+msgstr ""
+
+msgctxt "#30013"
+msgid "Preload capmt_ca.so library"
+msgstr ""
+
+msgctxt "#30014"
+msgid "Delay the start of Tvheadend"
+msgstr ""
+
+msgctxt "#30015"
+msgid "Seconds delay"
+msgstr ""
+
+msgctxt "#30016"
+msgid "Custom start parameter"
+msgstr ""
+
+msgctxt "#30017"
+msgid "Parameter"
+msgstr ""
+
+msgctxt "#30018"
+msgid "FRITZ!Box Sat>IP server"
+msgstr ""
+
+msgctxt "#30019"
+msgid "AVM device"
+msgstr ""
+
+msgctxt "#30020"
+msgid "IP of the AVM Repeater"
+msgstr ""
+
+msgctxt "#30021"
+msgid "Router IP range (last digits are always .254)"
+msgstr ""
+
+msgctxt "#30022"
+msgid "Used network"
+msgstr ""
+
+msgctxt "#30023"
+msgid "Virtual IP #1"
+msgstr ""
+
+msgctxt "#30024"
+msgid "Virtual IP #2"
+msgstr ""
+
+msgctxt "#30025"
+msgid "Virtual IP #3"
+msgstr ""
+
+msgctxt "#30026"
+msgid "Virtual IP #4"
+msgstr ""
+
+msgctxt "#30027"
+msgid "TRACE Configuration"
+msgstr ""
+
+msgctxt "#30028"
+msgid "Path"
+msgstr ""
+
+msgctxt "#30029"
+msgid "Activate TRACE Debug"
+msgstr ""
+
+msgctxt "#30030"
+msgid "Debug Value #1"
+msgstr ""
+
+msgctxt "#30031"
+msgid "Debug Value #2"
+msgstr ""
+
+msgctxt "#30032"
+msgid "Debug Value #3"
+msgstr ""
+
+msgctxt "#30033"
+msgid "Debug Value #4"
+msgstr ""
+
+msgctxt "#30034"
+msgid "Debug Value #5"
+msgstr ""
+
+msgctxt "#30035"
+msgid "FRITZ!Box Configuration for FRITZ!OS 6.x (do not use for 7.x)"
+msgstr ""
+
+msgctxt "#30036"
+msgid "Scan Tables"
+msgstr ""
+
+msgctxt "#30037"
+msgid "Manage Scan-Tables"
+msgstr ""
+
+msgctxt "#30038"
+msgid "Download and install Scan-Tables"
+msgstr ""
+
+msgctxt "#30039"
+msgid "Download completed, tables installed"
+msgstr ""
+
+msgctxt "#30040"
+msgid "Could not download Scan-Tables"
+msgstr ""
+
+msgctxt "#30041"
+msgid "Could not extract zip files"
+msgstr ""
+
+msgctxt "#30042"
+msgid "Download Scan-Tables"
+msgstr ""
+
+msgctxt "#30043"
+msgid "Extract Scan-Tables"
+msgstr ""

@@ -1,10 +1,11 @@
 [Unit]
-Description=QCA Bluetooth firmware service
-ConditionPathExists=/dev/ttyS1
+Description=Attach /dev/ttyS1 to BlueZ stack using qca type
+Wants=bluetooth.service
+Before=bluetooth.service
+After=dev-ttyS1.device
 
 [Service]
 Type=simple
-RemainAfterExit=yes
 ExecStartPre=/usr/sbin/rfkill unblock bluetooth
 ExecStart=/usr/bin/hciattach -n -s 115200 /dev/ttyS1 qca 2000000
 ExecStopPost=/usr/sbin/rfkill block bluetooth

@@ -1,0 +1,69 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
+
+if [ $# -lt 1 ]
+then
+  . /etc/profile
+
+  ADDON_HOME="$HOME/.kodi/userdata/addon_data/service.tvheadend43"
+  ADDON_SETTINGS="$ADDON_HOME/settings.xml"
+  XML_SETTINGS_VER="$(xmlstarlet sel -t -m settings -v @version $ADDON_SETTINGS)"
+  if [ "$XML_SETTINGS_VER" = "2" ]; then
+    XMLTV_TYPE="$(xmlstarlet sel -t -v '/settings/setting[@id="XMLTV_TYPE"]' $ADDON_SETTINGS)"
+    XMLTV_LOCATION_FILE="$(xmlstarlet sel -t -v '/settings/setting[@id="XMLTV_LOCATION_FILE"]' $ADDON_SETTINGS)"
+    XMLTV_LOCATION_WEB="$(xmlstarlet sel -t -v '/settings/setting[@id="XMLTV_LOCATION_WEB"]' $ADDON_SETTINGS | xmlstarlet unesc)"
+    XMLTV_LOCATION_SCRIPT="$(xmlstarlet sel -t -v '/settings/setting[@id="XMLTV_LOCATION_SCRIPT"]' $ADDON_SETTINGS)"
+  else
+    XMLTV_TYPE="$(xmlstarlet sel -t -m '/settings/setting[@id="XMLTV_TYPE"]' -v @value $ADDON_SETTINGS)"
+    XMLTV_LOCATION_FILE="$(xmlstarlet sel -t -m '/settings/setting[@id="XMLTV_LOCATION_FILE"]' -v @value $ADDON_SETTINGS)"
+    XMLTV_LOCATION_WEB="$(xmlstarlet sel -t -m '/settings/setting[@id="XMLTV_LOCATION_WEB"]' -v @value $ADDON_SETTINGS | xmlstarlet unesc)"
+    XMLTV_LOCATION_SCRIPT="$(xmlstarlet sel -t -m '/settings/setting[@id="XMLTV_LOCATION_SCRIPT"]' -v @value $ADDON_SETTINGS)"
+  fi
+
+  if [ "$XMLTV_TYPE" = "FILE" ]; then
+    case "$XMLTV_LOCATION_FILE" in
+    *.gz | *.bz2 | *.xz)
+        zcat "$XMLTV_LOCATION_FILE"
+        ;;
+    *)
+        cat "$XMLTV_LOCATION_FILE"
+        ;;
+    esac
+    exit 0
+  elif [ "$XMLTV_TYPE" = "SCRIPT" ]; then
+    if [ -e "$XMLTV_LOCATION_SCRIPT" ] ; then
+      exec "$XMLTV_LOCATION_SCRIPT"
+    fi
+  elif [ "$XMLTV_TYPE" = "WEB" ]; then
+    wget -qO - "$XMLTV_LOCATION_WEB"
+    exit 0
+  fi
+fi
+
+dflag=
+vflag=
+cflag=
+
+for a in "$@"
+do
+  [ "$a" = "-d" -o "$a" = "--description"  ] && dflag=1
+  [ "$a" = "-v" -o "$a" = "--version"      ] && vflag=1
+  [ "$a" = "-c" -o "$a" = "--capabilities" ] && cflag=1
+done
+
+if [ -n "$dflag" ]
+then
+  echo "tv_grab_file is a simple grabber that can be configured through the addon settings from Kodi"
+fi
+
+if [ -n "$vflag" ]
+then
+  echo "1.0"
+fi
+
+if [ -n "$cflag" ]
+then
+  echo "baseline"
+fi

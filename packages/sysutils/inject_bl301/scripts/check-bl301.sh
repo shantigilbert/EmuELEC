@@ -19,9 +19,9 @@ if [ "$1" = "-v" ]; then
   VERBOSE=1
 fi
 
-if [ -e /dev/bootloader ]; then
-  dd if=/dev/bootloader bs=1M count=4 status=none | grep -aq COREELEC_BL301_BIN
-  if [ ${?} = 0 ]; then
+if [ -e /usr/sbin/inject_bl301 ]; then
+  inject_bl301 -i
+  if [ ${?} = 1 ]; then
     INSTALLED=1
   fi
 fi

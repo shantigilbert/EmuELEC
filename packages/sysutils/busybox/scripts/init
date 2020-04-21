@@ -287,6 +287,14 @@ get_project_arch() {
   fi
 }
 
+# mount the specified SYSTEM file and output version from /etc/os-release
+get_project_version() {
+  if [ -f ${1}/etc/os-release ]; then
+    . ${1}/etc/os-release
+    echo "${VERSION}"
+  fi
+}
+
 # If the project/arch of current matches the update, then it is considered compatible.
 # Otherwise, mount the update SYSTEM partition and, if canupdate.sh is available,
 # call the script to determine if the current update file can be applied on to the
@@ -327,6 +335,21 @@ check_is_compatible() {
       echo ""
       return 1
     fi
+  fi
+
+  return 0
+}
+
+display_versions() {
+  local old_project_version new_project_version
+
+  old_project_version="$(get_project_version "/sysroot")" || return
+  new_project_version="$(get_project_version "/update")" || return
+
+  if [ -n "${old_project_version}" -a -n "${new_project_version}" ]; then
+    echo ""
+    echo "Updating from ${old_project_version} to ${new_project_version}"
+    echo ""
   fi
 
   return 0
@@ -965,6 +988,7 @@ check_update() {
   fi
 
   # all ok, update
+  display_versions
   if [ -b "/$IMAGE_KERNEL" ]; then
     update_partition "Kernel" "$UPDATE_KERNEL" "/$IMAGE_KERNEL"
   else

@@ -21,3 +21,4 @@ index 6f8d443..3739b92 100644
    void NotifyAppActiveChange(bool bActivated) override;
 -- 
 2.14.1
+

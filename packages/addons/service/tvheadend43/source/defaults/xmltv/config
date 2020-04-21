@@ -1,0 +1,14 @@
+{
+	"grabbers": [
+		{
+			"path": "/storage/.kodi/addons/service.tvheadend43/bin/tv_grab_file",
+			"description": "tv_grag_file is a simple grabber that just read the ~/.xmltv/tv_grab_file.xmltv file",
+			"version": "0.1\n",
+			"mtime": 1318774706,
+			"capabilities": 1
+		}
+	],
+	"grab-interval": 12,
+	"grab-enabled": 1,
+	"current-grabber": "/storage/.kodi/addons/service.tvheadend43/bin/tv_grab_file"
+}

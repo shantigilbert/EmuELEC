@@ -1,0 +1,9 @@
+################################################################################
+# udev rules file for loading rtl8822b_bt-firmware
+################################################################################
+
+ACTION!="add", GOTO="end"
+SUBSYSTEMS=="sdio", ATTRS{vendor}=="0x024c", ATTRS{device}=="0xb822", TAG+="systemd", ENV{SYSTEMD_WANTS}+="rtl8822b_bt-firmware.service"
+GOTO="end"
+
+LABEL="end"

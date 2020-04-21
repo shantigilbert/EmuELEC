@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: GPL-2.0
-# Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2017-2018 Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="ap6xxx-aml"
-PKG_VERSION="99b3459"
-PKG_SHA256="5f2bfc29616d869ad5fb41e0782887d73cafe0bae8a13e7e945bb32b2a2c0877"
+PKG_VERSION="f7a4641c4a83c9cea8e8b36b1303b843b9ecbf2a"
+PKG_SHA256="00a03ceef99f9c2b060c10d9261c57490ff52ac03167991f48b464726771abf8"
 PKG_ARCH="arm aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/khadas/android_hardware_wifi_broadcom_drivers_ap6xxx"
