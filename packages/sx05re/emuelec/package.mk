@@ -17,9 +17,9 @@ PKG_AUTORECONF="no"
 PKG_TOOLCHAIN="make"
 
 # Thanks to magicseb  Reicast SA now WORKS :D
-PKG_EXPERIMENTAL="munt_neon nestopiaCV quasi88 xmil np2kai hypseus triggerhappy"
+PKG_EXPERIMENTAL="munt nestopiaCV quasi88 xmil np2kai hypseus triggerhappy dosbox-x"
 PKG_EMUS="$LIBRETRO_CORES advancemame PPSSPPSDL reicastsa reicastsa_old amiberry hatarisa openbor dosbox-sdl2 mupen64plus-nx mba.mini.plus scummvmsa residualvm commander-genius stellasa VVVVVV devilutionX sdlpop"
-PKG_TOOLS="common-shaders scraper Skyscraper MC libretro-bash-launcher SDL_GameControllerDB linux-utils xmlstarlet CoreELEC-Debug-Scripts sixaxis jslisten evtest"
+PKG_TOOLS="common-shaders scraper Skyscraper MC libretro-bash-launcher SDL_GameControllerDB linux-utils xmlstarlet CoreELEC-Debug-Scripts sixaxis jslisten evtest mpv"
 PKG_RETROPIE_DEP="bash pyudev dialog six git dbus-python pygobject coreutils"
 PKG_DEPENDS_TARGET+=" $PKG_EMUS $PKG_TOOLS $PKG_RETROPIE_DEP $PKG_EXPERIMENTAL"
 
@@ -85,6 +85,7 @@ makeinstall_target() {
       echo "$PROJECT" > $INSTALL/ee_arch
   fi
 
+  ln -sf "/storage/.config/emuelec/scripts/modules/pyudev" $INSTALL/usr/bin/pyudev
   FILES=$INSTALL/usr/config/emuelec/scripts/*
 	for f in $FILES 
 	do
