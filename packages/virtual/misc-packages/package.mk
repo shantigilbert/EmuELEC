@@ -7,7 +7,7 @@ PKG_VERSION=""
 PKG_LICENSE="GPL"
 PKG_SITE="https://libreelec.tv"
 PKG_URL=""
-PKG_DEPENDS_TARGET="toolchain Python3 $ADDITIONAL_PACKAGES"
+PKG_DEPENDS_TARGET="toolchain Python3 bluetool $ADDITIONAL_PACKAGES"
 PKG_SECTION="virtual"
 PKG_LONGDESC="misc-packages: Metapackage for miscellaneous packages"
 
