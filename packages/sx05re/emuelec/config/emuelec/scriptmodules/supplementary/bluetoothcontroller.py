@@ -102,7 +102,7 @@ class MyApp(object):
     def trust_controller(self):
         mac = self.get_selected_device()[0]
         self.bt.trust(mac)
-        if bt.get_device_property(mac,'Trusted') == 1:
+        if self.bt.get_device_property(mac,'Trusted') == 1:
             self.menu.items[self.menu.position] = ('MAC {} ({}) trusted!\n'.format(mac,self.get_selected_device()[1]),self.navigate_to_back)
         else:
             self.menu.items[self.menu.position] = ('Error trusting MAC {} ({})!\n'.format(mac,self.get_selected_device()[1]),self.navigate_to_back)
@@ -127,7 +127,7 @@ class MyApp(object):
     def pair_controller(self):
         mac = self.get_selected_device()[0]
         self.bt.pair(mac)
-        if bt.get_device_property(mac,'Paired') == 1:
+        if self.bt.get_device_property(mac,'Paired') == 1:
             self.menu.items[self.menu.position] = ('MAC {} ({}) paired!\n'.format(mac,self.get_selected_device()[1]),self.navigate_to_back)
         else:
             self.menu.items[self.menu.position] = ('Error paring MAC {} ({})!\n'.format(mac,self.get_selected_device()[1]),self.navigate_to_back)        
@@ -153,7 +153,7 @@ class MyApp(object):
     def connect_device(self):
         mac = self.get_selected_device()[0]
         self.bt.connect(mac)
-        if bt.get_device_property(mac,'Connected') == 1:
+        if self.bt.get_device_property(mac,'Connected') == 1:
             self.menu.items[self.menu.position] = ('MAC {} ({}) connected!\n'.format(mac,self.get_selected_device()[1]),self.navigate_to_back)
         else:
             self.menu.items[self.menu.position] = ('Error connecting MAC {} ({})!\n'.format(mac,self.get_selected_device()[1]),self.navigate_to_back)        
@@ -178,7 +178,7 @@ class MyApp(object):
     def disconnect_device(self):
         mac = self.get_selected_device()[0]
         self.bt.disconnect(mac)
-        if bt.get_device_property(mac,'Connected') == 0:
+        if self.bt.get_device_property(mac,'Connected') == 0:
             self.menu.items[self.menu.position] = ('MAC {} ({}) disconnected!\n'.format(mac,self.get_selected_device()[1]),self.navigate_to_back)
         else:
             self.menu.items[self.menu.position] = ('Error disconnecting MAC {} ({})!\n'.format(mac,self.get_selected_device()[1]),self.navigate_to_back)          
@@ -208,7 +208,7 @@ class MyApp(object):
         self.menu.items[self.menu.position] = ('MAC {} ({}) removed!\n'.format(mac,self.get_selected_device()[1]),self.navigate_to_back)
 
     def rescan_devices(self):
-        self.menu.items[self.menu.position] = ('Rescanning devices\t\t(scanning for {} seconds in background now, please refresh views)'.format(self.scan_timeout), self.rescan_devices)    
+        self.menu.window.addstr(9, 1, 'Scanning for device for {} seconds in background now, please refresh views...'.format(self.scan_timeout), curses.A_NORMAL)
         self.bt.start_scanning(self.scan_timeout)
 
     def get_selected_device(self):
