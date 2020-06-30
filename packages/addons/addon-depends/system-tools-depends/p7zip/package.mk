@@ -17,10 +17,20 @@ make_host() {
 }
 
 make_target() {
-  make CXX=$CXX CC=$CC 7z 7za
+  make CXX=$CXX CC=$CC 7z 7za 7zr
 }
 
 makeinstall_host() {
   mkdir -p $TOOLCHAIN/bin
     cp bin/7za $TOOLCHAIN/bin
+}
+
+makeinstall_target() {
+	mkdir -p $INSTALL/usr/bin
+    cp bin/7zr $INSTALL/usr/bin
+    
+    mkdir -p $INSTALL/usr/config/emuelec/scripts/batocera
+    ln -sf /usr/bin/unzip $INSTALL/usr/config/emuelec/scripts/batocera/unzip
+    ln -sf /usr/bin/7zr $INSTALL/usr/config/emuelec/scripts/batocera/7zr
+    
 }

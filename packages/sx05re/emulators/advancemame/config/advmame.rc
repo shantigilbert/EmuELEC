@@ -24,3 +24,5 @@ device_video_clock 10-180 / 30-80 / 50-70
 device_video_modeline 1920x1080_60.00 153.234 1920 1968 2121 2168 1080 1127 1130 1178 +hsync +vsync
 # WARNING: auto gamepad needs device_joystick to be set to raw
 device_joystick raw
+input_map[ui_select] keyboard[0,enter] or keyboard[1,enter]
+

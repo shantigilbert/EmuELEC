@@ -9,7 +9,7 @@
 
 # IMPORTANT: This script should not return (echo) anything other than the shader if its set
 
-RETROARCHIVEMENTS=(snes nes gba gb gbc megadrive mastersystem pcengine psx lynx ngp atari2600 virtualboy neogeo neogeocd)
+RETROARCHIVEMENTS=(atari2600 atari7800 atarilynx colecovision gamegear gb gba gbc mastersystem megadrive msx n64 neogeo nes ngp pcengine pokemini psx sega32x segacd sg-1000 snes vectrex virtualboy wonderswan)
 NOREWIND=(sega32x psx zxspectrum odyssey2 mame n64 dreamcast atomiswave naomi neogeocd saturn psp pspminis)
 NORUNAHEAD=(psp sega32x n64 dreamcast atomiswave naomi neogeocd saturn)
 
@@ -24,6 +24,89 @@ ROM="${2##*/}"
 #ROM="${ROM%.*}"
 SETF=0
 SHADERSET=0
+
+function group_platform() {
+case ${1} in 
+	"atari2600")
+	PLATFORM="atari2600"
+	;;
+	"atari7800")
+	PLATFORM="atari7800"
+	;;
+	"atarilynx")
+	PLATFORM="atarilynx"
+	;;
+	"wonderswan"|"wonderswancolor")
+	PLATFORM="wonderswan"
+	;;
+	"colecovision")
+	PLATFORM="colecovision"
+	;;
+	"vectrex")
+	PLATFORM="vectrex"
+	;;
+	"msx"|"msx2")
+	PLATFORM="wonderswan"
+	;;
+	"pcengine"|"pcenginecd"|"pcfx"|"supergrafx"|"tg16"|"tg16cd")
+	PLATFORM="pcengine"
+	;;
+	"gb"|"gbh")
+	PLATFORM="gb"
+	;;
+	"gba"|"gbah")
+	PLATFORM="gba"
+	;;
+	"gbc"|"gbch")
+	PLATFORM="gb"
+	;;
+	"nes"|"nesh"|"fds"|"famicom")
+	PLATFORM="nes"
+	;;
+	"n64")
+	PLATFORM="n64"
+	;;
+	"pokemini")
+	PLATFORM="pokemini"
+	;;
+	"snes"|"snesh"|"snesmsu1"|"sfc")
+	PLATFORM="snes"
+	;;
+	"virtualboy")
+	PLATFORM="virtualboy"
+	;;
+	"mastersystem")
+	PLATFORM="mastersystem"
+	;;	
+	"genesis genh"|"megadrive"|"megadrive-japan")
+	PLATFORM="megadrive"
+	;;
+	"sega32x")
+	PLATFORM+"sega32x"
+	;;
+	"gamegear"|"ggh")
+	PLATFORM="gamegear"
+	;;
+	"sg-1000")
+	PLATFORM="sg-1000"
+	;;
+	"segacd")
+	PLATFORM="segacd"
+	;;
+	"neogeo"|"neogeocd")
+	PLATFORM="neogeo"
+	;;
+	"ngp"|"ngpc")
+	PLATFORM="ngp"
+	;;
+	"psx")
+	PLATFORM="psx"
+	;;
+esac
+
+	}
+
+group_platform
 
 function clean_settings() {
 # IMPORTANT: Every setting we change should be removed from retroarch.cfg before we do any changes.
@@ -50,6 +133,20 @@ function clean_settings() {
 	sed -i '/ai_service_source_lang =/d' ${RACONF}
 	sed -i '/ai_service_url =/d' ${RACONF}
 	sed -i "/input_libretro_device_p1/d" ${RACONF}
+	sed -i "/fps_show/d" ${RACONF}
+	sed -i "/netplay =/d" ${RACONF}
+	sed -i "/netplay_ip_port/d" ${RACONF}
+	sed -i "/netplay_delay_frames/d" ${RACONF}
+	sed -i "/netplay_nickname/d" ${RACONF}
+	sed -i "/netplay_client_swap_input/d" ${RACONF}
+	sed -i "/netplay_ip_port/d" ${RACONF}
+	sed -i "/netplay_server_ip/d" ${RACONF}
+	sed -i "/netplay_client_swap_input/d" ${RACONF}
+	sed -i "/netplay_spectator_mode_enable/d" ${RACONF}
+	sed -i "/netplay_use_mitm_server/d" ${RACONF}
+	sed -i "/netplay_ip_address/d" ${RACONF}
+	sed -i "/netplay_mitm_server/d" ${RACONF}
+	sed -i "/netplay_mode/d" ${RACONF}
 }
 
 function default_settings() {
@@ -74,10 +171,12 @@ function default_settings() {
 	echo 'cheevos_verbose_enable = "false"' >> ${RACONF}
 	echo 'cheevos_auto_screenshot = "false"' >> ${RACONF}
 	echo 'ai_service_mode = "0"' >> ${RACONF}
-	echo 'ai_service_enable = "false"' >> ${RACONF}
+	echo 'ai_service_enable = false' >> ${RACONF}
 	echo 'ai_service_source_lang = "0"' >> ${RACONF}
 	echo 'ai_service_url = ""' >> ${RACONF}
 	echo "input_libretro_device_p1 = \"1\"" >> ${RACONF}
+	echo 'fps_show = false' >> ${RACONF}
+	echo 'netplay = false' >> ${RACONF}
 }
 
 function set_setting() {
@@ -202,6 +301,68 @@ case ${1} in
 			fi
 		done
 	;; 
+	"netplay")
+
+	if [ "${2}" == "false" ] || [ "${2}" == "none" ] || [ "${2}" == "0" ]; then
+			echo 'netplay = false' >> ${RACONF}
+	else
+		echo 'netplay = true' >> ${RACONF}
+		
+		get_setting "netplay.mode"
+		NETPLAY_MODE=${EES}
+		
+        # Security : hardcore mode disables save states, which would kill netplay
+        sed -i '/cheevos_hardcore_mode_enable =/d' ${RACONF}
+        echo 'cheevos_hardcore_mode_enable = "false"' >> ${RACONF}
+	
+	if [[ "${NETPLAY_MODE}" == "host" ]]; then
+        # Quite strangely, host mode requires netplay_mode to be set to false when launched from command line
+        echo 'netplay_mode = false' >> ${RACONF}
+        echo 'netplay_client_swap_input = false' >> ${RACONF}
+        get_setting "netplay.port"
+        echo "netplay_ip_port = ${EES}" >> ${RACONF}
+        
+	elif [[ "${NETPLAY_MODE}" == "client" ]]; then
+		# But client needs netplay_mode = true ... bug ?
+        echo 'netplay_mode = true' >> ${RACONF}
+        
+        get_setting "netplay.client.ip"
+        echo "netplay_ip_address = ${EES}" >> ${RACONF}
+        
+        get_setting "netplay.client.port"
+        echo "netplay_ip_port = ${EES}" >> ${RACONF}
+        
+        echo 'netplay_client_swap_input = true' >> ${RACONF}
+	fi # Host or Client 
+
+            # relay
+        get_setting "netplay.relay"
+        if [[ ! -z "${EES}" && "${EES}" != "none" ]]; then
+            echo 'netplay_use_mitm_server = true'  >> ${RACONF}
+            echo "netplay_mitm_server = ${EES}" >> ${RACONF}
+        else
+            echo 'netplay_use_mitm_server = false' >> ${RACONF}
+            sed -i "/netplay_mitm_server/d" ${RACONF}
+        fi
+        
+        get_setting "netplay.frames"
+        echo "netplay_delay_frames = ${EES}" >> ${RACONF}
+
+        get_setting "netplay.nickname"
+        echo "netplay_nickname = ${EES}" >> ${RACONF}
+        
+     
+    # mode spectator
+         get_setting "netplay.spectator"
+         [ "${EES}" == "1" ] && echo 'netplay_spectator_mode_enable = true' >> ${RACONF} || echo 'netplay_spectator_mode_enable = false' >> ${RACONF}
+       
+	fi
+	;;
+	"fps")
+    # Display FPS
+	get_setting "showFPS"
+    [ "${EES}" == "1" ] && echo 'fps_show = "true"' >> ${RACONF} || echo 'fps_show = "false"' >> ${RACONF}
+	;;
 esac
 }
 
@@ -229,7 +390,7 @@ set_setting ${1} ${EES}
 
 clean_settings
 
-for s in ratio smooth shaderset rewind autosave integerscale runahead secondinstance retroachievements ai_service_enabled; do
+for s in ratio smooth shaderset rewind autosave integerscale runahead secondinstance retroachievements ai_service_enabled netplay fps; do
 get_setting $s
 [ -z "${EES}" ] || SETF=1
 done

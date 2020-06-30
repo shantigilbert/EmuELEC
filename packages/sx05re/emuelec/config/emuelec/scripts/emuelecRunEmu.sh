@@ -9,7 +9,10 @@
 # This whole file has become very hacky, I am sure there is a better way to do all of this, but for now, this works.
 
 # clear terminal window
-clear > /dev/tty1
+# clear > /dev/tty
+# clear > /dev/tty0
+# clear > /dev/tty1
+
 
 arguments="$@"
 
@@ -31,6 +34,7 @@ TBASH="/usr/bin/bash"
 JSLISTENCONF="/emuelec/configs/jslisten.cfg"
 RATMPCONF="/tmp/retroarch/ee_retroarch.cfg"
 RATMPCONF="/storage/.config/retroarch/retroarch.cfg"
+NETPLAY="No"
 
 set_kill_keys() {
 	
@@ -47,20 +51,44 @@ if [[ ! -d "$LOGSDIR" ]]; then
 mkdir -p "$LOGSDIR"
 fi
 
+# Clear the log file
+echo "EmuELEC Run Log" > $EMUELECLOG
+cat /etc/motd >> $EMUELECLOG
+
 # Extract the platform name from the arguments
 PLATFORM="${arguments##*-P}"  # read from -P onwards
 PLATFORM="${PLATFORM%% *}"  # until a space is found
+
+CORE="${arguments##*--core=}"  # read from --core= onwards
+CORE="${CORE%% *}"  # until a space is found
+EMULATOR="${arguments##*--emulator=}"  # read from --emulator= onwards
+EMULATOR="${EMULATOR%% *}"  # until a space is found
+
 ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
 
-# We check is emuelec.conf has an emulator for this game on this platform
-EMU=$(/emuelec/scripts/setemu.sh get ${PLATFORM}[\""${BASEROMNAME}\""].emulator)
+if [[ $EMULATOR = "libretro" ]]; then
+	EMU="${CORE}_libretro"
+	LIBRETRO="yes"
+else
+	EMU="${CORE}"
+fi
 
-# If not, we check to see if the platform has an emulator set, else, get default
-[[ -z $EMU ]] && EMU=$(/emuelec/scripts/setemu.sh get ${PLATFORM}.emulator)
-[[ -z $EMU ]] && EMU=$(/storage/.emulationstation/scripts/getcores.sh ${PLATFORM} default)
+# check if we started as host for a game
+if [[ "$arguments" == *"--host"* ]]; then
+NETPLAY="${arguments##*--host}"  # read from --host onwards
+NETPLAY="${NETPLAY%%--nick*}"  # until --nick is found
+NETPLAY="--host $NETPLAY --nick"
+fi
 
-[[ $EMU = *_libretro* ]] && LIBRETRO="yes"
+# check if we are trying to connect to a client on netplay
+if [[ "$arguments" == *"--connect"* ]]; then
+NETPLAY="${arguments##*--connect}"  # read from --connect onwards
+NETPLAY="${NETPLAY%%--nick*}"  # until --nick is found
+NETPLAY="--connect $NETPLAY --nick"
+fi
+
+
 [[ ${PLATFORM} = "ports" ]] && LIBRETRO="yes"
 
 # JSLISTEN setup so that we can kill running ALL emulators using hotkey+start
@@ -184,7 +212,7 @@ case ${PLATFORM} in
 		fi
 		;;		
 	"psp"|"pspminis")
-		if [ "$EMU" = "PPSSPPSA" ]; then
+		if [ "$EMU" = "PPSSPPSDL" ]; then
 		#PPSSPP can run at 32BPP but only with buffered rendering, some games need non-buffered and the only way they work is if I set it to 16BPP
 		# /emuelec/scripts/setres.sh 16 # This was only needed for S912, but PPSSPP does not work on S912 
 		set_kill_keys "PPSSPPSDL"
@@ -212,7 +240,56 @@ fi
 
 RUNTHIS='/usr/bin/retroarch $VERBOSE -L /tmp/cores/${EMU}.so --config ${RATMPCONF} "${ROMNAME}"'
 CONTROLLERCONFIG="${arguments#*--controllers=*}"
+CONTROLLERCONFIG="${CONTROLLERCONFIG%% --*}"  # until a -- is found
 CORE=${EMU%%_*}
+
+
+# Netplay
+
+# make sure the ip and port are blank
+set_ee_setting "netplay.client.ip" "disable"
+set_ee_setting "netplay.client.port" "disable"
+
+if [[ ${NETPLAY} != "No" ]]; then
+NETPLAY_NICK=$(get_ee_setting netplay.nickname)
+[[ -z "$NETPLAY_NICK" ]] && NETPLAY_NICK="Anonymous"
+NETPLAY="$(echo ${NETPLAY} | sed "s|--nick|--nick \"${NETPLAY_NICK}\"|")"
+
+RUNTHIS=$(echo ${RUNTHIS} | sed "s|--config|${NETPLAY} --config|")
+
+if [[ "${NETPLAY}" == *"connect"* ]]; then
+	echo "Netplay client!" >> $EMUELECLOG
+	NETPLAY_PORT="${arguments##*--port }"  # read from -netplayport  onwards
+	NETPLAY_PORT="${NETPLAY_PORT%% *}"  # until a space is found
+	NETPLAY_IP="${arguments##*--connect }"  # read from -netplayip  onwards
+	NETPLAY_IP="${NETPLAY_IP%% *}"  # until a space is found
+	set_ee_setting "netplay.client.ip" "${NETPLAY_IP}"
+	set_ee_setting "netplay.client.port" "${NETPLAY_PORT}"
+fi
+
+# if [[ "${NETPLAY}" == *"host"* ]]; then
+# echo "Netplay host!" >> $EMUELECLOG
+#	NETPLAY_PORT=$(get_ee_setting netplay.port)
+#	NETPLAY_RELAY==$(get_ee_setting global.netplay.relay)
+#	NETPLAY="--host"
+#	[[ ! -z "$NETPLAY_PORT" ]] && NETPLAY="$NETPLAY --port $NETPLAY_PORT"
+#	[[ ! -z "$NETPLAY_RELAY" && "$NETPLAY_RELAY" != *"none"* ]] && NETPLAY="$NETPLAY --relay $NETPLAY_RELAY"
+#elif [[ "${NETPLAY}" == *"client"* ]]; then
+#echo "Netplay client!" >> $EMUELECLOG
+#	NETPLAY_PORT="${arguments##*-netplayport }"  # read from -netplayport  onwards
+#	NETPLAY_PORT="${NETPLAY_PORT%% *}"  # until a space is found
+#	NETPLAY_IP="${arguments##*-netplayip }"  # read from -netplayip  onwards
+#	NETPLAY_IP="${NETPLAY_IP%% *}"  # until a space is found
+#	NETPLAY=""
+#	[[ ! -z "$NETPLAY_IP" ]] && NETPLAY="$NETPLAY --connect $NETPLAY_IP"
+#	[[ ! -z "$NETPLAY_PORT" ]] && NETPLAY="$NETPLAY --port $NETPLAY_PORT"
+#fi
+
+#[[ ! -z "$NETPLAY_NICK" ]] && NETPLAY="$NETPLAY --nick $NETPLAY_NICK"
+#RUNTHIS=$(echo ${RUNTHIS} | sed "s|--config|${NETPLAY} --config|")
+fi
+# End netplay
+
 
 if [[ ${PLATFORM} == "ports" ]]; then
 	SHADERSET=$(/storage/.config/emuelec/scripts/setsettings.sh "${PLATFORM}" "${PORTSCRIPT}" "${CORE}" --controllers="${CONTROLLERCONFIG}")
@@ -226,8 +303,6 @@ if [[ ${SHADERSET} != 0 ]]; then
 RUNTHIS=$(echo ${RUNTHIS} | sed "s|--config|${SHADERSET} --config|")
 fi
 
-fi
-
 # we check is maxperf is set 
 if [ $(get_ee_setting "maxperf" "${PLATFORM}" "${ROMNAME##*/}") == "0" ]; then
 	normperf
@@ -235,9 +310,7 @@ else
 	maxperf
 fi
 
-# Clear the log file
-echo "EmuELEC Run Log" > $EMUELECLOG
-cat /etc/motd >> $EMUELECLOG
+fi
 
 # Write the command to the log file.
 echo "PLATFORM: $PLATFORM" >> $EMUELECLOG
@@ -248,6 +321,7 @@ echo "1st Argument: $1" >> $EMUELECLOG
 echo "2nd Argument: $2" >> $EMUELECLOG
 echo "3rd Argument: $3" >> $EMUELECLOG 
 echo "4th Argument: $4" >> $EMUELECLOG 
+echo "Full arguments: $arguments" >> $EMUELECLOG 
 echo "Run Command is:" >> $EMUELECLOG 
 eval echo ${RUNTHIS} >> $EMUELECLOG 
 

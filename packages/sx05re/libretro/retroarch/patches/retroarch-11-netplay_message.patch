@@ -1,0 +1,11 @@
+--- a/retroarch.c
++++ b/retroarch.c
+@@ -8314,7 +8314,7 @@
+    frontend_drv =  
+       (const frontend_ctx_driver_t*)frontend_driver_get_cpu_architecture_str(
+             frontend_architecture_tmp, sizeof(frontend_architecture_tmp));
+-   snprintf(frontend_architecture, sizeof(frontend_architecture), "%s %s",
++   snprintf(frontend_architecture, sizeof(frontend_architecture), "%s %s@EmuELEC",
+          frontend_drv->ident, frontend_architecture_tmp);
+ 
+ #ifdef HAVE_DISCORD

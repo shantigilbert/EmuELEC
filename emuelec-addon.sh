@@ -17,6 +17,7 @@ EMUELEC="${SCRIPT_DIR}"
 [ -z "$GIT_BRANCH" ] && GIT_BRANCH="master"
 SX05RE_PATH="packages/sx05re"
 EMUELEC_PATH="${SX05RE_PATH}/emuelec"
+EMUELEC_ADDON_VERSION="3.6"
 
 LOG="${SCRIPT_DIR}/emuelec-kodi_`date +%Y%m%d_%H%M%S`.log"
 
@@ -42,7 +43,7 @@ if [ ${VERSION} = "devel" ]; then
 VERSION=$(cat $SCRIPT_DIR/distributions/$DISTRO/version | grep OS_VERSION | grep -oP '"\K[^"\047]+(?=["\047])')-${VERSION}
 fi
 
-[ -z "$REPO_DIR" ] && REPO_DIR="${SCRIPT_DIR}/repo/${VERSION}"
+[ -z "$REPO_DIR" ] && REPO_DIR="${SCRIPT_DIR}/repo/${EMUELEC_ADDON_VERSION}"
 
 BUILD_SUBDIR="build.${DISTRO}-${PROJECT}.${ARCH}-${VERSION}"
 SCRIPT="scripts/build"
@@ -58,9 +59,9 @@ LIBRETRO_BASE="retroarch retroarch-assets retroarch-overlays core-info common-sh
     [ -f "$OPTIONS_FILE" ] && source "$OPTIONS_FILE" || { echo "$OPTIONS_FILE: not found! Aborting." ; exit 1 ; }
     [ -z "$LIBRETRO_CORES" ] && { echo "LIBRETRO_CORES: empty. Aborting!" ; exit 1 ; }
 
-# PPSSPPSDL and openbor do not work on CoreELEC S922x (Amlogic-ng), we use PPSSPP from libretro and remove openbor
 PKG_EMUS="emulationstation-addon advancemame reicastsa amiberry hatarisa mupen64plus-nx"
 
+# PPSSPPSDL and openbor do not work on CoreELEC S922x (Amlogic-ng), we use PPSSPP from libretro and remove openbor
 if [ $PROJECT = "Amlogic" ]; then
 PKG_EMUS="$PKG_EMUS PPSSPPSDL openbor"	
 fi
@@ -92,13 +93,8 @@ PACKAGES_Sx05RE="$PKG_EMUS \
 				SDL_net \
 				capsimg"
 				
-LIBRETRO_CORES_LITE="fbneo gambatte genesis-plus-gx mame2003-plus mgba mupen64plus nestopia pcsx_rearmed snes9x stella"
 
-if [ "$1" = "lite" ]; then
-  PACKAGES_ALL="$LIBRETRO_CORES_LITE"
- else
   PACKAGES_ALL="$LIBRETRO_CORES"
- fi 
 
 LIBRETRO_EXTRA_CORES="citra beetle-psx beetle-saturn beetle-bsnes bsnes-mercury bsnes dinothawr higan-sfc-balanced higan-sfc lutro mame2003-midway mrboom easyrpg dolphin openlara pocketcdg virtualjaguar"
 
@@ -122,11 +118,9 @@ fi
 ADDON_NAME="script.emuelec.${PROJECT}.launcher"
 ADDON_DIR="${PROJECT_DIR}/${ADDON_NAME}"
 
-if [ "$1" = "lite" ] ; then
-  ARCHIVE_NAME="${ADDON_NAME}-${VERSION}-${PROJECT}-lite.zip"
-else
-  ARCHIVE_NAME="${ADDON_NAME}-${VERSION}-${PROJECT}.zip"
-fi
+
+  ARCHIVE_NAME="${ADDON_NAME}-${EMUELEC_ADDON_VERSION}-${PROJECT}.zip"
+
 
 read -d '' message <<EOF
 Building EmuELEC KODI add-on for CoreELEC:
@@ -147,12 +141,12 @@ echo "$message"
 echo
 
 # make sure the old add-on is deleted
-if [ -d ${REPO_DIR} ] && [ "$1" != "lite" ] ; then
+if [ -d ${REPO_DIR} ]; then
 echo "Removing old add-on at ${REPO_DIR}"
 rm -rf ${REPO_DIR}/${ADDON_NAME}
 fi
 
-if [ -d ${PROJECT_DIR} ] && [ "$1" != "lite" ] ; then
+if [ -d ${PROJECT_DIR} ]; then
 echo "Removing old project add-on at ${PROJECT_DIR}"
 rm -rf ${PROJECT_DIR}
 fi
@@ -265,6 +259,8 @@ echo -ne "\tProfile"
 cp -rf "${SCRIPT_DIR}/${EMUELEC_PATH}/profile.d" "${ADDON_DIR}" 
 mv "${ADDON_DIR}/profile.d/99-emuelec.conf" "${ADDON_DIR}/profile.d/99-emuelec.profile" &>>"$LOG"
 sed -i -e "s|export PATH.*|export PATH=\"/storage/.kodi/addons/${ADDON_NAME}/bin:/storage/.emulationstation/scripts:\$PATH\"|" "${ADDON_DIR}/profile.d/99-emuelec.profile"
+sed -i -e "s|/ee_arch|/storage/.kodi/addons/${ADDON_NAME}/config/ee_arch|" "${ADDON_DIR}/profile.d/99-emuelec.profile"
+echo "$PROJECT" > "${ADDON_DIR}/config/ee_arch"
 [ $? -eq 0 ] && echo "(ok)" || { echo "(failed)" ; exit 1 ; }
 
 echo -ne "\tretroarch.cfg "
@@ -433,17 +429,20 @@ ROMFILE="emuelecroms"
 
 # we look for the file in the rompath
 FULLPATHTOROMS="\$(find /media/*/roms/ -name \$ROMFILE -maxdepth 1 | head -n 1)"
+ROMS_FOLDER="/storage/.kodi/addons/${ADDON_NAME}/roms"
 
 if [[ -z "\${FULLPATHTOROMS}" ]]; then
 # echo "can't find roms"
 
     if [ ! -e /storage/roms ]; then
       rm /storage/roms
-      mv /storage/roms2 /storage/roms
+      ln -sf "\$ROMS_FOLDER" /storage/roms
     fi
     else
-      mv /storage/roms /storage/roms2
-      #echo "move the roms folder"
+	if [ -L "/storage/roms" ]; then
+		rm /storage/roms
+		#echo "move the roms folder"
+	fi
  
        # we strip the name of the file.
        PATHTOROMS=\${FULLPATHTOROMS%\$ROMFILE}
@@ -556,7 +555,7 @@ RA_CONFIG_DIR="/storage/.config/retroarch/"
 RA_CONFIG_FILE="\$RA_CONFIG_DIR/retroarch.cfg"
 RA_CONFIG_SUBDIRS="savestates savefiles remappings playlists system thumbnails"
 RA_EXE="\$ADDON_DIR/bin/retroarch"
-ROMS_FOLDER="/storage/roms"
+ROMS_FOLDER="/storage/.kodi/addons/${ADDON_NAME}/roms"
 DOWNLOADS="downloads"
 RA_PARAMS="--config=\$RA_CONFIG_FILE --menu"
 LOGFILE="\$ADDON_DIR/logs/emuelec_addon.log"
@@ -806,7 +805,7 @@ chmod +x bin/emuelec.start
 echo -ne "\taddon.xml "
 read -d '' addon <<EOF
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="${ADDON_NAME}" name="EmuELEC (${VERSION})" version="${VERSION}" provider-name="${PROVIDER}">
+<addon id="${ADDON_NAME}" name="EmuELEC (${EMUELEC_ADDON_VERSION})" version="${EMUELEC_ADDON_VERSION}" provider-name="${PROVIDER}">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
 	</requires>
@@ -1010,6 +1009,7 @@ fi
 
 echo -ne "Making modifications to advmame.sh..."
 CFG="bin/advmame.sh"
+sed -i -e "s|/emuelec/scripts/set_advmame_joy.sh|/usr/bin/bash /emuelec/scripts/set_advmame_joy.sh|" $CFG
 sed -i -e "s/\/usr\/share/\/storage\/.kodi\/addons\/${ADDON_NAME}\/config/" $CFG
 sed -i -e "s/\/usr\/bin/\/storage\/.kodi\/addons\/${ADDON_NAME}\/bin/" $CFG
 sed -i -e "s/device_alsa_device default/device_alsa_device sdl/" "config/advance/advmame.rc"
@@ -1026,6 +1026,7 @@ else
 	echo -ne "Making modifications to es_settings.cfg..."
 	CFG="config/emulationstation/es_settings.cfg"
 	sed -i -e "s|PPSSPPSA|Libretro_ppsspp|" $CFG
+	sed -i "s|,PPSSPPSA||" "config/emulationstation/scripts/getcores.sh"
 	[ $? -eq 0 ] && echo "(ok)" || { echo "(failed)" ; exit 1 ; }
 fi
 
@@ -1137,13 +1138,8 @@ mv -vf "${ARCHIVE_NAME}" "${REPO_DIR}/${ADDON_NAME}/" &>>"$LOG"
 [ $? -eq 0 ] && echo "(ok)" || { echo "(failed)" ; exit 1 ; }
 
 echo -ne "\tsymlink "
-if [ "$1" = "lite" ] ; then
-ln -vsf "${ARCHIVE_NAME}" "${REPO_DIR}/${ADDON_NAME}/${ADDON_NAME}-lite-LATEST.zip" &>>"$LOG"
-[ $? -eq 0 ] && echo "(ok)" || { echo "(failed)" ; exit 1 ; }
-else
 ln -vsf "${ARCHIVE_NAME}" "${REPO_DIR}/${ADDON_NAME}/${ADDON_NAME}-LATEST.zip" &>>"$LOG"
 [ $? -eq 0 ] && echo "(ok)" || { echo "(failed)" ; exit 1 ; }
-fi
 
 echo -ne "\ticon.png "
 cp "${SCRIPT_DIR}/${EMUELEC_PATH}/addon/icon.png" "${REPO_DIR}/${ADDON_NAME}/resources/icon.png"

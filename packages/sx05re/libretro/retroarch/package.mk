@@ -189,7 +189,7 @@ fi
   echo "input_player2_analog_dpad_mode = \"1\"" >> $INSTALL/etc/retroarch.cfg
   echo "input_player3_analog_dpad_mode = \"1\"" >> $INSTALL/etc/retroarch.cfg
   echo "input_player4_analog_dpad_mode = \"1\"" >> $INSTALL/etc/retroarch.cfg
-  echo "savefiles_in_content_dir = = \"true\"" >> $INSTALL/etc/retroarch.cfg
+  echo "savefiles_in_content_dir = \"true\"" >> $INSTALL/etc/retroarch.cfg
   echo "savestates_in_content_dir = \"true\"" >> $INSTALL/etc/retroarch.cfg
  
   mkdir -p $INSTALL/usr/config/retroarch/

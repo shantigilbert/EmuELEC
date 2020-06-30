@@ -7,7 +7,7 @@ PKG_SHA256=""
 PKG_LICENSE="GPLv3"
 PKG_SITE="http://www.libsdl.org/projects/SDL_mixer/release"
 PKG_URL="$PKG_SITE/$PKG_NAME-$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain alsa-lib SDL2-git"
+PKG_DEPENDS_TARGET="toolchain alsa-lib SDL2-git mpg123-compat"
 PKG_LONGDESC="SDL_mixer 2.0.1"
 
 pre_configure_target() {

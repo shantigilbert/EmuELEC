@@ -7,10 +7,8 @@
 . /etc/profile
 source /emuelec/scripts/env.sh
 
-
 joy2keyStart
 romdir="/storage/roms/"
-
 
 function buscarVideo {
 local f=0
@@ -25,19 +23,15 @@ local ytthumbs
 	#for t in $(seq 0 10 100) ; do sleep 1; echo $t | dialog --ascii-lines --backtitle "YouTube Video para EmuElec" --gauge "Generando resultados de la búsqueda..." 10 70 0; done
 	mpv -fs "/storage/.config/splash/youtube-1080.png" --really-quiet
 	
-	
-	ytresults=$(youtube-dl --restrict-filenames -j $ytSearchMode)
-	
+	ytresults=$(youtube-dl --restrict-filenames -j ytsearchdate10:"$ytSearchMode")
 	
 	rm /tmp/ytresults
 	echo $ytresults > /tmp/ytresults
-
 
 	losid=$(grep -o '"webpage_url": *"[^"]*"' /tmp/ytresults | grep -o '"[^"]*"$' | sed 's/"//g')
 	lostitulos=$(grep -o '"fulltitle": *"[^"]*"' /tmp/ytresults | grep -o '"[^"]*"$' | sed 's/"//g'| cut -c 1-50 | sed 's/|/-/g')
 	duracionvideos=$(grep -o ', "duration": *[^,]*' /tmp/ytresults | grep -o '[^ ]*$')
 	videopreview=$(grep -o '"thumbnail": *"[^"]*"' /tmp/ytresults | grep -o '"[^"]*"$' | sed 's/"//g' | sed 's/maxresdefault/hqdefault/g')
-
 
 	for f in $losid; do
 	ytstreams+=("$f")
@@ -100,22 +94,18 @@ clear
 }
 function listarPorInput {
 clear
-#mpv -fs "/storage/.config/splash/youtube-1080.png" --really-quiet
+palabra=$(get_ee_setting youtube.searchword)
+[[ -z "$palabra" ]] && palabra="emuelec"
 
-palabra=$(dialog --stdout --ascii-lines --backtitle "YouTube Video for EmuElec" --title "Search videos from Youtube" --inputbox "Type any term to search for videos" 0 0 "emuelec")
-	
+palabra=$(dialog --stdout --ascii-lines --backtitle "YouTube Video for EmuElec" --title "Search videos from Youtube" --inputbox "Type any term to search for videos" 0 0 "${palabra}")
 retval=$?
-
 
 	case $retval in
 	0)
-	if [[ -z "$palabra" ]]; then
-      palabra="emuelec"
-	fi
-	clear
-	
-	ytSearchMode="ytsearch10:date:$palabra"
-	ytResultsLabel="Results for: $palabra"
+	[[ -z "$palabra" ]] && palabra="emuelec"
+	#clear
+	ytSearchMode="$palabra"
+	ytResultsLabel="Results for: '$palabra'"
 	buscarVideo
 	;;
 	1)
@@ -130,18 +120,12 @@ opcionmenu=$(dialog --ascii-lines --backtitle "YouTube Video for EmuElec" --titl
 
 	case $opcionmenu in
 	1)
-
 	listarPorInput
 	;;
 	2)
-
 	listarPorYTBfile
 	;;
 	esac
 
 }
-
 menuPrincipal
-#buscarVideo
-
-
