@@ -24,6 +24,9 @@ if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
 		"mplayer_video")
 			/storage/.config/emuelec/scripts/playvideo.sh "${2}" "${3}"
 		;;
+		*)
+			kmscon --font-size 8 --login /usr/bin/bash -- -c "${1}"
+		;;
 		esac
 	fi 
 else
@@ -34,8 +37,11 @@ else
 		*.sh)
 			fbterm "${1}" -s 24 < /dev/tty1
 		;;
-		*)
+		"mplayer_video")
 			fbterm /emuelec/scripts/playvideo.sh "${2}" "${3}" < /dev/tty1
+		;;
+		*)
+			fbterm -c "${1}" -s 24 < /dev/tty1
 		;;
 		esac
 	fi 
