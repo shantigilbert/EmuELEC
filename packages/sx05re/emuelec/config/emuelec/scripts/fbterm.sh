@@ -41,7 +41,7 @@ else
 			fbterm /emuelec/scripts/playvideo.sh "${2}" "${3}" < /dev/tty1
 		;;
 		*)
-			fbterm -c "${1}" -s 24 < /dev/tty1
+			fbterm /usr/bin/bash -c "${1}" -s 24 < /dev/tty1
 		;;
 		esac
 	fi 
