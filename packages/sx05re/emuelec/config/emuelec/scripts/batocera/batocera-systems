@@ -234,6 +234,7 @@ def checkBios(systems, prefix):
                 missingBios[system][file["file"]] = { "status": BiosStatus.MISSING, "md5": file["md5"], "file": file["file"] }
     return missingBios
 
+# Returns True if missing, False if nothing is missing
 def displayMissingBios(systems, missingBios):
     sortedMissingBios = OrderedDict(sorted(missingBios.items()))
     if sortedMissingBios:
@@ -244,8 +245,10 @@ def displayMissingBios(systems, missingBios):
                 if sortedMissingBios[system][file]["md5"] != "":
                     md5str = sortedMissingBios[system][file]["md5"]
                 print("{} {} {}".format(sortedMissingBios[system][file]["status"], md5str, sortedMissingBios[system][file]["file"]))
+        return True
     else:
         print("No missing bios")
+        return False
 
 def createReadme(systems):
     for system in sorted(systems):
@@ -257,7 +260,8 @@ def createReadme(systems):
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         prefix = "/storage/roms/"
-        displayMissingBios(systems, checkBios(systems, prefix))
+        if displayMissingBios(systems, checkBios(systems, prefix)):
+            exit(2)
     elif sys.argv[1] == "--createReadme":
         createReadme(systems)
     elif len(sys.argv) == 3 and sys.argv[1] == "--filter":
@@ -273,4 +277,5 @@ if __name__ == '__main__':
             print("No system named {} found".format(sys.argv[2]))
             exit(1)
 
-        displayMissingBios(filtered_systems, checkBios(filtered_systems, prefix))
+        if displayMissingBios(filtered_systems, checkBios(filtered_systems, prefix)):
+            exit(2)
