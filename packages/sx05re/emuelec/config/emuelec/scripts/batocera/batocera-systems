@@ -264,13 +264,17 @@ if __name__ == '__main__':
             exit(2)
     elif sys.argv[1] == "--createReadme":
         createReadme(systems)
-    elif len(sys.argv) == 3 and sys.argv[1] == "--filter":
+    elif len(sys.argv) == 3 and sys.argv[1] in ["--filter", "--strictfilter"]:
         prefix = "/storage/roms/"
         lowered_name = sys.argv[2].lower()
 
         filtered_systems = {}
         for system in systems:
-            if lowered_name in system.lower() or lowered_name in systems[system]['name'].lower():
+            lowered_system = system.lower()
+            lowered_system_name = systems[system]['name'].lower()
+            
+            if ((lowered_name == lowered_system or lowered_name == lowered_system_name) or
+               (sys.argv[1] == "--filter" and (lowered_name in lowered_system or lowered_name in lowered_system_name))):
                 filtered_systems[system] = systems[system]
 
         if len(filtered_systems) == 0:
