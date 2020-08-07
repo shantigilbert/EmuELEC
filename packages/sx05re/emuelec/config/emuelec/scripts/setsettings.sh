@@ -78,7 +78,7 @@ case ${1} in
 	"mastersystem")
 	PLATFORM="mastersystem"
 	;;	
-	"genesis genh"|"megadrive"|"megadrive-japan")
+	"genesis"|"genh"|"megadrive"|"megadrive-japan")
 	PLATFORM="megadrive"
 	;;
 	"sega32x")
