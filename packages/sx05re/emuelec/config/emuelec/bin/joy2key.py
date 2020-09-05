@@ -256,10 +256,12 @@ for arg in args:
 event_format = 'IhBB'
 event_size = struct.calcsize(event_format)
 
+tty_device = sys.argv[2] if len(sys.argv) >= 3 else '/dev/tty'
+
 try:
-    tty_fd = open('/dev/tty', 'a')
+    tty_fd = open(tty_device, 'a')
 except IOError:
-    print 'Unable to open /dev/tty'
+    print 'Unable to open {}'.format(tty_device)
     sys.exit(1)
 
 rescan_time = time.time()
