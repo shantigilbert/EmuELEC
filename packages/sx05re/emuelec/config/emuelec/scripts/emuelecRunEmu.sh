@@ -83,6 +83,7 @@ EMULATOR="${EMULATOR%% *}"  # until a space is found
 
 ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
+GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
 if [[ $EMULATOR = "libretro" ]]; then
 	EMU="${CORE}_libretro"
@@ -221,11 +222,11 @@ case ${PLATFORM} in
 	"pc")
 		if [ "$EMU" = "DOSBOXSDL2" ]; then
 		set_kill_keys "dosbox"
-		RUNTHIS='${TBASH} /usr/bin/dosbox.start "${ROMNAME}"'
+		RUNTHIS='${TBASH} /usr/bin/dosbox.start -conf "${GAMEFOLDER}dosbox-SDL2.conf"'
 		fi
 		if [ "$EMU" = "DOSBOX-X" ]; then
 		set_kill_keys "dosbox-x"
-		RUNTHIS='${TBASH} /usr/bin/dosbox-x.start "${ROMNAME}"'
+		RUNTHIS='${TBASH} /usr/bin/dosbox-x.start -conf "${GAMEFOLDER}dosbox-SDL2.conf"'
 		fi
 		;;		
 	"psp"|"pspminis")
