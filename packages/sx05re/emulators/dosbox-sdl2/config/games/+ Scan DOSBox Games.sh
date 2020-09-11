@@ -40,7 +40,8 @@ function create_launcher() {
 for data_dir in /storage/roms/pcdata/*; do
     if [ -d "$data_dir" ]; then
         for executable in $(find "$data_dir" -iname "*.exe"); do
-            case "$executable" in
+            executable_case="$(basename $executable | tr '[:lower:]' '[:upper:]')"
+            case "$executable_case" in
                 "SETUP.EXE" | "INSTALL.EXE" | "INSTALLER.EXE")
                     ;;
                 *)
