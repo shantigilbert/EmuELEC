@@ -60,4 +60,4 @@ else
 fi
 
 joy2keyStop
-killall joy2key.py
+killall joy2key.py || true
