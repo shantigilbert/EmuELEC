@@ -83,7 +83,7 @@ Doom:
 
   check_bios: DOOM1
   commands:
-    - /emuelec/scripts/emuelecRunEmu.sh "/storage/roms/ports/doom2/doom1.wad" -Pports "${2}" -Cprboom "-SC${0}"
+    - /emuelec/scripts/emuelecRunEmu.sh "/storage/roms/ports/doom/doom1.wad" -Pports "${2}" -Cprboom "-SC${0}"
 
 Doom 2:
   description: A first-person shooter video game, the second title of id Software's Doom franchise. It was originally released for MS-DOS computers in 1994 and Macintosh computers in 1995.
