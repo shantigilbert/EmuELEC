@@ -1,0 +1,10 @@
+--- a/gold/errors.h	2021-01-03 22:21:29.363191712 -0500
++++ a/gold/errors.h	2021-01-03 22:21:41.963002330 -0500
+@@ -24,6 +24,7 @@
+ #define GOLD_ERRORS_H
+ 
+ #include <cstdarg>
++#include <string>
+ 
+ #include "gold-threads.h"
+ 
