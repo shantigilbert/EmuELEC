@@ -13,9 +13,11 @@ PKG_TOOLCHAIN="make"
 
 pre_configure_target() {
 
-if [ "${ARCH}" == "arm" ]; then
-	sed -i "s|-Wall|-Wall -lm|" Makefile
-fi
+case "${ARCH}" in
+	arm|aarch64)
+		sed -i "s|-Wall|-Wall -lm|" Makefile
+		;;
+esac
 
 }
 
