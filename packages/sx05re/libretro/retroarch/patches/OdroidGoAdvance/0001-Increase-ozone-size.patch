@@ -1,0 +1,34 @@
+From fd55f7ab35d64365d0d01ded93bf29dda8537a4a Mon Sep 17 00:00:00 2001
+From: valadaa48 <valadaa48@gmx.com>
+Date: Fri, 1 Jan 2021 23:02:28 -0500
+Subject: [PATCH] Increase ozone size
+
+---
+ menu/drivers/ozone/ozone.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/menu/drivers/ozone/ozone.c b/menu/drivers/ozone/ozone.c
+index f381ee9a20..fd900473b5 100644
+--- a/menu/drivers/ozone/ozone.c
++++ b/menu/drivers/ozone/ozone.c
+@@ -707,7 +707,7 @@ static void *ozone_init(void **userdata, bool video_is_threaded)
+ 
+    ozone->last_width        = width;
+    ozone->last_height       = height;
+-   ozone->last_scale_factor = gfx_display_get_dpi_scale(width, height);
++   ozone->last_scale_factor = gfx_display_get_dpi_scale(width, height) * 1.333f;
+ 
+    file_list_initialize(&ozone->selection_buf_old);
+ 
+@@ -1676,7 +1676,7 @@ static void ozone_render(void *data,
+ 
+    /* Check whether screen dimensions or menu scale
+     * factor have changed */
+-   scale_factor = gfx_display_get_dpi_scale(width, height);
++   scale_factor = gfx_display_get_dpi_scale(width, height) * 1.333f;
+ 
+    if ((scale_factor != ozone->last_scale_factor) ||
+        (width != ozone->last_width) ||
+-- 
+2.30.0
+
