@@ -230,3 +230,16 @@ Bermuda Syndrome:
   commands:
     - cd /storage/roms/ports/bermuda/
     - ${PORT} --datapath=/storage/roms/ports/bermuda/ --fullscreen --widescreen=4:3
+
+RigelEngine:
+  description: RigelEngine is an open-source recreation of the 2D side-scroller Duke Nukem II, originally released by Apogee in 1993.
+  rating: 1.0
+  release_date: 1993
+  developer: Apogee Software
+  publisher: Apogee Software
+
+  init_port: true
+  port_exe: "RigelEngine"
+  audio: "alsa"
+  commands:
+    - ${PORT} /storage/roms/ports/rigelengine
