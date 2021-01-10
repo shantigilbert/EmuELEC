@@ -48,6 +48,9 @@ makeinstall_target() {
   cp spring_libretro.so $INSTALL/usr/lib/libretro/spring_ppsspp_libretro.so
   cp spring_ppsspp_libretro.info $INSTALL/usr/lib/libretro/
 
+  cp spring_libretro.so $INSTALL/usr/lib/libretro/spring_pcsx_rearmed32_libretro.so
+  cp spring_pcsx_rearmed32_libretro.info $INSTALL/usr/lib/libretro/
+
   cp spring_libretro.so $INSTALL/usr/lib/libretro/spring_shell_libretro.so
   cp spring_shell_libretro.info $INSTALL/usr/lib/libretro/
 }
