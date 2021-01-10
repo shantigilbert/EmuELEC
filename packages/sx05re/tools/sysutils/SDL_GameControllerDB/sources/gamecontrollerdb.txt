@@ -860,7 +860,7 @@ xinput,XInput Controller,a:b0,b:b1,back:b6,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,
 
 # EmuELEC extra gamepads
 19000000010000000100000001010000,odroidgo2_joypad,a:b1,b:b0,x:b2,y:b3,leftshoulder:b4,rightshoulder:b5,dpdown:b7,dpleft:b8,dpright:b9,dpup:b6,leftx:a0,lefty:a1,guide:b10,leftstick:b12,lefttrigger:b11,rightstick:b13,righttrigger:b14,start:b15,platform:Linux,
-19000000010000000200000011000000,odroidgo2_joypad_v11,a:b1,b:b0,x:b2,y:b3,leftshoulder:b4,rightshoulder:b5,dpdown:b9,dpleft:b10,dpright:b11,dpup:b8,leftx:a0,lefty:a1,guide:b12,leftstick:b14,lefttrigger:b6,rightstick:b15,righttrigger:b7,start:b17,platform:Linux,
+19000000010000000200000011000000,odroidgo2_joypad_v11,a:b1,b:b0,x:b2,y:b3,leftshoulder:b4,rightshoulder:b5,dpdown:b9,dpleft:b10,dpright:b11,dpup:b8,leftx:a0,lefty:a1,guide:b12,back:b13,leftstick:b14,lefttrigger:b6,rightstick:b15,righttrigger:b7,start:b17,platform:Linux,
 
 
 # Android
