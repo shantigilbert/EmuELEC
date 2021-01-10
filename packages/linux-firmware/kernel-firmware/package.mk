@@ -3,10 +3,10 @@
 
 PKG_NAME="kernel-firmware"
 PKG_VERSION="20191215"
-PKG_SHA256="d8ec464e4ad55d9a94751e84524f0f6f4b6ca84db837efa350d6011f1b7867b0"
+PKG_SHA256="1f848809303643168e85377e4428af88619a13529b8121812678b90d8b38e012"
 PKG_LICENSE="other"
 PKG_SITE="https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/"
-PKG_URL="https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/snapshot/$PKG_VERSION.tar.gz"
+PKG_URL="https://cdn.kernel.org/pub/linux/kernel/firmware/linux-firmware-$PKG_VERSION.tar.gz"
 PKG_NEED_UNPACK="${PROJECT_DIR}/${PROJECT}/packages/${PKG_NAME} ${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/packages/${PKG_NAME}"
 PKG_LONGDESC="kernel-firmware: kernel related firmware"
 PKG_TOOLCHAIN="manual"
