@@ -50,7 +50,7 @@ fi
 
 pre_configure_target() {
 # Retroarch does not like -O3 for CHD loading with cheevos
-export CFLAGS="`echo $CFLAGS | sed -e "s|-O.|-O2|g"`"
+export CFLAGS="$CFLAGS -O3 -fno-tree-vectorize"
 
 TARGET_CONFIGURE_OPTS=""
 PKG_CONFIGURE_OPTS_TARGET="--disable-qt \
