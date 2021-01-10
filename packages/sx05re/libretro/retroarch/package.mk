@@ -152,22 +152,6 @@ fi
   sed -i -e "s/# video_gpu_screenshot = true/video_gpu_screenshot = false/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# video_fullscreen = false/video_fullscreen = true/" $INSTALL/etc/retroarch.cfg
 
-if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
-    echo "xmb_layout = 2" >> $INSTALL/etc/retroarch.cfg
-    echo "menu_widget_scale_auto = false" >> $INSTALL/etc/retroarch.cfg
-    echo "menu_widget_scale_factor = 2.00" >> $INSTALL/etc/retroarch.cfg
-    echo "menu_scale_factor = 1.250000" >> $INSTALL/etc/retroarch.cfg
-    echo "video_font_size = 12.000000" >> $INSTALL/etc/retroarch.cfg
-    echo "menu_show_advanced_settings = true" >> $INSTALL/etc/retroarch.cfg
-    echo "menu_rgui_shadows = true" >> $INSTALL/etc/retroarch.cfg
-    echo "rgui_aspect_ratio = 6" >> $INSTALL/etc/retroarch.cfg
-    echo "rgui_inline_thumbnails = true" >> $INSTALL/etc/retroarch.cfg
-    echo "input_max_users = 1" >> $INSTALL/etc/retroarch.cfg
-    echo "menu_show_reboot = true" >> $INSTALL/etc/retroarch.cfg
-    echo "menu_show_shutdown = true" >> $INSTALL/etc/retroarch.cfg
-
-fi
-
   # Audio
   sed -i -e "s/# audio_driver =/audio_driver = \"alsathread\"/" $INSTALL/etc/retroarch.cfg
   sed -i -e "s/# audio_filter_dir =/audio_filter_dir =\/usr\/share\/audio_filters/" $INSTALL/etc/retroarch.cfg
@@ -224,6 +208,22 @@ fi
   echo "input_player4_analog_dpad_mode = \"1\"" >> $INSTALL/etc/retroarch.cfg
   echo "savefiles_in_content_dir = \"true\"" >> $INSTALL/etc/retroarch.cfg
   echo "savestates_in_content_dir = \"true\"" >> $INSTALL/etc/retroarch.cfg
+
+if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
+    echo "xmb_layout = 2" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_widget_scale_auto = false" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_widget_scale_factor = 2.00" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_scale_factor = 1.250000" >> $INSTALL/etc/retroarch.cfg
+    echo "video_font_size = 12.000000" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_show_advanced_settings = true" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_rgui_shadows = true" >> $INSTALL/etc/retroarch.cfg
+    echo "rgui_aspect_ratio = 6" >> $INSTALL/etc/retroarch.cfg
+    echo "rgui_inline_thumbnails = true" >> $INSTALL/etc/retroarch.cfg
+    echo "input_max_users = 1" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_show_reboot = true" >> $INSTALL/etc/retroarch.cfg
+    echo "menu_show_shutdown = true" >> $INSTALL/etc/retroarch.cfg
+fi
+
  
   mkdir -p $INSTALL/usr/config/retroarch/
   mv $INSTALL/etc/retroarch.cfg $INSTALL/usr/config/retroarch/
