@@ -132,7 +132,6 @@ OpenJazz:
   developer: sana2dang, AlisterT
   publisher: non-commercial
 
-  check_bios: OpenJazz
   commands:
     - ${PORT} --Datadir /storage/roms/ports/openjazz >> $EE_LOG 2>&1
     
