@@ -295,4 +295,17 @@ for ecwolf in SOD sod WL6 wl6 N3D n3d SD2 sd2 SD3 sd3; do
     fi
 done
 
+#check if we have doom data installed
+doomdir="/storage/roms/ports/doom"
+
+mkdir -p ${doomdir}/games
+
+cd ${doomdir}
+for file in *.WAD *.wad *.IWAD *.iwad *.PWAD *.pwad; do
+	[ -e "$file" ] || continue
+	if [ ! -f ${doomdir}/games/${file} ]; then
+		cp $file ${doomdir}/games
+	fi
+done
+
 exit 0

@@ -5,19 +5,59 @@
 
 . /etc/profile
 
-CONFIG="/emuelec/configs/chocolate-doom"
+RUN_DIR="/storage/roms/ports/doom"
+CONFIG_DIR="/emuelec/configs/chocolate-doom"
 LOCALCONFIG="/storage/.local/share/chocolate-doom"
+
+params=" --savedir ${CONFIG_DIR}"
 
 if [ ! -L "${LOCALCONFIG}" ]; then 
 [[ -d "${LOCALCONFIG}" ]] && rm -rf "${LOCALCONFIG}"
-ln -sf "${CONFIG}" "${LOCALCONFIG}"
+ln -sf "${CONFIG_DIR}" "${LOCALCONFIG}"
 fi
 
 GUID=$(echo "${2}" | grep -Ewo '[[:xdigit:]]{32}' | head -n1)
 # echo "Will use controller with ${GUID}"
 # Try to set up gamepad
-sed -i "s|joystick_guid.*|joystick_guid                 \"${GUID}\"|" "${CONFIG}/chocolate-doom.cfg"
+sed -i "s|joystick_guid.*|joystick_guid                 \"${GUID}\"|" "${CONFIG_DIR}/chocolate-doom.cfg"
 
-/usr/bin/chocolate-doom -iwad "${1}"
+# EXT can be wad, WAD, iwad, IWAD, pwad, PWAD or choco
+FILE=$(basename -- "${1}")
+EXT=${1#*.}
 
+# If its not a simple wad (extension .choco) read the file and parse the data
+if [ ${EXT} == "choco" ]; then
+    while IFS== read -r key value; do
+	if [ "$key" == "GAMETYPE" ]; then
+	    case ${value} in
+		"doom"|"DOOM")
+		    PROGRAM="chocolate-doom"
+		;;
+		"heretic"|"HERETIC")
+		    PROGRAM="chocolate-heretic"
+		;;
+		"hexen"|"HEXEN")
+		    PROGRAM="chocolate-hexen"
+		;;
+		"strife"|"STRIFE")
+		    PROGRAM="chocolate-strife"
+		;;
+	    esac
+	fi
+
+        if [ "$key" == "SUBDIR" ]; then
+	    RUN_DIR="/storage/roms/ports/doom/$value"
+        fi
+
+        if [ "$key" == "PARAMS" ]; then
+            params+=" $value"
+        fi
+    done < "${1}"
+else
+    PROGRAM="chocolate-doom"
+    params+=" -iwad ${RUN_DIR}/${FILE}"
+fi
+
+cd "${RUN_DIR}"
+/usr/bin/${PROGRAM} ${params} >/emuelec/logs/emuelec.log 2>&1
 
