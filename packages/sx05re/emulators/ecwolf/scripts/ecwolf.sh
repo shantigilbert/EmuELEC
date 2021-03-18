@@ -5,6 +5,8 @@
 
 . /etc/profile
 
+# We cd into this directory before starting ecwolf
+RUN_DIR="/emuelec/configs/ecwolf"
 CONFIG_DIR="/emuelec/configs/ecwolf"
 CONFIG_FILE="${CONFIG_DIR}/ecwolf.cfg"
 
@@ -31,17 +33,26 @@ DATA=${1#*.}
 # If its a mod (extension .ecwolf) read the file and parse the data
 if [ ${DATA} == "ecwolf" ]; then
     while IFS== read -r key value; do
-        if [ "$key" == "DATA" ]; then
-            params+=" --data $value"
+        if [ "$key" == "SUBDIR" ]; then
+	    RUN_DIR="/storage/roms/ports/ecwolf/$value"
+	    # ecwolf does not work without ecwolf.pk3 in the current directory
+	    # so we have to copy it there if it not already exists
+	    if [ ! -f $RUN_DIR/ecwolf.pk3 ]; then
+		cp $CONFIG_DIR/ecwolf.pk3 $RUN_DIR
+	    fi
         fi
 
-        if [ "$key" == "PK3" ]; then
-            params+=" --file $value"
+        if [ "$key" == "PARAMS" ]; then
+            params+=" $value"
         fi
     done < "${1}"
 else
     params+=" --data ${DATA}"
 fi
 
-cd "${CONFIG_DIR}"
-ecwolf ${params} > /emuelec/logs/emuelec.log 2>&1 
+# There are mods which have the same files as the original games, so you have
+# to put them in subdirectories. ecwolf on the other side has no command line
+# parameter to switch to such a subdir, so you have to cd into that dir first.
+cd "${RUN_DIR}"
+ecwolf ${params} > /emuelec/logs/emuelec.log 2>&1
+
