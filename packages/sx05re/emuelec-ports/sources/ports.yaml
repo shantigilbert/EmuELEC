@@ -125,6 +125,17 @@ OpenTyrian:
   commands_end:
     - '[[ "$EE_DEVICE" == "Amlogic" ]] && mv /storage/.config/asound2.conf /storage/.config/asound.conf'
 
+OpenJazz:
+  description: "Port Of Jazz Jackrabbit."
+  rating: 1.0
+  release_date: 20210516T000000
+  developer: sana2dang, AlisterT
+  publisher: non-commercial
+
+  check_bios: OpenJazz
+  commands:
+    - ${PORT} --Datadir /storage/roms/ports/openjazz >> $EE_LOG 2>&1
+    
 Quake:
   description: Players must find their way through various maze-like, medieval environments while battling a variety of monsters using an array of weaponry.
   rating: 0.8
