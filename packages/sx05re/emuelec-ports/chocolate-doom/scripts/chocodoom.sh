@@ -42,6 +42,9 @@ if [ ${EXT} == "choco" ]; then
 		"strife"|"STRIFE")
 		    PROGRAM="chocolate-strife"
 		;;
+		*)
+		    PROGRAM="chocolate-doom"
+		;;
 	    esac
 	fi
 
