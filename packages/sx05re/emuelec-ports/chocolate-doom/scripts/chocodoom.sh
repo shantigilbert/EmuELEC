@@ -58,7 +58,7 @@ if [ ${EXT} == "choco" ]; then
     done < "${1}"
 else
     PROGRAM="chocolate-doom"
-    params+=" -iwad ${RUN_DIR}/${FILE}"
+    params+=" -iwad ${1}"
 fi
 
 cd "${RUN_DIR}"
