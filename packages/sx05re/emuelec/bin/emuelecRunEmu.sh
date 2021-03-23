@@ -261,6 +261,10 @@ case ${PLATFORM} in
             set_kill_keys "chocolate-doom"
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
             RUNTHIS='${TBASH} /usr/bin/chocodoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
+	elif [ "$EMU" = "LZDoom" ]; then
+	    set_kill_keys "lzdoom"
+            CONTROLLERCONFIG="${arguments#*--controllers=*}"
+            RUNTHIS='${TBASH} /usr/bin/lzdoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
         fi
         ;;
 	"ecwolf")

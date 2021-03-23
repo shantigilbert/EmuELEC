@@ -26,7 +26,7 @@ FILE=$(basename -- "${1}")
 EXT=${1#*.}
 
 # If its not a simple wad (extension .choco) read the file and parse the data
-if [ ${EXT} == "choco" ]; then
+if [ ${EXT} == "doom" ]; then
     while IFS== read -r key value; do
 	if [ "$key" == "GAMETYPE" ]; then
 	    case ${value} in
