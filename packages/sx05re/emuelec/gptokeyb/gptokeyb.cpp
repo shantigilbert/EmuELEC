@@ -91,13 +91,15 @@ void emit(int type, int code, int val)
   write(uinp_fd, &ev, sizeof(ev));
 }
 
-void emitKey(int code, bool is_pressed, int type = EV_KEY, int value = 0)
+void emitKey(int code, bool is_pressed)
 {
-  if (type == EV_ABS) {
-    emit(EV_ABS, code, value);
-  } else {
-    emit(EV_KEY, code, is_pressed ? 1 : 0);
-  }
+  emit(EV_KEY, code, is_pressed ? 1 : 0);
+  emit(EV_SYN, SYN_REPORT, 0);
+}
+
+void emitAxisMotion(int code, int value)
+{
+  emit(EV_ABS, code, value);
   emit(EV_SYN, SYN_REPORT, 0);
 }
 
@@ -440,24 +442,24 @@ int main(int argc, char* argv[])
           //printf("event.jhat.value: %u\n\n", event.jhat.value);
           switch (event.jhat.value) {
             case 0:
-              emitKey(ABS_HAT0Y, 0, EV_ABS, 0);
-              emitKey(ABS_HAT0X, 0, EV_ABS, 0);
+              emitAxisMotion(ABS_HAT0Y, 0);
+              emitAxisMotion(ABS_HAT0X, 0);
               break;
             case SDL_HAT_UP:
               //printf("Up!\n");
-              emitKey(ABS_HAT0Y, 0, EV_ABS, -1);
+              emitAxisMotion(ABS_HAT0Y, -1);
               break;
             case SDL_HAT_DOWN:
               //printf("Down!\n");
-              emitKey(ABS_HAT0Y, 0, EV_ABS, 1);
+              emitAxisMotion(ABS_HAT0Y, 1);
               break;
             case SDL_HAT_LEFT:
               //printf("Left!\n");
-              emitKey(ABS_HAT0X, 0, EV_ABS, -1);
+              emitAxisMotion(ABS_HAT0X, -1);
               break;
             case SDL_HAT_RIGHT:
               //printf("Right!\n");
-              emitKey(ABS_HAT0X, 0, EV_ABS, 1);
+              emitAxisMotion(ABS_HAT0X, 1);
               break;
           }
         }
@@ -477,45 +479,45 @@ int main(int argc, char* argv[])
             event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX &&
             event.jaxis.value < -deadzone) {
             // printf("Left !\n\n");
-            emitKey(ABS_X, 0, EV_ABS, event.jaxis.value);
+            emitAxisMotion(ABS_X, event.jaxis.value);
           } else if (
             event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX &&
             event.jaxis.value > deadzone) {
             //printf("Right!\n\n");
-            emitKey(ABS_X, 0, EV_ABS, event.jaxis.value);
+            emitAxisMotion(ABS_X, event.jaxis.value);
           } else if (
             event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY &&
             event.jaxis.value < -deadzone) {
             //printf("Up!\n\n");
-            emitKey(ABS_Y, 0, EV_ABS, event.jaxis.value);
+            emitAxisMotion(ABS_Y, event.jaxis.value);
           } else if (
             event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY &&
             event.jaxis.value > deadzone) {
             //printf("Down!\n\n");
-            emitKey(ABS_Y, 0, EV_ABS, event.jaxis.value);
+            emitAxisMotion(ABS_Y, event.jaxis.value);
           }
           // right analog
           // I use INT numbers because the CONS had incorrect axis?  SDL_CONTROLLER_AXIS_RIGHTX / SDL_CONTROLLER_AXIS_RIGHTY
           if (event.caxis.axis == 3 && event.jaxis.value < -deadzone) {
             // printf("Left !\n\n");
-            emitKey(ABS_RX, 0, EV_ABS, event.jaxis.value);
+            emitAxisMotion(ABS_RX, event.jaxis.value);
           } else if (event.caxis.axis == 3 && event.jaxis.value > deadzone) {
             //printf("Right!\n\n");
-            emitKey(ABS_RX, 0, EV_ABS, event.jaxis.value);
+            emitAxisMotion(ABS_RX, event.jaxis.value);
           } else if (event.caxis.axis == 4 && event.jaxis.value < -deadzone) {
             //printf("Up!\n\n");
-            emitKey(ABS_RY, 0, EV_ABS, event.jaxis.value);
+            emitAxisMotion(ABS_RY, event.jaxis.value);
           } else if (event.caxis.axis == 4 && event.jaxis.value > deadzone) {
             //printf("Down!\n\n");
-            emitKey(ABS_RY, 0, EV_ABS, event.jaxis.value);
+            emitAxisMotion(ABS_RY, event.jaxis.value);
           }
 
           // triggers // Same for SDL_CONTROLLER_AXIS_TRIGGERLEFT / SDL_CONTROLLER_AXIS_TRIGGERRIGHT, I use INT because of incorrect axis?
           // triggers return MORE than 255 and they do return a negative, so something is wrong
           if (event.caxis.axis == 2) {
-            emitKey(ABS_Z, 0, EV_ABS, event.caxis.value);
+            emitAxisMotion(ABS_Z, event.caxis.value);
           } else if (event.caxis.axis == 5) {
-            emitKey(ABS_RZ, 0, EV_ABS, event.caxis.value);
+            emitAxisMotion(ABS_RZ, event.caxis.value);
           }
         } // xbox mode
         break;
