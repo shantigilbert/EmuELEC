@@ -1,0 +1,20 @@
+﻿---
+BasedOnStyle: Mozilla
+AlignAfterOpenBracket: AlwaysBreak
+AllowShortLoopsOnASingleLine: 'true'
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: 'true'
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+PointerAlignment: Left
+ReflowComments: 'false'
+SpaceInEmptyParentheses: 'false'
+SpacesInAngles: 'false'
+SpacesInContainerLiterals: 'false'
+SpacesInParentheses: 'false'
+SpacesInSquareBrackets: 'false'
+Standard: Cpp11
+UseTab: Never
+
+...
