@@ -153,12 +153,12 @@ void setupFakeXbox360Device(uinput_user_dev& device, int fd)
     exit(-1);
   }
 
-  UINPUT_SET_ABS_P(&device, SDL_CONTROLLER_AXIS_LEFTX, -32768, 32768, 16, 128);
-  UINPUT_SET_ABS_P(&device, SDL_CONTROLLER_AXIS_LEFTY, -32768, 32768, 16, 128);
+  UINPUT_SET_ABS_P(&device, SDL_CONTROLLER_AXIS_LEFTX, -32768, 32767, 16, 128);
+  UINPUT_SET_ABS_P(&device, SDL_CONTROLLER_AXIS_LEFTY, -32768, 32767, 16, 128);
   UINPUT_SET_ABS_P(
-    &device, SDL_CONTROLLER_AXIS_RIGHTX, -32768, 32768, 16, 128);
+    &device, SDL_CONTROLLER_AXIS_RIGHTX, -32768, 32767, 16, 128);
   UINPUT_SET_ABS_P(
-    &device, SDL_CONTROLLER_AXIS_RIGHTY, -32768, 32768, 16, 128);
+    &device, SDL_CONTROLLER_AXIS_RIGHTY, -32768, 32767, 16, 128);
   UINPUT_SET_ABS_P(&device, ABS_HAT0X, -1, 1, 0, 0);
   UINPUT_SET_ABS_P(&device, ABS_HAT0Y, -1, 1, 0, 0);
   UINPUT_SET_ABS_P(&device, SDL_CONTROLLER_AXIS_TRIGGERLEFT, 0, 255, 0, 0);
@@ -226,13 +226,10 @@ int main(int argc, char* argv[])
       printf("SDL_WaitEvent() failed: %s\n", SDL_GetError());
       return -1;
     }
-    /*printf("event.caxis.axis: %u\n", event.caxis.axis);
-            printf("event.caxis.value: %u\n", event.caxis.value); 
-          */
+
     switch (event.type) {
       case SDL_CONTROLLERBUTTONDOWN:
       case SDL_CONTROLLERBUTTONUP: {
-
         const bool is_pressed = event.type == SDL_CONTROLLERBUTTONDOWN;
 
         if (kill_mode) {
@@ -362,6 +359,22 @@ int main(int argc, char* argv[])
             case SDL_CONTROLLER_BUTTON_START:
               emitKey(BTN_START, is_pressed);
               break;
+
+            case SDL_CONTROLLER_BUTTON_DPAD_UP:
+              emitAxisMotion(ABS_HAT0Y, is_pressed ? -1 : 0);
+              break;
+
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+              emitAxisMotion(ABS_HAT0Y, is_pressed ? 1 : 0);
+              break;
+
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+              emitAxisMotion(ABS_HAT0X, is_pressed ? -1 : 0);
+              break;
+
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+              emitAxisMotion(ABS_HAT0X, is_pressed ? 1 : 0);
+              break;
           }
         } else {
           // Fake Keyboard mode
@@ -400,88 +413,36 @@ int main(int argc, char* argv[])
           }
         } //kill mode
       } break;
-      case SDL_JOYHATMOTION:
-        if (xbox360_mode) {
-          //printf("event.jhat.hat: %u\n", event.jhat.hat);
-          //printf("event.jhat.value: %u\n\n", event.jhat.value);
-          switch (event.jhat.value) {
-            case 0:
-              emitAxisMotion(ABS_HAT0Y, 0);
-              emitAxisMotion(ABS_HAT0X, 0);
-              break;
-            case SDL_HAT_UP:
-              //printf("Up!\n");
-              emitAxisMotion(ABS_HAT0Y, -1);
-              break;
-            case SDL_HAT_DOWN:
-              //printf("Down!\n");
-              emitAxisMotion(ABS_HAT0Y, 1);
-              break;
-            case SDL_HAT_LEFT:
-              //printf("Left!\n");
-              emitAxisMotion(ABS_HAT0X, -1);
-              break;
-            case SDL_HAT_RIGHT:
-              //printf("Right!\n");
-              emitAxisMotion(ABS_HAT0X, 1);
-              break;
-          }
-        }
-        break;
-      case SDL_JOYAXISMOTION:
-        if (xbox360_mode) {
-          int deadzone = 200;
-          /*
-        if( event.jaxis.value > 200 || event.jaxis.value < -200) {
-						printf("Joystick   %02i axis %02i value %i\n", 
-									 event.jaxis.which, event.jaxis.axis, event.jaxis.value);
-		 }
-*/
 
-          // left analog
-          if (
-            event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX &&
-            event.jaxis.value < -deadzone) {
-            // printf("Left !\n\n");
-            emitAxisMotion(ABS_X, event.jaxis.value);
-          } else if (
-            event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX &&
-            event.jaxis.value > deadzone) {
-            //printf("Right!\n\n");
-            emitAxisMotion(ABS_X, event.jaxis.value);
-          } else if (
-            event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY &&
-            event.jaxis.value < -deadzone) {
-            //printf("Up!\n\n");
-            emitAxisMotion(ABS_Y, event.jaxis.value);
-          } else if (
-            event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY &&
-            event.jaxis.value > deadzone) {
-            //printf("Down!\n\n");
-            emitAxisMotion(ABS_Y, event.jaxis.value);
-          }
-          // right analog
-          // I use INT numbers because the CONS had incorrect axis?  SDL_CONTROLLER_AXIS_RIGHTX / SDL_CONTROLLER_AXIS_RIGHTY
-          if (event.caxis.axis == 3 && event.jaxis.value < -deadzone) {
-            // printf("Left !\n\n");
-            emitAxisMotion(ABS_RX, event.jaxis.value);
-          } else if (event.caxis.axis == 3 && event.jaxis.value > deadzone) {
-            //printf("Right!\n\n");
-            emitAxisMotion(ABS_RX, event.jaxis.value);
-          } else if (event.caxis.axis == 4 && event.jaxis.value < -deadzone) {
-            //printf("Up!\n\n");
-            emitAxisMotion(ABS_RY, event.jaxis.value);
-          } else if (event.caxis.axis == 4 && event.jaxis.value > deadzone) {
-            //printf("Down!\n\n");
-            emitAxisMotion(ABS_RY, event.jaxis.value);
-          }
+      case SDL_CONTROLLERAXISMOTION:
+        if (xbox360_mode) {
+          switch (event.caxis.axis) {
+            case SDL_CONTROLLER_AXIS_LEFTX:
+              emitAxisMotion(ABS_X, event.caxis.value);
+              break;
 
-          // triggers // Same for SDL_CONTROLLER_AXIS_TRIGGERLEFT / SDL_CONTROLLER_AXIS_TRIGGERRIGHT, I use INT because of incorrect axis?
-          // triggers return MORE than 255 and they do return a negative, so something is wrong
-          if (event.caxis.axis == 2) {
-            emitAxisMotion(ABS_Z, event.caxis.value);
-          } else if (event.caxis.axis == 5) {
-            emitAxisMotion(ABS_RZ, event.caxis.value);
+            case SDL_CONTROLLER_AXIS_LEFTY:
+              emitAxisMotion(ABS_Y, event.caxis.value);
+              break;
+
+            case SDL_CONTROLLER_AXIS_RIGHTX:
+              emitAxisMotion(ABS_RX, event.caxis.value);
+              break;
+
+            case SDL_CONTROLLER_AXIS_RIGHTY:
+              emitAxisMotion(ABS_RY, event.caxis.value);
+              break;
+
+            case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+              // The target range for the triggers is 0..255 instead of
+              // 0..32767, so we shift down by 7 as that does exactly the
+              // scaling we need (32767 >> 7 is 255)
+              emitAxisMotion(ABS_Z, event.caxis.value >> 7);
+              break;
+
+            case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+              emitAxisMotion(ABS_RZ, event.caxis.value >> 7);
+              break;
           }
         } // xbox mode
         break;
