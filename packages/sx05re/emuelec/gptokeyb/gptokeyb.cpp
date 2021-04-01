@@ -103,6 +103,68 @@ void emitAxisMotion(int code, int value)
   emit(EV_SYN, SYN_REPORT, 0);
 }
 
+void setupFakeKeyboardMouseDevice(uinput_user_dev& device, int fd)
+{
+  strncpy(device.name, "Fake Keyboard", UINPUT_MAX_NAME_SIZE);
+  device.id.vendor = 0x1234;  /* sample vendor */
+  device.id.product = 0x5678; /* sample product */
+
+  for (int i = 0; i < 256; i++) {
+    ioctl(fd, UI_SET_KEYBIT, i);
+  }
+
+  // Keys or Buttons
+  ioctl(fd, UI_SET_EVBIT, EV_KEY);
+}
+
+void setupFakeXbox360Device(uinput_user_dev& device, int fd)
+{
+  strncpy(device.name, "Microsoft X-Box 360 pad", UINPUT_MAX_NAME_SIZE);
+  device.id.vendor = 0x045e;  /* sample vendor */
+  device.id.product = 0x028e; /* sample product */
+
+  if (
+    ioctl(fd, UI_SET_EVBIT, EV_KEY) ||
+    ioctl(fd, UI_SET_EVBIT, EV_SYN) ||
+    ioctl(fd, UI_SET_EVBIT, EV_ABS) ||
+    // X-Box 360 pad buttons
+    ioctl(fd, UI_SET_KEYBIT, BTN_A) ||
+    ioctl(fd, UI_SET_KEYBIT, BTN_B) ||
+    ioctl(fd, UI_SET_KEYBIT, BTN_X) ||
+    ioctl(fd, UI_SET_KEYBIT, BTN_Y) ||
+    ioctl(fd, UI_SET_KEYBIT, BTN_TL) ||
+    ioctl(fd, UI_SET_KEYBIT, BTN_TR) ||
+    ioctl(fd, UI_SET_KEYBIT, BTN_THUMBL) ||
+    ioctl(fd, UI_SET_KEYBIT, BTN_THUMBR) ||
+    ioctl(fd, UI_SET_KEYBIT, BTN_SELECT) ||
+    ioctl(fd, UI_SET_KEYBIT, BTN_START) ||
+    ioctl(fd, UI_SET_KEYBIT, BTN_MODE) ||
+    // absolute (sticks)
+    ioctl(fd, UI_SET_ABSBIT, SDL_CONTROLLER_AXIS_LEFTX) ||
+    ioctl(fd, UI_SET_ABSBIT, SDL_CONTROLLER_AXIS_LEFTY) ||
+    ioctl(fd, UI_SET_ABSBIT, SDL_CONTROLLER_AXIS_RIGHTX) ||
+    ioctl(fd, UI_SET_ABSBIT, SDL_CONTROLLER_AXIS_RIGHTY) ||
+    ioctl(fd, UI_SET_ABSBIT, SDL_CONTROLLER_AXIS_TRIGGERLEFT) ||
+    ioctl(fd, UI_SET_ABSBIT, SDL_CONTROLLER_AXIS_TRIGGERRIGHT) ||
+    ioctl(fd, UI_SET_ABSBIT, ABS_HAT0X) ||
+    ioctl(fd, UI_SET_ABSBIT, ABS_HAT0Y)
+  ) {
+    printf("Failed to configure fake Xbox 360 controller\n");
+    exit(-1);
+  }
+
+  UINPUT_SET_ABS_P(&device, SDL_CONTROLLER_AXIS_LEFTX, -32768, 32768, 16, 128);
+  UINPUT_SET_ABS_P(&device, SDL_CONTROLLER_AXIS_LEFTY, -32768, 32768, 16, 128);
+  UINPUT_SET_ABS_P(
+    &device, SDL_CONTROLLER_AXIS_RIGHTX, -32768, 32768, 16, 128);
+  UINPUT_SET_ABS_P(
+    &device, SDL_CONTROLLER_AXIS_RIGHTY, -32768, 32768, 16, 128);
+  UINPUT_SET_ABS_P(&device, ABS_HAT0X, -1, 1, 0, 0);
+  UINPUT_SET_ABS_P(&device, ABS_HAT0Y, -1, 1, 0, 0);
+  UINPUT_SET_ABS_P(&device, SDL_CONTROLLER_AXIS_TRIGGERLEFT, 0, 255, 0, 0);
+  UINPUT_SET_ABS_P(&device, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, 0, 255, 0, 0);
+}
+
 int main(int argc, char* argv[])
 {
 
@@ -117,12 +179,8 @@ int main(int argc, char* argv[])
     }
   }
 
-  /* This should probably be separated, but for now it works */
-
-  // We do not need fake keyboard in kill mode
-  if (kill_mode == false && xbox360_mode == false) {
-    printf("Running in Fake Keyboard mode\n");
-
+  // Create fake input device (not needed in kill mode)
+  if (!kill_mode) {
     uinp_fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
     if (uinp_fd < 0) {
       printf("Unable to open /dev/uinput\n");
@@ -131,19 +189,16 @@ int main(int argc, char* argv[])
 
     // Intialize the uInput device to NULL
     memset(&uidev, 0, sizeof(uidev));
-
-    strncpy(uidev.name, "Fake Keyboard", UINPUT_MAX_NAME_SIZE);
     uidev.id.version = 1;
     uidev.id.bustype = BUS_USB;
-    uidev.id.vendor = 0x1234;  /* sample vendor */
-    uidev.id.product = 0x5678; /* sample product */
 
-    for (int i = 0; i < 256; i++) {
-      ioctl(uinp_fd, UI_SET_KEYBIT, i);
+    if (xbox360_mode) {
+      printf("Running in Fake Xbox 360 Mode\n");
+      setupFakeXbox360Device(uidev, uinp_fd);
+    } else {
+      printf("Running in Fake Keyboard mode\n");
+      setupFakeKeyboardMouseDevice(uidev, uinp_fd);
     }
-
-    // Keys or Buttons
-    ioctl(uinp_fd, UI_SET_EVBIT, EV_KEY);
 
     // Create input device into input sub-system
     write(uinp_fd, &uidev, sizeof(uidev));
@@ -152,98 +207,7 @@ int main(int argc, char* argv[])
       printf("Unable to create UINPUT device.");
       return -1;
     }
-  } //fake keyboard/kill mode
-
-  if (kill_mode == false && xbox360_mode == true) {
-    printf("Running in Fake Xbox 360 Mode\n");
-
-    uinp_fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
-    if (uinp_fd < 0) {
-      printf("Unable to open /dev/uinput\n");
-      return -1;
-    }
-
-    // Intialize the uInput device to NULL
-    memset(&uidev, 0, sizeof(uidev));
-    //{ "xbox_360", BUS_USB, 0x045e, 0x028e, 0x0110 },
-
-    if (ioctl(uinp_fd, UI_SET_EVBIT, EV_KEY))
-      throw std::runtime_error("Can't UI_SET_EVBIT EV_KEY");
-    if (ioctl(uinp_fd, UI_SET_EVBIT, EV_SYN))
-      throw std::runtime_error("Can't UI_SET_EVBIT EV_SYN");
-    if (ioctl(uinp_fd, UI_SET_EVBIT, EV_ABS))
-      throw std::runtime_error("Can't UI_SET_EVBIT EV_ABS");
-
-    // setup X-Box 360 pad buttons
-    if (ioctl(uinp_fd, UI_SET_KEYBIT, BTN_A))
-      throw std::runtime_error("Can't UI_SET_KEYBIT BTN_A");
-    if (ioctl(uinp_fd, UI_SET_KEYBIT, BTN_B))
-      throw std::runtime_error("Can't UI_SET_KEYBIT BTN_B");
-    if (ioctl(uinp_fd, UI_SET_KEYBIT, BTN_X))
-      throw std::runtime_error("Can't UI_SET_KEYBIT BTN_X");
-    if (ioctl(uinp_fd, UI_SET_KEYBIT, BTN_Y))
-      throw std::runtime_error("Can't UI_SET_KEYBIT BTN_Y");
-
-    if (ioctl(uinp_fd, UI_SET_KEYBIT, BTN_TL))
-      throw std::runtime_error("Can't UI_SET_KEYBIT BTN_TL");
-    if (ioctl(uinp_fd, UI_SET_KEYBIT, BTN_TR))
-      throw std::runtime_error("Can't UI_SET_KEYBIT BTN_TR");
-    if (ioctl(uinp_fd, UI_SET_KEYBIT, BTN_THUMBL))
-      throw std::runtime_error("Can't UI_SET_KEYBIT BTN_THUMBL");
-    if (ioctl(uinp_fd, UI_SET_KEYBIT, BTN_THUMBR))
-      throw std::runtime_error("Can't UI_SET_KEYBIT BTN_THUMBR");
-
-    if (ioctl(uinp_fd, UI_SET_KEYBIT, BTN_SELECT))
-      throw std::runtime_error("Can't UI_SET_KEYBIT BTN_SELECT");
-    if (ioctl(uinp_fd, UI_SET_KEYBIT, BTN_START))
-      throw std::runtime_error("Can't UI_SET_KEYBIT BTN_START");
-    if (ioctl(uinp_fd, UI_SET_KEYBIT, BTN_MODE))
-      throw std::runtime_error("Can't UI_SET_KEYBIT BTN_MODE");
-
-    // absolute (sticks)
-    if (ioctl(uinp_fd, UI_SET_ABSBIT, SDL_CONTROLLER_AXIS_LEFTX))
-      throw std::runtime_error("Can't UI_SET_ABSBIT ABS_X");
-    if (ioctl(uinp_fd, UI_SET_ABSBIT, SDL_CONTROLLER_AXIS_LEFTY))
-      throw std::runtime_error("Can't UI_SET_ABSBIT ABUINPUT_SET_ABS_PS_Y");
-    if (ioctl(uinp_fd, UI_SET_ABSBIT, SDL_CONTROLLER_AXIS_RIGHTX))
-      throw std::runtime_error("Can't UI_SET_ABSBIT ABS_RX");
-    if (ioctl(uinp_fd, UI_SET_ABSBIT, SDL_CONTROLLER_AXIS_RIGHTY))
-      throw std::runtime_error("Can't UI_SET_ABSBIT ABS_RY");
-    if (ioctl(uinp_fd, UI_SET_ABSBIT, SDL_CONTROLLER_AXIS_TRIGGERLEFT))
-      throw std::runtime_error("Can't UI_SET_ABSBIT ABS_Z");
-    if (ioctl(uinp_fd, UI_SET_ABSBIT, SDL_CONTROLLER_AXIS_TRIGGERRIGHT))
-      throw std::runtime_error("Can't UI_SET_ABSBIT ABS_RZ");
-    if (ioctl(uinp_fd, UI_SET_ABSBIT, ABS_HAT0X))
-      throw std::runtime_error("Can't UI_SET_ABSBIT ABS_HAT0X");
-    if (ioctl(uinp_fd, UI_SET_ABSBIT, ABS_HAT0Y))
-      throw std::runtime_error("Can't UI_SET_ABSBIT ABS_HAT0Y");
-
-    strncpy(uidev.name, "Microsoft X-Box 360 pad", UINPUT_MAX_NAME_SIZE);
-    uidev.id.version = 1;
-    uidev.id.bustype = BUS_USB;
-    uidev.id.vendor = 0x045e;  /* sample vendor */
-    uidev.id.product = 0x028e; /* sample product */
-
-    UINPUT_SET_ABS_P(&uidev, SDL_CONTROLLER_AXIS_LEFTX, -32768, 32768, 16, 128);
-    UINPUT_SET_ABS_P(&uidev, SDL_CONTROLLER_AXIS_LEFTY, -32768, 32768, 16, 128);
-    UINPUT_SET_ABS_P(
-      &uidev, SDL_CONTROLLER_AXIS_RIGHTX, -32768, 32768, 16, 128);
-    UINPUT_SET_ABS_P(
-      &uidev, SDL_CONTROLLER_AXIS_RIGHTY, -32768, 32768, 16, 128);
-    UINPUT_SET_ABS_P(&uidev, ABS_HAT0X, -1, 1, 0, 0);
-    UINPUT_SET_ABS_P(&uidev, ABS_HAT0Y, -1, 1, 0, 0);
-    UINPUT_SET_ABS_P(&uidev, SDL_CONTROLLER_AXIS_TRIGGERLEFT, 0, 255, 0, 0);
-    UINPUT_SET_ABS_P(&uidev, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, 0, 255, 0, 0);
-
-    // Create input device into input sub-system
-    write(uinp_fd, &uidev, sizeof(uidev));
-
-    if (ioctl(uinp_fd, UI_DEV_CREATE)) {
-      printf("Unable to create UINPUT device.");
-      return -1;
-    }
-
-  } //fake 360 mode
+  }
 
   // SDL initialization and main loop
   if (SDL_Init(SDL_INIT_GAMECONTROLLER) != 0) {
