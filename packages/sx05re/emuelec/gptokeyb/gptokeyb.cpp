@@ -52,6 +52,9 @@
 
 #include <SDL.h>
 
+const int FAKE_MOUSE_DEADZONE = 8000;
+const int FAKE_MOUSE_SCALE = 512;
+
 static int uinp_fd = -1;
 struct uinput_user_dev uidev;
 bool kill_mode = false;
@@ -62,6 +65,9 @@ bool back_pressed = false;
 bool start_pressed = false;
 int back_jsdevice;
 int start_jsdevice;
+
+int mouseX = 0;
+int mouseY = 0;
 
 void UINPUT_SET_ABS_P(
   uinput_user_dev* dev,
@@ -103,6 +109,20 @@ void emitAxisMotion(int code, int value)
   emit(EV_SYN, SYN_REPORT, 0);
 }
 
+void emitMouseMotion(int x, int y)
+{
+  if (x != 0) {
+    emit(EV_REL, REL_X, x);
+  }
+  if (y != 0) {
+    emit(EV_REL, REL_Y, y);
+  }
+
+  if (x != 0 || y != 0) {
+    emit(EV_SYN, SYN_REPORT, 0);
+  }
+}
+
 void setupFakeKeyboardMouseDevice(uinput_user_dev& device, int fd)
 {
   strncpy(device.name, "Fake Keyboard", UINPUT_MAX_NAME_SIZE);
@@ -115,6 +135,14 @@ void setupFakeKeyboardMouseDevice(uinput_user_dev& device, int fd)
 
   // Keys or Buttons
   ioctl(fd, UI_SET_EVBIT, EV_KEY);
+  ioctl(fd, UI_SET_EVBIT, EV_SYN);
+
+  // Fake mouse
+  ioctl(fd, UI_SET_EVBIT, EV_REL);
+  ioctl(fd, UI_SET_RELBIT, REL_X);
+  ioctl(fd, UI_SET_RELBIT, REL_Y);
+  ioctl(fd, UI_SET_KEYBIT, BTN_LEFT);
+  ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
 }
 
 void setupFakeXbox360Device(uinput_user_dev& device, int fd)
@@ -165,9 +193,278 @@ void setupFakeXbox360Device(uinput_user_dev& device, int fd)
   UINPUT_SET_ABS_P(&device, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, 0, 255, 0, 0);
 }
 
+bool handleEvent(const SDL_Event& event) {
+  switch (event.type) {
+    case SDL_CONTROLLERBUTTONDOWN:
+    case SDL_CONTROLLERBUTTONUP: {
+      const bool is_pressed = event.type == SDL_CONTROLLERBUTTONDOWN;
+
+      if (kill_mode) {
+        // Kill mode
+        switch (event.cbutton.button) {
+          case SDL_CONTROLLER_BUTTON_GUIDE:
+            back_jsdevice = event.cdevice.which;
+            back_pressed = is_pressed;
+            break;
+
+          case SDL_CONTROLLER_BUTTON_START:
+            start_jsdevice = event.cdevice.which;
+            start_pressed = is_pressed;
+            break;
+        }
+
+        if (start_pressed && back_pressed) {
+          // printf("Killing: %s\n", AppToKill);
+          if (start_jsdevice == back_jsdevice) {
+            system((" killall  '" + std::string(AppToKill) + "' ").c_str());
+            system("show_splash.sh exit");
+            sleep(3);
+            if (
+              system((" pgrep '" + std::string(AppToKill) + "' ").c_str()) ==
+              0) {
+              printf("Forcefully Killing: %s\n", AppToKill);
+              system(
+                (" killall  -9 '" + std::string(AppToKill) + "' ").c_str());
+            }
+            exit(0);
+          }
+        }
+      } else if (openbor_mode) {
+        // Fake Openbor mode
+        switch (event.cbutton.button) {
+          case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+            emitKey(KEY_LEFT, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_UP:
+            emitKey(KEY_UP, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+            emitKey(KEY_RIGHT, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+            emitKey(KEY_DOWN, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_A:
+            emitKey(KEY_A, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_B:
+            emitKey(KEY_D, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_X:
+            emitKey(KEY_S, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_Y:
+            emitKey(KEY_F, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+            emitKey(KEY_Z, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+            emitKey(KEY_X, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_BACK: // aka select
+            emitKey(KEY_F12, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_START:
+            emitKey(KEY_ENTER, is_pressed);
+            break;
+        }
+      } else if (xbox360_mode) {
+        // Fake Xbox360 mode
+        switch (event.cbutton.button) {
+          case SDL_CONTROLLER_BUTTON_A:
+            emitKey(BTN_A, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_B:
+            emitKey(BTN_B, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_X:
+            emitKey(BTN_X, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_Y:
+            emitKey(BTN_Y, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+            emitKey(BTN_TL, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+            emitKey(BTN_TR, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+            emitKey(BTN_THUMBL, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+            emitKey(BTN_THUMBR, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_BACK: // aka select
+            emitKey(BTN_SELECT, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_GUIDE:
+            emitKey(BTN_MODE, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_START:
+            emitKey(BTN_START, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_UP:
+            emitAxisMotion(ABS_HAT0Y, is_pressed ? -1 : 0);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+            emitAxisMotion(ABS_HAT0Y, is_pressed ? 1 : 0);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+            emitAxisMotion(ABS_HAT0X, is_pressed ? -1 : 0);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+            emitAxisMotion(ABS_HAT0X, is_pressed ? 1 : 0);
+            break;
+        }
+      } else {
+        // Fake Keyboard mode
+        switch (event.cbutton.button) {
+          case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+            emitKey(KEY_LEFT, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_UP:
+            emitKey(KEY_UP, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+            emitKey(KEY_RIGHT, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+            emitKey(KEY_DOWN, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_A:
+            emitKey(KEY_ENTER, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_B:
+            emitKey(KEY_ESC, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_BACK: // aka select
+            emitKey(KEY_PLAYPAUSE, is_pressed);
+            break;
+
+          case SDL_CONTROLLER_BUTTON_START:
+            emitKey(KEY_ENTER, is_pressed);
+            break;
+        }
+      } //kill mode
+    } break;
+
+    case SDL_CONTROLLERAXISMOTION:
+      if (xbox360_mode) {
+        switch (event.caxis.axis) {
+          case SDL_CONTROLLER_AXIS_LEFTX:
+            emitAxisMotion(ABS_X, event.caxis.value);
+            break;
+
+          case SDL_CONTROLLER_AXIS_LEFTY:
+            emitAxisMotion(ABS_Y, event.caxis.value);
+            break;
+
+          case SDL_CONTROLLER_AXIS_RIGHTX:
+            emitAxisMotion(ABS_RX, event.caxis.value);
+            break;
+
+          case SDL_CONTROLLER_AXIS_RIGHTY:
+            emitAxisMotion(ABS_RY, event.caxis.value);
+            break;
+
+          case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+            // The target range for the triggers is 0..255 instead of
+            // 0..32767, so we shift down by 7 as that does exactly the
+            // scaling we need (32767 >> 7 is 255)
+            emitAxisMotion(ABS_Z, event.caxis.value >> 7);
+            break;
+
+          case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+            emitAxisMotion(ABS_RZ, event.caxis.value >> 7);
+            break;
+        }
+      } else {
+        // fake mouse
+        switch (event.caxis.axis) {
+          case SDL_CONTROLLER_AXIS_RIGHTX:
+            if (std::abs(event.caxis.value) > FAKE_MOUSE_DEADZONE) {
+              mouseX = event.caxis.value / FAKE_MOUSE_SCALE;
+            } else {
+              mouseX = 0;
+            }
+            break;
+
+          case SDL_CONTROLLER_AXIS_RIGHTY:
+            if (std::abs(event.caxis.value) > FAKE_MOUSE_DEADZONE) {
+              mouseY = event.caxis.value / FAKE_MOUSE_SCALE;
+            } else {
+              mouseY = 0;
+            }
+            break;
+        }
+      }
+      break;
+    case SDL_CONTROLLERDEVICEADDED:
+      if (xbox360_mode == true || openbor_mode == true) {
+        SDL_GameControllerOpen(0);
+        /* SDL_GameController* controller = SDL_GameControllerOpen(0);
+     if (controller) {
+                      const char *name = SDL_GameControllerNameForIndex(0);
+                          printf("Joystick %i has game controller name '%s'\n", 0, name);
+                  }
+  */
+      } else {
+        SDL_GameControllerOpen(event.cdevice.which);
+      }
+      break;
+
+    case SDL_CONTROLLERDEVICEREMOVED:
+      if (
+        SDL_GameController* controller =
+          SDL_GameControllerFromInstanceID(event.cdevice.which)) {
+        SDL_GameControllerClose(controller);
+      }
+      break;
+
+    case SDL_QUIT:
+      return false;
+      break;
+  }
+
+  return true;
+}
+
+
 int main(int argc, char* argv[])
 {
-
   if (argc > 1) {
     if (strcmp(argv[1], "openbor") == 0) {
       openbor_mode = true;
@@ -222,255 +519,20 @@ int main(int argc, char* argv[])
   SDL_Event event;
   bool running = true;
   while (running) {
-    if (!SDL_WaitEvent(&event)) {
-      printf("SDL_WaitEvent() failed: %s\n", SDL_GetError());
-      return -1;
-    }
+    if (mouseX != 0 || mouseY != 0) {
+      while (running && SDL_PollEvent(&event)) {
+        running = handleEvent(event);
+      }
 
-    switch (event.type) {
-      case SDL_CONTROLLERBUTTONDOWN:
-      case SDL_CONTROLLERBUTTONUP: {
-        const bool is_pressed = event.type == SDL_CONTROLLERBUTTONDOWN;
+      emitMouseMotion(mouseX, mouseY);
+      SDL_Delay(100);
+    } else {
+      if (!SDL_WaitEvent(&event)) {
+        printf("SDL_WaitEvent() failed: %s\n", SDL_GetError());
+        return -1;
+      }
 
-        if (kill_mode) {
-          // Kill mode
-          switch (event.cbutton.button) {
-            case SDL_CONTROLLER_BUTTON_GUIDE:
-              back_jsdevice = event.cdevice.which;
-              back_pressed = is_pressed;
-              break;
-
-            case SDL_CONTROLLER_BUTTON_START:
-              start_jsdevice = event.cdevice.which;
-              start_pressed = is_pressed;
-              break;
-          }
-
-          if (start_pressed && back_pressed) {
-            // printf("Killing: %s\n", AppToKill);
-            if (start_jsdevice == back_jsdevice) {
-              system((" killall  '" + std::string(AppToKill) + "' ").c_str());
-              system("show_splash.sh exit");
-              sleep(3);
-              if (
-                system((" pgrep '" + std::string(AppToKill) + "' ").c_str()) ==
-                0) {
-                printf("Forcefully Killing: %s\n", AppToKill);
-                system(
-                  (" killall  -9 '" + std::string(AppToKill) + "' ").c_str());
-              }
-              exit(0);
-            }
-          }
-        } else if (openbor_mode) {
-          // Fake Openbor mode
-          switch (event.cbutton.button) {
-            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-              emitKey(KEY_LEFT, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_DPAD_UP:
-              emitKey(KEY_UP, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-              emitKey(KEY_RIGHT, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-              emitKey(KEY_DOWN, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_A:
-              emitKey(KEY_A, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_B:
-              emitKey(KEY_D, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_X:
-              emitKey(KEY_S, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_Y:
-              emitKey(KEY_F, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-              emitKey(KEY_Z, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-              emitKey(KEY_X, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_BACK: // aka select
-              emitKey(KEY_F12, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_START:
-              emitKey(KEY_ENTER, is_pressed);
-              break;
-          }
-        } else if (xbox360_mode) {
-          // Fake Xbox360 mode
-          switch (event.cbutton.button) {
-            case SDL_CONTROLLER_BUTTON_A:
-              emitKey(BTN_A, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_B:
-              emitKey(BTN_B, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_X:
-              emitKey(BTN_X, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_Y:
-              emitKey(BTN_Y, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-              emitKey(BTN_TL, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-              emitKey(BTN_TR, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_LEFTSTICK:
-              emitKey(BTN_THUMBL, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
-              emitKey(BTN_THUMBR, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_BACK: // aka select
-              emitKey(BTN_SELECT, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_GUIDE:
-              emitKey(BTN_MODE, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_START:
-              emitKey(BTN_START, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_DPAD_UP:
-              emitAxisMotion(ABS_HAT0Y, is_pressed ? -1 : 0);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-              emitAxisMotion(ABS_HAT0Y, is_pressed ? 1 : 0);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-              emitAxisMotion(ABS_HAT0X, is_pressed ? -1 : 0);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-              emitAxisMotion(ABS_HAT0X, is_pressed ? 1 : 0);
-              break;
-          }
-        } else {
-          // Fake Keyboard mode
-          switch (event.cbutton.button) {
-            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-              emitKey(KEY_LEFT, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_DPAD_UP:
-              emitKey(KEY_UP, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-              emitKey(KEY_RIGHT, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-              emitKey(KEY_DOWN, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_A:
-              emitKey(KEY_ENTER, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_B:
-              emitKey(KEY_ESC, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_BACK: // aka select
-              emitKey(KEY_PLAYPAUSE, is_pressed);
-              break;
-
-            case SDL_CONTROLLER_BUTTON_START:
-              emitKey(KEY_ENTER, is_pressed);
-              break;
-          }
-        } //kill mode
-      } break;
-
-      case SDL_CONTROLLERAXISMOTION:
-        if (xbox360_mode) {
-          switch (event.caxis.axis) {
-            case SDL_CONTROLLER_AXIS_LEFTX:
-              emitAxisMotion(ABS_X, event.caxis.value);
-              break;
-
-            case SDL_CONTROLLER_AXIS_LEFTY:
-              emitAxisMotion(ABS_Y, event.caxis.value);
-              break;
-
-            case SDL_CONTROLLER_AXIS_RIGHTX:
-              emitAxisMotion(ABS_RX, event.caxis.value);
-              break;
-
-            case SDL_CONTROLLER_AXIS_RIGHTY:
-              emitAxisMotion(ABS_RY, event.caxis.value);
-              break;
-
-            case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
-              // The target range for the triggers is 0..255 instead of
-              // 0..32767, so we shift down by 7 as that does exactly the
-              // scaling we need (32767 >> 7 is 255)
-              emitAxisMotion(ABS_Z, event.caxis.value >> 7);
-              break;
-
-            case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
-              emitAxisMotion(ABS_RZ, event.caxis.value >> 7);
-              break;
-          }
-        } // xbox mode
-        break;
-      case SDL_CONTROLLERDEVICEADDED:
-        if (xbox360_mode == true || openbor_mode == true) {
-          SDL_GameControllerOpen(0);
-          /* SDL_GameController* controller = SDL_GameControllerOpen(0);
-       if (controller) {
-                        const char *name = SDL_GameControllerNameForIndex(0);
-                            printf("Joystick %i has game controller name '%s'\n", 0, name);
-                    }
-    */
-        } else {
-          SDL_GameControllerOpen(event.cdevice.which);
-        }
-        break;
-
-      case SDL_CONTROLLERDEVICEREMOVED:
-        if (
-          SDL_GameController* controller =
-            SDL_GameControllerFromInstanceID(event.cdevice.which)) {
-          SDL_GameControllerClose(controller);
-        }
-        break;
-
-      case SDL_QUIT:
-        running = false;
-        break;
+      running = handleEvent(event);
     }
   }
 
