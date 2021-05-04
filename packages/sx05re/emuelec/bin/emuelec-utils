@@ -12,12 +12,12 @@ function error() {
 }
 
 function audio() {
-	# This has to be expanded to check for new GLX devices running on Amlogic-ng, 
+	# This has to be expanded to check for new GLX devices running on Amlogic-ng,
 	# but right now its mostly used on ES to change audio to alsa before launching or else ES hangs on GXL devices.
-   if [[ "$1" == "alsa" ]]; then 
+   if [[ "$1" == "alsa" ]]; then
 		set_audio alsa
    elif [[ "$1" == "pulse" ]]; then
-		set_audio pulseaudio 
+		set_audio pulseaudio
    else
 		set_audio auto
    fi
@@ -54,11 +54,11 @@ function clearconfig() {
 function ee_backup() {
 	BACKUPFILE="ee_backup_config.tar.gz"
 
-    if mountpoint -q /var/media/EEROMS; then 
-        mkdir -p "/var/media/EEROMS/backup" 
-        BACKUPFILE="/var/media/EEROMS/backup/${BACKUPFILE}" 
-    elif mountpoint -q /storage/roms; then 
-        mkdir -p "/storage/roms/backup" 
+    if mountpoint -q /var/media/EEROMS; then
+        mkdir -p "/var/media/EEROMS/backup"
+        BACKUPFILE="/var/media/EEROMS/backup/${BACKUPFILE}"
+    elif mountpoint -q /storage/roms; then
+        mkdir -p "/storage/roms/backup"
         BACKUPFILE="/storage/roms/backup/${BACKUPFILE}"
     fi
 
@@ -88,8 +88,9 @@ function ee_backup() {
 					  /storage/.config/retroarch/config/* \
 					  /storage/.config/supertux* \
 					  /storage/.emulationstation/scripts/drastic/config/* \
-					  /storage/.emulationstation/scripts/drastic/*.dsv \
-                      /storage/.config/emuelec/bin/pico-8/*
+					  /storage/.emulationstation/scripts/drastic/backup/* \
+					  /storage/.emulationstation/scripts/drastic/savestates/* \
+					  /storage/.config/emuelec/bin/pico-8/*
         sync
 		sleep 3
 		[ -z "${2}" ] && systemctl start emustation
@@ -102,15 +103,15 @@ function filemanager() {
 }
 
 function getshaders() {
-	find /tmp/shaders -name '*.glslp' -print0 | 
-		while IFS= read -r -d '' line; do 
+	find /tmp/shaders -name '*.glslp' -print0 |
+		while IFS= read -r -d '' line; do
 		echo ${line#/tmp/shaders/},
 	done
 }
 
 function getip() {
 IP="$(ifconfig wlan0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')"
-  
+
   if [ -z "$IP" ]; then
 	 IP="$(ifconfig eth0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')"
   fi
@@ -186,11 +187,11 @@ function small-cores() {
     fi
 }
 
-function unmount_all () { 
+function unmount_all () {
     if /usr/bin/busybox mountpoint -q /emuelec/themes ; then
         umount /emuelec/themes > /dev/null 2>&1
     fi
-    
+
     if /usr/bin/busybox mountpoint -q /storage/roms ; then
         umount /storage/roms > /dev/null 2>&1
     fi
