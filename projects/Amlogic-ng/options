@@ -122,7 +122,7 @@
   # Space separated list is supported,
   # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
     ADDITIONAL_DRIVERS="$ADDITIONAL_DRIVERS gpu-aml-ng openvfd-driver wifi_dummy-aml media_modules-aml
-                        ap6xxx-aml mt7668-aml RTL8189ES-aml RTL8189FS-aml RTL8723BS-aml RTL8814AU RTL8822BU-aml RTL8822BS-aml RTL8822CS-aml RTL8152-aml"
+                        ap6xxx-aml mt7668-aml RTL8189ES-aml RTL8189FS-aml RTL8723BS-aml RTL8814AU RTL8822BU-aml RTL8822BS-aml RTL8822CS-aml RTL8152-aml qca6174-aml"
 
   # additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware)
   # Space separated list is supported,
