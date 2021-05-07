@@ -1,0 +1,31 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+# Default indent via 2 spaces
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = true
+
+[*.py]
+# Set default charset
+charset = utf-8
+# 4 space indentation, required by Python
+indent_style = space
+indent_size = 4
+
+# Tab indentation (no size specified)
+[Makefile]
+indent_style = tab
+
+[*.{md, markdown}]
+# Trailing space has meaning
+trim_trailing_whitespace = false
+[CHANGELOG]
+# Trailing space has meaning
+trim_trailing_whitespace = false
