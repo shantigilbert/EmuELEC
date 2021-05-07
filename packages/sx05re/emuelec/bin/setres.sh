@@ -36,6 +36,12 @@ case "$MODE" in
 	echo 1080p60hz > /sys/class/display/mode
 	fbset -fb /dev/fb0 -g 1920 1080 1920 2160 $BPP
 	;;
+"1280x1024p60hz")
+	fbset -fb /dev/fb0 -g 1280 1024 1280 2048 $BPP
+	echo 0 0 1279 1023 > /sys/class/graphics/fb0/free_scale_axis
+	echo 0 0 1279 1023 > /sys/class/graphics/fb0/window_axis
+	echo 0x10001 > /sys/class/graphics/fb0/free_scale
+	;;
 "480cvbs")
 	fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
 	fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
