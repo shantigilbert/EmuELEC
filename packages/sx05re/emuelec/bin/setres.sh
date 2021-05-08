@@ -42,6 +42,18 @@ case "$MODE" in
 	echo 0 0 1279 1023 > /sys/class/graphics/fb0/window_axis
 	echo 0x10001 > /sys/class/graphics/fb0/free_scale
 	;;
+"1024x768p60hz")
+	fbset -fb /dev/fb0 -g 1024 768 1024 1536 $BPP
+	echo 0 0 1023 767 > /sys/class/graphics/fb0/free_scale_axis
+	echo 0 0 1023 767 > /sys/class/graphics/fb0/window_axis
+	echo 0x10001 > /sys/class/graphics/fb0/free_scale
+	;;
+"640x480p60hz")
+	fbset -fb /dev/fb0 -g 640 480 640 960 $BPP
+	echo 0 0 639 479 > /sys/class/graphics/fb0/free_scale_axis
+	echo 0 0 639 479 > /sys/class/graphics/fb0/window_axis
+	echo 0x10001 > /sys/class/graphics/fb0/free_scale
+	;;
 "480cvbs")
 	fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
 	fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
