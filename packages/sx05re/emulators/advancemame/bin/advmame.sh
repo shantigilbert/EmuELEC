@@ -35,6 +35,12 @@ fi
 "1280x1024p60hz"*)
 	echo "device_video_modeline 1280x1024_60.00 108.88 1280 1360 1496 1712 1024 1025 1028 1060 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
 	;;
+"1024x768p60hz"*)
+	echo "device_video_modeline 1024x768_60.00 64.11 1024 1080 1184 1344 768 769 772 795 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
+	;;
+"640x480p60hz"*)
+	echo "device_video_modeline 640x480_60.00 23.86 640 656 720 800 480 481 484 497 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
+	;;
 esac
 
 AUTOGP=$(get_ee_setting advmame_auto_gamepad)
