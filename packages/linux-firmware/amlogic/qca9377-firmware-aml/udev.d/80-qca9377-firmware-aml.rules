@@ -1,6 +1,0 @@
-################################################################################
-# udev rules file for loading qca9377-firmware-aml
-################################################################################
-
-ACTION=="add", SUBSYSTEMS=="sdio", ATTRS{vendor}=="0x0271", ATTRS{device}=="0x0701", \
-  TAG+="systemd", ENV{SYSTEMD_WANTS}+="qca9377-firmware-aml.service"
