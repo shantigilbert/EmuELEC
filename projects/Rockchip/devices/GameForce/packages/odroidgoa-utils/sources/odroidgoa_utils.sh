@@ -64,9 +64,9 @@ if [ "${1}" == "bright" ]; then
 STEPS="5"
 CURBRIGHT=$(cat /sys/class/backlight/backlight/brightness)
 MAXSYSBRIGHT=$(cat /sys/class/backlight/backlight/max_brightness)
-CURRENTBRIGHT=$(awk -v a="$CURBRIGHT" -v b="$MAXSYSBRIGHT" 'BEGIN{print int(a*100/b)}')
+CURRENTBRIGHT=$(awk -v a="$CURBRIGHT" -v b="$MAXSYSBRIGHT" 'BEGIN{print int((a*100/b)+0.5)}')
 MAXBRIGHT="100"
-MINBRIGHT="2"
+MINBRIGHT="5"
 
     if [ "${2}" == "+" ]; then
         STEPBRIGHT=$(($CURRENTBRIGHT+$STEPS))
@@ -80,7 +80,7 @@ MINBRIGHT="2"
     [ "$STEPBRIGHT" -le "$MINBRIGHT" ] && STEPBRIGHT="$MINBRIGHT"
     #echo "Setting bright to $STEPBRIGHT"
 
-NEWVAL=$(awk -v a="$STEPBRIGHT" -v b="$MAXSYSBRIGHT" 'BEGIN{print int(a*b/100)}')
+    NEWVAL=$(awk -v a="$STEPBRIGHT" -v b="$MAXSYSBRIGHT" 'BEGIN{print int((a*b/100)+0.5)}')
 echo "${NEWVAL}" > /sys/class/backlight/backlight/brightness
 set_ee_setting "brightness.level" $STEPBRIGHT
 fi
