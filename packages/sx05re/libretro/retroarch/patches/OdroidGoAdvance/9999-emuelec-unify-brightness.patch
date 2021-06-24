@@ -1,16 +1,25 @@
 --- a/frontend/drivers/platform_unix.c
 +++ b/frontend/drivers/platform_unix.c
-@@ -1340,6 +1340,9 @@
+@@ -1334,12 +1334,17 @@
+    }
+    #endif
+ 
+-   /* Calculate the brightness */
++   char bright[64];
++   sprintf(bright, "/usr/bin/odroidgoa_utils.sh bright %i", value);
++   system(bright);
++   /*
++   // Calculate the brightness 
+    value = (value * max_brightness) / 100;
+ 
     snprintf(svalue, sizeof(svalue), "%d\n", value);
     filestream_write_file("/sys/class/backlight/backlight/brightness",
                           svalue, strlen(svalue));
-+   char bright[64];
-+   sprintf(bright, "/usr/bin/odroidgoa_utils.sh bright %s", svalue);
-+   system(bright);
++*/
  }
  
  #endif
-@@ -1973,11 +1976,13 @@
+@@ -1973,11 +1978,13 @@
     android_app_destroy(android_app);
  #endif
  
