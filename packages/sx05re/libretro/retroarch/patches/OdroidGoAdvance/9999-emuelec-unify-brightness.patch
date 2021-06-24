@@ -1,0 +1,27 @@
+--- a/frontend/drivers/platform_unix.c
++++ b/frontend/drivers/platform_unix.c
+@@ -1340,6 +1340,9 @@
+    snprintf(svalue, sizeof(svalue), "%d\n", value);
+    filestream_write_file("/sys/class/backlight/backlight/brightness",
+                          svalue, strlen(svalue));
++   char bright[64];
++   sprintf(bright, "/usr/bin/odroidgoa_utils.sh bright %s", svalue);
++   system(bright);
+ }
+ 
+ #endif
+@@ -1973,11 +1976,13 @@
+    android_app_destroy(android_app);
+ #endif
+ 
++/*
+ #ifdef HAVE_LAKKA
+-   /* Reset brightness to maximum */
++   // Reset brightness to maximum 
+    if (settings->uints.screen_brightness != DEFAULT_SCREEN_BRIGHTNESS)
+       frontend_unix_set_screen_brightness(DEFAULT_SCREEN_BRIGHTNESS);
+ #endif
++*/
+ }
+ 
+ static void frontend_unix_init(void *data)

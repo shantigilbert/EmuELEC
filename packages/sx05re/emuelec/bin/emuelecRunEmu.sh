@@ -8,6 +8,11 @@
 
 # This whole file has become very hacky, I am sure there is a better way to do all of this, but for now, this works.
 
+if [ -f "/usr/bin/odroidgoa_utils.sh" ]; then
+    DEFBRIGHT=$(get_ee_setting brightness.level)
+    RACONF=/storage/.config/retroarch/retroarch.cfg
+    sed -i "s|screen_brightness=.*|screen_brightness=${DEFBRIGHT}|g" ${RACONF}
+fi
 
 BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 
@@ -478,6 +483,11 @@ if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
                 fi
             ;;
         esac
+fi
+
+
+if [ -f "/usr/bin/odroidgoa_utils.sh" ]; then
+    odroidgoa_utils.sh bright ${DEFBRIGHT}
 fi
 
 # Chocolate Doom does not like to be killed?
