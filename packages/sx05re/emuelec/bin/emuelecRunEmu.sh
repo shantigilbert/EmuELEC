@@ -485,11 +485,6 @@ if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
         esac
 fi
 
-
-if [ -f "/usr/bin/odroidgoa_utils.sh" ]; then
-    odroidgoa_utils.sh bright ${DEFBRIGHT}
-fi
-
 # Chocolate Doom does not like to be killed?
 [[ "$EMU" = "Chocolate-Doom" ]] && ret_error="0"
 
