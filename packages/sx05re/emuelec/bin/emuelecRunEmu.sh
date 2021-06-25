@@ -11,7 +11,7 @@
 if [ -f "/usr/bin/odroidgoa_utils.sh" ]; then
     DEFBRIGHT=$(get_ee_setting brightness.level)
     RACONF=/storage/.config/retroarch/retroarch.cfg
-    sed -i "s|screen_brightness=.*|screen_brightness=${DEFBRIGHT}|g" ${RACONF}
+    sed -i "s|screen_brightness =.*|screen_brightness = ${DEFBRIGHT}|g" ${RACONF}
 fi
 
 BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
