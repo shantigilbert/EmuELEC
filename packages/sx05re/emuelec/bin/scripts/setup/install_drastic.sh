@@ -56,7 +56,7 @@ fi
 		-s '//systemList/system[last()]' -t elem -n 'release' -v '2004'\
 		-s '//systemList/system[last()]' -t elem -n 'hardware' -v 'portable'\
 		-s '//systemList/system[last()]' -t elem -n 'path' -v '/storage/roms/nds'\
-		-s '//systemList/system[last()]' -t elem -n 'extension' -v '.nds .zip .NDS .ZIP'\
+		-s '//systemList/system[last()]' -t elem -n 'extension' -v '.nds .NDS .zip .ZIP .7z .7Z'\
 		-s '//systemList/system[last()]' -t elem -n 'command' -v "$EXE %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers=\"%CONTROLLERSCONFIG%\""\
 		-s '//systemList/system[last()]' -t elem -n 'platform' -v 'nds'\
 		-s '//systemList/system[last()]' -t elem -n 'theme' -v 'nds'\
