@@ -4,7 +4,7 @@ Based on  [CoreELEC](https://github.com/CoreELEC/CoreELEC) and [Lakka](https://g
 
 ---
 [![GitHub Release](https://img.shields.io/github/release/EmuELEC/EmuELEC.svg)](https://github.com/EmuELEC/EmuELEC/releases/latest)
-[![GPL-2.0 Licensed](https://img.shields.io/github/license/EmuELEC/EmuELEC.svg)](https://github.com/EmuELEC/EmuELEC/blob/master/LICENSE)
+[![GPL-2.0 Licensed](https://img.shields.io/github/license/EmuELEC/EmuELEC.svg)](https://github.com/EmuELEC/EmuELEC/blob/master/licenses/GPL2.txt)
 [![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg?logo=discord)](https://discord.gg/cbgtJTu)
 
 ### ⚠️**IMPORTANT**⚠️
