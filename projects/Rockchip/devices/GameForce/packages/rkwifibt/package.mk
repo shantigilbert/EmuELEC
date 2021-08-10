@@ -2,7 +2,7 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="rkwifibt"
-PKG_VERSION="70f208f21b48fbf645d3142274167f622c85d8dd"
+PKG_VERSION="a389710ca130405a0e6e4f22bc0335c976a5c4b0"
 PKG_SITE="https://github.com/rockchip-linux/rkwifibt"
 PKG_URL="$PKG_SITE.git"
 PKG_LICENSE="Unspecified"

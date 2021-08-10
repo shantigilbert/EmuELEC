@@ -2,8 +2,8 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="opentyrian"
-PKG_VERSION="84b820f852f3f6b812b4d00d6b3906adbbf3bbdb"
-PKG_SHA256="7429cc8e3468e3462b886cb99fe6cc0f5d232c193b68a94dc427493107c30dec"
+PKG_VERSION="0af1efb81d7d09235ca8d384eee0d8550efc1ff4"
+PKG_SHA256="028e3d223c784b62ae643f6adafa09f494226f81190fbd5a997c4d8a7141405c"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL2"

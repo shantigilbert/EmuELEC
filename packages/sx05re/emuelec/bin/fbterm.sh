@@ -21,7 +21,7 @@ if [[ "${1}" == *"launch_terminal_(kb).sh"* ]]; then
 		fbterm "${tmpsh}" -s 24 < /dev/tty1
 		rm ${tmpsh}
     fi
-elif [[ "${1}" == *"file_manager_(kb).sh"* ]]; then
+elif [[ "${1}" == *"file_manager.sh"* ]]; then
         if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
             bash "${1}"
         else
@@ -30,7 +30,7 @@ elif [[ "${1}" == *"file_manager_(kb).sh"* ]]; then
 else
 		case ${1} in
 		"mplayer_video")
-            bash /usr/bin/playvideo.sh "${2}" "${3}" < /dev/tty0
+            bash playvideo.sh "${2}" "${3}" < /dev/tty0
 		;;
 		*)
             bash "${1}" > /dev/tty0

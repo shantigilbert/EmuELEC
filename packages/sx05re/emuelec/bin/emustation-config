@@ -32,6 +32,11 @@ case "$line" in
         set_ee_setting wifi.key "${SECOND}"
         set_ee_setting wifi.enabled 1
         #echo "WiFi information added"
+        
+        # Connect to WiFi
+        if [[ ! -f "/storage/.cache/connman/emuelec_wifi.config" ]]; then
+            batocera-config wifi enable "${FIRST}" "${SECOND}"
+        fi
     fi
     ;;
     RAC=*)
@@ -75,6 +80,9 @@ while pgrep -x /usr/bin/retroarch >/dev/null; do
     systemctl stop retroarch
     sleep 1
 done
+
+# fat32 is default
+ROM_FS_TYPE="vfat"
 
 # Get EEROMS filetype
 if [ -e "/flash/ee_fstype" ]; then
@@ -244,6 +252,14 @@ if [ ! -e "${CONFILE}" ]; then
     echo '</config>' >> "${ESSETTINGS}" 
 fi
 
+else
+    # Use stored volume instead of system default, this is only for Amlogic devices using AV as output
+    AUDIO_DEVICE="hw:$(get_ee_setting ee_audio_device)"
+
+    if [ "${AUDIO_DEVICE}" == "hw:0,1" ]; then
+        amixer set 'DAC Extra Digital Gain' 6dB
+        amixer set 'DAC Digital' "$(get_ee_setting audio.volume)%"
+    fi
 fi
 
 # We need to always use the newest es_systems.cfg if there was a recent update

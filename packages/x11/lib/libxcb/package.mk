@@ -12,7 +12,7 @@ PKG_LONGDESC="X C-language Bindings library."
 PKG_BUILD_FLAGS="+pic"
 
 PKG_CONFIGURE_OPTS_TARGET="--enable-static \
-                           --disable-shared \
+                           --enable-shared \
                            --disable-screensaver \
                            --disable-xprint \
                            --disable-selinux \

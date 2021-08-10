@@ -1,0 +1,70 @@
+--- a/src/def.h
++++ b/src/def.h
+@@ -41,16 +41,20 @@
+    #define KEYBOARD_KEY_SPACING     4
+ 
+ // Paraters for desktop PC
++#elif defined(DEVICE_PC) || defined(DEVICE_EE_HH)
++   extern int SCREEN_WIDTH;
++   extern int SCREEN_HEIGHT;
++#if defined(DEVICE_PC)
++   #define HARDWARE_ACCELERATION    1
+ #else
+-   #define SCREEN_WIDTH             640
+-   #define SCREEN_HEIGHT            480
+-   #define HARDWARE_ACCELERATION    1
++    #define HARDWARE_ACCELERATION    0
++#endif
+    #define FULLSCREEN               0
+    #define FONT_NAME                "NotoSans-Regular.ttf"
+    #define FONT_NAME_MONO           "NotoSansMono-Regular.ttf"
+-   #define FONT_SIZE                20
+-   #define LINE_HEIGHT              32
+-   #define ICON_SIZE                24
++   extern int FONT_SIZE;
++   extern int LINE_HEIGHT;
++   extern int ICON_SIZE;
+    #define MARGIN_X                 10
+    #define KEYBOARD_MARGIN          8
+    #define KEYBOARD_KEY_SPACING     4
+
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -17,6 +17,12 @@
+ int g_charW = 0;
+ std::vector<IWindow *> g_windows;
+ bool IWindow::g_hasChanged = true;
++
++int SCREEN_WIDTH = 1920;
++int SCREEN_HEIGHT = 1080;
++int FONT_SIZE = 30;
++int LINE_HEIGHT = 42;
++int ICON_SIZE = 34;
+ 
+ // Textures for icons
+ SDL_Texture *g_iconFile = NULL;
+@@ -41,6 +47,24 @@
+ 
+ int main(int argc, char* args[])
+ {
++ 
++ if (argc > 2) {
++      SCREEN_WIDTH = atoi(args[1]);
++      SCREEN_HEIGHT = atoi(args[2]);
++      
++      if (argc > 3) { 
++          FONT_SIZE = atoi(args[3]);
++      }
++      
++      if (argc > 4) {  
++          LINE_HEIGHT = atoi(args[4]);
++      }
++      
++      if (argc > 5) {  
++          ICON_SIZE = atoi(args[5]);
++      }
++}  
++
+    // Init SDL
+    if (! SDLUtils::init())
+    {

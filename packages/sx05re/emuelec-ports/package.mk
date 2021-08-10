@@ -8,10 +8,43 @@ PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE=""
 PKG_URL=""
-PKG_DEPENDS_TARGET="toolchain jinja2:host pyyaml:host commander-genius devilutionX sdlpop VVVVVV opentyrian bermuda hodesdl hydracastlelabyrinth eduke rigelengine sonic2013 soniccd supertux supertuxkart chocolate-doom lzdoom supermariowar bstone"
+PKG_DEPENDS_TARGET="toolchain jinja2:host pyyaml:host"
 PKG_SECTION="emuelec"
 PKG_SHORTDESC="EmuELEC Ports Meta Package"
 PKG_TOOLCHAIN="manual"
+
+
+PKG_DEPENDS_TARGET+=" commander-genius \
+                devilutionX \
+                sdlpop \
+                VVVVVV \
+                opentyrian \
+                bermuda \
+                hodesdl \
+                hydracastlelabyrinth \
+                eduke \
+                rigelengine \
+                sonic2013 \
+                soniccd \
+                supertux \
+                supertuxkart \
+                chocolate-doom \
+                lzdoom \
+                supermariowar \
+                bstone \
+                hurrican"
+
+amlogicports=""
+hhports=" openjazz"
+
+if [ "$PROJECT" == "Amlogic"* ]; then
+	PKG_DEPENDS_TARGET+="${amlogicports}"
+fi
+
+if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
+	PKG_DEPENDS_TARGET+="${hhports}"
+fi
+
 
 make_target() {
 mkdir -p $PKG_BUILD/scripts

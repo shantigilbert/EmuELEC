@@ -35,5 +35,5 @@ fi
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro
-  cp parallel_n64_libretro.so $INSTALL/usr/lib/libretro/parallel_n64_32_libretro.so
+  cp parallel_n64_libretro.so $INSTALL/usr/lib/libretro/parallel_n64_32b_libretro.so
 }

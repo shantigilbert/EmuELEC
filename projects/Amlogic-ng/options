@@ -165,4 +165,4 @@
     ENTWARE_ARCH="aarch64-k3.10"
 
   # CoreELEC Subdevices
-    SUBDEVICES="Odroid_N2 Odroid_C4 Odroid_HC4"
+    SUBDEVICES="Odroid_N2 Odroid_C4 Odroid_HC4 Radxa_Zero"

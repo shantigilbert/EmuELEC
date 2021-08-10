@@ -15,7 +15,6 @@ PKG_DEPENDS_TARGET+=" ffmpeg \
                       common-shaders \
                       scraper \
                       Skyscraper \
-                      rs97-commander-sdl2 \
                       MC \
                       libretro-bash-launcher \
                       SDL_GameControllerDB \
@@ -45,4 +44,5 @@ PKG_DEPENDS_TARGET+=" ffmpeg \
                       htop \
                       libevdev \
                       gptokeyb \
-                      exfat"
+                      exfat \
+                      351Files"
