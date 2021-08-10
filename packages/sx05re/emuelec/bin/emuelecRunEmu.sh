@@ -75,7 +75,7 @@ CORE="${CORE%% *}"  # until a space is found
 EMULATOR="${arguments##*--emulator=}"  # read from --emulator= onwards
 EMULATOR="${EMULATOR%% *}"  # until a space is found
 
-SET_DISPLAY_SH="/usr/bin/set-display.sh" # source of set-display script.
+SET_DISPLAY_SH="/usr/bin/setres.sh" # source of set-display script.
 VIDEO="${arguments##*--video=}" # read from --video= onwards
 VIDEO="${VIDEO%% *}" # until space found.
 
