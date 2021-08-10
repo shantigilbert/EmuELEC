@@ -81,6 +81,16 @@ CORE="${CORE%% *}"  # until a space is found
 EMULATOR="${arguments##*--emulator=}"  # read from --emulator= onwards
 EMULATOR="${EMULATOR%% *}"  # until a space is found
 
+SET_DISPLAY_SH="/usr/bin/set-display.sh" # source of set-display script. 
+VIDEO="${arguments##*--video=}" # read from --video= onwards
+VIDEO="${VIDEO%% *}" # until space found.
+
+[[ -z "$VIDEO" ]] && VIDEO_EMU=$(echo $VIDEO | cut -d',' -f 1) # split video var
+[[ -z "$VIDEO" ]] && VIDEO=$(echo $VIDEO | cut -d',' -f 2) # split video var
+
+# Set the display video to that of the emulator setting.
+[[ -z "$VIDEO" ]] && source $SET_DISPLAY_SH $VIDEO_EMU # set display
+
 ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
 GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
@@ -426,6 +436,9 @@ fi
 
 # Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
+
+# Revert the display video to that of the normal setting.
+[[ -z "$VIDEO" ]] && source $SET_DISPLAY_SH $VIDEO # set display
 
 # Show exit splash
 ${TBASH} show_splash.sh exit
