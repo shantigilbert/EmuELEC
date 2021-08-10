@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="retroarch"
-PKG_VERSION="c226bd87f47b3fdec642216fcaf6edc651e30eb4"
+PKG_VERSION="8373ac67460cd0e092453bad6bb83e674b5af31a"
 PKG_SITE="https://github.com/libretro/RetroArch"
 PKG_URL="$PKG_SITE.git"
 PKG_LICENSE="GPLv3"
@@ -69,6 +69,7 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-qt \
 
 if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 PKG_CONFIGURE_OPTS_TARGET+=" --enable-opengles3 \
+                           --enable-opengles3_2 \
                            --enable-kms \
                            --disable-mali_fbdev"
 else

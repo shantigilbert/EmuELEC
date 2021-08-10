@@ -54,6 +54,8 @@ makeinstall_target() {
         PKG_CHAINUBOOTBIN=$(get_build_dir u-boot-${PKG_SUBDEVICE})/build/u-boot.bin
     elif [ $PKG_SUBDEVICE = "LaFrite" ]; then
         PKG_CHAINUBOOTBIN=$(get_build_dir u-boot-${PKG_SUBDEVICE})/build/u-boot.bin
+    elif [ $PKG_SUBDEVICE = "Radxa_Zero" ]; then
+        PKG_UBOOTBIN=$(get_build_dir u-boot-${PKG_SUBDEVICE})/sd_fuse/u-boot.bin.sd.bin
     fi
     if [ ${PKG_UBOOTBIN} ]; then
         cp -av ${PKG_UBOOTBIN} $INSTALL/usr/share/bootloader/${PKG_SUBDEVICE}_u-boot
@@ -67,4 +69,7 @@ makeinstall_target() {
         -i $INSTALL/usr/share/bootloader/canupdate.sh
   # Copy Hardkernel boot logo
   find_file_path splash/hk-boot-logo-1080.bmp.gz && cp -av ${FOUND_PATH} $INSTALL/usr/share/bootloader
+
+  # Copy Radxa boot logo
+  find_file_path splash/radxa-boot-logo-1080.bmp.gz && cp -av ${FOUND_PATH} $INSTALL/usr/share/bootloader
 }

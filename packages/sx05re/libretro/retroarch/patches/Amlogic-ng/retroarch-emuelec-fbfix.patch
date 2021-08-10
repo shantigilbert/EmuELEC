@@ -1,17 +1,17 @@
 --- a/tasks/task_content.c	2019-01-15 12:55:14.000000000 -0600
 +++ b/tasks/task_content.c	2019-01-28 22:00:41.340468631 -0600
-@@ -261,7 +261,9 @@
+@@ -789,7 +789,9 @@
  
-    content_info->data = content_data;
-    content_info->size = length;
+    *data      = content_data;
+    *data_size = (size_t)content_size;
 -
-+   
-+   system("/usr/bin/fbfix"); // emuelec
-+   
++    
++    system("/usr/bin/fbfix"); // emuelec
++    
     return true;
  }
  
-@@ -786,6 +788,7 @@
+@@ -1368,6 +1370,7 @@
     {
        RARCH_LOG("[CORE]: Using content: %s.\n", args->content_path);
        argv[(*argc)++] = strdup(args->content_path);
@@ -19,7 +19,7 @@
     }
  #ifdef HAVE_MENU
     else
-@@ -1123,7 +1126,7 @@
+@@ -1705,7 +1708,7 @@
  #else
     frontend_driver_set_fork(FRONTEND_FORK_CORE_WITH_ARGS);
  #endif

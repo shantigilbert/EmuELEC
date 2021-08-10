@@ -8,6 +8,12 @@
 
 # This whole file has become very hacky, I am sure there is a better way to do all of this, but for now, this works.
 
+if [ -f "/usr/bin/odroidgoa_utils.sh" ]; then
+    DEFBRIGHT=$(get_ee_setting brightness.level)
+    RACONF=/storage/.config/retroarch/retroarch.cfg
+    sed -i "/screen_brightness/d" ${RACONF}
+    echo "screen_brightness = \"${DEFBRIGHT}\"" >> ${RACONF}
+fi
 
 BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 
@@ -150,7 +156,7 @@ fi
 
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
-[ "$SPL" -eq "1" ] && ${TBASH} /usr/bin/show_splash.sh "$PLATFORM" "${ROMNAME}"
+[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}"
 
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
@@ -160,18 +166,18 @@ case ${PLATFORM} in
 	"atari2600")
 		if [ "$EMU" = "STELLASA" ]; then
             set_kill_keys "stella"
-            RUNTHIS='${TBASH} /usr/bin/stella.sh "${ROMNAME}"'
+            RUNTHIS='${TBASH} stella.sh "${ROMNAME}"'
 		fi
 		;;
 	"atarist")
 		if [ "$EMU" = "HATARISA" ]; then
             set_kill_keys "hatari"
-            RUNTHIS='${TBASH} /usr/bin/hatari.start "${ROMNAME}"'
+            RUNTHIS='${TBASH} hatari.start "${ROMNAME}"'
 		fi
 		;;
 	"openbor")
 		set_kill_keys "OpenBOR"
-		RUNTHIS='${TBASH} /usr/bin/openbor.sh "${ROMNAME}"'
+		RUNTHIS='${TBASH} openbor.sh "${ROMNAME}"'
 		;;
 	"setup")
         if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
@@ -179,29 +185,19 @@ case ${PLATFORM} in
         else
             set_kill_keys "fbterm"
         fi
-		RUNTHIS='${TBASH} /usr/bin/fbterm.sh "${ROMNAME}"'
+		RUNTHIS='${TBASH} fbterm.sh "${ROMNAME}"'
 		EMUELECLOG="$LOGSDIR/ee_script.log"
 		;;
-	"dreamcast")
-		if [ "$EMU" = "REICASTSA" ]; then
-            set_kill_keys "reicast"
-            sed -i "s|REICASTBIN=.*|REICASTBIN=\"/usr/bin/reicast\"|" /usr/bin/reicast.sh
-            RUNTHIS='${TBASH} /usr/bin/reicast.sh "${ROMNAME}"'
-            LOGEMU="No" # ReicastSA outputs a LOT of text, only enable for debugging.
-            cp -rf /storage/.config/reicast/emu_new.cfg /storage/.config/reicast/emu.cfg
-		fi
-		if [ "$EMU" = "REICASTSA_OLD" ]; then
-            set_kill_keys "reicast_old"
-            sed -i "s|REICASTBIN=.*|REICASTBIN=\"/usr/bin/reicast_old\"|" /usr/bin/reicast.sh
-            RUNTHIS='${TBASH} /usr/bin/reicast.sh "${ROMNAME}"'
-            LOGEMU="No" # ReicastSA outputs a LOT of text, only enable for debugging.
-            cp -rf /storage/.config/reicast/emu_old.cfg /storage/.config/reicast/emu.cfg
-            fi
+	"dreamcast"|"naomi"|"atomiswave")
+		if [ "$EMU" = "flycastsa" ]; then
+            set_kill_keys "flycast"
+            RUNTHIS='${TBASH} flycast.sh "${ROMNAME}"'
+        fi
 		;;
 	"mame"|"arcade"|"capcom"|"cps1"|"cps2"|"cps3")
 		if [ "$EMU" = "AdvanceMame" ]; then
             set_kill_keys "advmame"
-            RUNTHIS='${TBASH} /usr/bin/advmame.sh "${ROMNAME}"'
+            RUNTHIS='${TBASH} advmame.sh "${ROMNAME}"'
 		fi
 		;;
 	"nds")
@@ -211,70 +207,70 @@ case ${PLATFORM} in
 	"n64")
 		if [ "$EMU" = "M64P" ]; then
             set_kill_keys "mupen64plus"
-            RUNTHIS='${TBASH} /usr/bin/m64p.sh "${ROMNAME}"'
+            RUNTHIS='${TBASH} m64p.sh "${ROMNAME}"'
 		fi
 		;;
 	"amiga"|"amigacd32")
 		if [ "$EMU" = "AMIBERRY" ]; then
-            RUNTHIS='${TBASH} /usr/bin/amiberry.start "${ROMNAME}"'
+            RUNTHIS='${TBASH} amiberry.start "${ROMNAME}"'
 		fi
 		;;
 	"residualvm")
 		if [[ "${ROMNAME}" == *".sh" ]]; then
             set_kill_keys "fbterm"
-            RUNTHIS='${TBASH} /usr/bin/fbterm.sh "${ROMNAME}"'
+            RUNTHIS='${TBASH} fbterm.sh "${ROMNAME}"'
             EMUELECLOG="$LOGSDIR/ee_script.log"
 		else
             set_kill_keys "residualvm"
-            RUNTHIS='${TBASH} /usr/bin/residualvm.sh sa "${ROMNAME}"'
+            RUNTHIS='${TBASH} residualvm.sh sa "${ROMNAME}"'
 		fi
 		;;
 	"scummvm")
 		if [[ "${ROMNAME}" == *".sh" ]]; then
             set_kill_keys "fbterm"
-            RUNTHIS='${TBASH} /usr/bin/fbterm.sh "${ROMNAME}"'
+            RUNTHIS='${TBASH} fbterm.sh "${ROMNAME}"'
             EMUELECLOG="$LOGSDIR/ee_script.log"
 		else
 		if [ "$EMU" = "SCUMMVMSA" ]; then
             set_kill_keys "scummvm"
-            RUNTHIS='${TBASH} /usr/bin/scummvm.start sa "${ROMNAME}"'
+            RUNTHIS='${TBASH} scummvm.start sa "${ROMNAME}"'
 		else
-            RUNTHIS='${TBASH} /usr/bin/scummvm.start libretro'
+            RUNTHIS='${TBASH} scummvm.start libretro'
 		fi
 		fi
 		;;
 	"solarus")
 		set_kill_keys "solarus-run"
-		RUNTHIS='${TBASH} /usr/bin/solarus.sh "${ROMNAME}"'
+		RUNTHIS='${TBASH} solarus.sh "${ROMNAME}"'
 			;;
 	"daphne")
 		if [ "$EMU" = "HYPSEUS" ]; then
             set_kill_keys "hypseus"
-            RUNTHIS='${TBASH} /usr/bin/hypseus.start.sh "${ROMNAME}"'
+            RUNTHIS='${TBASH} hypseus.start.sh "${ROMNAME}"'
 		fi
 		;;
 	"wii"|"gamecube")
 		if [ "$EMU" = "dolphin" ]; then
             set_kill_keys "dolphin-emu-nogui"
-            RUNTHIS='${TBASH} /usr/bin/dolphin.sh "${ROMNAME}"'
+            RUNTHIS='${TBASH} dolphin.sh "${ROMNAME}"'
 		fi
 		;;
 	"pc")
 		if [ "$EMU" = "DOSBOXSDL2" ]; then
             set_kill_keys "dosbox"
-            RUNTHIS='${TBASH} /usr/bin/dosbox.start "${ROMNAME}"'
-            #RUNTHIS='${TBASH} /usr/bin/dosbox.start -conf "${GAMEFOLDER}dosbox-SDL2.conf"'
+            RUNTHIS='${TBASH} dosbox.start "${ROMNAME}"'
+            #RUNTHIS='${TBASH} dosbox.start -conf "${GAMEFOLDER}dosbox-SDL2.conf"'
 		fi
 		if [ "$EMU" = "DOSBOX-X" ]; then
             set_kill_keys "dosbox-x"
-            RUNTHIS='${TBASH} /usr/bin/dosbox-x.start "${ROMNAME}"'
-            #RUNTHIS='${TBASH} /usr/bin/dosbox-x.start -conf "${GAMEFOLDER}dosbox-SDL2.conf"'
+            RUNTHIS='${TBASH} dosbox-x.start "${ROMNAME}"'
+            #RUNTHIS='${TBASH} dosbox-x.start -conf "${GAMEFOLDER}dosbox-SDL2.conf"'
 		fi
 		;;
 	"psp"|"pspminis")
 		if [ "$EMU" = "PPSSPPSDL" ]; then
             set_kill_keys "PPSSPPSDL"
-            RUNTHIS='${TBASH} /usr/bin/ppsspp.sh "${ROMNAME}"'
+            RUNTHIS='${TBASH} ppsspp.sh "${ROMNAME}"'
 		fi
 		;;
 	"neocd")
@@ -284,38 +280,33 @@ case ${PLATFORM} in
 		;;
 	"mplayer")
 		set_kill_keys "${EMU}"
-		RUNTHIS='${TBASH} /usr/bin/fbterm.sh mplayer_video "${ROMNAME}" "${EMU}"'
+		RUNTHIS='${TBASH} fbterm.sh mplayer_video "${ROMNAME}" "${EMU}"'
 		;;
 	"pico8")
 		set_kill_keys "pico8_dyn"
-		RUNTHIS='${TBASH} /usr/bin/pico8.sh "${ROMNAME}"'
+		RUNTHIS='${TBASH} pico8.sh "${ROMNAME}"'
 			;;
 	"prboom")
         if [ "$EMU" = "Chocolate-Doom" ]; then
             set_kill_keys "chocolate-doom"
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
-            RUNTHIS='${TBASH} /usr/bin/chocodoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
+            RUNTHIS='${TBASH} chocodoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
 	elif [ "$EMU" = "LZDoom" ]; then
 	    set_kill_keys "lzdoom"
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
-            RUNTHIS='${TBASH} /usr/bin/lzdoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
+            RUNTHIS='${TBASH} lzdoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
         fi
         ;;
 	"ecwolf")
         if [ "$EMU" = "ecwolf" ]; then
             set_kill_keys "ecwolf"
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
-            RUNTHIS='${TBASH} /usr/bin/ecwolf.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
+            RUNTHIS='${TBASH} ecwolf.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
         fi
         ;;
 	esac
 elif [ ${LIBRETRO} == "yes" ]; then
 # We are running a Libretro emulator set all the settings that we chose on ES
-
-# Workaround for Atomiswave
-if [[ ${PLATFORM} == "atomiswave" ]]; then
-	rm ${ROMNAME}.nvmem*
-fi
 
 if [[ ${PLATFORM} == "ports" ]]; then
 	PORTCORE="${arguments##*-C}"  # read from -C onwards
@@ -363,7 +354,7 @@ if [[ ${NETPLAY} != "No" ]]; then
 fi
 # End netplay
 
-SHADERSET=$(/usr/bin/setsettings.sh "${PLATFORM}" "${ROMNAME_SHADER}" "${CORE}" --controllers="${CONTROLLERCONFIG}" --snapshot="${SNAPSHOT}")
+SHADERSET=$(setsettings.sh "${PLATFORM}" "${ROMNAME_SHADER}" "${CORE}" --controllers="${CONTROLLERCONFIG}" --snapshot="${SNAPSHOT}")
 #echo $SHADERSET # Only needed for debug
 
 if [[ ${SHADERSET} != 0 ]]; then
@@ -419,7 +410,7 @@ if [[ "${KILLTHIS}" != "none" ]]; then
 fi
 
 # Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && /usr/bin/fbfix
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # Execute the command and try to output the results to the log file if it was not disabled.
 if [[ $LOGEMU == "Yes" ]]; then
@@ -432,14 +423,20 @@ else
    ret_error=$?
 fi
 
+# clear terminal window
+	reset > /dev/tty < /dev/null 2>&1
+	reset > /dev/tty0 < /dev/null 2>&1
+	reset > /dev/tty1 < /dev/null 2>&1
+	reset > /dev/console < /dev/null 2>&1
+
 # Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && /usr/bin/fbfix
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # Revert the display video to that of the original emuelec setting.
 [[ -z "$VIDEO" ]] && source $SET_DISPLAY_SH $VIDEO # set display
 
 # Show exit splash
-${TBASH} /usr/bin/show_splash.sh exit
+${TBASH} show_splash.sh exit
 
 # Just in case
 kill_video_controls
@@ -452,7 +449,7 @@ fi
 #{log_addon}#
 
 # Return to default mode
-${TBASH} /usr/bin/setres.sh
+${TBASH} setres.sh
 
 # reset audio to default
 set_audio default

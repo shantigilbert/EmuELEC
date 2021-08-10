@@ -11,7 +11,7 @@ PKG_DEPENDS_TARGET="toolchain SDL2-git"
 PKG_TOOLCHAIN="auto"
 
 pre_configure_target() {
-  sed -i "s|sdl2-config|$SYSROOT_PREFIX/usr/bin/sdl2-config|g" Makefile
+  sed -i "s|sdl2-config|${SYSROOT_PREFIX}/usr/bin/sdl2-config|g" Makefile
 }
 
 makeinstall_target() {

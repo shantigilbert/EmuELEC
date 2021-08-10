@@ -12,4 +12,4 @@ PKG_DEPENDS_TARGET="toolchain util-macros xorgproto"
 PKG_LONGDESC="X authorization file management libary"
 PKG_BUILD_FLAGS="+pic"
 
-PKG_CONFIGURE_OPTS_TARGET="--enable-static --disable-shared --enable-xthreads"
+PKG_CONFIGURE_OPTS_TARGET="--enable-static --enable-shared --enable-xthreads"

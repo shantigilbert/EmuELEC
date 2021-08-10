@@ -3,7 +3,6 @@
 
 PKG_NAME="duckstation"
 PKG_VERSION="8b234c06"
-PKG_SHA256="3a986bc77837e92a116413956c6863b876effb018dbfd5da962d26ebd0f1c4b1"
 PKG_LICENSE="NON-COMMERCIAL"
 PKG_ARCH="aarch64"
 PKG_SITE="https://www.duckstation.org/libretro"

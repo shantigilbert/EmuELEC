@@ -2,15 +2,15 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 73d9407..bcc872f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -320,6 +320,7 @@
- option_string(ASSERTIONS "Enable internal sanity checks (auto/disabled/release/enabled/paranoid)" "auto")
- #set_option(DEPENDENCY_TRACKING "Use gcc -MMD -MT dependency tracking" ON)
- set_option(LIBC                "Use the system C library" ${OPT_DEF_LIBC})
+@@ -333,6 +333,7 @@ set_option(VIDEO_VIVANTE       "Use Vivante EGL video driver" ${UNIX_SYS})
+ dep_option(VIDEO_VULKAN        "Enable Vulkan support" ON "ANDROID OR APPLE OR LINUX OR WINDOWS" OFF)
+ set_option(VIDEO_KMSDRM        "Use KMS DRM video driver" ${UNIX_SYS})
+ dep_option(KMSDRM_SHARED       "Dynamically load KMS DRM support" ON "VIDEO_KMSDRM" OFF)
 +set_option(VIDEO_MALI          "Use Mali EGL video driver" ${UNIX_SYS})
- set_option(GCC_ATOMICS         "Use gcc builtin atomics" ${OPT_DEF_GCC_ATOMICS})
- set_option(ASSEMBLY            "Enable assembly routines" ${OPT_DEF_ASM})
- set_option(SSEMATH             "Allow GCC to use SSE floating point math" ${OPT_DEF_SSEMATH})
-@@ -1131,6 +1132,7 @@
+ 
+ # TODO: We should (should we?) respect cmake's ${BUILD_SHARED_LIBS} flag here
+ # The options below are for compatibility to configure's default behaviour.
+@@ -976,6 +977,7 @@ elseif(UNIX AND NOT APPLE AND NOT ANDROID)
      CheckWayland()
      CheckVivante()
      CheckKMSDRM()
@@ -138,8 +138,8 @@ index 55e0d4d..cd60ad6 100755
          if test x$enable_audio = xyes; then
 diff --git a/configure.in b/configure.in
 index 5ac2130..3e67f09 100644
---- a/configure.ac
-+++ b/configure.ac
+--- a/configure.in
++++ b/configure.in
 @@ -2012,6 +2012,35 @@ AC_HELP_STRING([--enable-video-vivante], [use Vivante EGL video driver [[default
      fi
  }
@@ -225,15 +225,14 @@ diff --git a/src/video/SDL_sysvideo.h b/src/video/SDL_sysvideo.h
 index 811fe19..991245e 100644
 --- a/src/video/SDL_sysvideo.h
 +++ b/src/video/SDL_sysvideo.h
-@@ -411,6 +411,7 @@
- } VideoBootStrap;
- 
- /* Not all of these are available in a given build. Use #ifdefs, etc. */
+@@ -418,6 +418,7 @@ extern VideoBootStrap NACL_bootstrap;
+ extern VideoBootStrap VIVANTE_bootstrap;
+ extern VideoBootStrap Emscripten_bootstrap;
+ extern VideoBootStrap QNX_bootstrap;
 +extern VideoBootStrap MALI_bootstrap;
- extern VideoBootStrap COCOA_bootstrap;
- extern VideoBootStrap X11_bootstrap;
- extern VideoBootStrap DirectFB_bootstrap;
-
+ 
+ extern SDL_VideoDevice *SDL_GetVideoDevice(void);
+ extern int SDL_AddBasicVideoDisplay(const SDL_DisplayMode * desktop_mode);
 diff --git a/src/video/SDL_video.c b/src/video/SDL_video.c
 index 8cf195d..7ade62a 100644
 --- a/src/video/SDL_video.c

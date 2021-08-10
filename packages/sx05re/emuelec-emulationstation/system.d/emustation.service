@@ -7,7 +7,7 @@ After=udevil-mount@-dev-sda1.service
 [Service]
 Environment=HOME=/storage
 EnvironmentFile=/storage/.config/emulationstation/scripts/es_env.sh
-ExecStartPre=/usr/bin/emustation-config
+ExecStartPre=emustation-config
 ExecStartPre=/usr/bin/killes.sh
 ExecStart=emulationstation --log-path /storage/.config/emuelec/logs
 KillMode=process

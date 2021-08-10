@@ -1,6 +1,41 @@
 EmuELEC CHANGELOG
 ==================
 
+# 4.3
+
+General: 
+
+* Fix Autoupdate
+* Fix no backup restore if EEROMS was set to fat32
+* Fix no external ROMS if EEROMS was set to fat32
+* Fix typo on Parallel N64 32b core name
+* Unify Brightness between ES and RA
+* Fix advmame.sh: unset DISPLAY for Amlogic and Amlogic-ng
+* Fix SuperTux2: Fix sed in launch script
+* Fix vertical mode not respecting index ratio
+* Fix Connect to WiFi on first boot if using es_defaults.txt
+* Fix volume resets to 98% using AV
+* Fix Do not redirect stdout/stderr to /dev/null in maxperf and normperf. (#661)
+* Fix Amstrad GX4000
+* Fix create /storage/roms/amstradgx4000 on boot
+* emuelecRunEmu.sh: remove hardcoded bin path, this allows to use most of the binaries/scripts be called from `/emuelec/bin` or `/usr/bin` in that order
+* Add Megadrive MSU to es_systems.cfg
+* Add fceumm-mod libretro core to play some additional NES ROM hacks. (#658)
+* New Packages: Box64, Box86, GL4es, Axe11, libglu (for future use)
+* Bump most cores and emulators to current versions
+* Bump Retroarch to 1.9.6
+* Add Flycast Stand Alone 
+* Add Alternate version of Mupen64plus-nx
+* Replace old filemanager for 351Files
+* Cleanup es_systems.cfg remove and add some extentions
+* Add Hurrican port (Handhelds currently have no working controls) 
+* Atomiswave: Remove workaround for nvmem
+
+Amlogic-ng: 
+
+* Add preliminary support for Raxda Zero 
+
+
 # 4.2
 
 A new forum has been open for emuelec: https://emuelec.org

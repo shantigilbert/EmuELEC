@@ -2,17 +2,23 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="tic-80"
-PKG_VERSION="f724c8c9bbc38d1f8d60707f9e1ce84ca7021f66"
+PKG_VERSION="6b91e9f4fffd069689048c767678dcff09c26eaf"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/nesbox/TIC-80"
 PKG_URL="$PKG_SITE.git"
-PKG_DEPENDS_TARGET="toolchain"
+PKG_DEPENDS_TARGET="toolchain tic-80:host"
 PKG_LONGDESC="TIC-80 is a fantasy computer for making, playing and sharing tiny games."
 GET_HANDLER_SUPPORT="git"
 
 PKG_CMAKE_OPTS_TARGET="-DBUILD_LIBRETRO=ON \
-					   -DBUILD_PLAYER=OFF \
+					   -DBUILD_PLAYER=ON \
 					   -DBUILD_DEMO_CARTS=OFF \
+                       -DBUILD_SOKOL=OFF \
+                       -DBUILD_SDL=ON"
+
+PKG_CMAKE_OPTS_HOST="-DBUILD_LIBRETRO=OFF \
+					   -DBUILD_PLAYER=OFF \
+					   -DBUILD_DEMO_CARTS=ON \
                        -DBUILD_SOKOL=OFF \
                        -DBUILD_SDL=OFF"
 

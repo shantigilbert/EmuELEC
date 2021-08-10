@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <gameList>
 	<game>
-		<path>./file_manager_(kb).sh</path>
+		<path>./file_manager.sh</path>
 		<name>File Manager</name>
-		<desc>MC File Manager. A keyboard is required!</desc>
+		<desc>MC File Manager. NO keyboard required</desc>
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
