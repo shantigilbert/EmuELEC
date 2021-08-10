@@ -51,7 +51,7 @@ if [[ ! -d "$LOGSDIR" ]]; then
     mkdir -p "$LOGSDIR"
 fi
 
-if [ "$(get_es_setting string LogLevel)" == "minimal" ]; then 
+if [ "$(get_es_setting string LogLevel)" == "minimal" ]; then
     EMUELECLOG="/dev/null"
     cat /etc/motd > "$LOGSDIR/emuelec.log"
     echo "Logging has been dissabled, enable it in Main Menu > System Settings > Developer > Log Level" >> "$LOGSDIR/emuelec.log"
@@ -60,7 +60,7 @@ else
 fi
 
 set_kill_keys() {
-    # If gptokeyb is running we kill it first. 
+    # If gptokeyb is running we kill it first.
     kill_video_controls
     KILLTHIS=${1}
 }
@@ -74,6 +74,16 @@ CORE="${CORE%% *}"  # until a space is found
 
 EMULATOR="${arguments##*--emulator=}"  # read from --emulator= onwards
 EMULATOR="${EMULATOR%% *}"  # until a space is found
+
+SET_DISPLAY_SH="/usr/bin/set-display.sh" # source of set-display script.
+VIDEO="${arguments##*--video=}" # read from --video= onwards
+VIDEO="${VIDEO%% *}" # until space found.
+
+[[ -z "$VIDEO" ]] && VIDEO_EMU=$(echo $VIDEO | cut -d',' -f 1) # split video var
+[[ -z "$VIDEO" ]] && VIDEO=$(echo $VIDEO | cut -d',' -f 2) # split video var
+
+# Set the display video to that of the emulator setting.
+[[ -z "$VIDEO" ]] && source $SET_DISPLAY_SH $VIDEO_EMU # set display
 
 ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
@@ -164,8 +174,8 @@ case ${PLATFORM} in
 		RUNTHIS='${TBASH} /usr/bin/openbor.sh "${ROMNAME}"'
 		;;
 	"setup")
-        if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then 
-            set_kill_keys "kmscon" 
+        if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
+            set_kill_keys "kmscon"
         else
             set_kill_keys "fbterm"
         fi
@@ -260,7 +270,7 @@ case ${PLATFORM} in
             RUNTHIS='${TBASH} /usr/bin/dosbox-x.start "${ROMNAME}"'
             #RUNTHIS='${TBASH} /usr/bin/dosbox-x.start -conf "${GAMEFOLDER}dosbox-SDL2.conf"'
 		fi
-		;;		
+		;;
 	"psp"|"pspminis")
 		if [ "$EMU" = "PPSSPPSDL" ]; then
             set_kill_keys "PPSSPPSDL"
@@ -375,10 +385,10 @@ fi
 else # Retrorun was selected
 # Retrotun does not support settings
     RUNTHIS="retrorun"
-    if [ "${BIT32}" == "yes" ]; then 
+    if [ "${BIT32}" == "yes" ]; then
         RUNTHIS+="32"
     fi
-    
+
     RUNTHIS+=' --triggers -n -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
 
 fi # end Libretro/retrorun or standalone emu logic
@@ -395,12 +405,12 @@ if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do al
     echo "ROM NAME: ${ROMNAME}" >> $EMUELECLOG
     echo "BASE ROM NAME: ${ROMNAME##*/}" >> $EMUELECLOG
     echo "USING CONFIG: ${RACONF}" >> $EMUELECLOG
-    echo "1st Argument: $1" >> $EMUELECLOG 
+    echo "1st Argument: $1" >> $EMUELECLOG
     echo "2nd Argument: $2" >> $EMUELECLOG
-    echo "3rd Argument: $3" >> $EMUELECLOG 
-    echo "4th Argument: $4" >> $EMUELECLOG 
-    echo "Full arguments: $arguments" >> $EMUELECLOG 
-    echo "Run Command is:" >> $EMUELECLOG 
+    echo "3rd Argument: $3" >> $EMUELECLOG
+    echo "4th Argument: $4" >> $EMUELECLOG
+    echo "Full arguments: $arguments" >> $EMUELECLOG
+    echo "Run Command is:" >> $EMUELECLOG
     eval echo ${RUNTHIS} >> $EMUELECLOG
 fi
 
@@ -420,10 +430,13 @@ else
    echo "Emulator log was dissabled" >> $EMUELECLOG
    eval ${RUNTHIS} > /dev/null 2>&1
    ret_error=$?
-fi 
+fi
 
 # Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && /usr/bin/fbfix
+
+# Revert the display video to that of the original emuelec setting.
+[[ -z "$VIDEO" ]] && source $SET_DISPLAY_SH $VIDEO # set display
 
 # Show exit splash
 ${TBASH} /usr/bin/show_splash.sh exit
@@ -496,7 +509,7 @@ if [[ "$ret_error" != "0" ]]; then
     # Check for missing bios if needed
     REQUIRESBIOS=(atari5200 atari800 atari7800 atarilynx colecovision amiga amigacd32 o2em intellivision pcengine pcenginecd pcfx fds segacd saturn dreamcast naomi atomiswave x68000 neogeo neogeocd msx msx2 sc-3000)
 
-    (for e in "${REQUIRESBIOS[@]}"; do [[ "${e}" == "${PLATFORM}" ]] && exit 0; done) && RB=0 || RB=1	
+    (for e in "${REQUIRESBIOS[@]}"; do [[ "${e}" == "${PLATFORM}" ]] && exit 0; done) && RB=0 || RB=1
         if [ $RB == 0 ]; then
             CBPLATFORM="${PLATFORM}"
             [[ "${CBPLATFORM}" == "msx2" ]] && CBPLATFORM="msx"
