@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
@@ -28,21 +28,25 @@ MODE=$1
 
 [ -z "$MODE" ] && MODE=`cat /sys/class/display/mode`;
 
-[[ $MODE == *"p"* ]] && H=$(echo $MODE | cut -d'p' -f 1)
-[[ $MODE == *"i"* ]] && H=$(echo $MODE | cut -d'i' -f 1)
-[[ $MODE == *"cvbs"* ]] && H=$(echo $MODE | cut -d'c' -f 1)
+case $MODE in
+	*p*) H=$(echo $MODE | cut -d'p' -f 1) ;;
+	*i*) H=$(echo $MODE | cut -d'i' -f 1) ;;
+	*cvbs*) H=$(echo $MODE | cut -d'c' -f 1) ;;
+	*hz*) HZ=${i:(-4):2} ;;
+esac
 
-if [[ $i == *"hz"* ]]; then
-	HZ=${i:(-4):2}
-fi
-
-if [[ "$HZ" == "50" ]]; then
+if [ $HZ = "50" ]; then
 	HZ=60
 fi
 
+# used for testing.
+#echo $MODE
+#echo $H
+#echo $HZ
+#exit 1
 
 case $i in
-	"480p60hz")
+	480p60hz)
 		W=720
 		DI=$(($H*2))
 		W1=$(($W-1))
@@ -57,13 +61,7 @@ case $i in
 		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
 		echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
-	"576p50hz")
-	"720p60hz")
-	"720p50hz")
-	"1080p60hz")
-	"1080i60hz")
-	"1080i50hz")
-	"1080p50hz")
+	576p50hz|720p60hz|720p50hz|1080p60hz|1080i60hz|1080i50hz|1080p50hz)
 		W=$(($H*16/9))
 		DH=$(($H*2))
 		W1=$(($W-1))
@@ -78,9 +76,7 @@ case $i in
 		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
 		echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
-	"1280x1024p60hz")
-	"1024x768p60hz")
-	"640x480p60hz")
+	1280x1024p60hz|1024x768p60hz|640x480p60hz)
 		W=$(($W*4/3))
 		DH=$(($H*2))
 		W1=$(($W-1))
@@ -95,7 +91,7 @@ case $i in
 		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
 		echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
-	"480cvbs")
+	480cvbs)
 		fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
 		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
 		echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
@@ -104,7 +100,7 @@ case $i in
 		echo 480 > /sys/class/graphics/fb0/scale_height
 		echo 0x10001 > /sys/class/graphics/fb0/free_scale
 		;;
-	"576cvbs")
+	576cvbs)
 		fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
 		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
 		echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
