@@ -82,14 +82,9 @@ EMULATOR="${arguments##*--emulator=}"  # read from --emulator= onwards
 EMULATOR="${EMULATOR%% *}"  # until a space is found
 
 SET_DISPLAY_SH="/usr/bin/setres.sh" # source of set-display script.
-VIDEO="${arguments##*--video=}" # read from --video= onwards
-VIDEO="${VIDEO%% *}" # until space found.
-
-[[ -z "$VIDEO" ]] && VIDEO_EMU=$(echo $VIDEO | cut -d',' -f 1) # split video var
-[[ -z "$VIDEO" ]] && VIDEO=$(echo $VIDEO | cut -d',' -f 2) # split video var
-
-# Set the display video to that of the emulator setting.
-[[ -z "$VIDEO" ]] && source $SET_DISPLAY_SH $VIDEO_EMU # set display
+VIDEO=$(get_ee_setting global.videomode)
+[[ -z "$VIDEO" ]] && VIDEO=$(get_ee_setting ee_videomode)
+VIDEO_EMU=$(get_ee_setting ${PLATFORM}.nativevideo)
 
 ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
@@ -158,6 +153,8 @@ fi
 SPL=$(get_ee_setting ee_splash.enabled)
 [ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}"
 
+# Set the display video to that of the emulator setting.
+[[ -z "$VIDEO_EMU" ]] && source $SET_DISPLAY_SH $VIDEO_EMU # set display
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
@@ -433,7 +430,7 @@ fi
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # Revert the display video to that of the original emuelec setting.
-[[ -z "$VIDEO" ]] && source $SET_DISPLAY_SH $VIDEO # set display
+[[ -z "$VIDEO_EMU" ]] && source $SET_DISPLAY_SH $VIDEO # set display
 
 # Show exit splash
 ${TBASH} show_splash.sh exit
