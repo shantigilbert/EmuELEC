@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="uae4arm"
-PKG_VERSION="a1838fc526524c0a2c407a5773acbd54dd1a6a3b"
-PKG_SHA256="7713dab5f833219fa0b37ee925841eb06aa30b66b093a9e1dd61c5c87390a2e8"
+PKG_VERSION="df262be9bf21e131125b1593abe4ca86248a49f8"
+PKG_SHA256="411a21131953252c845cd7051674ee08c1de8b1c4ff034b671628ac5f730ced5"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="GPL"

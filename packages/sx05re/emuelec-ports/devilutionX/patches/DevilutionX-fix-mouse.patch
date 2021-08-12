@@ -4,8 +4,8 @@
  	mouseWarping = true;
  	LogicalToOutput(&x, &y);
  	SDL_WarpMouseInWindow(ghMainWnd, x, y);
-+   MouseX = x;
-+   MouseY = y;
++ 	MousePosition.x = x;
++ 	MousePosition.y = y;
  }
  
  // Moves the mouse to the first attribute "+" button.

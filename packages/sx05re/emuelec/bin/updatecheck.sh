@@ -134,8 +134,6 @@ CVER=$(cat /usr/config/EE_VERSION)
 [[ -z "$CVER" ]] && no_update
 if $(echo "${CVER}" | grep -q "TEST"); then
     CVER=$(echo "$CVER" | sed "s|-TEST-||")
-else
-    CVER+="${BUILDATE}"
 fi
 
 UVER=$(echo "$UVER" | sed "s|-TEST-||")

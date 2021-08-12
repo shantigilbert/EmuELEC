@@ -1,38 +1,39 @@
 --- a/Core/System.cpp
 +++ b/Core/System.cpp
-@@ -582,13 +582,13 @@
- Path GetSysDirectory(PSPDirectories directoryType) {
+@@ -592,13 +592,13 @@
+ 
  	switch (directoryType) {
  	case DIRECTORY_CHEATS:
--		return g_Config.memStickDirectory / "PSP/Cheats";
+-		return pspDirectory / "Cheats";
 +		return Path("/storage/roms/savestates/PPSSPPSDL/PSP/Cheats/");
  	case DIRECTORY_GAME:
--		return g_Config.memStickDirectory / "PSP/GAME";
+-		return pspDirectory / "GAME";
 +		return Path("/storage/roms/savestates/PPSSPPSDL/PSP/GAME/");
  	case DIRECTORY_SAVEDATA:
--		return g_Config.memStickDirectory / "PSP/SAVEDATA";
+-		return pspDirectory / "SAVEDATA";
 +		return Path("/storage/roms/savestates/PPSSPPSDL/PSP/SAVEDATA");
  	case DIRECTORY_SCREENSHOT:
--		return g_Config.memStickDirectory / "PSP/SCREENSHOT";
+-		return pspDirectory / "SCREENSHOT";
 +		return Path("/storage/roms/screenshots");
  	case DIRECTORY_SYSTEM:
- 		return g_Config.memStickDirectory / "PSP/SYSTEM";
+ 		return pspDirectory / "SYSTEM";
  	case DIRECTORY_PAUTH:
-@@ -596,7 +596,7 @@
+@@ -606,7 +606,7 @@
  	case DIRECTORY_DUMP:
- 		return g_Config.memStickDirectory / "PSP/SYSTEM/DUMP";
+ 		return pspDirectory / "SYSTEM/DUMP";
  	case DIRECTORY_SAVESTATE:
--		return g_Config.memStickDirectory / "PSP/PPSSPP_STATE";
+-		return pspDirectory / "PPSSPP_STATE";
 +		return Path("/storage/roms/savestates/PPSSPPSDL/PSP/PPSSPP_STATE/");
  	case DIRECTORY_CACHE:
- 		return g_Config.memStickDirectory / "PSP/SYSTEM/CACHE";
+ 		return pspDirectory / "SYSTEM/CACHE";
  	case DIRECTORY_TEXTURES:
-@@ -611,7 +611,7 @@
+@@ -621,7 +621,7 @@
  	case DIRECTORY_VIDEO:
- 		return g_Config.memStickDirectory / "PSP/VIDEO";
+ 		return pspDirectory / "VIDEO";
  	case DIRECTORY_AUDIO:
--		return g_Config.memStickDirectory / "PSP/AUDIO";
+-		return pspDirectory / "AUDIO";
 +		return Path("/storage/roms/savestates/PPSSPPSDL/PSP/AUDIO/");
  	case DIRECTORY_MEMSTICK_ROOT:
  		return g_Config.memStickDirectory;
  	// Just return the memory stick root if we run into some sort of problem.
+

@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="ppsspp"
-PKG_VERSION="79e3d1c5f9c47899a786d8e3053df8557e006b96"
+PKG_VERSION="6daa18cca0ba412a3c511f5a358aa15e67bb9264"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/hrydgard/ppsspp"
 PKG_URL="https://github.com/hrydgard/ppsspp.git"
@@ -33,7 +33,7 @@ PKG_LIBPATH="lib/$PKG_LIBNAME"
 pre_configure_target() {
   PKG_CMAKE_OPTS_TARGET="-DLIBRETRO=ON \
                          -DUSE_SYSTEM_FFMPEG=ON \
-                         -DUSING_X11_VULKAN=OFF"
+                         -DUSING_X11_VULKAN=OFF --target clean"
 
   if [ "${ARCH}" = "arm" ] && [ ! "${TARGET_CPU}" = "arm1176jzf-s" ]; then
     PKG_CMAKE_OPTS_TARGET+=" -DARMV7=ON"
@@ -46,6 +46,13 @@ pre_configure_target() {
                              -DUSING_EGL=ON \
                              -DUSING_GLES2=ON"
   fi
+  
+if [ $ARCH == "aarch64" ]; then
+PKG_CMAKE_OPTS_TARGET+=" -DARM64=ON"
+else
+PKG_CMAKE_OPTS_TARGET+=" -DARMV7=ON"
+fi
+  
 }
 
 pre_make_target() {

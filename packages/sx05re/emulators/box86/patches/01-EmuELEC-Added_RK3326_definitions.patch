@@ -1,0 +1,98 @@
+From e0be5f57be799cefee899331891fca7400901634 Mon Sep 17 00:00:00 2001
+From: JohnnyonFlame <johnnyonflame@hotmail.com>
+Date: Thu, 11 Mar 2021 20:26:41 -0300
+Subject: [PATCH] Added RK3326 definitions.
+
+---
+ CMakeLists.txt          | 8 +++++++-
+ src/emu/x86int3.c       | 2 +-
+ src/include/fileutils.h | 2 +-
+ src/main.c              | 2 +-
+ src/tools/fileutils.c   | 2 +-
+ 5 files changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 13bb48bc..a31e676c 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -6,6 +6,7 @@ option(RPI2 "Set to ON if targeting an RaspberryPI2 device" ${RPI2})
+ option(RPI3 "Set to ON if targeting an RaspberryPI3 device" ${RPI3})
+ option(RPI4 "Set to ON if targeting an RaspberryPI4 device" ${RPI4})
+ option(RPI4ARM64 "Set to ON if targeting an RaspberryPI4 device with multiarch arm64 and armhf" ${RPI4ARM64})
++option(RK3326 "Set to ON if targeting an Rockchip RK3326 based device" ${RK3326})
+ option(RK3399 "Set to ON if targeting an Rockchip RK3399 based device" ${RK3399})
+ option(GAMESHELL "Set to ON if targeting a GameShell device" ${GAMESHELL})
+ option(ODROID "Set to ON if targeting an ODroid device" ${ODROID})
+@@ -15,7 +16,7 @@ option(HAVE_TRACE "Set to ON to have Trace ability (needs ZydisInfo library)" ${
+ option(NOLOADADDR "Set to ON to avoid fixing the load address of Box86" ${NO_LOADAADR})
+ option(NOGETCLOCK "Set to ON to avoid using clock_gettime with CLOCK_MONOTONIC_COARSE for RDTSC opcode (use gltimeofday instead)" ${NOGETCLOCK})
+ option(NOGIT "Set to ON if not building from a git clone repo (like when building from a zip download from github)" ${NOGIT})
+-if(PANDORA OR PYRA OR RPI2 OR RPI3 OR RPI4 OR GAMESHELL OR ODROID OR RK3399 OR RPI4ARM64)
++if(PANDORA OR PYRA OR RPI2 OR RPI3 OR RPI4 OR GAMESHELL OR ODROID OR RK3326 OR RK3399 OR RPI4ARM64)
+     set(LD80BITS OFF CACHE BOOL "")
+     set(NOALIGN OFF CACHE BOOL "")
+     set(ARM_DYNAREC ON CACHE BOOL "")
+@@ -102,6 +103,11 @@ if(ODROID)
+     add_definitions(-mcpu=cortex-a9 -mfpu=neon-vfpv4 -mfloat-abi=hard -marm)
+     set(CMAKE_ASM_FLAGS  "-marm -mcpu=cortex-a9 -mfpu=neon-vfpv4 -mfloat-abi=hard")
+ endif()
++if(RK3326)
++    add_definitions(-DRK3326)
++    add_definitions(-marm -mcpu=cortex-a35 -mfpu=neon-vfpv3 -march=armv8-a+crc+simd+crypto -mfloat-abi=hard)
++    set(CMAKE_ASM_FLAGS  "-marm -mcpu=cortex-a35 -mfpu=neon-vfpv3 -march=armv8-a+crc+simd+crypto -mfloat-abi=hard")
++endif()
+ if(RK3399)
+     add_definitions(-DRK3399)
+     add_definitions(-pipe -march=armv8-a+crc+simd+crypto -mcpu=cortex-a72+crypto)
+diff --git a/src/emu/x86int3.c b/src/emu/x86int3.c
+index 943ebdc8..59e14f7d 100755
+--- a/src/emu/x86int3.c
++++ b/src/emu/x86int3.c
+@@ -70,7 +70,7 @@ void x86Int3(x86emu_t* emu)
+     if(Peek(emu, 0)=='S' && Peek(emu, 1)=='C') // Signature for "Out of x86 door"
+     {
+         R_EIP += 2;
+-        #ifdef RK3399
++        #if defined(RK3399) || defined(RK3326)
+         volatile    // to avoid addr to be put in an VFPU register
+         #endif
+         uint32_t addr = Fetch32(emu);
+diff --git a/src/include/fileutils.h b/src/include/fileutils.h
+index 14d743f1..0b6a8633 100755
+--- a/src/include/fileutils.h
++++ b/src/include/fileutils.h
+@@ -16,7 +16,7 @@ char* ResolveFile(const char* filename, path_collection_t* paths);
+ // 1: if file is an x86 elf, 0: if not (or not found)
+ int FileIsX86ELF(const char* filename);
+ 
+-#if defined(RPI) || defined(RK3399)
++#if defined(RPI) || defined(RK3399) || defined(RK3326)
+ void sanitize_mojosetup_gtk_background();
+ #endif
+ 
+diff --git a/src/main.c b/src/main.c
+index 94c7c213..4c07bf00 100755
+--- a/src/main.c
++++ b/src/main.c
+@@ -1169,7 +1169,7 @@ int main(int argc, const char **argv, const char **env) {
+     setupTrace(my_context);
+     // get entrypoint
+     my_context->ep = GetEntryPoint(my_context->maplib, elf_header);
+-#if defined(RPI) || defined(RK3399)
++#if defined(RPI) || defined(RK3399) || defined(RK3326)
+     // before launching emulation, let's check if this is a mojosetup from GOG
+     if (((strstr(prog, "bin/linux/x86/mojosetup") && getenv("MOJOSETUP_BASE")) || strstr(prog, ".mojosetup/mojosetup"))
+        && getenv("GTK2_RC_FILES")) {
+diff --git a/src/tools/fileutils.c b/src/tools/fileutils.c
+index 478e0819..98bb3c12 100755
+--- a/src/tools/fileutils.c
++++ b/src/tools/fileutils.c
+@@ -77,7 +77,7 @@ int FileIsX86ELF(const char* filename)
+     return 0;
+ }
+ 
+-#if defined(RPI) || defined(RK3399)
++#if defined(RPI) || defined(RK3399) || defined(RK3326)
+ void sanitize_mojosetup_gtk_background()
+ {
+     // get GTK2_RC_FILES folder

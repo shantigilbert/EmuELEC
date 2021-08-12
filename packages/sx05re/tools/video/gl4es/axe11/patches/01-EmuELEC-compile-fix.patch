@@ -1,0 +1,12 @@
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,6 @@
+-CROSS_PREFIX=arm-linux-gnueabihf-
+-CCACHE?=
+-CC=$(CCACHE) $(CROSS_PREFIX)gcc
++#CROSS_PREFIX=arm-linux-gnueabihf-
++#CCACHE?=
++#CC=$(CCACHE) $(CROSS_PREFIX)gcc
+ SDL_CONFIG=$(CROSS_PREFIX)pkg-config sdl2
+ 
+ USE_SDL?=1

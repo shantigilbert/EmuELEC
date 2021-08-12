@@ -4,7 +4,7 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 # copy amlogic autoscript files to part1 if needed
-if [ "${SUBDEVICE}" != "Odroid_N2" ] && [ "${SUBDEVICE}" != "Odroid_C4" ] && [ "${SUBDEVICE}" != "Odroid_HC4" ] && [ "${SUBDEVICE}" != "LePotato" ] && [ "${SUBDEVICE}" != "LaFrite" ] ; then
+if [ "${SUBDEVICE}" != "Odroid_N2" ] && [ "${SUBDEVICE}" != "Odroid_C4" ] && [ "${SUBDEVICE}" != "Odroid_HC4" ] && [ "${SUBDEVICE}" != "LePotato" ] && [ "${SUBDEVICE}" != "LaFrite" ] && [ "${SUBDEVICE}" != "Radxa_Zero" ]; then
   for f in $RELEASE_DIR/3rdparty/bootloader/*autoscript; do
     [ -e "$f" ] && mcopy "$f" ::
   done
@@ -62,6 +62,12 @@ if [ "${SUBDEVICE}" != "Generic" ]; then
     fi
     if [ -f "$RELEASE_DIR/3rdparty/bootloader/libretech_chain_boot" ]; then
       mcopy $RELEASE_DIR/3rdparty/bootloader/libretech_chain_boot "::/boot.scr"
+    fi
+  fi
+
+  if [ "${SUBDEVICE}" == "Radxa_Zero" ]; then
+    if [ -f "$RELEASE_DIR/3rdparty/bootloader/radxa-boot-logo-1080.bmp.gz" ]; then
+      mcopy $RELEASE_DIR/3rdparty/bootloader/radxa-boot-logo-1080.bmp.gz "::/boot-logo-1080.bmp.gz"
     fi
   fi
 
