@@ -85,7 +85,7 @@ SET_DISPLAY_SH="/usr/bin/setres.sh" # source of set-display script.
 
 VIDEO=$(get_ee_setting global.videomode)
 [[ -z "$VIDEO" ]] && VIDEO=$(get_ee_setting ee_videomode)
-VIDEO_EMU=$(get_ee_setting ${PLATFORM}.nativevideo)
+VIDEO_EMU=$(get_ee_setting ${PLATFORM}.nativevideo ${PLATFORM})
 
 ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
