@@ -45,7 +45,7 @@ fi
 #echo $HZ
 #exit 1
 
-case $i in
+case $MODE in
 	480p60hz)
 		W=720
 		DI=$(($H*2))
