@@ -85,6 +85,11 @@ ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
 GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
+[[ -f "/emuelec/bin/setres.sh" ]] && SET_DISPLAY_SH="/emuelec/bin/setres.sh" || SET_DISPLAY_SH="/usr/bin/setres.sh"
+VIDEO=$(get_ee_setting global.videomode)
+[[ -z "$VIDEO" ]] && VIDEO=$(get_ee_setting ee_videomode)
+VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
+
 if [[ "${CORE}" == *"_32b"* ]]; then
     BIT32="yes"
     LD_LIBRARY_PATH="/emuelec/lib32:$LD_LIBRARY_PATH"
@@ -148,6 +153,8 @@ fi
 SPL=$(get_ee_setting ee_splash.enabled)
 [ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}"
 
+# Set the display video to that of the emulator setting.
+[[ ! -z "$VIDEO_EMU" ]] && source $SET_DISPLAY_SH $VIDEO_EMU # set display
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
@@ -421,6 +428,9 @@ fi
 
 # Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
+
+# Revert the display video to that of the original emuelec setting.
+[[ ! -z "$VIDEO_EMU" ]] && source $SET_DISPLAY_SH $VIDEO # set display
 
 # Show exit splash
 ${TBASH} show_splash.sh exit
