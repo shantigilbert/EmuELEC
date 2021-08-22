@@ -2,7 +2,7 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="lzdoom"
-PKG_VERSION="dc4d3f3ca7e0f561dc61ed758e319dd56f6516e8"
+PKG_VERSION="43865c19478fbf9e311414f1ffbc68278e60ba73"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/drfrag666/gzdoom"
 PKG_GIT_CLONE_BRANCH="g3.3mgw"

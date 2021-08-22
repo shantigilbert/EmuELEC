@@ -12,11 +12,11 @@ PKG_LONGDESC="A library for accessing various audio file formats."
 PKG_TOOLCHAIN="configure"
 
 # package specific configure options
-PKG_CONFIGURE_OPTS_TARGET="--enable-static --disable-shared \
+PKG_CONFIGURE_OPTS_TARGET="--enable-shared --disable-static \
                            --disable-silent-rules \
                            --disable-sqlite \
                            --enable-alsa \
-                           --disable-external-libs \
+                           --enable-external-libs \
                            --disable-experimental \
                            --disable-test-coverage \
                            --enable-largefile \

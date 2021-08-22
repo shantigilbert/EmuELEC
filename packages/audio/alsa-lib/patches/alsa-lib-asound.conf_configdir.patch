@@ -1,14 +1,14 @@
 diff --git a/src/conf/alsa.conf b/src/conf/alsa.conf
-index bb00ff40..cba5b6f2 100644
+index a04173a0..1f13fd84 100644
 --- a/src/conf/alsa.conf
 +++ b/src/conf/alsa.conf
-@@ -10,7 +10,8 @@
- 		files [
+@@ -11,7 +11,8 @@
+ 			"/usr/etc/alsa/conf.d"
  			"/etc/alsa/conf.d"
- 			"/etc/asound.conf"
+ 			"/etc/asound.conf|||/usr/etc/asound.conf"
 -			"~/.asoundrc"
 +			"/run/asound.conf"
 +			"/storage/.config/asound.conf"
- 		]
- 		errors false
- 	}
+ 			{
+ 				@func concat
+ 				strings [

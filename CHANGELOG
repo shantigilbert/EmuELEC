@@ -30,6 +30,9 @@ General:
 * Cleanup es_systems.cfg remove and add some extentions
 * Add Hurrican port (Handhelds currently have no working controls) 
 * Atomiswave: Remove workaround for nvmem
+* Fix Stadia Gamepad. Thanks to amuzulo#1322 
+* Fix issue with lzdoom loading .doom files and sound on mods
+* Update some sound packages
 
 Amlogic-ng: 
 
