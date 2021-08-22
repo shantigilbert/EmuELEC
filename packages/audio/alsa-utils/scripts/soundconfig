@@ -119,9 +119,46 @@ else
 # Allwinner H3 Analog
   mixer $card 'Line Out' 0db on
 
+# Allwinner A20 Analog
+  mixer $card 'Power Amplifier' 0db
+  mixer $card 'Power Amplifier DAC' on
+  mixer $card 'Power Amplifier Mute' on
+
 # Allwinner A64 Analog
   mixer $card Headphone 0db on
   mixer $card 'AIF1 Slot 0 Digital DAC' on
+
+# Amlogic G12A/G12B/SM1 HDMI
+  case $(dtname) in
+    azw,gsking-x|khadas,vim3*) #TDM_A
+      mixer $card 'FRDDR_A SINK 1 SEL' 'OUT 0'
+      mixer $card 'FRDDR_A SRC 1 EN' on
+      mixer $card 'TDMOUT_A SRC SEL' 'IN 0'
+      mixer $card 'TOHDMITX' on
+      mixer $card 'TOHDMITX I2S SRC' 'I2S A'
+      ;;
+    *) #TDM_B
+      mixer $card 'FRDDR_A SINK 1 SEL' 'OUT 1'
+      mixer $card 'FRDDR_A SRC 1 EN' on
+      mixer $card 'TDMOUT_B SRC SEL' 'IN 0'
+      mixer $card 'TOHDMITX' on
+      mixer $card 'TOHDMITX I2S SRC' 'I2S B'
+      ;;
+  esac
+
+# Amlogic G12A/G12B/SM1 S/PDIF
+  mixer $card 'FRDDR_B SINK 1 SEL' 'OUT 3'
+  mixer $card 'FRDDR_B SRC 1 EN' on
+  mixer $card 'SPDIFOUT SRC SEL' 'IN 1'
+  mixer $card 'SPDIFOUT Playback' on
+
+# Amlogic GX HDMI and S/PDIF
+  mixer $card 'AIU HDMI CTRL SRC' 'I2S'
+  mixer $card 'AIU SPDIF SRC SEL' 'SPDIF'
+
+# ES8316 headphone jack
+  mixer $card 'Right Headphone Mixer Right DAC' on
+  mixer $card 'Left Headphone Mixer Left DAC' on
 fi
 
 exit 0

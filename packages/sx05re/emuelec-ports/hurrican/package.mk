@@ -15,6 +15,10 @@ PKG_TOOLCHAIN="cmake"
 
 PKG_CMAKE_OPTS_TARGET=" ./Hurrican -DCMAKE_BUILD_TYPE=Release -DRENDERER=GLES2"
 
+if [ "${DEVICE}" == "OdroidGoAdvance" ] || [ "${DEVICE}" == "GameForce" ]; then
+	PKG_CMAKE_OPTS_TARGET+=" -DDEFAULT_SCREENBPP=16"
+fi
+
 pre_configure_target() {
   git submodule update --init --recursive
 }
@@ -23,4 +27,7 @@ makeinstall_target() {
 mkdir -p $INSTALL/usr/bin
 cp hurrican $INSTALL/usr/bin
 cp "${PKG_DIR}/scripts/hurrican.sh" $INSTALL/usr/bin
+
+mkdir -p $INSTALL/usr/config/emuelec/configs
+cp -rf ${PKG_DIR}/config/* $INSTALL/usr/config/emuelec/configs/
 }

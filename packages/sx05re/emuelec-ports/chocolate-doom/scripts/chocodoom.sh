@@ -25,7 +25,7 @@ sed -i "s|joystick_guid.*|joystick_guid                 \"${GUID}\"|" "${CONFIG_
 FILE=$(basename -- "${1}")
 EXT=${1#*.}
 
-# If its not a simple wad (extension .choco) read the file and parse the data
+# If its not a simple wad (extension .doom) read the file and parse the data
 if [ ${EXT} == "doom" ]; then
     while IFS== read -r key value; do
 	if [ "$key" == "GAMETYPE" ]; then
@@ -55,12 +55,13 @@ if [ ${EXT} == "doom" ]; then
         if [ "$key" == "PARAMS" ]; then
             params+=" $value"
         fi
-    done < "${1}"
+    done < <(<"${1}" tr -d '\r'; echo;)
 else
     PROGRAM="chocolate-doom"
     params+=" -iwad ${1}"
 fi
 
 cd "${RUN_DIR}"
-/usr/bin/${PROGRAM} ${params} >/emuelec/logs/emuelec.log 2>&1
+# Do not overwrite log messages already written by emuelecRunEmu.sh
+/usr/bin/${PROGRAM} ${params} >>/emuelec/logs/emuelec.log 2>&1
 

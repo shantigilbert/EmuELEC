@@ -19,6 +19,7 @@ if [ "$EE_DEVICE" == "Amlogic-ng" ]; then
 fi
 
 if [ "$EE_DEVICE" != "Amlogic-ng" ]; then 
+    gptokeyb -c /emuelec/configs/gptokeyb/hurrican.gptk &
     FLAGS=" --depth 16"
 fi
 
