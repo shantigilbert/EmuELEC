@@ -81,7 +81,7 @@ case $MODE in
 		echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
 	1280x1024p60hz)
-		W=$(($W*5/4))
+		W=$(($H*5/4))
 		DH=$(($H*2))
 		W1=$(($W-1))
 		H1=$(($H-1))
@@ -94,8 +94,8 @@ case $MODE in
 		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
 		echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
-	1024x768p60hz|640x480p60hz)
-		W=$(($W*4/3))
+	1024x768p60hz|640x480p60hz|800x600p60hz)
+		W=$(($H*4/3))
 		DH=$(($H*2))
 		W1=$(($W-1))
 		H1=$(($H-1))
