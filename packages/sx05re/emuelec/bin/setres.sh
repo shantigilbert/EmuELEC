@@ -35,6 +35,10 @@ case $MODE in
 	*hz*) HZ=${i:(-4):2} ;;
 esac
 
+if [ ! -n "$H" ]; then
+	H=$(echo $H | cut -d'x' -f 2)
+fi
+
 if [ $HZ = "50" ]; then
 	HZ=60
 fi
