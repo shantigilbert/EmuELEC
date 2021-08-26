@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
@@ -24,7 +24,7 @@ if [ "$EE_DEVICE" != "OdroidGoAdvance" ] && [ "$EE_DEVICE" != "GameForce" ]; the
     MODE=`cat /sys/class/display/mode`;
     sed -i '/device_video_modeline/d' $CONFIG_DIR/advmame.rc
 
-    if [  -f /ee_s905 ] && [ "$MODE" == 1080p* ]; then
+    if [[ -f "/ee_s905" && "$MODE" == "1080p"* ]]; then
         MODE="720p60hz"
     fi
 
