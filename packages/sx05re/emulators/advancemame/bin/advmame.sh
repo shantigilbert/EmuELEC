@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
@@ -13,22 +13,27 @@ if [ ! -d "$CONFIG_DIR" ]; then
  cp -rf /usr/share/advance/* $CONFIG_DIR/
 fi
 
-if [[ "$1" = *"roms/arcade"* ]]; then 
+if [[ "$1" = *"roms/arcade"* ]]; then
 sed -i "s|/roms/mame|/roms/arcade|g" $CONFIG_DIR/advmame.rc
  else
 sed -i "s|/roms/arcade|/roms/mame|g" $CONFIG_DIR/advmame.rc
-fi 
+fi
 
 if [ "$EE_DEVICE" != "OdroidGoAdvance" ] && [ "$EE_DEVICE" != "GameForce" ]; then
     unset DISPLAY
     MODE=`cat /sys/class/display/mode`;
     sed -i '/device_video_modeline/d' $CONFIG_DIR/advmame.rc
 
+    if [[ -f "/ee_s905" && "$MODE" == "1080p"* ]]; then
+        MODE="720p60hz"
+    fi
+
     case "$MODE" in
+        "480p"*)
+            echo "device_video_modeline 720x480 15.246 720 762 834 968 480 484 491 525 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
+        ;;
         "720p"*)
-            if [ -f /ee_s905 ]; then
-                echo "device_video_modeline 1280x720-60 91.517 1280 1440 1531 1691 720 810 812 902 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
-            fi
+            echo "device_video_modeline 1280x720-60 91.517 1280 1440 1531 1691 720 810 812 902 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
         ;;
         "1080p"*)
             echo "device_video_modeline 1920x1080_60.00 153.234 1920 1968 2121 2168 1080 1127 1130 1178 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
@@ -51,5 +56,5 @@ AUTOGP=$(get_ee_setting advmame_auto_gamepad)
 fi
 
 ARG=$(echo basename $1 | sed 's/\.[^.]*$//')
-ARG="$(echo $1 | sed 's=.*/==;s/\.[^.]*$//')"         
+ARG="$(echo $1 | sed 's=.*/==;s/\.[^.]*$//')"
 SDL_AUDIODRIVER=alsa /usr/bin/advmame $ARG -quiet
