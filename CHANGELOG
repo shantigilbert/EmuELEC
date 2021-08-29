@@ -35,6 +35,8 @@ General:
 * Update some sound packages
 * Fix es_systems.cfg: Add extensions to c64/c128 and Amiga (#677)
 * Add Cdogs-sdl to ports
+* Add Abuse to ports NOTE: WIP controls
+* Add Streets of Rage Remake
 
 Amlogic-ng: 
 
