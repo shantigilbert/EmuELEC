@@ -88,7 +88,7 @@ fi
 MODE=`cat /sys/class/display/mode`;
 case "$MODE" in
 		480*)
-			SIZE=" -x 800 -y 480 "
+			SIZE=" -x 720 -y 480 "
 		;;
 		576*)
 			SIZE=" -x 768 -y 576"
@@ -138,3 +138,4 @@ fi
 # Wait for the time specified in ee_splash_delay setting in emuelec.conf
 SPLASHTIME=$(get_ee_setting ee_splash.delay)
 [ ! -z "$SPLASHTIME" ] && sleep $SPLASHTIME
+[ -z "$SPLASHTIME" ] && sleep 0.25

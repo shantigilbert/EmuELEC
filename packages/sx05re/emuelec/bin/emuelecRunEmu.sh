@@ -148,12 +148,12 @@ if [[ $arguments != *"--NOLOG"* ]]; then
     VERBOSE="-v"
 fi
 
+# Set the display video to that of the emulator setting.
+[[ ! -z "$VIDEO_EMU" ]] && source $SET_DISPLAY_SH $VIDEO_EMU # set display
+
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
 [ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}"
-
-# Set the display video to that of the emulator setting.
-[[ ! -z "$VIDEO_EMU" ]] && source $SET_DISPLAY_SH $VIDEO_EMU # set display
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
@@ -445,7 +445,7 @@ fi
 #{log_addon}#
 
 # Return to default mode
-${TBASH} setres.sh
+[[ -z "$VIDEO_EMU" ]] && ${TBASH} setres.sh
 
 # reset audio to default
 set_audio default

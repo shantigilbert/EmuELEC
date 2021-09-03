@@ -128,11 +128,15 @@ case $MODE in
 		;;
 esac
 
-# Enable framebuffer device
-echo 0 > /sys/class/graphics/fb0/blank
+# Clear framebuffer device
+echo 1 > /sys/class/graphics/fb0/blank
 
 # Blank fb1 to prevent static noise
 echo 1 > /sys/class/graphics/fb1/blank
+
+# Enable framebuffer device
+sleep 0.1
+echo 0 > /sys/class/graphics/fb0/blank
 
 # End of reading the video output mode and setting it for emuelec to avoid video flicking.
 # The codes can be simplified with "elseif" sentences.
