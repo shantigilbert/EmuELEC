@@ -21,6 +21,11 @@
 # 1080i50hz
 # 576cvbs
 
+show_blank()
+{
+  mpv -fs "/storage/.config/splash/blank.png" > /dev/null 2>&1
+}
+
 BPP=32
 HZ=60
 
@@ -43,11 +48,7 @@ if [ $HZ = "50" ]; then
 	HZ=60
 fi
 
-# used for testing.
-#echo $MODE
-#echo $H
-#echo $HZ
-#exit 1
+show_blank
 
 case $MODE in
 	480p60hz)
@@ -127,16 +128,6 @@ case $MODE in
 		echo 0x10001 > /sys/class/graphics/fb0/free_scale
 		;;
 esac
-
-# Clear framebuffer device
-echo 1 > /sys/class/graphics/fb0/blank
-
-# Blank fb1 to prevent static noise
-echo 1 > /sys/class/graphics/fb1/blank
-
-# Enable framebuffer device
-sleep 0.1
-echo 0 > /sys/class/graphics/fb0/blank
 
 # End of reading the video output mode and setting it for emuelec to avoid video flicking.
 # The codes can be simplified with "elseif" sentences.
