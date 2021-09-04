@@ -129,6 +129,8 @@ case $MODE in
 		;;
 esac
 
+show_blank
+
 # End of reading the video output mode and setting it for emuelec to avoid video flicking.
 # The codes can be simplified with "elseif" sentences.
 # The codes for 480I and 576I are adjusted to avoid overscan.
