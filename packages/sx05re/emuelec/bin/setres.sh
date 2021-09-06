@@ -21,27 +21,12 @@
 # 1080i50hz
 # 576cvbs
 
-DEVICE=0
-if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
-  DEVICE=1
-fi
-  
-PLAYER="ffplay"
-if [ $DEVICE -eq 1 ] then
-    PLAYER="mpv"
-fi
-
-SPLASH="/storage/.config/splash/blank.png"
+TBASH="/usr/bin/bash"
 
 show_blank()
 {
-  if [ $DEVICE -eq 1 ] then
-      $PLAYER "$SPLASH" > /dev/null 2>&1
-  else
-      $PLAYER -fs "$SPLASH" > /dev/null 2>&1
-  fi
+  ${TBASH} show_splash.sh "blank"
 }
-
 
 BPP=32
 HZ=60
