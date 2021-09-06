@@ -26,6 +26,9 @@ TBASH="/usr/bin/bash"
 show_blank()
 {
   ${TBASH} show_splash.sh "blank"
+  # Enable the buffer again.
+  echo 0 > /sys/class/graphics/fb0/blank
+  echo 0 > /sys/class/graphics/fb1/blank  
 }
 
 BPP=32
