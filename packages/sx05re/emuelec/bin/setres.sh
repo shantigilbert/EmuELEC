@@ -27,7 +27,7 @@ if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; the
 fi
   
 PLAYER="ffplay"
-if [ $DEVICE == 1 ] then
+if [ $DEVICE -eq 1 ] then
     PLAYER="mpv"
 fi
 
@@ -35,7 +35,7 @@ SPLASH="/storage/.config/splash/blank.png"
 
 show_blank()
 {
-  if [ $DEVICE == 1 ] then
+  if [ $DEVICE -eq 1 ] then
       $PLAYER "$SPLASH" > /dev/null 2>&1
   else
       $PLAYER -fs "$SPLASH" > /dev/null 2>&1
