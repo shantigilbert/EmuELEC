@@ -25,10 +25,10 @@ TBASH="/usr/bin/bash"
 
 show_blank()
 {
+  # Blank the buffer.
+  echo 1 > /sys/class/graphics/fb0/blank
+  echo 1 > /sys/class/graphics/fb1/blank
   ${TBASH} show_splash.sh "blank"
-  # Enable the buffer again.
-  echo 0 > /sys/class/graphics/fb0/blank
-  echo 0 > /sys/class/graphics/fb1/blank  
 }
 
 BPP=32
@@ -52,6 +52,7 @@ fi
 if [ $HZ = "50" ]; then
 	HZ=60
 fi
+
 
 show_blank
 
@@ -134,7 +135,10 @@ case $MODE in
 		;;
 esac
 
-show_blank
+# Enable the buffer again.
+echo 0 > /sys/class/graphics/fb0/blank
+echo 0 > /sys/class/graphics/fb1/blank
+
 
 # End of reading the video output mode and setting it for emuelec to avoid video flicking.
 # The codes can be simplified with "elseif" sentences.
