@@ -300,6 +300,11 @@ case ${PLATFORM} in
             RUNTHIS='${TBASH} ecwolf.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
         fi
         ;;
+	"gmloader")
+            set_kill_keys "gmloader"
+            CONTROLLERCONFIG="${arguments#*--controllers=*}"
+            RUNTHIS='${TBASH} gmloader.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
+        ;;
 	esac
 elif [ ${LIBRETRO} == "yes" ]; then
 # We are running a Libretro emulator set all the settings that we chose on ES

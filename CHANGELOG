@@ -37,11 +37,16 @@ General:
 * Add Cdogs-sdl to ports
 * Add Abuse to ports NOTE: WIP controls
 * Add Streets of Rage Remake
+* Fix Retroarch display of CJK characters
+* Fix SFC not scraping
+* Updated most emulators and cores
+* Create folders for fbneo consoles
 
 Amlogic-ng: 
 
 * Add preliminary support for Raxda Zero 
 * Add RTL8761 Bluetooth Support (#698)
+* Include ssv6xxx-aml drivers
 
 
 # 4.2
