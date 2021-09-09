@@ -75,6 +75,10 @@ ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
 GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
+[[ -f "/emuelec/bin/setres.sh" ]] && SET_DISPLAY_SH="/emuelec/bin/setres.sh" || SET_DISPLAY_SH="/usr/bin/setres.sh"
+VIDEO=`cat /sys/class/display/mode`;
+VIDEO_EMU=$(get_ee_setting ${PLATFORM}.nativevideo "${PLATFORM}" "${BASEROMNAME}")
+
 if [[ $EMULATOR = "libretro" ]]; then
 	EMU="${CORE}_libretro"
 	LIBRETRO="yes"
@@ -111,6 +115,9 @@ if [[ $arguments != *"--NOLOG"* ]]; then
 LOGEMU="Yes"
 VERBOSE="-v"
 fi
+
+# Set the display video to that of the emulator setting.
+[[ ! -z "$VIDEO_EMU" ]] && source $SET_DISPLAY_SH $VIDEO_EMU # set display
 
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
@@ -358,6 +365,9 @@ fi
 # Only run fbfix on N2
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && /storage/.config/emuelec/bin/fbfix
 
+# Revert the display video to that of the original emuelec setting.
+[[ ! -z "$VIDEO_EMU" ]] && source $SET_DISPLAY_SH $VIDEO # set display
+
 # Show exit splash
 ${TBASH} /emuelec/scripts/show_splash.sh exit
 
@@ -372,7 +382,7 @@ fi
 #{log_addon}#
 
 # Return to default mode
-${TBASH} /emuelec/scripts/setres.sh
+[[ -z "$VIDEO_EMU" ]] && ${TBASH} /emuelec/scripts/setres.sh
 
 # reset audio to default
 set_audio default
