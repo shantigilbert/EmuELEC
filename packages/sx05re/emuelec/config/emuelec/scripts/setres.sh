@@ -162,7 +162,7 @@ esac
 # Enable the buffer again.
 echo 0 > /sys/class/graphics/fb0/blank
 echo 0 > /sys/class/graphics/fb1/blank
-
+sleep 0.1
 
 # End of reading the video output mode and setting it for emuelec to avoid video flicking.
 # The codes can be simplified with "elseif" sentences.
