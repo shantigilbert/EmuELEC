@@ -14,6 +14,7 @@
 # echo 5 > /sys/class/mpgpu/cur_freq
 
 # It seems some slow SDcards have a problem creating the symlink on time :/
+CONFIG_FLASH="/flash/config.ini"
 CONFIG_DIR="/storage/.emulationstation"
 CONFIG_DIR2="/storage/.config/emulationstation"
 
@@ -72,18 +73,27 @@ fi
 # Set video mode, this has to be done before starting ES
 DEFE=$(get_ee_setting ee_videomode)
 
-if [ "${DEFE}" != "Custom" ]; then
-    [ ! -z "${DEFE}" ] && DEFE=$(cat /sys/class/display/mode)
+# If the video-mode is contained in flash config.
+if [ -z "$DEFE" ] && [ -s "${CONFIG_FLASH}" ]; then
+  CFG_VAL=$(get_config_value.sh "$CONFIG_FLASH" "hdmimode")
+  [ ! -z "$CFG_VAL" ] && DEFE="$CFG_VAL"
 fi
 
-if [ -s "/storage/.config/EE_VIDEO_MODE" ]; then
-        DEFE=$(cat /storage/.config/EE_VIDEO_MODE)
-elif [ -s "/flash/EE_VIDEO_MODE" ]; then
-        DEFE=$(cat /flash/EE_VIDEO_MODE)
+# Otherwise retrieve via normal methods.
+if [ -z "$DEFE" ]; then
+  if [ "${DEFE}" == "Custom" ]; then
+      DEFE=$(cat /sys/class/display/mode)
+  elif [ -s "/storage/.config/EE_VIDEO_MODE" ]; then
+      DEFE=$(cat /storage/.config/EE_VIDEO_MODE)
+  elif [ -s "/flash/EE_VIDEO_MODE" ]; then
+      DEFE=$(cat /flash/EE_VIDEO_MODE)
+  else
+      DEFE=$(cat /sys/class/display/mode)
+  fi
 fi
 
 # finally we correct the FB according to video mode
-/usr/bin/setres.sh ${DEFE}
+setres.sh ${DEFE}
 
 # Clean cache garbage when boot up.
 rm -rf /storage/.cache/cores/* &
