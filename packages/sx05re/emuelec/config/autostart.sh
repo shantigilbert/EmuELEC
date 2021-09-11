@@ -73,17 +73,17 @@ fi
 DEFE=$(get_ee_setting ee_videomode)
 
 if [ "${DEFE}" != "Custom" ]; then
-    [ ! -z "${DEFE}" ] && echo "${DEFE}" > /sys/class/display/mode
-fi 
+    [ ! -z "${DEFE}" ] && DEFE=$(cat /sys/class/display/mode)
+fi
 
 if [ -s "/storage/.config/EE_VIDEO_MODE" ]; then
-        echo $(cat /storage/.config/EE_VIDEO_MODE) > /sys/class/display/mode
+        DEFE=$(cat /storage/.config/EE_VIDEO_MODE)
 elif [ -s "/flash/EE_VIDEO_MODE" ]; then
-        echo $(cat /flash/EE_VIDEO_MODE) > /sys/class/display/mode
+        DEFE=$(cat /flash/EE_VIDEO_MODE)
 fi
 
 # finally we correct the FB according to video mode
-setres.sh &
+/usr/bin/setres.sh ${DEFE}
 
 # Clean cache garbage when boot up.
 rm -rf /storage/.cache/cores/* &
