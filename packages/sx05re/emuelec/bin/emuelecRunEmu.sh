@@ -433,9 +433,6 @@ fi
 # Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
-# Revert the display video to that of the original emuelec setting.
-# [[ ! -z "$VIDEO_EMU" ]] && source $SET_DISPLAY_SH $VIDEO # set display
-
 # Show exit splash
 ${TBASH} show_splash.sh exit
 
