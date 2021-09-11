@@ -34,7 +34,8 @@ PKG_DEPENDS_TARGET+=" commander-genius \
                 bstone \
                 hurrican \
                 cdogs-sdl \
-                abuse"
+                abuse \
+                fheroes2"
 
 amlogicports=""
 hhports=" openjazz"

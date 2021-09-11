@@ -418,3 +418,17 @@ Sorr:
     - cd /storage/roms/ports/sorr
     - '[[ ! -e "/storage/roms/ports/sorr/SorR.dat" ]] && exit 21'
     - bgdi "/storage/roms/ports/sorr/SorR.dat"
+
+Heroes of Might and Magic II:
+  description: 'Heroes of Might and Magic II: The Succession Wars is a turn-based strategy video game developed by Jon Van Caneghem through New World Computing and published in 1996 by the 3DO Company.'
+  rating: 1.0
+  release_date: 1996
+  developer: New World Computing
+  publisher: The 3DO Company
+
+  init_port: true
+  port_exe: "fheroes2"
+  audio: "alsa"
+  commands:
+    - /usr/bin/show_splash.sh "ports" "abuse"
+    - fheroes2.sh
