@@ -365,9 +365,6 @@ fi
 # Only run fbfix on N2
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && /storage/.config/emuelec/bin/fbfix
 
-# Revert the display video to that of the original emuelec setting.
-[[ ! -z "$VIDEO_EMU" ]] && source $SET_DISPLAY_SH $VIDEO # set display
-
 # Show exit splash
 ${TBASH} /emuelec/scripts/show_splash.sh exit
 
@@ -381,8 +378,8 @@ fi
 
 #{log_addon}#
 
-# Return to default mode
-[[ -z "$VIDEO_EMU" ]] && ${TBASH} /emuelec/scripts/setres.sh
+# Revert the display video to that of the original emuelec setting.
+source $SET_DISPLAY_SH $VIDEO # set display
 
 # reset audio to default
 set_audio default
