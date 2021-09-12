@@ -134,6 +134,24 @@ case $MODE in
 		echo 576 > /sys/class/graphics/fb0/scale_height
 		echo 0x10001 > /sys/class/graphics/fb0/free_scale
 		;;
+  *)
+    W=$(echo $MODE | cut -d'x' -f 1)
+    H=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
+    [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
+    if [ -n "$W" ] && [ -n "$H" ]; then
+      DH=$(($H*2))
+  		W1=$(($W-1))
+  		H1=$(($H-1))
+  		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
+  		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+  		echo $MODE > /sys/class/display/mode
+  		echo 0 > /sys/class/graphics/fb0/free_scale
+  		echo 1 > /sys/class/graphics/fb0/freescale_mode
+  		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
+  		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
+  		echo 0 > /sys/class/graphics/fb1/free_scale      
+    fi
+    ;;
 esac
 
 # Enable the buffer again.
