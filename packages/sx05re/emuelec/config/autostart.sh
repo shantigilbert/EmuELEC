@@ -48,16 +48,14 @@ fi
 # Set video mode, this has to be done before starting ES
 DEFE=$(get_ee_setting ee_videomode)
 
-if [ -z "$DEFE" ]; then
-  if [ "${DEFE}" == "Custom" ]; then
-      DEFE=$(cat /sys/class/display/mode)
-  elif [ -s "/storage/.config/EE_VIDEO_MODE" ]; then
-      DEFE=$(cat /storage/.config/EE_VIDEO_MODE)
-  elif [ -s "/flash/EE_VIDEO_MODE" ]; then
-      DEFE=$(cat /flash/EE_VIDEO_MODE)
-  else
-      DEFE=$(cat /sys/class/display/mode)
-  fi
+if [ "${DEFE}" == "Custom" ]; then
+	DEFE=$(cat /sys/class/display/mode)
+elif [ -s "/storage/.config/EE_VIDEO_MODE" ]; then
+	DEFE=$(cat /storage/.config/EE_VIDEO_MODE)
+elif [ -s "/flash/EE_VIDEO_MODE" ]; then
+	DEFE=$(cat /flash/EE_VIDEO_MODE)
+else
+	DEFE=$(cat /sys/class/display/mode)
 fi
 
 # finally we correct the FB according to video mode
