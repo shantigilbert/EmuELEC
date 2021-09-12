@@ -120,18 +120,22 @@ if [ "$PLATFORM" == "blank" ]; then
   SIZE=" -x 1920 -y 1080"
 fi
 
-[[ "${PLATFORM}" != "intro" ]] && VIDEO=0 || VIDEO=$(get_ee_setting ee_bootvideo.enabled)
 
-if [[ -f "/storage/.config/emuelec/configs/novideo" ]] && [[ ${VIDEO} != "1" ]]; then
-	if [ "$PLATFORM" != "intro" ]; then
-	if [ $SS_DEVICE -eq 1 ]; then
-        $PLAYER "$SPLASH" > /dev/null 2>&1
-    else
-        $PLAYER -fs -autoexit ${SIZE} "$SPLASH" > /dev/null 2>&1
-    fi
+VIDEO="0"
+[[ "${PLATFORM}" == "intro" ]] && VIDEO=$(get_ee_setting ee_bootvideo.enabled)
 
-	fi 
-else
+if [[ ${VIDEO} == "0" ]]; then
+  if [ $SS_DEVICE -eq 1 ]; then
+      $PLAYER "$SPLASH" > /dev/null 2>&1
+  else
+      $PLAYER -fs -autoexit ${SIZE} "$SPLASH" > /dev/null 2>&1
+  fi
+fi 
+
+VIDEOSTART=1
+[[ -f "/storage/.config/emuelec/configs/novideo" ]] && VIDEOSTART=0
+
+if [[ $VIDEOSTART -eq 1 ]] || [[ ${VIDEO} == "1" ]]; then
 # Show intro video
 	SPLASH=${VIDEOSPLASH}
 	set_audio alsa
@@ -141,7 +145,7 @@ else
     else
         $PLAYER -fs -autoexit ${SIZE} "$SPLASH" > /dev/null 2>&1
     fi
-	touch "/storage/.config/emuelec/configs/novideo"
+	[ $VIDEOSTART -eq 1 ] && touch "/storage/.config/emuelec/configs/novideo"
 	#[ -e /storage/.config/asound.confs ] && mv /storage/.config/asound.confs /storage/.config/asound.conf
 fi
 

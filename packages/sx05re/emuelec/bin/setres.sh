@@ -26,9 +26,10 @@ TBASH="/usr/bin/bash"
 show_blank()
 {
   # Blank the buffer.
+  ${TBASH} show_splash.sh "blank"
   echo 1 > /sys/class/graphics/fb0/blank
   echo 1 > /sys/class/graphics/fb1/blank
-  ${TBASH} show_splash.sh "blank"
+  
 }
 
 BPP=32
