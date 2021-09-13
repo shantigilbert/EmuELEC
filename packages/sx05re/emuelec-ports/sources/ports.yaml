@@ -415,6 +415,7 @@ Sorr:
   audio: "alsa"
   commands:
     - /usr/bin/show_splash.sh "ports" "sorr"
+    - '[[ "${EE_DEVICE}" != "Amlogic"* ]] && gptokeyb -c /emuelec/configs/gptokeyb/sorr.gptk &'
     - cd /storage/roms/ports/sorr
     - '[[ ! -e "/storage/roms/ports/sorr/SorR.dat" ]] && exit 21'
     - bgdi "/storage/roms/ports/sorr/SorR.dat"
