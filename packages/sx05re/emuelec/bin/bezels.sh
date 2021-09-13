@@ -22,7 +22,7 @@ DEFAULT_RATIO="22"
 [ ! -z "${4}" ] && DEFAULT_RATIO="${4}"
 
 case ${PLATFORM} in
- "arcade"|"fba"|"fbn"|"neogeo"|"mame"|cps*)
+ "arcade"|"fbneo"|"fbn"|"neogeo"|"mame"|cps*)
    PLATFORM="ARCADE"
   ;;
   "none")
