@@ -111,7 +111,7 @@ case "$MODE" in
 			SIZE=" -x 640 -y 480 "
 		;;
 		*)
-			SIZE=" -x 1920 -y 1080"
+			SIZE=" -x 3184 -y 2160"
 		;;
 esac
 
