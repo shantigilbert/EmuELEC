@@ -19,7 +19,5 @@ sed -i "s/19000000010000000200000011000000,odroid/# 1900000001000000020000001100
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/config/SDL-GameControllerDB
-	cp $PKG_BUILD/gamecontrollerdb.txt $INSTALL/usr/config/SDL-GameControllerDB
-  mkdir -p $INSTALL/usr/bin
-  ln -sf /storage/.config/SDL-GameControllerDB/gamecontrollerdb.txt $INSTALL/usr/bin  
+  cp $PKG_BUILD/gamecontrollerdb.txt $INSTALL/usr/config/SDL-GameControllerDB
 }
