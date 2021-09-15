@@ -70,7 +70,7 @@ if [ -f ${BACKUPFILE} ]; then
 	rm ${BACKUPFILE} &
 fi
 
-DEFE="" 
+DEFE=""
 
 # If the video-mode is contained in flash config.
 if [ -s "${CONFIG_FLASH}" ]; then
