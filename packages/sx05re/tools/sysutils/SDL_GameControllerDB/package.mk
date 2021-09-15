@@ -21,5 +21,5 @@ makeinstall_target() {
   mkdir -p $INSTALL/usr/config/SDL-GameControllerDB
 	mkdir -p $INSTALL/storage/.config/SDL-GameControllerDB
   cp $PKG_BUILD/gamecontrollerdb.txt $INSTALL/usr/config/SDL-GameControllerDB/gamecontrollerdb.txt.bak
-	ln -sf $INSTALL/storage/.config/SDL-GameControllerDB/gamecontrollerdb.txt $INSTALL/usr/config/SDL-GameControllerDB
+	ln -sf /storage/.config/SDL-GameControllerDB/gamecontrollerdb.txt $INSTALL/usr/config/SDL-GameControllerDB
 }
