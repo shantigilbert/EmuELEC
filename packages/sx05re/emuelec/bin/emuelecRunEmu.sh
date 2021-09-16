@@ -85,8 +85,8 @@ ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
 GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
-[[ -f "/emuelec/bin/setres.sh" ]] && SET_DISPLAY_SH="/emuelec/bin/setres.sh" || SET_DISPLAY_SH="/usr/bin/setres.sh"
-VIDEO=`cat /sys/class/display/mode`;
+[ -f "/emuelec/bin/setres.sh" ] && SET_DISPLAY_SH="/emuelec/bin/setres.sh" || SET_DISPLAY_SH="/usr/bin/setres.sh"
+VIDEO="$(cat /sys/class/display/mode)"
 VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
 
 if [[ "${CORE}" == *"_32b"* ]]; then
@@ -149,7 +149,7 @@ if [[ $arguments != *"--NOLOG"* ]]; then
 fi
 
 # Set the display video to that of the emulator setting.
-[[ ! -z "$VIDEO_EMU" ]] && source $SET_DISPLAY_SH $VIDEO_EMU # set display
+[ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
 
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
@@ -433,9 +433,6 @@ fi
 # Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
-# Revert the display video to that of the original emuelec setting.
-[[ ! -z "$VIDEO_EMU" ]] && source $SET_DISPLAY_SH $VIDEO # set display
-
 # Show exit splash
 ${TBASH} show_splash.sh exit
 
@@ -450,7 +447,7 @@ fi
 #{log_addon}#
 
 # Return to default mode
-[[ -z "$VIDEO_EMU" ]] && ${TBASH} setres.sh
+$TBASH $SET_DISPLAY_SH $VIDEO
 
 # reset audio to default
 set_audio default

@@ -262,7 +262,7 @@ else
     fi
 fi
 
-# We need to always use the newest es_systems.cfg if there was a recent update
+# We need to always use the newest es_systems.cfg if there was a recent update, we also need to update the ports gamelist.xml
 CVER=$(cat /storage/.config/EE_VERSION)
 NVER=$(cat /usr/config/EE_VERSION)
 BUILDATE=$(cat /usr/buildate)
@@ -271,6 +271,7 @@ OLDCFG="/storage/.config/emulationstation/es_systems.cfg.${BUILDATE}.bak"
 CFG="/storage/.config/emulationstation/es_systems.cfg"
 
 if [[ "${CVER}" != "${NVER}" ]]; then
+    mv "/storage/.config/emuelec/ports/gamelist.xml" "/storage/.config/emuelec/ports/gamelist.xml.${BUILDATE}.bak"
     cp -f "${CFG}" "${OLDCFG}"
     cp -f "/usr/config/emulationstation/es_systems.cfg" "${CFG}"
     echo "${NVER}" > /storage/.config/EE_VERSION

@@ -287,6 +287,7 @@ opera \
 parallel-n64 \
 pcsx_rearmed \
 picodrive \
+pocketcdg \
 pokemini \
 ppsspp \
 prboom \
@@ -319,7 +320,6 @@ desmume \
 desmume-2015 \
 lutro \
 melonds \
-pocketcdg \
 snes9x2005 \
 yabause \
 virtualjaguar"
