@@ -153,7 +153,7 @@ fi
 
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
-[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}"
+[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}" &
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
@@ -434,7 +434,7 @@ fi
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # Show exit splash
-${TBASH} show_splash.sh exit
+${TBASH} show_splash.sh exit &
 
 # Just in case
 kill_video_controls

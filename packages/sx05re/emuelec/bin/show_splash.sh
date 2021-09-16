@@ -93,44 +93,39 @@ fi
 MODE=`cat /sys/class/display/mode`;
 case "$MODE" in
 		480*)
-			SIZE=" -x 720 -y 480 "
+			SIZE=" -x 720 -y 480"
 		;;
 		576*)
 			SIZE=" -x 768 -y 576"
 		;;
 		720*)
-			SIZE=" -x 1280 -y 720 "
+			SIZE=" -x 1280 -y 720"
+		;;
+		1080*)
+			SIZE=" -x 1920 -y 1080"
 		;;
 		1280x1024*)
-			SIZE=" -x 1280 -y 1024 "
+			SIZE=" -x 1280 -y 1024"
 		;;
 		1024x768*)
-			SIZE=" -x 1024 -y 768 "
+			SIZE=" -x 1024 -y 768"
 		;;
 		640x480*)
-			SIZE=" -x 640 -y 480 "
+			SIZE=" -x 640 -y 480"
 		;;
 		*)
-			SIZE=" -x 3184 -y 2160"
+			SIZE=" -x 1920 -y 1080"
 		;;
 esac
 
 # Blank screen needs to fill entire screen.
 if [ "$PLATFORM" == "blank" ]; then
-  SIZE=" -x 1920 -y 1080"
+  SIZE=" -x 3840 -y 2160"
 fi
 
 
 VIDEO="0"
 [[ "${PLATFORM}" == "intro" ]] && VIDEO=$(get_ee_setting ee_bootvideo.enabled)
-
-if [[ ${VIDEO} == "0" ]]; then
-  if [ $SS_DEVICE -eq 1 ]; then
-      $PLAYER "$SPLASH" > /dev/null 2>&1
-  else
-      $PLAYER -fs -autoexit ${SIZE} "$SPLASH" > /dev/null 2>&1
-  fi
-fi 
 
 VIDEOSTART=1
 [[ -f "/storage/.config/emuelec/configs/novideo" ]] && VIDEOSTART=0
@@ -147,6 +142,12 @@ if [[ $VIDEOSTART -eq 1 ]] || [[ ${VIDEO} == "1" ]]; then
     fi
 	[ $VIDEOSTART -eq 1 ] && touch "/storage/.config/emuelec/configs/novideo"
 	#[ -e /storage/.config/asound.confs ] && mv /storage/.config/asound.confs /storage/.config/asound.conf
+else
+  if [ $SS_DEVICE -eq 1 ]; then
+      $PLAYER "$SPLASH" > /dev/null 2>&1
+  else
+      $PLAYER -fs -autoexit ${SIZE} "$SPLASH" > /dev/null 2>&1
+  fi  
 fi
 
 # Wait for the time specified in ee_splash_delay setting in emuelec.conf
