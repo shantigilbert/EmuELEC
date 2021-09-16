@@ -45,4 +45,5 @@ PKG_DEPENDS_TARGET+=" ffmpeg \
                       libevdev \
                       gptokeyb \
                       exfat \
-                      351Files"
+                      351Files \
+                      box64"

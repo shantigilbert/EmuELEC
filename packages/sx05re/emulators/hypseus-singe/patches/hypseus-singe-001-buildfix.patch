@@ -55,11 +55,12 @@ index f95d29f..80c204c 100644
      string( REGEX MATCH "([-A-Za-z0-9\\._]+)-(gcc|cc)$" RESULT ${CMAKE_C_COMPILER} )
      string( REGEX REPLACE "-(gcc|cc)$" "" RESULT ${RESULT} )
      set( CONFIGURE_ARGS "--host=${RESULT}" )
-@@ -8,7 +8,8 @@
+@@ -8,8 +8,8 @@
  
  externalproject_add( libmpeg2
  	PREFIX ${CMAKE_CURRENT_BINARY_DIR}/3rdparty
--	URL https://github.com/DirtBagXon/libmpeg/raw/master/libmpeg2-master.tgz
+-	URL ../../../src/3rdparty/libmpeg2/libmpeg2-master.tgz
+-	URL_HASH SHA256=381e5cb6fcd98d9260679cf045f84d8a645b2850a44bf90454e35c583004c819
 +	GIT_REPOSITORY https://github.com/btolab/libmpeg2.git
 +	GIT_TAG master
  	CONFIGURE_COMMAND autoreconf -f -i && <SOURCE_DIR>/configure ${CONFIGURE_ARGS} --prefix=${CMAKE_CURRENT_BINARY_DIR}/3rdparty --disable-shared --enable-static --disable-sdl
@@ -91,3 +92,34 @@ index a08ebd0..3057534 100644
  // NOTICE : these variables should only be used by the private thread
  // !!!!!!!!!!!!
  
+--- a/src/manymouse/manymouse.c
++++ b/src/manymouse/manymouse.c
+@@ -17,7 +17,6 @@
+ extern const ManyMouseDriver *ManyMouseDriver_evdev;
+ extern const ManyMouseDriver *ManyMouseDriver_hidmanager;
+ extern const ManyMouseDriver *ManyMouseDriver_hidutilities;
+-extern const ManyMouseDriver *ManyMouseDriver_xinput2;
+ 
+ /*
+  * These have to be in the favored order...obviously it doesn't matter if the
+@@ -31,7 +30,6 @@
+  */
+ static const ManyMouseDriver **mice_drivers[] =
+ {
+-    &ManyMouseDriver_xinput2,
+     &ManyMouseDriver_evdev,
+     &ManyMouseDriver_windows,
+     &ManyMouseDriver_hidmanager,
+
+--- a/src/manymouse/CMakeLists.txt
++++ b/src/manymouse/CMakeLists.txt
+@@ -1,7 +1,8 @@
++
++
+ set( LIB_SOURCES
+     manymouse.c linux_evdev.c macosx_hidmanager.c
+     macosx_hidutilities.c windows_wminput.c
+-    x11_xinput2.c
+ )
+ 
+ set( LIB_HEADERS

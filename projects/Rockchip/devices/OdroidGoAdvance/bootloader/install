@@ -59,7 +59,7 @@ if [ -n "$PKG_LOAD_ADDR" ]; then
 fi
 
 
-if [ $DEVICE = "AndroidGoAdvance" ]; then
+if [ $DEVICE = "OdroidGoAdvance" ]; then
 if [ -n "$PKG_BL31" ]; then
   cat >trust.ini <<EOF
 [VERSION]

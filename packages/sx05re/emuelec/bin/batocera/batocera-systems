@@ -461,6 +461,12 @@ systems = {
 
 	# Ports
 	"Diablo": { "name": "Diablo 1 (devilutionx) ", "biosFiles": [ { "md5": "68f049866b44688a7af65ba766bef75a", "file": "ports/diablo/diabdat.mpq" } ] },
+    "Hellfire": { "name": "Diablo 1: Hellfire (devilutionx) ", "biosFiles": [ { "md5": "", "file": "ports/diablo/hellfire.mpq" },
+                                                                              { "md5": "", "file": "ports/diablo/hfmonk.mpq" },
+                                                                              { "md5": "", "file": "ports/diablo/hfmusic.mpq" },
+                                                                              { "md5": "", "file": "ports/diablo/hfvoice.mpq" },
+                                                                              { "md5": "68f049866b44688a7af65ba766bef75a", "file": "ports/diablo/diabdat.mpq" },
+                                                                            ] },
 	
 	"Dinothawr": { "name": "Dinothawr", "biosFiles": [ { "md5": "", "file": "ports/dinothawr/level_3-3.tmx" },
                                                        { "md5": "", "file": "ports/dinothawr/level_7-2.tmx" },

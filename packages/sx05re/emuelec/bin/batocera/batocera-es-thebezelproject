@@ -92,8 +92,15 @@ function list() {
 		if [ "${filescount}" -le 1 ]; then	 continue; fi
 		# check if url is valid and return [A] else [?]
 		ia=$(check_url "${url}")
+        
+        if [ "${systemname}" == "mame" ] || [ "${systemname}" == "arcade" ] || [ "${systemname}" == "fbneo" ] || [ "${systemname}" == "neogeo" ]; then
+        rsystemname="arcade"
+        else
+        rsystemname="${systemname}"
+        fi
+        
 		# if games/<system> directory exist we assume the bezels are already installed
-		if [ -d "${DECODIR}${BEZELPROJECTGAMESDIR}${systemname}" ]; then ia="[I]"; fi
+		if [ -d "${DECODIR}${BEZELPROJECTGAMESDIR}${rsystemname}" ]; then ia="[I]"; fi
 		echo "$ia ${systemname} - ${url}"
 	done < "${tmp}"
 	
@@ -117,6 +124,13 @@ function install() {
 	local url
 	local systemtoinstall="$1"
 	local systemfound=0
+    local realsystemtoinstall="${systemtoinstall}"
+
+case "${systemtoinstall}" in
+ "arcade"|"fbneo"|"fbn"|"neogeo"|"mame"|cps*)
+   systemtoinstall="arcade"
+  ;;
+esac
 	
 	[ $DEBUG -eq 1 ] && echo "DEBUG: path to bezels ${DECODIR}${BEZELPROJECTGAMESDIR}"
 
@@ -153,23 +167,23 @@ function install() {
 	fi
 
 	# check if roms/<system> directory exists
-	if [ ! -d "${ROMSDIR}${systemtoinstall}" ]; then
+	if [ ! -d "${ROMSDIR}${realsystemtoinstall}" ]; then
 		echo "Error - ROMs directory for system ${systemtoinstall} could not be found"
 		return 1
 	fi
 	
 	# there is at least one file in each roms/<system> directory (i.e. _info.txt)
-	filescount=$(files_count "${ROMSDIR}${systemtoinstall}")
+	filescount=$(files_count "${ROMSDIR}${realsystemtoinstall}")
 	[ $DEBUG -eq 1 ] && echo "DEBUG: roms files count ${filescount}"
 	if [ "${filescount}" -le 1 ]; then
-		echo "Error - ROMs directory for system ${systemtoinstall} is empty"
+		echo "Error - ROMs directory for system ${realsystemtoinstall} is empty"
 		return 1
 	fi
 
 	# create temporary directory in /tmp
 	fn=$(date +"%s")
 	tmp="$EE_TMP/dl_$fn"
-	[ $DEBUG -eq 1 ] && echo "DEBUG: path to roms ${ROMSDIR}${systemtoinstall}"
+	[ $DEBUG -eq 1 ] && echo "DEBUG: path to roms ${ROMSDIR}${realsystemtoinstall}"
 	[ $DEBUG -eq 1 ] && echo "DEBUG: path for downloading ${tmp}"
 	# extract gitname from the url
 	gitname=$(git_name "${url}")
@@ -177,7 +191,8 @@ function install() {
 	gitsystem=${gitname#bezelproject-}
 	mkdir -p "${tmp}"
 	cd "${tmp}"
-	echo "Downloading bezels for system ${systemtoinstall}"
+	echo "Downloading bezels for system ${realsystemtoinstall}"
+    [[ "${systemtoinstall}" == "arcade" ]] && echo "they will be installed to ${systemtoinstall}"
 	[ $DEBUG -eq 1 ] && echo "DEBUG: URL: ${url} OUT: ${gitname}.zip GITNAME: $gitname GITSYSTEM: $gitsystem"
 	curl -sfL "${url}/archive/master.zip" -o "${gitname}.zip"
 	# error while downloading ?
@@ -206,7 +221,8 @@ function install() {
 	fi
 	
 	# unzip archive for working on and remove the zip file
-	echo "Installing/Updating bezels for system ${systemtoinstall}..."
+	echo "Installing/Updating bezels for system ${realsystemtoinstall}..."
+    [[ "${systemtoinstall}" == "arcade" ]] && echo "removing from ${systemtoinstall}"
 	unzip -q "${gitname}.zip"
 	mv "${gitname}-master" "${gitname}"
 	rm "${gitname}.zip"
@@ -215,7 +231,7 @@ function install() {
 	echo "installing games bezels"
 	echo 0 > "/tmp/bcount"
 	echo 0 > "/tmp/bicount"
-	find "${ROMSDIR}${systemtoinstall}" -maxdepth 1 -type f -iname "[!.]*" | sort -V |
+	find "${ROMSDIR}${realsystemtoinstall}" -maxdepth 1 -type f -iname "[!.]*" | sort -V |
 	while read filename; do
 		filename=$(basename "$filename")
 		romname=${filename%%.*}
@@ -224,7 +240,7 @@ function install() {
 		echo $count > "/tmp/bcount"
 		[ $DEBUG -eq 1 ] && echo "DEBUG: count -> $count"
 		[ $DEBUG -eq 1 ] && echo "DEBUG: rom -> ${romname}"
-		if [ "${systemtoinstall}" == "mame" ] || [ "${systemtoinstall}" == "arcade" ] || [ "${systemtoinstall}" == "fba" ] || [ "${systemtoinstall}" == "neogeo" ]; then
+		if [ "${systemtoinstall}" == "mame" ] || [ "${systemtoinstall}" == "arcade" ] || [ "${systemtoinstall}" == "fbneo" ] || [ "${systemtoinstall}" == "neogeo" ]; then
 			# is there a matching PNG for arcade rom name ?
 			EE_REALSYSTEM="ArcadeBezels"
 			else
@@ -250,7 +266,7 @@ function install() {
 	# install system bezel if provided by TheBezelProject
 	echo "installing system bezel"
 	# * Arcade *
-	if [ "${systemtoinstall}" == "mame" ] || [ "${systemtoinstall}" == "arcade" ] || [ "${systemtoinstall}" == "fba" ] || [ "${systemtoinstall}" == "neogeo" ]; then
+	if [ "${systemtoinstall}" == "mame" ] || [ "${systemtoinstall}" == "arcade" ] || [ "${systemtoinstall}" == "fbneo" ] || [ "${systemtoinstall}" == "neogeo" ]; then
 		# copy the HORIZONTAL system bezel to the correct directory and rename it
 		cp "${tmp}/${gitname}/retroarch/overlay/MAME-Horizontal.png" "${DECODIR}${BEZELPROJECTSYSTEMDIR}${systemtoinstall}.png"
 	else
@@ -282,7 +298,7 @@ function install() {
 #	fi
 	
 	# leave current directory and remove all downloads
-	echo "Bezels for system ${systemtoinstall} are now installed"
+	echo "Bezels for system ${realsystemtoinstall} are now installed"
 	cd
 	rm -r "${tmp}"
 }

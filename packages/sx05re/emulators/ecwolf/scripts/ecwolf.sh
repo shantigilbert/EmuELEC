@@ -45,7 +45,7 @@ if [ ${DATA} == "ecwolf" ]; then
         if [ "$key" == "PARAMS" ]; then
             params+=" $value"
         fi
-    done < "${1}"
+    done < <(<"${1}" tr -d '\r'; echo;)
 else
     params+=" --data ${DATA}"
 fi
@@ -54,5 +54,6 @@ fi
 # to put them in subdirectories. ecwolf on the other side has no command line
 # parameter to switch to such a subdir, so you have to cd into that dir first.
 cd "${RUN_DIR}"
-ecwolf ${params} > /emuelec/logs/emuelec.log 2>&1
+# Do not overwrite log messages already written by emuelecRunEmu.sh
+ecwolf ${params} >> /emuelec/logs/emuelec.log 2>&1
 

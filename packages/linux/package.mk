@@ -26,8 +26,8 @@ case "$LINUX" in
     PKG_BUILD_PERF="no"
     ;;
   amlogic-4.9)
-	PKG_VERSION="9d240d3bd7529b142c109ab4865e0db332d84338"
-    PKG_SHA256="3e64b40c7c82c78db5863baf6b21ff62cc9e93885e3fd9296d7c066cb60450a8"
+	PKG_VERSION="ffca28d01ed144d89bb164570d31f405f84ab012"
+    PKG_SHA256="a79c07628f39038d83d010887b84ce294bca24da67c4244aa8a7d7085782a4d3"
     PKG_URL="https://github.com/CoreELEC/linux-amlogic/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
     PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET aml-dtbtools:host"
@@ -299,12 +299,7 @@ makeinstall_target() {
     mkdir -p $INSTALL/usr/share/bootloader/device_trees
     if [ -d arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic ]; then
       cp arch/$TARGET_KERNEL_ARCH/boot/*dtb.img $INSTALL/usr/share/bootloader/ 2>/dev/null || :
-      # [ "$PROJECT" = "Amlogic-ng" ] && cp arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic/*.dtb $INSTALL/usr/share/bootloader/device_trees 2>/dev/null || :
-      # TEMP EMUELEC CHANGE: Remnove GXL dtbs from amlogic-NG
-      	if [ "$PROJECT" = "Amlogic-ng" ]; then
-			cp arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic/*.dtb $INSTALL/usr/share/bootloader/device_trees 2>/dev/null || :
-			rm $INSTALL/usr/share/bootloader/device_trees/gxl_*.dtb
-		fi
+       [ "$PROJECT" = "Amlogic-ng" ] && cp arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic/*.dtb $INSTALL/usr/share/bootloader/device_trees 2>/dev/null || :
     fi
   elif [ "$BOOTLOADER" = "bcm2835-bootloader" ]; then
     mkdir -p $INSTALL/usr/share/bootloader/overlays

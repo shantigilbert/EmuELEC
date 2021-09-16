@@ -30,10 +30,23 @@ General:
 * Cleanup es_systems.cfg remove and add some extentions
 * Add Hurrican port (Handhelds currently have no working controls) 
 * Atomiswave: Remove workaround for nvmem
+* Fix Stadia Gamepad. Thanks to amuzulo#1322 
+* Fix issue with lzdoom loading .doom files and sound on mods
+* Update some sound packages
+* Fix es_systems.cfg: Add extensions to c64/c128 and Amiga (#677)
+* Add Cdogs-sdl to ports
+* Add Abuse to ports NOTE: WIP controls
+* Add Streets of Rage Remake
+* Fix Retroarch display of CJK characters
+* Fix SFC not scraping
+* Updated most emulators and cores
+* Create folders for fbneo consoles
 
 Amlogic-ng: 
 
 * Add preliminary support for Raxda Zero 
+* Add RTL8761 Bluetooth Support (#698)
+* Include ssv6xxx-aml drivers
 
 
 # 4.2

@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="scummvm"
-PKG_VERSION="6df2bdf73cc9596dbc0ef395d78e48a93e0854be"
-PKG_SHA256="40b31a0eacd7214b18998c8ed56a95958e16cb7b99e272a68faf7183c58e93a3"
+PKG_VERSION="2e7b84f566fda63646ae7d4be344b9cbfe194235"
+PKG_SHA256="0724e97ccd74ec9f903377a08427c801076cb6bf8056425c9326ad517f43bbd2"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"

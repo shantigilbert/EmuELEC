@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="xrick"
-PKG_VERSION="f281911d5b5f99770b7fc1f2aee7dff29a9754c1"
-PKG_SHA256="0a489bc8d67210a744955eef7e5b84ed71703bb82e7ca84fd5c85d2589493fc2"
+PKG_VERSION="79bfb278d2bbd919da5ffcd0698f9d5e673f7345"
+PKG_SHA256="8207125cc7f7d1ebdd2e5ab7d02399a209964e21fac14ebda3b664e67bba0cac"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"

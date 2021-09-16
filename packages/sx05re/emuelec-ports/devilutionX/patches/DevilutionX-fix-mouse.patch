@@ -1,11 +1,11 @@
---- a/Source/miniwin/misc_msg.cpp	2021-04-16 13:34:35.000000000 -0500
-+++ b/Source/miniwin/misc_msg.cpp	2021-04-16 15:47:52.874697748 -0500
-@@ -42,6 +42,8 @@
- 	mouseWarping = true;
- 	LogicalToOutput(&x, &y);
- 	SDL_WarpMouseInWindow(ghMainWnd, x, y);
-+ 	MousePosition.x = x;
-+ 	MousePosition.y = y;
+--- a/Source/controls/plrctrls.cpp
++++ b/Source/controls/plrctrls.cpp
+@@ -1284,6 +1284,8 @@ void HandleRightStickMotion()
+ 		if (now - lastMouseSetTick > 0) {
+ 			SetCursorPos(x, y);
+ 			lastMouseSetTick = now;
++			MousePosition.x = x;
++			MousePosition.y = y;
+ 		}
+ 	}
  }
- 
- // Moves the mouse to the first attribute "+" button.

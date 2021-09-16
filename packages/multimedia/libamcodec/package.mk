@@ -3,11 +3,11 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="libamcodec"
-PKG_VERSION="31cd6eceaa1402b9f4ff5cc349e53899860fe9b9"
-PKG_SHA256="9052aaa00c827d3bfef7de83f55678aa1674368f06911a003b138953409f4d7c"
+PKG_VERSION="f4cacd93b663c938fe596c5453dfe3ba40547fda"
+PKG_SHA256="8e5f7a83612ce9d8a698de7e866e6e5512cc94ba8333e326484056eb5c3d1617"
 PKG_LICENSE="proprietary"
 PKG_SITE="http://openlinux.amlogic.com"
-PKG_URL="https://sources.coreelec.org/$PKG_NAME-$PKG_VERSION.tar.xz"
+PKG_URL="https://sources.coreelec.org/$PKG_NAME-$ARCH-$PKG_VERSION.tar.xz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="libamplayer: Interface library for Amlogic media codecs"
 PKG_TOOLCHAIN="manual"

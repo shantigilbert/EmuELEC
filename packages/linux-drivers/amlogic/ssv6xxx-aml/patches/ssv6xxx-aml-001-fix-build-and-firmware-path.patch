@@ -4,32 +4,32 @@ index 43c268e..3f2fd8d 100755
 +++ b/ssv6051/Makefile.android
 @@ -1,8 +1,8 @@
  PLATFORMS =
- 
+
  KBUILD_TOP := $(PWD)
 -include $(KBUILD_TOP)/platforms/$(PLATFORMS).cfg
 -include $(KBUILD_TOP)/platforms/platform-config.mak
 +include $(KBUILD_TOP)/ssv6051.cfg
 +include $(KBUILD_TOP)/platform-config.mak
- 
+
  PWD := $(shell pwd)
- 
+
 @@ -57,7 +57,7 @@ KERN_SRCS_S += crypto/sha1-armv4-large.S
  endif
- 
- 
+
+
 -KERN_SRCS += platforms/$(PLATFORMS)-generic-wlan.c
 +KERN_SRCS += ssv6051-generic-wlan.c
- 
+
  $(KMODULE_NAME)-y += $(KERN_SRCS_S:.S=.o)
  $(KMODULE_NAME)-y += $(KERN_SRCS:.c=.o)
 @@ -67,7 +67,7 @@ obj-$(CONFIG_SSV6200_CORE) += $(KMODULE_NAME).o
  all:module strip
- 
+
  module:
 -	make  -C $(SSV_KERNEL_PATH) ARCH=$(SSV_ARCH) CROSS_COMPILE=$(SSV_CROSS) \
 +	$(MAKE)  -C $(SSV_KERNEL_PATH) ARCH=$(SSV_ARCH) CROSS_COMPILE=$(SSV_CROSS) \
  	EXTRA_CFLAGS="$(EXTRA_CFLAGS)" M=$(PWD) modules
- 
+
  install:
 @@ -80,7 +80,7 @@ strip:
  	#cp eagle.ko $(KO_NAME).ko
@@ -42,14 +42,14 @@ index 43c268e..3f2fd8d 100755
  ifneq ($(SSV_STRIP),)
 @@ -90,6 +90,6 @@ ifneq ($(SSV_STRIP),)
  endif
- 
+
  clean:
 -	make -C $(SSV_KERNEL_PATH) ARCH=$(SSV_ARCH) CROSS_COMPILE=$(SSV_CROSS) \
 +	$(MAKE) -C $(SSV_KERNEL_PATH) ARCH=$(SSV_ARCH) CROSS_COMPILE=$(SSV_CROSS) \
  	M=$(PWD) clean
- 
+
 diff --git a/ssv6051/hci/ssv_hci.c b/ssv6051/hci/ssv_hci.c
-index f0714ab..07be1c4 100755
+index f9c0a56..cafaffa 100755
 --- a/ssv6051/hci/ssv_hci.c
 +++ b/ssv6051/hci/ssv_hci.c
 @@ -21,7 +21,9 @@
@@ -57,7 +57,7 @@ index f0714ab..07be1c4 100755
  #include <ssv6200.h>
  #include "hctrl.h"
 +#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,9,0))
- extern void sdio_clk_always_on(void);
+ extern void sdio_clk_always_on(int on);
 +#endif
  MODULE_AUTHOR("iComm Semiconductor Co., Ltd");
  MODULE_DESCRIPTION("HCI driver for SSV6xxx 802.11n wireless LAN cards.");
@@ -67,13 +67,23 @@ index f0714ab..07be1c4 100755
      extern struct ssv6xxx_hci_ctrl *ssv_dbg_ctrl_hci;
  #endif
 +#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,9,0))
-     sdio_clk_always_on();
+     sdio_clk_always_on(1);
 +#endif
      ctrl_hci = kzalloc(sizeof(*ctrl_hci), GFP_KERNEL);
      if (ctrl_hci == NULL)
          return -ENOMEM;
+@@ -1141,7 +1145,9 @@ static void __exit ssv6xxx_hci_exit(void)
+ #ifdef CONFIG_SSV6200_CLI_ENABLE
+     ssv_dbg_ctrl_hci = NULL;
+ #endif
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,9,0))
+     sdio_clk_always_on(0);
++#endif
+ }
+ #if (defined(CONFIG_SSV_SUPPORT_ANDROID)||defined(CONFIG_SSV_BUILD_AS_ONE_KO))
+ EXPORT_SYMBOL(ssv6xxx_hci_init);
 diff --git a/ssv6051/image/ssv6051-wifi.cfg b/ssv6051/image/ssv6051-wifi.cfg
-index 46429fc..732d0fb 100755
+index 46429fc..bc909c9 100755
 --- a/ssv6051/image/ssv6051-wifi.cfg
 +++ b/ssv6051/image/ssv6051-wifi.cfg
 @@ -9,7 +9,7 @@
@@ -83,7 +93,7 @@ index 46429fc..732d0fb 100755
 -firmware_path = /vendor/etc/wifi/ssv6051/
 +firmware_path = /usr/lib/firmware/ssv6051/
  #flash_bin_path = /tmp/flash.bin
- 
+
  ############################################################
 @@ -68,7 +68,7 @@ hw_cap_security = on
  hw_cap_sgi_20 = on
@@ -104,23 +114,23 @@ index 5c37b23..8b74de6 100755
  ###########################################################################
 -ccflags-y += -Werror
 +# ccflags-y += -Werror
- 
- # Enable -g to help debug. Deassembly from .o to .S would help to track to 
+
+ # Enable -g to help debug. Deassembly from .o to .S would help to track to
  # the problomatic line from call stack dump.
 diff --git a/ssv6051/ssv6051.cfg b/ssv6051/ssv6051.cfg
-index 3aa643b..9676fec 100755
+index 12f46ef..93ff793 100755
 --- a/ssv6051/ssv6051.cfg
 +++ b/ssv6051/ssv6051.cfg
-@@ -21,6 +21,6 @@ ccflags-y += -DAML_WIFI_MAC
+@@ -22,6 +22,6 @@ ccflags-y += -DCONFIG_MMC_DISALLOW_STACK
  #SSV_KERNEL_PATH = $(ANDROID_BUILD_TOP)/out/target/product/m201/obj/KERNEL_OBJ/
  #SSV_CROSS = $(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
  #SSV_KERNEL_PATH = $(ANDROID_BUILD_TOP)/hardware/wifi/icomm/drivers/ssv6xxx/
 -SSV_ARCH = arm64
 +#SSV_ARCH = arm64
  #KMODDESTDIR = $(MODDESTDIR)
- 
+
 diff --git a/ssv6051/ssvdevice/ssvdevice.c b/ssv6051/ssvdevice/ssvdevice.c
-index 2e384bc..a520d4e 100755
+index 4d9257f..cd53d9f 100755
 --- a/ssv6051/ssvdevice/ssvdevice.c
 +++ b/ssv6051/ssvdevice/ssvdevice.c
 @@ -36,7 +36,7 @@

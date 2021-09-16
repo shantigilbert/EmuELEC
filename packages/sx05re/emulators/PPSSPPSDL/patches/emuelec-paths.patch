@@ -1,8 +1,8 @@
 --- a/Core/System.cpp
 +++ b/Core/System.cpp
-@@ -592,13 +592,13 @@
- 
- 	switch (directoryType) {
+@@ -599,13 +599,13 @@
+ 	case DIRECTORY_PSP:
+ 		return pspDirectory;
  	case DIRECTORY_CHEATS:
 -		return pspDirectory / "Cheats";
 +		return Path("/storage/roms/savestates/PPSSPPSDL/PSP/Cheats/");
@@ -18,7 +18,7 @@
  	case DIRECTORY_SYSTEM:
  		return pspDirectory / "SYSTEM";
  	case DIRECTORY_PAUTH:
-@@ -606,7 +606,7 @@
+@@ -615,7 +615,7 @@
  	case DIRECTORY_DUMP:
  		return pspDirectory / "SYSTEM/DUMP";
  	case DIRECTORY_SAVESTATE:
@@ -27,13 +27,12 @@
  	case DIRECTORY_CACHE:
  		return pspDirectory / "SYSTEM/CACHE";
  	case DIRECTORY_TEXTURES:
-@@ -621,7 +621,7 @@
+@@ -630,7 +630,7 @@
  	case DIRECTORY_VIDEO:
  		return pspDirectory / "VIDEO";
  	case DIRECTORY_AUDIO:
 -		return pspDirectory / "AUDIO";
 +		return Path("/storage/roms/savestates/PPSSPPSDL/PSP/AUDIO/");
- 	case DIRECTORY_MEMSTICK_ROOT:
- 		return g_Config.memStickDirectory;
- 	// Just return the memory stick root if we run into some sort of problem.
-
+ 	case DIRECTORY_CUSTOM_SHADERS:
+ 		return pspDirectory / "shaders";
+ 

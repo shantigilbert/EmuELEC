@@ -1,0 +1,63 @@
+From 2cee7f60a8fc7b70738f7ac090b6861354206718 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Sun, 18 Apr 2021 20:36:04 +0200
+Subject: [PATCH 1/2] ssv6051: fix driver after update
+
+---
+ ssv6051/hwif/sdio/sdio.c       | 2 --
+ ssv6051/ssv6051-generic-wlan.c | 4 ++--
+ ssv6051/ssvdevice/ssvdevice.c  | 2 +-
+ 3 files changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/ssv6051/hwif/sdio/sdio.c b/ssv6051/hwif/sdio/sdio.c
+index 65f5dd1..14736b7 100755
+--- a/ssv6051/hwif/sdio/sdio.c
++++ b/ssv6051/hwif/sdio/sdio.c
+@@ -94,9 +94,7 @@ static const struct sdio_device_id ssv6xxx_sdio_devices[] __devinitconst =
+ static const struct sdio_device_id ssv6xxx_sdio_devices[] =
+ #endif
+ {
+-#if 0
+     { SDIO_DEVICE(SSV_VENDOR_ID, SSV_CABRIO_DEVID) },
+-#endif
+     {}
+ };
+ MODULE_DEVICE_TABLE(sdio, ssv6xxx_sdio_devices);
+diff --git a/ssv6051/ssv6051-generic-wlan.c b/ssv6051/ssv6051-generic-wlan.c
+index 1c679a7..12d7180 100755
+--- a/ssv6051/ssv6051-generic-wlan.c
++++ b/ssv6051/ssv6051-generic-wlan.c
+@@ -113,7 +113,7 @@ void exitWlan(void)
+  }
+  return;
+ }
+-static __init int generic_wifi_init_module(void)
++static int generic_wifi_init_module(void)
+ {
+  int ret, time = 5;
+  printk("%s\n", __func__);
+@@ -142,7 +142,7 @@ out:
+  printk("generic_wifi_init finished\n");
+  return ret;
+ }
+-static __exit void generic_wifi_exit_module(void)
++static void generic_wifi_exit_module(void)
+ {
+  printk("%s\n", __func__);
+ #ifdef CONFIG_SSV_SUPPORT_AES_ASM
+diff --git a/ssv6051/ssvdevice/ssvdevice.c b/ssv6051/ssvdevice/ssvdevice.c
+index cd53d9f..a520d4e 100755
+--- a/ssv6051/ssvdevice/ssvdevice.c
++++ b/ssv6051/ssvdevice/ssvdevice.c
+@@ -280,7 +280,7 @@ static void __exit ssvdevice_exit(void)
+  remove_proc_entry(DEBUG_DIR_ENTRY, NULL);
+     kfree(ssv6xxx_cmd_buf);
+ }
+-#if 0// (defined(CONFIG_SSV_SUPPORT_ANDROID)||defined(CONFIG_SSV_BUILD_AS_ONE_KO))
++#if (defined(CONFIG_SSV_SUPPORT_ANDROID)||defined(CONFIG_SSV_BUILD_AS_ONE_KO))
+ EXPORT_SYMBOL(ssvdevice_init);
+ EXPORT_SYMBOL(ssvdevice_exit);
+ #else
+-- 
+2.31.1
+

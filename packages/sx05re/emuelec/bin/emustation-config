@@ -107,7 +107,7 @@ LOADTIME=$(get_ee_setting ee_load.delay)
 sleep $LOADTIME
 
 # Kodi seems to set its own FB settings for 720p, so we revert them to one that work on ES, I use all resolutions just in case :)
-setres.sh
+setres.sh &
 
 # Look for samba mounts to /storage/roms, MAKE ABSOLUTELY SURE YOUR MOUNT INFORMATION IS CORRECT OR ELSE YOU WILL GET NO ROMS AT ALL!
 if  compgen -G /storage/.config/system.d/storage-roms*.mount > /dev/null; then
@@ -262,7 +262,7 @@ else
     fi
 fi
 
-# We need to always use the newest es_systems.cfg if there was a recent update
+# We need to always use the newest es_systems.cfg if there was a recent update, we also need to update the ports gamelist.xml
 CVER=$(cat /storage/.config/EE_VERSION)
 NVER=$(cat /usr/config/EE_VERSION)
 BUILDATE=$(cat /usr/buildate)
@@ -271,6 +271,7 @@ OLDCFG="/storage/.config/emulationstation/es_systems.cfg.${BUILDATE}.bak"
 CFG="/storage/.config/emulationstation/es_systems.cfg"
 
 if [[ "${CVER}" != "${NVER}" ]]; then
+    mv "/storage/.config/emuelec/ports/gamelist.xml" "/storage/.config/emuelec/ports/gamelist.xml.${BUILDATE}.bak"
     cp -f "${CFG}" "${OLDCFG}"
     cp -f "/usr/config/emulationstation/es_systems.cfg" "${CFG}"
     echo "${NVER}" > /storage/.config/EE_VERSION

@@ -3,8 +3,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="alsa-lib"
-PKG_VERSION="1.1.9"
-PKG_SHA256="488373aef5396682f3a411a6d064ae0ad196b9c96269d0bb912fbdeec94b994b"
+PKG_VERSION="1.2.5.1"
+PKG_SHA256="628421d950cecaf234de3f899d520c0a6923313c964ad751ffac081df331438e"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.alsa-project.org/"
 PKG_URL="ftp://ftp.alsa-project.org/pub/lib/alsa-lib-$PKG_VERSION.tar.bz2"
@@ -19,7 +19,7 @@ else
   PKG_ALSA_DEBUG=--without-debug
 fi
 
-PKG_CONFIGURE_OPTS_TARGET="$PKG_ALSA_DEBUG \
+PKG_CONFIGURE_OPTS_TARGET="${PKG_ALSA_DEBUG} \
                            --disable-dependency-tracking \
                            --with-plugindir=/usr/lib/alsa \
                            --disable-python"
@@ -29,12 +29,8 @@ post_configure_target() {
 }
 
 post_makeinstall_target() {
-  rm -rf $INSTALL/usr/bin
+  rm -rf ${INSTALL}/usr/bin
 
-  mkdir -p $INSTALL/usr/config
-    cp -PR $PKG_DIR/config/modprobe.d $INSTALL/usr/config
-}
-
-post_install() {
-  add_group audio 63
+  mkdir -p ${INSTALL}/usr/config
+    cp -PR ${PKG_DIR}/config/modprobe.d ${INSTALL}/usr/config
 }

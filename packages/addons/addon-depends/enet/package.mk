@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="enet"
-PKG_VERSION="e33ca1d"
-PKG_SHA256="0ba5547de2c4c7fc79d367179a9bc92a7ac27e9258dd50fb277cd8761afaf9b0"
+PKG_VERSION="8d69c5abe4b699e7077395e01927bd102b3ba597"
+PKG_SHA256="4da28dc923828f2241f9086009c87d9679cb52bb3085305754cbcac33a06f312"
 PKG_LICENSE=""
 PKG_SITE="https://github.com/cgutman/enet/"
 PKG_URL="https://github.com/cgutman/enet/archive/$PKG_VERSION.tar.gz"

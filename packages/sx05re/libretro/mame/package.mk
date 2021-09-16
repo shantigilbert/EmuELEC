@@ -2,7 +2,7 @@
 # Copyright (C) 2019 Trond Haugland (trondah@gmail.com)
 
 PKG_NAME="mame"
-PKG_VERSION="209cdf44db384e8fa44874753972f71a5f8ca5f9"
+PKG_VERSION="0b8f5a56162e839b94ecaa7124df58b471bc3c31"
 PKG_SHA256=""
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"

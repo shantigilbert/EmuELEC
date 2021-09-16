@@ -29,11 +29,12 @@ if [ ${EXT} == "doom" ]; then
         if [ "$key" == "PARAMS" ]; then
             params+=" $value"
         fi
-    done < "${1}"
+    done < <(<"${1}" tr -d '\r'; echo;)
 else
     params+=" -iwad ${1}"
 fi
 
 cd "${RUN_DIR}"
-/usr/bin/lzdoom ${params} >/emuelec/logs/emuelec.log 2>&1
+# Do not overwrite log messages already written by emuelecRunEmu.sh
+/usr/bin/lzdoom ${params} >>/emuelec/logs/emuelec.log 2>&1
 

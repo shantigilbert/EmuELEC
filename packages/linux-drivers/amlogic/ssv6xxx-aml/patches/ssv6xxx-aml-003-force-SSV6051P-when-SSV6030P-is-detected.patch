@@ -1,0 +1,27 @@
+From 0b733e6fbfdd31b0a48c8cb1eba787eba65874aa Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Sun, 18 Apr 2021 20:36:33 +0200
+Subject: [PATCH 3/3] ssv6051: force SSV6051P when SSV6030P is detected Instead
+ using force_chip_identity in cfg file force the id directly in driver source.
+
+---
+ ssv6051/smac/init.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/ssv6051/smac/init.c b/ssv6051/smac/init.c
+index fc8006c..ac84cd0 100755
+--- a/ssv6051/smac/init.c
++++ b/ssv6051/smac/init.c
+@@ -1124,6 +1124,9 @@ static int ssv6xxx_init_hw(struct ssv_hw *sh)
+     sh->ampdu_divider = SSV6XXX_AMPDU_DIVIDER;
+     memset(sh->page_count, 0, sizeof(sh->page_count));
+ #ifdef CONFIG_SSV_CABRIO_E
++    if (sh->cfg.chip_identity == SSV6030P)
++      sh->cfg.force_chip_identity = SSV6051P;
++
+     if (sh->cfg.force_chip_identity)
+     {
+         printk("Force use external RF setting [%08x]\n",sh->cfg.force_chip_identity);
+-- 
+2.31.1
+

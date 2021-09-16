@@ -1,0 +1,12 @@
+--- a/src/fheroes2/game/fheroes2.cpp
++++ b/src/fheroes2/game/fheroes2.cpp
+@@ -147,9 +147,7 @@
+ 
+     u32 subsystem = INIT_VIDEO | INIT_AUDIO;
+ 
+-#if defined( FHEROES2_VITA ) || defined( __SWITCH__ )
+     subsystem |= INIT_GAMECONTROLLER;
+-#endif
+ 
+     if ( SDL::Init( subsystem ) ) {
+         try

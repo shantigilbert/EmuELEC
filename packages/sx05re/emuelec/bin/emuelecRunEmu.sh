@@ -85,6 +85,10 @@ ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
 GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
+[ -f "/emuelec/bin/setres.sh" ] && SET_DISPLAY_SH="/emuelec/bin/setres.sh" || SET_DISPLAY_SH="/usr/bin/setres.sh"
+VIDEO="$(cat /sys/class/display/mode)"
+VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
+
 if [[ "${CORE}" == *"_32b"* ]]; then
     BIT32="yes"
     LD_LIBRARY_PATH="/emuelec/lib32:$LD_LIBRARY_PATH"
@@ -144,10 +148,12 @@ if [[ $arguments != *"--NOLOG"* ]]; then
     VERBOSE="-v"
 fi
 
+# Set the display video to that of the emulator setting.
+[ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
+
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
-[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}"
-
+[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}" &
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
@@ -294,6 +300,11 @@ case ${PLATFORM} in
             RUNTHIS='${TBASH} ecwolf.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
         fi
         ;;
+	"gmloader")
+            set_kill_keys "gmloader"
+            CONTROLLERCONFIG="${arguments#*--controllers=*}"
+            RUNTHIS='${TBASH} gmloader.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
+        ;;
 	esac
 elif [ ${LIBRETRO} == "yes" ]; then
 # We are running a Libretro emulator set all the settings that we chose on ES
@@ -423,7 +434,7 @@ fi
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # Show exit splash
-${TBASH} show_splash.sh exit
+${TBASH} show_splash.sh exit &
 
 # Just in case
 kill_video_controls
@@ -436,7 +447,7 @@ fi
 #{log_addon}#
 
 # Return to default mode
-${TBASH} setres.sh
+$TBASH $SET_DISPLAY_SH $VIDEO
 
 # reset audio to default
 set_audio default

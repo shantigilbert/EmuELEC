@@ -2,7 +2,7 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="supertux"
-PKG_VERSION="e45b5f7f8635e1749eee7a74a9fc9fde13d8344e"
+PKG_VERSION="5f0bcac9fce556b250f97eeefbf2ddda88a09b71"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
