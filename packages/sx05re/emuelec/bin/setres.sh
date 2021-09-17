@@ -39,32 +39,29 @@ MODE=$1
 
 [ -z "$MODE" ] && MODE=`cat /sys/class/display/mode`;
 
-case $MODE in
-	*p*) H=$(echo $MODE | cut -d'p' -f 1) ;;
-	*i*) H=$(echo $MODE | cut -d'i' -f 1) ;;
-	*cvbs*) H=$(echo $MODE | cut -d'c' -f 1) ;;
-	*hz*) HZ=${i:(-4):2} ;;
-esac
-
-if [ ! -n "$H" ]; then
-	H=$(echo $H | cut -d'x' -f 2)
+if [[ ! "$MODE" == *"x"* ]]; then
+  case $MODE in
+  	*p*) H=$(echo $MODE | cut -d'p' -f 1) ;;
+  	*i*) H=$(echo $MODE | cut -d'i' -f 1) ;;
+  	*cvbs*) H=$(echo $MODE | cut -d'c' -f 1) ;;
+  esac
 fi
 
-if [ $HZ = "50" ]; then
+HZ=${MODE:(-4):2}
+if [[ ! -n "$HZ" ]] || [[ $HZ -eq 50 ]]; then
 	HZ=60
 fi
 
 [[ "${1}" != "intro" ]] && show_blank
 
 case $MODE in
-	480*hz)
+	480p*hz|480i*hz)
 		W=854
 		DI=$(($H*2))
 		W1=$(($W-1))
 		H1=$(($H-1))
 		fbset -fb /dev/fb0 -g $W $H $W $DI $BPP
 		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		MODE=$(echo "${H}p${HZ}hz")
 		echo $MODE > /sys/class/display/mode
 		echo 0 > /sys/class/graphics/fb0/free_scale
 		echo 1 > /sys/class/graphics/fb0/freescale_mode
@@ -72,37 +69,8 @@ case $MODE in
 		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
 		echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
-	576p*hz|720*hz|1080*hz|2160*hz)
+	576p*hz|720p*hz|1080p*hz|2160p*hz|576i*hz|720i*hz|1080i*hz|2160i*hz)
 		W=$(($H*16/9))
-		DH=$(($H*2))
-		W1=$(($W-1))
-		H1=$(($H-1))
-		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		MODE=$(echo "${H}p${HZ}hz")
-		echo $MODE > /sys/class/display/mode
-		echo 0 > /sys/class/graphics/fb0/free_scale
-		echo 1 > /sys/class/graphics/fb0/freescale_mode
-		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
-		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
-		echo 0 > /sys/class/graphics/fb1/free_scale
-		;;
-	1280x1024p*hz)
-		W=$(($H*5/4))
-		DH=$(($H*2))
-		W1=$(($W-1))
-		H1=$(($H-1))
-		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		echo $MODE > /sys/class/display/mode
-		echo 0 > /sys/class/graphics/fb0/free_scale
-		echo 1 > /sys/class/graphics/fb0/freescale_mode
-		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
-		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
-		echo 0 > /sys/class/graphics/fb1/free_scale
-		;;
-	1024x768p*hz|640x480p*hz|800x600p*hz)
-		W=$(($H*4/3))
 		DH=$(($H*2))
 		W1=$(($W-1))
 		H1=$(($H-1))
@@ -133,7 +101,7 @@ case $MODE in
 		echo 576 > /sys/class/graphics/fb0/scale_height
 		echo 0x10001 > /sys/class/graphics/fb0/free_scale
 		;;
-  *)
+  *x*)
     W=$(echo $MODE | cut -d'x' -f 1)
     H=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
     [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
@@ -143,6 +111,7 @@ case $MODE in
   		H1=$(($H-1))
   		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
   		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+      [[ "$MODE" = "720x480p"* ]] && MODE=$(echo "${H}p${HZ}hz")
   		echo $MODE > /sys/class/display/mode
   		echo 0 > /sys/class/graphics/fb0/free_scale
   		echo 1 > /sys/class/graphics/fb0/freescale_mode

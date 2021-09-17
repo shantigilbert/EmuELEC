@@ -131,33 +131,36 @@ fi
 
 [[ "${PLATFORM}" != "intro" ]] && VIDEO=0 || VIDEO=$(get_ee_setting ee_bootvideo.enabled)
 
-if [[ -f "/storage/.config/emuelec/configs/novideo" ]] && [[ ${VIDEO} != "1" ]]; then
-	if [ "$PLATFORM" != "intro" ]; then
-	if [ "$SS_DEVICE" == 1 ]; then
-        $PLAYER "$SPLASH" > /dev/null 2>&1
-    else
-        $PLAYER -fs -autoexit ${SIZE} "$SPLASH" > /dev/null 2>&1
-    fi
+VIDEOSTART=1
+NOVIDEOFILE="/storage/.config/emuelec/configs/novideo"
+[[ -f "$NOVIDEOFILE" ]] && VIDEOSTART=0
 
-	fi 
-else
-# Show intro video
-RND=$(get_ee_setting "ee_randombootvideo.enabled" == "1")
-if [ "${RND}" ==  1 ]; then
-    SPLASH=$(ls ${RANDOMVIDEO}/*.mp4 |sort -R |tail -1)
-    [[ -z "${SPLASH}" ]] && SPLASH="${VIDEOSPLASH}"
-else
-	SPLASH="${VIDEOSPLASH}"
-fi
+if [[ $VIDEOSTART -eq 1 ]] || [[ ${VIDEO} -eq 1 ]]; then
+  # Show intro video
+  RND=$(get_ee_setting ee_randombootvideo.enabled)
+  if [ ${RND} -eq 1 ]; then
+      SPLASH=$(ls ${RANDOMVIDEO}/*.mp4 |sort -R |tail -1)
+      [[ -z "${SPLASH}" ]] && SPLASH="${VIDEOSPLASH}"
+  else
+  	SPLASH="${VIDEOSPLASH}"
+  fi
 	set_audio alsa
 	#[ -e /storage/.config/asound.conf ] && mv /storage/.config/asound.conf /storage/.config/asound.confs
+  if [ $SS_DEVICE -eq 1 ]; then
+      $PLAYER "$SPLASH" > /dev/null 2>&1
+  else
+      $PLAYER -fs -autoexit ${SIZE} "$SPLASH" > /dev/null 2>&1
+  fi
+  [[ ! -f "$NOVIDEOFILE" ]] && touch "$NOVIDEOFILE"
+  #[ -e /storage/.config/asound.confs ] && mv /storage/.config/asound.confs /storage/.config/asound.conf
+else
+  if [ "$PLATFORM" != "intro" ]; then
     if [ $SS_DEVICE -eq 1 ]; then
         $PLAYER "$SPLASH" > /dev/null 2>&1
     else
         $PLAYER -fs -autoexit ${SIZE} "$SPLASH" > /dev/null 2>&1
     fi
-	touch "/storage/.config/emuelec/configs/novideo"
-	#[ -e /storage/.config/asound.confs ] && mv /storage/.config/asound.confs /storage/.config/asound.conf
+	fi 
 fi
 
 # Wait for the time specified in ee_splash_delay setting in emuelec.conf
