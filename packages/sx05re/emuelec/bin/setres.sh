@@ -54,8 +54,7 @@ if [ $HZ = "50" ]; then
 	HZ=60
 fi
 
-
-show_blank
+[[ "${1}" != "intro" ]] && show_blank
 
 case $MODE in
 	480*hz)

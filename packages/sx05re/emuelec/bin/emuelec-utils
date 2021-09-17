@@ -8,7 +8,7 @@
 
 function error() {
     text_viewer /emuelec/logs/emuelec.log -w -t "Error! ${2}" -f 24
-	/usr/bin/show_splash.sh exit
+	show_splash.sh exit
 }
 
 function audio() {

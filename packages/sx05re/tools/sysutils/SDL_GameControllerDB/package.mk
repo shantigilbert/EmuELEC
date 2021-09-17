@@ -15,6 +15,7 @@ pre_configure_target() {
 # These maps are old, we use our own
 sed -i "s/19000000010000000100000001010000,odroid/# 19000000010000000100000001010000,odroid/g" gamecontrollerdb.txt
 sed -i "s/19000000010000000200000011000000,odroid/# 19000000010000000200000011000000,odroid/g" gamecontrollerdb.txt
+sed -i "s/03000000d11800000094000011010000,Stadia Controller/# 03000000d11800000094000011010000,Stadia Controller/g" gamecontrollerdb.txt
 }
 
 makeinstall_target() {

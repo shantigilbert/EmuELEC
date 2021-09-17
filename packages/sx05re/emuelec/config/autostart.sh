@@ -114,9 +114,11 @@ case "$DEFE" in
 	;;
 esac
 
+# Mounts /storage/roms
+mount_romfs.sh 
+
 # Show splash creen 
 show_splash.sh intro
-
 
 # run custom_start before FE scripts
 /storage/.config/custom_start.sh before &

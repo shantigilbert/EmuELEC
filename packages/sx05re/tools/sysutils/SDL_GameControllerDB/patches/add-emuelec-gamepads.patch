@@ -1,6 +1,6 @@
 --- a/gamecontrollerdb.txt
 +++ b/gamecontrollerdb.txt
-@@ -1,5 +1,13 @@
+@@ -1,5 +1,14 @@
  # Game Controller DB for SDL in 2.0.9 format
  # Source: https://github.com/gabomdq/SDL_GameControllerDB
 +
@@ -11,6 +11,7 @@
 +19000000030000000300000002030000,gameforce_gamepad,platform:Linux,leftstick:b14,rightx:a3,leftshoulder:b4,start:b9,lefty:a0,dpup:b10,righty:a2,a:b1,b:b0,guide:b16,dpdown:b11,rightshoulder:b5,righttrigger:b7,rightstick:b15,dpright:b13,x:b2,back:b8,leftx:a1,y:b3,dpleft:b12,lefttrigger:b6,
 +05000000c82d00000021000000010000,8BitDo SN30 Pro for Android,platform:Linux,x:b3,a:b0,b:b1,y:b4,back:b10,guide:b12,start:b11,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,dpup:h0.1,leftshoulder:b6,lefttrigger:b8,rightshoulder:b7,righttrigger:b9,leftstick:b13,rightstick:b14,leftx:a0,lefty:a1,rightx:a2,righty:a5,
 +03000000c82d00000031000011010000,8BitDo 8BitDo Receiver,platform:Linux,x:b3,a:b0,b:b1,y:b4,back:b10,guide:b2,start:b11,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,dpup:h0.1,leftshoulder:b6,lefttrigger:b8,rightshoulder:b7,righttrigger:b9,leftstick:b13,rightstick:b14,leftx:a0,lefty:a1,rightx:a2,righty:a3, 
++03000000d11800000094000011010000,Google LLC Stadia Controller rev. A,platform:Linux,leftstick:b9,rightx:a2,leftshoulder:b4,start:b7,lefty:a1,dpup:h0.1,righty:a3,a:b1,b:b0,guide:b8,dpdown:h0.4,rightshoulder:b5,righttrigger:b13,rightstick:b10,dpright:h0.2,x:b3,back:b6,leftx:a0,y:b2,dpleft:h0.8,lefttrigger:b14,
 
  # Windows
  03000000fa2d00000100000000000000,3DRUDDER,leftx:a0,lefty:a1,rightx:a5,righty:a2,platform:Windows,

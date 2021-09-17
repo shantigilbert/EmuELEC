@@ -2,8 +2,8 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="duckstation"
-PKG_VERSION="200fb85f"
-PKG_SHA256="1b4a0038e208a1c9a0938f34c52eb09313f89fbb228380fc36b21b3c109548d8"
+PKG_VERSION="4a017bd1"
+PKG_SHA256="5c0563c1ca68b099c3936097f132a737ad6e270a90198743e45acc3f1cbd8830"
 PKG_LICENSE="NON-COMMERCIAL"
 PKG_ARCH="aarch64"
 PKG_SITE="https://www.duckstation.org/libretro"

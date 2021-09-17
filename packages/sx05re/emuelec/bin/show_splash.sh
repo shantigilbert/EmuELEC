@@ -15,7 +15,12 @@ GAMELOADINGSPLASH="/storage/.config/splash/loading-game.png"
 BLANKSPLASH="/storage/.config/splash/blank.png"
 DEFAULTSPLASH="/storage/.config/splash/splash-1080.png"
 VIDEOSPLASH="/usr/config/splash/emuelec_intro_1080p.mp4"
+RANDOMVIDEO="/storage/roms/splash/introvideos"
 DURATION="5"
+
+if [ -f "/storage/roms/splash/intro.mp4" ]; then
+    VIDEOSPLASH="/storage/roms/splash/intro.mp4"
+fi
 
 # we make sure the platform is all lowercase
 PLATFORM=${PLATFORM,,}
@@ -124,15 +129,26 @@ if [ "$PLATFORM" == "blank" ]; then
 fi
 
 
-VIDEO="0"
-[[ "${PLATFORM}" == "intro" ]] && VIDEO=$(get_ee_setting ee_bootvideo.enabled)
+[[ "${PLATFORM}" != "intro" ]] && VIDEO=0 || VIDEO=$(get_ee_setting ee_bootvideo.enabled)
 
-VIDEOSTART=1
-[[ -f "/storage/.config/emuelec/configs/novideo" ]] && VIDEOSTART=0
+if [[ -f "/storage/.config/emuelec/configs/novideo" ]] && [[ ${VIDEO} != "1" ]]; then
+	if [ "$PLATFORM" != "intro" ]; then
+	if [ "$SS_DEVICE" == 1 ]; then
+        $PLAYER "$SPLASH" > /dev/null 2>&1
+    else
+        $PLAYER -fs -autoexit ${SIZE} "$SPLASH" > /dev/null 2>&1
+    fi
 
-if [[ $VIDEOSTART -eq 1 ]] || [[ ${VIDEO} == "1" ]]; then
+	fi 
+else
 # Show intro video
-	SPLASH=${VIDEOSPLASH}
+RND=$(get_ee_setting "ee_randombootvideo.enabled" == "1")
+if [ "${RND}" ==  1 ]; then
+    SPLASH=$(ls ${RANDOMVIDEO}/*.mp4 |sort -R |tail -1)
+    [[ -z "${SPLASH}" ]] && SPLASH="${VIDEOSPLASH}"
+else
+	SPLASH="${VIDEOSPLASH}"
+fi
 	set_audio alsa
 	#[ -e /storage/.config/asound.conf ] && mv /storage/.config/asound.conf /storage/.config/asound.confs
     if [ $SS_DEVICE -eq 1 ]; then
@@ -140,14 +156,8 @@ if [[ $VIDEOSTART -eq 1 ]] || [[ ${VIDEO} == "1" ]]; then
     else
         $PLAYER -fs -autoexit ${SIZE} "$SPLASH" > /dev/null 2>&1
     fi
-	[ $VIDEOSTART -eq 1 ] && touch "/storage/.config/emuelec/configs/novideo"
+	touch "/storage/.config/emuelec/configs/novideo"
 	#[ -e /storage/.config/asound.confs ] && mv /storage/.config/asound.confs /storage/.config/asound.conf
-else
-  if [ $SS_DEVICE -eq 1 ]; then
-      $PLAYER "$SPLASH" > /dev/null 2>&1
-  else
-      $PLAYER -fs -autoexit ${SIZE} "$SPLASH" > /dev/null 2>&1
-  fi  
 fi
 
 # Wait for the time specified in ee_splash_delay setting in emuelec.conf
