@@ -59,7 +59,7 @@ show_blank
 
 case $MODE in
 	480*hz)
-		W=720
+		W=854
 		DI=$(($H*2))
 		W1=$(($W-1))
 		H1=$(($H-1))

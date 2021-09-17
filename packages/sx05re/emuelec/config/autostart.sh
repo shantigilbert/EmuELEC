@@ -115,7 +115,7 @@ case "$DEFE" in
 esac
 
 # Show splash creen 
-show_splash.sh intro &
+show_splash.sh intro
 
 
 # run custom_start before FE scripts
