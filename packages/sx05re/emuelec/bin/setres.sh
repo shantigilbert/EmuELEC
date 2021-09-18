@@ -111,7 +111,7 @@ case $MODE in
   		H1=$(($H-1))
   		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
   		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-      [[ "$MODE" = "720x480p"* ]] && MODE=$(echo "${H}p${HZ}hz")
+#  		[[ "$MODE" = "720x480p"* ]] && MODE=$(echo "${H}p${HZ}hz")
   		echo $MODE > /sys/class/display/mode
   		echo 0 > /sys/class/graphics/fb0/free_scale
   		echo 1 > /sys/class/graphics/fb0/freescale_mode
