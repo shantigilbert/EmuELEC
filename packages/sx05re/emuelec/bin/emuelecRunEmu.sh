@@ -430,6 +430,9 @@ fi
 	reset > /dev/tty1 < /dev/null 2>&1
 	reset > /dev/console < /dev/null 2>&1
 
+# Return to default mode
+$TBASH $SET_DISPLAY_SH $VIDEO
+
 # Show exit splash
 ${TBASH} show_splash.sh exit
 
@@ -442,9 +445,6 @@ if [[ -f "/storage/.config/retroarch/retroarch.log" ]] && [[ ! -e "${LOGSDIR}/re
 fi
 
 #{log_addon}#
-
-# Return to default mode
-$TBASH $SET_DISPLAY_SH $VIDEO
 
 # reset audio to default
 set_audio default
