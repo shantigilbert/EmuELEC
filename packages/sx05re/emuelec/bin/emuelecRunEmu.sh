@@ -433,6 +433,9 @@ fi
 # Return to default mode
 $TBASH $SET_DISPLAY_SH $VIDEO
 
+# Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
+
 # Show exit splash
 ${TBASH} show_splash.sh exit
 
