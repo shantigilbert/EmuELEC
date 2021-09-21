@@ -38,9 +38,11 @@ BPP=32
 HZ=60
 
 MODE=$1
+CUR_MODE=`cat /sys/class/display/mode`;
 
-[ -z "$MODE" ] && MODE=`cat /sys/class/display/mode`;
-[[ $MODE == "auto" ]] && MODE=`cat /sys/class/display/mode`;
+[ -z "$MODE" ] && MODE="$CUR_MODE";
+[[ $MODE == "auto" ]] && exit 0;
+[[ "$MODE" == "$CUR_MODE" ]] && exit 0;
 
 if [[ ! "$MODE" == *"x"* ]]; then
   case $MODE in
