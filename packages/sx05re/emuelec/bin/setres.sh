@@ -40,7 +40,8 @@ HZ=60
 MODE=$1
 CUR_MODE=`cat /sys/class/display/mode`;
 
-[ -z "$MODE" ] && MODE="$CUR_MODE";
+# If the current display is the same as the change just exit.
+[ -z "$MODE" ] && exit 0;
 [[ $MODE == "auto" ]] && exit 0;
 [[ "$MODE" == "$CUR_MODE" ]] && exit 0;
 
