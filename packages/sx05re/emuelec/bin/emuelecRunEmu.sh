@@ -148,6 +148,9 @@ if [[ $arguments != *"--NOLOG"* ]]; then
     VERBOSE="-v"
 fi
 
+# Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
+
 # Set the display video to that of the emulator setting.
 [ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
 
@@ -410,9 +413,6 @@ if [[ "${KILLTHIS}" != "none" ]]; then
     gptokeyb 1 ${KILLTHIS} &
 fi
 
-# Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
-
 # Execute the command and try to output the results to the log file if it was not disabled.
 if [[ $LOGEMU == "Yes" ]]; then
    echo "Emulator Output is:" >> $EMUELECLOG
@@ -429,9 +429,6 @@ fi
 	reset > /dev/tty0 < /dev/null 2>&1
 	reset > /dev/tty1 < /dev/null 2>&1
 	reset > /dev/console < /dev/null 2>&1
-
-# Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # Show exit splash
 ${TBASH} show_splash.sh exit
@@ -517,8 +514,8 @@ if [[ "$ret_error" != "0" ]]; then
 
     # Since the error was not because of missing BIOS but we did get an error, display the log to find out
     [[ "$ret_bios" == "0" ]] && text_viewer -e -w -t "Error! ${PLATFORM}-${EMULATOR}-${CORE}-${ROMNAME}" -f 24 ${EMUELECLOG}
-        exit 1
+      exit 1
 else
     echo "exit 0" >> $EMUELECLOG
-        exit 0
+      exit 0
 fi
