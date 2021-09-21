@@ -40,6 +40,7 @@ HZ=60
 MODE=$1
 
 [ -z "$MODE" ] && MODE=`cat /sys/class/display/mode`;
+[[ $MODE == "auto" ]] && MODE=`cat /sys/class/display/mode`;
 
 if [[ ! "$MODE" == *"x"* ]]; then
   case $MODE in
@@ -57,8 +58,6 @@ fi
 
 # hides buffer
 show_buffer 1
-
-# blank_buffer
 
 case $MODE in
 	480p*hz|480i*hz|576p*hz|720p*hz|1080p*hz|1440p*hz|2160p*hz|576i*hz|720i*hz|1080i*hz|1440i*hz|2160i*hz)
