@@ -148,11 +148,11 @@ if [[ $arguments != *"--NOLOG"* ]]; then
     VERBOSE="-v"
 fi
 
-# Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
-
 # Set the display video to that of the emulator setting.
 [ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
+
+# Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
