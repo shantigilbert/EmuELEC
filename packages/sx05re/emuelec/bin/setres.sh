@@ -43,7 +43,9 @@ CUR_MODE=`cat /sys/class/display/mode`;
 # If the current display is the same as the change just exit.
 [ -z "$MODE" ] && exit 0;
 [[ $MODE == "auto" ]] && exit 0;
-[[ "$MODE" == "$CUR_MODE" ]] && exit 0;
+# Removed because if try to set invalid video mode it becomes a valid MODE
+# in display/mode and then when trying to revert back this becomes true exiting.
+#[[ "$MODE" == "$CUR_MODE" ]] && exit 0;
 
 if [[ ! "$MODE" == *"x"* ]]; then
   case $MODE in
