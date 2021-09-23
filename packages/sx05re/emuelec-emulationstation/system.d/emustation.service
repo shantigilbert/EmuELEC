@@ -1,8 +1,6 @@
 [Unit]
 Description=EmulationStation emulator frontend
 ConditionPathExists=/var/lock/start.games
-Requires=udevil-mount@-dev-sda1.service
-After=udevil-mount@-dev-sda1.service
 
 [Service]
 Environment=HOME=/storage

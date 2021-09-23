@@ -28,8 +28,7 @@ EE_FS_TYPE=${ROM_FS_TYPE}
 
 # Wait for the time specified in ee_load.delay setting in emuelec.conf
 LOADTIME=$(get_ee_setting ee_load.delay)
-[[ -z "$LOADTIME" ]] && LOADTIME=0
-sleep $LOADTIME
+[ ! -z "$LOADTIME" ] && sleep $LOADTIME
 
 # Kodi seems to set its own FB settings for 720p, so we revert them to one that work on ES, I use all resolutions just in case :)
 setres.sh

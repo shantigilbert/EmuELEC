@@ -151,6 +151,9 @@ fi
 # Set the display video to that of the emulator setting.
 [ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
 
+# Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
+
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
 [ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}"
@@ -305,6 +308,12 @@ case ${PLATFORM} in
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
             RUNTHIS='${TBASH} gmloader.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
         ;;
+	"intellivision")
+    if [ "$EMU" = "jzintv" ]; then
+            set_kill_keys "jzintv"
+            RUNTHIS='jzintv.sh "${ROMNAME}"'
+    fi
+        ;;
 	esac
 elif [ ${LIBRETRO} == "yes" ]; then
 # We are running a Libretro emulator set all the settings that we chose on ES
@@ -410,9 +419,6 @@ if [[ "${KILLTHIS}" != "none" ]]; then
     gptokeyb 1 ${KILLTHIS} &
 fi
 
-# Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
-
 # Execute the command and try to output the results to the log file if it was not disabled.
 if [[ $LOGEMU == "Yes" ]]; then
    echo "Emulator Output is:" >> $EMUELECLOG
@@ -430,6 +436,9 @@ fi
 	reset > /dev/tty1 < /dev/null 2>&1
 	reset > /dev/console < /dev/null 2>&1
 
+# Return to default mode
+$TBASH $SET_DISPLAY_SH $VIDEO
+
 # Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
@@ -445,9 +454,6 @@ if [[ -f "/storage/.config/retroarch/retroarch.log" ]] && [[ ! -e "${LOGSDIR}/re
 fi
 
 #{log_addon}#
-
-# Return to default mode
-$TBASH $SET_DISPLAY_SH $VIDEO
 
 # reset audio to default
 set_audio default
@@ -517,8 +523,8 @@ if [[ "$ret_error" != "0" ]]; then
 
     # Since the error was not because of missing BIOS but we did get an error, display the log to find out
     [[ "$ret_bios" == "0" ]] && text_viewer -e -w -t "Error! ${PLATFORM}-${EMULATOR}-${CORE}-${ROMNAME}" -f 24 ${EMUELECLOG}
-        exit 1
+    exit 1
 else
     echo "exit 0" >> $EMUELECLOG
-        exit 0
+    exit 0
 fi

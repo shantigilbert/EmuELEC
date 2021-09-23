@@ -1,0 +1,77 @@
+; -----------------------------------------------------------------------------------------
+MAP 0      ; keymap 0 (default keymap)
+; -----------------------------------------------------------------------------------------
+
+; ***** Joystick #0 - Left Controller *****
+; ** Side Buttons and Numeric Keypad **
+JS0_BTN_00 PD0L_A_T
+JS0_BTN_01 PD0L_A_L
+JS0_BTN_02 PD0L_A_R
+JS0_BTN_03 PD0L_KP1
+JS0_BTN_04 PD0L_KP2
+JS0_BTN_05 PD0L_KP3
+JS0_BTN_06 PD0L_KP4
+JS0_BTN_07 PD0L_KP5
+JS0_BTN_08 PD0L_KP6
+JS0_BTN_09 PD0L_KP7
+JS0_BTN_10 PD0L_KP8
+JS0_BTN_11 PD0L_KP9
+JS0_BTN_12 PD0L_KPC
+JS0_BTN_13 PD0L_KP0
+JS0_BTN_07 PD0L_KPE
+
+
+; ** Direction Disc **
+JS0_HAT0_N      PD0L_J_N
+JS0_HAT0_NNE    PD0L_J_NNE
+JS0_HAT0_NE     PD0L_J_NE
+JS0_HAT0_ENE    PD0L_J_ENE
+JS0_HAT0_E      PD0L_J_E
+JS0_HAT0_ESE    PD0L_J_ESE
+JS0_HAT0_SE     PD0L_J_SE
+JS0_HAT0_SSE    PD0L_J_SSE
+JS0_HAT0_S      PD0L_J_S
+JS0_HAT0_SSW    PD0L_J_SSW
+JS0_HAT0_SW     PD0L_J_SW
+JS0_HAT0_WSW    PD0L_J_WSW
+JS0_HAT0_W      PD0L_J_W
+JS0_HAT0_WNW    PD0L_J_WNW
+JS0_HAT0_NW     PD0L_J_NW
+JS0_HAT0_NNW    PD0L_J_NNW
+
+; ***** Joystick #1 - Right Controller *****
+; ** Side Buttons and Numeric Keypad **
+JS1_BTN_00 PD0R_A_T
+JS1_BTN_01 PD0R_A_L
+JS1_BTN_02 PD0R_A_R
+JS1_BTN_03 PD0R_KP1
+JS1_BTN_04 PD0R_KP2
+JS1_BTN_05 PD0R_KP3
+JS1_BTN_06 PD0R_KP4
+JS1_BTN_07 PD0R_KP5
+JS1_BTN_08 PD0R_KP6
+JS1_BTN_09 PD0R_KP7
+JS1_BTN_10 PD0R_KP8
+JS1_BTN_11 PD0R_KP9
+JS1_BTN_12 PD0R_KPC
+JS1_BTN_13 PD0R_KP0
+JS1_BTN_14 PD0R_KPE
+
+
+; ** Direction Disc **
+JS1_N      PD0R_J_N
+JS1_NNE    PD0R_J_NNE
+JS1_NE     PD0R_J_NE
+JS1_ENE    PD0R_J_ENE
+JS1_E      PD0R_J_E
+JS1_ESE    PD0R_J_ESE
+JS1_SE     PD0R_J_SE
+JS1_SSE    PD0R_J_SSE
+JS1_S      PD0R_J_S
+JS1_SSW    PD0R_J_SSW
+JS1_SW     PD0R_J_SW
+JS1_WSW    PD0R_J_WSW
+JS1_W      PD0R_J_W
+JS1_WNW    PD0R_J_WNW
+JS1_NW     PD0R_J_NW
+JS1_NNW    PD0R_J_NNW

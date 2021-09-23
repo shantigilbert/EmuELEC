@@ -1,0 +1,29 @@
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -40,7 +40,7 @@
+ 
+ # Get SDL2 related build flags.
+ SDL2_CFLAGS := $(shell sdl2-config --cflags) -DUSE_SDL2
+-SDL2_LFLAGS := $(shell sdl2-config --static-libs || sdl2-config --libs)
++SDL2_LFLAGS := $(shell sdl2-config --libs)
+ 
+ # Override these in a .mak file. See buidlcfg/00-compiler*.txt for examples.
+ #
+@@ -115,8 +115,8 @@
+ $(PROG_SDL2): $(OBJS) $(OBJS_SDL1)
+ 	$(CXX) -o $(PROG_SDL2) $(OBJS) $(OBJS_SDL2) $(CFLAGS) $(SDL2_LFLAGS) $(LFLAGS) $(RL_LFLAGS)
+ 
+-$(PROG_NULL): $(OBJS) $(OBJS_NULL)
+-	$(CXX) -o $(PROG_NULL) $(OBJS) $(OBJS_NULL) $(CFLAGS) $(SLFLAGS) $(RL_LFLAGS)
++# $(PROG_NULL): $(OBJS) $(OBJS_NULL)
++#	$(CXX) -o $(PROG_NULL) $(OBJS) $(OBJS_NULL) $(CFLAGS) $(SLFLAGS) $(RL_LFLAGS)
+ 
+ clean:
+ 	$(RM) $(OBJS) 
+@@ -150,4 +150,4 @@
+ ## Makefile.common includes all the subMakefiles and such
+ ##############################################################################
+ include Makefile.common
+-build: jzIntv SDK-1600
++build: jzIntv
+

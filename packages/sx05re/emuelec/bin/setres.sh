@@ -21,88 +21,53 @@
 # 1080i50hz
 # 576cvbs
 
-TBASH="/usr/bin/bash"
+# arg1, 1 = Hides, 0 = Show.
+show_buffer ()
+{
+  echo $1 > /sys/class/graphics/fb0/blank
+  echo $1 > /sys/class/graphics/fb1/blank
+}
 
-show_blank()
+blank_buffer()
 {
   # Blank the buffer.
-  ${TBASH} show_splash.sh "blank"
-  echo 1 > /sys/class/graphics/fb0/blank
-  echo 1 > /sys/class/graphics/fb1/blank
-  
+  dd if=/dev/zero of=/dev/fb0 bs=12M > /dev/null 2>&1
 }
 
 BPP=32
 HZ=60
 
 MODE=$1
+CUR_MODE=`cat /sys/class/display/mode`;
 
-[ -z "$MODE" ] && MODE=`cat /sys/class/display/mode`;
+# If the current display is the same as the change just exit.
+[ -z "$MODE" ] && exit 0;
+[[ $MODE == "auto" ]] && exit 0;
+# Removed because if try to set invalid video mode it becomes a valid MODE
+# in display/mode and then when trying to revert back this becomes true exiting.
+#[[ "$MODE" == "$CUR_MODE" ]] && exit 0;
 
-case $MODE in
-	*p*) H=$(echo $MODE | cut -d'p' -f 1) ;;
-	*i*) H=$(echo $MODE | cut -d'i' -f 1) ;;
-	*cvbs*) H=$(echo $MODE | cut -d'c' -f 1) ;;
-	*hz*) HZ=${i:(-4):2} ;;
-esac
-
-if [ ! -n "$H" ]; then
-	H=$(echo $H | cut -d'x' -f 2)
+if [[ ! "$MODE" == *"x"* ]]; then
+  case $MODE in
+  	*p*) H=$(echo $MODE | cut -d'p' -f 1) ;;
+  	*i*) H=$(echo $MODE | cut -d'i' -f 1) ;;
+  	*cvbs*) H=$(echo $MODE | cut -d'c' -f 1) ;;
+  esac
 fi
 
-if [ $HZ = "50" ]; then
+HZ=${MODE:(-4):2}
+if [[ ! -n "$HZ" ]] || [[ $HZ -eq 50 ]]; then
 	HZ=60
 fi
 
-[[ "${1}" != "intro" ]] && show_blank
+
+# hides buffer
+show_buffer 1
 
 case $MODE in
-	480*hz)
-		W=854
-		DI=$(($H*2))
-		W1=$(($W-1))
-		H1=$(($H-1))
-		fbset -fb /dev/fb0 -g $W $H $W $DI $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		MODE=$(echo "${H}p${HZ}hz")
-		echo $MODE > /sys/class/display/mode
-		echo 0 > /sys/class/graphics/fb0/free_scale
-		echo 1 > /sys/class/graphics/fb0/freescale_mode
-		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
-		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
-		echo 0 > /sys/class/graphics/fb1/free_scale
-		;;
-	576p*hz|720*hz|1080*hz|2160*hz)
-		W=$(($H*16/9))
-		DH=$(($H*2))
-		W1=$(($W-1))
-		H1=$(($H-1))
-		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		MODE=$(echo "${H}p${HZ}hz")
-		echo $MODE > /sys/class/display/mode
-		echo 0 > /sys/class/graphics/fb0/free_scale
-		echo 1 > /sys/class/graphics/fb0/freescale_mode
-		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
-		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
-		echo 0 > /sys/class/graphics/fb1/free_scale
-		;;
-	1280x1024p*hz)
-		W=$(($H*5/4))
-		DH=$(($H*2))
-		W1=$(($W-1))
-		H1=$(($H-1))
-		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		echo $MODE > /sys/class/display/mode
-		echo 0 > /sys/class/graphics/fb0/free_scale
-		echo 1 > /sys/class/graphics/fb0/freescale_mode
-		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
-		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
-		echo 0 > /sys/class/graphics/fb1/free_scale
-		;;
-	1024x768p*hz|640x480p*hz|800x600p*hz)
-		W=$(($H*4/3))
+	480p*hz|480i*hz|576p*hz|720p*hz|1080p*hz|1440p*hz|2160p*hz|576i*hz|720i*hz|1080i*hz|1440i*hz|2160i*hz)
+    W=$(($H*16/9))
+    [[ "$MODE" == "480"* ]] && W=854
 		DH=$(($H*2))
 		W1=$(($W-1))
 		H1=$(($H-1))
@@ -133,7 +98,7 @@ case $MODE in
 		echo 576 > /sys/class/graphics/fb0/scale_height
 		echo 0x10001 > /sys/class/graphics/fb0/free_scale
 		;;
-  *)
+  *x*)
     W=$(echo $MODE | cut -d'x' -f 1)
     H=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
     [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
@@ -143,6 +108,7 @@ case $MODE in
   		H1=$(($H-1))
   		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
   		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+#  		[[ "$MODE" = "720x480p"* ]] && MODE=$(echo "${H}p${HZ}hz")
   		echo $MODE > /sys/class/display/mode
   		echo 0 > /sys/class/graphics/fb0/free_scale
   		echo 1 > /sys/class/graphics/fb0/freescale_mode
@@ -153,9 +119,11 @@ case $MODE in
     ;;
 esac
 
-# Enable the buffer again.
-echo 0 > /sys/class/graphics/fb0/blank
-echo 0 > /sys/class/graphics/fb1/blank
+blank_buffer
+
+# shows buffer
+show_buffer 0
+
 
 # End of reading the video output mode and setting it for emuelec to avoid video flicking.
 # The codes can be simplified with "elseif" sentences.
