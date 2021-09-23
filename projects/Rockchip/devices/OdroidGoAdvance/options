@@ -100,7 +100,7 @@
   KODI_DVDCSS_SUPPORT="no"
 
   # build and install bluetooth support (yes / no)
-  BLUETOOTH_SUPPORT="no"
+  BLUETOOTH_SUPPORT="yes"
 
   # build and install with KODI webfrontend (yes / no)
   KODI_WEBSERVER_SUPPORT="no"
