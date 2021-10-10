@@ -35,12 +35,12 @@ if [ ! -e "${DATAFOLDER}/worlds/Big JM_Mixed River.txt" ]; then
             rm "imgui.ini" > /dev/tty0 2>&1
             ee_console disable
             cd "${DATAFOLDER}/.."
-            smw "${DATAFOLDER}" > /emuelec/logs/emuelec.log 2>&1
+            smw --datadir "${DATAFOLDER}" > /emuelec/logs/emuelec.log 2>&1
         else
             exit 0
         fi
 else
-    smw "${DATAFOLDER}" > /emuelec/logs/emuelec.log 2>&1
+    smw --datadir "${DATAFOLDER}" > /emuelec/logs/emuelec.log 2>&1
 fi
 
 killall gptokeyb &
