@@ -45,21 +45,31 @@ fi
 # Check if we have unsynched update files
 /usr/config/emuelec/scripts/force_update.sh
 
-# Set video mode, this has to be done before starting ES
-DEFE=$(get_ee_setting ee_videomode)
+DEFE=""
 
-if [ "${DEFE}" == "Custom" ]; then
-	DEFE=$(cat /sys/class/display/mode)
-elif [ -s "/storage/.config/EE_VIDEO_MODE" ]; then
-	DEFE=$(cat /storage/.config/EE_VIDEO_MODE)
-elif [ -s "/flash/EE_VIDEO_MODE" ]; then
-	DEFE=$(cat /flash/EE_VIDEO_MODE)
-else
-	DEFE=$(cat /sys/class/display/mode)
+# If the video-mode is contained in flash config.
+if [ -s "${CONFIG_FLASH}" ]; then
+  CFG_VAL=$(get_config_value "$CONFIG_FLASH" "hdmimode")
+  [ ! -z "$CFG_VAL" ] && DEFE="$CFG_VAL" && set_ee_setting ee_videomode $DEFE
+fi
+
+# Otherwise retrieve via normal methods.
+if [ -z "$DEFE" ]; then
+  if [ -s "/storage/.config/EE_VIDEO_MODE" ]; then
+      DEFE=$(cat /storage/.config/EE_VIDEO_MODE) && set_ee_setting ee_videomode $DEFE
+  fi
+fi
+
+if [ -z "$DEFE" ]; then
+  # Set video mode, this has to be done before starting ES
+  DEFE=$(get_ee_setting ee_videomode)
+  if [ "${DEFE}" == "Custom" ]; then
+      DEFE=$(cat /sys/class/display/mode)
+  fi
 fi
 
 # finally we correct the FB according to video mode
-[ ! -z "${DEFE}" ] && /emuelec/scripts/setres.sh ${DEFE}
+setres.sh ${DEFE}
 
 # Clean cache garbage when boot up.
 rm -rf /storage/.cache/cores/*

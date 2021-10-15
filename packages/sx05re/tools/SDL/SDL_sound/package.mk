@@ -4,7 +4,7 @@
 
 PKG_NAME="SDL_sound"
 PKG_VERSION="f0d57c9b72d8"
-PKG_SHA256="f4848b27a79dd9bcf4720c1751730772472f501ddf5432be2e93a146fa7e57cb"
+PKG_SHA256="2d98c599d8bd120e75a9366d4d5c0b1284fee04cfdae4152898e0950544aa8eb"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://www.icculus.org/SDL_sound/"
 PKG_URL="http://hg.icculus.org/icculus/SDL_sound/archive/$PKG_VERSION.tar.gz"
