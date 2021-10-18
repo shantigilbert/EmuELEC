@@ -14,7 +14,7 @@ RATMPCONF="/storage/.config/retroarch/retroarch.cfg"
 
 create_svm(){
     mkdir -p ${TMP_DIR}
-	${BINDIR}/scummvm --list-targets | tail -n +3 | cut -d " " -f 1 | while read line; do
+    scummvm --list-targets | tail -n +3 | cut -d " " -f 1 | while read line; do
     id=($line);
     [[ -f "${TMP_DIR}/${id}.scummvm" ]] && rm "${TMP_DIR}/${id}.scummvm"
     touch "${TMP_DIR}/${id}.scummvm"
