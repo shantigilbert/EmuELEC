@@ -30,7 +30,6 @@ fi
 ES_FOLDER="/storage/.emulationstation"
 LINKDEST="$ES_FOLDER/scripts/drastic.tar.gz"
 CFG="$ES_FOLDER/es_systems.cfg"
-EXE="emuelecRunEmu.sh"
 
 mkdir -p "$ES_FOLDER/scripts/"
 
@@ -57,7 +56,7 @@ fi
 		-s '//systemList/system[last()]' -t elem -n 'hardware' -v 'portable'\
 		-s '//systemList/system[last()]' -t elem -n 'path' -v '/storage/roms/nds'\
 		-s '//systemList/system[last()]' -t elem -n 'extension' -v '.nds .NDS .zip .ZIP .7z .7Z'\
-		-s '//systemList/system[last()]' -t elem -n 'command' -v "$EXE %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers=\"%CONTROLLERSCONFIG%\""\
+		-s '//systemList/system[last()]' -t elem -n 'command' -v "emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers=\"%CONTROLLERSCONFIG%\""\
 		-s '//systemList/system[last()]' -t elem -n 'platform' -v 'nds'\
 		-s '//systemList/system[last()]' -t elem -n 'theme' -v 'nds'\
 		$CFG
