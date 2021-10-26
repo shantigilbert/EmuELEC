@@ -42,15 +42,15 @@ index 9052130198..36028a6ec4 100644
  static const video_poke_interface_t thread_poke = {
     thread_get_flags,
     thread_load_texture,
-@@ -1131,7 +1145,7 @@ static const video_poke_interface_t thread_poke = {
+@@ -1225,7 +1225,7 @@ static const video_poke_interface_t thread_poke = {
     thread_grab_mouse_toggle,
- 
+
     thread_get_current_shader,
 -   NULL,                      /* get_current_software_framebuffer */
 +   thread_get_current_software_framebuffer,
-    NULL                       /* get_hw_render_interface */
- };
- 
+    NULL,                      /* get_hw_render_interface */
+    thread_set_hdr_max_nits,
+    thread_set_hdr_paper_white_nits,
 -- 
 2.30.0
 
