@@ -12,6 +12,13 @@ if [ ! -e "/storage/roms/saturn/yabasanshiro/input.cfg" ]; then
     cp -rf "/emuelec/configs/yabasanshiro/input.cfg" "/storage/roms/saturn/yabasanshiro/input.cfg"
 fi
 
-# We use { } to avoid SIGUSR signal showing text and messing up with the error handling
 
-{ yabasanshiro -r 2 -a -nf -i "${1}" -b "/storage/roms/bios/saturn_bios.bin"; } > /emuelec/logs/emuelec.log 2>&1
+if [ -e "/storage/roms/bios/saturn_bios.bin" ]; then
+
+    # We use { } to avoid SIGUSR signal showing text and messing up with the error handling
+    { yabasanshiro -r 2 -i "${1}" -b "/storage/roms/bios/saturn_bios.bin"; } > /emuelec/logs/emuelec.log 2>&1
+
+# BIOS is not mandatory 
+else
+    { yabasanshiro -r 2 -i "${1}"; } > /emuelec/logs/emuelec.log 2>&1
+fi

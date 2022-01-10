@@ -1,5 +1,5 @@
 PKG_NAME="yabasanshiroSA"
-PKG_VERSION="7493f1d8908f4437a4c8e43aef1e67325b18f716"
+PKG_VERSION="f6f41dd6485c638ab661f3acd2951c9522f34450"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/devmiyax/yabause"
@@ -8,7 +8,7 @@ PKG_DEPENDS_TARGET="toolchain SDL2 boost openal-soft ${OPENGLES} zlib"
 PKG_LONGDESC="Yabause is a Sega Saturn emulator and took over as Yaba Sanshiro"
 PKG_TOOLCHAIN="cmake-make"
 GET_HANDLER_SUPPORT="git"
-PKG_GIT_CLONE_BRANCH="master"
+PKG_GIT_CLONE_BRANCH="pi4"
 PKG_BUILD_FLAGS="+size"
 
 post_unpack() {
@@ -35,7 +35,7 @@ PKG_CMAKE_OPTS_TARGET="${PKG_BUILD}/yabause \
                          -DOPENGL_glx_LIBRARY=${SYSROOT_PREFIX}/usr/lib \
                          -DLIBPNG_LIB_DIR=${SYSROOT_PREFIX}/usr/lib \
                          -Dpng_STATIC_LIBRARIES=${SYSROOT_PREFIX}/usr/lib/libpng16.a \
-                         -DCMAKE_BUILD_TYPE=Debug"
+                         -DCMAKE_BUILD_TYPE=Release"
 
 # for some reason Yabasanshiro only works if compiled in debug mode 	
 }
