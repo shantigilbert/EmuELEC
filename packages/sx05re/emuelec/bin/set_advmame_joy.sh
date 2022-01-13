@@ -14,7 +14,7 @@ PAD_FOUND=0
 EE_DEV="js0"
 GPFILE=""
 GAMEPAD=""
-ROMNAME="$1"
+ROMNAME="${1##*/}"
 BTN_CFG="input_a_btn input_b_btn input_x_btn input_y_btn input_r_btn input_l_btn input_r2_btn input_l2_btn input_up_btn input_down_btn input_right_btn input_left_btn"
 DEBUGFILE="$CONFIG_DIR/joy_debug.cfg"
 
@@ -26,18 +26,12 @@ get_button_cfg() {
 	game_len=${#game_cfg[@]}
 
 	for (( i=0; i<$game_len; i+=2 )); do
-		if [[ $ROM_NAME =~ ${game_cfg[$i]} ]]; then
-			echo "$ROM_NAME custom buttonmap found." >> "${DEBUGFILE}"
+		if [[ $ROMNAME =~ ${game_cfg[$i]} ]]; then
+			echo "$ROMNAME custom buttonmap found." >> "${DEBUGFILE}"
 			BTN_INDEX=${game_cfg[$i+1]}
-			BTN_CFG=${button_cfg[$BTN_INDEX]}
+			BTN_CFG="${button_cfg[$BTN_INDEX]} input_up_btn input_down_btn input_right_btn input_left_btn"
 		fi
 	done
-
-	if [[ -z "$BTN_CFG" ]]; then
-		BTN_CFG=${button_cfg[0]}
-	fi
-
-	BTN_CFG="${BTN_CFG} input_up_btn input_down_btn input_right_btn input_left_btn"
 	echo "$BTN_CFG"
 }
 
