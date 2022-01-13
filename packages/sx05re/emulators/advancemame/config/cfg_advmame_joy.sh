@@ -1,7 +1,5 @@
 #!/bin/bash
 
-ROM_NAME=$1
-
 # Mortal Kombat
 # Street Fighter
 # Street Fighter
