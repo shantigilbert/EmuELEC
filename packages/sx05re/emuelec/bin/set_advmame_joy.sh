@@ -16,37 +16,28 @@ GPFILE=""
 GAMEPAD=""
 ROMNAME="$1"
 BTN_CFG="input_a_btn input_b_btn input_x_btn input_y_btn input_r_btn input_l_btn input_r2_btn input_l2_btn input_up_btn input_down_btn input_right_btn input_left_btn"
-
-
+DEBUGFILE="$CONFIG_DIR/joy_debug.cfg"
 
 get_button_cfg() {
 	declare -A button_cfg
 
 	. "$CONFIG_DIR/cfg_advmame_joy.sh" "$ROMNAME"
-#	echo "ADVMAME_JOY_CFG_ENABLE=$ADVMAME_JOY_CFG_ENABLE"  >> ${DEBUGFILE}
-	[[ "$ADVMAME_JOY_CFG_ENABLE" == "0" ]] && echo "$BTN_CFG" && return 
-
-#	echo "$ROMNAME"  >> "${DEBUGFILE}"
 
 	game_len=${#game_cfg[@]}
-	
-#	echo "$game_len" >> "${DEBUGFILE}"
+
 	for (( i=0; i<$game_len; i+=2 )); do
-#		echo "${game_cfg[$i]}" >> "${DEBUGFILE}"
 		if [[ $ROM_NAME =~ ${game_cfg[$i]} ]]; then
-			echo "$ROM_NAME found" >> "${DEBUGFILE}"
+			echo "$ROM_NAME custom buttonmap found." >> "${DEBUGFILE}"
 			BTN_INDEX=${game_cfg[$i+1]}
 			BTN_CFG=${button_cfg[$BTN_INDEX]}
 		fi
 	done
 
-#	echo "$BTN_CFG"  >> ${DEBUGFILE}
 	if [[ -z "$BTN_CFG" ]]; then
 		BTN_CFG=${button_cfg[0]}
 	fi
 
 	BTN_CFG="${BTN_CFG} input_up_btn input_down_btn input_right_btn input_left_btn"
-#	echo "$BTN_CFG"  >> "${DEBUGFILE}"
 	echo "$BTN_CFG"
 }
 
@@ -207,7 +198,8 @@ find_gamepad "1" "js0"
 fi
 }
 
-BTN_CFG=$(get_button_cfg)
+ADVMAME_JOY_CFG_REMAP=$(get_ee_setting advmame_joy_cfg_remap)
+[[ "${ADVMAME_JOY_CFG_REMAP}" == "1" ]] && BTN_CFG=$(get_button_cfg)
 echo "SETTING_BUTTONS=$BTN_CFG"  >> "${DEBUGFILE}"
 
 get_players
