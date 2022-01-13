@@ -14,6 +14,7 @@ PAD_FOUND=0
 EE_DEV="js0"
 GPFILE=""
 GAMEPAD=""
+ROMNAME="$1"
 
 # Cleans all the inputs for the gamepad with name $GAMEPAD and player $1 
 clean_pad() {
@@ -45,10 +46,36 @@ set_pad(){
 	START=$((START+1))
 	echo "input_map[start${1}] joystick_button[${GAMEPAD},button${START}]" >> ${CONFIG}
 
-i=1
+
 button=""
 
-for button in input_a_btn input_b_btn input_x_btn input_y_btn input_r_btn input_l_btn input_r2_btn input_l2_btn input_up_btn input_down_btn input_right_btn input_left_btn; do 
+. "$CONFIG_DIR/cfg_advmame_joy.sh" "$ROMNAME"
+echo "$ROMNAME"  >> ${DEBUGFILE}
+
+game_len=${#game_cfg[@]}
+
+BTN_CFG=""
+echo "$game_len" >> ${DEBUGFILE}
+for (( i=0; i<$game_len; i+=2 )); do
+	echo "${game_cfg[$i]}" >> ${DEBUGFILE}
+	if [[ $ROM_NAME =~ ${game_cfg[$i]} ]]; then
+		echo "$ROM_NAME found" >> ${DEBUGFILE}
+		BTN_INDEX=${game_cfg[$i+1]}
+		BTN_CFG=${button_cfg[$BTN_INDEX]}
+	fi
+done
+
+echo "$BTN_CFG"  >> ${DEBUGFILE}
+if [ -z "$BTN_CFG" ]; then
+	BTN_CFG=${button_cfg[0]}
+fi
+
+#echo "$BTN_CFG"  >> ${DEBUGFILE}
+BTN_CFG="${BTN_CFG} input_up_btn input_down_btn input_right_btn input_left_btn"
+echo "$BTN_CFG"  >> ${DEBUGFILE}
+
+i=1
+for button in ${BTN_CFG}; do
 	KEY=$(cat "${GPFILE}" | grep -E "${button}" | cut -d '"' -f2)
 if [ ! -z "$KEY" ]; then 
 	KEY=$((KEY+1))
