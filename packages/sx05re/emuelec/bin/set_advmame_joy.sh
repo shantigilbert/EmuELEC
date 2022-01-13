@@ -21,7 +21,7 @@ DEBUGFILE="$CONFIG_DIR/joy_debug.cfg"
 get_button_cfg() {
 	declare -A button_cfg
 
-	. "$CONFIG_DIR/cfg_advmame_joy.sh" "$ROMNAME"
+	. "$CONFIG_DIR/cfg_advmame_joy.sh"
 
 	game_len=${#game_cfg[@]}
 
