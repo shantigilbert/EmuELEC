@@ -57,7 +57,7 @@ if [ "$EE_DEVICE" != "OdroidGoAdvance" ] && [ "$EE_DEVICE" != "GameForce" ]; the
 fi
 
 if [ "$EE_DEVICE" != "GameForce" ]; then
-ROMNAME=$(basename $1 | sed 's/\.*$//')
+ROMNAME=$(basename $1)
 AUTOGP=$(get_ee_setting advmame_auto_gamepad)
 [[ "${AUTOGP}" != "0" ]] && /usr/bin/set_advmame_joy.sh "$ROMNAME"
 fi
