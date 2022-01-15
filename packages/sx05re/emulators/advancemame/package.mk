@@ -45,6 +45,9 @@ elif [ "$DEVICE" == "GameForce" ]; then
 else
    cp -r $PKG_DIR/config/advmame.rc $INSTALL/usr/share/advance/advmame.rc
 fi
+
+cp -r $PKG_DIR/config/cfg_advmame_joy.sh $INSTALL/usr/share/advance/cfg_advmame_joy.sh
+chmod +x $INSTALL/usr/share/advance/cfg_advmame_joy.sh
    
 mkdir -p $INSTALL/usr/bin
    cp -r $PKG_DIR/bin/* $INSTALL/usr/bin
