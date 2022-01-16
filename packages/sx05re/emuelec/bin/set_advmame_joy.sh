@@ -42,7 +42,7 @@ get_button_cfg() {
 
 	game_len=${#game_cfg[@]}
 	
-	BTN_INDEX=$(get_ee_setting advmame_joy_cfg "mame" "${ROMNAME}")
+	BTN_INDEX=$(get_ee_setting joy_btn_cfg "mame" "${ROMNAME}")
 	if [[ -z $BTN_INDEX ]]; then
 		for (( i=0; i<$game_len; i+=2 )); do
 			if [[ $ROMNAME =~ ^${game_cfg[$i]}$ ]]; then
