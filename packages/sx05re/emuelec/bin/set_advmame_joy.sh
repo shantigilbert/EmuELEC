@@ -45,7 +45,7 @@ get_button_cfg() {
 	BTN_INDEX=$(get_ee_setting advmame_joy_cfg "mame" "${ROMNAME}")
 	if [[ -z $BTN_INDEX ]]; then
 		for (( i=0; i<$game_len; i+=2 )); do
-			if [[ $ROMNAME =~ ${game_cfg[$i]} ]]; then
+			if [[ $ROMNAME =~ ^${game_cfg[$i]}$ ]]; then
 				echo "$ROMNAME custom buttonmap found." >> "${DEBUGFILE}"
 				BTN_INDEX=${game_cfg[$i+1]}
 				break
@@ -53,8 +53,8 @@ get_button_cfg() {
 		done
 	fi
 	if [[ ! -z $BTN_INDEX ]]; then
-		BTN_SETTING="advmame_joy_btn_$BTN_INDEX"
-		BTN_CFG=$(echo "$(get_ee_setting $BTN_SETTING)" | sed 's/,/ /g')
+		BTN_SETTING="mame.joy_btn_order$BTN_INDEX"
+		BTN_CFG=$(echo "$(get_ee_setting $BTN_SETTING)")
 		BTN_CFG="${BTN_CFG} 8 9 10 11"		
 	fi
 	echo "$BTN_CFG"
@@ -218,7 +218,7 @@ find_gamepad "1" "js0"
 fi
 }
 
-ADVMAME_JOY_CFG_REMAP=$(get_ee_setting advmame_joy_cfg_remap)
+ADVMAME_JOY_CFG_REMAP=$(get_ee_setting advmame_joy_remap)
 [[ "${ADVMAME_JOY_CFG_REMAP}" == "1" ]] && BTN_CFG=$(get_button_cfg)
 echo "SETTING_BUTTONS=$BTN_CFG"  >> "${DEBUGFILE}"
 

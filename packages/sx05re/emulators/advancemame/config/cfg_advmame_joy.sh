@@ -7,8 +7,8 @@
 # Street Fight
 # Street Fight
 game_cfg=(
-  "^u?mk[0-9]?\.zip$" 1
-  "^sf[0-9]?b?c?e?\.zip$" 2
-  "^sfight2b\.zip$" 2
+  "u?mk[0-9]?\.zip" 1
+  "sf[0-9]?b?c?e?\.zip" 2
+  "sfight2b\.zip" 2
 )
 
