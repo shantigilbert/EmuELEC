@@ -52,7 +52,7 @@ get_button_cfg() {
 			fi
 		done
 	fi
-	if [[ ! -z $BTN_INDEX ]]; then
+	if [[ ! -z $BTN_INDEX && $BTN_INDEX -gt 0 ]]; then
 		BTN_SETTING="mame.joy_btn_order$BTN_INDEX"
 		BTN_CFG=$(echo "$(get_ee_setting $BTN_SETTING)")
 		BTN_CFG="${BTN_CFG} 8 9 10 11"		
