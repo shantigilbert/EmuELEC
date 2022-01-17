@@ -42,7 +42,9 @@ get_button_cfg() {
 
 	game_len=${#game_cfg[@]}
 	
-	BTN_INDEX=$(get_ee_setting joy_btn_cfg "mame" "${ROMNAME}")
+	BTN_INDEX=$(get_ee_setting "joy_btn_cfg" "mame" "${ROMNAME}")
+  [[ -z $BTN_INDEX ]] && BTN_INDEX=$(get_ee_setting "mame.joy_btn_cfg")
+  
 	if [[ -z $BTN_INDEX ]]; then
 		for (( i=0; i<$game_len; i+=2 )); do
 			if [[ $ROMNAME =~ ^${game_cfg[$i]}$ ]]; then
@@ -52,9 +54,10 @@ get_button_cfg() {
 			fi
 		done
 	fi
-	if [[ ! -z $BTN_INDEX && $BTN_INDEX -gt 0 ]]; then
-		BTN_SETTING="mame.joy_btn_order$BTN_INDEX"
-		BTN_CFG=$(echo "$(get_ee_setting $BTN_SETTING)")
+
+  if [[ ! -z $BTN_INDEX ]] && [[ $BTN_INDEX -gt 0 ]]; then
+		BTN_SETTING="AdvanceMame.joy_btn_order$BTN_INDEX"
+		BTN_CFG="$(get_ee_setting $BTN_SETTING)"
 		BTN_CFG="${BTN_CFG} 8 9 10 11"		
 	fi
 	echo "$BTN_CFG"
