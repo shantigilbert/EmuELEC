@@ -101,56 +101,47 @@ for bi in ${BTN_CFG}; do
 	KEY=$(cat "${GPFILE}" | grep -E "${button}" | cut -d '"' -f2)
 if [ ! -z "$KEY" ]; then 
 	KEY=$((KEY+1))
+  case "${button}" in 
+  	"input_up_btn")
+  	echo "input_map[p${1}_up] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,y,up]" >> ${CONFIG}
+  	[[ "${1}" == "1" ]] && echo "input_map[ui_up] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,y,up]" >> ${CONFIG}
+  		;;
+  	"input_down_btn")
+  	echo "input_map[p${1}_down] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,y,down]" >> ${CONFIG}
+  	[[ "${1}" == "1" ]] && echo "input_map[ui_down] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,y,down]" >> ${CONFIG}
+  		;;
+  	"input_left_btn")
+  	echo "input_map[p${1}_left] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,x,left]" >> ${CONFIG}
+  	[[ "${1}" == "1" ]] && echo "input_map[ui_left] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,x,left]" >> ${CONFIG}
+  		;;
+  	"input_right_btn")
+  	echo "input_map[p${1}_right] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,x,right]" >> ${CONFIG}
+  	[[ "${1}" == "1" ]] && echo "input_map[ui_right] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,x,right]" >> ${CONFIG}
+  		;;
+    *)
+  	echo "input_map[p${1}_button${i}] joystick_button[${GAMEPAD},button${KEY}]" >> ${CONFIG}
+  	i=$((i+1))
+  	;;
+  esac
   if [[ -f "$CONFIG_DIR/ADD_DPAD" ]]; then
-    STICK_VALUE=`cat $CONFIG_DIR/ADD_DPAD`
-    if [[ $STICK_VALUE =~ ^[0-9]{1}$ ]]; then
-      case "${button}" in
-      	"input_up_btn")
-      	echo "input_map[p${1}_up] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,y,up] or joystick_digital[${GAMEPAD},stick${STICK_VALUE},y,up]" >> ${CONFIG}
-      	[[ "${1}" == "1" ]] && echo "input_map[ui_up] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,y,up] or joystick_digital[${GAMEPAD},stick${STICK_VALUE},y,up]" >> ${CONFIG}
-      		;;
-      	"input_down_btn")
-      	echo "input_map[p${1}_down] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,y,down] or joystick_digital[${GAMEPAD},stick${STICK_VALUE},y,down]" >> ${CONFIG}
-      	[[ "${1}" == "1" ]] && echo "input_map[ui_down] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,y,down] or joystick_digital[${GAMEPAD},stick${STICK_VALUE},y,down]" >> ${CONFIG}
-      		;;
-      	"input_left_btn")
-      	echo "input_map[p${1}_left] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,x,left] or joystick_digital[${GAMEPAD},stick${STICK_VALUE},x,left]" >> ${CONFIG}
-      	[[ "${1}" == "1" ]] && echo "input_map[ui_left] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,x,left] or joystick_digital[${GAMEPAD},stick${STICK_VALUE},x,left]" >> ${CONFIG}
-      		;;
-      	"input_right_btn")
-      	echo "input_map[p${1}_right] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,x,right] or joystick_digital[${GAMEPAD},stick${STICK_VALUE},x,right]" >> ${CONFIG}
-      	[[ "${1}" == "1" ]] && echo "input_map[ui_right] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,x,right] or joystick_digital[${GAMEPAD},stick${STICK_VALUE},x,right]" >> ${CONFIG}
-      		;;
-        *)
-      	echo "input_map[p${1}_button${i}] joystick_button[${GAMEPAD},button${KEY}]" >> ${CONFIG}
-      	i=$((i+1))
-      	;;
-      esac
-    fi
-  else
-    case "${button}" in 
-    	"input_up_btn")
-    	echo "input_map[p${1}_up] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,y,up]" >> ${CONFIG}
-    	[[ "${1}" == "1" ]] && echo "input_map[ui_up] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,y,up]" >> ${CONFIG}
-    		;;
-    	"input_down_btn")
-    	echo "input_map[p${1}_down] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,y,down]" >> ${CONFIG}
-    	[[ "${1}" == "1" ]] && echo "input_map[ui_down] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,y,down]" >> ${CONFIG}
-    		;;
-    	"input_left_btn")
-    	echo "input_map[p${1}_left] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,x,left]" >> ${CONFIG}
-    	[[ "${1}" == "1" ]] && echo "input_map[ui_left] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,x,left]" >> ${CONFIG}
-    		;;
-    	"input_right_btn")
-    	echo "input_map[p${1}_right] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,x,right]" >> ${CONFIG}
-    	[[ "${1}" == "1" ]] && echo "input_map[ui_right] joystick_button[${GAMEPAD},button${KEY}] or joystick_digital[${GAMEPAD},stick,x,right]" >> ${CONFIG}
-    		;;
-      *)
-    	echo "input_map[p${1}_button${i}] joystick_button[${GAMEPAD},button${KEY}]" >> ${CONFIG}
-    	i=$((i+1))
-    	;;
-    esac
-  fi
+		STICK_VALUE=`cat $CONFIG_DIR/ADD_DPAD`
+		if [[ $STICK_VALUE =~ ^[0-9]{1}$ ]]; then
+			for direction in up down left right; do
+				AXIS="y"
+				[[ "$direction" =~ ^(left|right)$ ]] && AXIS="x"
+				if [[ "${button}" == "input_${direction}_btn" ]]; then
+					INPUT_MAP_VAL=`cat ${CONFIG} | grep "input_map\[p${1}_${direction}\]"`
+					sed -i "/input_map\[p${1}_${direction}\].*/d" ${CONFIG}
+					echo "${INPUT_MAP_VAL} or joystick_digital[${GAMEPAD},stick${STICK_VALUE},${AXIS},${direction}]" >> ${CONFIG}
+					if [[ "${1}" == "1" ]]; then
+						INPUT_MAP_VAL=`cat ${CONFIG} | grep "input_map\[ui_${direction}\]"`
+						sed -i "/input_map\[ui_${direction}\].*/d" ${CONFIG}
+						echo "${INPUT_MAP_VAL} or joystick_digital[${GAMEPAD},stick${STICK_VALUE},${AXIS},${direction}]" >> ${CONFIG}
+					fi
+				fi
+			done  
+		fi
+	fi
 fi
 done
 
