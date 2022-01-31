@@ -17,4 +17,6 @@ if [ ! -L "$CONFIG_DIR" ]; then
  ln -sf "/emuelec/configs/dolphin-emu" "${CONFIG_DIR}"
 fi
 
+/usr/bin/set_dolphin_joy.sh
+
 XDG_CONFIG_HOME=/emuelec/configs XDG_DATA_HOME=/storage/roms/dolphin /usr/bin/dolphin-emu-nogui -p fbdev "${1}"
