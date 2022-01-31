@@ -35,11 +35,14 @@ declare -A GC_DOLPHIN_BUTTONS=(
 # Cleans all the inputs for the gamepad with name $GAMEPAD and player $1 
 clean_pad() {
   #echo "Cleaning pad $1 $2" #debug
+  [[ -f "${CONFIG_TMP}" ]] && rm "${CONFIG_TMP}"
   START_DELETING=0
   while read -r line; do
     [[ "[GCPad${1}]" == "$line" ]] && START_DELETING=1
     if [[ $START_DELETING == 1 ]]; then
       [[ "$line" == "[GCPad"[0-9]"]" ]] && [[ "[GCPad${1}]" != "$line" ]] && return
+      [[ "$line" =~ ^(.*)+Stick\/Modifier(.*)+$ ]] && echo "$line" >> ${CONFIG_TMP}
+      [[ "$line" =~ ^(.)+Stick\/Dead(.*)+$ ]] && echo "$line" >> ${CONFIG_TMP}
       sed -i "1 d" "$CONFIG"
     fi
   done < ${CONFIG}
@@ -65,8 +68,6 @@ set_pad() {
   
   echo "[GCPad$1]" >> ${CONFIG}
   echo "Device = evdev/0/$JOY_NAME" >> ${CONFIG}
-
-  [[ -f "${CONFIG_TMP}" ]] && rm "${CONFIG_TMP}"
 
   set -f
   GC_ARRAY=(${GC_MAP//,/ })
@@ -107,12 +108,22 @@ set_pad() {
           ;;
       esac
   done
-  echo "C-Stick/Modifier = Control_L" >> ${CONFIG_TMP}
-  echo "C-Stick/Modifier/Range = 50.000000000000000" >> ${CONFIG_TMP}
-  echo "C-Stick/Dead Zone = 25.000000000000000" >> ${CONFIG_TMP}
-  echo "Main Stick/Modifier = Shift_L" >> ${CONFIG_TMP}
-  echo "Main Stick/Modifier/Range = 50.000000000000000" >> ${CONFIG_TMP}
-  echo "Main Stick/Dead Zone = 25.000000000000000" >> ${CONFIG_TMP}
+
+  JOYSTICK="Main Stick"
+  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^$JOYSTICK\/Modifier *\= *(.*)$")
+  [[ -z "$GC_RECORD" ]] && echo "$JOYSTICK/Modifier = Shift_L" >> ${CONFIG_TMP}
+  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^$JOYSTICK\/Modifier\/Range *\= *(.*)$")
+  [[ -z "$GC_RECORD" ]] && echo "$JOYSTICK/Modifier/Range = 50.000000000000000" >> ${CONFIG_TMP}
+  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^$JOYSTICK\/Dead Zone *\= *(.*)$")
+  [[ -z "$GC_RECORD" ]] && echo "$stick/Dead Zone = 25.000000000000000" >> ${CONFIG_TMP}
+
+  JOYSTICK="C-Stick"
+  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^$JOYSTICK\/Modifier *\= *(.*)$")
+  [[ -z "$GC_RECORD" ]] && echo "$JOYSTICK/Modifier = Control_L" >> ${CONFIG_TMP}
+  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^$JOYSTICK\/Modifier\/Range *\= *(.*)$")
+  [[ -z "$GC_RECORD" ]] && echo "$JOYSTICK/Modifier/Range = 50.000000000000000" >> ${CONFIG_TMP}
+  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^$JOYSTICK\/Dead Zone *\= *(.*)$")
+  [[ -z "$GC_RECORD" ]] && echo "$JOYSTICK/Dead Zone = 25.000000000000000" >> ${CONFIG_TMP}
 
   cat "${CONFIG_TMP}" | sort >> ${CONFIG}
   rm "${CONFIG_TMP}"
@@ -123,19 +134,22 @@ get_players() {
 # You can set up to 8 player on ES
   for ((y = 1; y <= 8; y++)); do
   #echo "Player $y" #debug
-  #echo "Getting GUID for INPUT P${y}GUID" #debug
+    echo "Getting GUID for INPUT P${y}GUID" #debug
 
     DEVICE_GUID=$(get_es_setting string "INPUT P${y}GUID")
     
     JOY_INDEX=$(( $y - 1 ))
     DETECT_LINE=$(echo "Handlers=event[0-9] js${JOY_INDEX}")
-    LINE_NUMBER=$(grep -n "${DETECT_LINE}" /proc/bus/input/devices | cut -d ":" -f 1)
-
-    [[ ! $LINE_NUMBER =~ ^[0-9]+$ ]] && continue
-
-    LINE_NUMBER=$(( $LINE_NUMBER - 4 ))
     
-    JOY_NAME=$(sed -n "${LINE_NUMBER}p" /proc/bus/input/devices | grep -E "^N\: Name\=\"(.*)\$" | cut -d "=" -f 2 | tr -d '"')
+    cat /proc/bus/input/devices | grep -E '^\H: Handlers\=event[0-9]+(.*)+$|^N\: Name\=\"(.*)+$' > /tmp/input_devices
+    LINE_NUMBER=$(cat /tmp/input_devices | grep -n "${DETECT_LINE}" | cut -d ":" -f 1)
+    echo "LINE_NUMBER=$LINE_NUMBER"
+    [[ ! $LINE_NUMBER =~ ^[0-9]+$ ]] && continue
+    LINE_NUMBER=$(( $LINE_NUMBER - 1 ))
+    
+    JOY_NAME=$(cat /tmp/input_devices | sed -n "${LINE_NUMBER}p" | cut -d "=" -f 2 | tr -d '"')
+    rm /tmp/input_devices
+
     echo "JOY_NAME=$JOY_NAME"
     [[ -z "$JOY_NAME" ]] && continue
 
@@ -147,7 +161,7 @@ get_players() {
       fi
     fi
     if [[ ! -z "${DEVICE_GUID}" ]]; then
-        clean_pad "${y}" "${JOY_INDEX}"
+        clean_pad "${y}"
     	  set_pad "${y}" "js${JOY_INDEX}" "${DEVICE_GUID}" "${JOY_NAME}"
   	fi
   done
