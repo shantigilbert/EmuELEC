@@ -56,14 +56,12 @@ set_pad() {
   JOY_NAME=$4
 
   echo "DEVICE_GUID=$DEVICE_GUID"
-  echo "JOY_NAME=$JOY_NAME"
   
   GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID")
   echo "GC_CONFIG=$GC_CONFIG"
-  GC_NAME=$(echo $GC_CONFIG | cut -d "," -f 2)
-  echo "GC_NAME=$GC_NAME"
-  GC_MAP=$(echo $GC_CONFIG | grep -Eo '([^,]+\,){4}(.*)+$')
-  echo "GC_MAP=$GC_MAP"
+  [[ -z $GC_CONFIG ]] && return
+
+  GC_MAP=$(echo $GC_CONFIG | grep -Eo '([^,]+\,){4}(.*)+$' | head -1)
   
   echo "[GCPad$1]" >> ${CONFIG}
   echo "Device = evdev/0/$JOY_NAME" >> ${CONFIG}
@@ -72,18 +70,14 @@ set_pad() {
 
   set -f
   GC_ARRAY=(${GC_MAP//,/ })
-  echo "GC_ARRAY=${!GC_ARRAY[@]}"
   for index in "${!GC_ARRAY[@]}"
   do
       REC=${GC_ARRAY[$index]}
       BUTTON_INDEX=$(echo $REC | cut -d ":" -f 1)
-      echo "BUTTON_INDEX=$BUTTON_INDEX"
       TVAL=$(echo $REC | cut -d ":" -f 2)
-      echo "TVAL=$TVAL"
       BUTTON_VAL=${TVAL:1}
-      TMP=${GC_DOLPHIN_BUTTONS[$BUTTON_INDEX]}
-      echo "TMP=$TMP"
-      if [[ ! -z "$TMP" ]]; then
+      TMP_BUTTONS=${GC_DOLPHIN_BUTTONS[$BUTTON_INDEX]}
+      if [[ ! -z "$TMP_BUTTONS" ]]; then
           GC_INDEX=${GC_DOLPHIN_BUTTONS[$BUTTON_INDEX]}
           [[ ${TVAL:0:1} == "b" ]] && echo "${GC_INDEX} = Button $BUTTON_VAL" >> ${CONFIG_TMP}
       fi
@@ -140,7 +134,10 @@ get_players() {
     [[ ! $LINE_NUMBER =~ ^[0-9]+$ ]] && continue
 
     LINE_NUMBER=$(( $LINE_NUMBER - 4 ))
-    JOY_NAME=$(sed -n "${LINE_NUMBER}p" /proc/bus/input/devices | cut -d "=" -f 2 | tr -d '"')
+    
+    JOY_NAME=$(sed -n "${LINE_NUMBER}p" /proc/bus/input/devices | grep -E "^N\: Name\=\"(.*)\$" | cut -d "=" -f 2 | tr -d '"')
+    echo "JOY_NAME=$JOY_NAME"
+    [[ -z "$JOY_NAME" ]] && continue
 
     if [[ -z "${DEVICE_GUID}" ]]; then
       INPUTCONFIG_XML=$(cat "$ESINPUT" | grep -i "$JOY_NAME")
