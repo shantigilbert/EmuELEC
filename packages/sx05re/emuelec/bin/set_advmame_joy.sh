@@ -74,25 +74,6 @@ case "${button}" in
 	i=$((i+1))
 	;;
 esac
-if [[ -f "$CONFIG_DIR/ADD_DPAD" ]]; then
-	STICK_VALUE=`cat $CONFIG_DIR/ADD_DPAD`
-	if [[ $STICK_VALUE =~ ^[0-9]{1}$ ]]; then
-		for direction in up down left right; do
-			AXIS="y"
-			[[ "$direction" =~ ^(left|right)$ ]] && AXIS="x"
-			if [[ "${button}" == "input_${direction}_btn" ]]; then
-				INPUT_MAP_VAL=`cat ${CONFIG} | grep "input_map\[p${1}_${direction}\]"`
-				sed -i "/input_map\[p${1}_${direction}\].*/d" ${CONFIG}
-				echo "${INPUT_MAP_VAL} or joystick_digital[${GAMEPAD},stick${STICK_VALUE},${AXIS},${direction}]" >> ${CONFIG}
-				if [[ "${1}" == "1" ]]; then
-					INPUT_MAP_VAL=`cat ${CONFIG} | grep "input_map\[ui_${direction}\]"`
-					sed -i "/input_map\[ui_${direction}\].*/d" ${CONFIG}
-					echo "${INPUT_MAP_VAL} or joystick_digital[${GAMEPAD},stick${STICK_VALUE},${AXIS},${direction}]" >> ${CONFIG}
-				fi
-			fi
-		done  
-	fi
-fi
 fi
 done
 
