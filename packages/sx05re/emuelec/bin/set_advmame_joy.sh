@@ -74,6 +74,7 @@ case "${button}" in
 	i=$((i+1))
 	;;
 esac
+
 fi
 done
 
