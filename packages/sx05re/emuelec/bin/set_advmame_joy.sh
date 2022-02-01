@@ -209,7 +209,7 @@ CFG_FILE="/storage/.config/emulationstation/es_features.cfg"
 ATT="[[:alnum:][:space:],\-]*"
 CFG_REGEX="\S*\<emulator.*name\=\"AdvanceMame\".*features\=\"${ATT}joybtnremap${ATT}\".*>.*$"
 
-CFG_ENTRY=$(cat "${CFG_FILE}" | grep -E ^${CFG_REGEX}$)
+CFG_ENTRY=$(cat "${CFG_FILE}" | grep -E "${CFG_REGEX}")
 [[ ! -z "${CFG_ENTRY}" ]] && BTN_CFG=$(get_button_cfg)
 echo "SETTING_BUTTONS=$BTN_CFG"  >> "${DEBUGFILE}"
 
