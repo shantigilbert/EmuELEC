@@ -64,7 +64,7 @@ set_pad() {
   echo "GC_CONFIG=$GC_CONFIG"
   [[ -z $GC_CONFIG ]] && return
 
-  GC_MAP=$(echo $GC_CONFIG | grep -Eo '([^,]+\,){4}(.*)+$' | head -1)
+  GC_MAP=$(echo $GC_CONFIG | cut -d',' -f4-)
   
   echo "[GCPad$1]" >> ${CONFIG}
   echo "Device = evdev/0/$JOY_NAME" >> ${CONFIG}
@@ -139,10 +139,12 @@ get_players() {
     DEVICE_GUID=$(get_es_setting string "INPUT P${y}GUID")
     
     JOY_INDEX=$(( $y - 1 ))
-    DETECT_LINE=$(echo "Handlers=event[0-9] js${JOY_INDEX}")
+    JSI="js${JOY_INDEX}"
+    DETECT_LINE=$(echo "^H\: Handlers.*[\= ]?${JSI}.*$")
     
-    cat /proc/bus/input/devices | grep -E '^\H: Handlers\=event[0-9]+(.*)+$|^N\: Name\=\"(.*)+$' > /tmp/input_devices
-    LINE_NUMBER=$(cat /tmp/input_devices | grep -n "${DETECT_LINE}" | cut -d ":" -f 1)
+    cat /proc/bus/input/devices | grep -E "^H\: Handlers\=.*${JSI}.*+$|^N\: Name\=\"(.*)+$" > /tmp/input_devices
+
+    LINE_NUMBER=$(cat /tmp/input_devices | grep -E -n "${DETECT_LINE}" | cut -d ":" -f 1)
     echo "LINE_NUMBER=$LINE_NUMBER"
     [[ ! $LINE_NUMBER =~ ^[0-9]+$ ]] && continue
     LINE_NUMBER=$(( $LINE_NUMBER - 1 ))
@@ -161,10 +163,12 @@ get_players() {
       fi
     fi
     if [[ ! -z "${DEVICE_GUID}" ]]; then
-        clean_pad "${y}"
-    	  set_pad "${y}" "js${JOY_INDEX}" "${DEVICE_GUID}" "${JOY_NAME}"
+      clean_pad "${y}" "${JSI}"
+	    set_pad "${y}" "${JSI}" "${DEVICE_GUID}" "${JOY_NAME}"
   	fi
+  
   done
 }
 
 get_players
+
