@@ -20,9 +20,9 @@ PKG_CMAKE_OPTS_TARGET+="-DUSE_GLES=ON -DUSE_VULKAN=OFF"
 }
 
 makeinstall_target() {
-	mkdir -p $INSTALL/usr/share/flycast
-	mkdir -p $INSTALL/usr/share/flycast/mappings
-	cp $PKG_DIR/config/* $INSTALL/usr/share/flycast
+	mkdir -p $INSTALL/usr/config/flycast
+	mkdir -p $INSTALL/usr/config/flycast/mappings
+	cp $PKG_DIR/config/* $INSTALL/usr/config/flycast
 
   mkdir -p $INSTALL/usr/bin
   cp $PKG_BUILD/.${TARGET_NAME}/flycast $INSTALL/usr/bin/flycast
