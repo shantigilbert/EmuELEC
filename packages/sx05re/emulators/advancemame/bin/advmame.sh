@@ -10,7 +10,7 @@ export DISPLAY=:0
 
 if [ ! -d "$CONFIG_DIR" ]; then
  mkdir -p $CONFIG_DIR
- cp -rfp /usr/share/advance/* $CONFIG_DIR/
+ cp -rf /usr/share/advance/* $CONFIG_DIR/
 fi
 
 if [[ "$1" = *"roms/arcade"* ]]; then
