@@ -125,15 +125,15 @@ if [ ! -z "$KEY" ]; then
       ;;
   	input_down_btn|input_l_y_plus_axis)
       [[ ! -z "$DIR_DOWN" ]] && DIR_DOWN+=" or "
-      DIR_DOWN+=" or joystick_digital[${GAMEPAD},${KEY_MAP}]"
+      DIR_DOWN+="joystick_digital[${GAMEPAD},${KEY_MAP}]"
   		;;
   	input_left_btn|input_l_x_minus_axis)
       [[ ! -z "$DIR_LEFT" ]] && DIR_LEFT+=" or "
-      DIR_LEFT+=" or joystick_digital[${GAMEPAD},${KEY_MAP}]"
+      DIR_LEFT+="joystick_digital[${GAMEPAD},${KEY_MAP}]"
   		;;
   	input_right_btn|input_l_x_plus_axis)
     [[ ! -z "$DIR_RIGHT" ]] && DIR_RIGHT+=" or "
-      DIR_RIGHT+=" or joystick_digital[${GAMEPAD},${KEY_MAP}]"
+      DIR_RIGHT+="joystick_digital[${GAMEPAD},${KEY_MAP}]"
   		;;
     *)
   	echo "input_map[p${1}_button${i}] joystick_button[${GAMEPAD},${KEY_MAP}]" >> ${CONFIG}
