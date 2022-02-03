@@ -29,10 +29,10 @@ declare -A FLYCAST_D_INDEXES=(
 )
 
 declare -A FLYCAST_D_BIND=(
-  [a]=1
-  [b]=0
-  [x]=3
-  [y]=2
+  [a]=0
+  [b]=1
+  [x]=2
+  [y]=3
   [leftshoulder]=4
   [rightshoulder]=5
   [lefttrigger]=6
