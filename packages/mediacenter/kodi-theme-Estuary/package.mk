@@ -7,6 +7,7 @@ PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"
 PKG_URL=""
 PKG_DEPENDS_TARGET="kodi"
+PKG_DEPENDS_UNPACK="kodi"
 PKG_LONGDESC="Kodi Mediacenter default theme."
 PKG_TOOLCHAIN="manual"
 

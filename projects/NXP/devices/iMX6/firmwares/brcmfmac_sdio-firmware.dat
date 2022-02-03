@@ -1,11 +1,15 @@
 BCM4329B1.hcd
 BCM4330B1.hcd
 BCM4339A0.hcd
+brcmfmac4329-sdio.solidrun,cubox-i-dl.bin
 brcmfmac4329-sdio.solidrun,cubox-i-dl.txt
+brcmfmac4329-sdio.solidrun,cubox-i-q.bin
 brcmfmac4329-sdio.solidrun,cubox-i-q.txt
 brcmfmac4329-sdio.wand,imx6dl-wandboard.txt
 brcmfmac4329-sdio.wand,imx6q-wandboard.txt
+brcmfmac4330-sdio.solidrun,cubox-i-dl.bin
 brcmfmac4330-sdio.solidrun,cubox-i-dl.txt
+brcmfmac4330-sdio.solidrun,cubox-i-q.bin
 brcmfmac4330-sdio.solidrun,cubox-i-q.txt
 brcmfmac4330-sdio.wand,imx6dl-wandboard.txt
 brcmfmac4330-sdio.wand,imx6q-wandboard.txt

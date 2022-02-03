@@ -105,6 +105,7 @@ set_pad(){
 
 button=""
 i=1
+
 DIR_LEFT=""
 DIR_RIGHT=""
 DIR_UP=""

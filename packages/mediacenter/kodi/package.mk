@@ -3,8 +3,8 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="kodi"
-PKG_VERSION="5ad708b518e6bb3e8ac31a9c7b5a8908573a409f"
-PKG_SHA256="db16e3bdacfbb816a98d99c94720e80d91eeb8024a35c16775b6916089e7eecf"
+PKG_VERSION="e976cd0e3ad9ed0e4ff80e2f97e2fce1922717be"
+PKG_SHA256="a2ebdddcba17906429252355018403b1ab668c943214e05575d7c9b967ee57fe"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"
 PKG_URL="https://github.com/xbmc/xbmc/archive/${PKG_VERSION}.tar.gz"
@@ -60,6 +60,10 @@ configure_package() {
     KODI_PULSEAUDIO="-DENABLE_PULSEAUDIO=ON"
   else
     KODI_PULSEAUDIO="-DENABLE_PULSEAUDIO=OFF"
+  fi
+
+  if [ "$ESPEAK_SUPPORT" = yes ]; then
+    PKG_DEPENDS_TARGET+=" espeak-ng"
   fi
 
   if [ "${CEC_SUPPORT}" = yes ]; then

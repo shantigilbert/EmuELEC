@@ -5,8 +5,8 @@ Subject: [PATCH 17/17] r40 hdmi audio wip
 
 Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 ---
- arch/arm/boot/dts/sun8i-r40.dtsi | 32 ++++++++++++++++++++++++++++++++
- 1 file changed, 32 insertions(+)
+ arch/arm/boot/dts/sun8i-r40.dtsi | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
 
 --- a/arch/arm/boot/dts/sun8i-r40.dtsi
 +++ b/arch/arm/boot/dts/sun8i-r40.dtsi
@@ -35,26 +35,6 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
  	thermal-zones {
  		cpu_thermal: cpu0-thermal {
  			/* milliseconds */
-@@ -710,6 +728,19 @@
- 			clocks = <&osc24M>;
- 		};
- 
-+		i2s2: i2s@1c22800 {
-+			#sound-dai-cells = <0>;
-+			compatible = "allwinner,sun8i-r40-i2s",
-+				     "allwinner,sun8i-h3-i2s";
-+			reg = <0x01c22800 0x400>;
-+			interrupts = <GIC_SPI 90 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&ccu CLK_BUS_I2S2>, <&ccu CLK_I2S2>;
-+			clock-names = "apb", "mod";
-+			resets = <&ccu RST_BUS_I2S2>;
-+			dmas = <&dma 6>, <&dma 6>;
-+			dma-names = "rx", "tx";
-+		};
-+
- 		ir0: ir@1c21800 {
- 			compatible = "allwinner,sun8i-r40-ir",
- 				     "allwinner,sun6i-a31-ir";
 @@ -1186,6 +1217,7 @@
  		};
  

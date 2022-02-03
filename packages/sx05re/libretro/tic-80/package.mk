@@ -6,10 +6,9 @@ PKG_VERSION="600341db23fa1b6ce3deaccd54ab180d6caee6e2"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/nesbox/TIC-80"
 PKG_URL="$PKG_SITE.git"
-PKG_DEPENDS_TARGET="toolchain tic-80:host"
+PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="TIC-80 is a fantasy computer for making, playing and sharing tiny games."
 GET_HANDLER_SUPPORT="git"
-PKG_DEPENDS_HOST="toolchain:host"
 
 PKG_CMAKE_OPTS_TARGET="-DBUILD_LIBRETRO=ON \
 					   -DBUILD_PLAYER=ON \
@@ -17,12 +16,6 @@ PKG_CMAKE_OPTS_TARGET="-DBUILD_LIBRETRO=ON \
                        -DBUILD_SOKOL=OFF \
                        -DBUILD_SDL=ON \
                        -DCMAKE_BUILD_TYPE=Release"
-
-PKG_CMAKE_OPTS_HOST="-DBUILD_LIBRETRO=OFF \
-					   -DBUILD_PLAYER=OFF \
-					   -DBUILD_DEMO_CARTS=ON \
-                       -DBUILD_SOKOL=OFF \
-                       -DBUILD_SDL=OFF"
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro

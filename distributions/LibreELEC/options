@@ -87,6 +87,9 @@
 # build and install PulseAudio support (yes / no)
   PULSEAUDIO_SUPPORT="yes"
 
+# build and install eSpeak-NG support (yes / no)
+  ESPEAK_SUPPORT="no"
+
 # build and install with BluRay support (yes / no)
   KODI_BLURAY_SUPPORT="yes"
 

@@ -1,3 +1,10 @@
+116
+- libmediainfo: update to 21.09
+- mediainfo: update to 21.09
+- mpg123: update to 1.29.3
+- mpv-drmprime: update to 0.34.1
+- squeezelite: update to 2022-01-06 (1.9.9.1395)
+
 115
 - libmediainfo: update to 21.03
 - libzen: update to 0.4.39

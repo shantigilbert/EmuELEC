@@ -1,0 +1,11 @@
+--- a/src/burner/sdl/drv.cpp	2022-01-22 01:27:13.278967632 -0600
++++ b/src/burner/sdl/drv.cpp	2022-01-22 01:24:57.509794634 -0600
+@@ -3,7 +3,7 @@
+ #include "neocdlist.h"
+ int bDrvOkay = 0;                       // 1 if the Driver has been initted okay, and it's okay to use the BurnDrv functions
+ 
+-char szAppRomPaths[DIRS_MAX][MAX_PATH] = { { "/usr/local/share/roms/" }, { "roms/" }, };
++char szAppRomPaths[DIRS_MAX][MAX_PATH] = { { "/storage/roms/fbneo/" }, { "/storage/roms/neogeo/" }, { "/storage/roms/neocd/" }, };
+ 
+ static bool bSaveRAM = false;
+ 

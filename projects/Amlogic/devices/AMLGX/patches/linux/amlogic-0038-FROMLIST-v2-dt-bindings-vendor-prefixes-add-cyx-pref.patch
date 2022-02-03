@@ -1,0 +1,31 @@
+From 9e14ce133cd6f3b7a7461e580f3ee0b9e6a2f672 Mon Sep 17 00:00:00 2001
+From: Christian Hewitt <christianshewitt@gmail.com>
+Date: Tue, 30 Nov 2021 05:00:45 +0000
+Subject: [PATCH 38/77] FROMLIST(v2): dt-bindings: vendor-prefixes: add cyx
+ prefix
+
+Shenzhen CYX Industrial Co., Ltd are a manufacturer of Android
+Set-Top Box devices.
+
+Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
+Acked-by: Rob Herring <robh@kernel.org>
+---
+ Documentation/devicetree/bindings/vendor-prefixes.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/vendor-prefixes.yaml b/Documentation/devicetree/bindings/vendor-prefixes.yaml
+index eddc8a3a07c2..52ff63248892 100644
+--- a/Documentation/devicetree/bindings/vendor-prefixes.yaml
++++ b/Documentation/devicetree/bindings/vendor-prefixes.yaml
+@@ -279,6 +279,8 @@ patternProperties:
+     description: CUI Devices
+   "^cypress,.*":
+     description: Cypress Semiconductor Corporation
++  "^cyx,.*":
++    description: Shenzhen CYX Industrial Co., Ltd
+   "^cznic,.*":
+     description: CZ.NIC, z.s.p.o.
+   "^dallas,.*":
+-- 
+2.17.1
+

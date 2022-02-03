@@ -64,9 +64,17 @@ MACHINE_UID="$(awk '/^Serial/{s='0000000' $3; print substr(s, length(s) - 7)}' /
 
 # script functions
 progress() {
+  echo "init: ### ${1::160}" >/dev/kmsg
+
   if test "$PROGRESS" = "yes"; then
     echo "### $1 ###" >&2
   fi
+}
+
+echo_to_kmsg() {
+  while IFS= read -r line || [ -n "${line}" ]; do
+    echo "init: ### ${line::160}" >/dev/kmsg
+  done
 }
 
 debug_msg() {
@@ -553,14 +561,27 @@ force_fsck() {
   fi
 }
 
+fix_bootlabel() {
+local flash_label
+
+  [ ! -b /dev/CE_FLASH ] && return 0
+
+  flash_label=$(/usr/sbin/fatlabel /dev/CE_FLASH)
+  if [ "${flash_label}" != "CE_FLASH" ]; then
+    progress "wrong eMMC flash label \"${flash_label}\", fixing it"
+    fatlabel /dev/CE_FLASH CE_FLASH 2>&1 | echo_to_kmsg
+  fi
+}
+
 check_disks() {
   if [ "$RUN_FSCK" = "yes" -a -n "$RUN_FSCK_DISKS" ]; then
     progress "Checking disk(s): $RUN_FSCK_DISKS"
-    echo "Checking disk(s): $RUN_FSCK_DISKS" >/dev/kmsg
     for i in 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0; do
       /usr/sbin/fsck -T -M -p -a $RUN_FSCK_DISKS >/dev/fsck.latest 2>&1
       FSCK_RET=$?
       cat /dev/fsck.latest >>/dev/fsck.log
+      cat /dev/fsck.latest | echo_to_kmsg
+      rm -f /dev/fsck.latest
 
       # FSCK_RET is the bit-wise OR of the exit codes for each filesystem that is checked.
       if [ $FSCK_RET -ge 16 ]; then
@@ -590,10 +611,6 @@ check_disks() {
         break
       fi
     done
-    while read line; do
-      [ -n "$line" ] && echo "fsck: ${line::160}" >/dev/kmsg
-    done </dev/fsck.latest
-    rm -f /dev/fsck.latest
   fi
 }
 
@@ -1342,6 +1359,7 @@ for BOOT_STEP in \
     load_modules \
     set_consolefont \
     check_disks \
+    fix_bootlabel \
     mount_flash \
     cleanup_flash \
     update_bootmenu \

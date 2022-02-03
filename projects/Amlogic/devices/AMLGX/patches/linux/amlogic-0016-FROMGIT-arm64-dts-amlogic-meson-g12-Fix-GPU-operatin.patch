@@ -1,0 +1,38 @@
+From 2f0f9aacc3bd2d12a89cfb02aa8e7eb999f57243 Mon Sep 17 00:00:00 2001
+From: Alexander Stein <alexander.stein@mailbox.org>
+Date: Fri, 26 Nov 2021 15:47:31 +0000
+Subject: [PATCH 16/77] FROMGIT: arm64: dts: amlogic: meson-g12: Fix GPU
+ operating point table node name
+
+Starting with commit 94274f20f6bf ("dt-bindings: opp: Convert to DT
+schema") the opp node name has a mandatory pattern. This change
+fixes the dtbs_check warning:
+gpu-opp-table: $nodename:0: 'gpu-opp-table' does not match
+'^opp-table(-[a-z0-9]+)?$'
+Put the 'gpu' part at the end to match the pattern.
+
+Fixes: 916a0edc43f0 ("arm64: dts: amlogic: meson-g12: add the Mali OPP table and use DVFS")
+Reviewed-by: Neil Armstrong <narmstrong@baylibre.com>
+Signed-off-by: Alexander Stein <alexander.stein@mailbox.org>
+Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
+Link: https://lore.kernel.org/r/20211026182813.900775-2-alexander.stein@mailbox.org
+---
+ arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi b/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
+index 524188b3344c..4f4c8e7d79d2 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
+@@ -58,7 +58,7 @@
+ 		secure-monitor = <&sm>;
+ 	};
+ 
+-	gpu_opp_table: gpu-opp-table {
++	gpu_opp_table: opp-table-gpu {
+ 		compatible = "operating-points-v2";
+ 
+ 		opp-124999998 {
+-- 
+2.17.1
+

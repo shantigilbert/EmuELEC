@@ -11,8 +11,17 @@ function error() {
 	show_splash.sh exit
 }
 
+function setauddev() {
+#set audio device out according to emuelec.conf
+    AUDIO_DEVICE="${1}"
+    [ -z "${AUDIO_DEVICE}" ] && AUDIO_DEVICE="$(get_ee_setting ee_audio_device)"
+    [[ "${AUDIO_DEVICE}" = "auto" || -z "${AUDIO_DEVICE}" ]] && AUDIO_DEVICE="0,0"
+    sed -i "s|pcm \"hw:.*|pcm \"hw:${AUDIO_DEVICE}\"|" /storage/.config/asound.conf
+}
+
 function audio() {
-	# This has to be expanded to check for new GLX devices running on Amlogic-ng,
+    setauddev;
+    # This has to be expanded to check for new GLX devices running on Amlogic-ng,
 	# but right now its mostly used on ES to change audio to alsa before launching or else ES hangs on GXL devices.
    if [[ "$1" == "alsa" ]]; then
 		set_audio alsa
@@ -52,31 +61,31 @@ function clearconfig() {
 }
 
 function ee_backup() {
-	BACKUPFILE="ee_backup_config.tar.gz"
+    BACKUPDIR="/storage/roms/backup"
+    BACKUPTAR="ee_backup_config.tar.gz"
+    BACKUPFILE="${BACKUPDIR}/${BACKUPTAR}"
 
-    if mountpoint -q /var/media/EEROMS; then
-        mkdir -p "/var/media/EEROMS/backup"
-        BACKUPFILE="/var/media/EEROMS/backup/${BACKUPFILE}"
-    elif mountpoint -q /storage/roms; then
-        mkdir -p "/storage/roms/backup"
-        BACKUPFILE="/storage/roms/backup/${BACKUPFILE}"
-    fi
+    mkdir -p "${BACKUPDIR}"
 
 	case "${1}" in
 	"restore")
-		[ -z "$2" ] && systemctl stop emustation
+		[ -z "${2}" ] && systemctl stop emustation
         cd /
 		tar xvf "${BACKUPFILE}"
 		sync
         sleep 3
-		[ -z "$2" ] && systemctl start emustation
+        RESTOREDATE="$(date +'%m-%d-%Y')_$(uuidgen)"
+        # Move the backup file instead of deleting it
+        mv "${BACKUPFILE}" "${BACKUPDIR}/restored_${RESTOREDATE}_${BACKUPTAR}" &
+		[ -z "${2}" ] && systemctl start emustation
 	;;
 	"backup")
 		[ -f "${BACKUPFILE}" ] && rm "${BACKUPFILE}"
-		[ -z "$2" ] && systemctl stop emustation
+		[ -z "${2}" ] && systemctl stop emustation
         tar -zcvf "${BACKUPFILE}" /storage/.local/share/VVVVVV/* \
 					  /storage/.cache/bluetooth/* \
 					  /storage/.cache/timezone \
+					  /storage/.cache/hostname \
 					  /storage/.config/scummvm/* \
 					  /storage/.config/emuelec/configs/emuoptions.conf \
 					  /storage/.config/emuelec/configs/emuelec.conf \

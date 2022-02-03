@@ -11,7 +11,7 @@ PKG_SHORTDESC="Fast PlayStation 1 emulator for PC and Android "
 PKG_TOOLCHAIN="manual"
 
 pre_unpack() {
-	unzip sources/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.zip -d $PKG_BUILD
+	unzip ${SOURCES}/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.zip -d ${PKG_BUILD}
 }
 
 makeinstall_target() {

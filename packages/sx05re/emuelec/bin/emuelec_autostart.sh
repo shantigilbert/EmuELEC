@@ -17,6 +17,14 @@ if [ ! -L "$CONFIG_DIR" ]; then
 ln -sf $CONFIG_DIR2 $CONFIG_DIR
 fi
 
+HOSTNAME=$(get_ee_setting system.hostname)
+if [ ! -z "${HOSTNAME}" ];then 
+    echo "${HOSTNAME}" > /storage/.cache/hostname
+else
+    echo "EMUELEC" > /storage/.cache/hostname
+fi
+cat /storage/.cache/hostname > /proc/sys/kernel/hostname
+
 if [[ "$EE_DEVICE" == "GameForce" ]]; then
 LED=$(get_ee_setting bl_rgb)
 [ -z "${LED}" ] && LED="Off"
@@ -46,8 +54,10 @@ BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 if [[ "$BTENABLED" != "1" ]]; then
 systemctl stop bluetooth
 rm /storage/.cache/services/bluez.conf & 
+else
+systemctl restart bluetooth
+systemctl restart bluetooth-agent
 fi
-
 
 # Mounts /storage/roms
 mount_romfs.sh 
@@ -59,14 +69,13 @@ cp -rf /usr/share/retroarch-overlays/bezels/* /storage/roms/bezels/ &
 fi
 
 # Restore config if backup exists
-BACKUPFILE="ee_backup_config.tar.gz"
-BACKUPFILE="/storage/roms/backup/${BACKUPFILE}"
+BACKUPTAR="ee_backup_config.tar.gz"
+BACKUPFILE="/storage/roms/backup/${BACKUPTAR}"
 
-[[ ! -f "${BACKUPFILE}" ]] && BACKUPFILE="/var/media/EEROMS/backup/${BACKUPFILE}"
+[[ ! -f "${BACKUPFILE}" ]] && BACKUPFILE="/var/media/EEROMS/backup/${BACKUPTAR}"
 
-if [ -f ${BACKUPFILE} ]; then 
+if [ -f "${BACKUPFILE}" ]; then 
 	emuelec-utils ee_backup restore no
-	rm ${BACKUPFILE} &
 fi
 
 DEFE=""

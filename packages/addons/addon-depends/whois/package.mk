@@ -3,8 +3,8 @@
 # Copyright (C) 2020-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="whois"
-PKG_VERSION="5.5.7"
-PKG_SHA256="ae389c1486cdeae99f5f02940f98f5d7ff1f08ac0f96810365159b27b0189b5e"
+PKG_VERSION="5.5.11"
+PKG_SHA256="e0e051773df982f12d000566b5eea433f7055b965f76bb6febda04ba5bf213fa"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.linux.it/~md/software/"
 PKG_URL="https://github.com/rfc1036/whois/archive/v${PKG_VERSION}.tar.gz"

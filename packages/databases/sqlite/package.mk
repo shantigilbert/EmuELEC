@@ -10,7 +10,7 @@ PKG_LICENSE="PublicDomain"
 PKG_SITE="https://www.sqlite.org/"
 PKG_URL="https://www.sqlite.org/2021/${PKG_NAME}-autoconf-${PKG_VERSION_SQLITE/./0}.tar.gz"
 PKG_DEPENDS_HOST="ccache:host autoconf:host automake:host"
-PKG_DEPENDS_TARGET="toolchain ncurses icu"
+PKG_DEPENDS_TARGET="toolchain ncurses"
 PKG_LONGDESC="An Embeddable SQL Database Engine."
 # libsqlite3.a(sqlite3.o): requires dynamic R_X86_64_PC32 reloc against 'sqlite3_stricmp' which may overflow at runtime
 PKG_BUILD_FLAGS="+pic +pic:host -parallel"
@@ -53,8 +53,4 @@ pre_configure_target() {
 # sqlite3_config(SQLITE_CONFIG_MMAP_SIZE) call, or at run-time using the
 # mmap_size pragma.
   CFLAGS+=" -DSQLITE_TEMP_STORE=3 -DSQLITE_DEFAULT_MMAP_SIZE=268435456"
-
-# Enable ICU support.
-# This make case insensitive like statement for non ASCII characters.
-  CFLAGS+=" -DSQLITE_ENABLE_ICU -licuio -licui18n -licuuc -licudata"
 }

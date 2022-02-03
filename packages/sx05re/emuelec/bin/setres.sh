@@ -81,22 +81,24 @@ case $MODE in
 		echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
 	480cvbs)
-		fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
+    echo 480cvbs > /sys/class/display/mode
+		fbset -fb /dev/fb0 -g 640 480 640 960 $BPP
 		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
-		echo 30 10 669 469 > /sys/class/graphics/fb0/window_axis
-		echo 640 > /sys/class/graphics/fb0/scale_width
-		echo 480 > /sys/class/graphics/fb0/scale_height
-		echo 0x10001 > /sys/class/graphics/fb0/free_scale
+		echo 0 0 639 479 > /sys/class/graphics/fb0/free_scale_axis
+		echo 0 0 639 479 > /sys/class/graphics/fb0/window_axis
+		echo 0 > /sys/class/graphics/fb0/free_scale
+		echo 1 > /sys/class/graphics/fb0/freescale_mode    
+		echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
 	576cvbs)
-		fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
+    echo 576cvbs > /sys/class/display/mode
+		fbset -fb /dev/fb0 -g 720 576 720 1152 $BPP
 		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
-		echo 35 20 680 565 > /sys/class/graphics/fb0/window_axis
-		echo 720 > /sys/class/graphics/fb0/scale_width
-		echo 576 > /sys/class/graphics/fb0/scale_height
-		echo 0x10001 > /sys/class/graphics/fb0/free_scale
+		echo 0 0 719 575 > /sys/class/graphics/fb0/free_scale_axis
+		echo 0 0 719 575 > /sys/class/graphics/fb0/window_axis
+		echo 0 > /sys/class/graphics/fb0/free_scale
+		echo 1 > /sys/class/graphics/fb0/freescale_mode    
+    echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
   *x*)
     W=$(echo $MODE | cut -d'x' -f 1)

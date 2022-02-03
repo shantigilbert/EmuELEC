@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="yabasanshiro"
-PKG_VERSION="2848d5053fef1a69f68c600b65a1b9e0d915056c"
+PKG_VERSION="7ae0de7abc378f6077aff0fd365ab25cff58b055"
 PKG_GIT_CLONE_BRANCH="yabasanshiro"
 PKG_REV="1"
 PKG_ARCH="any"
@@ -43,15 +43,14 @@ if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 		PKG_MAKE_OPTS_TARGET+=" -C yabause/src/libretro platform=AMLG12B"
 	fi
 else
-if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
+	if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 		sed -i "s|-mtune=cortex-a73.cortex-a53|-mtune=cortex-a35|g" $PKG_BUILD/yabause/src/libretro/Makefile
 	fi
 	
 	if [[ "${DEVICE}" == "Amlogic" ]]; then
 		sed -i "s|-mtune=cortex-a73.cortex-a53|-mtune=cortex-a53|g" $PKG_BUILD/yabause/src/libretro/Makefile
 	fi
-	
-	PKG_MAKE_OPTS_TARGET+=" -C yabause/src/libretro platform=odroid-n2"
+		PKG_MAKE_OPTS_TARGET+=" -C yabause/src/libretro platform=odroid-n2"
 fi
 }
 

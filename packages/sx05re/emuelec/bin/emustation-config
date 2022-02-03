@@ -269,25 +269,12 @@ wait
 # We do not care if BT scanning finishes before ES starts
 BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 if [[ "$BTENABLED" == "1" ]]; then
-
-# Search for bluetooth gamepads while ES loads. 
-(
-# Kill the BT agent if exists, in case of restart 
-NPID=$(pgrep -f batocera-bluetooth-agent)
-if [[ ! -z "$NPID" ]]; then
-	kill "$NPID"
+    # Search for bluetooth gamepads while ES loads. 
+    (
+        batocera-bluetooth trust
+    ) &
 fi
-echo "EmuELEC Bluetooth Log" > /emuelec/logs/bt.log
-sleep 5
-echo "Starting..." >> /emuelec/logs/bt.log
-python /usr/bin/scripts/scriptmodules/supplementary/bluetoothcontroller.py >> /emuelec/logs/bt.log 2>&1
 
-# only start the bt agent if not already running 
-NPID=$(pgrep -f batocera-bluetooth-agent)
-if [[ -z "$NPID" ]]; then
- (systemd-run batocera-bluetooth-agent) || :
-fi
-) &
-fi 
+emuelec-utils setauddev
 
 exit 0

@@ -529,31 +529,3 @@ index 5a70a56cd406..47c1861eece0 100644
  	rockchip_gem_create_object(struct drm_device *drm, unsigned int size,
  				   bool alloc_kmap);
 
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Andy Yan <andy.yan@rock-chips.com>
-Date: Sun, 27 Jun 2021 16:47:37 +0800
-Subject: [PATCH] drm/rockchip: Check iommu itself instead of it's parent for
- device_is_available
-
-When iommu itself is disabled in dts, we should
-fallback to non-iommu buffer, check iommu parent
-is meanless here.
-
-Signed-off-by: Andy Yan <andy.yan@rock-chips.com>
----
- drivers/gpu/drm/rockchip/rockchip_drm_drv.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/gpu/drm/rockchip/rockchip_drm_drv.c b/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
-index 2e3ab573a817..8161540be6c8 100644
---- a/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
-+++ b/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
-@@ -367,7 +367,7 @@ static int rockchip_drm_platform_of_probe(struct device *dev)
- 		}
- 
- 		iommu = of_parse_phandle(port->parent, "iommus", 0);
--		if (!iommu || !of_device_is_available(iommu->parent)) {
-+		if (!iommu || !of_device_is_available(iommu)) {
- 			DRM_DEV_DEBUG(dev,
- 				      "no iommu attached for %pOF, using non-iommu buffers\n",
- 				      port->parent);

@@ -1,0 +1,13 @@
+diff --git a/girepository/girepository.c b/girepository/girepository.c
+index 7d03485..aef2320 100644
+--- a/girepository/girepository.c	
++++ b/girepository/girepository.c
+@@ -824,6 +824,8 @@ g_irepository_find_by_gtype (GIRepository *repository,
+     return NULL;
+ 
+   data.gtype_name = g_type_name (gtype);
++  if (data.gtype_name == NULL)
++    return NULL;
+   data.result_typelib = NULL;
+ 
+   /* Inside each typelib, we include the "C prefix" which acts as

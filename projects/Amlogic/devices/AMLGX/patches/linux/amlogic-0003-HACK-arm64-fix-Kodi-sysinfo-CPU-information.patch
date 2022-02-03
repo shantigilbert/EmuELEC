@@ -1,4 +1,4 @@
-From b802e78a49c769397ebdd9f8eef65bbaf4282309 Mon Sep 17 00:00:00 2001
+From b566a3fd9a98747fd3ee6c14740aaacc85bde061 Mon Sep 17 00:00:00 2001
 From: chewitt <github@chrishewitt.net>
 Date: Sat, 13 Apr 2019 05:45:18 +0000
 Subject: [PATCH 03/77] HACK: arm64: fix Kodi sysinfo CPU information

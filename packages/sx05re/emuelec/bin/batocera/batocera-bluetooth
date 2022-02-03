@@ -3,21 +3,11 @@
 ACTION=$1
 shift
 
-mkdir -p /emuelec/configs/bluetooth/
-
-# only start the bt agent if not already running 
-NPID=$(pgrep -f batocera-bluetooth-agent)
-if [[ -z "$NPID" ]]; then
- (systemd-run batocera-bluetooth-agent) || :
-sleep 3
-fi
-
 do_help() {
     echo "${1} list" >&2
     echo "${1} trust" >&2
     echo "${1} remove <device address>" >&2
 }
-
 
 do_list() {
     find /storage/.cache/bluetooth -type f -name info |

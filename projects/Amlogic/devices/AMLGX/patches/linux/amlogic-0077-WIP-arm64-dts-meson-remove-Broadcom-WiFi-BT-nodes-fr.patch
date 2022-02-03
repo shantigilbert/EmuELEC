@@ -1,4 +1,4 @@
-From 70ee128fcd4825e844b4fb7f9634349b68e2c2f0 Mon Sep 17 00:00:00 2001
+From f99adeec959a2c74db1f3c97fc1a9b4c8f5de862 Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Tue, 4 Jan 2022 04:36:12 +0000
 Subject: [PATCH 77/77] WIP: arm64: dts: meson: remove Broadcom WiFi/BT nodes

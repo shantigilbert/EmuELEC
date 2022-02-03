@@ -130,7 +130,7 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
  	}
  }
  
-@@ -388,36 +429,6 @@ static void cedrus_h265_setup(struct ced
+@@ -388,37 +429,6 @@ static void cedrus_h265_setup(struct ced
  	width_in_ctb_luma =
  		DIV_ROUND_UP(sps->pic_width_in_luma_samples, ctb_size_luma);
  
@@ -152,6 +152,7 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 -		ctx->codec.h265.mv_col_buf_size = num_buffers *
 -			ctx->codec.h265.mv_col_buf_unit_size;
 -
+-		/* Buffer is never accessed by CPU, so we can skip kernel mapping. */
 -		ctx->codec.h265.mv_col_buf =
 -			dma_alloc_attrs(dev->dev,
 -					ctx->codec.h265.mv_col_buf_size,
@@ -192,9 +193,9 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 -	/* The buffer size is calculated at setup time. */
 -	ctx->codec.h265.mv_col_buf_size = 0;
 -
+ 	/* Buffer is never accessed by CPU, so we can skip kernel mapping. */
  	ctx->codec.h265.neighbor_info_buf =
  		dma_alloc_attrs(dev->dev, CEDRUS_H265_NEIGHBOR_INFO_BUF_SIZE,
- 				&ctx->codec.h265.neighbor_info_buf_addr,
 @@ -759,15 +767,6 @@ static void cedrus_h265_stop(struct cedr
  {
  	struct cedrus_dev *dev = ctx->dev;

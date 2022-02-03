@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="mpg123"
-PKG_VERSION="1.27.2"
-PKG_SHA256="52f6ceb962c05db0c043bb27acf5a721381f5f356ac4610e5221f50293891b04"
+PKG_VERSION="1.29.3"
+PKG_SHA256="963885d8cc77262f28b77187c7d189e32195e64244de2530b798ddf32183e847"
 PKG_LICENSE="LGPLv2"
 PKG_SITE="http://www.mpg123.org/"
 PKG_URL="http://downloads.sourceforge.net/sourceforge/mpg123/mpg123-${PKG_VERSION}.tar.bz2"

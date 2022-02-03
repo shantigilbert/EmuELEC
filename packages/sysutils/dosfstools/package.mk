@@ -27,6 +27,7 @@ make_init() {
 
 makeinstall_init() {
   mkdir -p ${INSTALL}/usr/sbin
+    cp $(get_install_dir dosfstools:target)/usr/sbin/fatlabel ${INSTALL}/usr/sbin
     cp $(get_install_dir dosfstools:target)/usr/sbin/fsck.fat ${INSTALL}/usr/sbin
     ln -sf fsck.fat ${INSTALL}/usr/sbin/fsck.msdos
     ln -sf fsck.fat ${INSTALL}/usr/sbin/fsck.vfat

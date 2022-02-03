@@ -2,9 +2,9 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="game.libretro"
-PKG_VERSION="20.0.0-Nexus"
-PKG_SHA256="677b0ddb87e6ca5831715ae7de11d19aba6f0d11be6ae82e97656955b281ea46"
-PKG_REV="3"
+PKG_VERSION="20.1.0-Nexus"
+PKG_SHA256="ebd06560c0c4229155507644089b84007802322a1693fa26f451421ec33e453e"
+PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-game/game.libretro"

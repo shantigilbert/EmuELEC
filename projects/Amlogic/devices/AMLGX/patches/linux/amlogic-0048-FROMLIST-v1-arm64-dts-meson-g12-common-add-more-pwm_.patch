@@ -1,0 +1,43 @@
+From 37d980a916b47746c71803f4dd97e02ffde6b394 Mon Sep 17 00:00:00 2001
+From: Gary Bisson <gary.bisson@boundarydevices.com>
+Date: Mon, 3 Jan 2022 16:51:30 +0000
+Subject: [PATCH 48/77] FROMLIST(v1): arm64: dts: meson-g12-common: add more
+ pwm_f options
+
+Add missing PWM_F pin muxing for GPIOA_11 and GPIOZ_12.
+
+Signed-off-by: Gary Bisson <gary.bisson@boundarydevices.com>
+---
+ .../arm64/boot/dts/amlogic/meson-g12-common.dtsi | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi b/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
+index 4f4c8e7d79d2..8fdf6890b370 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
+@@ -839,6 +839,22 @@
+ 						};
+ 					};
+ 
++					pwm_f_z_pins: pwm-f-z {
++						mux {
++							groups = "pwm_f_z";
++							function = "pwm_f";
++							bias-disable;
++						};
++					};
++
++					pwm_f_a_pins: pwm-f-a {
++						mux {
++							groups = "pwm_f_a";
++							function = "pwm_f";
++							bias-disable;
++						};
++					};
++
+ 					pwm_f_x_pins: pwm-f-x {
+ 						mux {
+ 							groups = "pwm_f_x";
+-- 
+2.17.1
+

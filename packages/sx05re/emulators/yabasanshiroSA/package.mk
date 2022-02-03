@@ -9,7 +9,7 @@ PKG_LONGDESC="Yabause is a Sega Saturn emulator and took over as Yaba Sanshiro"
 PKG_TOOLCHAIN="cmake-make"
 GET_HANDLER_SUPPORT="git"
 PKG_GIT_CLONE_BRANCH="pi4"
-PKG_BUILD_FLAGS="+size"
+PKG_BUILD_FLAGS="+speed"
 
 post_unpack() {
   # use host versions
@@ -34,8 +34,7 @@ PKG_CMAKE_OPTS_TARGET="${PKG_BUILD}/yabause \
                          -DOPENGL_opengl_LIBRARY=${SYSROOT_PREFIX}/usr/lib \
                          -DOPENGL_glx_LIBRARY=${SYSROOT_PREFIX}/usr/lib \
                          -DLIBPNG_LIB_DIR=${SYSROOT_PREFIX}/usr/lib \
-                         -Dpng_STATIC_LIBRARIES=${SYSROOT_PREFIX}/usr/lib/libpng16.a \
-                         -DCMAKE_BUILD_TYPE=Release"
+                         -Dpng_STATIC_LIBRARIES=${SYSROOT_PREFIX}/usr/lib/libpng16.a"
 }
 
 makeinstall_target() {

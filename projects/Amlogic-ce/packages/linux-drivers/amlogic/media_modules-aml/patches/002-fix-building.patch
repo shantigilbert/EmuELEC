@@ -1,8 +1,8 @@
 diff --git a/drivers/amvdec_ports/aml_vcodec_vfm.c b/drivers/amvdec_ports/aml_vcodec_vfm.c
-index e7b85fb..6d1bdc2 100644
+index 62896ea0..a3e7be7c 100644
 --- a/drivers/amvdec_ports/aml_vcodec_vfm.c
 +++ b/drivers/amvdec_ports/aml_vcodec_vfm.c
-@@ -57,8 +57,6 @@ static void vdec_vf_put(struct vframe_s *vf, void *op_arg)
+@@ -60,8 +60,6 @@ static void vdec_vf_put(struct vframe_s *vf, void *op_arg)
  		return;
  	}
  
@@ -11,7 +11,7 @@ index e7b85fb..6d1bdc2 100644
  	vfq_push(&vfm->vf_que_recycle, vf);
  
  	/* schedule capture work. */
-@@ -100,7 +98,7 @@ void video_vf_put(char *receiver, struct vdec_v4l2_buffer *fb, int id)
+@@ -105,7 +103,7 @@ void video_vf_put(char *receiver, struct vdec_v4l2_buffer *fb, int id)
  		fb->m.mem[1].addr, fb->m.mem[1].size,
  		fb->m.mem[2].addr, fb->m.mem[2].size);
  
@@ -20,11 +20,11 @@ index e7b85fb..6d1bdc2 100644
  		vf_put(vf, receiver);
  }
  
-diff --git a/drivers/amvdec_ports/decoder/vdec_h264_if.c b/drivers/amvdec_ports/decoder/vdec_h264_if.c
-index 02848b8..6a3d076 100644
---- a/drivers/amvdec_ports/decoder/vdec_h264_if.c
-+++ b/drivers/amvdec_ports/decoder/vdec_h264_if.c
-@@ -593,8 +593,6 @@ static void vdec_h264_get_vf(struct vdec_h264_inst *inst, struct vdec_v4l2_buffe
+diff --git a/drivers/amvdec_ports/decoder/vdec_av1_if.c b/drivers/amvdec_ports/decoder/vdec_av1_if.c
+index e8693d40..0e5e791d 100644
+--- a/drivers/amvdec_ports/decoder/vdec_av1_if.c
++++ b/drivers/amvdec_ports/decoder/vdec_av1_if.c
+@@ -553,8 +553,6 @@ static void vdec_av1_get_vf(struct vdec_av1_inst *inst, struct vdec_v4l2_buffer
  		return;
  	}
  
@@ -33,11 +33,24 @@ index 02848b8..6a3d076 100644
  	fb = (struct vdec_v4l2_buffer *)vf->v4l_mem_handle;
  	fb->vf_handle = (unsigned long)vf;
  	fb->status = FB_ST_DISPLAY;
+diff --git a/drivers/amvdec_ports/decoder/vdec_h264_if.c b/drivers/amvdec_ports/decoder/vdec_h264_if.c
+index d7c4f437..2fedc273 100644
+--- a/drivers/amvdec_ports/decoder/vdec_h264_if.c
++++ b/drivers/amvdec_ports/decoder/vdec_h264_if.c
+@@ -737,8 +737,6 @@ static void vdec_h264_get_vf(struct vdec_h264_inst *inst, struct vdec_v4l2_buffe
+ 		return;
+ 	}
+ 
+-	atomic_set(&vf->use_cnt, 1);
+-
+ 	fb = (struct vdec_v4l2_buffer *)vf->v4l_mem_handle;
+ 	if (fb) {
+ 		fb->vf_handle = (unsigned long)vf;
 diff --git a/drivers/amvdec_ports/decoder/vdec_hevc_if.c b/drivers/amvdec_ports/decoder/vdec_hevc_if.c
-index 59ce85f..11a1d6f 100644
+index 569806d3..fb4a5482 100644
 --- a/drivers/amvdec_ports/decoder/vdec_hevc_if.c
 +++ b/drivers/amvdec_ports/decoder/vdec_hevc_if.c
-@@ -407,8 +407,6 @@ static void vdec_hevc_get_vf(struct vdec_hevc_inst *inst, struct vdec_v4l2_buffe
+@@ -575,8 +575,6 @@ static void vdec_hevc_get_vf(struct vdec_hevc_inst *inst, struct vdec_v4l2_buffe
  		return;
  	}
  
@@ -47,10 +60,10 @@ index 59ce85f..11a1d6f 100644
  	fb->vf_handle = (unsigned long)vf;
  	fb->status = FB_ST_DISPLAY;
 diff --git a/drivers/amvdec_ports/decoder/vdec_mjpeg_if.c b/drivers/amvdec_ports/decoder/vdec_mjpeg_if.c
-index 8bc5faa..fda0b33 100644
+index f9816cc3..c031aab8 100644
 --- a/drivers/amvdec_ports/decoder/vdec_mjpeg_if.c
 +++ b/drivers/amvdec_ports/decoder/vdec_mjpeg_if.c
-@@ -352,8 +352,6 @@ static void vdec_mjpeg_get_vf(struct vdec_mjpeg_inst *inst, struct vdec_v4l2_buf
+@@ -470,8 +470,6 @@ static void vdec_mjpeg_get_vf(struct vdec_mjpeg_inst *inst, struct vdec_v4l2_buf
  		return;
  	}
  
@@ -60,10 +73,10 @@ index 8bc5faa..fda0b33 100644
  	fb->vf_handle = (unsigned long)vf;
  	fb->status = FB_ST_DISPLAY;
 diff --git a/drivers/amvdec_ports/decoder/vdec_mpeg12_if.c b/drivers/amvdec_ports/decoder/vdec_mpeg12_if.c
-index cdde95b..ce76cec 100644
+index fa272841..528fb78e 100644
 --- a/drivers/amvdec_ports/decoder/vdec_mpeg12_if.c
 +++ b/drivers/amvdec_ports/decoder/vdec_mpeg12_if.c
-@@ -344,8 +344,6 @@ static void vdec_mpeg12_get_vf(struct vdec_mpeg12_inst *inst, struct vdec_v4l2_b
+@@ -457,8 +457,6 @@ static void vdec_mpeg12_get_vf(struct vdec_mpeg12_inst *inst, struct vdec_v4l2_b
  		return;
  	}
  
@@ -73,10 +86,10 @@ index cdde95b..ce76cec 100644
  	fb->vf_handle = (unsigned long)vf;
  	fb->status = FB_ST_DISPLAY;
 diff --git a/drivers/amvdec_ports/decoder/vdec_mpeg4_if.c b/drivers/amvdec_ports/decoder/vdec_mpeg4_if.c
-index 7a40a4a..80a140b 100644
+index e067e156..fb5ada67 100644
 --- a/drivers/amvdec_ports/decoder/vdec_mpeg4_if.c
 +++ b/drivers/amvdec_ports/decoder/vdec_mpeg4_if.c
-@@ -353,8 +353,6 @@ static void vdec_mpeg4_get_vf(struct vdec_mpeg4_inst *inst, struct vdec_v4l2_buf
+@@ -467,8 +467,6 @@ static void vdec_mpeg4_get_vf(struct vdec_mpeg4_inst *inst, struct vdec_v4l2_buf
  		return;
  	}
  
@@ -86,10 +99,10 @@ index 7a40a4a..80a140b 100644
  	fb->vf_handle = (unsigned long)vf;
  	fb->status = FB_ST_DISPLAY;
 diff --git a/drivers/amvdec_ports/decoder/vdec_vp9_if.c b/drivers/amvdec_ports/decoder/vdec_vp9_if.c
-index 5b3bbab..823426c 100644
+index 6704350b..d865c25b 100644
 --- a/drivers/amvdec_ports/decoder/vdec_vp9_if.c
 +++ b/drivers/amvdec_ports/decoder/vdec_vp9_if.c
-@@ -397,8 +397,6 @@ static void vdec_vp9_get_vf(struct vdec_vp9_inst *inst, struct vdec_v4l2_buffer
+@@ -604,8 +604,6 @@ static void vdec_vp9_get_vf(struct vdec_vp9_inst *inst, struct vdec_v4l2_buffer
  		return;
  	}
  
@@ -98,3 +111,29 @@ index 5b3bbab..823426c 100644
  	fb = (struct vdec_v4l2_buffer *)vf->v4l_mem_handle;
  	fb->vf_handle = (unsigned long)vf;
  	fb->status = FB_ST_DISPLAY;
+diff --git a/drivers/fake_video_out/fake_video.c b/drivers/fake_video_out/fake_video.c
+index e0e9b164..3e3fe8d8 100644
+--- a/drivers/fake_video_out/fake_video.c
++++ b/drivers/fake_video_out/fake_video.c
+@@ -72,20 +72,12 @@ static struct vframe_s *video_vf_get(void)
+ 
+ 	vf = vf_get(RECEIVER_NAME);
+ 
+-	if (vf) {
+-		atomic_set(&vf->use_cnt, 1);
+-		/*pr_err("Get vframe  w: %d, h: %d, fence: %lx, idx: %d\n",
+-			vf->width, vf->height, (ulong)vf->fence, vf->index & 0xff);*/
+-	}
+-
+ 	return vf;
+ }
+ 
+ static void video_vf_put(struct vframe_s *vf)
+ {
+-	struct vframe_provider_s *vfp = vf_get_provider(RECEIVER_NAME);
+-
+-	if (vfp && vf && atomic_dec_and_test(&vf->use_cnt)) {
++	if (vf) {
+ 		vf_put(vf, RECEIVER_NAME);
+ 	}
+ }

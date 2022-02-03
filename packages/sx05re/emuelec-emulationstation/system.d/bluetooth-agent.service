@@ -1,0 +1,11 @@
+[Unit]
+Description=EmuELEC Bluetooth Agent
+After=bluetooth.service
+
+[Service]
+EnvironmentFile=/storage/.config/emulationstation/scripts/es_env.sh
+ExecStart=/usr/bin/python /usr/bin/batocera/batocera-bluetooth-agent
+Restart=on-failure
+
+[Install]
+WantedBy=emuelec.target

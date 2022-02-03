@@ -1,0 +1,36 @@
+From 4bbf6486ea01d20c0760ebc4a8ac48b481831d46 Mon Sep 17 00:00:00 2001
+From: Stefan Agner <stefan@agner.ch>
+Date: Wed, 15 Sep 2021 05:00:45 +0000
+Subject: [PATCH 13/77] HACK: of: partial revert of fdt.c changes
+
+This resolves reports similar to the below which are present in dmesg
+since Linux 5.10; which are also causing crashes in some distros:
+
+[    0.000000] OF: fdt: Reserved memory: failed to reserve memory for node 'secmon@5000000': base 0x0000000005000000, size 3 MiB
+
+Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
+---
+ drivers/of/fdt.c | 7 -------
+ 1 file changed, 7 deletions(-)
+
+diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
+index bdca35284ceb..674d12e37e65 100644
+--- a/drivers/of/fdt.c
++++ b/drivers/of/fdt.c
+@@ -480,13 +480,6 @@ static int __init early_init_dt_reserve_memory_arch(phys_addr_t base,
+ 					phys_addr_t size, bool nomap)
+ {
+ 	if (nomap) {
+-		/*
+-		 * If the memory is already reserved (by another region), we
+-		 * should not allow it to be marked nomap.
+-		 */
+-		if (memblock_is_region_reserved(base, size))
+-			return -EBUSY;
+-
+ 		return memblock_mark_nomap(base, size);
+ 	}
+ 	return memblock_reserve(base, size);
+-- 
+2.17.1
+

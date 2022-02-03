@@ -3,7 +3,7 @@
 #https://github.com/MaximLopez/HeartOfDarkness-SDL"
 
 PKG_NAME="hodesdl"
-PKG_VERSION="6b969cd59e7fa6cdc759dba07bb8197103ecb6ae"
+PKG_VERSION="a971e54d53ac8c8e94894139d5b89c81d04b4d63"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/usineur/hode"

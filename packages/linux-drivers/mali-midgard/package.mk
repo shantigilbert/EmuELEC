@@ -2,8 +2,8 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="mali-midgard"
-PKG_VERSION="4d72a50cd76e2cdeef25fec113e3f6b3396f6e3c" # TX011-SW-99002-r28p0-01rel0
-PKG_SHA256="deafa22863440733f0f48b48bfb87329ae2a96c394f90cae36d1121909c31804"
+PKG_VERSION="2c2accf67356463ee661627b8705429256011dcb" # TX011-SW-99002-r28p0-01rel0
+PKG_SHA256="506ec1e388f491f53a9acf8ca2077bd135a6d31f688ed7139ed0cd77f5c44d72"
 PKG_ARCH="arm aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="https://developer.arm.com/products/software/mali-drivers/"

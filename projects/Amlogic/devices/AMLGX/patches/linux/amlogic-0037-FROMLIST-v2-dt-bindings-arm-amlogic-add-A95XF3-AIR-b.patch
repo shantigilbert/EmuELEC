@@ -1,0 +1,32 @@
+From dcf35fe217ea7244da1c73b69257d27b5bb2fe1d Mon Sep 17 00:00:00 2001
+From: Christian Hewitt <christianshewitt@gmail.com>
+Date: Mon, 29 Jun 2020 15:54:45 +0000
+Subject: [PATCH 37/77] FROMLIST(v2): dt-bindings: arm: amlogic: add A95XF3-AIR
+ bindings
+
+Add board bindings for the CYX A95XF3-AIR set-top box which ships
+with model variants distiguished by Ethernet configuration: models
+using external Gigabit PHY have a -gbit suffix, while models using
+an internal 10/100 PHY have no suffix.
+
+Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
+---
+ Documentation/devicetree/bindings/arm/amlogic.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/arm/amlogic.yaml b/Documentation/devicetree/bindings/arm/amlogic.yaml
+index 294c1948c25a..9176ba3eebab 100644
+--- a/Documentation/devicetree/bindings/arm/amlogic.yaml
++++ b/Documentation/devicetree/bindings/arm/amlogic.yaml
+@@ -171,6 +171,8 @@ properties:
+         items:
+           - enum:
+               - bananapi,bpi-m5
++              - cyx,a95xf3-air
++              - cyx,a95xf3-air-gbit
+               - hardkernel,odroid-c4
+               - hardkernel,odroid-hc4
+               - haochuangyi,h96-max
+-- 
+2.17.1
+

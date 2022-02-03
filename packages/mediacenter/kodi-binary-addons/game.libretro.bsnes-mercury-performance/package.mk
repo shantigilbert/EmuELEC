@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="game.libretro.bsnes-mercury-performance"
-PKG_VERSION="0.94.0.18-Matrix"
-PKG_SHA256="5b5df15cdf534a722c2ecf06649a77795027ff869e01a60ad564cde91047ac52"
+PKG_VERSION="0.94.0.20-Leia"
+PKG_SHA256="087bde42d36dd68b00c3fe0dd2565e3db8d4b9f86d6d17f8edff8386a943f92b"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

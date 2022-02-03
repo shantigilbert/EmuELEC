@@ -1,0 +1,29 @@
+From 8940635fc5a695e4f71343c822f0e002ef626c3f Mon Sep 17 00:00:00 2001
+From: Christian Hewitt <christianshewitt@gmail.com>
+Date: Sat, 29 Feb 2020 15:13:02 +0000
+Subject: [PATCH 68/77] WIP: dt-bindings: arm: amlogic: add support for the
+ Tanix TX5 Max
+
+The Oranth (Tanix) TX5 Max is based on the Amlogic U200 reference
+board with an S905X2 chip.
+
+Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
+---
+ Documentation/devicetree/bindings/arm/amlogic.yaml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/arm/amlogic.yaml b/Documentation/devicetree/bindings/arm/amlogic.yaml
+index 7c3627d9c773..6f3c43ae92c2 100644
+--- a/Documentation/devicetree/bindings/arm/amlogic.yaml
++++ b/Documentation/devicetree/bindings/arm/amlogic.yaml
+@@ -143,6 +143,7 @@ properties:
+           - enum:
+               - amediatech,x96-max
+               - amlogic,u200
++              - oranth,tx5-max
+               - radxa,zero
+               - seirobotics,sei510
+           - const: amlogic,g12a
+-- 
+2.17.1
+

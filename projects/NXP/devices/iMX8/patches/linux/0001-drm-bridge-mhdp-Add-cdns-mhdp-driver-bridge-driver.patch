@@ -4129,14 +4129,14 @@ index a4a45daf93f2..058bc372f02b 100644
 +	struct device *dev = dp->mhdp.dev;
  	struct device_node *np = dev->of_node;
  	struct platform_device *pdev = to_platform_device(dev);
- 	struct resource *res;
+ 
 @@ -704,10 +715,10 @@ static int cdn_dp_parse_dt(struct cdn_dp_device *dp)
+ 		return PTR_ERR(dp->grf);
  	}
  
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	dp->regs = devm_ioremap_resource(dev, res);
+-	dp->regs = devm_platform_ioremap_resource(pdev, 0);
 -	if (IS_ERR(dp->regs)) {
-+	dp->mhdp.regs_base = devm_ioremap_resource(dev, res);
++	dp->mhdp.regs_base = devm_platform_ioremap_resource(pdev, 0);
 +	if (IS_ERR(dp->mhdp.regs_base)) {
  		DRM_DEV_ERROR(dev, "ioremap reg failed\n");
 -		return PTR_ERR(dp->regs);

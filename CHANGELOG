@@ -1,6 +1,48 @@
 EmuELEC CHANGELOG
 ==================
 
+# 4.4
+
+General: 
+
+Huge update to base build system: 
+
+* All Amlogic devices now use the same kernel 4.9-19! 
+* You might notice a bit more performance on some emulators as well usage in general.
+* IMPORTANT: S905 (GXBB, p201) for the moment is no longer supported. If you have one of those devices (s905 no letter after the 5) DO NOT UPDATE, stay in 4.3.
+
+Fixed Bugs:
+
+* One of the most annyoing bugs that plagued fbdev with Retroarch was also fixed (Issue #76) 
+  fixed in PR `mali_fbdev fix for fps drop after egl_destroy` (#789) by spleen1981!
+  This means that using retroarch as bootup option is now possible (some small changes need to be done).  
+* Fixed bluetooth connectivity issues
+* Fix zoom not working on manuals 
+* Fix many external mounting issues
+* Backup will now rename the file instead of deleting it after restore.
+* Fixed SuperTux and SuperTuxKart data download 
+* Fixed autoupdate would show update available even if there was none. 
+
+Additions and other fixes: 
+
+* Added WIP Mupen64plus Standalone
+* Added WIP fbneo Standalone
+* Added Duckstation Standalone
+* Added Yabasanshiro Standalone
+* Added iotop
+* Added VIM
+* Added External Mount settings in ES
+* Added option to create key remaps for Advance MAME
+* Switch to SDL 2.0.16 for all devices
+* Support for Pixelcade
+* Retroachievements encore is now configurable from ES
+* Added Enable Integer Overscaling in ES
+* Use toggle for fast forward instead of hold
+* add .68k .68K .sgd .SGD to genesis/md
+* WIP: Added symlinks for compatibility with portmaster
+
+And many other changes! for the full list check out the commit history. 
+
 # 4.3
 
 General: 

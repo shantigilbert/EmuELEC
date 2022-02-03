@@ -41,5 +41,9 @@ pre_make_target() {
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro
-  cp flycast_libretro.so $INSTALL/usr/lib/libretro/
+  if [ "${ARCH}" == "arm" ]; then
+	cp flycast_libretro.so $INSTALL/usr/lib/libretro/flycast_32b_libretro.so
+  else
+	cp flycast_libretro.so $INSTALL/usr/lib/libretro/
+  fi
 }

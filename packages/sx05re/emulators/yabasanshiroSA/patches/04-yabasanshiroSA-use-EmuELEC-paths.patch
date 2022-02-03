@@ -1,6 +1,6 @@
 --- a/yabause/src/retro_arena/main.cpp
 +++ b/yabause/src/retro_arena/main.cpp
-@@ -285,7 +285,7 @@
+@@ -286,7 +286,7 @@
  
    // Inisialize home directory
    std::string home_dir = getenv("HOME");
@@ -9,6 +9,17 @@
    struct stat st = {0};
    if (stat(home_dir.c_str(), &st) == -1) {
      mkdir(home_dir.c_str(), 0700);
+@@ -597,7 +597,9 @@
+         if( ret == 0 ){
+           char pngname[256];
+           snprintf(pngname,256,"%s/%s_%d.png", s_savepath, cdip->itemnum, e.user.code);
+-          fs::copy(tmpfilename, pngname, fs::copy_options::overwrite_existing );
++          //fs::copy(tmpfilename, pngname, fs::copy_options::overwrite_existing );
++
++           system((std::string("cp -f ") + tmpfilename + " " + pngname).c_str()); 
+         }
+         hideMenuScreen();
+       }
 
 --- a/yabause/src/retro_arena/Preference.cpp
 +++ b/yabause/src/retro_arena/Preference.cpp

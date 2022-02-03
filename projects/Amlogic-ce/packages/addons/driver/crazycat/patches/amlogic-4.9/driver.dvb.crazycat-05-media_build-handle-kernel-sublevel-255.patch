@@ -1,0 +1,268 @@
+From a313a759f6e46e50b33ac85739ddd7966367cdcd Mon Sep 17 00:00:00 2001
+From: Hans Verkuil <hverkuil-cisco@xs4all.nl>
+Date: Tue, 9 Mar 2021 12:01:55 +0100
+Subject: [PATCH] media_build: handle kernel sublevel > 255
+
+Signed-off-by: Hans Verkuil <hverkuil-cisco@xs4all.nl>
+---
+ backports/backports.txt     | 78 ++++++++++++++++++-------------------
+ linux/Makefile              |  4 +-
+ linux/patches_for_kernel.pl |  1 +
+ linux/use_dir.pl            |  2 +-
+ 4 files changed, 43 insertions(+), 42 deletions(-)
+
+diff --git a/backports/backports.txt b/backports/backports.txt
+index 0806864..1ade47e 100644
+--- a/backports/backports.txt
++++ b/backports/backports.txt
+@@ -5,7 +5,7 @@
+ # by summing the patches needed to backport to all kernel
+ # versions higher or equal to the desired one. For example,
+ # if this file has:
+-# [3.255.255]
++# [3.255.1023]
+ # add patch_for_upstream.patch
+ # [2.6.38]
+ # add patch_for_2.6.38.patch
+@@ -20,153 +20,153 @@
+ # use linux/patches_for_kernel.pl <version>
+ 
+ # All supported versions need those patches
+-[9.255.255]
++[9.255.1023]
+ add api_version.patch
+ add pr_fmt.patch
+ add debug.patch
+ add drx39xxj.patch
+ 
+-[5.1.255]
++[5.1.1023]
+ add v5.1_vm_map_pages.patch
+ 
+-[5.0.255]
++[5.0.1023]
+ add v5.0_ipu3-cio2.patch
+ 
+-[4.20.255]
++[4.20.1023]
+ add v4.20_access_ok.patch
+ 
+-[4.18.255]
++[4.18.1023]
+ add v4.18_fwnode_args_args.patch
+ add v4.18_add_map_atomic.patch
+ 
+-[4.17.255]
++[4.17.1023]
+ add v4.17_proc_create_single.patch
+ add v4.17_i2c_check_num_msgs.patch
+ 
+-[4.15.255]
++[4.15.1023]
+ add v4.15_pmdown_time.patch
+ 
+-[4.14.255]
++[4.14.1023]
+ add v4.14_saa7146_timer_cast.patch
+ add v4.14_module_param_call.patch
+ 
+-[4.13.255]
++[4.13.1023]
+ add v4.13_remove_nospec_h.patch
+ add v4.13_drmP.patch
+ 
+-[4.12.255]
++[4.12.1023]
+ add v4.12_revert_solo6x10_copykerneluser.patch
+ 
+-[4.11.255]
++[4.11.1023]
+ add v4.11_drop_drm_file.patch
+ 
+-[4.10.255]
++[4.10.1023]
+ add v4.10_sched_signal.patch
+ add v4.10_fault_page.patch
+ add v4.10_refcount.patch
+ 
+-[4.9.255]
++[4.9.1023]
+ add v4.9_mm_address.patch
+ add v4.9_dvb_net_max_mtu.patch
+ 
+-[4.8.255]
++[4.8.1023]
+ add v4.8_user_pages_flag.patch
+ add v4.8_em28xx_bitfield.patch
+ add v4.8_dma_map_resource.patch
+ add v4.8_drm_crtc.patch
+ 
+-[4.7.255]
++[4.7.1023]
+ add v4.7_dma_attrs.patch
+ add v4.7_pci_alloc_irq_vectors.patch
+ add v4.7_copy_to_user_warning.patch
+ add v4.7_objtool_warning.patch
+ 
+-[4.6.255]
++[4.6.1023]
+ add v4.6_i2c_mux.patch
+ 
+-[4.5.255]
++[4.5.1023]
+ add v4.5_gpiochip_data_pointer.patch
+ add v4.5_get_user_pages.patch
+ add v4.5_uvc_super_plus.patch
+ add v4.5_copy_to_user_warning.patch
+ 
+-[4.4.255]
++[4.4.1023]
+ add v4.4_gpio_chip_parent.patch
+ 
+-[4.3.255]
++[4.3.1023]
+ add v4.3_bt87x_const_fix.patch
+ 
+-[4.2.255]
++[4.2.1023]
+ add v4.2_atomic64.patch
+ add v4.2_frame_vector.patch
+ 
+-[4.1.255]
++[4.1.1023]
+ add v4.1_pat_enabled.patch
+ add v4.1_drop_fwnode.patch
+ 
+-[4.0.255]
++[4.0.1023]
+ add v4.0_dma_buf_export.patch
+ add v4.0_drop_trace.patch
+ add v4.0_fwnode.patch
+ 
+-[3.19.255]
++[3.19.1023]
+ add v3.19_get_user_pages_unlocked.patch
+ add v3.19_get_user_pages_locked.patch
+ 
+-[3.18.255]
++[3.18.1023]
+ add v3.18_drop_property_h.patch
+ add v3.18_ktime_get_real_seconds.patch
+ 
+-[3.17.255]
++[3.17.1023]
+ add v3.17_fix_clamp.patch
+ add v3.17_remove_bpf_h.patch
+ 
+-[3.16.255]
++[3.16.1023]
+ add v3.16_netdev.patch
+ add v3.16_wait_on_bit.patch
+ add v3.16_void_gpiochip_remove.patch
+ 
+-[3.13.255]
++[3.13.1023]
+ add v3.13_ddbridge_pcimsi.patch
+ 
+-[3.12.255]
++[3.12.1023]
+ add v3.12_kfifo_in.patch
+ 
+-[3.11.255]
++[3.11.1023]
+ add v3.11_dev_groups.patch
+ 
+-[3.10.255]
++[3.10.1023]
+ add v3.10_fw_driver_probe.patch
+ add v3.10_ir_hix5hd2.patch
+ add v3.10_const_snd_pcm_ops.patch
+ 
+-[3.9.255]
++[3.9.1023]
+ add v3.9_drxj_warnings.patch
+ 
+-[3.8.255]
++[3.8.1023]
+ add v3.8_config_of.patch
+ 
+-[3.6.255]
++[3.6.1023]
+ add v3.6_pci_error_handlers.patch
+ add v3.6_i2c_add_mux_adapter.patch
+ 
+-[3.4.255]
++[3.4.1023]
+ add v3.4_i2c_add_mux_adapter.patch
+ add v3.4_stk_webcam.patch
+ 
+-[3.3.255]
++[3.3.1023]
+ add v3.3_eprobe_defer.patch
+ 
+-[3.2.255]
++[3.2.1023]
+ add v3.2_devnode_uses_mode_t.patch
+ add v3.2_alloc_ordered_workqueue.patch
+ 
+-[3.1.255]
++[3.1.1023]
+ add v3.1_no_export_h.patch
+ add v3.1_no_dma_buf_h.patch
+ add v3.1_no_pm_qos.patch
+ 
+-[3.0.255]
++[3.0.1023]
+ add no_atomic_include.patch
+ add v3.0_ida2bit.patch
+ add v3.0_remove_ida_lird_dev.patch
+diff --git a/linux/Makefile b/linux/Makefile
+index c7a4341..8cfc932 100644
+--- a/linux/Makefile
++++ b/linux/Makefile
+@@ -80,7 +80,7 @@ todaytar:
+ 	-rm -f $(PWD)/$(TODAY_TAR).bz2
+ 	tar cf $(PWD)/$(TODAY_TAR) -C $(DIR) $(TARFILES)
+ 	git --git-dir $(DIR)/.git log --pretty=oneline -n3 |sed -r 's,([\x22]),,g; s,([\x25\x5c]),\1\1,g' >git_log
+-	perl -e 'while (<>) { $$a=$$1 if (m/^\s*VERSION\s*=\s*(\d+)/); $$b=$$1 if (m/^\s*PATCHLEVEL\s*=\s*(\d+)/); $$c=$$1 if (m/^\s*SUBLEVEL\s*=\s*(\d+)/); } printf "#define V4L2_VERSION %d\n", ((($$a) << 16) + (($$b) << 8) + ($$c))' $(DIR)/Makefile > kernel_version.h
++	perl -e 'while (<>) { $$a=$$1 if (m/^\s*VERSION\s*=\s*(\d+)/); $$b=$$1 if (m/^\s*PATCHLEVEL\s*=\s*(\d+)/); $$c=$$1 if (m/^\s*SUBLEVEL\s*=\s*(\d+)/); } printf "#define V4L2_VERSION %d\n", ((($$a) << 16) + (($$b) << 8) + ($$c > 255 ? 255 : $$c))' $(DIR)/Makefile > kernel_version.h
+ 	tar rvf $(PWD)/$(TODAY_TAR) git_log kernel_version.h
+ 
+ 	for i in $(TARDIR); do \
+@@ -99,7 +99,7 @@ tar:
+ 	-rm -f $(PWD)/linux-media.tar.bz2
+ 	tar cf $(PWD)/linux-media.tar -C $(DIR) $(TARFILES)
+ 	git --git-dir $(DIR)/.git log --pretty=oneline -n3 |sed -r 's,([\x22]),,g; s,([\x25\x5c]),\1\1,g' >git_log
+-	perl -e 'while (<>) { $$a=$$1 if (m/^\s*VERSION\s*=\s*(\d+)/); $$b=$$1 if (m/^\s*PATCHLEVEL\s*=\s*(\d+)/); $$c=$$1 if (m/^\s*SUBLEVEL\s*=\s*(\d+)/); } printf "#define V4L2_VERSION %d\n", ((($$a) << 16) + (($$b) << 8) + ($$c))' $(DIR)/Makefile > kernel_version.h
++	perl -e 'while (<>) { $$a=$$1 if (m/^\s*VERSION\s*=\s*(\d+)/); $$b=$$1 if (m/^\s*PATCHLEVEL\s*=\s*(\d+)/); $$c=$$1 if (m/^\s*SUBLEVEL\s*=\s*(\d+)/); } printf "#define V4L2_VERSION %d\n", ((($$a) << 16) + (($$b) << 8) + ($$c > 255 ? 255 : $$c))' $(DIR)/Makefile > kernel_version.h
+ 	tar rvf $(PWD)/linux-media.tar git_log kernel_version.h
+ 	for i in $(TARDIR); do \
+ 		if [ "`echo $$i|grep Documentation`" = "" ]; then \
+diff --git a/linux/patches_for_kernel.pl b/linux/patches_for_kernel.pl
+index 91b79fd..6ab3077 100755
+--- a/linux/patches_for_kernel.pl
++++ b/linux/patches_for_kernel.pl
+@@ -22,6 +22,7 @@ sub kernel_version($) {
+ 		$sublevel = 0;
+ 	}
+ 	$sublevel = 0 if ($sublevel == "");
++	$sublevel = 255 if ($sublevel > 255);
+ 	return ($version * 65536 + $patchlevel * 256 + $sublevel);
+ }
+ 
+diff --git a/linux/use_dir.pl b/linux/use_dir.pl
+index b461ec5..7ca8b35 100755
+--- a/linux/use_dir.pl
++++ b/linux/use_dir.pl
+@@ -291,7 +291,7 @@ sub sync_kernel_version()
+ 		$c=$1 if (m/^\s*SUBLEVEL\s*=\s*(\d+)/);
+ 	}
+ 	close IN;
+-	$source_v4l_version = ((($a) << 16) + (($b) << 8) + ($c));
++	$source_v4l_version = ((($a) << 16) + (($b) << 8) + ($c > 255 ? 255 : $c));
+ 
+ 	if (open IN, "kernel_version.h") {
+ 		while (<IN>) {
+-- 
+2.33.0
+

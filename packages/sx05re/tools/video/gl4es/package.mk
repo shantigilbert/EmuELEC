@@ -24,7 +24,8 @@ fi
 
 makeinstall_target(){
 mkdir -p ${INSTALL}/usr/lib/
-cp ${PKG_BUILD}/lib/libGL.so.1 ${INSTALL}/usr/lib/libGL.so.1
+cp ${PKG_BUILD}/lib/libGL.so.1 ${INSTALL}/usr/lib/libGL.so
+ln -sf libGL.so ${INSTALL}/usr/lib/libGL.so.1
 }
 
 
@@ -33,6 +34,6 @@ cp ${PKG_BUILD}/lib/libGL.so.1 ${INSTALL}/usr/lib/libGL.so.1
 #post_makeinstall_target() {
 #cp -rf ${INSTALL}/usr/lib/libGL.so.1 ${SYSROOT_PREFIX}/usr/lib/libGL.so
 #ln -sf ${SYSROOT_PREFIX}/usr/lib/libGL.so ${SYSROOT_PREFIX}/usr/lib/libGL.so.1
-#cp -rf ${PKG_BUILD}/include ${SYSROOT_PREFIX}/usr/include
+#cp -rf ${PKG_BUILD}/include/* ${SYSROOT_PREFIX}/usr/include
 #cp -rf ${PKG_DIR}/pkgconfig/gl.pc ${SYSROOT_PREFIX}/usr/lib/pkgconfig
 #}

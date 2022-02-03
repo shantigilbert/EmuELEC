@@ -1,0 +1,29 @@
+From 677ac5ae62575e7f0a478e48a6ac0b2d12238414 Mon Sep 17 00:00:00 2001
+From: Christian Hewitt <christianshewitt@gmail.com>
+Date: Tue, 12 Jan 2021 17:25:33 +0000
+Subject: [PATCH 34/77] FROMLIST(v2): dt-bindings: arm: amlogic: add H96-Max
+ bindings
+
+Add the board binding for the Haochuangyi H96-Max STB device.
+
+Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
+Acked-by: Rob Herring <robh@kernel.org>
+---
+ Documentation/devicetree/bindings/arm/amlogic.yaml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/arm/amlogic.yaml b/Documentation/devicetree/bindings/arm/amlogic.yaml
+index 36081734f720..294c1948c25a 100644
+--- a/Documentation/devicetree/bindings/arm/amlogic.yaml
++++ b/Documentation/devicetree/bindings/arm/amlogic.yaml
+@@ -173,6 +173,7 @@ properties:
+               - bananapi,bpi-m5
+               - hardkernel,odroid-c4
+               - hardkernel,odroid-hc4
++              - haochuangyi,h96-max
+               - khadas,vim3l
+               - seirobotics,sei610
+           - const: amlogic,sm1
+-- 
+2.17.1
+

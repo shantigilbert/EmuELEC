@@ -9,6 +9,12 @@
 # fat32 is default
 ROM_FS_TYPE="vfat"
 
+ESRESTART="${1}"
+
+EXTERNALDRIVE="${2}"
+[[ -z "${EXTERNALDRIVE}" ]] && EXTERNALDRIVE=$(get_ee_setting global.externalmount)
+[[ -z "${EXTERNALDRIVE}" || "${EXTERNALDRIVE}" == "auto" ]] && EXTERNALDRIVE=""
+
 # Get EEROMS filetype
 if [ -e "/flash/ee_fstype" ]; then
     EE_FS_TYPE=$(cat "/flash/ee_fstype")
@@ -59,17 +65,21 @@ ROMFILE="emuelecroms"
 
 # Only run the USB check if the ROMFILE does not exists in /storage/roms, this can help for manually created symlinks or network shares
 # or if you want to skip the USB rom mount for whatever reason
-if  [ ! -f "/storage/roms/$ROMFILE" ]; then
+if  [ ! -f "/storage/roms/$ROMFILE" ] || [ "${ESRESTART}" == "yes" ]; then
 
 # if the file is not present then we look for the file in connected USB media, and only return the first match 
-FULLPATHTOROMS="$(find /media/*/roms/ -name $ROMFILE* -maxdepth 1 | head -n 1)"
+ROMSPATH="/media/*/roms/"
+[[ ! -z "${EXTERNALDRIVE}" ]] && ROMSPATH="/var/media/${EXTERNALDRIVE}/roms/"
+FULLPATHTOROMS="$(find ${ROMSPATH} -name ${ROMFILE}* -maxdepth 1 | head -n 1)"
+
+echo "Using path ${FULLPATHTOROMS}"
 
 if [[ -z "${FULLPATHTOROMS}" ]]; then
 TRY=0
 RETRY=$(get_ee_setting ee_mount.retry)
     if [ "${RETRY}" -ge  1 ]; then
         while [ "${TRY}" -le "${RETRY}" ] ; do
-            FULLPATHTOROMS="$(find /media/*/roms/ -name $ROMFILE* -maxdepth 1 | head -n 1)"
+            FULLPATHTOROMS="$(find ${ROMSPATH} -name ${ROMFILE}* -maxdepth 1 | head -n 1)"
             [[ ! -z "${FULLPATHTOROMS}" ]] && break;
             TRY=$((TRY+1))
             sleep 1
@@ -124,3 +134,5 @@ fi
 fi # samba 
 
 systemctl start smbd
+
+[[ "${ESRESTART}" == "yes" ]] && systemctl restart emustation

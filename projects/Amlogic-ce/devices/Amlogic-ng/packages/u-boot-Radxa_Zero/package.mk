@@ -2,8 +2,8 @@
 # Copyright (C) 2021-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="u-boot-Radxa_Zero"
-PKG_VERSION="efde497a7f4cd7b63422dc18c7ed02ac013ba10d"
-PKG_SHA256="4f48253ac8613e8c343c2d312eed05d8778c17e27c8ca5d3404889055718032b"
+PKG_VERSION="d3c411ea314dbc4b3af03f93db4fa85524a4adf5"
+PKG_SHA256="9941a36d814981498fb067887bc6a4f1453204a923a680c22bf406b534eee4e2"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.denx.de/wiki/U-Boot"
 PKG_URL="https://github.com/CoreELEC/u-boot/archive/$PKG_VERSION.tar.gz"
