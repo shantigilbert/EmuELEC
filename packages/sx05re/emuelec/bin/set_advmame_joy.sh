@@ -20,6 +20,9 @@ BTN_CFG="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15"
 
 DEBUGFILE="$CONFIG_DIR/joy_debug.cfg"
 
+BTN_H0=$(get_ee_setting advmame_btn_h0)
+[[ -z "$BTN_H0" ]] && BTN_H0="stick4"
+
 declare -A JS_BUTTON_INDEXES=(
   ["0"]="button1"
   ["1"]="button2"
@@ -31,10 +34,10 @@ declare -A JS_BUTTON_INDEXES=(
   ["7"]="button8"
   ["8"]="button9"
   ["9"]="button10"
-  ["h0up"]="stick4,y,up"
-  ["h0down"]="stick4,y,down"
-  ["h0left"]="stick4,x,left"
-  ["h0right"]="stick4,x,right"
+  ["h0up"]="$BTN_H0,y,up"
+  ["h0down"]="$BTN_H0,y,down"
+  ["h0left"]="$BTN_H0,x,left"
+  ["h0right"]="$BTN_H0,x,right"
   ["-0"]="stick,x,left"
   ["+0"]="stick,x,right"
   ["-1"]="stick,y,up"
