@@ -10,14 +10,8 @@ export DISPLAY=:0
 
 if [ ! -d "$CONFIG_DIR" ]; then
  mkdir -p $CONFIG_DIR
- cp -rfp /usr/share/advance/* $CONFIG_DIR/
+ cp -rf /usr/share/advance/* $CONFIG_DIR/
 fi
-
-CONFIG_JOY_DIR="$CONFIG_DIR/cfg_advmame_joy.sh"
-if [[ ! -f "$CONFIG_JOY_DIR" ]]; then
-  cp -p /usr/share/advance/cfg_advmame_joy.sh "$CONFIG_JOY_DIR"
-fi
-
 
 if [[ "$1" = *"roms/arcade"* ]]; then
 sed -i "s|/roms/mame|/roms/arcade|g" $CONFIG_DIR/advmame.rc
