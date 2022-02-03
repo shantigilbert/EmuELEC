@@ -21,18 +21,21 @@ EE_DEV="js0"
 GPFILE=""
 GAMEPAD=""
 
+BTN_H0=$(get_ee_setting flycast_btn_h0)
+[[ -z "$BTN_H0" ]] && BTN_H0=255
+
 declare -A FLYCAST_D_INDEXES=(
-[h0.1]=256
-[h0.4]=257
-[h0.8]=258
-[h0.2]=259
+[h0.1]=$(( BTN_H0+1 ))
+[h0.4]=$(( BTN_H0+2 ))
+[h0.8]=$(( BTN_H0+3 ))
+[h0.2]=$(( BTN_H0+4 ))
 )
 
 declare -A FLYCAST_D_BIND=(
-  [a]=0
-  [b]=1
-  [x]=2
-  [y]=3
+  [a]=1
+  [b]=0
+  [x]=3
+  [y]=2
   [leftshoulder]=4
   [rightshoulder]=5
   [lefttrigger]=6
