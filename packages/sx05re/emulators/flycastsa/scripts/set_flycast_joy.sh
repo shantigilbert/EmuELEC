@@ -90,7 +90,7 @@ set_pad() {
   JOY_NAME=$4
 
   CONFIG="${CONFIG_DIR}/SDL_${JOY_NAME}.cfg"
-  [[ -f "${CONFIG}" ]] cp "${CONFIG}" "${CONFIG}.bak"
+  [[ -f "${CONFIG}" ]] && cp "${CONFIG}" "${CONFIG}.bak"
 
   echo "DEVICE_GUID=${DEVICE_GUID}"
 
