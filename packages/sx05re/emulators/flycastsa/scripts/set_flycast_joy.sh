@@ -114,26 +114,19 @@ set_pad() {
   echo "GC_CONFIG=$GC_CONFIG"
   [[ -z $GC_CONFIG ]] && return
 
-  GC_MAP=$(echo $GC_CONFIG | cut -d',' -f4-)
-  echo "GC_MAP=$GC_MAP"
+  GC_MAP=$(echo $GC_CONFIG | cut -d',' -f5-)
 
   set -f
   GC_ARRAY=(${GC_MAP//,/ })
   
   for index in "${!GC_ARRAY[@]}"; do
       REC=${GC_ARRAY[$index]}
-      echo "REC=$REC"
       BUTTON_INDEX=$(echo $REC | cut -d ":" -f 1)
-      echo "BUTTON_INDEX=$BUTTON_INDEX"
       TVAL=$(echo $REC | cut -d ":" -f 2)
-      echo "TVAL=$TVAL"
       BTN_TYPE="${TVAL:1}"
-      echo "BTN_TYPE=$BTN_TYPE"
       FC_INDEX_D=${FLYCAST_D_BUTTONS[$BUTTON_INDEX]}
-      echo "FC_INDEX_D=$FC_INDEX_D"
       if [[ ! -z "$FC_INDEX_D" ]]; then
           BTN_TYPE=${TVAL:0:1}
-          echo "BTN_TYPE=$BTN_TYPE"
           BIND_NUM=${FLYCAST_D_BIND[$BUTTON_INDEX]}
           [[ $BTN_TYPE == "b" ]] && NUM=${TVAL:1} && echo "bind${BIND_NUM} = $NUM:${FC_INDEX_D}" >> ${CONFIG_TMP_D}
           [[ $BTN_TYPE == "h" ]] && NUM=${FLYCAST_D_INDEXES[$TVAL]} && echo "bind${BIND_NUM} = ${NUM}:${FC_INDEX_D}" >> ${CONFIG_TMP_D}
@@ -182,46 +175,67 @@ set_pad() {
 # This will extract the GUID from es_settings.cfg depending on how many players have been set on ES and determine if they are currently connected to the device.
 get_players() {
 # You can set up to 8 player on ES
-  OLD_DEVICE_GUID=""
+  local OLD_DEVICE_GUID
+  declare -i PLAYER=1
+  
+  cat /proc/bus/input/devices | grep -E "^I\: (.*)$|^H\: Handlers\=.*${JSI}.*+$|^N\: Name\=\"(.*)+$|^B\: KEY\=[0-9a-f ]+$" > /tmp/input_devices
+  
   for ((y = 1; y <= 8; y++)); do
-  #echo "Player $y" #debug
-    echo "Getting GUID for INPUT P${y}GUID" #debug
+    #echo "Getting GUID for INPUT P${y}GUID" #debug
 
-    DEVICE_GUID=$(get_es_setting string "INPUT P${y}GUID")
+    local DEVICE_GUID=$(get_es_setting string "INPUT P${y}GUID")
     
-    JOY_INDEX=$(( $y - 1 ))
-    JSI="js${JOY_INDEX}"
-    DETECT_LINE=$(echo "^H\: Handlers.*[\= ]?${JSI}.*$")
-    
-    cat /proc/bus/input/devices | grep -E "^H\: Handlers\=.*${JSI}.*+$|^N\: Name\=\"(.*)+$" > /tmp/input_devices
+    declare -i JOY_INDEX=$y-1
+    local JSI="js${JOY_INDEX}"
+    local DETECT_LINE=$(echo "^H\: Handlers.*[\= ]?${JSI}.*$")
+      
+    declare -i LINE_NUM=0
+    local LINE_NUM=$(cat /tmp/input_devices | grep -E -n "${DETECT_LINE}" | cut -d : -f 1)
+    [[ ! $LINE_NUM =~ ^[0-9]+$ ]] && continue
 
-    LINE_NUMBER=$(cat /tmp/input_devices | grep -E -n "${DETECT_LINE}" | cut -d ":" -f 1)
-    echo "LINE_NUMBER=$LINE_NUMBER"
-    [[ ! $LINE_NUMBER =~ ^[0-9]+$ ]] && continue
-    LINE_NUMBER=$(( $LINE_NUMBER - 1 ))
-    
-    JOY_NAME=$(cat /tmp/input_devices | sed -n "${LINE_NUMBER}p" | cut -d "=" -f 2 | tr -d '"')
-    rm /tmp/input_devices
+    ((LINE_NUM++))
+    local JOY_KEY=$(cat /tmp/input_devices | sed -n "${LINE_NUM}p" | grep -E "^B\: KEY\=[0-9a-f ]+$")
+    [[ -z "$JOY_KEY" ]] && continue
 
-    echo "JOY_NAME=$JOY_NAME"
+    ((LINE_NUM-=2))
+    local JOY_NAME=$(cat /tmp/input_devices | sed -n "${LINE_NUM}p" | cut -d "=" -f 2 | tr -d '"')
     [[ -z "$JOY_NAME" ]] && continue
 
-    if [[ -z "${DEVICE_GUID}" ]]; then
-      INPUTCONFIG_XML=$(cat "$ESINPUT" | grep -i "$JOY_NAME")
-      if [[ ! -z "${INPUTCONFIG_XML}" ]]; then
-        GUID_DIRTY=$(echo "$INPUTCONFIG_XML" | cut -d "=" -f 4)
-        DEVICE_GUID="${GUID_DIRTY:1:-2}"
-      fi
-    fi
+    ((LINE_NUM--))
+    local GUID_LINE=$(cat /tmp/input_devices | sed -n "${LINE_NUM}p")
+
+    DEVICE_GUID=$(generate_guid "$GUID_LINE")
+    [[ -z "$DEVICE_GUID" ]] && continue
+
     if [[ ! -z "${DEVICE_GUID}" ]]; then
         if [[ ! "${DEVICE_GUID}" == "${OLD_DEVICE_GUID}" ]]; then
           clean_pad
-    	    set_pad "${y}" "${JSI}" "${DEVICE_GUID}" "${JOY_NAME}"
+    	    set_pad "${PLAYER}" "${JSI}" "${DEVICE_GUID}" "${JOY_NAME}"
           OLD_DEVICE_GUID="${DEVICE_GUID}"
         fi
   	fi
-  
+    ((PLAYER++))
   done
+
+  rm /tmp/input_devices
 }
 
+generate_guid() {
+  local GUID_STRING="$1"
+  local p1=$( echo $GUID_STRING | cut -d = -f2 | cut -d ' ' -f1 | awk '{ printf "%8s\n", $0 }' | sed 's/ /0/g')
+  local p2=$( echo $GUID_STRING | cut -d = -f3 | cut -d ' ' -f1 | awk '{ printf "%8s\n", $0 }' | sed 's/ /0/g')
+  local p3=$( echo $GUID_STRING | cut -d = -f4 | cut -d ' ' -f1 | awk '{ printf "%8s\n", $0 }' | sed 's/ /0/g')
+  local p4=$( echo $GUID_STRING | cut -d = -f5 | cut -d ' ' -f1 | awk '{ printf "%8s\n", $0 }' | sed 's/ /0/g')
+
+  local v
+  v+=$(echo ${p1:6:2}${p1:4:2}${p1:2:2}${p1:0:2})
+  v+=$(echo ${p2:6:2}${p2:4:2}${p2:2:2}${p2:0:2})
+  v+=$(echo ${p3:6:2}${p3:4:2}${p3:2:2}${p3:0:2})
+  v+=$(echo ${p4:6:2}${p4:4:2}${p4:2:2}${p4:0:2})
+  
+  echo "$v"
+}
+
+mkdir -p "/storage/.config/flycast"
+mkdir -p "/storage/.config/flycast/mappings"
 get_players
