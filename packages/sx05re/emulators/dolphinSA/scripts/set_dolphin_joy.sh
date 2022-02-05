@@ -101,11 +101,11 @@ set_pad() {
 
   echo "DEVICE_GUID=$DEVICE_GUID"
   
-  local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID")
+  local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep -v "platform:Linux" | head -1)
   echo "GC_CONFIG=$GC_CONFIG"
   [[ -z $GC_CONFIG ]] && return
 
-  local GC_MAP=$(echo $GC_CONFIG | cut -d',' -f4-)
+  local GC_MAP=$(echo $GC_CONFIG | cut -d',' -f3-)
   #local JOY_NAME=$(echo $GC_CONFIG | cut -d',' -f2)
   echo "[GCPad$1]" >> ${CONFIG}
   local JOY_INDEX=$(( $1 - 1 ))
