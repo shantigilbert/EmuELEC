@@ -10,6 +10,7 @@
 GCDB="/storage/.config/SDL-GameControllerDB/gamecontrollerdb.txt"
 ESINPUT="/storage/.config/emulationstation/es_input.cfg"
 CONFIG_DIR="/storage/.config/flycast/mappings"
+EMU_FILE="/storage/.config/flycast/emu.cfg"
 
 #CONFIG_TMP=/tmp/SDLflycast.tmp
 CONFIG_TMP_A="/tmp/SDLflycastA.tmp"
@@ -31,29 +32,31 @@ declare -A FLYCAST_D_INDEXES=(
 [h0.2]=$(( BTN_H0+4 ))
 )
 
-declare -A FLYCAST_D_BIND=(
-  [a]=1
-  [b]=0
-  [x]=3
-  [y]=2
-  [leftshoulder]=4
-  [rightshoulder]=5
-  [lefttrigger]=6
-  [righttrigger]=7
-  [back]=8
-  [start]=9
-  [guide]=10
-  [dpup]=11
-  [dpdown]=12
-  [dpleft]=13
-  [dpright]=14
-)
+# Only needed for version 3.
+#declare -A FLYCAST_D_BIND=(
+#  [a]=1
+#  [b]=0
+#  [x]=3
+#  [y]=2
+#  [leftshoulder]=4
+#  [rightshoulder]=5
+#  [lefttrigger]=6
+#  [righttrigger]=7
+#  [back]=8
+#  [start]=9
+#  [guide]=10
+#  [dpup]=11
+#  [dpdown]=12
+#  [dpleft]=13
+#  [dpright]=14
+#)
 
+# Regular buttons a,b,x,y flipped.
 declare -A FLYCAST_D_BUTTONS=(
-  [x]="btn_x"
-  [y]="btn_y"
-  [a]="btn_a"
-  [b]="btn_b"
+  [x]="btn_y"
+  [y]="btn_x"
+  [a]="btn_b"
+  [b]="btn_a"
   [leftshoulder]="btn_c"
   [rightshoulder]="btn_d"
   [lefttrigger]="btn_trigger_left"
@@ -65,13 +68,13 @@ declare -A FLYCAST_D_BUTTONS=(
   [dpdown]="btn_dpad1_down"
   [dpleft]="btn_dpad1_left"
   [dpright]="btn_dpad1_right"
+  [leftx]="axis_x"
+  [lefty]="axis_y"
+  [rightx]="axis_right_x"
+  [righty]="axis_right_y"
 )
 
 declare -A FLYCAST_A_BUTTONS=(
-  [leftx]="btn_analog_left,btn_analog_right"
-  [lefty]="btn_analog_up,btn_analog_down"
-  [rightx]="btn_dpad2_left,btn_dpad2_right"
-  [righty]="btn_dpad2_up,btn_dpad2_down"
 )
 
 # Cleans all the inputs for the gamepad with name $GAMEPAD and player $1 
@@ -101,6 +104,12 @@ set_pad() {
   touch "${CONFIG_TMP_D}"
   touch "${CONFIG_TMP_E}"
 
+  echo "axis_right_x_inverted = no" >> ${CONFIG_TMP_A}
+  echo "axis_right_y_inverted = no" >> ${CONFIG_TMP_A}
+  echo "axis_x_inverted = no" >> ${CONFIG_TMP_A}
+  echo "axis_y_inverted = no" >> ${CONFIG_TMP_A}
+
+
   [[ -f "${CONFIG}" ]] && GC_RECORD=$(cat "${CONFIG}" | grep -E "^dead_zone \= [0-9]*$")
   [[ -z "$GC_RECORD" ]] && GC_RECORD="dead_zone = 10"
   echo "$GC_RECORD" >> ${CONFIG_TMP_E}
@@ -108,7 +117,7 @@ set_pad() {
   [[ -f "${CONFIG}" ]] && rm "${CONFIG}"
 
   echo "mapping_name = $JOY_NAME" >> ${CONFIG_TMP_E}
-  echo "version = 3" >> ${CONFIG_TMP_E}
+  echo "version = 2" >> ${CONFIG_TMP_E}
 
   GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID")
   echo "GC_CONFIG=$GC_CONFIG"
@@ -125,43 +134,40 @@ set_pad() {
       TVAL=$(echo $REC | cut -d ":" -f 2)
       BTN_TYPE="${TVAL:1}"
       FC_INDEX_D=${FLYCAST_D_BUTTONS[$BUTTON_INDEX]}
+      ABORT_ENTRY=0
       if [[ ! -z "$FC_INDEX_D" ]]; then
           BTN_TYPE=${TVAL:0:1}
-          BIND_NUM=${FLYCAST_D_BIND[$BUTTON_INDEX]}
-          [[ $BTN_TYPE == "b" ]] && NUM=${TVAL:1} && echo "bind${BIND_NUM} = $NUM:${FC_INDEX_D}" >> ${CONFIG_TMP_D}
-          [[ $BTN_TYPE == "h" ]] && NUM=${FLYCAST_D_INDEXES[$TVAL]} && echo "bind${BIND_NUM} = ${NUM}:${FC_INDEX_D}" >> ${CONFIG_TMP_D}
+          NUM=${TVAL:1}
+          [[ $BUTTON_INDEX == "lefttrigger" ]] && ABORT_ENTRY=1
+          [[ $BUTTON_INDEX == "righttrigger" ]] && ABORT_ENTRY=1
+          [[ $BUTTON_INDEX == "back" ]]  && ABORT_ENTRY=1 && echo "${FC_INDEX_D} = $NUM" >> ${CONFIG_TMP_E}
+          [[ $BUTTON_INDEX == "guide" ]] && ABORT_ENTRY=1 && echo "${FC_INDEX_D} = $NUM" >> ${CONFIG_TMP_E} 
+
+          if [[ $ABORT_ENTRY == 0 ]]; then
+            [[ $BTN_TYPE == "a" ]] && echo "${FC_INDEX_D} = $NUM" >> ${CONFIG_TMP_D}
+            [[ $BTN_TYPE == "b" ]] && echo "${FC_INDEX_D} = $NUM" >> ${CONFIG_TMP_D}
+            [[ $BTN_TYPE == "h" ]] && NUM=${FLYCAST_D_INDEXES[$TVAL]} && echo "${FC_INDEX_D} = ${NUM}" >> ${CONFIG_TMP_D}
+          fi
       fi
 
-      FC_INDEX_A=${FLYCAST_A_BUTTONS[$BUTTON_INDEX]}
+      FC_INDEX_A=${FLYCAST_D_BUTTONS[$BUTTON_INDEX]}
       if [[ ! -z "$FC_INDEX_A" ]]; then
-        FC_INDEX_A1=$(echo $FC_INDEX_A | cut -d "," -f 1)
-        FC_INDEX_A2=$(echo $FC_INDEX_A | cut -d "," -f 2)        
         NUM=${TVAL:1}
         case $BUTTON_INDEX in
-          "leftx")
-            echo "bind0 = $NUM-:$FC_INDEX_A1" >> ${CONFIG_TMP_A}
-            echo "bind1 = $NUM+:$FC_INDEX_A2" >> ${CONFIG_TMP_A}
+          "lefttrigger")
+            echo "${FC_INDEX_A} = $NUM" >> ${CONFIG_TMP_A}
             ;;
-          "lefty")
-            echo "bind2 = $NUM-:$FC_INDEX_A1" >> ${CONFIG_TMP_A}
-            echo "bind3 = $NUM+:$FC_INDEX_A2" >> ${CONFIG_TMP_A}
-            ;;
-          "rightx")
-            echo "bind4 = $NUM-:$FC_INDEX_A1" >> ${CONFIG_TMP_A}
-            echo "bind5 = $NUM+:$FC_INDEX_A2" >> ${CONFIG_TMP_A}
-            ;;
-          "righty")
-            echo "bind6 = $NUM-:$FC_INDEX_A1" >> ${CONFIG_TMP_A}
-            echo "bind7 = $NUM+:$FC_INDEX_A2" >> ${CONFIG_TMP_A}
+          "righttrigger")
+            echo "${FC_INDEX_A} = $NUM" >> ${CONFIG_TMP_A}
             ;;
         esac
       fi
   done 
 
-  echo "[analog]" >> "${CONFIG}"
+  echo "[compat]" >> "${CONFIG}"
   cat "${CONFIG_TMP_A}" | sort >> "${CONFIG}"
 
-  echo -e "\n[digital]" >> "${CONFIG}"
+  echo -e "\n[dreamcast]" >> "${CONFIG}"
   cat "${CONFIG_TMP_D}" | sort >> "${CONFIG}"
   
   echo -e "\n[emulator]" >> "${CONFIG}"
@@ -170,6 +176,16 @@ set_pad() {
   rm "${CONFIG_TMP_A}"
   rm "${CONFIG_TMP_D}"
   rm "${CONFIG_TMP_E}"
+  
+  # Adjust the emulator config file to load sdl controller files.
+  declare -i LN=$( cat "$EMU_FILE" | grep -n "\[input\]" | cut -d: -f1 )
+  if [ ${LN} -ne 0 ]; then
+    sed -i '/maple_sdl_joystick_0/d' "$EMU_FILE"
+    sed -i '/maple_sdl_joystick_1/d' "$EMU_FILE"
+  fi
+  ((LN++))
+  sed -i "${LN} i maple_sdl_joystick_0 = 0\nmaple_sdl_joystick_1 = 1" "$EMU_FILE"
+
 }
 
 # This will extract the GUID from es_settings.cfg depending on how many players have been set on ES and determine if they are currently connected to the device.
@@ -178,7 +194,7 @@ get_players() {
   local OLD_DEVICE_GUID
   declare -i PLAYER=1
   
-  cat /proc/bus/input/devices | grep -E "^I\: (.*)$|^H\: Handlers\=.*${JSI}.*+$|^N\: Name\=\"(.*)+$|^B\: KEY\=[0-9a-f ]+$" > /tmp/input_devices
+  cat /proc/bus/input/devices | grep -E -B5 -A3 "^H: Handlers\=.*js[0-9]{1}.*+$" > /tmp/input_devices
   
   for ((y = 1; y <= 8; y++)); do
     #echo "Getting GUID for INPUT P${y}GUID" #debug
@@ -193,16 +209,16 @@ get_players() {
     local LINE_NUM=$(cat /tmp/input_devices | grep -E -n "${DETECT_LINE}" | cut -d : -f 1)
     [[ ! $LINE_NUM =~ ^[0-9]+$ ]] && continue
 
-    ((LINE_NUM++))
-    local JOY_KEY=$(cat /tmp/input_devices | sed -n "${LINE_NUM}p" | grep -E "^B\: KEY\=[0-9a-f ]+$")
+    declare -i LINE_KEY_NUM=$(( LINE_NUM+3 ))
+    local JOY_KEY=$(cat /tmp/input_devices | sed -n "${LINE_KEY_NUM}p" | grep -E "^B\: KEY\=[0-9a-f ]+$")
     [[ -z "$JOY_KEY" ]] && continue
 
-    ((LINE_NUM-=2))
-    local JOY_NAME=$(cat /tmp/input_devices | sed -n "${LINE_NUM}p" | cut -d "=" -f 2 | tr -d '"')
+    declare -i LINE_NAME_NUM=$(( LINE_NUM-4 ))
+    local JOY_NAME=$(cat /tmp/input_devices | sed -n "${LINE_NAME_NUM}p" | cut -d "=" -f 2 | tr -d '"')
     [[ -z "$JOY_NAME" ]] && continue
 
-    ((LINE_NUM--))
-    local GUID_LINE=$(cat /tmp/input_devices | sed -n "${LINE_NUM}p")
+    ((LINE_NAME_NUM--))
+    local GUID_LINE=$(cat /tmp/input_devices | sed -n "${LINE_NAME_NUM}p")
 
     DEVICE_GUID=$(generate_guid "$GUID_LINE")
     [[ -z "$DEVICE_GUID" ]] && continue
