@@ -119,7 +119,7 @@ set_pad() {
   echo "mapping_name = $JOY_NAME" >> ${CONFIG_TMP_E}
   echo "version = 2" >> ${CONFIG_TMP_E}
 
-  GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID")
+  local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep -v "platform:Linux" | head -1)
   echo "GC_CONFIG=$GC_CONFIG"
   [[ -z $GC_CONFIG ]] && return
 
