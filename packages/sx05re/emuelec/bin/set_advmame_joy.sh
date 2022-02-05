@@ -102,6 +102,8 @@ set_pad(){
 #echo "Setting pad $1 from ${GPFILE}" #debug
   local GPFILE="/tmp/joypads/${JOY_NAME}.cfg"
   local EE_GAMEPAD=$(cat "$GPFILE" | grep input_device |  cut -d'"' -f2)
+  [[ -z "$EE_GAMEPAD" ]] && return
+
   local GAMEPAD=$(echo "$EE_GAMEPAD" | sed "s|,||g" | sed "s|_||g" | cut -d'"' -f 2 | sed "s|(||" | sed "s|)||" | sed -e 's/[^A-Za-z0-9._-]/ /g' | sed 's/[[:blank:]]*$//' | sed 's/-//' | sed -e 's/[^A-Za-z0-9._-]/_/g' |tr '[:upper:]' '[:lower:]' | tr -d '.')
 	[[ "$1" != "1" ]] && GAMEPAD="$GAMEPAD_${1}"
 
