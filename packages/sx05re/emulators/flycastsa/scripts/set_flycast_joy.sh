@@ -123,7 +123,7 @@ set_pad() {
   echo "GC_CONFIG=$GC_CONFIG"
   [[ -z $GC_CONFIG ]] && return
 
-  GC_MAP=$(echo $GC_CONFIG | cut -d',' -f5-)
+  GC_MAP=$(echo $GC_CONFIG | cut -d',' -f3-)
 
   set -f
   GC_ARRAY=(${GC_MAP//,/ })
