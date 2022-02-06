@@ -75,10 +75,9 @@ get_button_cfg() {
 	local BTN_INDEX=$(get_ee_setting "joy_btn_cfg" "mame" "${ROMNAME}")
   [[ -z $BTN_INDEX ]] && BTN_INDEX=$(get_ee_setting "mame.joy_btn_cfg")
 
-  local BTN_CFG_TMP=
   if [[ ! -z $BTN_INDEX ]] && [[ $BTN_INDEX -gt 0 ]]; then
 		local BTN_SETTING="AdvanceMame.joy_btn_order$BTN_INDEX"
-    BTN_CFG_TMP="$(get_ee_setting $BTN_SETTING)"
+    local BTN_CFG_TMP="$(get_ee_setting $BTN_SETTING)"
 		[[ ! -z $BTN_CFG_TMP ]] && BTN_CFG="${BTN_CFG_TMP} 8 9 10 11 12 13 14 15"
 	fi
 	echo "$BTN_CFG"
