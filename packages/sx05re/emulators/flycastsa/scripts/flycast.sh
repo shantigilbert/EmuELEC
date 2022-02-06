@@ -15,10 +15,12 @@ if [ ! -L "/storage/.local/share/flycast" ]; then
 fi
 
 AUTOGP=$(get_ee_setting flycast_auto_gamepad)
+sleep 0.5
 if [[ "${AUTOGP}" != "0" ]]; then 
   mkdir -p "/storage/.config/flycast"
   mkdir -p "/storage/.config/flycast/mappings"
   /usr/bin/set_flycast_joy.sh
+  sleep 0.5
 fi
 
 flycast "${1}"
