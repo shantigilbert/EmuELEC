@@ -53,12 +53,12 @@ declare -A JS_BUTTON_INDEXES=(
 )
 
 BTN_ORDER=(
-  "input_a_btn"
-	"input_b_btn"
+  "input_b_btn"
+	"input_a_btn"
 	"input_x_btn"
 	"input_y_btn"
-	"input_r_btn"
 	"input_l_btn"
+	"input_r_btn"
 	"input_r2_btn"
 	"input_l2_btn"
 	"input_up_btn"
@@ -116,14 +116,25 @@ set_pad(){
 
   local button=""
   local i=1
-  local DIR_LEFT=""
-  local DIR_RIGHT=""
-  local DIR_UP=""
-  local DIR_DOWN=""
-  
+  #local DIR_LEFT=""
+  #local DIR_RIGHT=""
+  #local DIR_UP=""
+  #local DIR_DOWN=""
+  declare DIRS=()
+  declare -A DIR_INDEX=(
+    [input_up_btn]="0"
+    [input_down_btn]="1"
+    [input_left_btn]="2"
+    [input_right_btn]="3"
+    [input_l_y_minus_axis]="0"
+    [input_l_y_plus_axis]="1"
+    [input_l_x_minus_axis]="2"
+    [input_l_x_plus_axis]="3"
+  )
 
+  declare -i INDEX=0
   for bi in ${BTN_CFG}; do
-  	button="${BTN_ORDER[$bi]}"
+  	local button="${BTN_ORDER[$bi]}"
     #echo "button=$button"
   	local KEY=$(cat "${GPFILE}" | grep -E "${button}" | cut -d '"' -f2)
     #echo "KEY=$KEY"
@@ -131,56 +142,43 @@ set_pad(){
       local KEY_MAP="${JS_BUTTON_INDEXES[${KEY}]}"
       #echo "KEY_MAP=$KEY_MAP"
       # Dpad buttons will always start first in loop because of the ordered array.
+      #local JBV="joystick_button[${GAMEPAD},${KEY_MAP}]"
+      #local JDV="joystick_digital[${GAMEPAD},${KEY_MAP}]"
+      #echo "button=$button"
+      local I="${DIR_INDEX[${button}]}"
+      #echo "I=$I"
+      local DIR=${DIRS[$I]}
+      #echo "DIR=$DIR"
       case "${button}" in
-      	input_up_btn)
-          DIR_UP="joystick_button[${GAMEPAD},${KEY_MAP}]"
+      	input_up_btn|input_down_btn|input_left_btn|input_right_btn)
+          DIR+="joystick_button[${GAMEPAD},${KEY_MAP}]"
           ;;
-        input_down_btn)
-          DIR_DOWN="joystick_button[${GAMEPAD},${KEY_MAP}]"
-          ;;        
-        input_left_btn)
-          DIR_LEFT="joystick_button[${GAMEPAD},${KEY_MAP}]"
-          ;;  
-        input_right_btn)
-          DIR_RIGHT="joystick_button[${GAMEPAD},${KEY_MAP}]"
+        input_l_y_minus_axis|input_l_y_plus_axis|input_l_x_minus_axis|input_l_x_plus_axis)
+          [[ ! -z "$DIR" ]] && DIR+=" or "
+          DIR+="joystick_digital[${GAMEPAD},${KEY_MAP}]"
           ;;
-        input_l_y_minus_axis)
-          [[ ! -z "$DIR_UP" ]] && DIR_UP+=" or "
-          DIR_UP+="joystick_digital[${GAMEPAD},${KEY_MAP}]"
-          ;;
-        input_l_y_plus_axis)
-          [[ ! -z "$DIR_DOWN" ]] && DIR_DOWN+=" or "
-          DIR_DOWN+="joystick_digital[${GAMEPAD},${KEY_MAP}]"
-      		;;
-      	input_l_x_minus_axis)
-          [[ ! -z "$DIR_LEFT" ]] && DIR_LEFT+=" or "
-          DIR_LEFT+="joystick_digital[${GAMEPAD},${KEY_MAP}]"
-      		;;
-        input_l_x_plus_axis)
-          [[ ! -z "$DIR_RIGHT" ]] && DIR_RIGHT+=" or "
-          DIR_RIGHT+="joystick_digital[${GAMEPAD},${KEY_MAP}]"
-      		;;
         *)
       	  echo "input_map[p${1}_button${i}] joystick_button[${GAMEPAD},${KEY_MAP}]" >> ${CONFIG}
       	  i=$((i+1))
       	  ;;
       esac
+      DIRS[$I]=$DIR
+      #echo "DIRS_I=${DIRS[$I]}"
     fi
   done
 
-  echo "input_map[p${1}_up] $DIR_UP" >> ${CONFIG}
-  echo "input_map[p${1}_down] $DIR_DOWN" >> ${CONFIG}
-  echo "input_map[p${1}_left] $DIR_LEFT" >> ${CONFIG}
-  echo "input_map[p${1}_right] $DIR_RIGHT" >> ${CONFIG}
-
+  echo "input_map[p${1}_up] ${DIRS[0]}" >> ${CONFIG}
+  echo "input_map[p${1}_down] ${DIRS[1]}" >> ${CONFIG}
+  echo "input_map[p${1}_left] ${DIRS[2]}" >> ${CONFIG}
+  echo "input_map[p${1}_right] ${DIRS[3]}" >> ${CONFIG}
 
   # Menu should only be set to player 1
   if [[ "${1}" == "1" ]]; then	
   #echo "Setting menu buttons for player 1" #debug
-    echo "input_map[ui_up] $DIR_UP" >> ${CONFIG}
-    echo "input_map[ui_down] $DIR_DOWN" >> ${CONFIG}
-    echo "input_map[ui_left] $DIR_LEFT" >> ${CONFIG}
-    echo "input_map[ui_right] $DIR_RIGHT" >> ${CONFIG}
+    echo "input_map[ui_up] ${DIRS[0]}" >> ${CONFIG}
+    echo "input_map[ui_down] ${DIRS[1]}" >> ${CONFIG}
+    echo "input_map[ui_left] ${DIRS[2]}" >> ${CONFIG}
+    echo "input_map[ui_right] ${DIRS[3]}" >> ${CONFIG}
 
   	BSELECT=$(cat "${GPFILE}" | grep -E 'input_a_btn' | cut -d '"' -f2)
     if [ ! -z "$BSELECT" ]; then 
@@ -262,4 +260,6 @@ ADVMAME_REMAP=$(cat "${ES_FEATURES}" | grep -E "<emulator.*name\=\"AdvanceMame\"
 [[ ! -z "$ADVMAME_REMAP" ]] && BTN_CFG=$(get_button_cfg)
 #echo "SETTING_BUTTONS=$BTN_CFG"  >> "${DEBUGFILE}"
 
-get_players
+AUTOGP=$(get_ee_setting advmame_auto_gamepad)
+[[ "${AUTOGP}" != "0" ]] && get_players
+
