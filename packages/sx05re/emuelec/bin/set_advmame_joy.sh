@@ -41,6 +41,7 @@ declare -A JS_BUTTON_INDEXES=(
   ["13"]="button14"
   ["14"]="button15"
   ["15"]="button16"
+  ["16"]="button17"
   ["h0up"]="stick${BTN_H0},y,up"
   ["h0down"]="stick${BTN_H0},y,down"
   ["h0left"]="stick${BTN_H0},x,left"
@@ -87,7 +88,7 @@ get_button_cfg() {
 clean_pad() {
 #echo "Cleaning pad $1 $2" #debug
 	sed -i "/device_joystick.*/d" ${CONFIG}
-	sed -i "/input_map\[p${1}_*/d" ${CONFIG}
+	sed -i "/input_map\[p${1}_.*/d" ${CONFIG}
 	sed -i "/input_map\[coin${1}.*/d" ${CONFIG}
 	sed -i "/input_map\[start${1}.*/d" ${CONFIG}
 
@@ -130,20 +131,33 @@ set_pad(){
     if [ ! -z "$KEY" ]; then
       local KEY_MAP="${JS_BUTTON_INDEXES[${KEY}]}"
       #echo "KEY_MAP=$KEY_MAP"
+      # Dpad buttons will always start first in loop because of the ordered array.
       case "${button}" in
-      	input_up_btn|input_l_y_minus_axis)
+      	input_up_btn)
+          DIR_UP="joystick_button[${GAMEPAD},${KEY_MAP}]"
+          ;;
+        input_down_btn)
+          DIR_DOWN="joystick_button[${GAMEPAD},${KEY_MAP}]"
+          ;;        
+        input_left_btn)
+          DIR_LEFT="joystick_button[${GAMEPAD},${KEY_MAP}]"
+          ;;  
+        input_right_btn)
+          DIR_RIGHT="joystick_button[${GAMEPAD},${KEY_MAP}]"
+          ;;
+        input_l_y_minus_axis)
           [[ ! -z "$DIR_UP" ]] && DIR_UP+=" or "
           DIR_UP+="joystick_digital[${GAMEPAD},${KEY_MAP}]"
           ;;
-      	input_down_btn|input_l_y_plus_axis)
+        input_l_y_plus_axis)
           [[ ! -z "$DIR_DOWN" ]] && DIR_DOWN+=" or "
           DIR_DOWN+="joystick_digital[${GAMEPAD},${KEY_MAP}]"
       		;;
-      	input_left_btn|input_l_x_minus_axis)
+      	input_l_x_minus_axis)
           [[ ! -z "$DIR_LEFT" ]] && DIR_LEFT+=" or "
           DIR_LEFT+="joystick_digital[${GAMEPAD},${KEY_MAP}]"
       		;;
-      	input_right_btn|input_l_x_plus_axis)
+        input_l_x_plus_axis)
           [[ ! -z "$DIR_RIGHT" ]] && DIR_RIGHT+=" or "
           DIR_RIGHT+="joystick_digital[${GAMEPAD},${KEY_MAP}]"
       		;;
