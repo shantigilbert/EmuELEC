@@ -101,7 +101,7 @@ set_pad() {
 
   echo "DEVICE_GUID=$DEVICE_GUID"
   
-  local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep -v "platform:Linux" | head -1)
+  local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep "platform:Linux" | head -1)
   echo "GC_CONFIG=$GC_CONFIG"
   [[ -z $GC_CONFIG ]] && return
 
