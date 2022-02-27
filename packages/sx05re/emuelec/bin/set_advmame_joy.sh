@@ -89,7 +89,7 @@ clean_pad() {
   if [[ "${1}" == "1" ]]; then
     sed -i '/input_map\[ui_[[:alpha:]]*\].*/d' ${CONFIG}
   fi
-	echo "device_joystick sdl" >> ${CONFIG}
+	echo "device_joystick raw" >> ${CONFIG}
 }
 
 # Sets pad depending on parameters $GAMEPAD = name $1 = player
@@ -154,8 +154,9 @@ set_pad(){
       # Create Axis Maps
       case $GC_INDEX in
         dpup|dpdown|dpleft|dpright)
-          [[ ! -z "$DIR" ]] && DIR+= " or "
-          DIR+="joystick_button[${GAMEPAD},${VAL}]"
+          [[ ! -z "$DIR" ]] && DIR+= " or " 
+          [[ "$BTN_TYPE" == "b" ]] && DIR+="joystick_button[${GAMEPAD},${VAL}]"
+          [[ "$BTN_TYPE" == "h" ]] && DIR+="joystick_digital[${GAMEPAD},${VAL}]"
           DIRS["$I"]=$DIR
           ;;
         leftx|lefty)
@@ -184,7 +185,7 @@ set_pad(){
     button="${GC_ASSOC[$button]}"
     local VAL="${ADVMAME_VALUES[$button]}"
     local BTN_TYPE="${button:0:1}"
-    [[ "$BTN_TYPE" == "a" ]] && echo "input_map[p${1}_button${i}] joystick[${GAMEPAD},${VAL}]" >> ${CONFIG}
+    [[ "$BTN_TYPE" == "a" ]] && echo "input_map[p${1}_button${i}] joystick_digital[${GAMEPAD},${VAL}]" >> ${CONFIG}
     [[ "$BTN_TYPE" == "b" ]] && echo "input_map[p${1}_button${i}] joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
     (( i++ ))
   done
