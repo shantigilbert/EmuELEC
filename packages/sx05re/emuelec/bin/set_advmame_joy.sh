@@ -49,8 +49,10 @@ declare -A ADVMAME_VALUES=(
   ["a0,2"]="stick,y,down"
   ["a1,1"]="stick,x,left"
   ["a1,2"]="stick,x,right"
-  ["a2"]="stick,z"
-  ["a5"]="stick,rz"
+  ["a2,1"]="1,0,0"
+  ["a2,2"]="1,0,1"
+  ["a5,1"]="2,1,0"
+  ["a5,2"]="2,1,1"  
 )
 
 declare GC_ORDER=(
@@ -183,10 +185,19 @@ set_pad(){
     local button="${GC_ORDER[$bi]}"
     [[ -z "$button" ]] && continue
     button="${GC_ASSOC[$button]}"
-    local VAL="${ADVMAME_VALUES[$button]}"
+    
     local BTN_TYPE="${button:0:1}"
-    [[ "$BTN_TYPE" == "a" ]] && echo "input_map[p${1}_button${i}] joystick_digital[${GAMEPAD},${VAL}]" >> ${CONFIG}
-    [[ "$BTN_TYPE" == "b" ]] && echo "input_map[p${1}_button${i}] joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
+    if [[ "$BTN_TYPE" == "a" ]]; then
+      local STR="input_map[p${1}_button${i}]"
+      for j in {1..2}; do
+        local VAL="${ADVMAME_VALUES[${button},${j}]}"
+        STR+=" joystick_digital[${GAMEPAD},${VAL}]"
+      done
+      echo "${STR}" >> ${CONFIG}
+    elif [[ "$BTN_TYPE" == "b" ]]; then
+      local VAL="${ADVMAME_VALUES[$button]}"
+      echo "input_map[p${1}_button${i}] joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
+    fi
     (( i++ ))
   done
 
