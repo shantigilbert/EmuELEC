@@ -92,8 +92,11 @@ clean_pad() {
 
 # Sets pad depending on parameters $GAMEPAD = name $1 = player
 set_pad(){
+
   local DEVICE_GUID=$3
   local JOY_NAME="$4"
+
+
 
   local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep "platform:Linux" | head -1)
   echo "GC_CONFIG=$GC_CONFIG"
