@@ -29,7 +29,6 @@ if [[ ! -L "/storage/.advance" || "${ADVMAME_LINK}" != "${CONFIG_DIR}" ]]; then
   ln -sf ${CONFIG_DIR} /storage/.advance
 fi
 
-
 if [[ "$1" = *"roms/arcade"* ]]; then
 sed -i "s|/roms/mame|/roms/arcade|g" $CONFIG_DIR/advmame.rc
  else
