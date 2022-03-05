@@ -8,7 +8,7 @@ dir_image /storage/roms/mame/image
 dir_inp /storage/roms/mame/inp
 dir_memcard /storage/roms/mame/memcard
 dir_nvram /storage/roms/mame/nvram
-dir_rom /storage/roms/mame
+dir_rom /storage/roms/mame:/storage/roms/bios
 dir_sample /storage/roms/bios/advmame/samples
 dir_snap /storage/roms/mame/snap
 dir_sta /storage/roms/mame/nvram

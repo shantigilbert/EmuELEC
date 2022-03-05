@@ -8,16 +8,27 @@
 CONFIG_DIR="/emuelec/configs/advmame"
 export DISPLAY=:0
 
-if [ ! -d "${CONFIG_DIR}" ]; then
- mkdir -p $CONFIG_DIR
- cp -rf /usr/share/advance/* ${CONFIG_DIR}/
+if [ -f "/usr/share/advance" ]; then
+  rm /usr/share/advance
 fi
 
-if [ ! -L "/storage/.advance" ]; then
-    cp -rf /storage/.advance/* ${CONFIG_DIR}/
-    rm -rf /storage/.advance
-    ln -sf ${CONFIG_DIR} /storage/.advance
+if [ ! -d "${CONFIG_DIR}" ]; then
+  mkdir -p $CONFIG_DIR
+  if [ -d "/usr/share/advance" ]; then
+    cp -rf /usr/share/advance/* ${CONFIG_DIR}/
+  else
+    cp -rf /usr/config/emuelec/configs/advmame/* ${CONFIG_DIR}/
+  fi
 fi
+
+ADVMAME_LINK=$( readlink "/storage/.advance" )
+if [[ ! -L "/storage/.advance" || "${ADVMAME_LINK}" != "${CONFIG_DIR}" ]]; then
+  mkdir -p $CONFIG_DIR
+  cp -rf /storage/.advance/* ${CONFIG_DIR}/
+  rm -rf /storage/.advance
+  ln -sf ${CONFIG_DIR} /storage/.advance
+fi
+
 
 if [[ "$1" = *"roms/arcade"* ]]; then
 sed -i "s|/roms/mame|/roms/arcade|g" $CONFIG_DIR/advmame.rc
