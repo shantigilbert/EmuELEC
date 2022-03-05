@@ -1,0 +1,68 @@
+--- a/advance/j/j.c
++++ b/advance/j/j.c
+@@ -34,6 +34,7 @@
+ 			strcpy(name, DEVICE_NONAME);
+ 		if (joystickb_device_desc_get(i, desc) != 0)
+ 			strcpy(desc, DEVICE_NONAME);
++		printf("sticks: %i \n", joystickb_state.driver_current->stick_count_get(i));
+ 
+ 		printf("joy %d '%s' '%s', controls %d, buttons %d, ball axes %d\n", i, name, desc, joystickb_stick_count_get(i), joystickb_button_count_get(i), joystickb_rel_count_get(i));
+ 		for (j = 0; j < joystickb_stick_count_get(i); ++j) {
+@@ -214,6 +215,7 @@
+ 	const char* section_map[1];
+ 	adv_bool opt_log;
+ 	adv_bool opt_logsync;
++	int idriver = 1;
+ 
+ 	opt_log = 0;
+ 	opt_logsync = 0;
+@@ -224,22 +226,28 @@
+ 		goto err_conf;
+ 
+ 	joystickb_reg(context, 1);
+-	joystickb_reg_driver_all(context);
+ 
+ 	if (conf_input_args_load(context, 0, "", &argc, argv, error_callback, 0) != 0)
+ 		goto err_os;
+ 
+ 	for (i = 1; i < argc; ++i) {
+-		if (target_option_compare(argv[i], "log")) {
+-			opt_log = 1;
+-		} else if (target_option_compare(argv[i], "logsync")) {
+-			opt_logsync = 1;
++		if (target_option_compare(argv[i], "event")) {
++			idriver = 3;
++		} else if (target_option_compare(argv[i], "sdl")) {
++			idriver = 2;
+ 		} else {
+-			fprintf(stderr, "Unknown argument '%s'\n", argv[1]);
+-			goto err_os;
+-		}
+-	}
+-
++			idriver = 1;
++		}
++	}
++
++    if (idriver == 2) {
++        joystickb_reg_driver(context, &joystickb_sdl_driver);
++    } else if (idriver == 3) {
++        joystickb_reg_driver(context, &joystickb_event_driver);
++    } else {
++        joystickb_reg_driver(context, &joystickb_raw_driver);
++    }
++        
+ 	if (opt_log || opt_logsync) {
+ 		const char* log = "advj.log";
+ 		remove(log);
+@@ -263,8 +271,8 @@
+ 	}
+ 
+ 	probe();
+-	calibrate();
+-	run();
++	/* calibrate();
++	run();*/
+ 
+ 	joystickb_done();
+ 	os_inner_done();
