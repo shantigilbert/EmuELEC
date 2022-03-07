@@ -14,7 +14,11 @@ record_video no
 sound_latency 0.10
 sound_normalize no
 device_video_clock 10-180 / 30-80 / 50-70
-display_mode 640x480x32
+display_mode 640x480x16
+display_resizeeffect none
+display_magnify 1
+display_resize none
+display_vsync no
 device_keyboard none
 device_joystick raw
 input_map[coin1] joystick_button[gameforcegamepad,button9]

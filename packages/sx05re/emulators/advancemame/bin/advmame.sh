@@ -8,6 +8,10 @@
 CONFIG_DIR="/emuelec/configs/advmame"
 export DISPLAY=:0
 
+if [ -L ${CONFIG_DIR} ]; then
+ rm ${CONFIG_DIR}
+fi
+
 if [ ! -d "${CONFIG_DIR}" ]; then
  mkdir -p $CONFIG_DIR
  cp -rf /usr/share/advance/* ${CONFIG_DIR}/
@@ -56,12 +60,14 @@ if [ "$EE_DEVICE" != "OdroidGoAdvance" ] && [ "$EE_DEVICE" != "GameForce" ]; the
     esac
 fi
 
-if [ "$EE_DEVICE" != "GameForce" ]; then
-  ROMNAME=$(basename $1)
-  AUTOGP=$(get_ee_setting advmame_auto_gamepad)
-  [[ "${AUTOGP}" != "0" ]] && set_advmame_joy.sh "$ROMNAME"
-fi
+ROMNAME=$(basename $1)
+AUTOGP=$(get_ee_setting advmame_auto_gamepad)
+[[ "${AUTOGP}" != "0" ]] && set_advmame_joy.sh "$ROMNAME"
 
 ARG=$(echo basename $1 | sed 's/\.[^.]*$//')
 ARG="$(echo $1 | sed 's=.*/==;s/\.[^.]*$//')"
 SDL_AUDIODRIVER=alsa advmame $ARG -quiet
+
+if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
+    exit 0
+fi
