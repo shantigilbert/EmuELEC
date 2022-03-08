@@ -2,6 +2,7 @@
 
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
+# Copyright (C) 2022-present Joshua L (https://github.com/Langerz82)
 
 # Source predefined functions and variables
 . /etc/profile
