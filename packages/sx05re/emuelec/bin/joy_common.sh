@@ -2,6 +2,7 @@
 
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
+# Copyright (C) 2022-present Joshua L (https://github.com/Langerz82)
 
 # Source predefined functions and variables
 . /etc/profile
@@ -21,7 +22,9 @@ jc_get_players() {
   declare -i PLAYER=1
 
 # Dump gamepad information
-  cat /proc/bus/input/devices > /tmp/input_devices 
+  cat /proc/bus/input/devices \
+    | grep -E -B 5 -A 3 "H\: Handlers=(js[0-9] event[0-9])|(event[0-9] js[0-9])" \
+    | grep -Ew -B 8 "B: KEY\=[0-9a-f ]+" > /tmp/input_devices
 
 # Determine how many gamepads/players are connected
   JOYS=$(ls -A1 /dev/input/js*| sort )
@@ -37,8 +40,10 @@ jc_get_players() {
 
     [[ -z "${DEVICE_GUID}" ]] && continue
 
-    local JOY_NAME=$(jc_get_device_name "${DEVICE_GUID}")
-    local JSI=$(jc_get_device_name "${DEVICE_GUID}" "true")
+    local JOY_DETAIL=$(jc_get_device_detail "${DEVICE_GUID}")
+    [[ "$JOY_DETAIL" == 0 ]] && continue
+    local JSI=$(echo "$JOY_DETAIL" | cut -d' ' -f1)
+    local JOY_NAME=$(echo "$JOY_DETAIL" | cut -d' ' -f2-)
 
     # Add the joy config to array if guid and joyname set.
     if [[ ! -z "${DEVICE_GUID}" && ! -z "$JOY_NAME" ]]; then
@@ -147,9 +152,8 @@ jc_generate_guid() {
   echo "$v"
 }
 
-jc_get_device_name() {
+jc_get_device_detail() {
   local GUID="${1}"
-  local RETURN_JSI="${2}"
 
   v=${DEVICE_GUID:0:8}
   local p1=$(echo ${v:6:2}${v:4:2}${v:2:2}${v:0:2}) # Bus, generally not needed
@@ -165,13 +169,18 @@ jc_get_device_name() {
   local version=$(echo ${p4:4})
 
   local I_REGEX="^I\: .* Vendor\=${vendor} Product\=${product} Version\=${version}$"
-  local EE_DEV=$(cat /proc/bus/input/devices | grep -Ew -A 8 "$I_REGEX" | grep -Ew -B 8 "B: KEY\=[0-9a-f ]+")
-  local JSI=$(echo -e "${EE_DEV}" | grep "H: Handlers" | sed -E 's/.*H: Handlers=.*(js[0-9]).*/\1/')
+  local EE_DEV=$(cat /tmp/input_devices | grep -Ew -A 8 "$I_REGEX" | head -n8)
+
+  declare -i REC_INDEX=$(cat /tmp/input_devices | grep -n -E "$I_REGEX" | cut -d':' -f1 | head -n1 )
+  declare -i REC_LENGTH=$(( REC_INDEX + 9 ))
+  sed -i "${REC_INDEX},${REC_LENGTH}d" /tmp/input_devices
+
+  local JSI=$(echo -e "${EE_DEV}" | grep "H: Handlers" | sed -E 's/.*H: Handlers=.*(js[0-9]).*/\1/' | head -n1 )
   
   if [[ ! -z "${EE_DEV}" ]]; then
     local JOY_NAME=$(echo "${EE_DEV}" | grep -E "^N\: Name.*[\= ]?.*$" \
       | cut -d "=" -f 2 | tr -d '"')
-    [ "${RETURN_JSI}" == "true" ] && echo ${JSI} || echo "${JOY_NAME}"
+    echo "${JSI} ${JOY_NAME}"
     return
   fi
   echo "0"
