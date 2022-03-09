@@ -1,6 +1,6 @@
 --- a/gamecontrollerdb.txt
 +++ b/gamecontrollerdb.txt
-@@ -1,5 +1,16 @@
+@@ -1,5 +1,17 @@
  # Game Controller DB for SDL in 2.0.9 format
  # Source: https://github.com/gabomdq/SDL_GameControllerDB
 +
@@ -14,6 +14,7 @@
 +03000000d11800000094000011010000,Google LLC Stadia Controller rev. A,platform:Linux,leftstick:b9,rightx:a2,leftshoulder:b4,start:b7,lefty:a1,dpup:h0.1,righty:a3,a:b1,b:b0,guide:b8,dpdown:h0.4,rightshoulder:b5,righttrigger:b13,rightstick:b10,dpright:h0.2,x:b3,back:b6,leftx:a0,y:b2,dpleft:h0.8,lefttrigger:b14,
 +03000000790000001100000010010000,iNNEXT SNES Retro USB Controller,platform:Linux,leftshoulder:b4,start:b9,dpup:a1,a:b1,b:b2,guide:b8,dpdown:a1,rightshoulder:b5,dpright:a0,x:b0,back:b8,y:b3,dpleft:a0,
 +03000000100800000100000010010000,PlayGame PS2-like Controller,platform:Linux,leftstick:b10,rightx:a3,leftshoulder:b4,start:b9,lefty:a1,dpup:h0.1,righty:a2,a:b1,b:b2,guide:b8,dpdown:h0.4,rightshoulder:b5,righttrigger:b7,rightstick:b11,dpright:h0.2,x:b0,back:b8,leftx:a0,y:b3,dpleft:h0.8,lefttrigger:b6,
-
++050000007e0500000920000001000000,8BitDo SN30 pro,platform:Linux,leftstick:b10,rightx:a2,leftshoulder:b4,start:b9,lefty:a1,dpup:h0.1,righty:a3,a:b1,b:b0,guide:b13,dpdown:h0.4,rightshoulder:b5,righttrigger:b7,rightstick:b11,dpright:h0.2,x:b3,back:b8,leftx:a0,y:b2,dpleft:h0.8,lefttrigger:b6,
+ 
  # Windows
  03000000fa2d00000100000000000000,3DRUDDER,leftx:a0,lefty:a1,rightx:a5,righty:a2,platform:Windows,
