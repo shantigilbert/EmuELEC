@@ -84,13 +84,10 @@ declare -A GC_DOLPHIN_STICKS=(
 )
 
 # Cleans all the inputs for the gamepad with name $GAMEPAD and player $1
-clean_pad_all() {
-  #echo "Cleaning pad $1 $2" #debug
-  local JOY_NAME="$4"
-  
+clean_pad() {
   [[ -f "${CONFIG_TMP}" ]] && rm "${CONFIG_TMP}"
   local START_DELETING=0
-  local GC_REGEX="\[GCPad[1-9]\]"
+  local GC_REGEX="\[GCPad${1}\]"
   local LN=1
   [[ ! -f "${CONFIG}" ]] && return
   while read -r line; do
@@ -109,11 +106,6 @@ clean_pad_all() {
       LN=$(( $LN + 1 ))  
     fi
   done < ${CONFIG}
-}
-
-# Cleans all the inputs for the gamepad with name $GAMEPAD and player $1
-clean_pad() {
-  return
 }
 
 # Sets pad depending on parameters.
@@ -212,6 +204,5 @@ init_config() {
 
 
 init_config
-clean_pad_all
 
 jc_get_players
