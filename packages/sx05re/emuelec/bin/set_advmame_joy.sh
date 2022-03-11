@@ -40,6 +40,7 @@ declare -A ADVMAME_VALUES=(
   ["b14"]="button15"
   ["b15"]="button16"
   ["b16"]="button17"
+  ["b17"]="button18"
   ["h0.1"]="stick$BTN_H0,y,up"
   ["h0.4"]="stick$BTN_H0,y,down"
   ["h0.8"]="stick$BTN_H0,x,left"
