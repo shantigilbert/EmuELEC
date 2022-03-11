@@ -155,6 +155,9 @@ set_pad() {
         if [[ "$BTN_TYPE" == "b"  || "$BTN_TYPE" == "h" ]]; then
           [[ ! -z "$VAL" ]] && echo "${GC_INDEX} = ${VAL}" >> ${CONFIG_TMP}
         fi
+        if [[ "$BTN_TYPE" == "a" ]]; then
+          echo "$GC_INDEX = Axis $BUTTON_VAL+" >> ${CONFIG_TMP}
+        fi        
       fi
 
       # Create Axis Maps
