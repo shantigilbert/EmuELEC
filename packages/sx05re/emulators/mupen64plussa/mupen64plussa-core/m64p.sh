@@ -22,7 +22,7 @@ if [[ "${FILE: -4}" == ".zip" ]]; then
 fi
 
 AUTOGP=$(get_ee_setting mupen64plus_auto_gamepad)
-if [[ "${AUTOGP}" == "" || "${AUTOGP}" == "1" ]]; then
+if [[ -z "${AUTOGP}" || "${AUTOGP}" == "1" ]]; then
   /usr/bin/set_mupen64_joy.sh
 fi
 
