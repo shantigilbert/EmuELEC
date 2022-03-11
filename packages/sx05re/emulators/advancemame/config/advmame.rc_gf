@@ -19,8 +19,11 @@ display_resizeeffect none
 display_magnify 1
 display_resize none
 display_vsync no
-device_keyboard none
+device_keyboard sdl
 device_joystick raw
+misc_smp no
+misc_quiet yes
+device_alsa_device sdl
 input_map[coin1] joystick_button[gameforcegamepad,button9]
 input_map[start1] joystick_button[gameforcegamepad,button10]
 input_map[p1_button1] joystick_button[gameforcegamepad,button2]

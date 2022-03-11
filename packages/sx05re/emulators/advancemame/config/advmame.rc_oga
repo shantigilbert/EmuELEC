@@ -11,6 +11,7 @@ dir_snap /storage/roms/mame/snap
 dir_sta /storage/roms/mame/nvram
 device_joystick raw
 device_keyboard sdl
+misc_smp no
 display_magnifysize 320
 display_resize none
 display_resizeeffect none
