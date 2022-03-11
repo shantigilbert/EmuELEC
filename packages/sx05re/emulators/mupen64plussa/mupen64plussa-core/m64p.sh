@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Source predefined functions and variables
+. /etc/profile
+
 CONFIGDIR="/emuelec/configs/mupen64plussa"
 
 if [[ ! -f "${CONFIGDIR}/InputAutoCfg.ini" ]]; then
@@ -22,7 +25,7 @@ if [[ "${FILE: -4}" == ".zip" ]]; then
 fi
 
 AUTOGP=$(get_ee_setting mupen64plus_auto_gamepad)
-if [[ -z "${AUTOGP}" || "${AUTOGP}" == "1" ]]; then
+if [[ "${AUTOGP}" != "0" ]]; then
   /usr/bin/set_mupen64_joy.sh
 fi
 
