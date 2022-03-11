@@ -18,10 +18,10 @@ BTN_H0=$(get_ee_setting mupen_btn_h0)
 
 
 declare -A GC_MUPEN64_VALUES=(
-  [h0.1]="hat (${BTN_H0} Up)"
-  [h0.4]="hat (${BTN_H0} Down)"
-  [h0.8]="hat (${BTN_H0} Left)"
-  [h0.2]="hat (${BTN_H0} Right)"
+  [h0.1]="hat(${BTN_H0} Up)"
+  [h0.4]="hat(${BTN_H0} Down)"
+  [h0.8]="hat(${BTN_H0} Left)"
+  [h0.2]="hat(${BTN_H0} Right)"
   [b0]="button(0)"
   [b1]="button(1)"
   [b2]="button(2)"
