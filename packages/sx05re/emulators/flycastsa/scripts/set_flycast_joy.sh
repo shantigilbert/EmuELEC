@@ -65,10 +65,8 @@ declare -A FLYCAST_D_BUTTONS=(
   [dpdown]="btn_dpad1_down"
   [dpleft]="btn_dpad1_left"
   [dpright]="btn_dpad1_right"
-  [leftx,0]="axis_x"
-  [leftx,1]="axis_dpad1_x"
-  [lefty,0]="axis_y"
-  [lefty,1]="axis_dpad1_y"
+  [leftx]="axis_x"
+  [lefty]="axis_y"
   [rightx]="axis_right_x"
   [righty]="axis_right_y"
 )
@@ -158,13 +156,6 @@ set_pad() {
       local BTN_TYPE=${TVAL:0:1}
       local NUM=${TVAL:1}
 
-      if [[ $BUTTON_INDEX == "leftx" || $BUTTON_INDEX == "lefty" ]]; then
-        FC_INDEX_D=${FLYCAST_D_BUTTONS[$BUTTON_INDEX,0]}
-        echo "${FC_INDEX_D} = $NUM" >> ${CONFIG_TMP_D} 
-        FC_INDEX_D=${FLYCAST_D_BUTTONS[$BUTTON_INDEX,1]}
-        echo "${FC_INDEX_D} = $NUM" >> ${CONFIG_TMP_A}
-        continue
-      fi
       if [[ ! -z "$FC_INDEX_D" ]]; then
           [[ $BUTTON_INDEX == "lefttrigger" ]] && ABORT_ENTRY=1
           [[ $BUTTON_INDEX == "righttrigger" ]] && ABORT_ENTRY=1
@@ -204,12 +195,6 @@ set_pad() {
   rm "${CONFIG_TMP_D}"
   rm "${CONFIG_TMP_E}"
 
-  local ARCADE_CFG="${CONFIG:0:-4}_arcade.cfg"
-  cp "${CONFIG}" "${ARCADE_CFG}"
-  
-  sed -i '/axis_dpad1_x =/d' "${CONFIG}"
-  sed -i '/axis_dpad1_y =/d' "${CONFIG}"
-  
 }
 
 init_config() {
