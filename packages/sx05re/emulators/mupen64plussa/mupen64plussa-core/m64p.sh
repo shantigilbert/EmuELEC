@@ -52,7 +52,7 @@ fi
 
 if [[ ! -f "${CONFIGDIR}/mupen64plus.cfg" ]]; then
 	mkdir -p ${CONFIGDIR}
-	cp -f /usr/local/share/mupen64plus/mupen64plus.cfg ${CONFIGDIR}/
+	cp /usr/local/share/mupen64plus/mupen64plus.cfg ${CONFIGDIR}/
 fi
 
 FILE="$1"
