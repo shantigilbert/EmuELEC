@@ -55,6 +55,7 @@ if [[ ! -f "${CONFIGDIR}/mupen64plus.cfg" ]]; then
 	cp /usr/local/share/mupen64plus/mupen64plus.cfg ${CONFIGDIR}/
 fi
 
+
 FILE="$1"
 if [[ "${FILE: -4}" == ".zip" ]]; then
 	mkdir -p /tmp/mupen64plus
