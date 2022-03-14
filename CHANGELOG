@@ -34,7 +34,7 @@ Additions and other fixes:
 * Added VIM
 * Added External Mount settings in ES
 * Added option to create key remaps for Advance MAME
-* Switch to SDL 2.0.16 for all devices
+* Switch to SDL 2.0.20 for all devices
 * Support for Pixelcade (Install script is in Setup)
 * Retroachievements encore is now configurable from ES
 * Added Enable Integer Overscaling in ES

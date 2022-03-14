@@ -2,15 +2,15 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 73d9407..bcc872f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -419,6 +419,7 @@
- set_option(HIDAPI              "Use HIDAPI for low level joystick drivers" ${OPT_DEF_HIDAPI})
- set_option(JOYSTICK_VIRTUAL    "Enable the virtual-joystick driver" ON)
- set_option(ASAN                "Use AddressSanitizer to detect memory errors" OFF)
+@@ -446,6 +446,7 @@
+ set_option(SDL_HIDAPI_JOYSTICK     "Use HIDAPI for low level joystick drivers" ON)
+ set_option(SDL_VIRTUAL_JOYSTICK    "Enable the virtual-joystick driver" ON)
+ set_option(SDL_ASAN                "Use AddressSanitizer to detect memory errors" OFF)
 +set_option(VIDEO_MALI          "Use Mali EGL video driver" ${UNIX_SYS})
  
  set(SDL_SHARED ${SDL_SHARED_ENABLED_BY_DEFAULT} CACHE BOOL "Build a shared version of the library")
  set(SDL_STATIC ${SDL_STATIC_ENABLED_BY_DEFAULT} CACHE BOOL "Build a static version of the library")
-@@ -1221,6 +1222,7 @@
+@@ -1268,6 +1269,7 @@
      CheckOpenGLES()
      CheckWayland()
      CheckVivante()
@@ -190,10 +190,10 @@ diff --git a/include/SDL_config.h.cmake b/include/SDL_config.h.cmake
 index 9b20398..a14a92b 100644
 --- a/include/SDL_config.h.cmake
 +++ b/include/SDL_config.h.cmake
-@@ -378,6 +378,7 @@
- #cmakedefine SDL_VIDEO_DRIVER_VIVANTE_VDK @SDL_VIDEO_DRIVER_VIVANTE_VDK@
- #cmakedefine SDL_VIDEO_DRIVER_OS2 @SDL_VIDEO_DRIVER_OS2@
+@@ -401,6 +401,7 @@
  #cmakedefine SDL_VIDEO_DRIVER_QNX @SDL_VIDEO_DRIVER_QNX@
+ #cmakedefine SDL_VIDEO_DRIVER_RISCOS @SDL_VIDEO_DRIVER_RISCOS@
+ #cmakedefine SDL_VIDEO_DRIVER_PSP @SDL_VIDEO_DRIVER_PSP@
 +#cmakedefine SDL_VIDEO_DRIVER_MALI @SDL_VIDEO_DRIVER_MALI@
  
  #cmakedefine SDL_VIDEO_DRIVER_KMSDRM @SDL_VIDEO_DRIVER_KMSDRM@
@@ -203,14 +203,14 @@ diff --git a/include/SDL_config.h.in b/include/SDL_config.h.in
 index a28e83f..605a421 100644
 --- a/include/SDL_config.h.in
 +++ b/include/SDL_config.h.in
-@@ -310,6 +310,7 @@
+@@ -380,6 +380,7 @@
  #undef SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC_GBM
  #undef SDL_VIDEO_DRIVER_ANDROID
  #undef SDL_VIDEO_DRIVER_EMSCRIPTEN
 +#undef SDL_VIDEO_DRIVER_MALI
+ #undef SDL_VIDEO_DRIVER_OFFSCREEN
  #undef SDL_VIDEO_DRIVER_X11_DYNAMIC
  #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT
- #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XCURSOR
 diff --git a/src/video/SDL_egl.c b/src/video/SDL_egl.c
 index 0daf98a..5295c1c 100644
 --- a/src/video/SDL_egl.c

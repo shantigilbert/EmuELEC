@@ -75,11 +75,7 @@ BACKUPFILE="/storage/roms/backup/${BACKUPTAR}"
 [[ ! -f "${BACKUPFILE}" ]] && BACKUPFILE="/var/media/EEROMS/backup/${BACKUPTAR}"
 
 if [ -f "${BACKUPFILE}" ]; then 
-	echo "emuelec-utils ee_backup restore no" > /tmp/script.sh
-    echo "echo \"Done!...Press 'Select' or choose 'Close' to continue!\"" >> /tmp/script.sh
-    chmod +x /tmp/script.sh
-    text_viewer -s /tmp/script.sh -t "Restoring backup, please wait!..."
-    rm /tmp/script.sh > /dev/null 2>&1
+	emuelec-utils ee_backup restore no > /emuelec/logs/last-restore.log 2>&1
 fi
 
 DEFE=""

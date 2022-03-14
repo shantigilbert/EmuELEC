@@ -3,7 +3,7 @@
 
 PKG_NAME="rkwifibt"
 PKG_VERSION="a389710ca130405a0e6e4f22bc0335c976a5c4b0"
-PKG_SITE="https://github.com/rockchip-linux/rkwifibt"
+PKG_SITE="https://github.com/shantigilbert/rkwifibt"
 PKG_URL="$PKG_SITE.git"
 PKG_LICENSE="Unspecified"
 PKG_DEPENDS_TARGET="toolchain linux"

@@ -45,6 +45,11 @@ get_resolution()
     echo "$W $H"
 }
 
+if [[ ! -f "${CONFIGDIR}/InputAutoCfg.ini" ]]; then
+	mkdir -p ${CONFIGDIR}
+	cp /usr/local/share/mupen64plus/InputAutoCfg.ini ${CONFIGDIR}/
+fi
+
 if [[ ! -f "${CONFIGDIR}/mupen64plus.cfg" ]]; then
 	mkdir -p ${CONFIGDIR}
 	cp -f /usr/local/share/mupen64plus/mupen64plus.cfg ${CONFIGDIR}/

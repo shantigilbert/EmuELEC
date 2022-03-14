@@ -52,7 +52,7 @@ if [ ! -e "${DATAFOLDER}/credits.stxt" ]; then
         if [[ $? == 21 ]]; then
             ee_console enable
             rm -rf ${DATAFOLDER}/*
-            wget "${DATA}" -o "${VERSION}.zip" -q --show-progress > /dev/tty0 2>&1
+            wget "${DATA}" -O "${VERSION}.zip" -q --show-progress > /dev/tty0 2>&1
             unzip "${VERSION}.zip" > /dev/tty0
             mv supertux-${VERSION}/data/* "${DATAFOLDER}" > /dev/tty0
             rm -rf "supertux-${VERSION}"

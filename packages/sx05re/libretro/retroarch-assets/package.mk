@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="retroarch-assets"
-PKG_VERSION="9c22505bed22370d4b81d10429afc9e0d6cc11ff"
-PKG_SHA256="c34b107325d966c67e68d3ed40571c8d4f6561b908ab92a968ad1b95fb1b22f4"
+PKG_VERSION="5d230051b96cbbe35c137d9b939da038d82e4556"
+PKG_SHA256="d242a77fbad0df2db1b25f27b3791c652d8e68bb6c2484206acd66e6dee0817e"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/libretro/retroarch-assets"
 PKG_URL="https://github.com/libretro/retroarch-assets/archive/$PKG_VERSION.tar.gz"
@@ -35,4 +35,17 @@ pre_configure_target() {
 
 makeinstall_target() {
   make install INSTALLDIR="$INSTALL/usr/share/retroarch-assets"
+  
+  
+  # Remove unnecesary Retroarch Assets
+  for i in Automatic branding cfg devtools FlatUX glui nxrgui pkg/wiiu scripts Systematic switch wallpapers COPYING; do
+    rm -rf "$INSTALL/usr/share/retroarch-assets/$i"
+  done
+  
+  for i in automatic dot-art flatui neoactive pixel retroactive retrosystem systematic convert.sh NPMApng2PMApng.py; do
+  rm -rf "$INSTALL/usr/share/retroarch-assets/xmb/$i"
+  done
+  
+  
+  
 }
