@@ -3,6 +3,8 @@
 ACTION=$1
 shift
 
+echo "EmuELEC Bluetooth Log" > /emuelec/logs/bluetooth-agent.log
+
 do_help() {
     echo "${1} list" >&2
     echo "${1} trust" >&2

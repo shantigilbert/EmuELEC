@@ -8,13 +8,13 @@
 CONFIG_DIR="/emuelec/configs/advmame"
 export DISPLAY=:0
 
-if [ -L ${CONFIG_DIR} ]; then
- rm ${CONFIG_DIR}
+if [ -L "${CONFIG_DIR}" ]; then
+ rm "${CONFIG_DIR}"
 fi
 
 if [ ! -d "${CONFIG_DIR}" ]; then
- mkdir -p $CONFIG_DIR
- cp -rf /usr/share/advance/* ${CONFIG_DIR}/
+ mkdir -p "${CONFIG_DIR}"
+ cp -rf /usr/config/emuelec/configs/advmame/* "${CONFIG_DIR}/"
 fi
 
 if [ ! -L "/storage/.advance" ]; then

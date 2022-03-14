@@ -80,18 +80,14 @@ get_button_cfg() {
 	echo "$BTN_CFG"
 }
 
-# Cleans all the inputs for the gamepad with name $GAMEPAD and player $1 
-clean_pad() {
-#echo "Cleaning pad $1 $2" #debug
-	sed -i "/device_joystick.*/d" ${CONFIG}
-	sed -i "/input_map\[p${1}_.*/d" ${CONFIG}
-	sed -i "/input_map\[coin${1}.*/d" ${CONFIG}
-	sed -i "/input_map\[start${1}.*/d" ${CONFIG}
+clean_all_pad() {
+  sed -i "/device_joystick.*/d" ${CONFIG}
+	sed -i "/input_map\[.*/d" ${CONFIG}
+  echo "device_joystick raw" >> ${CONFIG}  
+}
 
-  if [[ "${1}" == "1" ]]; then
-    sed -i '/input_map\[ui_[[:alpha:]]*\].*/d' ${CONFIG}
-  fi
-	echo "device_joystick raw" >> ${CONFIG}
+clean_pad() {
+	return
 }
 
 # Sets pad depending on parameters $GAMEPAD = name $1 = player
@@ -245,4 +241,5 @@ ADVMAME_REMAP=$(cat "${ES_FEATURES}" | grep -E "$ADVMAME_REGEX")
 [[ ! -z "$ADVMAME_REMAP" ]] && BTN_CFG=$(get_button_cfg)
 echo "BTN_CFG=$BTN_CFG"
 
+clean_all_pad
 jc_get_players

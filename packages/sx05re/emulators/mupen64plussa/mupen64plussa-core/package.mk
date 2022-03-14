@@ -46,5 +46,7 @@ makeinstall_target() {
   mkdir -p ${INSTALL}/usr/bin
   cp ${PKG_DIR}/m64p.sh ${INSTALL}/usr/bin
   chmod 755 ${INSTALL}/usr/bin/m64p.sh
+	cp ${PKG_DIR}/set_mupen64_joy.sh ${INSTALL}/usr/bin
+  chmod 755 ${INSTALL}/usr/bin/set_mupen64_joy.sh
 }
 

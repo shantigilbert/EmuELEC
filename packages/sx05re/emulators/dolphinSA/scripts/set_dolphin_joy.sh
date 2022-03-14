@@ -85,21 +85,25 @@ declare -A GC_DOLPHIN_STICKS=(
 
 # Cleans all the inputs for the gamepad with name $GAMEPAD and player $1
 clean_pad() {
-  #echo "Cleaning pad $1 $2" #debug
-  local P_INDEX=${1}
   [[ -f "${CONFIG_TMP}" ]] && rm "${CONFIG_TMP}"
   local START_DELETING=0
-  local GC_REGEX="\[GCPad[1-9]\]"
+  local GC_REGEX="\[GCPad${1}\]"
+  local LN=1
   [[ ! -f "${CONFIG}" ]] && return
   while read -r line; do
-    if [[ "$line" =~ $GC_REGEX && "[GCPad${P_INDEX}]" != "$line" ]]; then
+    if [[ "$line" =~ \[.+\] ]]; then
       START_DELETING=0
     fi
-    [[ "[GCPad${P_INDEX}]" == "$line" ]] && START_DELETING=1
+    local header=$(echo "$line" | grep -E "$GC_REGEX" )
+    if [[ ! -z "$header" ]]; then
+      START_DELETING=1
+    fi    
     if [[ "$START_DELETING" == "1" ]]; then
       [[ "$line" =~ ^(.*)+Stick\/Modifier(.*)+$ ]] && echo "$line" >> ${CONFIG_TMP}
       [[ "$line" =~ ^(.*)+Stick\/Dead(.*)+$ ]] && echo "$line" >> ${CONFIG_TMP}
-      sed -i "1 d" "$CONFIG"
+      sed -i "$LN d" "$CONFIG"
+    else
+      LN=$(( $LN + 1 ))  
     fi
   done < ${CONFIG}
 }
@@ -143,6 +147,9 @@ set_pad() {
         if [[ "$BTN_TYPE" == "b"  || "$BTN_TYPE" == "h" ]]; then
           [[ ! -z "$VAL" ]] && echo "${GC_INDEX} = ${VAL}" >> ${CONFIG_TMP}
         fi
+        if [[ "$BTN_TYPE" == "a" ]]; then
+          echo "$GC_INDEX = Axis $BUTTON_VAL+" >> ${CONFIG_TMP}
+        fi        
       fi
 
       # Create Axis Maps
