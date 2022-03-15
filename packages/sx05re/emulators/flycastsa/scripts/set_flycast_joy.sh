@@ -205,7 +205,11 @@ set_pad() {
   rm "${CONFIG_TMP_E}"
 
   local ARCADE_CFG="${CONFIG:0:-4}_arcade.cfg"
+<<<<<<< HEAD
   cp "${CONFIG}" "${ARCADE_CFG}"
+=======
+  cp -f "${CONFIG}" "${ARCADE_CFG}"
+>>>>>>> 572bf10a52496543f3f62cd538043b2739ba1461
   
   sed -i '/axis_dpad1_x =/d' "${CONFIG}"
   sed -i '/axis_dpad1_y =/d' "${CONFIG}"

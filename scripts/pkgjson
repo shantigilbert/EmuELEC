@@ -51,6 +51,6 @@ fi
 # pipefail: return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status
 set -o pipefail
 
-cat ${_CACHE_PACKAGE_GLOBAL} ${_CACHE_PACKAGE_LOCAL} | \
+cat ${_CACHE_PACKAGE_GLOBAL} ${_CACHE_PACKAGE_LOCAL} ${_CACHE_PACKAGE_LOCAL_DEVICE} | \
   xargs --max-args=64 --max-procs="$(nproc)" "$0" --worker
 exit $?

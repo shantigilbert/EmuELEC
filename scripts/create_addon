@@ -59,7 +59,7 @@ get_addons() {
 
   exit() { exited=1; }
 
-  for pkgpath in $(cat "${_CACHE_PACKAGE_LOCAL}" "${_CACHE_PACKAGE_GLOBAL}" | grep -E "${paths}"); do
+  for pkgpath in $(cat "${_CACHE_PACKAGE_LOCAL_DEVICE}" "${_CACHE_PACKAGE_LOCAL}" "${_CACHE_PACKAGE_GLOBAL}" | grep -E "${paths}"); do
     if [ -n "${filter}" ]; then
       [[ ${pkgpath} =~ ^.*/${filter}@?+?@ ]] || continue
     fi

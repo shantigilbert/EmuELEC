@@ -7,7 +7,7 @@ export NOONEXIT=yes
 
 cd "$(readlink -f "$(dirname "$0")")/.."
 
-export _CACHE_PACKAGE_LOCAL=none _CACHE_PACKAGE_GLOBAL=none _DEBUG_DEPENDS_LIST=none DEFAULT_PYTHON_VERSION=none
+export _CACHE_PACKAGE_LOCAL_DEVICE=none _CACHE_PACKAGE_LOCAL=none _CACHE_PACKAGE_GLOBAL=none _DEBUG_DEPENDS_LIST=none DEFAULT_PYTHON_VERSION=none
 
 if [ -n "${PROJECT}" -a "$1" != "auto" ]; then
   # loads project config and sets THREAD_CONTROL

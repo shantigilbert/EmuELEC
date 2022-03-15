@@ -119,15 +119,6 @@ makeinstall_target() {
 }
 
 post_install() {
-# Remove unnecesary Retroarch Assets and overlays
-  for i in branding glui nuklear nxrgui pkg/wiiu switch wallpapers zarch COPYING; do
-    rm -rf "$INSTALL/usr/share/retroarch-assets/$i"
-  done
-  
-  for i in automatic dot-art flatui neoactive pixel retroactive retrosystem systematic convert.sh NPMApng2PMApng.py; do
-  rm -rf "$INSTALL/usr/share/retroarch-assets/xmb/$i"
-  done
-  
   for i in borders effects gamepads ipad keyboards misc; do
     rm -rf "$INSTALL/usr/share/retroarch-overlays/$i"
   done

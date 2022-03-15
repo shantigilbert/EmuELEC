@@ -18,14 +18,12 @@
                    list, list_info,
 --- a/msg_hash.h
 +++ b/msg_hash.h
-@@ -1020,9 +1020,7 @@
+@@ -1105,9 +1105,7 @@
     MENU_LABEL(VIDEO_RECORD_THREADS),
     MENU_LABEL(VIDEO_SMOOTH),
     MENU_LABEL(VIDEO_CTX_SCALING),
 -#ifdef HAVE_ODROIDGO2
     MENU_LABEL(VIDEO_RGA_SCALING),
 -#endif
-    
-    MENU_LABEL(VIDEO_CROP_OVERSCAN),
  
-
+    MENU_LABEL(VIDEO_CROP_OVERSCAN),

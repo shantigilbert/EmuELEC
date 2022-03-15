@@ -667,13 +667,14 @@ init_package_cache() {
   local temp_global temp_local
 
   # If the package caches are unset, then populate them
-  if [ -z "${_CACHE_PACKAGE_LOCAL}" -o -z "${_CACHE_PACKAGE_GLOBAL}" ]; then
+  if [ -z "${_CACHE_PACKAGE_LOCAL}" -o -z "${_CACHE_PACKAGE_GLOBAL}" -o -z "${_CACHE_PACKAGE_LOCAL_DEVICE}" ]; then
     temp_global="$(mktemp)"
     temp_local="$(mktemp)"
+    temp_local_device="$(mktemp)"
 
     # cache project/device folder for packages
     if [ -n "${DEVICE}" ]; then
-      find "${ROOT}/projects/${PROJECT}/devices/${DEVICE}/packages" -type f -name package.mk 2>/dev/null | sed "s#/package\.mk\$#${_ANCHOR}#" >> "${temp_local}"
+      find "${ROOT}/projects/${PROJECT}/devices/${DEVICE}/packages" -type f -name package.mk 2>/dev/null | sed "s#/package\.mk\$#${_ANCHOR}#" >> "${temp_local_device}"
     fi
 
     # cache project folder for packages
@@ -683,11 +684,17 @@ init_package_cache() {
     find "${ROOT}/${PACKAGES}" -type f -name package.mk 2>/dev/null | sed "s#/package\.mk\$#${_ANCHOR}#" >> "${temp_global}"
 
     _CACHE_PACKAGE_LOCAL="${BUILD}/.cache_package_local"
+    _CACHE_PACKAGE_LOCAL_DEVICE="${BUILD}/.cache_package_local_device"
     _CACHE_PACKAGE_GLOBAL="${BUILD}/.cache_package_global"
-    export _CACHE_PACKAGE_LOCAL _CACHE_PACKAGE_GLOBAL
+    export _CACHE_PACKAGE_LOCAL _CACHE_PACKAGE_GLOBAL _CACHE_PACKAGE_LOCAL_DEVICE
 
     # overwrite existing cache files only when they are invalid, or not yet created
     mkdir -p "${_CACHE_PACKAGE_GLOBAL%/*}"
+    if [ -f "${_CACHE_PACKAGE_LOCAL_DEVICE}" ] && cmp -s "${temp_local_device}" "${_CACHE_PACKAGE_LOCAL_DEVICE}"; then
+      rm "${temp_local_device}"
+    else
+      mv "${temp_local_device}" "${_CACHE_PACKAGE_LOCAL_DEVICE}"
+    fi
     if [ -f "${_CACHE_PACKAGE_LOCAL}" ] && cmp -s "${temp_local}" "${_CACHE_PACKAGE_LOCAL}"; then
       rm "${temp_local}"
     else
@@ -924,6 +931,18 @@ get_pkg_version_maj_min() {
 get_pkg_directory() {
   local _PKG_ROOT_NAME=${1%:*} _ALL_DIRS _FOUND=0 _ANCHOR="@?+?@" _PKG_DIR _DIR
 
+  # Check for any available local_device package in preference to a global package
+  for _DIR in $(grep -F "/${_PKG_ROOT_NAME}${_ANCHOR}" "${_CACHE_PACKAGE_LOCAL_DEVICE}"); do
+    _DIR="${_DIR%${_ANCHOR}}"
+    # found first, set $_PKG_DIR
+    _PKG_DIR="$_DIR"
+    # keep track of dirs with package.mk for detecting multiple folders
+    _ALL_DIRS+="${_DIR}\n"
+    _FOUND=$((_FOUND+1))
+  done
+
+  # If there's no local_device package available, use the global package
+  if [ $_FOUND -eq 0 ]; then
   # Check for any available local package in preference to a global package
   for _DIR in $(grep -F "/${_PKG_ROOT_NAME}${_ANCHOR}" "${_CACHE_PACKAGE_LOCAL}"); do
     _DIR="${_DIR%${_ANCHOR}}"
@@ -933,6 +952,7 @@ get_pkg_directory() {
     _ALL_DIRS+="${_DIR}\n"
     _FOUND=$((_FOUND+1))
   done
+  fi
 
   # If there's no local package available, use the global package
   if [ $_FOUND -eq 0 ]; then
@@ -958,7 +978,7 @@ get_pkg_directory() {
 
 # Return a list of sorted package names for this project/device/arch
 get_all_package_names() {
-  sed -e 's#@?+?@##g; s#.*/##g' ${_CACHE_PACKAGE_GLOBAL} ${_CACHE_PACKAGE_LOCAL} | sort --ignore-case --unique
+  sed -e 's#@?+?@##g; s#.*/##g' ${_CACHE_PACKAGE_GLOBAL} ${_CACHE_PACKAGE_LOCAL} ${_CACHE_PACKAGE_LOCAL_DEVICE} | sort --ignore-case --unique
 }
 
 calculate_stamp() {
