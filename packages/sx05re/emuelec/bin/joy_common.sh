@@ -61,30 +61,18 @@ jc_get_players() {
     return
   fi
 
-  SDL_CHECK=$(get_ee_setting ${EMULATOR}_joy_sdl_check)
-
-  if [[ "${SDL_CHECK}" == "1" ]]; then
-    jc_get_sdl_order
-
-    declare -i PLAYER=1
-    for SDL_NAME in "${SDL_GC_ORDER[@]}"; do
-      declare -i index=0
-      for PLAYER_CFG in "${PLAYER_CFGS[@]}"; do
-        local JOY_NAME=$(echo $PLAYER_CFG | cut -d' ' -f4-)
-        if [[ "$SDL_NAME" == "${JOY_NAME}" ]]; then
-          PLAYER_CFG="${PLAYER} ${PLAYER_CFG:2}"
-          jc_setup_gamecontroller "${PLAYER_CFG}"
-          unset 'PLAYER_CFGS[index]'
-        fi
-        (( index++ ))
-      done
-      (( PLAYER++ ))
-    done
-  else
-    for PLAYER_CFG in "${PLAYER_CFGS[@]}"; do
+  declare -i PLAYERS=${#PLAYER_CFGS[@]}
+  local PLAYER_CFG=0
+  for PLAYER in {1..4}; do
+    local PINDEX=$(( PLAYER - 1 ))
+    PLAYER_CFG=$PLAYER
+    if [[ "$PINDEX" -lt "$PLAYERS" ]]; then
+      PLAYER_CFG="${PLAYER_CFGS[$PINDEX]}"
       jc_setup_gamecontroller "${PLAYER_CFG}"
-    done
-  fi
+    fi
+    clean_pad ${PLAYER_CFG}
+  done
+
 }
 
 jc_setup_gamecontroller() {
@@ -104,36 +92,11 @@ jc_setup_gamecontroller() {
     fi
   fi
 
-  clean_pad ${PLAYER_CFG}
   echo "CONTROLLER: ${PLAYER_CFG}"
   set_pad ${JOY_INFO} "${JOY_NAME}"
 
   [[ -f "${CACHE_FILE}" ]] && sed -i "/^${PLAYER_CFG:0:1} js.*$/d" ${CACHE_FILE}
   echo "${PLAYER_CFG}" >> "${CACHE_FILE}"
-}
-
-declare SDL_GC_ORDER=()
-
-jc_get_sdl_order() {
-  echo "Performing sdljoytest"
-
-  SDL_OUT="/tmp/sdljoytest.txt"
-
-  sdljoytest > "${SDL_OUT}" &
-  SDL_PID=$!
-  sleep 2
-  kill -9 $SDL_PID
-  wait $SDL_PID 2>/dev/null
-
-  while read line; do
-    local REC=$(echo $line | grep "SDL_JOYDEVICEADDED")
-    if [[ ! -z "$REC" ]]; then
-      local JOY_NAME=$(echo $REC | cut -d ' ' -f4- )
-      SDL_GC_ORDER+=("${JOY_NAME:1:-16}")
-    fi
-  done < "${SDL_OUT}"
-
-  rm "${SDL_OUT}"
 }
 
 jc_generate_guid() {
