@@ -27,17 +27,13 @@ PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/drhelius/Gearcoleco/"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
-PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
-PKG_SHORTDESC="Gearcoleco is a very accurate cross-platform ColecoVision emulator written in C++"
 PKG_LONGDESC="Gearcoleco is a very accurate cross-platform ColecoVision emulator written in C++"
 PKG_TOOLCHAIN="make"
-#GET_HANDLER_SUPPORT="git"
 
 make_target() {
   make -C platforms/libretro/
 }
-
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro
