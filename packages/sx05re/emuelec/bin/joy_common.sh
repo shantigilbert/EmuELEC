@@ -69,8 +69,9 @@ jc_get_players() {
     if [[ "$PINDEX" -lt "$PLAYERS" ]]; then
       PLAYER_CFG="${PLAYER_CFGS[$PINDEX]}"
       jc_setup_gamecontroller "${PLAYER_CFG}"
+    else
+      clean_pad ${PLAYER_CFG}
     fi
-    [[ "$PINDEX" -ge "$PLAYERS" ]] && clean_pad ${PLAYER_CFG}
   done
 }
 
