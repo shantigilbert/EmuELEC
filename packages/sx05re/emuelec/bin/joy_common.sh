@@ -70,9 +70,8 @@ jc_get_players() {
       PLAYER_CFG="${PLAYER_CFGS[$PINDEX]}"
       jc_setup_gamecontroller "${PLAYER_CFG}"
     fi
-    clean_pad ${PLAYER_CFG}
+    [[ "$PINDEX" -ge "$PLAYERS" ]] && clean_pad ${PLAYER_CFG}
   done
-
 }
 
 jc_setup_gamecontroller() {
@@ -93,6 +92,7 @@ jc_setup_gamecontroller() {
   fi
 
   echo "CONTROLLER: ${PLAYER_CFG}"
+  clean_pad ${JOY_INFO} "${JOY_NAME}"
   set_pad ${JOY_INFO} "${JOY_NAME}"
 
   [[ -f "${CACHE_FILE}" ]] && sed -i "/^${PLAYER_CFG:0:1} js.*$/d" ${CACHE_FILE}
