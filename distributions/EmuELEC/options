@@ -257,6 +257,7 @@ LAKKA_MIRROR="http://sources.lakka.tv"
 
 LIBRETRO_CORES="2048 \
 81 \
+a5200 \
 atari800 \
 beetle-lynx \
 beetle-ngp \
@@ -281,6 +282,7 @@ freeintv \
 fuse-libretro \
 gambatte \
 gearboy \
+gearcoleco \
 gearsystem \
 genesis-plus-gx \
 genesis-plus-gx-wide \
