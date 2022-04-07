@@ -22,6 +22,7 @@ PKG_CMAKE_OPTS_TARGET="-DBUILD_PROGRAMS=OFF \
                        -DBUILD_EXAMPLES=OFF \
                        -DBUILD_REGTEST=OFF \
                        -DBUILD_TESTING=OFF \
+                       -DBUILD_SHARED_LIBS=ON \
                        -DENABLE_EXTERNAL_LIBS=ON \
                        -DINSTALL_MANPAGES=OFF \
                        -DINSTALL_PKGCONFIG_MODULE=ON"
