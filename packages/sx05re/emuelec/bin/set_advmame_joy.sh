@@ -121,13 +121,13 @@ set_pad(){
     fi
   fi
 
-  local NAME_NUM="${GC_NAMES[$JOY_NAME]}"
+  local NAME_NUM="${GC_NAMES[$GAMEPAD]}"
   if [[ -z "NAME_NUM" ]]; then
-    GC_NAMES[$JOY_NAME]=1
+    GC_NAMES[$GAMEPAD]=1
   else
-    GC_NAMES[$JOY_NAME]=$(( NAME_NUM+1 ))
+    GC_NAMES[$GAMEPAD]=$(( NAME_NUM+1 ))
   fi
-	[[ "$1" != "1" && "$NAME_NUM" -gt "1" ]] && GAMEPAD="${GAMEPAD}_${NAME_NUM}"
+	[[ "${GC_NAMES[$GAMEPAD]}" -gt "1" ]] && GAMEPAD="${GAMEPAD}_${GC_NAMES[$GAMEPAD]}"
 
   local GC_MAP=$(echo $GC_CONFIG | cut -d',' -f3-)
 
