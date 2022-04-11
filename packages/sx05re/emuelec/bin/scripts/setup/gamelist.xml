@@ -18,6 +18,15 @@
 		<genre>script</genre>
 		<image>./downloaded_images/wifi.png</image>
 	</game>
+		<game>
+		<path>./duckstationcheevos.sh</path>
+		<name>Enable DuckstationSA Retroachievements</name>
+		<desc>Enable DuckstationSA Retroachievements. Before running it needed to have retroachiements credentials set up in emulationstation</desc>
+		<developer>Hector Calvarro</developer>
+		<publisher>Emuelec</publisher>
+		<genre>script</genre>
+		<image>./downloaded_images/duckstationcheevos.png</image>
+	</game>
 	<game>
 		<path>./install_drastic.sh</path>
 		<name>Install Drastic</name>
