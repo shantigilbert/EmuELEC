@@ -211,6 +211,31 @@ function resolutions() {
 	echo "${RESOLUTIONS[*]}"
 }
 
+function check_resolutions() {
+
+	RESOLUTIONS=()
+
+	# N2 supported resolutions source : https://wiki.odroid.com/odroid-n2/application_note/software/set_display_mode
+	N2_SUPPORTED_RESOLUTIONS="480x320p60hz 640x480p60hz 720x480p60hz 720x576p50hz 800x480p60hz 1024x600p60hz 1024x768p60hz 1280x1024p60hz 1280x720p50hz 1280x720p60hz 1280x800p60hz 1360x768p60hz 1440x900p60hz 1600x1200p60hz 1600x900p60hz 1680x1050p60hz 1920x1080p24hz 1920x1080p30hz 1920x1080p50hz 1920x1080p60hz 1920x1200p60hz 2560x1080p60hz 2560x1440p60hz 2560x1600p60hz 3440x1440p60hz 3840x2160p24hz 3840x2160p25hz 3840x2160p30hz 3840x2160p50hz 3840x2160p60hz"
+
+	# Screen supported resolutions
+  SCREEN_SUPPORTED_RESOLUTIONS=`cat /sys/class/amhdmitx/amhdmitx0/rawedid | /usr/bin/edid-decode | grep -E '^ *VIC' | sed 's/ *VIC  *[0-9]*\://g' | sed 's/^ *//g' | sed 's/ * / /g' | cut -d'.' -f1 | sed 's/i /i/g' | sed 's/ /p/g' | sed -e 's/$/hz/g' `
+
+	for N2SP in $N2_SUPPORTED_RESOLUTIONS
+	do
+	for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
+	do
+		if [ "$N2SP" = "$SSR" ]
+		then
+		RESOLUTIONS+=($N2SP)
+		fi
+	done
+	done
+
+	IFS=","
+	echo "${RESOLUTIONS[*]}"
+}
+
 function current_timezone() {
 	readlink -f /etc/localtime | sed 's;/usr/share/zoneinfo/;;'
 }
