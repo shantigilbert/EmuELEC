@@ -15,22 +15,22 @@ EXTERNALDRIVE="${2}"
 [[ -z "${EXTERNALDRIVE}" ]] && EXTERNALDRIVE=$(get_ee_setting global.externalmount)
 [[ -z "${EXTERNALDRIVE}" || "${EXTERNALDRIVE}" == "auto" ]] && EXTERNALDRIVE=""
 
+# fat32 is default
+ROM_FS_TYPE="vfat"
+
 # Get EEROMS filetype
 if [ -e "/flash/ee_fstype" ]; then
-    EE_FS_TYPE=$(cat "/flash/ee_fstype")
+    FS_TYPE=$(cat "/flash/ee_fstype")
     
-    case $EE_FS_TYPE in
+    case $FS_TYPE in
     "ntfs"|"ext4"|"exfat")
-        ROM_FS_TYPE=${EE_FS_TYPE}
+        ROM_FS_TYPE=${FS_TYPE}
     ;;
-    *)
-        # Failsafe
-        ROM_FS_TYPE="vfat"
-    ;;
-    esac 
+    esac
 fi
 
 EE_FS_TYPE=${ROM_FS_TYPE}
+
 
 # Wait for the time specified in ee_load.delay setting in emuelec.conf
 LOADTIME=$(get_ee_setting ee_load.delay)
