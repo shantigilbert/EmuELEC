@@ -73,27 +73,7 @@ systemctl restart bluetooth
 systemctl restart bluetooth-agent
 fi
 
-# Mounts /storage/roms
-mount_romfs.sh 
-
-# copy default bezel to /storage/roms/bezel if it doesn't exists
-if [ ! -f "/storage/roms/bezels/default.cfg" ]; then 
-mkdir -p /storage/roms/bezels/
-cp -rf /usr/share/retroarch-overlays/bezels/* /storage/roms/bezels/ &
-fi
-
-# Restore config if backup exists
-BACKUPTAR="ee_backup_config.tar.gz"
-BACKUPFILE="/storage/roms/backup/${BACKUPTAR}"
-
-[[ ! -f "${BACKUPFILE}" ]] && BACKUPFILE="/var/media/EEROMS/backup/${BACKUPTAR}"
-
-if [ -f "${BACKUPFILE}" ]; then 
-	emuelec-utils ee_backup restore no > /emuelec/logs/last-restore.log 2>&1
-fi
-
 DEFE=""
-
 # If the video-mode is contained in flash config.
 if [ -s "${CONFIG_FLASH}" ]; then
   CFG_VAL=$(get_config_value "$CONFIG_FLASH" "hdmimode")
@@ -114,9 +94,27 @@ if [ -z "$DEFE" ]; then
       DEFE=$(cat /sys/class/display/mode)
   fi
 fi
-
 # finally we correct the FB according to video mode
 setres.sh ${DEFE}
+
+# Mounts /storage/roms
+mount_romfs.sh 
+
+# copy default bezel to /storage/roms/bezel if it doesn't exists
+if [ ! -f "/storage/roms/bezels/default.cfg" ]; then 
+mkdir -p /storage/roms/bezels/
+cp -rf /usr/share/retroarch-overlays/bezels/* /storage/roms/bezels/ &
+fi
+
+# Restore config if backup exists
+BACKUPTAR="ee_backup_config.tar.gz"
+BACKUPFILE="/storage/roms/backup/${BACKUPTAR}"
+
+[[ ! -f "${BACKUPFILE}" ]] && BACKUPFILE="/var/media/EEROMS/backup/${BACKUPTAR}"
+
+if [ -f "${BACKUPFILE}" ]; then 
+	emuelec-utils ee_backup restore no > /emuelec/logs/last-restore.log 2>&1
+fi
 
 # Clean cache garbage when boot up.
 rm -rf /storage/.cache/cores/* &

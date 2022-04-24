@@ -125,7 +125,7 @@ blank_buffer
 # shows buffer
 show_buffer 0
 
-fbfix
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # End of reading the video output mode and setting it for emuelec to avoid video flicking.
 # The codes can be simplified with "elseif" sentences.
