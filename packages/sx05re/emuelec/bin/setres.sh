@@ -60,7 +60,6 @@ if [[ ! -n "$HZ" ]] || [[ $HZ -eq 50 ]]; then
 	HZ=60
 fi
 
-
 # hides buffer
 show_buffer 1
 
@@ -126,6 +125,7 @@ blank_buffer
 # shows buffer
 show_buffer 0
 
+fbfix
 
 # End of reading the video output mode and setting it for emuelec to avoid video flicking.
 # The codes can be simplified with "elseif" sentences.
