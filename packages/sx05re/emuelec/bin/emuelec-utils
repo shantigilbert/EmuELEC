@@ -211,6 +211,19 @@ function resolutions() {
 	echo "${RESOLUTIONS[*]}"
 }
 
+function array_contains() { 
+    local array="$1[@]"
+    local seeking=$2
+    local in=1
+    for element in "${!array}"; do
+        if [[ $element == "$seeking" ]]; then
+            in=0
+            break
+        fi
+    done
+    return $in
+}
+
 function check_resolutions() {
   RESOLUTIONS=()
 
@@ -221,12 +234,13 @@ function check_resolutions() {
     RESOLUTIONS+=($SSR)
   done    
 
+  
   if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
-    RESOLUTIONS+="480x320p60hz"
+    array_contains RESOLUTIONS "480x320p60hz" && RESOLUTIONS+="480x320p60hz"
   fi
   
   if [ "$EE_DEVICE" == "GameForce" ]; then
-    RESOLUTIONS+="640x480p60hz"
+    array_contains RESOLUTIONS "640x480p60hz" && RESOLUTIONS+="640x480p60hz"
   fi
 
 	IFS=","
