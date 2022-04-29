@@ -1,13 +1,14 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
+# Copyright (C) 2022-present Langerz82 (https://github.com/Langerz82)
 
 PKG_NAME="retrorun"
 PKG_VERSION="7e3ab628d465a024a06ee113de50929b873157d0"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
-PKG_SITE="https://github.com/AmberELEC/retrorun-go2"
+PKG_SITE="https://github.com/navy1978/retrorun-go2"
 PKG_URL="$PKG_SITE.git"
-PKG_DEPENDS_TARGET="toolchain libgo2 libdrm libpng linux"
+PKG_DEPENDS_TARGET="toolchain libgo2 libdrm libpng"
 PKG_TOOLCHAIN="make"
 
 pre_make_target() {
