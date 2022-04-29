@@ -167,7 +167,7 @@ EE_DEVICE=$(cat /storage/.config/.OS_ARCH)
 echo 'confguring inputs on device:'$EE_DEVICE
 if [[ "$EE_DEVICE" == "GameForce" ]]
 then
-	ln -s /dev/input/event4 /dev/input/by-path/platform-odroidgo2-joypad-event-joystick
+	ln -s /dev/input/event2 /dev/input/by-path/platform-odroidgo2-joypad-event-joystick
 else
 	ln -s /dev/input/event3 /dev/input/by-path/platform-odroidgo2-joypad-event-joystick
 fi
