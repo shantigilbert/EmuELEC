@@ -11,6 +11,10 @@ release:
 image:
 	./scripts/image mkimage
 
+image_with_arm:
+	ARCH=arm ARCH_PARENT=$(ARCH) ./scripts/build_arm
+	./scripts/image mkimage
+
 noobs:
 	./scripts/image noobs
 
