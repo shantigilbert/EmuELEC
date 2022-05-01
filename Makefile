@@ -9,7 +9,6 @@ release:
 	./scripts/image release
 
 image:
-	ARCH=arm ARCH_PARENT=$(ARCH) ./scripts/build_arm
 	./scripts/image mkimage
 
 noobs:
