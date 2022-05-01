@@ -3,7 +3,7 @@
 # Copyright (C) 2022-present Langerz82 (https://github.com/Langerz82)
 
 PKG_NAME="retrorun"
-PKG_VERSION="7e3ab628d465a024a06ee113de50929b873157d0"
+PKG_VERSION="d324cb6a50c74323b2c53a89bad749ac0207e584"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/navy1978/retrorun-go2"
@@ -28,19 +28,13 @@ pre_configure_target() {
 
 makeinstall_target() {
 	mkdir -p $INSTALL/usr/bin
-  if [ "${ARCH}" != "aarch64" ]; then
-    cp retrorun $INSTALL/usr/bin/retrorun32
-  else
-    cp retrorun $INSTALL/usr/bin
-		#cp retrorun $INSTALL/usr/bin/retrorun32
-		#cp -vP $PKG_BUILD/../../install_pkg/retrorun-*/usr/bin/retrorun32 $INSTALL/usr/bin
-		#patchelf --set-interpreter /emuelec/lib32/ld-linux-armhf.so.3 $INSTALL/usr/bin/retrorun32
+	cp -f retrorun $INSTALL/usr/bin/retrorun
+	if [ "${ARCH}" == "arm" ]; then
+		cp -f retrorun "${INSTALL}/usr/bin/retrorun32"
+	fi
 
-    cp $PKG_DIR/retrorun.sh $INSTALL/usr/bin
-    
-    mkdir -p $INSTALL/usr/config/retrorun/configs
-    cp -vP $PKG_DIR/retrorun.cfg $INSTALL/usr/config/retrorun/configs
-  fi
-	
+  cp $PKG_DIR/retrorun.sh $INSTALL/usr/bin
+
+  mkdir -p $INSTALL/usr/config/retrorun/configs
+  cp -vP $PKG_DIR/retrorun.cfg $INSTALL/usr/config/retrorun/configs
 }
-
