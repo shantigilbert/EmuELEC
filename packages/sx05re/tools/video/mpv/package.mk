@@ -30,7 +30,7 @@ configure_target() {
 	cd ${PKG_BUILD}
  
  if [[ "$DEVICE" == "OdroidGoAdvance" || "$DEVICE" == "GameForce" ]]; then
-  ./waf configure --enable-sdl2 --enable-sdl2-gamepad --disable-pulse --enable-egl --disable-libbluray --enable-drm --enable-gl
+  ./waf configure --enable-sdl2 --enable-sdl2-gamepad --disable-pulse --enable-egl --disable-libbluray --enable-drm --disable-gl
   else
   ./waf configure --enable-libmpv-shared --enable-sdl2 --enable-sdl2-gamepad --disable-pulse --enable-egl --disable-libbluray --disable-drm --disable-gl
  fi
