@@ -80,16 +80,17 @@ if [ -e "/flash/ee_fstype" ]; then
    
 fi 
     DISK_NAME=$(basename $DISK)
-    DISK_SECTORS=$(cat "/sys/block/$DISK_NAME/size") # Obtain the disk sector
+    DISK_SECTORS=$(cat "/sys/block/$DISK_NAME/size") # Obtain the disk sectors count
     SECTOR_SIZE=$(cat "/sys/block/$DISK_NAME/queue/physical_block_size") # Obtain the sector size, in most situations this should be 512, but there ARE exceptions
     DISK_SIZE=$(( $DISK_SECTORS * $SECTOR_SIZE )) # Calculate the disk actual size, in byte
-    if [ $DISK_SIZE -gt 4294967296 ]; then # The default behaviour that EmuELEC used to have
+    if [ $DISK_SIZE -gt 4294967296 ]; then # The default behaviour that EmuELEC used to have, this will leave 2GiB to storage
       ROMS_OFFSET='4GiB'
-    elif [ $DISK_SIZE -gt 3221225472 ]; then  # Optionaly reduce the roms offset if disk is too small (larger than 2GiB since the image was written anyway, smaller than 4GiB as many cheapo 4GB cards are smaller than 4GiB, this is mainly for 4GB SD cards/USB drive)
+    elif [ $DISK_SIZE -gt 3221225472 ]; then  # Optionaly reduce the eeroms offset if disk is too small (larger than 2GiB since the image was written successfully anyway, smaller than 4GiB as many cheapo 4GB cards are smaller than 4GiB, this is mainly for 4GB SD cards/USB drive)
       ROMS_OFFSET='3GiB'
     else
       # The bare minumum a EmuELEC image itself needs is 2186280960, but after adding in user configs things become uncontrollable, so we don't care about disks with size between 2085MiB and 3GiB
-      echo 'ERROR: You disk is too smaller! You need to use a USB drive/SD card that is at least 4GB.'
+      echo 'ERROR: You disk is too small! You need to use a USB drive/SD card that is at least 4GB!'
+      echo 'ERROR: You should NOT try to boot up this drive as it is NOT properly resized!'
       StartProgress countdown "Powering off in 30s...     " 30 "NOW"
       poweroff
     fi
