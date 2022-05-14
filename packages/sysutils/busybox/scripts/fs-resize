@@ -25,9 +25,11 @@ if [ -e /storage/.please_resize_me ] ; then
   case $PART in
     "/dev/mmcblk"* | "/dev/nvme"*)
       DISK=$(echo $PART | sed s/p2$//g)
+      ROM_PART_NAME="${DISK}p3"
       ;;
     *)
       DISK=$(echo $PART | sed s/2$//g)
+      ROM_PART_NAME="${DISK}3"
       ;;
   esac
 
@@ -77,24 +79,38 @@ if [ -e "/flash/ee_fstype" ]; then
     esac    
    
 fi 
-    StartProgress spinner "Resizing partition...   " "parted -s -a optimal -m $DISK resizepart 2 4GiB &>/dev/null"
+    DISK_NAME=$(basename $DISK)
+    DISK_SECTORS=$(cat "/sys/block/$DISK_NAME/size") # Obtain the disk sector
+    SECTOR_SIZE=$(cat "/sys/block/$DISK_NAME/queue/physical_block_size") # Obtain the sector size, in most situations this should be 512, but there ARE exceptions
+    DISK_SIZE=$(( $DISK_SECTORS * $SECTOR_SIZE )) # Calculate the disk actual size, in byte
+    if [ $DISK_SIZE -gt 4294967296 ]; then # The default behaviour that EmuELEC used to have
+      ROMS_OFFSET='4GiB'
+    elif [ $DISK_SIZE -gt 3221225472 ]; then  # Optionaly reduce the roms offset if disk is too small (larger than 2GiB since the image was written anyway, smaller than 4GiB as many cheapo 4GB cards are smaller than 4GiB, this is mainly for 4GB SD cards/USB drive)
+      ROMS_OFFSET='3GiB'
+    else
+      # The bare minumum a EmuELEC image itself needs is 2186280960, but after adding in user configs things become uncontrollable, so we don't care about disks with size between 2085MiB and 3GiB
+      echo 'ERROR: You disk is too smaller! You need to use a USB drive/SD card that is at least 4GB.'
+      StartProgress countdown "Powering off in 30s...     " 30 "NOW"
+      poweroff
+    fi
+    StartProgress spinner "Resizing partition...   " "parted -s -a optimal -m $DISK resizepart 2 $ROMS_OFFSET &>/dev/null"
     StartProgress spinner "Checking file system... " "e2fsck -f -p $PART &>/dev/null"
     StartProgress spinner "Resizing file system... " "resize2fs $PART &>/dev/null"
-    StartProgress spinner "Creating EEROMS partition..." "parted -s -a optimal -m $DISK mkpart primary ${PARTED_FS_TYPE} 4296MB 100% &>/dev/null"
+    StartProgress spinner "Creating EEROMS partition..." "parted -s -a optimal -m $DISK mkpart primary ${PARTED_FS_TYPE} $ROMS_OFFSET 100% &>/dev/null"
     partprobe &>/dev/null
     
 case $ROM_FS_TYPE in 
     "ntfs")
-    StartProgress spinner "Formatting EEROMS partition as NTFS..." "mkfs.ntfs -L EEROMS -f ${DISK}p3 &>/dev/null"
+    StartProgress spinner "Formatting EEROMS partition as NTFS..." "mkfs.ntfs -L EEROMS -f ${ROM_PART_NAME} &>/dev/null"
     ;;
     "ext4")
-    StartProgress spinner "Formatting EEROMS partition as EXT4..." "mkfs.ext4 -L EEROMS -t ext4 -O 64bit ${DISK}p3 &>/dev/null"
+    StartProgress spinner "Formatting EEROMS partition as EXT4..." "mkfs.ext4 -L EEROMS -t ext4 -O 64bit ${ROM_PART_NAME} &>/dev/null"
     ;;
     "exfat")
-    StartProgress spinner "Formatting EEROMS partition as EXFAT..." "mkfs.exfat -n EEROMS ${DISK}p3 &>/dev/null"
+    StartProgress spinner "Formatting EEROMS partition as EXFAT..." "mkfs.exfat -n EEROMS ${ROM_PART_NAME} &>/dev/null"
     ;;
     *)
-    StartProgress spinner "Formatting EEROMS partition as FAT32..." "mkfs.vfat -n EEROMS ${DISK}p3 &>/dev/null"
+    StartProgress spinner "Formatting EEROMS partition as FAT32..." "mkfs.vfat -n EEROMS ${ROM_PART_NAME} &>/dev/null"
     ;;
 esac    
 
