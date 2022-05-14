@@ -80,9 +80,8 @@ if [ -e "/flash/ee_fstype" ]; then
    
 fi 
     DISK_NAME=$(basename $DISK)
-    DISK_SECTORS=$(cat "/sys/block/$DISK_NAME/size") # Obtain the disk sectors count
-    SECTOR_SIZE=$(cat "/sys/block/$DISK_NAME/queue/physical_block_size") # Obtain the sector size, in most situations this should be 512, but there ARE exceptions
-    DISK_SIZE=$(( $DISK_SECTORS * $SECTOR_SIZE )) # Calculate the disk actual size, in byte
+    DISK_SECTORS=$(cat "/sys/block/$DISK_NAME/size") # Obtain the disk sectors count, each sector is always 512 Bytes large, independent of the underlying device, according to https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/linux/types.h#n117
+    DISK_SIZE=$(( $DISK_SECTORS * 512 )) # Calculate the disk actual size, in byte
     if [ $DISK_SIZE -gt 4294967296 ]; then # The default behaviour that EmuELEC used to have, this will leave 2GiB to storage
       ROMS_OFFSET='4GiB'
     elif [ $DISK_SIZE -gt 3221225472 ]; then  # Optionaly reduce the eeroms offset if disk is too small (larger than 2GiB since the image was written successfully anyway, smaller than 4GiB as many cheapo 4GB cards are smaller than 4GiB, this is mainly for 4GB SD cards/USB drive)
