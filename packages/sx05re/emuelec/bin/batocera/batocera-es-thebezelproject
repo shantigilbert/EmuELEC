@@ -246,6 +246,11 @@ esac
 			else
 			EE_REALSYSTEM="GameBezels/${gitsystem}"
 		fi
+    
+    if [ "${systemtoinstall}" == "genesis" ] || [ "${systemtoinstall}" == "megadrive" ]; then
+      # ${gitsystem} has wrong case -- MegaDrive instead of Megadrive
+      EE_REALSYSTEM="GameBezels/Megadrive"
+    fi
 		
 		if [ -f "${tmp}/${gitname}/retroarch/overlay/$EE_REALSYSTEM/${romname}.png" ]; then
 			[ $DEBUG -eq 1 ] && echo "DEBUG: found PNG for ${romname}"
