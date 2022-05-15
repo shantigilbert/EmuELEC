@@ -165,7 +165,7 @@ rm /dev/input/by-path/platform-odroidgo2-joypad-event-joystick || true
 echo 'confguring inputs'
 EE_DEVICE=$(cat /storage/.config/.OS_ARCH)
 echo 'confguring inputs on device:'$EE_DEVICE
-if [[ "$EE_DEVICE" == "GameForce" ]]
+if [[ "$EE_DEVICE" == "GameForce" || "$EE_DEVICE" == "OdroidGoAdvance" ]]
 then
 	ln -s /dev/input/event2 /dev/input/by-path/platform-odroidgo2-joypad-event-joystick
 else
@@ -183,7 +183,7 @@ then
     FPS="-f"
 fi
 GPIO_JOYPAD=''
-if [[ "$EE_DEVICE" == "GameForce" ]]
+if [[ "$EE_DEVICE" == "GameForce" || "$EE_DEVICE" == "OdroidGoAdvance" ]]
 then
     echo 'GPIO joypad'
     GPIO_JOYPAD="-g"
