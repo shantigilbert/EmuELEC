@@ -45,6 +45,40 @@ RACONF="/storage/.config/retroarch/retroarch.cfg"
 NETPLAY="No"
 RABIN="retroarch"
 
+# ROMNAME=$(get_multi_disc "$PLATFORM" "$EMULATOR" "$CORE" "$ROMNAME" )
+get_multi_disc() {
+  local PLATFORM="$1"
+  local EMULATOR="$2"
+  local CORE="$3"
+  local ROMNAME="$4"
+
+  local BASEROMNAME="${ROMNAME##*/}"
+  local BASEFOLDER="$(dirname "${ROMNAME}")"
+  local ROMEXT="${BASEROMNAME##*.}"
+  local ROMNAME_NOEXT="${BASEROMNAME%.*}"
+
+  [[ "$ROMEXT" == "m3u" ]] && echo "$ROMNAME" && return
+  
+  if [[ "${ROMNAME_NOEXT,,}" =~ ^.*disc[[:space:]]*1.*$ ]]; then
+      local M3U_FILE=$(echo "${BASEFOLDER}/${ROMNAME_NOEXT}.m3u" | sed -nE "s/(.*)(disc *)1(.*)/\1 DISCS \3/pi")
+      [[ -f "${M3U_FILE}" ]] && echo "${M3U_FILE}" && return
+      touch "${M3U_FILE}"
+      echo "${BASEROMNAME}" >> "$M3U_FILE"
+      local DISC_SEQ
+      for i in {2..9}; do
+        DISC_SEQ=$( echo "${BASEROMNAME}" | sed -nE "s/(.*)(disc *)1(.*)/\1\2${i}\3/pi" )
+        if [[ -f "${BASEFOLDER}/${DISC_SEQ}" ]]; then
+          echo "${DISC_SEQ}" >> "$M3U_FILE"
+        else
+          break
+        fi
+      done
+      echo "${M3U_FILE}" && return
+  fi
+  echo "$ROMNAME"
+}
+
+
 # Make sure the /emuelec/logs directory exists
 if [[ ! -d "$LOGSDIR" ]]; then
     mkdir -p "$LOGSDIR"
@@ -137,6 +171,9 @@ SPL=$(get_ee_setting ee_splash.enabled)
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
+
+MULTIDISC=$(get_ee_setting multidisc "${PLATFORM}")
+[[ -z "$MULTIDISC" ]] && ROMNAME=$(get_multi_disc "$PLATFORM" "$EMULATOR" "$CORE" "$ROMNAME" )
 
 # Read the first argument in order to set the right emulator
 case ${PLATFORM} in
