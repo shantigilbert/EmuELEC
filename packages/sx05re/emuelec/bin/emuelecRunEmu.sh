@@ -60,8 +60,10 @@ get_multi_disc() {
   [[ "$ROMEXT" == "m3u" ]] && echo "$ROMNAME" && return
   
   if [[ "${ROMNAME_NOEXT,,}" =~ ^.*disc[[:space:]]*1.*$ ]]; then
-      local M3U_FILE=$(echo "${BASEFOLDER}/${ROMNAME_NOEXT}.m3u" | sed -nE "s/(.*)(disc *)1(.*)/\1 DISCS \3/pi")
+      local M3U_FILE=$(echo "${ROMNAME_NOEXT}" | sed -nE "s/(.*)(disc *)1(.*)/\1 DISCS \3/pi")
+      M3U_FILE=$(echo "${BASEFOLDER}/${M3U_FILE}.m3u")
       [[ -f "${M3U_FILE}" ]] && echo "${M3U_FILE}" && return
+
       touch "${M3U_FILE}"
       echo "${BASEROMNAME}" >> "$M3U_FILE"
       local DISC_SEQ
