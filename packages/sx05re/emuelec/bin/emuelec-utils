@@ -209,13 +209,20 @@ function resolutions() {
   	done
   fi
 
-  # Screen supported resolutions
-	SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/amhdmitx/amhdmitx0/disp_cap | /usr/bin/cat /sys/class/amhdmitx/amhdmitx0/disp_cap_3d | tail -n +3 | sort | uniq -u`
-  for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
-  do
-    RESOLUTIONS+=($SSR)
-  done    
-
+  if [[ "$EE_PROJECT" == "Rockchip" ]]; then
+    SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/display/display0.HDMI/modes | sort | uniq -u`
+    for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
+    do
+      RESOLUTIONS+=($SSR)
+    done    
+  else
+    # Screen supported resolutions
+  	SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/amhdmitx/amhdmitx0/disp_cap | /usr/bin/cat /sys/class/amhdmitx/amhdmitx0/disp_cap_3d | tail -n +3 | sort | uniq -u`
+    for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
+    do
+      RESOLUTIONS+=($SSR)
+    done
+  fi    
   
   if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
     RESOLUTIONS+="480x320p60hz"
