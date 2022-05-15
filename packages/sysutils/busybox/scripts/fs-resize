@@ -56,30 +56,30 @@ if [ -e /storage/.please_resize_me ] ; then
     PARTED_FS_TYPE="fat32"
 
     if [ -e "/flash/ee_fstype" ]; then
-        EE_FS_TYPE=$(cat "/flash/ee_fstype")
-        
-        case $EE_FS_TYPE in
-        "ntfs")
-            ROM_FS_TYPE="ntfs"
-            PARTED_FS_TYPE="ntfs"
-        ;;
-        "ext4")
-            ROM_FS_TYPE="ext4"
-            PARTED_FS_TYPE="ext4"
-        ;;
-        "exfat")
-            ROM_FS_TYPE="exfat"
-            PARTED_FS_TYPE="ntfs"
-        ;;
-        *)
-            # Failsafe
-            ROM_FS_TYPE="vfat"
-            PARTED_FS_TYPE="fat32"
-        ;;
-        esac    
+      EE_FS_TYPE=$(cat "/flash/ee_fstype")
+      
+      case $EE_FS_TYPE in
+      "ntfs")
+          ROM_FS_TYPE="ntfs"
+          PARTED_FS_TYPE="ntfs"
+      ;;
+      "ext4")
+          ROM_FS_TYPE="ext4"
+          PARTED_FS_TYPE="ext4"
+      ;;
+      "exfat")
+          ROM_FS_TYPE="exfat"
+          PARTED_FS_TYPE="ntfs"
+      ;;
+      *)
+          # Failsafe
+          ROM_FS_TYPE="vfat"
+          PARTED_FS_TYPE="fat32"
+      ;;
+      esac    
       
     fi 
-    
+
     DISK_NAME=$(basename $DISK)
     DISK_SECTORS=$(cat "/sys/block/$DISK_NAME/size") # Obtain the disk sectors count, each sector is always 512 Bytes large, independent of the underlying device, according to https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/linux/types.h#n117
     DISK_SIZE=$(( $DISK_SECTORS * 512 )) # Calculate the disk actual size, in byte
@@ -101,18 +101,18 @@ if [ -e /storage/.please_resize_me ] ; then
     partprobe &>/dev/null
         
     case $ROM_FS_TYPE in 
-        "ntfs")
-        StartProgress spinner "Formatting EEROMS partition as NTFS..." "mkfs.ntfs -L EEROMS -f ${ROM_PART_NAME} &>/dev/null"
-        ;;
-        "ext4")
-        StartProgress spinner "Formatting EEROMS partition as EXT4..." "mkfs.ext4 -L EEROMS -t ext4 -O 64bit ${ROM_PART_NAME} &>/dev/null"
-        ;;
-        "exfat")
-        StartProgress spinner "Formatting EEROMS partition as EXFAT..." "mkfs.exfat -n EEROMS ${ROM_PART_NAME} &>/dev/null"
-        ;;
-        *)
-        StartProgress spinner "Formatting EEROMS partition as FAT32..." "mkfs.vfat -n EEROMS ${ROM_PART_NAME} &>/dev/null"
-        ;;
+      "ntfs")
+      StartProgress spinner "Formatting EEROMS partition as NTFS..." "mkfs.ntfs -L EEROMS -f ${ROM_PART_NAME} &>/dev/null"
+      ;;
+      "ext4")
+      StartProgress spinner "Formatting EEROMS partition as EXT4..." "mkfs.ext4 -L EEROMS -t ext4 -O 64bit ${ROM_PART_NAME} &>/dev/null"
+      ;;
+      "exfat")
+      StartProgress spinner "Formatting EEROMS partition as EXFAT..." "mkfs.exfat -n EEROMS ${ROM_PART_NAME} &>/dev/null"
+      ;;
+      *)
+      StartProgress spinner "Formatting EEROMS partition as FAT32..." "mkfs.vfat -n EEROMS ${ROM_PART_NAME} &>/dev/null"
+      ;;
     esac    
 
     StartProgress countdown "Rebooting in 5s...     " 5 "NOW"
