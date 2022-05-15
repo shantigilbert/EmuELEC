@@ -25,11 +25,11 @@ if [ -e /storage/.please_resize_me ] ; then
   case $PART in
     "/dev/mmcblk"* | "/dev/nvme"*)
       DISK=$(echo $PART | sed s/p2$//g)
-      ROM_PART_NAME="${DISK}p3"
+      ROMS_PART_NAME="${DISK}p3"
       ;;
     *)
       DISK=$(echo $PART | sed s/2$//g)
-      ROM_PART_NAME="${DISK}3"
+      ROMS_PART_NAME="${DISK}3"
       ;;
   esac
 
@@ -39,6 +39,23 @@ if [ -e /storage/.please_resize_me ] ; then
   # just in case
   if [ ! -z "$DISK" -a ! -z "$PART" ] ; then
     umount $PART
+
+    DISK_NAME=$(basename $DISK)
+    DISK_SECTORS=$(cat "/sys/block/$DISK_NAME/size") # Obtain the disk sectors count, each sector is always 512 Bytes large, independent of the underlying device, according to https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/linux/types.h#n117
+    DISK_SIZE=$(( $DISK_SECTORS * 512 )) # Calculate the disk actual size, in byte
+    if [ $DISK_SIZE -gt 4294967296 ]; then # The optimal behaviour, this will leave 2GiB to storage, and create the EEROMS partition
+      ROMS_CREATE='yes'
+      STORAGE_END='4GiB'
+    elif [ $DISK_SIZE -gt 3221225472 ]; then  # Optionaly omit the EEROMS partition for 4GB cards/drives
+      ROMS_CREATE=''
+      STORAGE_END='100%'
+    else
+      # The bare minumum a EmuELEC image itself needs is 2186280960, but after adding in user configs things become uncontrollable, so we don't care about disks with size between 2085MiB and 3GiB
+      echo 'ERROR: You disk is too small! You need to use a USB drive/SD card that is at least 4GB!'
+      echo 'ERROR: You should NOT try to boot up this drive as it is NOT properly resized!'
+      StartProgress countdown "Powering off in 30s...     " 30 "NOW"
+      poweroff
+    fi
 
     echo "PARTITION RESIZING IN PROGRESS"
     echo ""
@@ -78,43 +95,31 @@ if [ -e /storage/.please_resize_me ] ; then
       ;;
       esac    
       
-    fi 
-
-    DISK_NAME=$(basename $DISK)
-    DISK_SECTORS=$(cat "/sys/block/$DISK_NAME/size") # Obtain the disk sectors count, each sector is always 512 Bytes large, independent of the underlying device, according to https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/linux/types.h#n117
-    DISK_SIZE=$(( $DISK_SECTORS * 512 )) # Calculate the disk actual size, in byte
-    if [ $DISK_SIZE -gt 4294967296 ]; then # The default behaviour that EmuELEC used to have, this will leave 2GiB to storage
-      ROMS_OFFSET='4GiB'
-    elif [ $DISK_SIZE -gt 3221225472 ]; then  # Optionaly reduce the eeroms offset if disk is too small (larger than 2GiB since the image was written successfully anyway, smaller than 4GiB as many cheapo 4GB cards are smaller than 4GiB, this is mainly for 4GB SD cards/USB drive)
-      ROMS_OFFSET='3GiB'
-    else
-      # The bare minumum a EmuELEC image itself needs is 2186280960, but after adding in user configs things become uncontrollable, so we don't care about disks with size between 2085MiB and 3GiB
-      echo 'ERROR: You disk is too small! You need to use a USB drive/SD card that is at least 4GB!'
-      echo 'ERROR: You should NOT try to boot up this drive as it is NOT properly resized!'
-      StartProgress countdown "Powering off in 30s...     " 30 "NOW"
-      poweroff
     fi
-    StartProgress spinner "Resizing partition...   " "parted -s -a optimal -m $DISK resizepart 2 $ROMS_OFFSET &>/dev/null"
+
+    StartProgress spinner "Resizing partition...   " "parted -s -a optimal -m $DISK resizepart 2 $STORAGE_END &>/dev/null"
     StartProgress spinner "Checking file system... " "e2fsck -f -p $PART &>/dev/null"
     StartProgress spinner "Resizing file system... " "resize2fs $PART &>/dev/null"
-    StartProgress spinner "Creating EEROMS partition..." "parted -s -a optimal -m $DISK mkpart primary ${PARTED_FS_TYPE} $ROMS_OFFSET 100% &>/dev/null"
-    partprobe &>/dev/null
-        
-    case $ROM_FS_TYPE in 
-      "ntfs")
-      StartProgress spinner "Formatting EEROMS partition as NTFS..." "mkfs.ntfs -L EEROMS -f ${ROM_PART_NAME} &>/dev/null"
-      ;;
-      "ext4")
-      StartProgress spinner "Formatting EEROMS partition as EXT4..." "mkfs.ext4 -L EEROMS -t ext4 -O 64bit ${ROM_PART_NAME} &>/dev/null"
-      ;;
-      "exfat")
-      StartProgress spinner "Formatting EEROMS partition as EXFAT..." "mkfs.exfat -n EEROMS ${ROM_PART_NAME} &>/dev/null"
-      ;;
-      *)
-      StartProgress spinner "Formatting EEROMS partition as FAT32..." "mkfs.vfat -n EEROMS ${ROM_PART_NAME} &>/dev/null"
-      ;;
-    esac    
-
+    if [ "$ROMS_CREATE" ]; then
+      StartProgress spinner "Creating EEROMS partition..." "parted -s -a optimal -m $DISK mkpart primary ${PARTED_FS_TYPE} 4GiB 100% &>/dev/null"
+      partprobe &>/dev/null
+      case $ROM_FS_TYPE in 
+        "ntfs")
+        StartProgress spinner "Formatting EEROMS partition as NTFS..." "mkfs.ntfs -L EEROMS -f ${ROMS_PART_NAME} &>/dev/null"
+        ;;
+        "ext4")
+        StartProgress spinner "Formatting EEROMS partition as EXT4..." "mkfs.ext4 -L EEROMS -t ext4 -O 64bit ${ROMS_PART_NAME} &>/dev/null"
+        ;;
+        "exfat")
+        StartProgress spinner "Formatting EEROMS partition as EXFAT..." "mkfs.exfat -n EEROMS ${ROMS_PART_NAME} &>/dev/null"
+        ;;
+        *)
+        StartProgress spinner "Formatting EEROMS partition as FAT32..." "mkfs.vfat -n EEROMS ${ROMS_PART_NAME} &>/dev/null"
+        ;;
+      esac   
+    else
+      echo 'WARNING: EEROMS partition is omitted for 4GB drives'
+    fi
     StartProgress countdown "Rebooting in 5s...     " 5 "NOW"
   fi
 fi
