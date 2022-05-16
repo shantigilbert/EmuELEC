@@ -1,5 +1,3 @@
-
-  
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
@@ -30,6 +28,5 @@ makeinstall_target() {
 		cp retrorun ${INSTALL}/usr/bin/retrorun
 	fi
 	cp ${PKG_BUILD}/setting.cfg ${INSTALL}/usr/config/emuelec/configs/retrorun.cfg
-	
 	
 }
