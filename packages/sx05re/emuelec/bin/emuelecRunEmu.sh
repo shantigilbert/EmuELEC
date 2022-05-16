@@ -405,9 +405,8 @@ else # Retrorun was selected
     if [ "${BIT32}" == "yes" ]; then 
         RUNTHIS+="32"
     fi
-    EMU="/tmp/cores/${CORE}_libretro.so"
-    /usr/bin/retrorun.sh "${EMU}" "${ROMNAME}" "${PLATFORM}"
-    #RUNTHIS+=' --triggers -n -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
+    
+    RUNTHIS+=' --triggers -n -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
 
 fi # end Libretro/retrorun or standalone emu logic
 
