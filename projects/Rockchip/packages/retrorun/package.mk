@@ -28,9 +28,11 @@ pre_configure_target() {
 
 makeinstall_target() {
 	mkdir -p $INSTALL/usr/bin
-	cp -f retrorun $INSTALL/usr/bin/retrorun
+
 	if [ "${ARCH}" == "arm" ]; then
 		cp -f retrorun "${INSTALL}/usr/bin/retrorun32"
+  else
+    cp -f retrorun $INSTALL/usr/bin/retrorun
 	fi
 
   cp $PKG_DIR/retrorun.sh $INSTALL/usr/bin
