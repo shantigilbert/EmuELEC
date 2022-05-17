@@ -28,6 +28,6 @@ makeinstall_target() {
 		cp retrorun ${INSTALL}/usr/bin/retrorun
 	fi
 	cp ${PKG_BUILD}/setting.cfg ${INSTALL}/usr/config/emuelec/configs/retrorun.cfg
-
-
+	
+	
 }
