@@ -265,16 +265,20 @@ function createMultidisc() {
       local DISC_SEQ
       local HAS_SEQ=0
       for i in {2..9}; do
-        DISC_SEQ=$( echo "${BASEROMNAME}" | sed -nE "s/(.*)(disc *)1(.*)/\1\2${i}\3/pi" )
-        #if [[ -f "${BASEFOLDER}/${DISC_SEQ}" ]]; then
-        if ls "${BASEFOLDER}/${DISC_SEQ}"* 1> /dev/null 2>&1; then
-          echo $(ls "${BASEFOLDER}/${DISC_SEQ}"*) >> "$M3U_FILE"
+        DISC_SEQ=$( echo "${ROMNAME_NOEXT}" | sed -nE "s/(.*)(disc *)1(.*)/\1\2${i}\3/pi" )
+        local NEXT_FILE=$( ls "${BASEFOLDER}/${DISC_SEQ}"* )
+        if [[ ! -z "${NEXT_FILE}" ]]; then
+          echo "${NEXT_FILE}.${ROMEXT}" >> "$M3U_FILE"
           HAS_SEQ=1
         else
           break
         fi
       done
-      [[ "$HAS_SEQ" == "1" ]] && echo -e "${M3U_FILE}"
+      if [[ "$HAS_SEQ" == "1" ]]; then
+        echo -e "${M3U_FILE}"
+      else
+        rm "${M3U_FILE}"
+      fi
   fi
   echo -e "\n"
 }
