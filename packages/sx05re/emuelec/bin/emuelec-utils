@@ -245,8 +245,7 @@ function unmount_all () {
 }
 
 function createMultidisc() {
-  local PLATFORM="$1"
-  local ROMNAME="$2"
+  local ROMNAME="$1"
 
   local BASEROMNAME="${ROMNAME##*/}"
   local BASEFOLDER="$(dirname "${ROMNAME}")"
@@ -254,27 +253,27 @@ function createMultidisc() {
   local ROMNAME_NOEXT="${BASEROMNAME%.*}"
 
   [[ "$ROMEXT" == "m3u" ]] && echo -e "\n" && return
-  
+
   if [[ "${ROMNAME_NOEXT,,}" =~ ^.*disc[[:space:]]*1.*$ ]]; then
       local M3U_FILE=$(echo "${ROMNAME_NOEXT}" | sed -nE "s/(.*)(disc *)1(.*)/\1 DISCS \3/pi")
       M3U_FILE=$(echo "${BASEFOLDER}/${M3U_FILE}.m3u")
       [[ -f "${M3U_FILE}" ]] && echo -e "\n" && return
 
       touch "${M3U_FILE}"
-      echo "${BASEROMNAME}" >> "$M3U_FILE"
-      local DISC_SEQ
       local HAS_SEQ=0
-      for i in {2..9}; do
-        DISC_SEQ=$( echo "${ROMNAME_NOEXT}" | sed -nE "s/(.*)(disc *)1(.*)/\1\2${i}\3/pi" )
-        local NEXT_FILE=$( ls "${BASEFOLDER}/${DISC_SEQ}"* )
-        if [[ ! -z "${NEXT_FILE}" ]]; then
-          echo "${NEXT_FILE}.${ROMEXT}" >> "$M3U_FILE"
-          HAS_SEQ=1
-        else
-          break
-        fi
+      local REGEX=$( echo "${ROMNAME_NOEXT}" | sed -nE "s/(.*)(disc*)\s*[0-9](.*)/\1\2\3/pi" \
+        | sed -e 's/\[[^][]*\]//g' | sed -e 's/([^()]*)//g' | sed -e 's/\s+/ /' \
+        | awk '{$1=$1};1' )
+      REGEX=$( echo ".*${REGEX}.*" )
+      local FILES=$( ls "${BASEFOLDER}/"* | grep ".${ROMEXT}" | grep -E "${REGEX}" | sort )
+      IFS=$'\n'
+      local ITER=0
+      for item in $FILES
+      do
+        echo "${item}" >> "$M3U_FILE"
+        ((ITER++))
       done
-      if [[ "$HAS_SEQ" == "1" ]]; then
+      if [[ "$ITER" -gt "1" ]]; then
         echo -e "${M3U_FILE}"
       else
         rm "${M3U_FILE}"
