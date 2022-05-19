@@ -12,10 +12,10 @@ CORE="$1"
 ROM="${2##*/}"
 PLATFORM="$3"
 CONF="/emuelec/configs/emuelec.conf"
-RRCONF="/storage/.config/retrorun/configs/retrorun.cfg"
+RRCONF="/emuelec/configs/retrorun.cfg"
 
 if [ ! -f ${RRCONF} ]; then
-  cp -f /usr/config/retrorun/configs/retrorun.cfg /storage/.config/retrorun/configs
+  cp -f /usr/config/retrorun/configs/retrorun.cfg /emuelec/configs
 fi
 
 function get_setting() {
