@@ -100,7 +100,7 @@ fi
 
 if [[ "${EMULATOR}" = "retrorun" ]]; then
     EMU="${CORE}_libretro"
-	RETRORUN="yes"
+	  RETRORUN="yes"
     LIBRETRO=""
 fi
 
@@ -401,12 +401,19 @@ fi
 
 else # Retrorun was selected
 # Retrotun does not support settings
-    RUNTHIS="retrorun"
+    RUNTHIS="retrorun.sh"
     if [ "${BIT32}" == "yes" ]; then 
-        RUNTHIS+="32"
+      set_kill_keys "retrorun32"
+      RUNTHIS+=" 32"
+    else
+      set_kill_keys "retrorun"
+      RUNTHIS+=" 64"
     fi
-    
-    RUNTHIS+=' --triggers -n -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
+    FPS=$(get_ee_setting global.showFPS)
+    [[ "$FPS" == "1" ]] && FPS="show_fps"
+    EMU="/tmp/cores/${CORE}_libretro.so"
+    RUNTHIS+=" \"${EMU}\" \"${ROMNAME}\" \"${PLATFORM}\" ${FPS} "
+    #RUNTHIS+=' --triggers -n -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
 
 fi # end Libretro/retrorun or standalone emu logic
 
