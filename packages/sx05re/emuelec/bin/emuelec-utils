@@ -196,7 +196,7 @@ function resolutions() {
 
   	# Screen supported resolutions
   	SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/amhdmitx/amhdmitx0/rawedid | /usr/bin/edid-decode |/usr/bin/grep "@" | sed -E "s| {0,9}VIC {0,9}[0-9]{1,2}||" | /usr/bin/awk '{print $1}' | /usr/bin/sed  's/@/p/g'|/usr/bin/tr '[:upper:]' '[:lower:]'`
-
+    echo "SCREEN_SUPPORTED_RESOLUTIONS=${SCREEN_SUPPORTED_RESOLUTIONS[@]}"
   	for N2SP in $N2_SUPPORTED_RESOLUTIONS
   	do
   	for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
@@ -210,20 +210,20 @@ function resolutions() {
   fi
 
   if [[ "$EE_PROJECT" == "Rockchip" ]]; then
-    SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/display/display0.HDMI/modes | sort | uniq -u`
-    for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
-    do
-      RESOLUTIONS+=($SSR)
-    done    
-  else
-    # Screen supported resolutions
-  	SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/amhdmitx/amhdmitx0/disp_cap | /usr/bin/cat /sys/class/amhdmitx/amhdmitx0/disp_cap_3d | tail -n +3 | sort | uniq -u`
+    SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/display/display0.HDMI/modes | sort -u`
     for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
     do
       RESOLUTIONS+=($SSR)
     done
-  fi    
-  
+  else
+    # Screen supported resolutions
+  	SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/display/cap | sed '/smpte/d' | sed '/pal/d' | sed '/ntsc/d' | sed 's/\*//' | grep -E '[0-9x]+[pi][56]0hz|cvbs'`
+    for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
+    do
+      RESOLUTIONS+=($SSR)
+    done
+  fi
+
   if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
     RESOLUTIONS+="480x320p60hz"
   fi
@@ -232,7 +232,7 @@ function resolutions() {
     RESOLUTIONS+="640x480p60hz"
   fi
 
-  RESOLUTIONS=($(printf "%s\n" "${RESOLUTIONS[@]}" | sort -u))
+  RESOLUTIONS=($(printf "%s\n" "${RESOLUTIONS[@]}" | sort -u ))
 
 	IFS=","
 	echo "${RESOLUTIONS[*]}"
