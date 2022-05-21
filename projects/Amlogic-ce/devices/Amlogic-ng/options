@@ -144,7 +144,7 @@
   # Space separated list is supported,
   # e.g. ADDITIONAL_PACKAGES="PACKAGE1 PACKAGE2"
     ADDITIONAL_PACKAGES="u-boot-script dtc CoreELEC-Debug-Scripts inject_bl301"
-    ADDITIONAL_PACKAGES+=" nfs-utils dtb-xml megatools"
+    ADDITIONAL_PACKAGES+=" nfs-utils dtb-xml megatools ampart"
 
   # add OOTB support for IR remote
     IR_REMOTE_KEYMAPS="$IR_REMOTE_KEYMAPS odroid wetek_hub wetek_play_2 tanix"
