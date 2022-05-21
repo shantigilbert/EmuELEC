@@ -74,12 +74,11 @@ install_to_nand() {
     echo "All done!"
     echo "Your system will reboot from internal memory."
     echo ""
-
+    /usr/sbin/fw_setenv storeboot 'run cfgloademmc'
     read -p "Would you like to reboot now [y/N]? " choice
     case "$choice" in
       [yY]*)
         if /usr/sbin/fw_printenv whereToBootFrom > /dev/null 2>&1; then /usr/sbin/fw_setenv whereToBootFrom internal; fi
-        /usr/sbin/fw_setenv storeboot 'run cfgloademmc'
         /usr/sbin/fw_setenv bootfromnand 1
         /usr/sbin/reboot switch_system
         ;;
