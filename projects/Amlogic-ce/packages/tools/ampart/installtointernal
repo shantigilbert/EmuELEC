@@ -40,8 +40,7 @@ install_to_nand() {
     mount -o rw,remount /flash
 
     echo -n "Formatting SYSTEM partition..."
-    mke2fs -F -q -t ext4 -m 0 /dev/system || exit 1
-    e2fsck -n /dev/system || exit 1
+    mkfs.fat /dev/system || exit 1
     echo "done."
 
     echo -n "Copying all system files (kernel, SYSTEM, dtb, etc) under EMUELEC partition to internal SYSTEM partition..."
