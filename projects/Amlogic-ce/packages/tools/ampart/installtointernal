@@ -1,0 +1,107 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2016-2018 kszaq (kszaquitto@gmail.com)
+# Copyright (C) 2018-2022 Team CoreELEC (https://coreelec.org)
+# Copyright (C) 2022-present 7Ji (pugokushin@gmail.com)
+
+IMAGE_KERNEL="/flash/kernel.img"
+IMAGE_SYSTEM="/flash/SYSTEM"
+BACKUP_DATE=$(date +%Y%m%d%H%M%S)
+
+install_to_nand() {
+  if [ -f $IMAGE_KERNEL -a -f $IMAGE_SYSTEM ] ; then
+
+    if grep -q /dev/system /proc/mounts ; then
+      echo "Unmounting SYSTEM partiton."
+      umount -f /dev/system
+    fi
+
+    if grep -q /dev/data /proc/mounts ; then
+      echo "Unmounting DATA partiton."
+      umount -f /dev/data
+    fi
+
+    echo "Creating new partition table..."
+    ampart /dev/mmcblk0 system::2G:2 data::: &> /dev/null
+    if [ ! $? ]; then
+      echo "Failed to create new partition table, exiting..."
+      exit
+    fi
+
+    mkdir -p /tmp/system
+
+    mount -o rw,remount /flash
+
+    echo -n "Formatting SYSTEM partition..."
+    mke2fs -F -q -t ext4 -m 0 /dev/system || exit 1
+    e2fsck -n /dev/system || exit 1
+    echo "done."
+
+    echo -n "Copying all system files (kernel, SYSTEM, dtb, etc) under EMUELEC partition to internal SYSTEM partition..."
+    mount -o rw /dev/system /tmp/system
+    cp -rva /flash/* /tmp/system && sync
+    echo "done."
+
+    umount /tmp/system
+
+    echo -n "Formatting DATA partition..."
+    mke2fs -F -q -t ext4 -m 0 /dev/data > /dev/null
+    e2fsck -n /dev/data &> /dev/null
+    echo "done."
+
+    read -p "Do you want to copy your user data to internal data partition? [Y/n] " choice
+    case "$choice" in
+      [nN]*)
+        :
+        ;;
+      *)
+        echo -n "Stopping EmulationStation..."
+        systemctl stop emustation.service
+        echo "done."
+        echo "Copying user data..."
+        mkdir -p /tmp/data
+        mount -o rw /dev/data /tmp/data
+        cp -pPRv /storage/. /tmp/data
+        ;;
+    esac
+
+    echo "All done!"
+    echo "Your system will reboot from internal memory."
+    echo ""
+
+    read -p "Would you like to reboot now [y/N]? " choice
+    case "$choice" in
+      [yY]*)
+        if /usr/sbin/fw_printenv whereToBootFrom > /dev/null 2>&1; then /usr/sbin/fw_setenv whereToBootFrom internal; fi
+        /usr/sbin/fw_setenv bootfromnand 1
+        /usr/sbin/reboot switch_system
+        ;;
+    esac
+
+  else
+    echo "No EmuELEC image found on /flash! Exiting..."
+  fi
+}
+
+if [ ! -e /dev/system -o ! -e /dev/data ]; then
+  echo "One of SYTEM, DATA partitions is missing."
+  echo "Make sure that you are using a correct device tree and a device with internal memory!"
+  echo ""
+  echo "Not all devices are compatible with installtointernal due to unsupported NAND/eMMC"
+  echo "chips being used by some manufacturers."
+  exit 0
+fi
+
+echo "This script will erase the old partition table on your emmc"
+echo "and create a new partition that ONLY contains SYSTEM and DATA partiitons"
+echo "(reserved partitions like bootloader, reserved and env will be kept)"
+echo "and install EmuELEC that you booted from SD card/USB drive."
+echo ""
+echo "WARNING: The script does not have any safeguards, you will not receive any"
+echo "support for problems that you may encounter if you proceed!"
+echo ""
+read -p "Type \"yes\" if you know what you are doing or anything else to exit: " choice
+case "$choice" in
+  yes) install_to_nand ;;
+esac
