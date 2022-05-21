@@ -94,7 +94,7 @@ if [ ! -e /dev/system -o ! -e /dev/data ]; then
 fi
 
 echo "This script will erase the old partition table on your emmc"
-echo "and create a new partition that ONLY contains SYSTEM and DATA partiitons"
+echo "and create a new part table that ONLY contains SYSTEM and DATA partiitons"
 echo "(reserved partitions like bootloader, reserved and env will be kept)"
 echo "and install EmuELEC that you booted from SD card/USB drive."
 echo ""
