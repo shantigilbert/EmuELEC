@@ -15,17 +15,17 @@ install_to_nand() {
       echo "Reboot to a SD/USB installation and try again."
       exit 1
     fi
-    echo "Finding underlying block device for /dev/system..."
+    echo "Finding underlying block device for /dev/env..."
     RDEV=''
     for i in '/dev/block/'*; do
-      if [ "$(readlink -f $i)" == '/dev/system' ]; then
-        echo "Device major:minor pair for /dev/system is $i"
+      if [ "$(readlink -f $i)" == '/dev/env' ]; then
+        echo "Device major:minor pair for /dev/env is $i"
         RDEV="$i"
         break
       fi
     done
     if [ -z "$RDEV" ]; then
-      echo "Failed to find underlying block device for /dev/system"
+      echo "Failed to find underlying block device for /dev/env"
       exit 1
     fi
     MAJOR="$(basename $RDEV | cut -d ':' -f 1)"
@@ -40,7 +40,7 @@ install_to_nand() {
       fi
     done
     if [ -z "$DISK_DEVICE" ]; then
-      echo 'ERROR: Failed to find corresponding disk for /dev/system'
+      echo 'ERROR: Failed to find corresponding disk for /dev/env'
       exit 1
     fi
 
@@ -187,8 +187,8 @@ install_to_nand() {
   fi
 }
 
-if [ ! -e /dev/system -o ! -e /dev/data -o ! -e /dev/env ]; then
-  echo "One of SYTEM, DATA, ENV partitions is missing."
+if [ ! -e /dev/env ]; then
+  echo "ENV partition is missing."
   echo "Make sure that you are using a correct device tree and a device with internal memory!"
   echo ""
   echo "Not all devices are compatible with installtointernal due to unsupported NAND/eMMC"
