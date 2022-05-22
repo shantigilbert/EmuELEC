@@ -76,12 +76,12 @@ install_to_nand() {
       echo "Oh great! You emmc is larger than 4G (${DISK_SIZE_INT}G), so you can create a dedicated EEROMS partition to save your ROMs, savestates, etc"
       read -p "Do you want to create a dedicated EEROMS partition? (if not, DATA partition will fill the rest of the disk) [Y/n] " choice
       case "$choice" in
-        [yY]*)
-          TABLE='system::2G:2 data::2G: eeroms:::'
-          ROMS_CREATE='yes'
+        [nN]*)
+          TABLE='system::2G:2 data:::'
           ;;
         *)
-          TABLE='system::2G:2 data:::'
+          TABLE='system::2G:2 data::2G: eeroms:::'
+          ROMS_CREATE='yes'
           ;;
       esac
     elif [ "$DISK_SIZE" -gt 3221225472]; then
