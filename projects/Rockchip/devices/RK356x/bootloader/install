@@ -71,8 +71,6 @@ esac
 cp -av idblock.bin $INSTALL/usr/share/bootloader/idbloader.img
 mv idblock.bin idbloader.img
 cp -av uboot.img $INSTALL/usr/share/bootloader
-cp -av trust.img $INSTALL/usr/share/bootloader
-
 
 #if [ -n "$PKG_LOAD_ADDR" ]; then
 #  echo "$PKG_RKBIN/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img $PKG_LOAD_ADDR"

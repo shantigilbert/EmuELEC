@@ -15,7 +15,7 @@ PKG_LONGDESC="The Mali GPU library used in Rockchip Platform for Odroidgo Advanc
 
 pre_configure_target() {
 
-if [ "${DEVICE}" != "RK356x" ]; then
+if [ "${DEVICE}" != "RK356x" ] && [ "$DEVICE" != "OdroidM1" ]; then
 # Testing new version, Vulkan in the name means nothing, Vulkan is not working.
 BLOB_PKG="rk3326_r13p0_gbm_with_vulkan_and_cl.zip"
 BLOB_SUM="ef1a18fabf270d0a6029917d6b0e6237d328613c2f8be4d420ea23e022288dd9"
@@ -42,7 +42,7 @@ makeinstall_target() {
 	# remove all the extra blobs, we only need one
 	rm -rf ${INSTALL}/usr
 
-if [ "${DEVICE}" != "RK356x" ]; then
+if [ "${DEVICE}" != "RK356x" ] && [ "$DEVICE" != "OdroidM1" ]; then
 	if [ "$ARCH" == "arm" ]; then
 		BLOB="libmali.so_rk3326_gbm_arm32_r13p0_with_vulkan_and_cl"
 	else

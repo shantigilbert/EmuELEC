@@ -5,7 +5,7 @@
 PKG_NAME="ffmpeg"
 PKG_LICENSE="LGPLv2.1+"
 PKG_SITE="https://ffmpeg.org"
-PKG_DEPENDS_TARGET="toolchain zlib bzip2 gnutls speex SDL2"
+PKG_DEPENDS_TARGET="toolchain zlib bzip2 gnutls speex SDL2 lame x264"
 PKG_LONGDESC="FFmpeg is a complete, cross-platform solution to record, convert and stream audio and video."
 PKG_BUILD_FLAGS="-gold"
 
@@ -72,7 +72,7 @@ else
   PKG_FFMPEG_VAAPI="--disable-vaapi"
 fi
 
-if [ "${DISPLAYSERVER}" != "x11" ]; then
+if [ "${DISPLAYSERVER}" != "x11" ] && [ ${PROJECT} != "Amlogic-ce" ]; then
   PKG_DEPENDS_TARGET+=" libdrm"
   PKG_NEED_UNPACK+=" $(get_pkg_directory libdrm)"
   PKG_FFMPEG_VAAPI=" --enable-libdrm"
@@ -125,6 +125,11 @@ else
 fi
 
 configure_target() {
+
+if [ ${DISTRO} == "EmuELEC" ]; then
+sed -i "s|int hide_banner = 0|int hide_banner = 1|" ${PKG_BUILD}/fftools/cmdutils.c
+fi
+
   ./configure --prefix="/usr" \
               --cpu="${TARGET_CPU}" \
               --arch="${TARGET_ARCH}" \
@@ -161,7 +166,6 @@ configure_target() {
               --enable-swscale \
               --enable-postproc \
               --enable-avfilter \
-              --disable-devices \
               --enable-pthreads \
               --enable-network \
               --enable-gnutls --disable-openssl \
@@ -179,14 +183,15 @@ configure_target() {
               ${PKG_FFMPEG_RPI} \
               --enable-runtime-cpudetect \
               --disable-hardcoded-tables \
-              --disable-encoders \
               --enable-encoder=ac3 \
+              --enable-encoder=libmp3lame \
               --enable-encoder=aac \
               --enable-encoder=wmav2 \
               --enable-encoder=mjpeg \
               --enable-encoder=png \
+              --enable-encoder=mpeg4 \
+              --enable-encoder=libx264 \
               ${PKG_FFMPEG_HWACCEL} \
-              --disable-muxers \
               --enable-muxer=spdif \
               --enable-muxer=adts \
               --enable-muxer=asf \
@@ -196,8 +201,6 @@ configure_target() {
               --enable-parsers \
               --enable-bsfs \
               --enable-protocol=http \
-              --disable-indevs \
-              --disable-outdevs \
               --enable-filters \
               --disable-avisynth \
               --enable-bzlib \
@@ -210,7 +213,7 @@ configure_target() {
               --disable-libdc1394 \
               --disable-libfreetype \
               --disable-libgsm \
-              --disable-libmp3lame \
+              --enable-libmp3lame \
               --disable-libopenjpeg \
               --disable-librtmp \
               ${PKG_FFMPEG_AV1} \
@@ -219,7 +222,7 @@ configure_target() {
               --disable-libvo-amrwbenc \
               --disable-libvorbis \
               --disable-libvpx \
-              --disable-libx264 \
+              --enable-libx264 \
               --disable-libxavs \
               --disable-libxvid \
               --enable-zlib \

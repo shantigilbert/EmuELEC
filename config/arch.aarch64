@@ -21,6 +21,7 @@
       TARGET_SUBARCH=aarch64
       TARGET_VARIANT=armv8-a
       TARGET_ABI=eabi
+      TARGET_EXTRA_FLAGS="-mcpu=${TARGET_CPU}${TARGET_CPU_FLAGS}"
       ;;
   cortex-a55)
       TARGET_SUBARCH=aarch64

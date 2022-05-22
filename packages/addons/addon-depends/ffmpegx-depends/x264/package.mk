@@ -2,11 +2,10 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="x264"
-PKG_VERSION="20191217"
-PKG_SHA256="0bb67d095513391e637b3b47e8efc3ba4603c3844f1b4c2690f4d36da7763055"
+PKG_VERSION="bfc87b7a330f75f5c9a21e56081e4b20344f139e"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.videolan.org/developers/x264.html"
-PKG_URL="https://download.videolan.org/x264/snapshots/x264-snapshot-${PKG_VERSION}-2245.tar.bz2"
+PKG_URL="https://code.videolan.org/videolan/x264.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="x264 codec"
 
@@ -37,6 +36,6 @@ configure_target() {
     --disable-cli \
     --enable-lto \
     --enable-pic \
-    --enable-static \
+    --enable-shared \
     --enable-strip
 }

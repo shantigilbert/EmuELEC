@@ -19,18 +19,18 @@ if [ "$DEVICE" == "OdroidGoAdvance" ]; then
   PKG_PATCH_DIRS="OdroidGoAdvance"
 fi
 
-if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ] || [ "$DEVICE" == "RK356x" ]; then
+if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ] || [ "$DEVICE" == "RK356x" ] || [ "$DEVICE" == "OdroidM1" ]; then
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libdrm mali-bifrost librga"
 fi
 
 pre_make_host() {
-if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ] || [ "$DEVICE" == "RK356x" ]; then
+if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ] || [ "$DEVICE" == "RK356x" ] || [ "$DEVICE" == "OdroidM1" ]; then
 	sed -i "s| -lrga||g" ${PKG_BUILD}/CMakeLists.txt
 fi
 }
 
 pre_make_target() {
-if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ] || [ "$DEVICE" == "RK356x" ]; then
+if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ] || [ "$DEVICE" == "RK356x" ] || [ "$DEVICE" == "OdroidM1" ]; then
 # Since we removed "-lrga" from host we need to re-add it for target, hacky way of doing it but for now it works.
 if ! `grep -rnw "${PKG_BUILD}/CMakeLists.txt" -e '-lrga'`; then
 	sed -i "s|--no-undefined|--no-undefined -lrga|" ${PKG_BUILD}/CMakeLists.txt
@@ -83,7 +83,7 @@ pre_configure_target(){
                          -DSDL_VULKAN=OFF \
                          -DSDL_PULSEAUDIO=ON \
                          -DSDL_HIDAPI_JOYSTICK=OFF"
-if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ] || [ "$DEVICE" == "RK356x" ]; then
+if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ] || [ "$DEVICE" == "RK356x" ] || [ "$DEVICE" == "OdroidM1" ]; then
 PKG_CMAKE_OPTS_TARGET="$PKG_CMAKE_OPTS_TARGET -DSDL_KMSDRM=ON"
 else
 PKG_CMAKE_OPTS_TARGET="$PKG_CMAKE_OPTS_TARGET -DVIDEO_MALI=ON -DSDL_KMSDRM=OFF"
