@@ -101,7 +101,7 @@ install_to_nand() {
 
     echo "Creating new partition table..."
     ampart "/dev/$DISK_DEVICE" $TABLE &> /dev/null
-    if [ ! $? ]; then
+    if [ $? != 0 ]; then
       echo "Failed to create new partition table, exiting..."
       exit
     fi
