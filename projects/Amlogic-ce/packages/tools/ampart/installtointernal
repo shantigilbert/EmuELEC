@@ -37,6 +37,7 @@ install_to_nand() {
       if [[ "$BLK_DEVICE" =~ ^mmcblk[0-9]$ ]]; then
         DISK_DEVICE="$BLK_DEVICE"
         echo "Found corresponding disk: $DISK_DEVICE"
+        break
       fi
     done
     if [ -z "$DISK_DEVICE" ]; then
