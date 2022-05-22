@@ -49,8 +49,14 @@ install_to_nand() {
     for i in "/dev/block/${MAJOR}:"*; do
       PART="$(readlink -f $i)"
       if grep -q "^$PART " /proc/mounts; then
-        echo "Umounting $PART..."
-        umount "$PART" || exit 1
+        if [[ "$PART" =~ ^/dev/mmcblk[0-9]p[0-9] ]]; then
+          : ## We don't want to umount SD card
+        elif [[ "$PART" =~ ^/dev/mmcblk[0-9] && "$PART" != "/dev/$DISK_DEVICE" ]];
+          : ## We don't want to umount the SD card itself (not parted)
+        else
+          echo "Umounting $PART..."
+          umount "$PART" || exit 1
+        fi
       fi
     done
 
