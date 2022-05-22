@@ -8,6 +8,10 @@
 IMAGE_KERNEL="/flash/kernel.img"
 IMAGE_SYSTEM="/flash/SYSTEM"
 
+abs() { 
+    [[ $[ $@ ] -lt 0 ]] && echo "$[ ($@) * -1 ]" || echo "$[ $@ ]"
+}
+
 install_to_nand() {
   if [ -f $IMAGE_KERNEL -a -f $IMAGE_SYSTEM ] ; then
     if grep -q '/dev/system /flash' /proc/mounts; then 
@@ -29,17 +33,19 @@ install_to_nand() {
       exit 1
     fi
     MAJOR="$(basename $RDEV | cut -d ':' -f 1)"
-
+    MINOR="$(basename $RDEV | cut -d ':' -f 2)"
 
     DISK_DEVICE=''
     echo "Finding corresponding disk for it..."
-    for BLK_DEVICE in $(grep -e " *$MAJOR \+[0-9]\+ \+[0-9]\+ \+mmcblk" /proc/partitions); do
-      if [[ "$BLK_DEVICE" =~ ^mmcblk[0-9]$ ]]; then
-        DISK_DEVICE="$BLK_DEVICE"
+    while read -r line ; do
+      BLK_MINOR=$(awk -F ' ' '{print $2}' <<< $line)
+      BLK_DEVICE=$(awk -F ' ' '{print $4}' <<< $line)
+      if [[ "$BLK_DEVICE" =~ ^mmcblk[0-9]$ ]] && [ $(abs $(( $BLK_MINOR - $MINOR))) -le 32 ]; then  # 32 is because of the partition count limit of emmc is 32
+        DISK_DEVICE="$BLK_DEVICE"  # This is a subshell
         echo "Found corresponding disk: $DISK_DEVICE"
         break
       fi
-    done
+    done <<< "$(grep -e " *$MAJOR \+[0-9]\+ \+[0-9]\+ \+mmcblk" /proc/partitions)"
     if [ -z "$DISK_DEVICE" ]; then
       echo 'ERROR: Failed to find corresponding disk for /dev/env'
       exit 1
@@ -51,7 +57,7 @@ install_to_nand() {
       if grep -q "^$PART " /proc/mounts; then
         if [[ "$PART" =~ ^/dev/mmcblk[0-9]p[0-9] ]]; then
           : ## We don't want to umount SD card
-        elif [[ "$PART" =~ ^/dev/mmcblk[0-9] && "$PART" != "/dev/$DISK_DEVICE" ]];
+        elif [[ "$PART" =~ ^/dev/mmcblk[0-9] && "$PART" != "/dev/$DISK_DEVICE" ]]; then
           : ## We don't want to umount the SD card itself (not parted)
         else
           echo "Umounting $PART..."
@@ -94,7 +100,7 @@ install_to_nand() {
     dd if=/dev/env of=/tmp/env.img &>/dev/null
 
     echo "Creating new partition table..."
-    ampart $DISK_DEVICE $TABLE &> /dev/null
+    ampart "/dev/$DISK_DEVICE" $TABLE &> /dev/null
     if [ ! $? ]; then
       echo "Failed to create new partition table, exiting..."
       exit
