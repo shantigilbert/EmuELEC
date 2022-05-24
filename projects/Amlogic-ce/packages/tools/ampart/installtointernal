@@ -27,11 +27,7 @@ snapshot() {
 }
 
 no_emmc_boot() {
-  if [[ "$SINGLE_BOOT" == 'yes' ]]; then
-    local SYSTEM_PART='system'
-  else
-    local SYSTEM_PART='eesystem'
-  fi
+  local SYSTEM_PART='eesystem'
   if grep -q "/dev/$SYSTEM_PART /flash" /proc/mounts; then 
     die "ERROR: You are running EmuELEC from EMMC, can not install to EMMC. Reboot to a SD/USB installation and try again."
   fi
