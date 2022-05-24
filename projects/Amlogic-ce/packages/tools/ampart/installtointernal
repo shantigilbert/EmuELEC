@@ -337,20 +337,21 @@ if [ "$1" == "--iknowwhatimdoing" ]; then
   echo "(reserved partitions like bootloader, reserved and env will be kept)"
   echo "You Android installation will be COMPLETELY erased and can not be recovered"
   echo "Unless you use Amlogic USB Burning Tool to flash a stock image"
-  echo "and install EmuELEC that you booted from SD card/USB drive."
-  echo ""
+  echo "This script will install EmuELEC that you booted from SD card/USB drive."
   SINGLE_BOOT='yes'
 else
   echo "This script will shrink the last partition by 2G on your emmc"
+  echo "and give it an alias name CE_STORAGE and store your data under a subfolder coreelec_storage"
   echo "and create a new part CE_FLASH to store EmuELEC's system files"
-  echo "You Android installation should be safe but we are not sure for this"
+  echo "You Android installation should be safe but we can not guarantee this"
   echo "You need to make sure the data partition on your Android installtion"
   echo "has at least 2G free space, otherwise we can't install in this way"
   SINGLE_BOOT=''
 fi
+echo
 echo "WARNING: The script does not have any safeguards, you will not receive any"
 echo "support for problems that you may encounter if you proceed!"
-echo ""
+echo 
 read -p "Type \"yes\" if you know what you are doing or anything else to exit: " choice
 case "$choice" in
   yes) install_to_nand ;;
