@@ -1,203 +1,266 @@
 #!/bin/sh
 
-# SPDX-License-Identifier: GPL-2.0-or-later
-# Copyright (C) 2016-2018 kszaq (kszaquitto@gmail.com)
-# Copyright (C) 2018-2022 Team CoreELEC (https://coreelec.org)
+# SPDX-License-Identifier: GPL-3.0
 # Copyright (C) 2022-present 7Ji (pugokushin@gmail.com)
 
-IMAGE_KERNEL="/flash/kernel.img"
-IMAGE_SYSTEM="/flash/SYSTEM"
+# This script should NEVER be used in CoreELEC. 
+# If you can see this, that means you are trying to modify this script
+# I'll NEVER EVER test and debug on CoreELEC as it already has ceemmc
+# Even if you made it to work on there, you should debug it yourself.
+# If you want to extract and run ampart on CoreELEC, save it
+# ampart is hard-coded not to run on CoreELEC
+# Don't even think about opening issue on ampart to allow CoreELEC, I'll close it
 
 abs() { 
     [[ $[ $@ ] -lt 0 ]] && echo "$[ ($@) * -1 ]" || echo "$[ $@ ]"
 }
 
-install_to_nand() {
-  if [ -f $IMAGE_KERNEL -a -f $IMAGE_SYSTEM ] ; then
-    if grep -q '/dev/system /flash' /proc/mounts; then 
-      echo "ERROR: You are running EmuELEC from EMMC, can not install to EMMC."
-      echo "Reboot to a SD/USB installation and try again."
-      exit 1
-    fi
-    echo "Finding underlying block device for /dev/env..."
-    RDEV=''
-    for i in '/dev/block/'*; do
-      if [ "$(readlink -f $i)" == '/dev/env' ]; then
-        echo "Device major:minor pair for /dev/env is $i"
-        RDEV="$i"
-        break
-      fi
-    done
-    if [ -z "$RDEV" ]; then
-      echo "Failed to find underlying block device for /dev/env"
-      exit 1
-    fi
-    MAJOR="$(basename $RDEV | cut -d ':' -f 1)"
-    MINOR="$(basename $RDEV | cut -d ':' -f 2)"
+die() {
+  printf "ERROR: "
+  echo $*
+  exit 1
+}
 
-    DISK_DEVICE=''
-    echo "Finding corresponding disk for it..."
-    while read -r line ; do
-      BLK_MINOR=$(awk -F ' ' '{print $2}' <<< $line)
-      BLK_DEVICE=$(awk -F ' ' '{print $4}' <<< $line)
-      if [[ "$BLK_DEVICE" =~ ^mmcblk[0-9]$ ]] && [ $(abs $(( $BLK_MINOR - $MINOR))) -le 32 ]; then  # 32 is because of the partition count limit of emmc is 32
-        DISK_DEVICE="$BLK_DEVICE"  # This is a subshell
-        echo "Found corresponding disk: $DISK_DEVICE"
-        break
-      fi
-    done <<< "$(grep -e " *$MAJOR \+[0-9]\+ \+[0-9]\+ \+mmcblk" /proc/partitions)"
-    if [ -z "$DISK_DEVICE" ]; then
-      echo 'ERROR: Failed to find corresponding disk for /dev/env'
-      exit 1
-    fi
+snapshot() {
+  local LOG="$(ampart --snapshot /dev/mmcblk0 2>/dev/null)" || die "Failed to read partition table"
+  SNAPSHOT="$(sed 'x;$!d' <<< $LOG)" # We can restore the part table in case something goes wrong
+}
 
-    echo "Umounting all partitions under disk $DISK_DEVICE"
-    for i in "/dev/block/${MAJOR}:"*; do
-      PART="$(readlink -f $i)"
-      if grep -q "^$PART " /proc/mounts; then
-        if [[ "$PART" =~ ^/dev/mmcblk[0-9]p[0-9] ]]; then
-          : ## We don't want to umount SD card
-        elif [[ "$PART" =~ ^/dev/mmcblk[0-9] && "$PART" != "/dev/$DISK_DEVICE" ]]; then
-          : ## We don't want to umount the SD card itself (not parted)
-        else
-          echo "Umounting $PART..."
-          umount "$PART" || exit 1
-        fi
-      fi
-    done
-
-    echo "All partitions under /dev/$DISK_DEVICE are not mounted, we can safely continue our work" 
-
-    DISK_SIZE=$(( $(cat "/sys/block/$DISK_DEVICE/size") * 512 ))
-    DISK_SIZE_INT=$(( $DISK_SIZE / 1073741824 + 1 ))
-    ROMS_CREATE=''
-
-    if [ "$DISK_SIZE" -gt 4294967296 ]; then
-      echo "Oh great! You emmc is larger than 4G (${DISK_SIZE_INT}G), so you can create a dedicated EEROMS partition to save your ROMs, savestates, etc"
-      read -p "Do you want to create a dedicated EEROMS partition? (if not, DATA partition will fill the rest of the disk) [Y/n] " choice
-      case "$choice" in
-        [nN]*)
-          TABLE='system::2G:2 data:::'
-          ;;
-        *)
-          TABLE='system::2G:2 data::2G: eeroms:::'
-          ROMS_CREATE='yes'
-          ;;
-      esac
-    elif [ "$DISK_SIZE" -gt 3221225472]; then
-      echo "Oops, You emmc is only 4G, to prevent DATA from filling up, you can not have a dedicated EEROMS partition :("
-      echo "Your new partition table on emmc will only contain a 2G system and a data partition to fill the rest free space"
-      TABLE='system::2G:2 data:::'
-    else
-      echo "Oh no! You emmc is smaller than 4G! This is impossible!"
-      echo "Every Amlogic S9xxx device should have at least 4G emmc onboard!"
-      echo "I'm afraid you can not install EmuELEC to internal storage :("
-      echo "As this only works on emmc at least 4G :<"
-      exit 1
-    fi
-
-    echo "Backing up env partition..."
-    dd if=/dev/env of=/tmp/env.img &>/dev/null
-
-    echo "Creating new partition table..."
-    ampart "/dev/$DISK_DEVICE" $TABLE &> /dev/null
-    if [ $? != 0 ]; then
-      echo "Failed to create new partition table, exiting..."
-      exit
-    fi
-
-    echo "Restoring env partition..."
-    dd if=/tmp/env.img of=/dev/env &>/dev/null
-
-    mkdir -p /tmp/system
-
-    mount -o rw,remount /flash
-
-    echo -n "Formatting SYSTEM partition..."
-    mkfs.fat /dev/system || exit 1
-    echo "done."
-
-    echo -n "Copying all system files (kernel, SYSTEM, dtb, etc) under EMUELEC partition to internal SYSTEM partition..."
-    mount -o rw /dev/system /tmp/system
-    cp -rva /flash/* /tmp/system && sync
-    if [ "$ROMS_CREATE" ]; then
-      echo 'ext4' > /tmp/system/ee_fstype   ## Internal EEROMS should always be EXT4
-    fi
-    echo "done."
-
-    umount /tmp/system
-
-    echo -n "Formatting DATA partition..."
-    mke2fs -F -q -t ext4 -m 0 /dev/data > /dev/null
-    e2fsck -n /dev/data &> /dev/null
-    echo "done."
-
-    if [ "$ROMS_CREATE" ]; then
-      read -p "Do you want to copy your user data to internal data partition? (This will not include all of the stuffs under /storage/roms, they will be copied to EEROMS partition later) [Y/n] " choice
-    else
-      read -p "Do you want to copy your user data to internal data partition? [Y/n] " choice
-    fi
-    case "$choice" in
-      [nN]*)
-        :
-        ;;
-      *)
-        echo -n "Stopping EmulationStation..."
-        systemctl stop emustation.service
-        echo "done."
-        echo "Copying user data..."
-        mkdir -p /tmp/data
-        mount -o rw /dev/data /tmp/data
-        rsync -qaHSx /storage/. /tmp/data
-        umount /tmp/data
-        sync
-        echo "done."
-        ;;
-    esac
-
-    if [ "$ROMS_CREATE" ]; then
-      ROMS_PART='/dev/eeroms'
-      echo -n "Formatting EEROMS partition..."
-      echo "Note: EEROMS on the emmc will always be formatted as EXT4"
-      echo " - Since you can not plug the emmc to a Windows PC just like"
-      echo " - you would for a SD card/USB drive"
-      mke2fs -F -q -t ext4 -m 0 /dev/eeroms -L EEROMS > /dev/null
-      e2fsck -n /dev/eeroms &> /dev/null
-      echo "done."
-      read -p "Do you want to copy all of your ROMs, savestates, etc under /storage/roms to internal EEROMS partition? [Y/n]" choice
-        case "$choice" in
-        [nN]*)
-          :
-          ;;
-        *)
-          echo "Copying Roms, savestates, etc..."
-          mkdir -p /tmp/eeroms
-          mount -o rw /dev/eeroms /tmp/eeroms
-          rsync -qaHSx /storage/roms/. /tmp/eeroms
-          umount /tmp/eeroms
-          sync
-          echo "done."
-          ;;
-      esac
-    fi
-
-
-    echo "All done!"
-    echo "Your system will reboot from internal memory."
-    echo ""
-    /usr/sbin/fw_setenv storeboot 'run cfgloademmc'
-    read -p "Would you like to reboot now [y/N]? " choice
-    case "$choice" in
-      [yY]*)
-        if /usr/sbin/fw_printenv whereToBootFrom > /dev/null 2>&1; then /usr/sbin/fw_setenv whereToBootFrom internal; fi
-        /usr/sbin/fw_setenv bootfromnand 1
-        /usr/sbin/reboot switch_system
-        ;;
-    esac
-
+no_emmc_boot() {
+  if [[ "$SINGLE_BOOT" == 'yes' ]]; then
+    local SYSTEM_PART='system'
   else
-    echo "No EmuELEC image found on /flash! Exiting..."
+    local SYSTEM_PART='eesystem'
   fi
+  if grep -q "/dev/$SYSTEM_PART /flash" /proc/mounts; then 
+    die "ERROR: You are running EmuELEC from EMMC, can not install to EMMC. Reboot to a SD/USB installation and try again."
+  fi
+}
+
+unmount_part() {
+  local PART_PATH="/dev/$1"
+  if grep -q "^$PART_PATH " /proc/mounts; then
+    echo "Warning: partition '$PART_PATH' under mmcblk0 is mounted, unmounting it..."
+    umount "$PART_PATH" &>/dev/null || die "Failed to unmount partition '$PART_PATH'"
+  fi
+}
+
+get_block_value() { # $1:path $2: line start
+  VALUE=$(tune2fs -l $1 | grep "^$2:")
+  VALUE=${VALUE##* }
+  [ -z "$VALUE" ] && die "Failed to get block size/count via tune2fs"
+}
+
+resize_part() { # $1 part name $2 size in K, we use K as 1. resize2fs does not accept byte, 2. on MB there may be difference as the part may actually assigned be on KB 3. size will definitely be multiplies of 4K, then multiplies of 1K
+  e2fsck -fy "/dev/$1" &>/dev/null || die "Failed to fsck on partition /dev/$1, there's something wrong in the partition, you may need to fix it yourself"
+  resize2fs "/dev/$1" "$2K" || "Failed to resize partition /dev/$1, may be space is not enough?"
+}
+
+revert_table() {
+  ampart --clone $SNAPSHOT &>/dev/null
+  echo "Oops, failed to install EmuELEC to internal storage, but don't worry, everything we have done is reverted"
+  exit 1
+}
+
+update_table() {
+  ROMS_CREATE=''
+  if [ "$SINGLE_BOOT" == 'no' ]; then
+    # Make sure space is enough for dual-boot mode
+    VALUE=''
+    get_block_value "/dev/$PART_NAME"  "Free blocks"
+    BLK_FREE="$VALUE"
+    get_block_value "/dev/$PART_NAME"  "Block size"
+    BLK_SIZE="$VALUE"
+    PART_FREE=$(( $BLK_FREE * $BLK_SIZE ))
+    if [[ $PART_FREE -le 0x80000000 ]]; then
+      die "The free space of the last part on your emmc is too small! We need at least 2G free space so we can create a 2G eesystem partition after we shrink it. Boot to Android and delete some files and try again!"
+    fi
+    PART_SIZE="$(awk -F ':' '{print $3}' <<< $PART)"
+    resize_part "$PART_NAME" $(( ($PART_SIZE - 0x80000000) / 1024 ))
+    ampart --update /dev/mmcblk0 ^-1:::-2G: ^-1%:eesystem eestorage::: &>/dev/null
+    if [ $? != 0 ]; then
+      resize_part "$PART_NAME" $(( $PART_SIZE  / 1024 ))
+      revert_table
+    fi
+  else
+    # Single boot mode
+    DISK_SIZE=$(( $(cat "/sys/block/$DISK_DEVICE/size") * 512 ))
+    DISK_SIZE_INT=$(( $DISK_SIZE / 0x40000000 + 1 ))
+    if [[ "$DISK_SIZE" -gt 0x100000000 ]]; then
+        echo "Oh sweet! You emmc is larger than 4G (${DISK_SIZE_INT}G), so you can create a dedicated EEROMS partition to save your ROMs, savestates, etc"
+        read -p "Do you want to create a dedicated EEROMS partition? (if not, DATA partition will fill the rest of the disk) [Y/n] " choice
+        case "$choice" in
+          [nN]*)
+            TABLE='eesystem::2G:2 eestorage:::'
+            ;;
+          *)
+            TABLE='eesystem::2G:2 eestorage::2G: eeroms:::'
+            ROMS_CREATE='yes'
+            ;;
+        esac
+      elif [[ "$DISK_SIZE" -gt 0xc0000000 ]]; then
+        echo "Oops, You emmc is only 4G, to prevent DATA from filling up, you can not have a dedicated EEROMS partition :("
+        echo "Your new partition table on emmc will only contain a 2G system and a data partition to fill the rest free space"
+        TABLE='eesystem::2G:2 eestorage:::'
+      else
+        echo "Oh no! You emmc is smaller than 4G! This is impossible!"
+        echo "Every Amlogic S9xxx device should have at least 4G emmc onboard!"
+        echo "I'm afraid you can not install EmuELEC to internal storage :("
+        echo "As this only works on emmc at least 4G :<"
+        exit 1
+      fi
+    ampart /dev/mmcblk0 $TABLE &>/dev/null
+    if [ $? != 0 ]; then
+      revert_table
+    fi
+  fi
+}
+
+essential_check() {
+  if [[ ! -f '/flash/kernel.img' || ! -f '/flash/SYSTEM' ]] ; then
+    die "Essential files (kernel.img SYSTEM) not found under /flash"
+  fi
+  DIR_CACHE='/tmp/ampart_installtointernal_cache'
+  if [[ -e $DIR_CACHE ]]; then
+    die "Cache dir for ampart installtointernal already exists, maybe intertointernal have failed? Or you are trying to run it again during the same boot?"
+  fi
+}
+
+no_reinstall() {
+  if [[ "$PART_NAME" == 'CE_STORAGE' || "$PART_NAME" == 'CE_FLASH' ]]; then
+    die "CoreELEC was installed on your internal storage. Since we can not properly understand how ceemmc works as it's closed-srouce, we will not touch the emmc already modifed by it"
+  elif [[ "$PART_NAME" == 'eesystem' ||  "$PART_NAME" == 'eestorage' || "$PART_NAME" == 'eeroms' ]]; then
+    die "Partition '$PART_NAME' found in partition table, you've already installed ee to internal storage!"
+  fi
+}
+
+unmount_parts() {
+  for PART in $SNAPSHOT; do
+    PART_NAME="${PART%%:*}"
+    # some parts will be used by us
+    no_reinstall
+    unmount_part "$PART_NAME"
+  done
+}
+
+create_ext4() { # $1: dev path
+  mke2fs -F -q -t ext4 -m 0 "$1" > /dev/null || die "Failed to create an ext4 fs on '$1'"
+  e2fsck -fy "$1" &> /dev/null || die "Filesystem glitched on '$1', this should be impossible as we just created it. Maybe you have a bad emmc?"
+}
+
+populate_eesystem() {
+  echo "Populating internal eesytem partition..."
+  echo "Formatting internal eesystem partition..."
+  local PART_PATH='/dev/eesystem'
+  mkfs.fat "$PART_PATH" &>/dev/null || die 'Failed to create a fat fs on /dev/eesystem'
+  local DIR_CACHE="$DIR_CACHE/eesystem"
+  mkdir -p "$DIR_CACHE" || die 'Failed to create temp dir for eesystem'
+  echo 'Copying all system files (kernel, SYSTEM, dtb, etc) under EMUELEC partition to internal eesystem partition...'
+  cp -ra /flash/* "$DIR_CACHE" || die 'Failed to copy system files'
+  [ "$ROMS_CREATE" ] && echo 'ext4' > "$DIR_CACHE/ee_fstype"  # Internal roms fs type should always be ext4
+  if [ "$SINGLE_BOOT" == 'yes' ]; then
+    # in single boot mode, storage is not in subfolder
+    sed -i 's_disk=FOLDER=/dev/eestorage_disk=/dev/eestorage_' "$DIR_CACHE/cfgload" || die 'Failed to edit cfgload (in single boot mode kernel cmdline [disk=] should be different), did you remove it in your external drive?'
+  fi
+  umount "$PART_PATH" &>/dev/null
+  sync
+  echo "Populated internal eesystem partition"
+}
+
+populate_eestorage() {
+  echo "Populating internal eestorage partition"
+  local PART_PATH='/dev/eestorage'
+  local DIR_CACHE="$DIR_CACHE/eestorage"
+  if [ "$SINGLE_BOOT" == 'yes' ]; then
+    echo "Formatting internal eestorage partition..."
+    create_ext4 "$PART_PATH"
+  else
+    mount -o rw "$PART_PATH" "$DIR_CACHE"
+    DIR_CACHE="$DIR_CACHE/emuelec_storage"
+    mkdir -p "$DIR_CACHE"
+    chmod 755 "$DIR_CACHE" # Just in case, if it's already be created by some random user?
+  fi
+  printf 'Do you want to copy your user data under /storage to internal data partition? '
+  [ "$ROMS_CREATE" ] && printf '(This will not include all of the stuffs under /storage/roms, they will be copied to eeroms partition later) '
+  read -p '[Y/n] ' choice
+  case "$choice" in
+    [nN]*)
+      :
+      ;;
+    *)
+      echo "Stopping EmulationStation..."
+      systemctl stop emustation.service
+      echo "Copying user data..."
+      [ "$SINGLE_BOOT" = 'yes' ] && mount -o rw "$PART_PATH" "$DIR_CACHE"  # In dual boot mode, we've mounted it
+      rsync -qaHSx /storage/. "$DIR_CACHE"
+      sync
+      ;;
+  esac
+  umount "$PART_PATH" &>/dev/null # It may fail as we could've never mounted it
+  sync
+  echo "Populated internal eestorage partition"
+}
+
+populate_eeroms() {
+  [ -z "$ROMS_CREATE" ] && return
+  echo "Populating internal eeroms partition"
+  local PART_PATH='/dev/eeroms'
+  echo "Formatting EEROMS partition..."
+  echo "Note: EEROMS on the emmc will always be formatted as EXT4, Since you can not plug the emmc to a Windows PC just like you would for a SD card/USB drive"
+  create_ext4 "$PART_PATH"
+  read -p "Do you want to copy all of your ROMs, savestates, etc under /storage/roms to internal eeroms partition? [Y/n]" choice
+    case "$choice" in
+    [nN]*)
+      :
+      ;;
+    *)
+      local DIR_CACHE="$DIR_CACHE/eeroms"
+      echo "Copying Roms, savestates, etc..."
+      mkdir -p "$DIR_CACHE"
+      mount -o rw "$PART_PATH" "$DIR_CACHE"
+      rsync -qaHSx /storage/roms/. "$DIR_CACHE"
+      umount "$PART_PATH" &>/dev/null
+      sync
+      ;;
+  esac
+  echo 'Populated internal eeroms partition'
+}
+
+finish_work() {
+  [ "$SINGLE_BOOT" == 'yes' ] && /usr/sbin/fw_setenv storeboot 'run cfgloademmc'
+  echo "All done!"
+  echo "EmuELEC has been installed to your internal emmc."
+  echo 
+  read -p "Would you like to reboot now [y/N]? " choice
+  case "$choice" in
+    [yY]*)
+      if /usr/sbin/fw_printenv whereToBootFrom > /dev/null 2>&1; then /usr/sbin/fw_setenv whereToBootFrom internal; fi
+      /usr/sbin/fw_setenv bootfromnand 1
+      /usr/sbin/reboot switch_system
+      ;;
+  esac
+}
+
+
+install_to_nand() {  # $1 single boot or not
+  essential_check
+  no_emmc_boot
+  SNAPSHOT=''
+  snapshot
+  ##PART_LIST="$(echo $SNAPSHOT | tr ' ' '\n' | cut -d ':' -f 1 | tr '\n' ' ')"
+  unmount_parts
+  update_table
+  echo "Warning: from this point onward, all of the changes are IRREVERSIBLE since new data will be written to emmc. Make sure you keep the power pluged in."
+  echo "If anything break apart, you can revert your partition table with the following command, but changes to the data are IRREVERSIBLE"
+  echo
+  echo "ampart --clone $SNAPSHOT"
+  echo
+  echo "Ready to actually populate internal EmuELEC installation in 10 seconds..."
+  sleep 10
+  populate_eesystem
+  populate_eestorage
+  populate_eeroms
+  finish_work
 }
 
 DT_NAME="$( /usr/bin/dtname )"
@@ -207,8 +270,9 @@ if ! [[ "$DT_NAME" =~ ^gxl_p212 ]]; then
   exit 1
 fi
 
-if [ ! -e /dev/env ]; then
-  echo "ENV partition is missing."
+if [ ! -e /dev/mmcblk0 -o ! -e /dev/reserved -o ! -e /dev/bootloader -o ! -e /dev/env ]; then
+  echo "One of bootloader, reserved, env partition is missing."
+  echo "Or your device does not have emmc"
   echo "Make sure that you are using a correct device tree and a device with internal memory!"
   echo ""
   echo "Not all devices are compatible with installtointernal due to unsupported NAND/eMMC"
@@ -216,15 +280,31 @@ if [ ! -e /dev/env ]; then
   exit 0
 fi
 
-echo "This script will erase the old partition table on your emmc"
-echo "and create a new part table that ONLY contains SYSTEM, DATA and EEROMS partiitons"
-echo "(reserved partitions like bootloader, reserved and env will be kept)"
-echo "and install EmuELEC that you booted from SD card/USB drive."
-echo ""
-echo "WARNING: The script does not have any safeguards, you will not receive any"
-echo "support for problems that you may encounter if you proceed!"
-echo ""
-read -p "Type \"yes\" if you know what you are doing or anything else to exit: " choice
-case "$choice" in
-  yes) install_to_nand ;;
-esac
+if [ "$1" == "--iknowwhatimdoing" ]; then
+  echo "Warning: working in single boot mode"
+  echo "This script will erase the old partition table on your emmc"
+  echo "and create a new part table that ONLY contains eesystem, eestorage and eeroms partiitons"
+  echo "You Android installation will completely be erased"
+  echo "(reserved partitions like bootloader, reserved and env will be kept)"
+  echo "and install EmuELEC that you booted from SD card/USB drive."
+  echo ""
+  SINGLE_BOOT="yes"
+else
+  echo "This script will shrink the last partition by 2G on your emmc"
+  echo "and create a new part eesystem to store EmuELEC's system files"
+  echo "You Android installation should be safe but we are not sure for this"
+  echo "You need to make sure the data partition on your Android installtion"
+  echo "has at least 2G free space, otherwise we can't install in this way"
+  SINGLE_BOOT="no"
+fi
+  echo "WARNING: The script does not have any safeguards, you will not receive any"
+  echo "support for problems that you may encounter if you proceed!"
+  echo ""
+  read -p "Type \"yes\" if you know what you are doing or anything else to exit: " choice
+  case "$choice" in
+    yes) install_to_nand "$SINGLE_BOOT" ;;
+  esac
+else
+  
+
+fi
