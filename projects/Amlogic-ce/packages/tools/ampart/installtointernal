@@ -52,7 +52,13 @@ get_block_value() { # $1:path $2: line start
 }
 
 resize_part() { # $1 part name $2 size in K, we use K as 1. resize2fs does not accept byte, 2. on MB there may be difference as the part may actually assigned be on KB 3. size will definitely be multiplies of 4K, then multiplies of 1K
-  e2fsck -fy "/dev/$1" &>/dev/null || die "Failed to fsck on partition /dev/$1, there's something wrong in the partition, you may need to fix it yourself"
+  e2fsck -fy "/dev/$1" &>/dev/null
+  local RTR=$?
+  if [ $RTR == 1 ]; then
+    echo "Note: Fixed issues in /dev/$1"
+  elif [ $RTR != 0 ]; then
+    die "Failed to fsck on partition /dev/$1, there's something wrong in the partition, you may need to fix it yourself"
+  fi
   resize2fs "/dev/$1" "$2K" || "Failed to resize partition /dev/$1, may be space is not enough?"
 }
 
