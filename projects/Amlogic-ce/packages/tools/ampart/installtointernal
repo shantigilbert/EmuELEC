@@ -116,7 +116,7 @@ update_table() {
     fi
   else
     # Single boot mode
-    DISK_SIZE=$(( $(cat "/sys/block/$DISK_DEVICE/size") * 512 ))
+    DISK_SIZE=$(( $(cat "/sys/block/mmcblk0/size") * 512 ))
     DISK_SIZE_INT=$(( $DISK_SIZE / 0x40000000 + 1 ))
     if [[ "$DISK_SIZE" -gt 0x100000000 ]]; then
         echo "Oh sweet! You emmc is larger than 4G (${DISK_SIZE_INT}G), so you can create a dedicated EEROMS partition to save your ROMs, savestates, etc"
