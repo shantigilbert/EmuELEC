@@ -3,6 +3,10 @@
 # SPDX-License-Identifier: GPL-3.0
 # Copyright (C) 2022-present 7Ji (pugokushin@gmail.com)
 
+# This script is NOT part of the project ampart (https://github.com/7Ji/ampart)
+# Even this script is placed in ampart package in the EmuELEC source code
+# Issues regarding this script should NOT be opened on ampart's project page
+
 # This script should NEVER be used in CoreELEC. 
 # If you can see this, that means you are trying to modify this script
 # I'll NEVER EVER test and debug on CoreELEC as it already has ceemmc
