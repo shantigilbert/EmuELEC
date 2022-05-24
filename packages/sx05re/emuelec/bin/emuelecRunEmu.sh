@@ -409,12 +409,8 @@ else # Retrorun was selected
       set_kill_keys "retrorun"
       RUNTHIS+=" 64"
     fi
-    FPS=$(get_ee_setting global.showFPS)
-    [[ "$FPS" == "1" ]] && FPS="show_fps"
     EMU="/tmp/cores/${CORE}_libretro.so"
-    RUNTHIS+=" \"${EMU}\" \"${ROMNAME}\" \"${PLATFORM}\" ${FPS} "
-    #RUNTHIS+=' --triggers -n -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
-
+    RUNTHIS+=" \"${EMU}\" \"${ROMNAME}\" \"${PLATFORM}\" "
 fi # end Libretro/retrorun or standalone emu logic
 
 if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do all this if log is disabled

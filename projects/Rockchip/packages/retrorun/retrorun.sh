@@ -161,30 +161,30 @@ fi
 
 JOY_FILE="/dev/input/by-path/platform-odroidgo2-joypad-event-joystick"
 [[ -f "${JOY_FILE}" ]] && rm "${JOY_FILE}"
-#rm /dev/input/by-path/platform-odroidgo2-joypad-event-joystick || true
 #echo 'creating fake joypad'
 #/usr/bin/rg351p-js2xbox --silent -t oga_joypad &
 #sleep 0.2
-echo 'confguring inputs'
-EE_DEVICE=$(cat /storage/.config/.OS_ARCH)
-echo 'confguring inputs on device:'$EE_DEVICE
+
+echo "confguring inputs on device: ${EE_DEVICE}"
 if [[ "$EE_DEVICE" == "GameForce" || "$EE_DEVICE" == "OdroidGoAdvance" ]]
 then
-	ln -s /dev/input/event2 /dev/input/by-path/platform-odroidgo2-joypad-event-joystick
+	ln -s /dev/input/event2 ${JOY_FILE}
 else
-	ln -s /dev/input/event3 /dev/input/by-path/platform-odroidgo2-joypad-event-joystick
+	ln -s /dev/input/event3 ${JOY_FILE}
 fi
-chmod 777 /dev/input/by-path/platform-odroidgo2-joypad-event-joystick
+chmod 777 ${JOY_FILE}
 echo 'using core:' "$2"
 echo 'platform:' "$3"
 echo 'starting game:' "$4"
 
-FPS=''
-if [[ "$5" == "show_fps" ]] || [[ "$5" == "SHOW_FPS" ]]
+FPS=$(get_setting "showFPS")
+FPS_CMD=
+if [[ "$FPS" == "1" ]]
 then
     echo 'enabling FPS in the logs'
-    FPS="-f"
+    FPS_CMD="-f"
 fi
+
 GPIO_JOYPAD=''
 if [[ "$EE_DEVICE" == "GameForce" || "$EE_DEVICE" == "OdroidGoAdvance" ]]
 then
@@ -197,16 +197,12 @@ if [[ "$1" == "32" ]] || [[ "$2" =~ "pcsx_rearmed" ]] || [[ "$2" =~ "parallel_n6
 then
     echo 'using 32bit'
   	export LD_LIBRARY_PATH="/storage/.config/emuelec/lib32"
-	/usr/bin/retrorun32 --triggers $FPS $GPIO_JOYPAD -s /storage/roms/"$4" -d /roms/bios "$2" "$3"
+	/usr/bin/retrorun32 --triggers $FPS_CMD $GPIO_JOYPAD -s /storage/roms/"$4" -d /roms/bios "$2" "$3"
 else
 	echo 'using 64bit'
-	/usr/bin/retrorun --triggers $FPS $GPIO_JOYPAD -s /storage/roms/"$4" -d /roms/bios "$2" "$3"
+	/usr/bin/retrorun --triggers $FPS_CMD $GPIO_JOYPAD -s /storage/roms/"$4" -d /roms/bios "$2" "$3"
 fi
 sleep 0.5
-rm /dev/input/by-path/platform-odroidgo2-joypad-event-joystick
+rm ${JOY_FILE}
 #kill $(pidof rg351p-js2xbox)
 echo 'end!'
-
-if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
-    exit 0
-fi

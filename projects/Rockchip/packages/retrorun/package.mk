@@ -3,7 +3,7 @@
 # Copyright (C) 2022-present Langerz82 (https://github.com/Langerz82)
 
 PKG_NAME="retrorun"
-PKG_VERSION="d324cb6a50c74323b2c53a89bad749ac0207e584"
+PKG_VERSION="be6de9f24ef872d752c0e143e8a0edb30e424ada"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/navy1978/retrorun-go2"
 PKG_URL="$PKG_SITE.git"

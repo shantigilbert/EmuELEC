@@ -11,10 +11,3 @@ index 876e0f5..7adfd58 100755
      }
  }
  
-@@ -1073,4 +1073,4 @@ void core_video_refresh(const void *data, unsigned width, unsigned height, size_
-                            x, y, w, h,
-                            _351Rotation);
-     }
--}
-\ No newline at end of file
-+}
