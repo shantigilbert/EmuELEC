@@ -34,7 +34,7 @@ revert_and_die() {
   echo "Reverting changes..."
   for i in $PART_MOUNTED; do
     umount -f "$i"
-  fi
+  done
   sync
   ampart --clone $SNAPSHOT &>/dev/null
   sync
@@ -72,7 +72,7 @@ get_block_value() { # $1:path $2: line start
   [ -z "$VALUE" ] && die "Failed to get block size/count via tune2fs"
 }
 
-resize_part() { # $1 part name $2 size in K, we use K as 1. resize2fs does not accept byte, 2. on MB there may be difference as the part may actually assigned be on KB 3. size will definitely be multiplies of 4K, then multiplies of 1K
+e2fsck_allow_fix() {
   e2fsck -fy "/dev/$1" &>/dev/null
   local RTR=$?
   if [ $RTR == 1 ]; then
@@ -80,6 +80,10 @@ resize_part() { # $1 part name $2 size in K, we use K as 1. resize2fs does not a
   elif [ $RTR != 0 ]; then
     die "Failed to fsck on partition /dev/$1, there's something wrong in the partition, you may need to fix it yourself"
   fi
+}
+
+resize_part() { # $1 part name $2 size in K, we use K as 1. resize2fs does not accept byte, 2. on MB there may be difference as the part may actually assigned be on KB 3. size will definitely be multiplies of 4K, then multiplies of 1K
+  e2fsck_allow_fix "$1"
   if [ "$2" ]; then
     resize2fs "/dev/$1" "$2K" || "Failed to resize partition /dev/$1, may be space is not enough?"
   else
@@ -175,7 +179,7 @@ unmount_parts() {
 
 create_ext4() { # $1: name
   mke2fs -F -q -t ext4 -m 0 "/dev/$1" -L "$1" > /dev/null || die "Failed to create an ext4 fs on '$1'"
-  e2fsck -fy "$1" &> /dev/null || die "Filesystem glitched on '$1', this should be impossible as we just created it. Maybe you have a bad emmc?"
+  e2fsck_allow_fix "$1"
 }
 
 notice_populate_start() {
