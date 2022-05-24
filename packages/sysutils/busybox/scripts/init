@@ -229,7 +229,7 @@ mount_folder() {
 
   mkdir -p /dev/bind_tmp
   mount_common "$target" "/dev/bind_tmp" "rw,noatime"
-  mount_common "/dev/bind_tmp/coreelec_$(basename $2)" "$2" "bind"  # seperate coreelec_storage and emuelec_storage under the same partition is possible
+  mount_common "/dev/bind_tmp/coreelec_$(basename $2)" "$2" "bind"
   umount /dev/bind_tmp
 
   [ "$2" = "/flash" ] && mount -o remount,ro /flash
