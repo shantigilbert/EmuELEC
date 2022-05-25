@@ -15,6 +15,7 @@
 # ampart is hard-coded not to run on CoreELEC
 # Don't even think about opening issue on ampart to allow CoreELEC, I'll close it
 
+
 abs() { 
     [[ $[ $@ ] -lt 0 ]] && echo "$[ ($@) * -1 ]" || echo "$[ $@ ]"
 }
@@ -316,6 +317,18 @@ install_to_nand() {  # $1 single boot or not
   populate_eeroms
   finish_work
 }
+
+no_coreelec() {
+  if grep -q "^NAME=\"CoreELEC\"$" /etc/os-release ; then
+    echo "Hello, Mr naughty naughty. You are trying to run this script on CoreELEC right?"
+    echo "Sorry but it does not work in that way. Both the script and the tool ampart it relies"
+    echo "does not work on CoreELEC and I have no interest on providing support there"
+    echo "You should use ceemmc as it's the official method for CoreELEC"
+    exit 1
+  fi
+}
+
+no_coreelec
 
 DT_NAME="$( /usr/bin/dtname )"
 if ! [[ "$DT_NAME" =~ ^gxl_p212 ]]; then
