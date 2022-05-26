@@ -48,8 +48,8 @@ revert_and_die() {
 
 snapshot() {
   local LOG="$(ampart --snapshot /dev/mmcblk0 2>/dev/null)" || die "Failed to read partition table"
-  SNAPSHOT="$(sed 'x;$!d' <<< $LOG)" # We can restore the part table in case something goes wrong
-  SNAPSHOT_HUMAN="$(tail -1<<< $LOG)"
+  SNAPSHOT_HUMAN="$(sed 'x;$!d' <<< $LOG)" # We can restore the part table in case something goes wrong
+  SNAPSHOT="$(tail -1<<< $LOG)"
 }
 
 no_emmc_boot() {
