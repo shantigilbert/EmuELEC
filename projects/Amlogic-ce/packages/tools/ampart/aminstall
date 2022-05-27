@@ -38,12 +38,14 @@ DIR_ROMS="$DIR_STORAGE/roms"
 
 PART_SYSTEM_SIZE=$(( 2 * $SIZE_1G ))
 PART_SYSTEM_SIZE_HUMAN='2G'   # This is not used in any processing, just for reporting to users
-PART_STORAGE_SIZE$(( 2 * $SIZE_1G ))   # The minimum size of it, and actual size of it if roms is created
-PART_ROMS_OFFSET$(( 4 * $SIZE_1G ))   # Disk should be at least this size for roms partitions to be created
+PART_STORAGE_SIZE=$(( 2 * $SIZE_1G ))   # The minimum size of it, and actual size of it if roms is created
+PART_ROMS_OFFSET=$(( 4 * $SIZE_1G ))   # Disk should be at least this size for roms partitions to be created
+PART_ROMS_OFFSET_HUMAN='4G'
 
 PART_STORAGE_SUBDIR='coreelec_storage'
 
 DISK_SIZE_LEAST=$(( 3 * $SIZE_1G ))
+DISK_SIZE_LEAST_HUMAN='3G'
 
 DISK_DEVICE='mmcblk0'
 DISK_DEVICE_PATH="/dev/$DISK_DEVICE"
@@ -53,6 +55,7 @@ DISTRO_NAME='EmuELEC'
 ACTION_REVERT=''
 ACTION_UPDATE=''
 ACTION_UPDATE_ROMS=''
+ACTION_CREATE_ROMS=''
 ACTION_SINGLE_BOOT=''
 ACTION_SINGLE_BOOT_OLDSCHOOL=''
 
@@ -68,8 +71,8 @@ TEA_TIME=60
 SNAPSHOT=''
 SNAPSHOT_HUMAN=''
 
-ROMS_CREATE=''
 
+PARTS=()
 PART=''
 
 abs() { 
@@ -103,6 +106,7 @@ snapshot() {
   local LOG="$(ampart --snapshot /dev/$DISK_DEVICE 2>/dev/null)" || die "Failed to read partition table"
   SNAPSHOT_HUMAN="$(sed 'x;$!d' <<< $LOG)" # We can restore the part table in case something goes wrong
   SNAPSHOT="$(tail -1<<< $LOG)"
+  read -r -a PARTS <<< "$SNAPSHOT"
 }
 
 no_emmc_boot() {
@@ -138,27 +142,95 @@ e2fsck_allow_fix() {
 resize_part() { # $1 part name $2 size in K, we use K as 1. resize2fs does not accept byte, 2. on MB there may be difference as the part may actually assigned be on KB 3. size will definitely be multiplies of 4K, then multiplies of 1K
   e2fsck_allow_fix "$1"
   if [ "$2" ]; then
-    resize2fs "/dev/$1" "$2K" &>/dev/null || "Failed to resize partition /dev/$1, may be space is not enough?"
+    resize2fs "/dev/$1" "$2K" &>/dev/null || revert_and_die "Failed to resize partition /dev/$1, may be space is not enough?"
   else
-    resize2fs "/dev/$1" &>/dev/null || "Failed to resize partition /dev/$1, may be space is not enough?"
+    resize2fs "/dev/$1" &>/dev/null || revert_and_die "Failed to resize partition /dev/$1, may be space is not enough?"
   fi
 }
 
-revertable() {
-  local 
-
-
-
+revert_dualboot() {
+  local PART
+  local PART_ID
+  local PART_NAME
+  local PART_SYSTEM_ID=-1
+  local PART_STORAGE_ID=-1
+  local PART_ROMS_ID=-1
+  for PART_ID in "${!PARTS[@]}"; do
+    PART="${PARTS[$PART_ID]}"
+    PART_NAME="${PART%%:*}"
+    case "$PART_NAME" in
+      "$PART_SYSTEM_NAME")
+        PART_SYSTEM_ID=PART_ID
+        ;;
+      "$PART_STORAGE_NAME")
+        PART_STORAGE_ID=PART_ID
+        ;;
+      "$PART_ROMS_NAME")
+        PART_ROMS_ID=PART_ID
+        ;;
+    esac    
+  done
+  if [ $PART_ROMS_ID != -1 ]; then
+    die "$PART_ROMS_NAME exists in the partition table, can not revert it as $PART_ROMS_NAME can only exist in single-boot mode, in which revert is impossible unless you flash a stock Android image"
+  fi
+  if [[ $PART_SYSTEM_ID == -1 || $PART_STORAGE_ID == -1 ]]; then
+    die "Can not find both $PART_SYSTEM_NAME and $PART_STORAGE_NAME in partition table, you've not installed to internal storage yet, can not revert it"
+  fi
+  # if [ $PART_SYSTEM_ID -le $PART_STORAGE_ID ]; then
+  #   die "$PART_SYSTEM_NAME is placed before $PART_STORAGE_ID in partition table, you've installed in single-boot mode and we can not revert this"
+  # fi
+  if [ $PART_SYSTEM_ID != $PART_ID ]; then
+    die "$PART_SYSTEM_NAME is not the last part in the partition table, which suggests you've installed in single-boot mode and we cannot revert this"
+  fi
+  if [ $(( $PART_SYSTEM_ID - $PART_STORAGE_ID )) != 1 ]; then
+    die "$PART_SYSTEM_NAME is not right after $PART_STORAGE_NAME, we can not revert this as it is not the expected layout the installation script would do"
+  fi
+  local PART_DATA="${PARTS[$PART_STORAGE_ID-1]}"
+  local PART_STORAGE="${PARTS[$PART_STORAGE_ID]}"
+  if [ "${PART_DATA*:}" != "${PART_STORAGE*:}" ]; then
+    die "$PART_STORAGE_NAME is not a duplicate (alias) for data partition, this is not the expected layout the installation script would do, can not revert it."
+  fi
+  ampart --update "$DISK_DEVICE_PATH" ^-1? ^-1? ^-1:::+"$(awk -F ':' '{print $3}' <<< $PART)": &>/dev/null || revert_and_die 'Failed to revert the partition table'
+  echo "Successfully revert the partition table"
+  echo "Resizing the last partition back to its old size..."
+  resize_part "$PART_NAME"
+  echo "Done, your single-boot Android installation is restored"
+  exit
 }
 
 update_table() {
   if [ "$ACTION_REVERT" ]; then
-    # Revert always happen first
-
-
-
-
-  elif [ -z "$ACTION_SINGLE_BOOT" ]; then
+    # Revert has highest priority first
+    revert_dualboot
+  elif [ "$ACTION_SINGLE_BOOT" ]; then
+    # Single boot mode
+    DISK_SIZE=$(( $(cat "/sys/block/$DISK_DEVICE/size") * 512 ))
+    DISK_SIZE_INT=$(( $DISK_SIZE / $SIZE_1G + 1 ))
+    if [ $DISK_SIZE -gt $PART_ROMS_OFFSET_LEAST ]; then
+        echo "Oh sweet! You emmc is larger than $PART_ROMS_OFFSET_HUMAN (${DISK_SIZE_INT}G), so you can create a dedicated $PART_ROMS_NAME partition to save your ROMs, savestates, etc"
+        read -p "Do you want to create a dedicated $PART_ROMS_NAME partition? (if not, $PART_STORAGE_NAME partition will fill the rest of the disk) [Y/n] " choice
+        case "$choice" in
+          [nN]*)
+            TABLE="$PART_SYSTEM_NAME::$PART_SYSTEM_SIZE:2 $PART_STORAGE_NAME:::"
+            ;;
+          *)
+            TABLE="$PART_SYSTEM_NAME::$PART_SYSTEM_SIZE:2 $PART_STORAGE_NAME::$PART_STORAGE_SIZE: $PART_ROMS_NAME:::"
+            ACTION_CREATE_ROMS='yes'
+            ;;
+        esac
+      elif [ $DISK_SIZE -gt $DISK_SIZE_LEAST ]; then
+        echo "Oops, You emmc is too small, to prevent $PART_STORAGE_NAME from filling up, you can not have a dedicated $PART_ROMS_NAME partition :("
+        echo "Your new partition table on emmc will only contain a $PART_SYSTEM_SIZE_HUMAN $PART_SYSTEM_NAME and a $PART_STORAGE_NAME partition to fill the rest free space"
+        TABLE="$PART_SYSTEM_NAME::$PART_SYSTEM_SIZE:2 $PART_STORAGE_NAME:::"
+      else
+        echo "Oh no! You emmc is smaller than 4G! This is impossible!"
+        echo "Every Amlogic S9xxx device should have at least 4G emmc onboard!"
+        echo "I'm afraid you can not install EmuELEC to internal storage :("
+        echo "As this only works on emmc at least 4G :<"
+        exit 1
+      fi
+    ampart "$DISK_DEVICE_PATH" $TABLE &>/dev/null || revert_and_die
+  else
     # Make sure space is enough for dual-boot mode
     local VALUE=''
     get_block_value "/dev/$PART_NAME"  "Free blocks"
@@ -173,41 +245,7 @@ update_table() {
     echo "Shrinking partition $PART_NAME by $PART_SYSTEM_SIZE_HUMAN..."
     resize_part "$PART_NAME" $(( ($PART_SIZE - $PART_SYSTEM_SIZE) / 1024 ))
     PART_RESIZED="$PART_NAME"
-    ampart --update /dev/mmcblk0 ^-1:::-$PART_SYSTEM_SIZE: ^-1%:CE_STORAGE CE_FLASH::: &>/dev/null
-    if [ $? != 0 ]; then
-      revert_and_die
-    fi
-  else
-    # Single boot mode
-    DISK_SIZE=$(( $(cat "/sys/block/mmcblk0/size") * 512 ))
-    DISK_SIZE_INT=$(( $DISK_SIZE / $SIZE_1G + 1 ))
-    if [[ $DISK_SIZE -gt $PART_ROMS_OFFSET_LEAST ]]; then
-        echo "Oh sweet! You emmc is larger than 4G (${DISK_SIZE_INT}G), so you can create a dedicated EEROMS partition to save your ROMs, savestates, etc"
-        read -p "Do you want to create a dedicated EEROMS partition? (if not, DATA partition will fill the rest of the disk) [Y/n] " choice
-        case "$choice" in
-          [nN]*)
-            TABLE='CE_FLASH::2G:2 CE_STORAGE:::'
-            ;;
-          *)
-            TABLE='CE_FLASH::2G:2 CE_STORAGE::2G: EEROMS:::'
-            ROMS_CREATE='yes'
-            ;;
-        esac
-      elif [[ "$DISK_SIZE" -gt 0xc0000000 ]]; then
-        echo "Oops, You emmc is only 4G, to prevent DATA from filling up, you can not have a dedicated EEROMS partition :("
-        echo "Your new partition table on emmc will only contain a 2G system and a data partition to fill the rest free space"
-        TABLE='CE_FLASH::2G:2 CE_STORAGE:::'
-      else
-        echo "Oh no! You emmc is smaller than 4G! This is impossible!"
-        echo "Every Amlogic S9xxx device should have at least 4G emmc onboard!"
-        echo "I'm afraid you can not install EmuELEC to internal storage :("
-        echo "As this only works on emmc at least 4G :<"
-        exit 1
-      fi
-    ampart /dev/mmcblk0 $TABLE &>/dev/null
-    if [ $? != 0 ]; then
-      revert_and_die
-    fi
+    ampart --update "$DISK_DEVICE_PATH" ^-1:::-$PART_SYSTEM_SIZE: ^-1%:CE_STORAGE CE_FLASH::: &>/dev/null || revert_and_die
   fi
 }
 
@@ -240,21 +278,29 @@ can_reinstall() {
         echo "smaller than $PART_SYSTEM_SIZE_HUMAN"
         die "Existing partition layout not suited"
       fi
-      if [ "$ROMS_EXIST" ]; then
-        UPDATE_ROMS='yes'
+      read -p "Should we update/reinstall the internal installation? [y/N]" CHOICE
+      if [[ "$CHOICE" =~ ^[yY] ]]; then
+        :
+      else
+        echo 'No changes made to internal installation, exiting'
+        exit
       fi
-      UPDATE='yes'
+      if [ "$ROMS_EXIST" ]; then
+        ACTION_UPDATE_ROMS='yes'
+      fi
+      ACTION_UPDATE='yes'
     else
-      die "Can not proceed as only one of $PART_SYSTEM_NAME and $PART_STORAGE_NAME is found, your old installation on emmc is incomplete and we can not reinstall it"
+      die "Can not proceed as only one of $PART_SYSTEM_NAME and $PART_STORAGE_NAME is found, your old installation on emmc is incomplete and we can not update/reinstall it"
     fi
   fi
 }
 
-unmount_parts() {
+check_parts() {
   local SYSTEM_EXIST=''
   local STORAGE_EXIST=''
   local ROMS_EXIST=''
-  for PART in $SNAPSHOT; do  # Part is purposedly used as a global var, it will be used later
+  local PART_NAME=''
+  for PART in "${PARTS[@]}"; do  # Part is purposedly used as a global var, it will be used later
     PART_NAME="${PART%%:*}"
     # some parts will be used by us
     if [ -z "$ACTION_REVERT" ]; then
@@ -297,18 +343,36 @@ umount_and_sync() {
   sync
 }
 
+format_or_not() {
+  if [ "$ACTION_UPDATE" ]; then
+    read -p "Should we reformat $1 partition? This is only useful if your want a totally new installation [y/N]" CHOICE
+    if [[ "$CHOICE" =~ ^[yY] ]]; then
+      FORMAT='yes'
+    fi
+  else
+    FORMAT='yes'
+  fi
+}
+
 populate_system() {
   notice_populate_start
-  notice_format
   local PART_PATH="/dev/$PART_SYSTEM_NAME"
-  mkfs.fat -n "$PART_SYSTEM_NAME" "$PART_PATH" &>/dev/null || revert_and_die "Failed to create a fat fs on '$PART_PATH'"
+  local FORMAT=''
+  format_or_not "$PART_SYSTEM_NAME"
+  if [ "$FORMAT" ]; then
+    notice_format
+    mkfs.fat -n "$PART_SYSTEM_NAME" "$PART_PATH" &>/dev/null || revert_and_die "Failed to create a fat fs on '$PART_PATH'"
+  fi
   local DIR_CACHE="$DIR_CACHE/$PART_SYSTEM_NAME"
   mount_part_cache
   echo "Copying all system files (kernel, SYSTEM, dtb, etc) under $DIR_SYSTEM to internal $PART_SYSTEM_NAME partition..."
-  cp -ra "$DIR_SYSTEM/"* "$DIR_CACHE" || die 'Failed to copy system files'
-  [ "$ROMS_CREATE" ] && echo 'ext4' > "$DIR_CACHE/ee_fstype"  # Internal roms fs type should 
+  cp -raf "$DIR_SYSTEM/"* "$DIR_CACHE" || die 'Failed to copy system files'
+  [ "$ACTION_CREATE_ROMS" ] && echo 'ext4' > "$DIR_CACHE/ee_fstype"  # Internal roms fs type should 
+  if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
+    sed -i 's_boot=LABEL=CE\_FLASH_boot=/dev/system_;s_disk=FOLDER=/dev/CE\_STORAGE_disk=/dev/data_' "$DIR_CACHE/cfgload"
+  fi
   umount_and_sync
-  notice_populate_start
+  notice_populate_end
 }
 
 populate_storage() {
@@ -316,52 +380,83 @@ populate_storage() {
   local PART_PATH="/dev/$PART_STORAGE_NAME"
   local DIR_CACHE="$DIR_CACHE/$PART_STORAGE_NAME"
   if [ "$ACTION_SINGLE_BOOT" == 'yes' ]; then
-    notice_format
-    create_ext4 "$PART_NAME"
+    local FORMAT=''
+    format_or_not "$PART_STORAGE_NAME"
+    if [ "$FORMAT" ]; then
+      notice_format
+      create_ext4 "$PART_STORAGE_NAME"
+    fi
   fi
   mount_part_cache
-  [ "$PART_STORAGE_SUBDIR" ] && DIR_CACHE="$DIR_CACHE/$PART_STORAGE_SUBDIR"
-  mkdir -p "$DIR_CACHE"
-  chmod 755 "$DIR_CACHE" # Just in case, if it's already be created by some random user?
-  printf "Do you want to copy your user data under $DIR_STORAGE to internal $PART_STORAGE_NAME partition? "
-  [ "$ROMS_CREATE" ] && printf "(This will not include all of the stuffs under $DIR_ROMS, they will be copied to $PART_ROMS_NAME partition later) "
-  read -p '[Y/n] ' choice
-  case "$choice" in
-    [nN]*)
+  if [ "$PART_STORAGE_SUBDIR" ]; then
+    DIR_CACHE="$DIR_CACHE/$PART_STORAGE_SUBDIR"
+    mkdir -p "$DIR_CACHE"
+    chmod 755 "$DIR_CACHE" # Just in case, if it's already be created by some random user?
+  fi
+  local EMPTY=''
+  if [ -e "$DIR_CACHE/.config" ]; then
+    echo "Warning: userdata found in internal $PART_STORAGE_NAME partitions"
+    read -p "Should we clean everything under this internal installation? You can then populate it with userdata from your the current external boot, or leave it empty to have a fresh installtion (y/N)" CHOICE
+    if [[ "$CHOICE" =~ ^[yY] ]]; then
+      rm -rf "$DIR_CACHE"/.[a-zA-Z_-]* "$DIR_CACHE"/*
+      EMPTY='yes'
+    fi
+  else
+    EMPTY='yes'
+  fi
+  if [ "$EMPTY" ]; then
+    printf "Do you want to copy your user data under $DIR_STORAGE to internal $PART_STORAGE_NAME partition? "
+    [ "$ACTION_CREATE_ROMS" ] && printf "(This will not include all of the stuffs under $DIR_ROMS, they will be copied to $PART_ROMS_NAME partition later) "
+    read -p '[Y/n] ' CHOICE
+    if [[ "$CHOICE" =~ ^[nN] ]]; then
       :
-      ;;
-    *)
+    else
       echo "Stopping EmulationStation so we can make sure configs are flushed onto disk... You can run 'systemctl start emustation.service' later to bring EmulationStation back"
       systemctl stop emustation.service
       echo "Copying user data..."
       rsync -qaHSx "$DIR_STORAGE/". "$DIR_CACHE"
       sync
-      ;;
-  esac
+    fi
+  fi
   umount_and_sync
   notice_populate_end
 }
 
 populate_roms() {
-  [ -z "$ROMS_CREATE" ] && return
+  [[ -z "$ACTION_CREATE_ROMS" && -z "$ACTION_UPDATE_ROMS" ]] && return
   notice_populate_start
   local PART_PATH="/dev/$PART_ROMS_NAME"
-  notice_format
-  echo "Note: $PART_ROMS_NAME on the emmc will always be formatted as EXT4, Since you can not plug the emmc to a Windows PC just like you would for a SD card/USB drive"
-  create_ext4 "$PART_ROMS_NAME"
-  read -p "Do you want to copy all of your ROMs, savestates, etc under $DIR_ROMS to internal eeroms partition? [Y/n]" choice
-    case "$choice" in
-    [nN]*)
+  local FORMAT=''
+  local EMPTY=''
+  format_or_not "$PART_ROMS_NAME"
+  if [ "$FORMAT" ]; then
+    notice_format
+    echo "Note: $PART_ROMS_NAME on the emmc will always be formatted as EXT4, Since you can not plug the emmc to a Windows PC just like you would for a SD card/USB drive"
+    create_ext4 "$PART_ROMS_NAME"
+    EMPTY='yes'
+  fi
+  local DIR_CACHE="$DIR_CACHE/$PART_ROMS_NAME"
+  mount_part_cache
+  if [ -e "$DIR_CACHE/nes" ]; then  # Why would I choose NES? Because Nintendo ruled the fucking world (Ahem, AVGN meme)
+    echo "Warning: roms/savedata found in internal $PART_STORAGE_NAME partitions"
+    read -p "Should we clean everything under this internal installation? You can then populate it with roms/savedata from your the current external boot, or leave it empty to have a fresh installtion (y/N)" CHOICE
+    if [[ "$CHOICE" =~ ^[yY] ]]; then
+      rm -rf "$DIR_CACHE"/.[a-zA-Z_-]* "$DIR_CACHE"/*
+      EMPTY='yes'
+    fi
+  else
+    EMPTY='yes'
+  fi
+  if [ "$EMPTY" ]; then
+    read -p "Do you want to copy all of your ROMs, savestates, etc under $DIR_ROMS to internal $PART_ROMS_NAME partition? [Y/n]" CHOICE
+    if [[ "$CHOICE" =~ ^[nN] ]]; then
       :
-      ;;
-    *)
-      local DIR_CACHE="$DIR_CACHE/$PART_ROMS_NAME"
-      mount_part_cache
+    else
       echo "Copying Roms, savestates, etc..."
       rsync -qaHSx "$DIR_ROMS/". "$DIR_CACHE"
-      umount_and_sync
-      ;;
-  esac
+    fi
+  fi
+  umount_and_sync
   notice_populate_end
 }
 
@@ -369,27 +464,27 @@ finish_work() {
   echo "All done!"
   echo "$DISTRO_NAME has been installed to your internal emmc."
   echo 
-  if [ "$ACTION_SINGLE_BOOT" == 'yes' ] && /usr/sbin/fw_setenv storeboot "$UBOOT_EMMC_SINGLE_BOOT"  # this was used to boot Android, but since Android is gone, we replace to what we want for emmc boot
-  echo "You'll need to poweroff the box and unplug your SD card/USB drive for the box"
-  read -p "Would you like to poweroff now [y/N]? " choice
-  case "$choice" in
-    [yY]*)
-      if /usr/sbin/fw_printenv whereToBootFrom > /dev/null 2>&1; then /usr/sbin/fw_setenv whereToBootFrom internal; fi
-      /usr/sbin/fw_setenv bootfromnand 1
-      /usr/sbin/reboot switch_system
-      ;;
-  esac
+  if [ "$ACTION_SINGLE_BOOT" ] 
+    fw_setenv storeboot "$UBOOT_EMMC_SINGLE_BOOT"  # this was used to boot Android, but since Android is gone, we replace to what we want for emmc boot
+  fi
+  if [ "$ACTION_SINGLE_BOOT" ]; then
+    read -p "Would you like to reboot to the fresh-installed internal installation of $DISTRO_NAME? (y/N)" CHOICE
+    if [[ "$CHOICE" =~ ^[yY] ]]; then
+        if fw_printenv whereToBootFrom > /dev/null 2>&1; then 
+          fw_setenv whereToBootFrom internal
+        fi
+        fw_setenv bootfromnand 1
+        reboot switch_system
+    fi
+  else
+    echo "To boot to the internal installation of $DISTRO_NAME, you need to unplug all SD card/USB drives that contains a bootable system when the box is powered off and boot the box. If you select reboot to internal system from GUI, you'll always reboot to internal Android"
+    echo "You can type 'poweroff' to poweroff the box and try for yourself"
+  fi
 }
 
 
 install_to_internal() {  # $1 single boot or not
-  update_table
-  echo "Warning: from this point onward, all of the changes are IRREVERSIBLE since new data will be written to emmc. Make sure you keep the power pluged in."
-  echo "If anything breaks apart, you can revert your partition table with the following command, but changes to the data are IRREVERSIBLE"
-  echo
-  echo "ampart --clone /dev/mmcblk0 $SNAPSHOT_HUMAN"
-  echo
-  echo "Ready to actually populate internal EmuELEC installation in 10 seconds..."
+  echo "Ready to actually populate internal $DISTRO_NAME installation in 10 seconds..."
   echo "You can ctrl+c now to stop the installation if you regret"
   sleep 10
   populate_system
@@ -431,58 +526,64 @@ mmc_drivable() {
 }
 
 confirm_method() {
-  if [ "$1" == "--iknowwhatimdoingandidontcareaboutupdate" ]; then # Gosh, I think such a long argument will surely stop users from doing so
-    echo "WARNING: You'll install via the old-school /dev/system+/dev/data way"
-    echo "You should only try this if we can't modify the part table"
-    echo "to implement a custom partition layout to achive safer dual/single install"
-    echo
-    echo "However, doing so will both render your installtion non-upgradable and your"
-    echo "Android installtion unusable even some of its partitions are still kept"
-    echo 
-    echo "As we'll modify the cfgload script under internal /dev/system partition,"
-    echo "You'll need to modify it by YOURSELF every time you want to ugrade your OS"
-    echo "as the official upgrade package will revert it back."
-    echo 
-    echo "Doing so is dangerous, tedious and you'll NOT receive a single support"
-    echo
-    cup_of_tea
-    PART_SYSTEM_NAME='system'
-    PART_STORAGE_NAME='data'
-    ACTION_SINGLE_BOOT_OLDSCHOOL='yes'
-  elif [ "$1" == "--iknowwhatimdoing" ]; then
-    echo "Warning: working in single boot mode"
-    echo "This script will erase the old partition table on your emmc"
-    echo "and create a new part table that ONLY contains $PART_SYSTEM_NAME, $PART_STORAGE_NAME and $PART_ROMS_NAME (if emmc size big enough) partiitons"
-    echo "(reserved partitions like bootloader, reserved, env, logo and misc will be kept)"
-    echo "You Android installation will be COMPLETELY erased and can not be recovered"
-    echo "Unless you use Amlogic USB Burning Tool to flash a stock image"
-    echo "This script will install EmuELEC that you booted from SD card/USB drive."
-    ACTION_SINGLE_BOOT='yes'
-  elif [ "$1" == "--revert" ]; then
-    echo "This script will revert your partition layout back to single-boot Android mode"
-    echo "If you've installed via this script in default dual-boot mode"
-    echo "The $PART_SYSTEM_SIZE_HUMAN we've taken from your data partition"
-    echo "will be returned to it"
-    ACTION_REVERT='yes'
-  else
-    echo "This script will shrink the last partition by $PART_SYSTEM_SIZE_HUMAN on your emmc"
-    printf "and give it an alias name $PART_STORAGE_NAME and store your data under "
-    if [ "$PART_STORAGE_SUBDIR" ]; then
-      echo "a subfolder $PART_STORAGE_SUBDIR"
-    else
-      echo "it"
-    fi
-    echo "and create a new part $PART_SYSTEM_NAME to store $DISTRO_NAME's system files"
-    echo "You Android installation should be safe but we can not guarantee this"
-    echo "You need to make sure the data partition on your Android installtion"
-    echo "has at least $PART_SYSTEM_SIZE_HUMAN free space, otherwise we can't install in this way"
-  fi
+  case "$1" in 
+    '--iknowwhatimdoingandidontcareaboutupdate') # Gosh, I think such a long argument will surely stop users from doing so
+      echo "WARNING: You'll install via the old-school /dev/system+/dev/data way"
+      echo "You should only try this if we can't modify the part table"
+      echo "to implement a custom partition layout to achive safer dual/single install"
+      echo
+      echo "However, doing so will both render your installtion non-upgradable and your"
+      echo "Android installtion unusable even some of its partitions are still kept"
+      echo 
+      echo "As we'll modify the cfgload script under internal /dev/system partition,"
+      echo "You'll need to modify it by YOURSELF every time you want to ugrade your OS"
+      echo "as the official upgrade package will revert it back."
+      echo 
+      echo "Doing so is dangerous, tedious and you'll NOT receive a single support"
+      echo
+      cup_of_tea
+      PART_SYSTEM_NAME='system'
+      PART_STORAGE_NAME='data'
+      ACTION_SINGLE_BOOT='yes'
+      ACTION_SINGLE_BOOT_OLDSCHOOL='yes'
+      ;;
+    '--iknowwhatimdoing')
+      echo "Warning: working in single boot mode"
+      echo "This script will erase the old partition table on your emmc"
+      echo "and create a new part table that ONLY contains $PART_SYSTEM_NAME, $PART_STORAGE_NAME and $PART_ROMS_NAME (if emmc size big enough) partiitons"
+      echo "(reserved partitions like bootloader, reserved, env, logo and misc will be kept)"
+      echo "You Android installation will be COMPLETELY erased and can not be recovered"
+      echo "Unless you use Amlogic USB Burning Tool to flash a stock image"
+      echo "This script will install EmuELEC that you booted from SD card/USB drive."
+      ACTION_SINGLE_BOOT='yes'
+      ;;
+    '--revert')
+      echo "This script will revert your partition layout back to single-boot Android mode"
+      echo "If you've installed via this script in default dual-boot mode"
+      echo "The $PART_SYSTEM_SIZE_HUMAN we've taken from your data partition"
+      echo "will be returned to it"
+      ACTION_REVERT='yes'
+      ;;
+    *)
+      echo "This script will shrink the last partition by $PART_SYSTEM_SIZE_HUMAN on your emmc"
+      printf "and give it an alias name $PART_STORAGE_NAME and store your data under "
+      if [ "$PART_STORAGE_SUBDIR" ]; then
+        echo "a subfolder $PART_STORAGE_SUBDIR"
+      else
+        echo "it"
+      fi
+      echo "and create a new part $PART_SYSTEM_NAME to store $DISTRO_NAME's system files"
+      echo "You Android installation should be safe but we can not guarantee this"
+      echo "You need to make sure the data partition on your Android installtion"
+      echo "has at least $PART_SYSTEM_SIZE_HUMAN free space, otherwise we can't install in this way"
+      ;;
+  esac
   echo
   echo "WARNING: The script does not have any safeguards, you will not receive any"
   echo "support for problems that you may encounter if you proceed!"
   echo 
-  read -p 'Type "yes" if you know what you are doing or anything else to exit: ' choice
-  [ "$choice" != 'yes' ] && exit 0
+  read -p 'Type "yes" if you know what you are doing or anything else to exit: ' CHOICE
+  [ "$CHOICE" != 'yes' ] && exit 0
 }
 
 main() {
@@ -493,9 +594,17 @@ main() {
   essential_check
   no_emmc_boot
   snapshot
-  unmount_parts
+  check_parts
+  if [[ -z "$ACTION_SINGLE_BOOT_OLDSCHOOL" && -z "$ACTION_UPDATE" ]]; then
+    update_table
+    echo "Warning: from this point onward, all of the changes are IRREVERSIBLE since new data will be written to emmc. Make sure you keep the power pluged in."
+    echo "If anything breaks apart, you can revert your partition table with the following command, but changes to the data are IRREVERSIBLE"
+    echo
+    echo "ampart --clone $DISK_DEVICE_PATH $SNAPSHOT_HUMAN"
+    echo
+  fi
   install_to_internal
   finish_work
 }
 
-main
+main "$1"
