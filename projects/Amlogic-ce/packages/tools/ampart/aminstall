@@ -361,6 +361,7 @@ format_or_not() {
 }
 
 populate_system() {
+  local PART_NAME="$PART_SYSTEM_NAME"
   notice_populate_start
   local PART_PATH="/dev/$PART_SYSTEM_NAME"
   local FORMAT=''
@@ -382,6 +383,7 @@ populate_system() {
 }
 
 populate_storage() {
+  local PART_NAME="$PART_STORAGE_NAME"
   notice_populate_start
   local PART_PATH="/dev/$PART_STORAGE_NAME"
   local DIR_CACHE="$DIR_CACHE/$PART_STORAGE_NAME"
@@ -430,6 +432,7 @@ populate_storage() {
 
 populate_roms() {
   [[ -z "$ACTION_CREATE_ROMS" && -z "$ACTION_UPDATE_ROMS" ]] && return
+  local PART_NAME="$PART_ROMS_NAME"
   notice_populate_start
   local PART_PATH="/dev/$PART_ROMS_NAME"
   local FORMAT=''
