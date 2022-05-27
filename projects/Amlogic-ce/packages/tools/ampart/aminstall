@@ -221,7 +221,7 @@ update_table() {
     # Single boot mode
     DISK_SIZE=$(( $(cat "/sys/block/$DISK_DEVICE/size") * 512 ))
     DISK_SIZE_INT=$(( $DISK_SIZE / $SIZE_1G + 1 ))
-    if [ $DISK_SIZE -gt $PART_ROMS_OFFSET_LEAST ]; then
+    if [ $DISK_SIZE -gt $PART_ROMS_OFFSET ]; then
         echo "Oh sweet! You emmc is larger than $PART_ROMS_OFFSET_HUMAN (${DISK_SIZE_INT}G), so you can create a dedicated $PART_ROMS_NAME partition to save your ROMs, savestates, etc"
         read -p "Do you want to create a dedicated $PART_ROMS_NAME partition? (if not, $PART_STORAGE_NAME partition will fill the rest of the disk) [Y/n] " choice
         case "$choice" in
@@ -384,7 +384,8 @@ populate_system() {
   cp -raf "$DIR_SYSTEM/"* "$DIR_CACHE" || die 'Failed to copy system files'
   [ "$ACTION_CREATE_ROMS" ] && echo 'ext4' > "$DIR_CACHE/ee_fstype"  # Internal roms fs type should 
   if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
-    sed -i 's_boot=LABEL=CE\_FLASH_boot=/dev/system_;s_disk=FOLDER=/dev/CE\_STORAGE_disk=/dev/data_' "$DIR_CACHE/cfgload"
+    [ ! -f '/usr/share/ampart/oldschool_cfgload' ] && revert_and_die "Failed to find corresponding oldschool_cfgload"
+    cp -f '/usr/share/ampart/oldschool_cfgload' "$DIR_CACHE/cfgload"
   fi
   umount_and_sync
   notice_populate_end
