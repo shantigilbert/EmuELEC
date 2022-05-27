@@ -133,7 +133,7 @@ e2fsck_allow_fix() {
   local i
   local RTR
   for i in {0..9}; do
-    e2fsck -fpy "/dev/$1" &>/dev/null
+    e2fsck -fp "/dev/$1" &>/dev/null
     RTR=$?
     if [ $RTR == 1 ]; then 
       echo "Note: Found and fixed issues on /dev/$1"
