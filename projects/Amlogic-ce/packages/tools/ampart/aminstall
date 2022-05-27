@@ -257,8 +257,8 @@ essential_check() {
   local ESSENTIAL_PATH=''
   for ESSENTIAL_FILE in $ESSENTIAL_FILES; do
     ESSENTIAL_PATH="$DIR_SYSTEM/$ESSENTIAL_FILE"
-    [ ! -f "$ESSENTIAL_FILE" ]; then
-      die "Essential file '$ESSENTIAL_FILE' $PROMPT_END"
+    if [ ! -f "$ESSENTIAL_PATH" ]; then
+      die "Essential file '$ESSENTIAL_PATH' $PROMPT_END"
     fi
   done
 }
@@ -299,8 +299,7 @@ check_parts() {
   local SYSTEM_EXIST=''
   local STORAGE_EXIST=''
   local ROMS_EXIST=''
-  local PART_NAME=''
-  for PART in "${PARTS[@]}"; do  # Part is purposedly used as a global var, it will be used later
+  for PART in "${PARTS[@]}"; do  # Part and part name are purposedly used as a global var, they will be used later
     PART_NAME="${PART%%:*}"
     # some parts will be used by us
     if [ -z "$ACTION_REVERT" ]; then
@@ -464,10 +463,8 @@ finish_work() {
   echo "All done!"
   echo "$DISTRO_NAME has been installed to your internal emmc."
   echo 
-  if [ "$ACTION_SINGLE_BOOT" ] 
-    fw_setenv storeboot "$UBOOT_EMMC_SINGLE_BOOT"  # this was used to boot Android, but since Android is gone, we replace to what we want for emmc boot
-  fi
   if [ "$ACTION_SINGLE_BOOT" ]; then
+    fw_setenv storeboot "$UBOOT_EMMC_SINGLE_BOOT"  # this was used to boot Android, but since Android is gone, we replace to what we want for emmc boot
     read -p "Would you like to reboot to the fresh-installed internal installation of $DISTRO_NAME? (y/N)" CHOICE
     if [[ "$CHOICE" =~ ^[yY] ]]; then
         if fw_printenv whereToBootFrom > /dev/null 2>&1; then 
