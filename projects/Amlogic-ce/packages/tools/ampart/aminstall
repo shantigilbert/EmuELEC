@@ -560,6 +560,7 @@ confirm_method() {
       cup_of_tea
       PART_SYSTEM_NAME='system'
       PART_STORAGE_NAME='data'
+      PART_STORAGE_SUBDIR=''
       ACTION_SINGLE_BOOT='yes'
       ACTION_SINGLE_BOOT_OLDSCHOOL='yes'
       ;;
