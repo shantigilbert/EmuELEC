@@ -130,11 +130,18 @@ get_block_value() { # $1:path $2: line start  VALUE should be set at outer level
 }
 
 e2fsck_allow_fix() {
-  e2fsck -fy "/dev/$1" &>/dev/null
-  local RTR=$?
-  if [ $RTR == 1 ]; then 
-    echo "Note: Found and fixed issues on /dev/$1"
-  elif [ $RTR != 0 ]; then
+  local i
+  local RTR
+  for i in {0..9}; do
+    e2fsck -fpy "/dev/$1" &>/dev/null
+    RTR=$?
+    if [ $RTR == 1 ]; then 
+      echo "Note: Found and fixed issues on /dev/$1"
+    elif [ $RTR == 0 ]; then
+      break
+    fi
+  done
+  if [ $RTR != 0 ]; then
     die "Failed to fsck on partition /dev/$1, there's something wrong in the partition, you may need to fix it yourself"
   fi
 }
@@ -160,13 +167,13 @@ revert_dualboot() {
     PART_NAME="${PART%%:*}"
     case "$PART_NAME" in
       "$PART_SYSTEM_NAME")
-        PART_SYSTEM_ID=PART_ID
+        PART_SYSTEM_ID=$PART_ID
         ;;
       "$PART_STORAGE_NAME")
-        PART_STORAGE_ID=PART_ID
+        PART_STORAGE_ID=$PART_ID
         ;;
       "$PART_ROMS_NAME")
-        PART_ROMS_ID=PART_ID
+        PART_ROMS_ID=$PART_ID
         ;;
     esac    
   done
@@ -187,7 +194,7 @@ revert_dualboot() {
   fi
   local PART_DATA="${PARTS[$PART_STORAGE_ID-1]}"
   local PART_STORAGE="${PARTS[$PART_STORAGE_ID]}"
-  if [ "${PART_DATA*:}" != "${PART_STORAGE*:}" ]; then
+  if [ "${PART_DATA#*:}" != "${PART_STORAGE#*:}" ]; then
     die "$PART_STORAGE_NAME is not a duplicate (alias) for data partition, this is not the expected layout the installation script would do, can not revert it."
   fi
   ampart --update "$DISK_DEVICE_PATH" ^-1? ^-1? ^-1:::+"$(awk -F ':' '{print $3}' <<< $PART)": &>/dev/null || revert_and_die 'Failed to revert the partition table'
@@ -410,7 +417,7 @@ populate_storage() {
     if [[ "$CHOICE" =~ ^[nN] ]]; then
       :
     else
-      echo "Stopping EmulationStation so we can make sure configs are flushed onto disk... You can run 'systemctl start emustation.service' later to bring EmulationStation back"
+      echo "Stopping EmulationStation so we can make sure configs are flushed onto disk... You can run 'systemctl start emustation.service' later to bring EmulationStation back up"
       systemctl stop emustation.service
       echo "Copying user data..."
       rsync -qaHSx "$DIR_STORAGE/". "$DIR_CACHE"
@@ -557,8 +564,7 @@ confirm_method() {
     '--revert')
       echo "This script will revert your partition layout back to single-boot Android mode"
       echo "If you've installed via this script in default dual-boot mode"
-      echo "The $PART_SYSTEM_SIZE_HUMAN we've taken from your data partition"
-      echo "will be returned to it"
+      echo "The $PART_SYSTEM_SIZE_HUMAN we've taken from your data partition will be returned to it"
       ACTION_REVERT='yes'
       ;;
     *)
