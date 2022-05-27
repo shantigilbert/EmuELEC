@@ -12,8 +12,15 @@ PKG_LONGDESC="A simple, fast, yet reliable partition tool for Amlogic's propriet
 PKG_DEPENDS_TARGET="toolchain"
 PKG_TOOLCHAIN="make"
 
+make_target() {
+  make
+  mkimage -A $TARGET_KERNEL_ARCH -O linux -T script -C none -d "$PKG_DIR/oldschool_cfgload.src" 'oldschool_cfgload'
+}
+
 makeinstall_target() {
   mkdir -p $INSTALL/usr/sbin
   cp -a $PKG_DIR/aminstall $INSTALL/usr/sbin
   cp -a $PKG_BUILD/ampart $INSTALL/usr/sbin
+  mkdir -p $INSTALL/usr/share/ampart
+  cp -a $PKG_BUILD/oldschool_cfgload $INSTALL/usr/share/ampart
 }
