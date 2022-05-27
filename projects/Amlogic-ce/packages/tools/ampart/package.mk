@@ -2,8 +2,8 @@
 # Copyright (C) 2022-present 7Ji (pugokushin@gmail.com)
 
 PKG_NAME="ampart"
-PKG_VERSION="d0f15d00bab208cdb5541890495e31ba0a84f0ae"
-PKG_SHA256="9f28e34e2adfb93facccc03c3a67eeb220164149d6a906bf223d3279ec4290e4"
+PKG_VERSION="e9dbdb1654e08c792601ebf2f2cf32df05ab318a"
+PKG_SHA256="35e0868bd5b929f70ff1f4972b9119367f9efb1a0fe8586380aff1067b32a11a"
 PKG_LICENSE="GPL3"
 PKG_SITE="https://github.com/7Ji/ampart"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
