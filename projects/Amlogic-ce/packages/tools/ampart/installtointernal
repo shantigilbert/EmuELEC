@@ -308,7 +308,7 @@ install_to_nand() {  # $1 single boot or not
   echo "Warning: from this point onward, all of the changes are IRREVERSIBLE since new data will be written to emmc. Make sure you keep the power pluged in."
   echo "If anything breaks apart, you can revert your partition table with the following command, but changes to the data are IRREVERSIBLE"
   echo
-  echo "ampart --clone $SNAPSHOT_HUMAN"
+  echo "ampart --clone /dev/mmcblk0 $SNAPSHOT_HUMAN"
   echo
   echo "Ready to actually populate internal EmuELEC installation in 10 seconds..."
   sleep 10
