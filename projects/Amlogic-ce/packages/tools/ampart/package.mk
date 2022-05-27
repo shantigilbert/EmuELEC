@@ -14,6 +14,6 @@ PKG_TOOLCHAIN="make"
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/sbin
-  cp -a $PKG_DIR/installtointernal $INSTALL/usr/sbin
+  cp -a $PKG_DIR/aminstall $INSTALL/usr/sbin
   cp -a $PKG_BUILD/ampart $INSTALL/usr/sbin
 }
