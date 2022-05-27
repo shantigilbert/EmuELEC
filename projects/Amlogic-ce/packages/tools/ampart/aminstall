@@ -200,7 +200,15 @@ revert_dualboot() {
   ampart --update "$DISK_DEVICE_PATH" ^-1? ^-1? ^-1:::+"$(awk -F ':' '{print $3}' <<< $PART)": &>/dev/null || revert_and_die 'Failed to revert the partition table'
   echo "Successfully revert the partition table"
   echo "Resizing the last partition back to its old size..."
+  local PART="${PARTS[-3]}"
+  local PART_NAME="${PART%%:*}"
   resize_part "$PART_NAME"
+  local PART_PATH="/dev/$PART_NAME"
+  mount_part_cache
+  echo "Removing $PART_STORAGE_SUBDIR from internal partition $PART_NAME..."
+  local PATH_STORAGE_SUBDIR="$DIR_CACHE/$PART_STORAGE_SUBDIR"
+  [ -e "$PATH_STORAGE_SUBDIR" ] && rm -rf "$PATH_STORAGE_SUBDIR"
+  umount_and_sync
   echo "Done, your single-boot Android installation is restored"
   exit
 }
