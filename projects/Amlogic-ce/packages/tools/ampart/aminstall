@@ -300,7 +300,7 @@ can_reinstall() {
       fi
       printf 'Should we update/reinstall the internal installation? '
       if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
-        printf "(running in single-boot mode, cannot properly figure out if its a $DISTRO_NAME installation or not, you need to select Y for installation to continue if you are sure it's the stock Android on emmc) "
+        printf "(running in old-school system+data single-boot mode, cannot properly figure out if its a $DISTRO_NAME installation or not, you need to select Y for installation to continue if you are sure it's the stock Android on emmc) "
       fi
       read -p '[y/N]' CHOICE
       if [[ "$CHOICE" =~ ^[yY] ]]; then
@@ -370,7 +370,7 @@ format_or_not() {
   if [ "$ACTION_UPDATE" ]; then
     printf "Should we reformat $1 partition? This is only useful if your want a totally new installation "
     if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
-      printf "(running in single-boot mode, cannot properly figure out if its a $DISTRO_NAME installation or not, you need to select Y for installation to continue if you are sure it's the stock Android on emmc) "
+      printf "(running in old-school system+data single-boot mode, cannot properly figure out if its a $DISTRO_NAME installation or not, you need to select Y for installation to continue if you are sure it's the stock Android on emmc) "
     fi
     read -p '[y/N]' CHOICE
     if [[ "$CHOICE" =~ ^[yY] ]]; then
