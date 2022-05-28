@@ -103,7 +103,12 @@ revert_and_die() {
 }
 
 snapshot() {
-  local LOG="$(ampart --snapshot /dev/$DISK_DEVICE 2>/dev/null)" || die "Failed to read partition table"
+  if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
+    local NO_NODE='--no-node'
+  else
+    local NO_NODE=''
+  fi
+  local LOG="$(ampart --snapshot $NO_NODE $DISK_DEVICE_PATH 2>/dev/null)" || die "Failed to read partition table"
   SNAPSHOT_HUMAN="$(sed 'x;$!d' <<< $LOG)" # We can restore the part table in case something goes wrong
   SNAPSHOT="$(tail -1<<< $LOG)"
   read -r -a PARTS <<< "$SNAPSHOT"
@@ -260,7 +265,7 @@ update_table() {
     echo "Shrinking partition $PART_NAME by $PART_SYSTEM_SIZE_HUMAN..."
     resize_part "$PART_NAME" $(( ($PART_SIZE - $PART_SYSTEM_SIZE) / 1024 ))
     PART_RESIZED="$PART_NAME"
-    ampart --update "$DISK_DEVICE_PATH" ^-1:::-$PART_SYSTEM_SIZE: ^-1%:CE_STORAGE CE_FLASH::: &>/dev/null || revert_and_die
+    ampart --update "$DISK_DEVICE_PATH" ^-1:::-$PART_SYSTEM_SIZE: ^-1%:$PART_STORAGE_NAME $PART_SYSTEM_NAME::: &>/dev/null || revert_and_die
   fi
 }
 
@@ -602,6 +607,13 @@ confirm_method() {
   [ "$CHOICE" != 'yes' ] && exit 0
 }
 
+regret_pill() {
+  echo "Warning: from this point onward, all of the changes are IRREVERSIBLE since new data will be written to emmc. Make sure you keep the power pluged in."
+  echo "If anything breaks apart, you can revert your partition table with the following command, but changes to the data are IRREVERSIBLE"
+  echo
+  echo "ampart --clone $DISK_DEVICE_PATH $SNAPSHOT_HUMAN"
+  echo
+}
 main() {
   no_coreelec
   limit_device  # This is a temporary check and should be removed in the future
@@ -613,12 +625,8 @@ main() {
   check_parts
   if [[ -z "$ACTION_SINGLE_BOOT_OLDSCHOOL" && -z "$ACTION_UPDATE" ]]; then
     update_table
-    echo "Warning: from this point onward, all of the changes are IRREVERSIBLE since new data will be written to emmc. Make sure you keep the power pluged in."
-    echo "If anything breaks apart, you can revert your partition table with the following command, but changes to the data are IRREVERSIBLE"
-    echo
-    echo "ampart --clone $DISK_DEVICE_PATH $SNAPSHOT_HUMAN"
-    echo
   fi
+  regret_pill
   install_to_internal
   finish_work
 }
