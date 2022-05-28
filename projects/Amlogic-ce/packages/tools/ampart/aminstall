@@ -115,7 +115,7 @@ snapshot() {
 }
 
 no_emmc_boot() {
-  if grep -q "/dev/$PART_SYSTEM_NAME /flash" /proc/mounts; then 
+  if grep -q "/dev/$PART_SYSTEM_NAME $DIR_SYSTEM" /proc/mounts; then 
     die "ERROR: You are running $DISTRO_NAME from EMMC. Reboot to a SD/USB installation and try again."
   fi
 }
@@ -298,7 +298,11 @@ can_reinstall() {
         echo "smaller than $PART_SYSTEM_SIZE_HUMAN"
         die "Existing partition layout not suited"
       fi
-      read -p "Should we update/reinstall the internal installation? [y/N]" CHOICE
+      printf 'Should we update/reinstall the internal installation? '
+      if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
+        printf "(running in single-boot mode, cannot properly figure out if its a $DISTRO_NAME installation or not, you need to select Y for installation to continue if you are sure it's the stock Android on emmc) "
+      fi
+      read -p '[y/N]' CHOICE
       if [[ "$CHOICE" =~ ^[yY] ]]; then
         :
       else
@@ -364,7 +368,11 @@ umount_and_sync() {
 
 format_or_not() {
   if [ "$ACTION_UPDATE" ]; then
-    read -p "Should we reformat $1 partition? This is only useful if your want a totally new installation [y/N]" CHOICE
+    printf "Should we reformat $1 partition? This is only useful if your want a totally new installation "
+    if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
+      printf "(running in single-boot mode, cannot properly figure out if its a $DISTRO_NAME installation or not, you need to select Y for installation to continue if you are sure it's the stock Android on emmc) "
+    fi
+    read -p '[y/N]' CHOICE
     if [[ "$CHOICE" =~ ^[yY] ]]; then
       FORMAT='yes'
     fi
