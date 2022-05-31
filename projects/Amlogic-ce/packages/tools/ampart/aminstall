@@ -34,7 +34,8 @@ PART_ROMS_NAME='EEROMS'
 
 DIR_SYSTEM='/flash'
 DIR_STORAGE='/storage'
-DIR_ROMS="$DIR_STORAGE/roms"
+DIR_ROMS_NAME='roms'
+DIR_ROMS="$DIR_STORAGE/$DIR_ROMS_NAME"
 
 PART_SYSTEM_SIZE=$(( 2 * $SIZE_1G ))
 PART_SYSTEM_SIZE_HUMAN='2G'   # This is not used in any processing, just for reporting to users
@@ -445,14 +446,14 @@ populate_storage() {
       systemctl stop emustation.service
       echo "Copying user data..."
       if [[ "$ACTION_CREATE_ROMS" || "$ACTION_UPDATE_ROMS" ]]; then
-        rsync -qaHSx --exclude="$DIR_ROMS/*" "$DIR_STORAGE/". "$DIR_CACHE"
+        rsync -qaHSx --exclude="$DIR_ROMS_NAME/*" "$DIR_STORAGE/". "$DIR_CACHE"
       else
         rsync -qaHSx "$DIR_STORAGE/". "$DIR_CACHE"
       fi
       if [[ -z "$ACTION_CREATE_ROMS" && -z "$ACTION_UPDATE_ROMS" ]]; then
         if grep -qs " $DIR_ROMS " /proc/mounts; then 
-          mkdir -p "$DIR_CACHE/roms"
-          rsync -qaHSx "$DIR_ROMS/". "$DIR_CACHE/roms"
+          mkdir -p "$DIR_CACHE/$DIR_ROMS_NAME"
+          rsync -qaHSx "$DIR_ROMS/". "$DIR_CACHE/$DIR_ROMS_NAME"
         fi
       fi
       sync
