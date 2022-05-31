@@ -436,7 +436,7 @@ populate_storage() {
   fi
   if [ "$EMPTY" ]; then
     printf "Do you want to copy your user data under $DIR_STORAGE to internal $PART_STORAGE_NAME partition? "
-    [ "$ACTION_CREATE_ROMS" ] && printf "(This will not include all of the stuffs under $DIR_ROMS, they will be copied to $PART_ROMS_NAME partition later) "
+    [[ "$ACTION_CREATE_ROMS" || "$ACTION_UPDATE_ROMS" ]] && printf "(This will not include all of the stuffs under $DIR_ROMS, they will be copied to $PART_ROMS_NAME partition later) "
     read -p '[Y/n] ' CHOICE
     if [[ "$CHOICE" =~ ^[nN] ]]; then
       :
@@ -444,7 +444,11 @@ populate_storage() {
       echo "Stopping EmulationStation so we can make sure configs are flushed onto disk... You can run 'systemctl start emustation.service' later to bring EmulationStation back up"
       systemctl stop emustation.service
       echo "Copying user data..."
-      rsync -qaHSx "$DIR_STORAGE/". "$DIR_CACHE"
+      if [[ "$ACTION_CREATE_ROMS" || "$ACTION_UPDATE_ROMS" ]]; then
+        rsync -qaHSx --exclude="$DIR_ROMS/*" "$DIR_STORAGE/". "$DIR_CACHE"
+      else
+        rsync -qaHSx "$DIR_STORAGE/". "$DIR_CACHE"
+      fi
       if [[ -z "$ACTION_CREATE_ROMS" && -z "$ACTION_UPDATE_ROMS" ]]; then
         if grep -qs " $DIR_ROMS " /proc/mounts; then 
           mkdir -p "$DIR_CACHE/roms"
