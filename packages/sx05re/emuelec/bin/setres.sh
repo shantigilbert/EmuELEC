@@ -41,8 +41,8 @@ fi
 
 if [[ ! "$MODE" == *"x"* ]]; then
   case $MODE in
-    *p*) H=$(echo $MODE | cut -d'p' -f1) ;;
-    *i*) H=$(echo $MODE | cut -d'i' -f1) ;;
+    *p*) H=$(echo $MODE | cut -d'p' -f 1) ;;
+    *i*) H=$(echo $MODE | cut -d'i' -f 1) ;;
   esac
 fi
 
