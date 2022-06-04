@@ -104,7 +104,6 @@ case $MODE in
     ;;
 esac
 
-
 blank_buffer
 
 # shows buffer
