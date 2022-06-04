@@ -11,6 +11,9 @@
 
 # set -x #echo on
 
+# Source predefined functions and variables
+. /etc/profile
+
 # arg1, 1 = Hides, 0 = Show.
 show_buffer ()
 {
@@ -27,14 +30,19 @@ blank_buffer()
 BPP=32
 MODE=$1
 
+FILE_MODE="/sys/class/display/mode"
+if [[ -f "/sys/class/display/display0.HDMI/mode" ]]; then
+  FILE_MODE="/sys/class/display/display0.HDMI/mode"
+fi
+
 # If the current display is the same as the change just exit.
 [ -z "$MODE" ] && exit 0;
 [[ $MODE == "auto" ]] && exit 0;
 
 if [[ ! "$MODE" == *"x"* ]]; then
   case $MODE in
-    *p*) H=$(echo $MODE | cut -f'p' -f 1) ;;
-    *i*) H=$(echo $MODE | cut -f'i' -f 1) ;;
+    *p*) H=$(echo $MODE | cut -d'p' -f1) ;;
+    *i*) H=$(echo $MODE | cut -d'i' -f1) ;;
   esac
 fi
 
@@ -42,28 +50,8 @@ fi
 # hides buffer
 show_buffer 1
 
-if [[ "$EE_PROJECT" == "Rockchip" ]]; then
-  echo $MODE > /sys/class/display/display0.HDMI/mode  
-else
-  echo $MODE > /sys/class/display/mode
-fi
-
 case $MODE in
-	480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
-    W=$(($H*16/9))
-    [[ "$MODE" == "480"* ]] && W=854
-		DH=$(($H*2))
-		W1=$(($W-1))
-		H1=$(($H-1))
-		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		echo 0 > /sys/class/graphics/fb0/free_scale
-		echo 1 > /sys/class/graphics/fb0/freescale_mode
-		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
-		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
-		echo 0 > /sys/class/graphics/fb1/free_scale
-		;;
-	480cvbs)
+  480cvbs)
 		fbset -fb /dev/fb0 -g 640 480 640 960 $BPP
 		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
 		echo 0 0 639 479 > /sys/class/graphics/fb0/free_scale_axis
@@ -81,16 +69,32 @@ case $MODE in
 		echo 1 > /sys/class/graphics/fb0/freescale_mode    
     echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
+	480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
+    W=$(( $H*16/9 ))
+    [[ "$MODE" == "480"* ]] && W=854
+		DH=$(( $H*2 ))
+		W1=$(( $W-1 ))
+		H1=$(( $H-1 ))
+		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
+		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+    echo $MODE > "${FILE_MODE}"
+		echo 0 > /sys/class/graphics/fb0/free_scale
+		echo 1 > /sys/class/graphics/fb0/freescale_mode
+		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
+		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
+		echo 0 > /sys/class/graphics/fb1/free_scale
+		;;
   *x*)
-    W=$(echo $MODE | cut -d'x' -f 1)
-    H=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
-    [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
+    W=$(echo $MODE | cut -d'x' -f1)
+    H=$(echo $MODE | cut -d'x' -f2 | cut -d'p' -f1)
+    [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f2 | cut -d'i' -f1)
     if [ -n "$W" ] && [ -n "$H" ]; then
-      DH=$(($H*2))
-  		W1=$(($W-1))
-  		H1=$(($H-1))
+      DH=$(( $H*2 ))
+  		W1=$(( $W-1 ))
+  		H1=$(( $H-1 ))
   		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
   		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+      echo $MODE > "${FILE_MODE}"
   		echo 0 > /sys/class/graphics/fb0/free_scale
   		echo 1 > /sys/class/graphics/fb0/freescale_mode
   		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
@@ -100,11 +104,13 @@ case $MODE in
     ;;
 esac
 
+
 blank_buffer
 
 # shows buffer
 show_buffer 0
 
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # End of reading the video output mode and setting it for emuelec to avoid video flicking.
 # The codes can be simplified with "elseif" sentences.
