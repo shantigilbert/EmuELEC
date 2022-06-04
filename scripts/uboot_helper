@@ -283,7 +283,13 @@ devices = \
     'RK356x': { 
       'rk356x': {
         'dtb': 'rk3568-firefly-roc-pc.dtb',
-         'config' : 'rk3568-firefly-roc-pc_defconfig' 
+         'config' : 'firefly-rk3568_defconfig' 
+         },
+    },
+    'OdroidM1': { 
+      'OdroidM1': {
+        'dtb': 'rk3568-odroid-m1.dtb',
+         'config' : 'odroid_rk3568_defconfig' 
          },
     },
     'RK3288': {

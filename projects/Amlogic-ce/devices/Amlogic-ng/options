@@ -18,7 +18,9 @@
         # arm1176jz-s arm1176jzf-s cortex-a8 cortex-a9 cortex-r4
         # cortex-r4f cortex-m3 cortex-m1 xscale iwmmxt iwmmxt2 ep9312.
         #
-        TARGET_CPU="cortex-a53"
+        TARGET_KERNEL_ARCH="arm64"
+        TARGET_FLOAT="hard"
+        TARGET_CPU="cortex-a73.cortex-a53"
         TARGET_CPU_FLAGS="+crc+fp+simd"
         ;;
       arm)
@@ -142,7 +144,7 @@
   # Space separated list is supported,
   # e.g. ADDITIONAL_PACKAGES="PACKAGE1 PACKAGE2"
     ADDITIONAL_PACKAGES="u-boot-script dtc CoreELEC-Debug-Scripts inject_bl301"
-    ADDITIONAL_PACKAGES+=" nfs-utils dtb-xml megatools"
+    ADDITIONAL_PACKAGES+=" nfs-utils dtb-xml megatools ampart"
 
   # add OOTB support for IR remote
     IR_REMOTE_KEYMAPS="$IR_REMOTE_KEYMAPS odroid wetek_hub wetek_play_2 tanix"

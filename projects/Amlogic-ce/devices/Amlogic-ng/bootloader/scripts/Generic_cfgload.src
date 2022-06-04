@@ -8,7 +8,7 @@ setenv frac_rate_policy "0"
 setenv native_4k_gui "0"
 
 setenv rootopt "BOOT_IMAGE=kernel.img boot=LABEL=EMUELEC disk=LABEL=STORAGE"
-if test "${ce_on_emmc}" = "yes"; then setenv rootopt "BOOT_IMAGE=kernel.img boot=LABEL=CE_FLASH disk=FOLDER=/dev/CE_STORAGE"; fi
+if test "${ce_on_emmc}" = "yes"; then setenv rootopt "BOOT_IMAGE=kernel.img boot=/dev/system disk=/dev/data"; fi
 
 if fatload ${device} ${devnr}:${partnr} ${loadaddr} resolution.ini; then env import -t ${loadaddr} ${filesize}; fi
 if test "${allfmt_names}" != ""; then for name in ${allfmt_names}; do if test "${kernel_hdmimode}" = ${name}; then setenv vout ${name}; fi; done; fi

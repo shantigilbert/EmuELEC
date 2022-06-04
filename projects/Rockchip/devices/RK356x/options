@@ -61,7 +61,7 @@
     DRIVER_ADDONS="" #dvb-latest"
 
   # additional packages to install
-    ADDITIONAL_PACKAGES="dtc"
+    ADDITIONAL_PACKAGES="dtc:host dtc"
 
   # debug tty path
     DEBUG_TTY="/dev/ttyFIQ0"

@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
+
+ACTION!="add|change", GOTO="end"
+
+DRIVER=="ehci-pci|xhci_hcd", RUN+="/usr/bin/sh -c 'echo disabled > /sys/$devpath/power/wakeup'"
+
+LABEL="end"
