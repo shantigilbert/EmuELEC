@@ -319,11 +319,6 @@ makeinstall_target() {
     cp -p arch/$TARGET_KERNEL_ARCH/boot/dts/overlays/README $INSTALL/usr/share/bootloader/overlays
   fi
   
-  # because of `module mali: overflow in relocation type 261 val ffffffbffc05b000`
-  # TEMPORARY UNTIL WE CAN FIND A FIX - Using CE20 the old kernel seems to not work, so we use prebuild img from EmuELEC 4.3
-  tar -xf ${PKG_BUILD}/ee_kernel_3.14.tar.xz
-  cp ${PKG_BUILD}/kernel.img $INSTALL/.image/${KERNEL_TARGET}
-  
 }
 
 make_init() {
