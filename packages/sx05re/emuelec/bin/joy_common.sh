@@ -41,6 +41,10 @@ jc_get_players() {
     local DEVICE_GUID=$(jc_generate_guid ${PROC_GUID})
     [[ -z "${DEVICE_GUID}" ]] && continue
 
+    local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep "platform:Linux" | head -1)
+    echo "GC_CONFIG=$GC_CONFIG"
+    [[ -z $GC_CONFIG ]] && continue
+
     local JOY_NAME=$(echo "${DETAILS}" | grep -E "^N\: Name.*[\= ]?.*$" | cut -d "=" -f 2 | tr -d '"')
     [[ -z "$JOY_NAME" ]] && continue
 
