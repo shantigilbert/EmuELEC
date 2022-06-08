@@ -3,7 +3,7 @@
 
 PKG_NAME="ampart"
 PKG_VERSION="78cc3e0a136e81b6f10b46c2e00929c24a403c96"
-PKG_SHA256="5c9f145ed2cbe77bd34e5c4b0415d5cba43c1e1850be9cae5a8adc33829eafbd "
+PKG_SHA256="5c9f145ed2cbe77bd34e5c4b0415d5cba43c1e1850be9cae5a8adc33829eafbd"
 PKG_LICENSE="GPL3"
 PKG_SITE="https://github.com/7Ji/ampart"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
