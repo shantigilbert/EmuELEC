@@ -46,6 +46,8 @@ if [[ ! "$MODE" == *"x"* ]]; then
   esac
 fi
 
+blank_buffer
+show_buffer 0
 
 # hides buffer
 show_buffer 1
