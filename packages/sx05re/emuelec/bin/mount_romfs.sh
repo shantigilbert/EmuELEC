@@ -37,7 +37,7 @@ LOADTIME=$(get_ee_setting ee_load.delay)
 [ ! -z "${LOADTIME}" ] && sleep ${LOADTIME}
 
 # Kodi seems to set its own FB settings for 720p, so we revert them to one that work on ES, I use all resolutions just in case :)
-setres.sh
+#setres.sh
 
 # Look for samba mounts to /storage/roms, MAKE ABSOLUTELY SURE YOUR MOUNT INFORMATION IS CORRECT OR ELSE YOU WILL GET NO ROMS AT ALL!
 if  compgen -G /storage/.config/system.d/storage-roms*.mount > /dev/null; then
