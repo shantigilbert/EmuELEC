@@ -296,7 +296,7 @@ fi
 # Otherwise retrieve via normal methods.
 if [ -z "$DEFE" ]; then
   if [ -s "/storage/.config/EE_VIDEO_MODE" ]; then
-      DEFE=$(cat /storage/.config/EE_VIDEO_MODE) && set_ee_setting ee_videomode $DEFE
+      DEFE=$(cat /storage/.config/EE_VIDEO_MODE)
   fi
 fi
 
