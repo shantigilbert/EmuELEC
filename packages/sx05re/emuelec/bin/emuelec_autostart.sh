@@ -92,29 +92,6 @@ if [ -f "${BACKUPFILE}" ]; then
 	emuelec-utils ee_backup restore no > /emuelec/logs/last-restore.log 2>&1
 fi
 
-DEFE=""
-
-# If the video-mode is contained in flash config.
-if [ -s "${CONFIG_FLASH}" ]; then
-  CFG_VAL=$(get_config_value "$CONFIG_FLASH" "vout")
-  [ ! -z "$CFG_VAL" ] && DEFE="$CFG_VAL" && set_ee_setting ee_videomode $DEFE
-fi
-
-# Otherwise retrieve via normal methods.
-if [ -z "$DEFE" ]; then
-  if [ -s "/storage/.config/EE_VIDEO_MODE" ]; then
-      DEFE=$(cat /storage/.config/EE_VIDEO_MODE)
-  fi
-fi
-
-if [ -z "$DEFE" ]; then
-  # Set video mode, this has to be done before starting ES
-  DEFE=$(get_ee_setting ee_videomode)
-fi
-
-# finally we correct the FB according to video mode
-setres.sh ${DEFE}
-
 # Clean cache garbage when boot up.
 rm -rf /storage/.cache/cores/* &
 
