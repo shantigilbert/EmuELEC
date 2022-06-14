@@ -80,6 +80,8 @@ case $MODE in
 		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
 		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
     echo $MODE > "${FILE_MODE}"
+    NEW_MODE=$(cat "${FILE_MODE}")
+    [[ "$MODE" != "$NEW_MODE" ]] && exit
 		echo 0 > /sys/class/graphics/fb0/free_scale
 		echo 1 > /sys/class/graphics/fb0/freescale_mode
 		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
@@ -97,6 +99,8 @@ case $MODE in
   		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
   		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
       echo $MODE > "${FILE_MODE}"
+      NEW_MODE=$(cat "${FILE_MODE}")
+      [[ "$MODE" != "$NEW_MODE" ]] && exit
   		echo 0 > /sys/class/graphics/fb0/free_scale
   		echo 1 > /sys/class/graphics/fb0/freescale_mode
   		echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
