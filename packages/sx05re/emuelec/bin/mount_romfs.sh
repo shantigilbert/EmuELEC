@@ -2,137 +2,377 @@
 
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
+# Copyright (C) 2022-present 7Ji (https://github.com/7Ji)
 
 # Source predefined functions and variables
 . /etc/profile
 
-# fat32 is default
-ROM_FS_TYPE="vfat"
+ROMS_PART_LABEL='EEROMS'
+ROMS_PART_FS_CONFIG='/flash/ee_fstype'
+ROMS_FILE_MARK='emuelecroms'
+ROMS_DIR_NAME='roms'
+ROMS_DIR_ACTUAL="/storage/$ROMS_DIR_NAME"
+ROMS_DIR_BACKUP="${ROMS_DIR_ACTUAL}_backup"
+MEDIA_DIR='/var/media'
+ROMS_DIR_MEDIA="$MEDIA_DIR/$ROMS_PART_LABEL"
 
-ESRESTART="${1}"
-
-EXTERNALDRIVE="${2}"
-[[ -z "${EXTERNALDRIVE}" ]] && EXTERNALDRIVE=$(get_ee_setting global.externalmount)
-[[ -z "${EXTERNALDRIVE}" || "${EXTERNALDRIVE}" == "auto" ]] && EXTERNALDRIVE=""
-
-# Get EEROMS filetype
-if [ -e "/flash/ee_fstype" ]; then
-    EE_FS_TYPE=$(cat "/flash/ee_fstype")
-    
-    case $EE_FS_TYPE in
-    "ntfs"|"ext4"|"exfat")
-        ROM_FS_TYPE=${EE_FS_TYPE}
-    ;;
-    *)
-        # Failsafe
-        ROM_FS_TYPE="vfat"
-    ;;
-    esac 
+if [ "$1" == 'yes' ]; then
+  ACTION_ES_RESTART='yes'
+  echo 'Note: restart of EmulattionStation is requested, it will be restarted after roms is correctly mounted'
+else
+  ACTION_ES_RESTART=''
 fi
 
-EE_FS_TYPE=${ROM_FS_TYPE}
+if [ "$2" ]; then
+  ROMS_PART_MATCHER="$2"
+else
+  ROMS_PART_MATCHER="$(get_ee_setting global.externalmount)"
+  if [[ "$ROMS_PART_MATCHER" == 'auto' || -z "$ROMS_PART_MATCHER" ]]; then
+    echo 'Note: no specific externalmount defined in config or argument, will try to scan all possible external drives'
+    ROMS_PART_MATCHER='*'
+  fi
+fi
 
-# Wait for the time specified in ee_load.delay setting in emuelec.conf
-LOADTIME=$(get_ee_setting ee_load.delay)
-[ ! -z "${LOADTIME}" ] && sleep ${LOADTIME}
+get_mount_list() {  # MOUNTPOINT should be set/gotten by outer functions
+  local IFS=$'\n'
+  MOUNTLIST=($(printf "$(cat /proc/mounts | cut -d ' ' -f 2)")) # Use printf to convert \040, \134, etc back to ' ', '\', etc
+}
 
-# Kodi seems to set its own FB settings for 720p, so we revert them to one that work on ES, I use all resolutions just in case :)
-setres.sh
-
-# Look for samba mounts to /storage/roms, MAKE ABSOLUTELY SURE YOUR MOUNT INFORMATION IS CORRECT OR ELSE YOU WILL GET NO ROMS AT ALL!
-if  compgen -G /storage/.config/system.d/storage-roms*.mount > /dev/null; then
-
-[[ -L "/storage/roms" ]] && rm /storage/roms
-    umount /storage/roms > /dev/null 2>&1
-    mkdir -p /var/media/EEROMS
-    mount -t ${EE_FS_TYPE} "LABEL=EEROMS" /var/media/EEROMS > /dev/null 2>&1
-
-    for f in /storage/.config/system.d/storage-roms*.mount; do
-        systemctl enable $(basename ${f}) > /dev/null 2>&1
-        systemctl start $(basename ${f}) > /dev/null 2>&1
-        systemctl is-active --quiet $(basename ${f}) && echo "Mounted ${f} from samba roms"
-        
+umount_recursively() { # $1: start point, e.g. /storage. This is a replica of umount -r from standard Linux distros
+  [ -z "$1" ] && return 1
+  local TARGET="$(readlink -f "$1")"
+  [ -z "$TARGET" ] && TARGET="$(pwd -P)/$1"
+  echo "WARNING: unmounting all folders under '$TARGET' and the folder itself"
+  local IFS=$'\n'
+  UMOUNTLIST=($(printf "$(cat /proc/mounts | cut -d ' ' -f 2)" | grep ^"$TARGET"'\(/\|$\)' | sort -r ))
+  unset IFS
+  local MOUNTPOINT
+  local TRY
+  for MOUNTPOINT in "${UMOUNTLIST[@]}"; do
+    for TRY in {0..2}; do # Brute force, hope we only run once
+      sync
+      if umount -f "$MOUNTPOINT"; then
+        echo "Successfully umounted '$MOUNTPOINT'"
+        break
+      fi
+      sleep 1
     done
-else
+  done
+}
 
-# Sanity check 
-umount "/storage/roms/ports_scripts" > /dev/null 2>&1
-umount "/var/media/EEROMS/roms/ports_scripts" > /dev/null 2>&1
+move_merge() { #$1 source dir, $2 target dir
+  # e.g. move_merge /storage/roms_backup /storage/roms
+  [ -z "$1" ] || [ -z "$2" ] && return 1
+  local SOURCE="$(readlink -f "$1")"
+  local TARGET="$(readlink -f "$2")"
+  local PWD_SECURE="$(pwd -P)"
+  [ -z "$SOURCE" ] && SOURCE="$PWD_SECURE/$1"
+  [ -z "$TARGET" ] && TARGET="$PWD_SECURE/$2"
+  echo "WARNING: Merging '$SOURCE' into '$TARGET'"
+  pushd "$SOURCE" &>/dev/null
+  find . -type d -exec mkdir -p "$TARGET/"\{} \; 
+  find . -type f -exec mv \{} "$TARGET/"\{} \; 
+  find . -type d -empty -delete
+  popd &>/dev/null
+}
 
-# Lets try and find some roms on a mounted USB drive
-# name of the file we need to put in the roms folder in your USB or SDCARD
-ROMFILE="emuelecroms"
-
-# Only run the USB check if the ROMFILE does not exists in /storage/roms, this can help for manually created symlinks or network shares
-# or if you want to skip the USB rom mount for whatever reason
-if  [ ! -f "/storage/roms/$ROMFILE" ] || [ "${ESRESTART}" == "yes" ]; then
-
-# if the file is not present then we look for the file in connected USB media, and only return the first match 
-ROMSPATH="/media/*/roms/"
-[[ ! -z "${EXTERNALDRIVE}" ]] && ROMSPATH="/var/media/${EXTERNALDRIVE}/roms/"
-FULLPATHTOROMS="$(find ${ROMSPATH} -name ${ROMFILE}* -maxdepth 1 | head -n 1)"
-
-echo "Using path ${FULLPATHTOROMS}"
-
-if [[ -z "${FULLPATHTOROMS}" ]]; then
-TRY=0
-RETRY=$(get_ee_setting ee_mount.retry)
-    if [ "${RETRY}" -ge  1 ]; then
-        while [ "${TRY}" -le "${RETRY}" ] ; do
-            FULLPATHTOROMS="$(find ${ROMSPATH} -name ${ROMFILE}* -maxdepth 1 | head -n 1)"
-            [[ ! -z "${FULLPATHTOROMS}" ]] && break;
-            TRY=$((TRY+1))
-            sleep 1
-        done
+# Check if (multiple) EEROMS exists. By calling blkid we also force all drives to wake up
+scan_eeroms() {
+  BOOL_EEROMS_EXIST=''  # ='yes' if EEROMS exist, ='' if not
+  ROMS_PART_PATH=''  # The dev path for the EEROMS partition, shouldn't be empty if EEROMS_EXIST
+  ROMS_PART_TOKEN=''  # What we should use to mount eeroms, shouldn't be empty if EEROMS_EXIST, default is LABEL=EEROMS 
+  # Get EEROMS filetype, vfat is default (considering capacity, it is most likely fat32)
+  if [ -e "$ROMS_PART_FS_CONFIG" ]; then
+    ROMS_PART_FS="$(cat "$ROMS_PART_FS_CONFIG")"
+    case "$ROMS_PART_FS" in
+      'ntfs'|'ext4'|'exfat'|'vfat')
+        : # Do nothing
+      ;;
+      *) # Always downgrade to vfat in case it's messed up
+        ROMS_PART_FS="vfat"
+      ;;
+    esac 
+  else
+    ROMS_PART_FS='vfat'
+  fi
+  LINE_EEROMS="$(blkid | grep "LABEL=\"$ROMS_PART_LABEL\"")" &>/dev/null
+  if [ "$LINE_EEROMS" ]; then
+    ROMS_PART_FS_ACTUAL=''
+    roms_part_fs_from_line(){
+      ROMS_PART_FS_ACTUAL="$(sed -e 's/.* TYPE="\([a-z0-9]\+\)".*/\1/' <<< "$LINE_EEROMS")"
+    }
+    if [ "$(wc -l <<< "$LINE_EEROMS")" == 1 ]; then # Only one EEROMS, good
+      ROMS_PART_PATH="${LINE_EEROMS%%:*}"
+      roms_part_fs_from_line
+    else # Multiple EEROMS
+      LINES_EEROMS="$LINE_EEROMS"
+      while read LINE_EEROMS; do
+        LINE_PART_PATH="${LINE_EEROMS%%:*}"
+        if [ -z "$ROMS_PART_PATH" ] || grep -q "^$LINE_PART_PATH $ROMS_DIR_ACTUAL " '/proc/mounts'; then
+          # At least use the first EEROMS. We prefer the one already mounted
+          ROMS_PART_PATH="$LINE_PART_PATH"
+          roms_part_fs_from_line
+        fi
+      done <<< "$LINES_EEROMS"
     fi
-fi
+    if [ "$ROMS_PART_PATH" ]; then
+      ROMS_PART_TOKEN="$ROMS_PART_PATH"
+    else # Failsafe, this shouldn't happen
+      ROMS_PART_TOKEN="LABEL=$ROMS_PART_LABEL"
+    fi
+    case "$ROMS_PART_FS_ACTUAL" in 
+      # Update roms part fs in case it's different from the config
+      'ntfs'|'ext4'|'exfat'|'vfat')
+        if [ "$ROMS_PART_FS_ACTUAL" != "$ROMS_PART_FS" ]; then
+          echo "WARNING: Actual EEROMS partition fs type different from configured fs type ('$ROMS_PART_FS_ACTUAL' != '$ROMS_PART_FS'), fixing '$ROMS_PART_FS_CONFIG'"
+          mount -o rw,remount /flash
+          echo "$ROMS_PART_FS_ACTUAL" > "$ROMS_PART_FS_CONFIG"
+          mount -o ro,remount /flash
+        fi
+        BOOL_EEROMS_EXIST='yes'
+        ROMS_PART_FS="$ROMS_PART_FS_ACTUAL"
+      ;;
+      # If fs is not supported, then consider EEROMS does not exist
+      *)
+        echo "ERROR: EEROMS partition fs not supported ($ROMS_PART_FS_ACTUAL), please re-format it to one of the following fs: fat32, exfat, ext4, ntfs"
+      ;;
+    esac
+  fi
+}
 
-# stop samba while we search where the ROMS folder will be pointing
-systemctl stop smbd
+is_storage_roms_mounted() {
+  if mountpoint -q "$ROMS_DIR_ACTUAL" &>/dev/null; then
+    BOOL_ROMS_DIR_MOUNTED='yes'
+  else
+    BOOL_ROMS_DIR_MOUNTED=''
+  fi
+}
 
-if [[ -z "${FULLPATHTOROMS}" ]]; then
-# Can't find the ROMFILE, if the symlink exists, then remove it and mount the roms partition
-[[ -L "/storage/roms" ]] && rm /storage/roms
-# "/storage/roms" should never be a directory, move the directory instead of deleting it in case it has ROMS
-[[ ! -L "/storage/roms" && -d "/storage/roms" ]] && mv /storage/roms /storage/roms_backup
+mount_eeroms() { # $1 where to mount
+  mkdir -p "$1" &>/dev/null 
+  mount -t "$ROMS_PART_FS" "$ROMS_PART_TOKEN" "$1" &>/dev/null
+}
 
-if /usr/bin/busybox mountpoint -q /var/media/EEROMS ; then
-      umount /var/media/EEROMS > /dev/null 2>&1
-      rmdir /var/media/EEROMS > /dev/null 2>&1
-fi
-      mkdir -p /storage/roms
-      mount -t ${EE_FS_TYPE} "LABEL=EEROMS" /storage/roms
+umount_eeroms() {
+  local i
+  if [ "$ROMS_PART_PATH" ]; then
+    for i in {0..2}; do
+      if grep -q "^$ROMS_PART_PATH " '/proc/mounts' &>/dev/null; then
+        sync
+        umount -f "$ROMS_PART_PATH"
+        sleep 1
+      else
+        break
+      fi
+    done
+  else
+    sync
+    umount -f "label=$ROMS_PART_LABEL" &>/dev/null
+  fi
+}
+
+mount_eeroms_to_media() {
+  if [ "$BOOL_EEROMS_EXIST" ]; then
+    if [ -d "$ROMS_DIR_MEDIA" ]; then
+      if grep -q "^$ROMS_PART_PATH $ROMS_DIR_MEDIA " '/proc/mounts' &>/dev/null; then
+        return
+      else
+        umount_recursively "$ROMS_DIR_MEDIA" &>/dev/null
+      fi
+    fi
+    umount_eeroms
+    mount_eeroms "$ROMS_DIR_MEDIA"
+    echo "Note: Moved EEROMS partition to '$ROMS_DIR_MEDIA', you can still access your roms from there, but the roms inside it can't be scanned and used by EmulationStation"
+  fi
+}
+
+migrate_roms() { # $1 source, $2 target
+  echo "Migrating roms: '$1' => '$2'"
+  if [[ -L "$2" || ! -d "$2" ]]; then # Also easy
+    rm -f "$2"
+    mv "$1" "$2"
+  elif [ ! -e "$2" ]; then # Easy, just move it
+    mv "$1" "$2"
+  else # We need to move-merge roms_backup into roms
+    move_merge "$1" "$2"
+    rm -rf "$1" &>/dev/null
+  fi
+}
+
+backup_roms() {
+  is_storage_roms_mounted
+  if [ "$BOOL_ROMS_DIR_MOUNTED" ]; then
+    echo "ERROR: refuse to backup roms since '$ROMS_DIR_ACTUAL' is a mountpoint, we will only backup roms if '$ROMS_DIR_ACTUAL' is an folder directly stored on the underlying disk"
+    return
+  elif [ -d "$ROMS_DIR_ACTUAL" ]; then
+    echo 'Backing up roms...'
+    umount_recursively "$ROMS_DIR_ACTUAL"
+    umount_recursively "$ROMS_DIR_BACKUP" # Usually /storage/roms_backup shouldn't be mounted, but we do this in case something wrong happened
+    migrate_roms "$ROMS_DIR_ACTUAL" "$ROMS_DIR_BACKUP"
+  elif [ -e "$ROMS_DIR_ACTUAL" ]; then
+    # Don't mess up with our intended layout
+    echo "WARNING: '$ROMS_DIR_BACKUP' exists but is not a folder. No roms are backed up"
+    return
+  else
+    echo 'Note: no roms need to be backed up'
+  fi
+}
+
+restore_roms() {
+  is_storage_roms_mounted
+  if [ "$BOOL_ROMS_DIR_MOUNTED" ]; then
+    echo "ERROR: refuse to restore roms since '$ROMS_DIR_ACTUAL' is a mountpoint, we will only restore roms if '$ROMS_DIR_ACTUAL' is an folder directly stored on the underlying disk"
+    return 1
+  elif [ -d "$ROMS_DIR_BACKUP" ]; then
+    echo 'Restoring roms...'
+    umount_recursively "$ROMS_DIR_ACTUAL"
+    umount_recursively "$ROMS_DIR_BACKUP" # Usually /storage/roms_backup shouldn't be mounted, but we do this in case something wrong happened
+    migrate_roms "$ROMS_DIR_BACKUP" "$ROMS_DIR_ACTUAL"
+  elif [ -e "$ROMS_DIR_BACKUP" ]; then
+    # Don't mess up with our intended layout
+    echo "WARNING: '$ROMS_DIR_BACKUP' exists but is not a folder. No roms are restored"
+    return 1
+  else
+    echo 'Note: no roms need to be restored'
+  fi
+}
+
+prepare_scan() {
+  echo "Preparing to scan for roms mounts..."
+  echo "Stopping samba to avoid I/O conflicts..."
+  systemctl stop smbd.service # Stop samba to avoid I/O conflicts
+  LOAD_DELAY="$(get_ee_setting ee_load.delay)" # The delay is waited before we check for EEROMS
+  [ "$LOAD_DELAY" ] && sleep "$LOAD_DELAY"
+  scan_eeroms
+}
+
+finish_scan() {
+  echo "Finished scanning for roms mounts..."
+  echo "Bringing back samba..."
+  systemctl start smbd.service
+}
+
+if compgen -G /storage/.config/system.d/storage-roms*.mount &>/dev/null; then
+  prepare_scan
+  echo 'Note: mount unit starts with storage-roms found under /storage/.config/system.d, we will only try to mount these units and will not scan for external drives'
+  # User defined mount units, most likely samba mounts
+  BOOL_DAEMON_RELOADED=''
+  SYSTEMD_UNIT_NAME='storage-roms.mount'
+  SYSTEMD_UNIT_PATH="/storage/.config/system.d/$SYSTEMD_UNIT_NAME"
+  mount_samba_and_notice() {
+    if [ -z "$BOOL_DAEMON_RELOAD" ]; then # Only reload once, to save time
+      BOOL_DAEMON_RELOADED='yes'
+      systemctl daemon-reload
+    fi
+    systemctl enable --now "$SYSTEMD_UNIT_NAME" &>/dev/null
+    systemctl is-active --quiet "$SYSTEMD_UNIT_NAME" && echo "Mounted '$SYSTEMD_UNIT_PATH' from samba roms"
+  }
+  # Only try to mount /storage/roms according to systemd if it's not mounted yet
+  if [ -f "$SYSTEMD_UNIT_PATH" ]; then
+    echo "Note: Systemd mount unit '$SYSTEMD_UNIT_NAME' found, will try to mount the whole roms folder"
+    # backup_roms No need to backup roms
+    if ! systemctl is-active --quiet "$SYSTEMD_UNIT_NAME" || [ "FragmentPath=$SYSTEMD_UNIT_PATH" != "$(systemctl show "$SYSTEMD_UNIT_NAME" | grep ^FragmentPath= )" ] ; then
+      umount_recursively "$ROMS_DIR_ACTUAL"
+      mount_eeroms_to_media
+      if [ -L "$ROMS_DIR_ACTUAL" ]; then
+        rm -f "$ROMS_DIR_ACTUAL"
+        mkdir -p "$ROMS_DIR_ACTUAL"
+      fi
+      mount_samba_and_notice
+    else
+      echo "No need to mount '$SYSTEMD_UNIT_NAME' as it's already mounted"
+    fi
+  fi
+  is_storage_roms_mounted
+  [ -z "$BOOL_ROMS_DIR_MOUNTED" ] && restore_roms # If for some wierd reasons rom can't be mounted from the systemd unit, then at least restore backed up roms
+  IFS=$'\n'
+  SYSTEMD_UNIT_PATHS=($(ls -d /storage/.config/system.d/storage-roms-*.mount 2>/dev/null | sort))
+  unset IFS
+  if [ "${#SYSTEMD_UNIT_PATHS[@]}" -gt 0 ]; then # As long as the first element is not empty, the array is not empty
+    echo "Note: Multiple systemd mount units for folders under '$ROMS_DIR_ACTUAL' found, will try to mount the roms folders for specific systems"
+    for SYSTEMD_UNIT_PATH in "${SYSTEMD_UNIT_PATHS[@]}"; do
+      [ ! -f "$SYSTEMD_UNIT_PATH" ] && continue
+      # Note: systemd unit names need specific escape rules, which should be done by systemd-escape, and I really don't think users would make themselves suffer and create units with name like that
+      SYSTEMD_UNIT_NAME="$(basename $SYSTEMD_UNIT_PATH)"
+      if ! systemctl is-active --quiet "$SYSTEMD_UNIT_NAME" || [ "FragmentPath=$SYSTEMD_UNIT_PATH" != "$(systemctl show "$SYSTEMD_UNIT_NAME" | grep ^FragmentPath= )" ]; then # Either unit not read yet, or unit updated. We don't support escaped names nor paths, since all roms paths can be used without escaping (So if there's a unit with escaped name, it's definitely not a roms system mount)
+        MOUNTPOINT="$(grep ^Where= "$SYSTEMD_UNIT_PATH")"
+        umount_recursively "${MOUNTPOINT:6}"
+        mount_samba_and_notice
+      else
+        echo "No need to mount '$SYSTEMD_UNIT_NAME' as it's already mounted"
+      fi
+    done
+  fi
+  finish_scan
+elif [[ ! -f "$ROMS_DIR_ACTUAL/$ROMS_FILE_MARK" || "$ACTION_ES_RESTART" ]]; then
+  prepare_scan
+  echo "Note: current '$ROMS_DIR_ACTUAL' is not linked from external drives or es_restart requested, we'll try to scan for external roms"
+  find_roms_mark() {
+    echo "Finding roms mark ($ROMS_FILE_MARK)..."
+    if [ "$ROMS_PART_MATCHER" == '*' ]; then
+      ROMS_PATH_MARK="$(find "$MEDIA_DIR/"*"/$ROMS_DIR_NAME" -maxdepth 1 -name $ROMS_FILE_MARK* 2>/dev/null | head -n 1)" # Even we said the mark file should have no extension, but we still accept that, just in case
+    else
+      ROMS_PATH_MARK="$(find "$MEDIA_DIR/$ROMS_PART_MATCHER/$ROMS_DIR_NAME" -maxdepth 1 -name $ROMS_FILE_MARK* 2>/dev/null | head -n 1)"
+    fi
+  }
+  find_roms_mark
+  if [ -z "$ROMS_PATH_MARK" ]; then
+    TRY=0
+    RETRY="$(get_ee_setting ee_mount.retry)"
+    if [ "$RETRY" -ge 1 ]; then
+      while [ "$TRY" -le "$RETRY" ] ; do
+        echo "WARNING: Roms mark not found ($ROMS_FILE_MARK), retrying ($TRY/$RETRY)"
+        find_roms_mark
+        [ "$EE_ROMS_PATH_MARK" ] && break
+        let TRY++
+        sleep 1
+      done
+    fi
+  fi
+  if [ -z "$ROMS_PATH_MARK" ]; then
+    echo "WARNING: No external mount mark found ($ROMS_FILE_MARK), make sure you set it correctly"
+    # No external roms could be found, if EEROMS exists, make sure it's mounted, otherwise restore backed up roms if possible
+    is_storage_roms_mounted
+    if [[ "$BOOL_EEROMS_EXIST" && -z "$BOOL_ROMS_DIR_MOUNTED" ]]; then
+      echo "Note: Remounting EEROMS to '$ROMS_DIR_ACTUAL'"
+      umount_eeroms 
+      mount_eeroms "$ROMS_DIR_ACTUAL"
+    fi
+    is_storage_roms_mounted
+    if [ -z "$BOOL_ROMS_DIR_MOUNTED" ]; then
+      echo "WARNING: '$ROMS_DIR_ACTUAL' is not a mountpoint, restoring backed up roms if possible"
+      restore_roms  # If for some wierd reason EEROMS can't be mounted, then at least restore backed up roms
+    fi
+  else
+    echo "Note: External mount mark found ($ROMS_PATH_MARK)"
+    if [[ -f "$ROMS_DIR_ACTUAL/$ROMS_FILE_MARK" && "$(readlink -f "$ROMS_DIR_ACTUAL/$ROMS_FILE_MARK")" == "$(readlink -f "$ROMS_PATH_MARK")" ]]; then
+      echo 'Note: This is the same external drive as we are using, no need to update'
+    else
+      echo "Trying to create a symbol link at '$ROMS_DIR_ACTUAL' to it"
+      umount_recursively "$ROMS_DIR_ACTUAL"
+      mount_eeroms_to_media
+      backup_roms
+      ROMS_DIR_EXTERNAL="$(dirname "$ROMS_PATH_MARK")"
+      echo "Using '$ROMS_DIR_EXTERNAL' as the external roms dir"
+      if [ ! -d "$ROMS_DIR_EXTERNAL" ]; then
+        rm -rf "$ROMS_DIR_EXTERNAL" &>/dev/null
+        mkdir -p "$ROMS_DIR_EXTERNAL"
+      fi
+      rm -rf "$ROMS_DIR_ACTUAL" &>/dev/null
+      if ln -sTf "$ROMS_DIR_EXTERNAL" "$ROMS_DIR_ACTUAL" &>/dev/null; then
+        echo "Successfully create symbol link '$ROMS_DIR_ACTUAL' pointing to '$ROMS_DIR_EXTERNAL'"
+      else
+        echo "WARNING: Failed to create symbol link, restoring backed up roms if possible"
+        restore_roms
+      fi
+    fi
+  fi
+  finish_scan
 else
-# unmount the roms partition and make a symlink to the external media, mount the roms partition in media
-
-if /usr/bin/busybox mountpoint -q /storage/roms ; then
-    umount /storage/roms > /dev/null 2>&1
-    rmdir /storage/roms > /dev/null 2>&1
+  echo 'Note: no need to scan external roms, mount_romfs skipped'
 fi
-    umount /var/media/EEROMS > /dev/null 2>&1
-    mkdir -p /var/media/EEROMS
-    mount -t ${EE_FS_TYPE} "LABEL=EEROMS" /var/media/EEROMS
 
-# we strip the name of the file.
-  PATHTOROMS=${FULLPATHTOROMS%$ROMFILE}
-
-# this might be overkill but we need to double check that there is no symlink to roms folder already
-# only delete the symlink if the ROMFILE is found.
-# this could be bad if you manually create the symlink, but if you do that, then you know how to edit this file :) 
-# but we need to find a better way
-# "/storage/roms" should never be a directory, move the directory instead of deleting it in case it has ROMS
-       
-[[ -L "/storage/roms" ]] && rm /storage/roms
-[[ ! -L "/storage/roms" && -d "/storage/roms" ]] && mv /storage/roms /storage/roms_backup
-
-# All the sanity checks have passed, we have a ROMFILE so we create the symlink to the roms in our USB
-## this could potentially be a mount bind, but for now symlink helps us identify if its external or not.
-    ln -sTf "$PATHTOROMS" /storage/roms
-  fi 
-fi 
-
-fi # samba 
-
-systemctl start smbd
-
-[[ "${ESRESTART}" == "yes" ]] && systemctl restart emustation
+if [ "$ACTION_ES_RESTART" ]; then
+  echo 'Restarting EmulationStation as requested...'
+  systemctl restart emustation.service
+fi
