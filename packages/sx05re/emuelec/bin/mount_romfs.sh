@@ -166,7 +166,7 @@ umount_eeroms() {
       MOUNTPOINT="$(printf $MOUNTPOINT_RAW)"
       if [ "$MOUNTPOINT" != "$UPDATE_DIR" ]; then # Don't umount /storage/.update
         for i in {0..2}; do
-          if grep -q "^$ROMS_PARTPATH $MOUNTPOINT_RAW " '/proc/mounts' &>/dev/null; then
+          if grep -q "^$ROMS_PART_PATH $MOUNTPOINT_RAW " '/proc/mounts' &>/dev/null; then
             sync
             umount -f "$MOUNTPOINT" && break
           else
