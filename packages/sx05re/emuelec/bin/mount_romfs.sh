@@ -12,6 +12,7 @@ ROMS_PART_FS_CONFIG='/flash/ee_fstype'
 ROMS_FILE_MARK='emuelecroms'
 ROMS_DIR_NAME='roms'
 ROMS_DIR_ACTUAL="/storage/$ROMS_DIR_NAME"
+UPDATE_DIR='/storage/.update'
 ROMS_DIR_BACKUP="${ROMS_DIR_ACTUAL}_backup"
 MEDIA_DIR='/var/media'
 ROMS_DIR_MEDIA="$MEDIA_DIR/$ROMS_PART_LABEL"
@@ -157,20 +158,24 @@ mount_eeroms() { # $1 where to mount
 }
 
 umount_eeroms() {
-  local i
   if [ "$ROMS_PART_PATH" ]; then
-    for i in {0..2}; do
-      if grep -q "^$ROMS_PART_PATH " '/proc/mounts' &>/dev/null; then
-        sync
-        umount -f "$ROMS_PART_PATH"
-        sleep 1
-      else
-        break
+    local i
+    local MOUNTPOINT_RAW
+    local MOUNTPOINT
+    for MOUNTPOINT_RAW in $(grep "^$ROMS_PART_PATH " '/proc/mounts' | cut -d ' ' -f 2); do
+      MOUNTPOINT="$(printf $MOUNTPOINT_RAW)"
+      if [ "$MOUNTPOINT" != "$UPDATE_DIR" ]; then # Don't umount /storage/.update
+        for i in {0..2}; do
+          if grep -q "^$ROMS_PARTPATH $MOUNTPOINT_RAW " '/proc/mounts' &>/dev/null; then
+            sync
+            umount -f "$MOUNTPOINT" && break
+          else
+            break
+          fi
+          sleep 1
+        done
       fi
     done
-  else
-    sync
-    umount -f "label=$ROMS_PART_LABEL" &>/dev/null
   fi
 }
 
