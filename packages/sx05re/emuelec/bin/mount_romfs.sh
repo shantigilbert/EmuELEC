@@ -283,17 +283,13 @@ if compgen -G /storage/.config/system.d/storage-roms*.mount &>/dev/null; then
   if [ -f "$SYSTEMD_UNIT_PATH" ]; then
     echo "Note: Systemd mount unit '$SYSTEMD_UNIT_NAME' found, will try to mount the whole roms folder"
     # backup_roms No need to backup roms
-    if ! systemctl is-active --quiet "$SYSTEMD_UNIT_NAME" || [ "FragmentPath=$SYSTEMD_UNIT_PATH" != "$(systemctl show "$SYSTEMD_UNIT_NAME" | grep ^FragmentPath= )" ] ; then
-      umount_recursively "$ROMS_DIR_ACTUAL"
-      mount_eeroms_to_media
-      if [[ -L "$ROMS_DIR_ACTUAL" || ! -d "$ROMS_DIR_ACTUAL" ]]; then
-        rm -f "$ROMS_DIR_ACTUAL" &>/dev/null
-        mkdir -p "$ROMS_DIR_ACTUAL"
-      fi
-      mount_samba_and_notice
-    else
-      echo "No need to mount '$SYSTEMD_UNIT_NAME' as it's already mounted"
+    umount_recursively "$ROMS_DIR_ACTUAL"
+    mount_eeroms_to_media
+    if [[ -L "$ROMS_DIR_ACTUAL" || ! -d "$ROMS_DIR_ACTUAL" ]]; then
+      rm -f "$ROMS_DIR_ACTUAL" &>/dev/null
+      mkdir -p "$ROMS_DIR_ACTUAL"
     fi
+    mount_samba_and_notice
   fi
   is_storage_roms_mounted || restore_roms # If for some wierd reasons rom can't be mounted from the systemd unit, then at least restore backed up roms
   IFS=$'\n'
@@ -305,13 +301,9 @@ if compgen -G /storage/.config/system.d/storage-roms*.mount &>/dev/null; then
       [ ! -f "$SYSTEMD_UNIT_PATH" ] && continue
       # Note: systemd unit names need specific escape rules, which should be done by systemd-escape, and I really don't think users would make themselves suffer and create units with name like that
       SYSTEMD_UNIT_NAME="$(basename $SYSTEMD_UNIT_PATH)"
-      if ! systemctl is-active --quiet "$SYSTEMD_UNIT_NAME" || [ "FragmentPath=$SYSTEMD_UNIT_PATH" != "$(systemctl show "$SYSTEMD_UNIT_NAME" | grep ^FragmentPath= )" ]; then # Either unit not read yet, or unit updated. We don't support escaped names nor paths, since all roms paths can be used without escaping (So if there's a unit with escaped name, it's definitely not a roms system mount)
-        MOUNTPOINT="$(grep ^Where= "$SYSTEMD_UNIT_PATH")"
-        umount_recursively "${MOUNTPOINT:6}"
-        mount_samba_and_notice
-      else
-        echo "No need to mount '$SYSTEMD_UNIT_NAME' as it's already mounted"
-      fi
+      MOUNTPOINT="$(grep ^Where= "$SYSTEMD_UNIT_PATH")"
+      umount_recursively "${MOUNTPOINT:6}"
+      mount_samba_and_notice
     done
   fi
   finish_scan
