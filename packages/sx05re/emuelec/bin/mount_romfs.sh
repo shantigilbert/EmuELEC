@@ -42,7 +42,7 @@ umount_recursively() { # $1: start point, e.g. /storage. This is a replica of um
   [ -z "$1" ] && return 1
   local TARGET="$(readlink -f "$1")"
   [ -z "$TARGET" ] && TARGET="$(pwd -P)/$1"
-  echo "WARNING: unmounting all folders under '$TARGET' and the folder itself"
+  echo "WARNING: unmounting '$TARGET', recursively"
   local IFS=$'\n'
   UMOUNTLIST=($(printf "$(cat /proc/mounts | cut -d ' ' -f 2)" | grep ^"$TARGET"'\(/\|$\)' | sort -r ))
   unset IFS
@@ -142,14 +142,17 @@ scan_eeroms() {
 
 is_storage_roms_mounted() {
   if mountpoint -q "$ROMS_DIR_ACTUAL" &>/dev/null; then
-    BOOL_ROMS_DIR_MOUNTED='yes'
+    return 0
   else
-    BOOL_ROMS_DIR_MOUNTED=''
+    return 1
   fi
 }
 
 mount_eeroms() { # $1 where to mount
-  mkdir -p "$1" &>/dev/null 
+  if [[ -L "$1" || ! -d "$1" ]]; then
+    rm -f "$1" &>/dev/null
+    mkdir -p "$1" &>/dev/null 
+  fi
   mount -t "$ROMS_PART_FS" "$ROMS_PART_TOKEN" "$1" &>/dev/null
 }
 
@@ -188,10 +191,11 @@ mount_eeroms_to_media() {
 
 migrate_roms() { # $1 source, $2 target
   echo "Migrating roms: '$1' => '$2'"
-  if [[ -L "$2" || ! -d "$2" ]]; then # Also easy
-    rm -f "$2"
-    mv "$1" "$2"
-  elif [ ! -e "$2" ]; then # Easy, just move it
+  if mountpoint -q "$1" &>/dev/null || mountpoint -q "$2" &>/dev/null; then
+    echo 'ERROR: Refuse to migrate as one of the source/target folder is a mountpoint!'
+    return
+  elif [[ -L "$2" || ! -d "$2" ]]; then # Easy, just move it
+    rm -f "$2" &>dev/null
     mv "$1" "$2"
   else # We need to move-merge roms_backup into roms
     move_merge "$1" "$2"
@@ -200,33 +204,33 @@ migrate_roms() { # $1 source, $2 target
 }
 
 backup_roms() {
-  is_storage_roms_mounted
-  if [ "$BOOL_ROMS_DIR_MOUNTED" ]; then
+  echo 'Preparing to backup roms...'
+  umount_recursively "$ROMS_DIR_ACTUAL"
+  umount_recursively "$ROMS_DIR_BACKUP" # Usually /storage/roms_backup shouldn't be mounted, but we do this in case something wrong happened
+  if is_storage_roms_mounted; then
     echo "ERROR: refuse to backup roms since '$ROMS_DIR_ACTUAL' is a mountpoint, we will only backup roms if '$ROMS_DIR_ACTUAL' is an folder directly stored on the underlying disk"
-    return
+    return 1
   elif [ -d "$ROMS_DIR_ACTUAL" ]; then
     echo 'Backing up roms...'
-    umount_recursively "$ROMS_DIR_ACTUAL"
-    umount_recursively "$ROMS_DIR_BACKUP" # Usually /storage/roms_backup shouldn't be mounted, but we do this in case something wrong happened
     migrate_roms "$ROMS_DIR_ACTUAL" "$ROMS_DIR_BACKUP"
   elif [ -e "$ROMS_DIR_ACTUAL" ]; then
     # Don't mess up with our intended layout
     echo "WARNING: '$ROMS_DIR_BACKUP' exists but is not a folder. No roms are backed up"
-    return
+    return 1
   else
     echo 'Note: no roms need to be backed up'
   fi
 }
 
 restore_roms() {
-  is_storage_roms_mounted
-  if [ "$BOOL_ROMS_DIR_MOUNTED" ]; then
+  echo 'Preparing to restore roms...'
+  umount_recursively "$ROMS_DIR_ACTUAL"
+  umount_recursively "$ROMS_DIR_BACKUP" # Usually /storage/roms_backup shouldn't be mounted, but we do this in case something wrong happened
+  if is_storage_roms_mounted; then
     echo "ERROR: refuse to restore roms since '$ROMS_DIR_ACTUAL' is a mountpoint, we will only restore roms if '$ROMS_DIR_ACTUAL' is an folder directly stored on the underlying disk"
     return 1
   elif [ -d "$ROMS_DIR_BACKUP" ]; then
     echo 'Restoring roms...'
-    umount_recursively "$ROMS_DIR_ACTUAL"
-    umount_recursively "$ROMS_DIR_BACKUP" # Usually /storage/roms_backup shouldn't be mounted, but we do this in case something wrong happened
     migrate_roms "$ROMS_DIR_BACKUP" "$ROMS_DIR_ACTUAL"
   elif [ -e "$ROMS_DIR_BACKUP" ]; then
     # Don't mess up with our intended layout
@@ -274,8 +278,8 @@ if compgen -G /storage/.config/system.d/storage-roms*.mount &>/dev/null; then
     if ! systemctl is-active --quiet "$SYSTEMD_UNIT_NAME" || [ "FragmentPath=$SYSTEMD_UNIT_PATH" != "$(systemctl show "$SYSTEMD_UNIT_NAME" | grep ^FragmentPath= )" ] ; then
       umount_recursively "$ROMS_DIR_ACTUAL"
       mount_eeroms_to_media
-      if [ -L "$ROMS_DIR_ACTUAL" ]; then
-        rm -f "$ROMS_DIR_ACTUAL"
+      if [[ -L "$ROMS_DIR_ACTUAL" || ! -d "$ROMS_DIR_ACTUAL" ]]; then
+        rm -f "$ROMS_DIR_ACTUAL" &>/dev/null
         mkdir -p "$ROMS_DIR_ACTUAL"
       fi
       mount_samba_and_notice
@@ -283,12 +287,11 @@ if compgen -G /storage/.config/system.d/storage-roms*.mount &>/dev/null; then
       echo "No need to mount '$SYSTEMD_UNIT_NAME' as it's already mounted"
     fi
   fi
-  is_storage_roms_mounted
-  [ -z "$BOOL_ROMS_DIR_MOUNTED" ] && restore_roms # If for some wierd reasons rom can't be mounted from the systemd unit, then at least restore backed up roms
+  is_storage_roms_mounted || restore_roms # If for some wierd reasons rom can't be mounted from the systemd unit, then at least restore backed up roms
   IFS=$'\n'
   SYSTEMD_UNIT_PATHS=($(ls -d /storage/.config/system.d/storage-roms-*.mount 2>/dev/null | sort))
   unset IFS
-  if [ "${#SYSTEMD_UNIT_PATHS[@]}" -gt 0 ]; then # As long as the first element is not empty, the array is not empty
+  if [ "${#SYSTEMD_UNIT_PATHS[@]}" -gt 0 ]; then
     echo "Note: Multiple systemd mount units for folders under '$ROMS_DIR_ACTUAL' found, will try to mount the roms folders for specific systems"
     for SYSTEMD_UNIT_PATH in "${SYSTEMD_UNIT_PATHS[@]}"; do
       [ ! -f "$SYSTEMD_UNIT_PATH" ] && continue
@@ -309,10 +312,14 @@ elif [[ ! -f "$ROMS_DIR_ACTUAL/$ROMS_FILE_MARK" || "$ACTION_ES_RESTART" ]]; then
   echo "Note: current '$ROMS_DIR_ACTUAL' is not linked from external drives or es_restart requested, we'll try to scan for external roms"
   find_roms_mark() {
     echo "Finding roms mark ($ROMS_FILE_MARK)..."
-    if [ "$ROMS_PART_MATCHER" == '*' ]; then
-      ROMS_PATH_MARK="$(find "$MEDIA_DIR/"*"/$ROMS_DIR_NAME" -maxdepth 1 -name $ROMS_FILE_MARK* 2>/dev/null | head -n 1)" # Even we said the mark file should have no extension, but we still accept that, just in case
+    if ! compgen -G "$MEDIA_DIR/$ROMS_PART_MATCHER/$ROMS_DIR_NAME" &>/dev/null; then
+      echo "ERROR: no folders under '$MEDIA_DIR' match the matcher '$ROMS_PART_MATCHER' and contain roms folder, maybe you should adjust some settings?"
+      ROMS_PATH_MARK=''
+      return 1
+    elif [ "$ROMS_PART_MATCHER" == '*' ]; then
+      ROMS_PATH_MARK="$(find "$MEDIA_DIR/"*"/$ROMS_DIR_NAME" -maxdepth 1 -name $ROMS_FILE_MARK* -not -path "$MEDIA_DIR/$ROMS_PART_LABEL/*" 2>/dev/null | head -n 1)" # Even we said the mark file should have no extension, but we still accept that, just in case
     else
-      ROMS_PATH_MARK="$(find "$MEDIA_DIR/$ROMS_PART_MATCHER/$ROMS_DIR_NAME" -maxdepth 1 -name $ROMS_FILE_MARK* 2>/dev/null | head -n 1)"
+      ROMS_PATH_MARK="$(find "$MEDIA_DIR/$ROMS_PART_MATCHER/$ROMS_DIR_NAME" -maxdepth 1 -name $ROMS_FILE_MARK* -not -path "$MEDIA_DIR/$ROMS_PART_LABEL/*" 2>/dev/null | head -n 1)"
     fi
   }
   find_roms_mark
@@ -330,16 +337,16 @@ elif [[ ! -f "$ROMS_DIR_ACTUAL/$ROMS_FILE_MARK" || "$ACTION_ES_RESTART" ]]; then
     fi
   fi
   if [ -z "$ROMS_PATH_MARK" ]; then
-    echo "WARNING: No external mount mark found ($ROMS_FILE_MARK), make sure you set it correctly"
+    echo "WARNING: No external mount mark found ($ROMS_FILE_MARK), if you want to use external roms, make sure you set it correctly"
     # No external roms could be found, if EEROMS exists, make sure it's mounted, otherwise restore backed up roms if possible
-    is_storage_roms_mounted
-    if [[ "$BOOL_EEROMS_EXIST" && -z "$BOOL_ROMS_DIR_MOUNTED" ]]; then
-      echo "Note: Remounting EEROMS to '$ROMS_DIR_ACTUAL'"
-      umount_eeroms 
-      mount_eeroms "$ROMS_DIR_ACTUAL"
+    if [ "$BOOL_EEROMS_EXIST" ]; then
+      if ! is_storage_roms_mounted; then
+        echo "Note: Remounting EEROMS to '$ROMS_DIR_ACTUAL'"
+        umount_eeroms 
+        mount_eeroms "$ROMS_DIR_ACTUAL"
+      fi
     fi
-    is_storage_roms_mounted
-    if [ -z "$BOOL_ROMS_DIR_MOUNTED" ]; then
+    if ! is_storage_roms_mounted; then
       echo "WARNING: '$ROMS_DIR_ACTUAL' is not a mountpoint, checking if we should restore backed up roms"
       restore_roms  # If for some wierd reason EEROMS can't be mounted, then at least restore backed up roms
     fi
