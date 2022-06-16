@@ -259,16 +259,20 @@ PWDFILE="/flash/ee_defaults.txt"
 [ -f "${PWDFILE}" ] && check_pwd ${PWDFILE}
 
 # Find and mount the ports directory 
-[[ -L "/storage/roms" ]] && LINK=$(readlink /storage/roms) || LINK="/storage/roms/"
+if [ -L "/storage/roms" ]; then
+    LINK=$(readlink /storage/roms)
+else
+    LINK="/storage/roms"
+fi
 
 # Just in case
-mkdir -p "${LINK}ports_scripts"
+mkdir -p "${LINK}/ports_scripts"
 mkdir -p "/emuelec/ports"
 mkdir -p "/storage/.tmp/ports-workdir"
 umount "/storage/roms/ports_scripts" > /dev/null 2>&1
 umount "/var/media/EEROMS/roms/ports_scripts" > /dev/null 2>&1
 
-mount -t overlay ports -o lowerdir=/usr/bin/ports,upperdir=/emuelec/ports,workdir=/storage/.tmp/ports-workdir "${LINK}ports_scripts"
+mount -t overlay ports -o lowerdir=/usr/bin/ports,upperdir=/emuelec/ports,workdir=/storage/.tmp/ports-workdir "${LINK}/ports_scripts"
 
 # wait for all the subshells to finish
 wait
