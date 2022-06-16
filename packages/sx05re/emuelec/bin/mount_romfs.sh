@@ -375,6 +375,8 @@ else
   echo 'Note: no need to scan external roms, mount_romfs skipped'
 fi
 
+find "$ROMS_DIR_BACKUP" -maxdepth 0 -empty -exec rm -rf \{} \;
+
 if [ "$ACTION_ES_RESTART" ]; then
   echo 'Restarting EmulationStation as requested...'
   systemctl restart emustation.service
