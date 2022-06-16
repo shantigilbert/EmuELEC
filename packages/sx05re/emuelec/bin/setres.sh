@@ -46,9 +46,6 @@ if [[ ! "$MODE" == *"x"* ]]; then
   esac
 fi
 
-blank_buffer
-show_buffer 0
-
 # hides buffer
 show_buffer 1
 
@@ -74,11 +71,11 @@ case $MODE in
 	480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
     W=$(( $H*16/9 ))
     [[ "$MODE" == "480"* ]] && W=640
-		DH=$(($H*2))
+		DH=$(($H*4))
 		W1=$(($W-1))
 		H1=$(($H-1))
 		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+		fbset -fb /dev/fb1 -g $W $H $W $H $BPP
     echo $MODE > "${FILE_MODE}"
     NEW_MODE=$(cat "${FILE_MODE}")
     [[ "$MODE" != "$NEW_MODE" ]] && exit
@@ -93,11 +90,11 @@ case $MODE in
     H=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
     [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
     if [ -n "$W" ] && [ -n "$H" ]; then
-      DH=$(($H*2))
+      DH=$(($H*4))
   		W1=$(($W-1))
   		H1=$(($H-1))
   		fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-  		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+  		fbset -fb /dev/fb1 -g $W $H $W $H $BPP
       echo $MODE > "${FILE_MODE}"
       NEW_MODE=$(cat "${FILE_MODE}")
       [[ "$MODE" != "$NEW_MODE" ]] && exit
