@@ -176,6 +176,9 @@ umount_eeroms() {
         done
       fi
     done
+  else
+    echo 'ERROR: Failed to find valid EEROMS partition, impossible to umount it'
+    return 1
   fi
 }
 
