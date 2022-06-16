@@ -317,7 +317,7 @@ elif [[ ! -f "$ROMS_DIR_ACTUAL/$ROMS_FILE_MARK" || "$ACTION_ES_RESTART" ]]; then
   }
   find_roms_mark
   if [ -z "$ROMS_PATH_MARK" ]; then
-    TRY=0
+    TRY=1
     RETRY="$(get_ee_setting ee_mount.retry)"
     if [ "$RETRY" -ge 1 ]; then
       while [ "$TRY" -le "$RETRY" ] ; do
@@ -340,7 +340,7 @@ elif [[ ! -f "$ROMS_DIR_ACTUAL/$ROMS_FILE_MARK" || "$ACTION_ES_RESTART" ]]; then
     fi
     is_storage_roms_mounted
     if [ -z "$BOOL_ROMS_DIR_MOUNTED" ]; then
-      echo "WARNING: '$ROMS_DIR_ACTUAL' is not a mountpoint, restoring backed up roms if possible"
+      echo "WARNING: '$ROMS_DIR_ACTUAL' is not a mountpoint, checking if we should restore backed up roms"
       restore_roms  # If for some wierd reason EEROMS can't be mounted, then at least restore backed up roms
     fi
   else
@@ -354,10 +354,6 @@ elif [[ ! -f "$ROMS_DIR_ACTUAL/$ROMS_FILE_MARK" || "$ACTION_ES_RESTART" ]]; then
       backup_roms
       ROMS_DIR_EXTERNAL="$(dirname "$ROMS_PATH_MARK")"
       echo "Using '$ROMS_DIR_EXTERNAL' as the external roms dir"
-      if [ ! -d "$ROMS_DIR_EXTERNAL" ]; then
-        rm -rf "$ROMS_DIR_EXTERNAL" &>/dev/null
-        mkdir -p "$ROMS_DIR_EXTERNAL"
-      fi
       rm -rf "$ROMS_DIR_ACTUAL" &>/dev/null
       if ln -sTf "$ROMS_DIR_EXTERNAL" "$ROMS_DIR_ACTUAL" &>/dev/null; then
         echo "Successfully create symbol link '$ROMS_DIR_ACTUAL' pointing to '$ROMS_DIR_EXTERNAL'"
