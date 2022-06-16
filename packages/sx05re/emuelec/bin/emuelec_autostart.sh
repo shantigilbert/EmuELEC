@@ -110,6 +110,8 @@ case "$DEFE" in
 	;;
 esac
 
+setres.sh 720p60hz
+
 # Show splash creen 
 show_splash.sh intro
 
