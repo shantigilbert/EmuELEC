@@ -7,17 +7,11 @@
 # Even this script is placed in ampart package in the EmuELEC source code
 # Issues regarding this script should NOT be opened on ampart's project page
 
-# This script should NEVER be used in CoreELEC. 
+# This script should NEVER be used in CoreELEC
+# This script ONLY works on EmuELEC's partition layout
 # If you can see this, that means you are trying to modify this script
-# I'll NEVER EVER test and debug on CoreELEC as it already has ceemmc
-# Even if you made it to work on there, you should debug it yourself.
-# If you want to extract and run ampart on CoreELEC, save it
-# ampart is hard-coded not to run on CoreELEC
-# Don't even think about opening issue on ampart to allow CoreELEC, I'll close it
-
-
-# Note: It is possible to applay a global offset to ampart via an alias on the top of the script, e.g. alias ampart='ampart --offset 4M', this would only be useful if you are using a Xiaomi device as they modify the offset from standard 36M to 4M to avoid the 32M wasted between bootloader and reserved. You surely need some patches to the kernel's mmc driver for it to correctly recognize the internel emmc partition table, though. https://github.com/7Ji/HybridELEC/tree/coreelec-9.2/projects/Amlogic/devices/mibox3/patches/linux. Please be noted this is only a personal advice from me(7Ji) and doing so will end up with no support from neither Team EmuELEC nor myself.
-
+# I'll NEVER test and debug on CoreELEC as it already has ceemmc
+# which is the approved way to install to internal and is tested more
 
 PART_RESIZED=''
 PART_MOUNTED=''
