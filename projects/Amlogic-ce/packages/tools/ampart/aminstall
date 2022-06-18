@@ -362,7 +362,7 @@ umount_and_sync() {
 }
 
 is_fs() { # $1 part type
-  if "$(blkid "$PART_PATH" | sed -e 's/.* TYPE="\([a-z0-9]\+\)".*/\1/')" == "$1"; then
+  if [ "$(blkid "$PART_PATH" | sed -e 's/.* TYPE="\([a-z0-9]\+\)".*/\1/')" == "$1" ]; then
     return 0
   else
     return 1
