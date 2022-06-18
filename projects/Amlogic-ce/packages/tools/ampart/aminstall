@@ -361,15 +361,35 @@ umount_and_sync() {
   sync
 }
 
-format_or_not() {
+is_fs() { # $1 part type
+  if "$(blkid "$PART_PATH" | sed -e 's/.* TYPE="\([a-z0-9]\+\)".*/\1/')" == "$1"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+
+format_or_not() { # $1 part path, $2 part type
   if [ "$ACTION_UPDATE" ]; then
-    printf "Should we reformat $1 partition? This is only useful if your want a totally new installation "
-    if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
-      printf "(running in old-school system+data single-boot mode, cannot properly figure out if its a $DISTRO_NAME installation or not, you need to select Y for installation to continue if you are sure it's the stock Android on emmc) "
-    fi
-    read -p '[y/N]' CHOICE
-    if [[ "$CHOICE" =~ ^[yY] ]]; then
-      FORMAT='yes'
+    if is_fs "$2"; then
+      printf "Should we reformat $1 partition? This is only useful if your want a totally new installation "
+      if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
+        printf "(running in old-school system+data single-boot mode, cannot properly figure out if its a $DISTRO_NAME installation or not, you need to select Y for installation to continue if you are sure it's the stock Android on emmc) "
+      fi
+      printf 'YOU WILL LOSE ALL DATA ON THE PARTITION IF WE REFORMAT IT '
+      read -p '[y/N]' CHOICE
+      if [[ "$CHOICE" =~ ^[yY] ]]; then
+        FORMAT='yes'
+      fi
+    else
+      echo "Warning: Actual fs type on '$PART_PATH' is different from the one it should be ($2), we have to reformat this partition. YOU WILL LOSE ALL DATA ON THE PARTITION IF WE REFORMAT IT"
+      read -p 'Should we reformat the partition? If not, you cannot install to internal and we have to exit [y/N]' CHOICE
+      if [[ "$CHOICE" =~ ^[yY] ]]; then
+        FORMAT='yes'
+      else
+        revert_and_die 'User aborted installation'
+      fi
     fi
   else
     FORMAT='yes'
@@ -381,16 +401,22 @@ populate_system() {
   notice_populate_start
   local PART_PATH="/dev/$PART_SYSTEM_NAME"
   local FORMAT=''
-  format_or_not "$PART_SYSTEM_NAME"
+  format_or_not "$PART_SYSTEM_NAME" 'vfat'
   if [ "$FORMAT" ]; then
     notice_format
     mkfs.fat -n "$PART_SYSTEM_NAME" "$PART_PATH" &>/dev/null || revert_and_die "Failed to create a fat fs on '$PART_PATH'"
+  fi
+  fatlabel "$PART_PATH" "$PART_NAME" &>/dev/null || revert_and_die "Failed to check and fix fat label on '$PART_PATH'"
+  if ! is_fs 'vfat'; then
+    revert_and_die "Can't proceed installation: fs on partition '$PART_PATH' is not vfat (fat32)"
   fi
   local DIR_CACHE="$DIR_CACHE/$PART_SYSTEM_NAME"
   mount_part_cache
   echo "Copying all system files (kernel, SYSTEM, dtb, etc) under $DIR_SYSTEM to internal $PART_SYSTEM_NAME partition..."
   cp -raf "$DIR_SYSTEM/"* "$DIR_CACHE" || die 'Failed to copy system files'
-  [ "$ACTION_CREATE_ROMS" ] && echo 'ext4' > "$DIR_CACHE/ee_fstype"  # Internal roms fs type should 
+  if [[ "$ACTION_CREATE_ROMS" || "$ACTION_UPDATE_ROMS" ]]; then
+    echo 'ext4' > "$DIR_CACHE/ee_fstype"  # Internal roms fs type should always be ext4
+  fi
   if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
     [ ! -f '/usr/share/ampart/oldschool_cfgload' ] && revert_and_die "Failed to find corresponding oldschool_cfgload"
     cp -f '/usr/share/ampart/oldschool_cfgload' "$DIR_CACHE/cfgload"
@@ -406,11 +432,15 @@ populate_storage() {
   local DIR_CACHE="$DIR_CACHE/$PART_STORAGE_NAME"
   if [ "$ACTION_SINGLE_BOOT" == 'yes' ]; then
     local FORMAT=''
-    format_or_not "$PART_STORAGE_NAME"
+    format_or_not "$PART_STORAGE_NAME" 'ext4'
     if [ "$FORMAT" ]; then
       notice_format
       create_ext4 "$PART_STORAGE_NAME"
     fi
+    tune2fs -L "$PART_STORAGE_NAME" "$PART_PATH"
+  fi
+  if ! is_fs 'ext4'; then
+    revert_and_die "Can't proceed installation: fs on partition '$PART_PATH' is not ext4"
   fi
   mount_part_cache
   if [ "$PART_STORAGE_SUBDIR" ]; then
@@ -464,16 +494,20 @@ populate_roms() {
   local PART_PATH="/dev/$PART_ROMS_NAME"
   local FORMAT=''
   local EMPTY=''
-  format_or_not "$PART_ROMS_NAME"
+  format_or_not "$PART_ROMS_NAME" 'ext4'
   if [ "$FORMAT" ]; then
     notice_format
     echo "Note: $PART_ROMS_NAME on the emmc will always be formatted as EXT4, Since you can not plug the emmc to a Windows PC just like you would for a SD card/USB drive"
     create_ext4 "$PART_ROMS_NAME"
     EMPTY='yes'
   fi
+  tune2fs -L "$PART_STORAGE_NAME" "$PART_PATH"
+  if ! is_fs 'ext4'; then
+    revert_and_die "Can't proceed installation: fs on partition '$PART_PATH' is not ext4"
+  fi
   local DIR_CACHE="$DIR_CACHE/$PART_ROMS_NAME"
   mount_part_cache
-  if [ -e "$DIR_CACHE/nes" ]; then  # Why would I choose NES? Because Nintendo ruled the fucking world (Ahem, AVGN meme)
+  if [ -z "$(find "$DIR_CACHE" -maxdepth 0 -empty)" ]; then
     echo "Warning: roms/savedata found in internal $PART_STORAGE_NAME partitions"
     read -p "Should we clean everything under this internal installation? You can then populate it with roms/savedata from your the current external boot, or leave it empty to have a fresh installtion (y/N)" CHOICE
     if [[ "$CHOICE" =~ ^[yY] ]]; then
@@ -489,7 +523,7 @@ populate_roms() {
       :
     else
       echo "Copying Roms, savestates, etc..."
-      rsync -qaHSx "$DIR_ROMS/". "$DIR_CACHE"
+      rsync -qaHSx "$DIR_ROMS/". "$DIR_CACHE" || echo 'Error encountered, maybe disk space used up? Installation will continue anyway'
     fi
   fi
   umount_and_sync
@@ -527,11 +561,10 @@ install_to_internal() {  # $1 single boot or not
 }
 
 no_coreelec() {
-  if grep -q "^NAME=\"CoreELEC\"$" /etc/os-release ; then
-    echo "Hello, Mr naughty naughty. You are trying to run this script on CoreELEC right?"
-    echo "Sorry but it does not work in that way. Both the script and the tool ampart it relies"
-    echo "does not work on CoreELEC and I have no interest on providing support there"
-    echo "You should use ceemmc as it's the official method for CoreELEC"
+  if ! grep -q "^NAME=\"EmuELEC\"$" /etc/os-release ; then
+    echo "Hello, Mr naughty naughty. You are trying to run this script outside EmuELEC right?"
+    echo "Sorry but it does not work in that way. The script only works on EmuELEC"
+    echo "because it will only work with the 3-partition layout for EmuELEC"
     exit 1
   fi
 }
