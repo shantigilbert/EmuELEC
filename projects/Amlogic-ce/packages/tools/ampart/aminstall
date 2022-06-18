@@ -437,7 +437,7 @@ populate_storage() {
       notice_format
       create_ext4 "$PART_STORAGE_NAME"
     fi
-    tune2fs -L "$PART_STORAGE_NAME" "$PART_PATH"
+    tune2fs -L "$PART_STORAGE_NAME" "$PART_PATH" &>/dev/null
   fi
   if ! is_fs 'ext4'; then
     revert_and_die "Can't proceed installation: fs on partition '$PART_PATH' is not ext4"
@@ -501,7 +501,7 @@ populate_roms() {
     create_ext4 "$PART_ROMS_NAME"
     EMPTY='yes'
   fi
-  tune2fs -L "$PART_STORAGE_NAME" "$PART_PATH"
+  tune2fs -L "$PART_STORAGE_NAME" "$PART_PATH" &>/dev/null
   if ! is_fs 'ext4'; then
     revert_and_die "Can't proceed installation: fs on partition '$PART_PATH' is not ext4"
   fi
