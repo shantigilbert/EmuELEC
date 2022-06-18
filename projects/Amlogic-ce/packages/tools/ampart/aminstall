@@ -34,7 +34,8 @@ PART_ROMS_NAME='EEROMS'
 
 DIR_SYSTEM='/flash'
 DIR_STORAGE='/storage'
-DIR_ROMS="$DIR_STORAGE/roms"
+DIR_ROMS_NAME='roms'
+DIR_ROMS="$DIR_STORAGE/$DIR_ROMS_NAME"
 
 PART_SYSTEM_SIZE=$(( 2 * $SIZE_1G ))
 PART_SYSTEM_SIZE_HUMAN='2G'   # This is not used in any processing, just for reporting to users
@@ -245,7 +246,7 @@ update_table() {
       else
         echo "Oh no! You emmc is smaller than 4G! This is impossible!"
         echo "Every Amlogic S9xxx device should have at least 4G emmc onboard!"
-        echo "I'm afraid you can not install EmuELEC to internal storage :("
+        echo "I'm afraid you can not install $DISTRO_NAME to internal storage :("
         echo "As this only works on emmc at least 4G :<"
         exit 1
       fi
@@ -349,7 +350,7 @@ notice_populate_start() {
   echo "Populating internal $PART_NAME partition..."
 }
 notice_populate_end() {
-  echo "Populated internal $PART_NAME partition..."
+  echo "Populated internal $PART_NAME partition"
 }
 notice_format() {
   echo "Formatting internal $PART_NAME partition..."
@@ -436,7 +437,7 @@ populate_storage() {
   fi
   if [ "$EMPTY" ]; then
     printf "Do you want to copy your user data under $DIR_STORAGE to internal $PART_STORAGE_NAME partition? "
-    [ "$ACTION_CREATE_ROMS" ] && printf "(This will not include all of the stuffs under $DIR_ROMS, they will be copied to $PART_ROMS_NAME partition later) "
+    [[ "$ACTION_CREATE_ROMS" || "$ACTION_UPDATE_ROMS" ]] && printf "(This will not include all of the stuffs under $DIR_ROMS, they will be copied to $PART_ROMS_NAME partition later) "
     read -p '[Y/n] ' CHOICE
     if [[ "$CHOICE" =~ ^[nN] ]]; then
       :
@@ -444,7 +445,17 @@ populate_storage() {
       echo "Stopping EmulationStation so we can make sure configs are flushed onto disk... You can run 'systemctl start emustation.service' later to bring EmulationStation back up"
       systemctl stop emustation.service
       echo "Copying user data..."
-      rsync -qaHSx "$DIR_STORAGE/". "$DIR_CACHE"
+      if [[ "$ACTION_CREATE_ROMS" || "$ACTION_UPDATE_ROMS" ]]; then
+        rsync -qaHSx --exclude="$DIR_ROMS_NAME/*" "$DIR_STORAGE/". "$DIR_CACHE"
+      else
+        rsync -qaHSx "$DIR_STORAGE/". "$DIR_CACHE"
+      fi
+      if [[ -z "$ACTION_CREATE_ROMS" && -z "$ACTION_UPDATE_ROMS" ]]; then
+        if grep -qs " $DIR_ROMS " /proc/mounts; then 
+          mkdir -p "$DIR_CACHE/$DIR_ROMS_NAME"
+          rsync -qaHSx "$DIR_ROMS/". "$DIR_CACHE/$DIR_ROMS_NAME"
+        fi
+      fi
       sync
     fi
   fi
@@ -584,7 +595,7 @@ confirm_method() {
       echo "(reserved partitions like bootloader, reserved, env, logo and misc will be kept)"
       echo "You Android installation will be COMPLETELY erased and can not be recovered"
       echo "Unless you use Amlogic USB Burning Tool to flash a stock image"
-      echo "This script will install EmuELEC that you booted from SD card/USB drive."
+      echo "This script will install $DISTRO_NAME that you booted from SD card/USB drive."
       ACTION_SINGLE_BOOT='yes'
       ;;
     '--revert')
@@ -617,10 +628,11 @@ confirm_method() {
 
 regret_pill() {
   echo "Warning: from this point onward, all of the changes are IRREVERSIBLE since new data will be written to emmc. Make sure you keep the power pluged in."
-  echo "If anything breaks apart, you can revert your partition table with the following command, but changes to the data are IRREVERSIBLE"
+  echo "If anything breaks apart, you can revert your partition table and ONLY your partition table with the following command to what it looks like before this run of aminstall, but changes to the data are IRREVERSIBLE"
   echo
   echo "ampart --clone $DISK_DEVICE_PATH $SNAPSHOT_HUMAN"
   echo
+  echo "Please take a note of the above command on your PC/notebooks/any paper in case you mistakenly closed the SSH/Serial client and couldn't find it in the history"
 }
 main() {
   no_coreelec
@@ -632,7 +644,9 @@ main() {
   snapshot
   check_parts
   if [[ -z "$ACTION_SINGLE_BOOT_OLDSCHOOL" && -z "$ACTION_UPDATE" ]]; then
+    echo "Updating partition table on emmc... Please keep the box powered on, interruption during this session will be fatal and will most likely brick your device"
     update_table
+    echo "Partition table updated on emmc"
   fi
   regret_pill
   install_to_internal
