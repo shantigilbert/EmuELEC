@@ -57,8 +57,6 @@ ACTION_SINGLE_BOOT_OLDSCHOOL=''
 ESSENTIAL_FILES='aml_autoscript cfgload config.ini dtb.img kernel.img SYSTEM'
 ESSENTIAL_DEVICES="$DISK_DEVICE bootloader reserved env logo misc dtb"
 
-DIR_CACHE="$(mktemp -d)" || die 'Failed to create temporary dir for installation'  # If non-conflicting name can be ensured, it can be hard-coded here
-
 UBOOT_EMMC_SINGLE_BOOT='run cfgloademmc'
 
 TEA_TIME=60
@@ -79,6 +77,8 @@ die() {
   echo $*
   exit 1
 }
+
+DIR_CACHE="$(mktemp -d)" || die 'Failed to create temporary dir for installation'  # If non-conflicting name can be ensured, it can be hard-coded here
 
 revert_and_die() {
   printf "ERROR: "
