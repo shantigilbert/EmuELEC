@@ -261,7 +261,10 @@ prepare_scan() {
 }
 
 ensure_dir_update_mounted() {
-  mkdir -p "$UPDATE_DIR" &>/dev/null
+  if [[ -L "$UPDATE_DIR" || ! -d "$UPDATE_DIR" ]]; then
+    rm -rf "$UPDATE_DIR" &>/dev/null
+    mkdir -p "$UPDATE_DIR" &>/dev/null
+  fi
   # This should only be useful for the very first boot after a user re-format EEROMS yet forgot to update ee_fstype
   if [ "$BOOL_EEROMS_EXIST" ]  && ! mountpoint -q "$UPDATE_DIR" &>/dev/null; then
     if [ -z "$ROMS_PART_MOUNTPOINT" ]; then
