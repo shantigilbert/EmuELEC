@@ -16,7 +16,6 @@ UPDATE_DIR='/storage/.update'
 ROMS_DIR_BACKUP="${ROMS_DIR_ACTUAL}_backup"
 MEDIA_DIR='/var/media'
 ROMS_DIR_MEDIA="$MEDIA_DIR/$ROMS_PART_LABEL"
-ROMS_PART_MOUNTPOINT=''
 
 if [ "$1" == 'yes' ]; then
   ACTION_ES_RESTART='yes'
@@ -252,6 +251,7 @@ restore_roms() {
 }
 
 prepare_scan() {
+  ROMS_PART_MOUNTPOINT=''
   echo "Preparing to scan for roms mounts..."
   echo "Stopping samba to avoid I/O conflicts..."
   systemctl stop smbd.service # Stop samba to avoid I/O conflicts
@@ -260,7 +260,32 @@ prepare_scan() {
   scan_eeroms
 }
 
+ensure_dir_update_mounted() {
+  mkdir -p "$UPDATE_DIR" &>/dev/null
+  # This should only be useful for the very first boot after a user re-format EEROMS yet forgot to update ee_fstype
+  if [ "$BOOL_EEROMS_EXIST" ]  && ! mountpoint -q "$UPDATE_DIR" &>/dev/null; then
+    if [ -z "$ROMS_PART_MOUNTPOINT" ]; then
+      ROMS_PART_MOUNTPOINT="$(mktemp -d)"
+      mount_eeroms "$ROMS_PART_MOUNTPOINT"
+      BOOL_ROMS_TEMP='yes'
+    else
+      BOOL_ROMS_TEMP=''
+    fi
+    ROMS_DIR_UPDATE="$ROMS_PART_MOUNTPOINT/.update"
+    if [[ -L "$ROMS_DIR_UPDATE" || ! -d "$ROMS_DIR_UPDATE" ]]; then
+      rm -rf "$ROMS_DIR_UPDATE" &>/dev/null
+      mkdir -p "$ROMS_DIR_UPDATE" &>/dev/null
+    fi
+    mount --bind "$ROMS_DIR_UPDATE" "$UPDATE_DIR" &>/dev/null
+    if [ "$BOOL_ROMS_TEMP" ]; then
+      umount_recursively "$ROMS_PART_MOUNTPOINT"
+      rm -rf "$ROMS_PART_MOUNTPOINT" &>/dev/null
+    fi
+  fi
+}
+
 finish_scan() {
+  ensure_dir_update_mounted
   echo "Finished scanning for roms mounts..."
   echo "Bringing back samba..."
   systemctl start smbd.service
@@ -382,28 +407,6 @@ else
 fi
 
 find "$ROMS_DIR_BACKUP" -maxdepth 0 -empty -exec rm -rf \{} \;
-
-mkdir -p "$UPDATE_DIR" &>/dev/null
-# This should only be useful for the very first boot after a user re-format EEROMS yet forgot to update ee_fstype
-if [ "$BOOL_EEROMS_EXIST" ]  && ! mountpoint -q "$UPDATE_DIR" &>/dev/null; then
-  if [ -z "$ROMS_PART_MOUNTPOINT" ]; then
-    ROMS_PART_MOUNTPOINT="$(mktemp -d)"
-    mount_eeroms "$ROMS_PART_MOUNTPOINT"
-    BOOL_ROMS_TEMP='yes'
-  else
-    BOOL_ROMS_TEMP=''
-  fi
-  ROMS_DIR_UPDATE="$ROMS_PART_MOUNTPOINT/.update"
-  if [[ -L "$ROMS_DIR_UPDATE" || ! -d "$ROMS_DIR_UPDATE" ]]; then
-    rm -rf "$ROMS_DIR_UPDATE" &>/dev/null
-    mkdir -p "$ROMS_DIR_UPDATE" &>/dev/null
-  fi
-  mount --bind "$ROMS_DIR_UPDATE" "$UPDATE_DIR" &>/dev/null
-  if [ "$BOOL_ROMS_TEMP" ]; then
-    umount_recursively "$ROMS_PART_MOUNTPOINT"
-    rm -rf "$ROMS_PART_MOUNTPOINT" &>/dev/null
-  fi
-fi
 
 if [ "$ACTION_ES_RESTART" ]; then
   echo 'Restarting EmulationStation as requested...'
