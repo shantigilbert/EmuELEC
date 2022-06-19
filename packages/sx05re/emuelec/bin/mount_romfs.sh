@@ -392,11 +392,12 @@ if [ "$BOOL_EEROMS_EXIST" ]  && ! mountpoint -q "$UPDATE_DIR" &>/dev/null; then
   else
     BOOL_ROMS_TEMP=''
   fi
-  if [[ -L "$ROMS_PART_MOUNTPOINT" || ! -d "$ROMS_PART_MOUNTPOINT" ]]; then
-    rm -rf "$ROMS_PART_MOUNTPOINT/.update" &>/dev/null
-    mkdir -p "$ROMS_PART_MOUNTPOINT/.update" &>/dev/null
+  ROMS_DIR_UPDATE="$ROMS_PART_MOUNTPOINT/.update"
+  if [[ -L "$ROMS_DIR_UPDATE" || ! -d "$ROMS_DIR_UPDATE" ]]; then
+    rm -rf "$ROMS_DIR_UPDATE" &>/dev/null
+    mkdir -p "$ROMS_DIR_UPDATE" &>/dev/null
   fi
-  mount --bind "$ROMS_PART_MOUNTPOINT/.update" "$UPDATE_DIR" &>/dev/null
+  mount --bind "$ROMS_DIR_UPDATE" "$UPDATE_DIR" &>/dev/null
   if [ "$BOOL_ROMS_TEMP" ]; then
     umount_recursively "$ROMS_PART_MOUNTPOINT"
     rm -rf "$ROMS_PART_MOUNTPOINT" &>/dev/null
