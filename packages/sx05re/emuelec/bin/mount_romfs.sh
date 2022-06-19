@@ -383,6 +383,7 @@ fi
 
 find "$ROMS_DIR_BACKUP" -maxdepth 0 -empty -exec rm -rf \{} \;
 
+mkdir -p "$UPDATE_DIR" &>/dev/null
 # This should only be useful for the very first boot after a user re-format EEROMS yet forgot to update ee_fstype
 if [ "$BOOL_EEROMS_EXIST" ]  && ! mountpoint -q "$UPDATE_DIR" &>/dev/null; then
   if [ -z "$ROMS_PART_MOUNTPOINT" ]; then
