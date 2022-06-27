@@ -8,7 +8,7 @@ PKG_REV="1"
 PKG_LICENSE="GPL2"
 PKG_SITE="https://github.com/stella-emu/stella"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain"
+PKG_DEPENDS_TARGET="toolchain SDL2"
 PKG_SHORTDESC="A multi-platform Atari 2600 Emulator"
 PKG_TOOLCHAIN="configure"
 
