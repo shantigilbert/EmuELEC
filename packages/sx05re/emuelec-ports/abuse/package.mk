@@ -21,6 +21,7 @@ pre_configure_target() {
 	fi
 
 	tar -xf ${SOURCES}/${PKG_NAME}/abuse-0.8.tar.gz -C ${SOURCES}/${PKG_NAME}/
+	rm -rf ${PKG_BUILD}/data/{music,sfx}
 	mv ${SOURCES}/${PKG_NAME}/abuse-0.8/data/music ${PKG_BUILD}/data
 	mv ${SOURCES}/${PKG_NAME}/abuse-0.8/data/sfx ${PKG_BUILD}/data
 	rm -rf ${SOURCES}/${PKG_NAME}/abuse-0.8/
