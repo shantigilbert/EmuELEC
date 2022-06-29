@@ -9,6 +9,7 @@ PKG_DEPENDS_HOST="ccache:host rsync:host openssl:host"
 PKG_DEPENDS_TARGET="toolchain linux:host kmod:host xz:host keyutils ${KERNEL_EXTRA_DEPENDS_TARGET}"
 PKG_NEED_UNPACK="${LINUX_DEPENDS} $(get_pkg_directory initramfs) $(get_pkg_variable initramfs PKG_NEED_UNPACK)"
 PKG_LONGDESC="This package contains a precompiled kernel image and the modules."
+PKG_DEPENDS_UNPACK+=" exfat-linux"
 PKG_IS_KERNEL_PKG="yes"
 PKG_STAMP="${KERNEL_TARGET} ${KERNEL_MAKE_EXTRACMD}"
 
@@ -197,22 +198,13 @@ pre_make_target() {
     ${PKG_BUILD}/scripts/config --set-str CONFIG_EXTRA_FIRMWARE_DIR "external-firmware"
   fi
 
-
-  # Add EXFat, from https://github.com/351ELEC/351ELEC/commit/5aac2680bb97a69e0e44e08760caeca9939ab461
-  PREEXF=`pwd`
-  cd ${PKG_BUILD}/fs
-  git clone https://github.com/arter97/exfat-linux.git
-  cd exfat-linux
-  git checkout old
-  cd ${PKG_BUILD}/fs
-  if [ -d "exfat" ]
-  then
-    rm -rf exfat
-  fi
-  mv exfat-linux exfat
-  sed -i '/source "fs\/fat\/Kconfig"/a source "fs\/exfat\/Kconfig"' Kconfig
-  sed -i '/obj-$(CONFIG_FAT_FS).*+= fat\//a obj-$(CONFIG_EXFAT_FS)\t\t+= exfat\/' Makefile
-  cd ${PREEXF}
+  # Add exFAT
+	PKG_BUILD_EXFAT="${PKG_BUILD}/fs/exfat"
+	[ -e "$PKG_BUILD_EXFAT" ] && rm -rf "$PKG_BUILD_EXFAT"
+	mkdir -p "$PKG_BUILD_EXFAT"
+	tar --strip-components=1 -xf "${SOURCES}/exfat-linux/exfat-linux-$(get_pkg_version exfat-linux).tar.gz" -C "$PKG_BUILD_EXFAT"
+  sed -i '/source "fs\/fat\/Kconfig"/a source "fs\/exfat\/Kconfig"' "${PKG_BUILD}/fs/Kconfig"
+  sed -i '/obj-$(CONFIG_FAT_FS).*+= fat\//a obj-$(CONFIG_EXFAT_FS)\t\t+= exfat\/' "${PKG_BUILD}/fs/Makefile"
   
   kernel_make oldconfig
 
