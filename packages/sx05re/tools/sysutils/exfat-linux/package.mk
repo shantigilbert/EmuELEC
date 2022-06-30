@@ -8,3 +8,8 @@ PKG_SITE="https://github.com/arter97/exfat-linux"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
 PKG_LONGDESC="exFAT filesystem module for Linux kernel, for extraction in linux package only, DO NOT BUILD"
 PKG_TOOLCHAIN="manual"
+
+unpack() {
+  # This package should not be built, and should not be unpacked to the build dir
+  :
+}
