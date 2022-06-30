@@ -166,8 +166,6 @@ pre_make_target() {
 	[ -e "$PKG_BUILD_EXFAT" ] && rm -rf "$PKG_BUILD_EXFAT"
 	mkdir -p "$PKG_BUILD_EXFAT"
 	tar --strip-components=1 -xf "${SOURCES}/exfat-linux/exfat-linux-$(get_pkg_version exfat-linux).tar.gz" -C "$PKG_BUILD_EXFAT"
-  sed -i '/source "fs\/fat\/Kconfig"/a source "fs\/exfat\/Kconfig"' "${PKG_BUILD}/fs/Kconfig"
-  sed -i '/obj-$(CONFIG_FAT_FS).*+= fat\//a obj-$(CONFIG_EXFAT_FS)\t\t+= exfat\/' "${PKG_BUILD}/fs/Makefile"
 
   kernel_make oldconfig
 }
