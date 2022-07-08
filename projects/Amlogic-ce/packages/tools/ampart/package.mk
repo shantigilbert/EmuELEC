@@ -9,11 +9,10 @@ PKG_SITE="https://github.com/7Ji/ampart"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
 PKG_MAINTAINER="7Ji"
 PKG_LONGDESC="A simple, fast, yet reliable partition tool for Amlogic's proprietary emmc partition format."
-PKG_DEPENDS_TARGET="toolchain"
+PKG_DEPENDS_TARGET="toolchain zlib u-boot-tools:host"
 PKG_TOOLCHAIN="make"
 
-make_target() {
-  make
+post_make_target(){
   mkimage -A $TARGET_KERNEL_ARCH -O linux -T script -C none -d "$PKG_DIR/oldschool_cfgload.src" 'oldschool_cfgload'
 }
 
