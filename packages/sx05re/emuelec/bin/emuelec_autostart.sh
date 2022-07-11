@@ -111,7 +111,7 @@ case "$DEFE" in
 esac
 
 FILE_MODE="/sys/class/display/mode"
-[[ -f "$FILE_MODE" ]] && setres.sh 720p60hz
+[[ -f "$FILE_MODE" ]] && setres.sh
 
 # Show splash creen 
 show_splash.sh intro
