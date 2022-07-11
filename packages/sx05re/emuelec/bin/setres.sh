@@ -24,16 +24,18 @@ show_buffer ()
 blank_buffer()
 {
   # Blank the buffer.
-  dd if=/dev/zero of=/dev/fb0 bs=12M > /dev/null 2>&1
+  dd if=/dev/zero of=/dev/fb0 bs=10M > /dev/null 2>&1
 }
 
-BPP=32
-MODE=$1
 
 FILE_MODE="/sys/class/display/mode"
-if [[ -f "/sys/class/display/display0.HDMI/mode" ]]; then
-  FILE_MODE="/sys/class/display/display0.HDMI/mode"
-fi
+[[ ! -f "$FILE_MODE" ]] && FILE_MODE="/sys/class/display/display0.HDMI/mode"
+[[ ! -f "$FILE_MODE" ]] && exit 0;
+
+BPP=32
+
+MODE=$1
+[[ -z "$MODE" ]] && MODE=$(cat $FILE_MODE)
 
 # If the current display is the same as the change just exit.
 [ -z "$MODE" ] && exit 0;
