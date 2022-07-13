@@ -210,14 +210,14 @@ function resolutions() {
   fi
 
   if [[ "$EE_PROJECT" == "Rockchip" ]]; then
-    SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/display/display0.HDMI/modes | sort | uniq -u`
+    SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/display/display0.HDMI/modes | sort -u`
     for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
     do
       RESOLUTIONS+=($SSR)
     done
   else
     # Screen supported resolutions
-  	SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/amhdmitx/amhdmitx0/disp_cap | /usr/bin/cat /sys/class/amhdmitx/amhdmitx0/disp_cap_3d | tail -n +3 | sort | uniq -u`
+  	SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/display/cap | sed '/smpte/d' | sed '/pal/d' | sed '/ntsc/d' | sed 's/\*//' | grep -E '[0-9x]+[pi][56]0hz|cvbs'`
     for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
     do
       RESOLUTIONS+=($SSR)
