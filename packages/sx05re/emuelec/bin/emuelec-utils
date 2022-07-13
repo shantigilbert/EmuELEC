@@ -109,16 +109,16 @@ function ee_backup() {
 function ee_cloud_backup() {
     RCLONECONF="/emuelec/configs/rclone/rclone.conf"
     EESYNCCFG="/emuelec/configs/rclone/ee_cloud_sync.cfg"
-    
+
     if [ -e "${EESYNCCFG}" ]; then
         . "${EESYNCCFG}"
     fi
-    
+
     [ -z "${EE_SYNC_REMOTE}" ] && EE_SYNC_REMOTE="EmuELEC_Remote"
     [ -z "${EE_SYNC_PATH}" ] && EE_SYNC_PATH="EmuELEC_Backup"
 
     [ -z "${2}" ] && systemctl stop emustation
-    
+
     # We need to check if rclone.conf exists and its configured correctly, else show error
     if [ -e "${RCLONECONF}" ]; then
         # in case this file was created in windows, we need to convert it
@@ -133,8 +133,8 @@ function ee_cloud_backup() {
         systemctl start emustation
         exit 1;
     fi
-        
-   	case "${1}" in 
+
+   	case "${1}" in
     "backup")
         # we first create a regular backup
         echo "emuelec-utils ee_backup backup no" > /tmp/cloud.sh
@@ -148,12 +148,12 @@ function ee_cloud_backup() {
         echo "emuelec-utils ee_backup restore no" >> /tmp/cloud.sh
     ;;
 	esac
-    echo "echo \"Done!...Press 'Select' or choose 'Close' to continue!\"" >> /tmp/cloud.sh    
+    echo "echo \"Done!...Press 'Select' or choose 'Close' to continue!\"" >> /tmp/cloud.sh
     chmod +x /tmp/cloud.sh
     text_viewer -s /tmp/cloud.sh -t "EmuELEC cloud sync, please wait!..."
     rm /tmp/cloud.sh > /dev/null 2>&1
-    
-    if [ "${1}" == "restore" ]; then 
+
+    if [ "${1}" == "restore" ]; then
         systemctl reboot
     else
         [ -z "${2}" ] && systemctl start emustation
@@ -190,58 +190,42 @@ function resolutions() {
 
 	RESOLUTIONS=()
 
-  # N2 supported resolutions source : https://wiki.odroid.com/odroid-n2/application_note/software/set_display_mode
-	N2_SUPPORTED_RESOLUTIONS="480x320p60hz 640x480p60hz 720x480p60hz 720x576p50hz 800x480p60hz 1024x600p60hz 1024x768p60hz 1280x1024p60hz 1280x720p50hz 1280x720p60hz 1280x800p60hz 1360x768p60hz 1440x900p60hz 1600x1200p60hz 1600x900p60hz 1680x1050p60hz 1920x1080p24hz 1920x1080p30hz 1920x1080p50hz 1920x1080p60hz 1920x1200p60hz 2560x1080p60hz 2560x1440p60hz 2560x1600p60hz 3440x1440p60hz 3840x2160p24hz 3840x2160p25hz 3840x2160p30hz 3840x2160p50hz 3840x2160p60hz"
+  if [ -f "/storage/LEGACY_RESOLUTIONS" ]; then
+  	# N2 supported resolutions source : https://wiki.odroid.com/odroid-n2/application_note/software/set_display_mode
+  	N2_SUPPORTED_RESOLUTIONS="480x320p60hz 640x480p60hz 720x480p60hz 720x576p50hz 800x480p60hz 1024x600p60hz 1024x768p60hz 1280x1024p60hz 1280x720p50hz 1280x720p60hz 1280x800p60hz 1360x768p60hz 1440x900p60hz 1600x1200p60hz 1600x900p60hz 1680x1050p60hz 1920x1080p24hz 1920x1080p30hz 1920x1080p50hz 1920x1080p60hz 1920x1200p60hz 2560x1080p60hz 2560x1440p60hz 2560x1600p60hz 3440x1440p60hz 3840x2160p24hz 3840x2160p25hz 3840x2160p30hz 3840x2160p50hz 3840x2160p60hz"
 
-	# Screen supported resolutions
-	SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/amhdmitx/amhdmitx0/rawedid | /usr/bin/edid-decode |/usr/bin/grep "@" | sed -E "s| {0,9}VIC {0,9}[0-9]{1,2}||" | /usr/bin/awk '{print $1}' | /usr/bin/sed  's/@/p/g'|/usr/bin/tr '[:upper:]' '[:lower:]'`
+  	# Screen supported resolutions
+  	SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/amhdmitx/amhdmitx0/rawedid | /usr/bin/edid-decode |/usr/bin/grep "@" | sed -E "s| {0,9}VIC {0,9}[0-9]{1,2}||" | /usr/bin/awk '{print $1}' | /usr/bin/sed  's/@/p/g'|/usr/bin/tr '[:upper:]' '[:lower:]'`
 
-	for N2SP in $N2_SUPPORTED_RESOLUTIONS
-	do
-	for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
-	do
-		if [ "$N2SP" = "$SSR" ]
-		then
-		RESOLUTIONS+=($N2SP)
-		fi
-	done
-	done
+  	for N2SP in $N2_SUPPORTED_RESOLUTIONS
+  	do
+  	for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
+  	do
+  		if [ "$N2SP" = "$SSR" ]
+  		then
+  		RESOLUTIONS+=($N2SP)
+  		fi
+  	done
+  	done
+  fi
 
-	IFS=","
-	echo "${RESOLUTIONS[*]}"
-}
-
-function array_contains() { 
-    local array="$1[@]"
-    local seeking=$2
-    local in=1
-    for element in "${!array}"; do
-        if [[ $element == "$seeking" ]]; then
-            in=0
-            break
-        fi
-    done
-    return $in
-}
-
-function check_resolutions() {
-  RESOLUTIONS=()
-
-	# Screen supported resolutions
+  # Screen supported resolutions
 	SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/amhdmitx/amhdmitx0/disp_cap | /usr/bin/cat /sys/class/amhdmitx/amhdmitx0/disp_cap_3d | tail -n +3 | sort | uniq -u`
   for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
   do
     RESOLUTIONS+=($SSR)
-  done    
+  done
 
-  
+
   if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
-    array_contains RESOLUTIONS "480x320p60hz" && RESOLUTIONS+="480x320p60hz"
+    RESOLUTIONS+="480x320p60hz"
   fi
-  
+
   if [ "$EE_DEVICE" == "GameForce" ]; then
-    array_contains RESOLUTIONS "640x480p60hz" && RESOLUTIONS+="640x480p60hz"
+    RESOLUTIONS+="640x480p60hz"
   fi
+
+  RESOLUTIONS=($(printf "%s\n" "${RESOLUTIONS[@]}" | sort -u))
 
 	IFS=","
 	echo "${RESOLUTIONS[*]}"
