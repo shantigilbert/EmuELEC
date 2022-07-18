@@ -53,6 +53,7 @@ show_buffer 1
 
 case $MODE in
   480cvbs)
+    echo 480cvbs > "${FILE_MODE}"
 		fbset -fb /dev/fb0 -g 640 480 640 960 $BPP
 		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
 		echo 0 0 639 479 > /sys/class/graphics/fb0/free_scale_axis
@@ -62,6 +63,7 @@ case $MODE in
 		echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
 	576cvbs)
+    echo 576cvbs > "${FILE_MODE}"
 		fbset -fb /dev/fb0 -g 720 576 720 1152 $BPP
 		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
 		echo 0 0 719 575 > /sys/class/graphics/fb0/free_scale_axis
