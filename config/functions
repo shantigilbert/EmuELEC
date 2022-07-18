@@ -1802,6 +1802,20 @@ release_update_lock() {
   flock --unlock 97 2>/dev/null
 }
 
+# Multilib support
+use_32_options() {
+  LIB64_TARGET_NAME="${TARGET_NAME}"
+  TARGET_NAME="${LIB32_TARGET_NAME}"
+  TARGET_ARCH="arm"
+  TARGET_SUBARCH="${LIB32_TARGET_SUBARCH}"
+  LIB64_TARGET_PREFIX="${TARGET_PREFIX}"
+  TARGET_PREFIX="${LIB32_TARGET_PREFIX}"
+  TARGET_CFLAGS="${LIB32_TARGET_CFLAGS}"
+  TARGET_CXXFLAGS="${LIB32_TARGET_CXXFLAGS}"
+  TARGET_LDFLAGS="${LIB32_TARGET_LDFLAGS}"
+  SYSROOT_PREFIX="${LIB32_SYSROOT_PREFIX}"
+}
+
 # Use distribution functions if any
 if [ -f "distributions/$DISTRO/config/functions" ]; then
   . distributions/$DISTRO/config/functions

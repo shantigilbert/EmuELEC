@@ -71,11 +71,11 @@ fi
     ln -sf ${SYSROOT_PREFIX}/usr/lib/libMali.so ${SYSROOT_PREFIX}/usr/lib/libGLESv3.so.3.0
     ln -sf ${SYSROOT_PREFIX}/usr/lib/libMali.so ${SYSROOT_PREFIX}/usr/lib/libGLESv3.so.3.0.0
 
-  mkdir -p ${INSTALL}/usr/sbin
-    cp $PKG_DIR/scripts/libmali-overlay-setup ${INSTALL}/usr/sbin
+  # mkdir -p ${INSTALL}/usr/sbin
+  #   cp $PKG_DIR/scripts/libmali-overlay-setup ${INSTALL}/usr/sbin
 }
 
 post_install() {
   enable_service unbind-console.service
-  enable_service libmali.service
+  # enable_service libmali.service
 }

@@ -138,6 +138,11 @@ check_config
 . config/graphic
 . config/path $1
 
+# Multilib Magics
+if [ "$ARCH" = "aarch64" ]; then
+  . config/options32
+fi
+
 ## package processing
 
 # If the package caches are unset, then populate them

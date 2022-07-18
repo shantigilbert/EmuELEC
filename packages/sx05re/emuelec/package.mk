@@ -47,8 +47,20 @@ if [ "$ARCH" == "aarch64" ]; then
   for discore in quicknes parallel-n64 pcsx_rearmed; do
 		PKG_DEPENDS_TARGET=$(echo $PKG_DEPENDS_TARGET | sed "s|$discore| |")
 	done
-	
-  PKG_DEPENDS_TARGET+=" swanstation emuelec-32bit-libs"
+
+  PKG_DEPENDS_TARGET+=" swanstation \
+                        lib32-essential \
+                        lib32-retroarch \
+                        emuelec-32bit-info \
+                        lib32-flycast \
+                        lib32-mupen64plus \
+                        lib32-pcsx_rearmed \
+                        lib32-uae4arm \
+                        lib32-parallel-n64 \
+                        lib32-bennugd-monolithic \
+                        lib32-droidports \
+                        lib32-box86
+                        lib32-libusb"
 
   if [ "${DEVICE}" == "Amlogic-ng" ] || [ "$DEVICE" == "RK356x" ] || [ "$DEVICE" == "OdroidM1" ]; then
     PKG_DEPENDS_TARGET+=" dolphinSA"
@@ -112,6 +124,7 @@ makeinstall_target() {
    
   # Make sure all scripts and binaries are executable  
   find $INSTALL/usr/bin -type f -exec chmod +x {} \;
+
 }
 
 post_install() {

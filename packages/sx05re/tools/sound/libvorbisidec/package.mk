@@ -7,7 +7,7 @@ PKG_SHA256="54c4cfaf442885575261d7b310b2dfa79e4fbf095aaf34de07875b024e499991"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/sezero/tremor"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain libogg"
+PKG_DEPENDS_TARGET="toolchain libogg freetype"
 PKG_LONGDESC="libvorbisidec"
 PKG_TOOLCHAIN="make"
 
@@ -17,4 +17,3 @@ cd $PKG_BUILD
 ./autogen.sh HAVE_OGG=no --disable-mmx --prefix=/usr --datadir=/usr/share/ --datarootdir=/usr/share/ --host=armv8a-libreelec-linux --enable-fb --enable-freetype --with-freetype-prefix=$SYSROOT_PREFIX/usr/ --enable-slang
 make 
 }
-

@@ -1,0 +1,25 @@
+From bfdcab6e5f8352d5a1ee9724244d98cfd1d1d309 Mon Sep 17 00:00:00 2001
+From: 7Ji <pugokushin@gmail.com>
+Date: Fri, 15 Jul 2022 11:30:30 +0800
+Subject: [PATCH] glibc: ld.so.cache to .cache
+
+---
+ sysdeps/generic/dl-cache.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sysdeps/generic/dl-cache.h b/sysdeps/generic/dl-cache.h
+index 93d4bea930..34aa313cf0 100644
+--- a/sysdeps/generic/dl-cache.h
++++ b/sysdeps/generic/dl-cache.h
+@@ -35,7 +35,7 @@
+ #endif
+ 
+ #ifndef LD_SO_CACHE
+-# define LD_SO_CACHE SYSCONFDIR "/ld.so.cache"
++# define LD_SO_CACHE "/storage/.cache/ld.so.cache"
+ #endif
+ 
+ #ifndef add_system_dir
+-- 
+2.37.1
+

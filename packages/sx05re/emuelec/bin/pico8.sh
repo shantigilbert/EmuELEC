@@ -34,7 +34,7 @@ if [[ ! -L "/emuelec/configs/pico-8/sdl_controllers.txt" ]]; then
     ln -sf /storage/.config/SDL-GameControllerDB/gamecontrollerdb.txt /emuelec/configs/pico-8/sdl_controllers.txt
 fi
 
-LD_LIBRARY_PATH="/emuelec/lib32:$LD_LIBRARY_PATH"
+#LD_LIBRARY_PATH="/emuelec/lib32:$LD_LIBRARY_PATH"
 
 CART="${1}"
 
