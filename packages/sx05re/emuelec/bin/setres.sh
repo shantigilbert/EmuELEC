@@ -27,9 +27,9 @@ blank_buffer()
   dd if=/dev/zero of=/dev/fb0 bs=10M > /dev/null 2>&1
 }
 
-
+DEFAULT_MODE="720p60hz"
 FILE_MODE="/sys/class/display/mode"
-[[ ! -f "$FILE_MODE" ]] && FILE_MODE="/sys/class/display/display0.HDMI/mode"
+[[ ! -f "$FILE_MODE" ]] && FILE_MODE="/sys/class/display/display0.HDMI/mode" && DEFAULT_MODE="720p-60"
 [[ ! -f "$FILE_MODE" ]] && exit 0;
 
 BPP=32
@@ -88,6 +88,7 @@ case $MODE in
     echo 0 > /sys/class/graphics/fb1/free_scale
     ;;
   *x*)
+    echo $DEFAULT_MODE > "${FILE_MODE}"
     echo $MODE > "${FILE_MODE}"
     NEW_MODE=$(cat "${FILE_MODE}")
     if [[ "$MODE" != "$NEW_MODE" ]]; then
@@ -95,7 +96,7 @@ case $MODE in
       echo $MODE > "${FILE_MODE}"
       NEW_MODE=$(cat "${FILE_MODE}")
     fi
-    [[ "$MODE" != "$NEW_MODE" ]] && exit  
+    [[ "$MODE" != "$NEW_MODE" ]] && exit
     W=$(echo $MODE | cut -d'x' -f 1)
     H=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
     [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
