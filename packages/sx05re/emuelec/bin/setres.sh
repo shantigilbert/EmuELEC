@@ -27,9 +27,11 @@ blank_buffer()
   dd if=/dev/zero of=/dev/fb0 bs=10M > /dev/null 2>&1
 }
 
-DEFAULT_MODE="720p60hz"
+# By initially setting with these values we can garuntee the file changes, and the mode corrects itself.
+HACK1_MODE="640x480p60hz"
+HACK2_MODE="480p60hz"
 FILE_MODE="/sys/class/display/mode"
-[[ ! -f "$FILE_MODE" ]] && FILE_MODE="/sys/class/display/display0.HDMI/mode" && DEFAULT_MODE="720p-60"
+[[ ! -f "$FILE_MODE" ]] && FILE_MODE="/sys/class/display/display0.HDMI/mode" && HACK1_MODE="640x480p-60" && HACK2_MODE="480p-60"
 [[ ! -f "$FILE_MODE" ]] && exit 0;
 
 BPP=32
@@ -73,6 +75,7 @@ case $MODE in
     echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
 	480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
+    echo $HACK1_MODE > "${FILE_MODE}"
     echo $MODE > "${FILE_MODE}"
     NEW_MODE=$(cat "${FILE_MODE}")
     [[ "$MODE" != *"$NEW_MODE" ]] && exit
@@ -90,7 +93,7 @@ case $MODE in
     echo 0 > /sys/class/graphics/fb1/free_scale
     ;;
   *x*)
-    echo $DEFAULT_MODE > "${FILE_MODE}"
+    echo $HACK2_MODE > "${FILE_MODE}"
     echo $MODE > "${FILE_MODE}"
     NEW_MODE=$(cat "${FILE_MODE}")
     if [[ "$MODE" != "$NEW_MODE" ]]; then
