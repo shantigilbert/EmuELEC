@@ -58,7 +58,7 @@ case $MODE in
 		echo 0 0 639 479 > /sys/class/graphics/fb0/free_scale_axis
 		echo 0 0 639 479 > /sys/class/graphics/fb0/window_axis
 		echo 0 > /sys/class/graphics/fb0/free_scale
-		echo 1 > /sys/class/graphics/fb0/freescale_mode    
+		echo 1 > /sys/class/graphics/fb0/freescale_mode
 		echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
 	576cvbs)
@@ -67,7 +67,7 @@ case $MODE in
 		echo 0 0 719 575 > /sys/class/graphics/fb0/free_scale_axis
 		echo 0 0 719 575 > /sys/class/graphics/fb0/window_axis
 		echo 0 > /sys/class/graphics/fb0/free_scale
-		echo 1 > /sys/class/graphics/fb0/freescale_mode    
+		echo 1 > /sys/class/graphics/fb0/freescale_mode
     echo 0 > /sys/class/graphics/fb1/free_scale
 		;;
 	480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
@@ -110,7 +110,7 @@ case $MODE in
       echo 1 > /sys/class/graphics/fb0/freescale_mode
       echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
       echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
-      echo 0 > /sys/class/graphics/fb1/free_scale      
+      echo 0 > /sys/class/graphics/fb1/free_scale
     fi
     ;;
 esac
@@ -125,4 +125,4 @@ show_buffer 0
 # End of reading the video output mode and setting it for emuelec to avoid video flicking.
 # The codes can be simplified with "elseif" sentences.
 # The codes for 480I and 576I are adjusted to avoid overscan.
-# Forece 720p50hz to 720p60hz and 1080i/p60hz to 1080i/p60hz since 50hz would make video very choppy.
+# Force 720p50hz to 720p60hz and 1080i/p60hz to 1080i/p60hz since 50hz would make video very choppy.
