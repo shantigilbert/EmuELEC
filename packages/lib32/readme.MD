@@ -9,9 +9,12 @@ To get a multilib target image, the package ``lib32-essential`` must be added, i
 
 On the EmuELEC target system, the libraries will be searched in the following order:
  - Any path defined in ``LD_LIBRARY_PATH``. Most of them come from /etc/profile. Not indexed in ``ld.so.cache`` (slow)
-   - /etc/profile.d/99-emuelec.conf
-     - ``/emuelec/lib32`` => ``/storage/.config/emuelec/lib32``, writable
-     - ``/emuelec/lib`` => ``/storage/.config/emuelec/lib``, writable
+   - /etc/profile.d
+     - 99-emuelec.conf
+       - ``/emuelec/lib32`` => ``/storage/.config/emuelec/lib32``, writable
+       - ``/emuelec/lib`` => ``/storage/.config/emuelec/lib``, writable
+     - 99-rk-mali-workaround.conf (only on OdroidM1 and RK356x)
+       - ``/usr/lib32/libmali``, read-only
  - Any path defined in ``ld.so.conf`` and ``ld.so.conf.d/*.conf``, *.conf files indexed in alphabetical order. Indexed in ``ld.so.cache`` (fast)
    - gcc-lib32.conf
      - ``/usr/lib32``, read-only
@@ -27,9 +30,9 @@ If user wants to overwrite a certain library or provide additional libraries, th
  - **Do not add the paths that's already indexed by ``ld.so.cache`` to ``LD_LIBRARY_PATH``, unless you want to re-write the lookup order, as this will significantly slows down the lookup speed**
    - Bad practice: (most paths in the following ``LD_LIBRARY_PATH`` is already indexed by ``ld.so.cache`` and this just adds meaningless search time) ``LD_LIBRARY_PATH=/emuelec/lib32:/emuelec/lib:/usr/lib32/pulseaudio:/usr/lib/pulseaudio:/usr/lib32:/usr/lib``
 ## Daemons
-The systemd units ``ldconfig-boot.service`` and ``ldconfig-watch.path`` are what made it possible to drop ``LD_LIBRARY_PATH`` entirely (note it is still supported for out-of-tree paths like when you load ports). 
+The systemd unit ``ldconfig.service`` is what made it possible to drop ``LD_LIBRARY_PATH`` for the system-wide "static" libraries stored under ``/usr/lib`` and ``/usr/lib32`` (note it is still supported for out-of-tree paths like when you load ports, and the LD_LIBRARY_PATH is still used for ``/emuelec/libs``). 
 
-The ``-boot.service`` will refresh ``ld.so.cache`` every time EmuELEC boots, and ``ldconfig-watch.path`` will watch for ``/emuelec/lib`` and ``/emuelec/lib32`` (both points to folders under ``/storage/.config/emuelec/``) and to refresh the cache each time those folders are updated.
+The ``ldconfig.service`` will refresh ``ld.so.cache`` every time EmuELEC boots, you can also manually run it with ``systemctl restart ldconfig`` or ``ldconfig -vX`` to refresh the cache.
 
 
 ## Image layout
@@ -40,11 +43,6 @@ The following part is different from non-multilib images, if ``lib32-essential``
     include /etc/ld.so.conf.d/*.conf
     ````
   - ``ld.so.conf.d/``
-    - ``emuelec.conf``
-      ````
-      /emuelec/lib32
-      /emuelec/lib
-      ````
     - ``lib32-glibc.conf``
       ````
       /usr/lib32
@@ -58,9 +56,7 @@ The following part is different from non-multilib images, if ``lib32-essential``
   - ``bin/``
     - ``ldconfig`` The binary to create ld cache
   - ``lib/systemd/system``
-    - ``ldconfig-boot.service`` The systemd unit to rebuild ld cache on boot
-    - ``ldconfig-watch.path`` The systemd unit to rebuild ld cache in case ``/emuelec/lib(|32)`` is updated
-    - ``ldconfig-watch.service``
+    - ``ldconfig.service`` The systemd unit to rebuild ld cache on boot
 - ``/storage/.cache/ld.so.cache`` Actual ld cache
 
 The ``ld.so.conf`` and ``ld.so.conf.d`` are very similar to those you will find on standard Linux distros like ArchLinux, Debian, Ubuntu, etc, even they will have some differences. A Big difference is that we keep ``ld.so.cache`` at ``/storage/.cache/`` instead of ``/etc/`` since on EmuELEC ``/etc/`` is read-only.
