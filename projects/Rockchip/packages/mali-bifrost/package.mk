@@ -58,10 +58,6 @@ fi
 
 	mkdir -p ${INSTALL}/usr/lib/
 	cp ${PKG_BUILD}/${BLOB} ${INSTALL}/usr/lib/libmali.so
-  # The mali blob comes with a hardcoded libmali.so.1 SONAME, it confuses ldconfig and libGLESv2.so, libGLESv3.so, etc won't be indexed as a result
-  # It is always a BAD idea to code in a SONAME that is not what the library is actually used as, we need to clean it so it can be treated as 
-  # libGLES.so, libgbm.so, etc and ldconfig can caches it in ld.so.cache
-  patchelf --set-soname "" ${INSTALL}/usr/lib/libmali.so
 
 	ln -sf /usr/lib/libmali.so ${INSTALL}/usr/lib/libEGL.so
 	ln -sf /usr/lib/libmali.so ${INSTALL}/usr/lib/libEGL.so.1

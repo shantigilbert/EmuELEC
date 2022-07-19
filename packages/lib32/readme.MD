@@ -8,11 +8,11 @@ To get a multilib target image, the package ``lib32-essential`` must be added, i
 ## Library search order
 
 On the EmuELEC target system, the libraries will be searched in the following order:
- - Any path defined in ``LD_LIBRARY_PATH``. Not indexed in ``ld.so.cache`` (slow)
- - Any path defined in ``ld.so.conf`` and ``ld.so.conf.d/*.conf``, *.conf files indexed in alphabetical order. Indexed in ``ld.so.cache`` (fast)
-   - emuelec.conf
+ - Any path defined in ``LD_LIBRARY_PATH``. Most of them come from /etc/profile. Not indexed in ``ld.so.cache`` (slow)
+   - /etc/profile.d/99-emuelec.conf
      - ``/emuelec/lib32`` => ``/storage/.config/emuelec/lib32``, writable
      - ``/emuelec/lib`` => ``/storage/.config/emuelec/lib``, writable
+ - Any path defined in ``ld.so.conf`` and ``ld.so.conf.d/*.conf``, *.conf files indexed in alphabetical order. Indexed in ``ld.so.cache`` (fast)
    - gcc-lib32.conf
      - ``/usr/lib32``, read-only
    - pulseaudio.conf
@@ -22,10 +22,10 @@ On the EmuELEC target system, the libraries will be searched in the following or
    - ``/usr/lib``, read-only
 
 If user wants to overwrite a certain library or provide additional libraries, they can achieve this in one of the following way:
- - Place it under ``/emuelec/lib32`` or ``/emuelec/lib``, this is suggested as it will be indexed by ``ld.so.cache`` which will make it fast to lookup, and the cache will be automatically refreshed if these folders are updated (specifically after write operation finishes). **The libraries will be applied system-wide, not only for your user session(SSH/service)**
+ - Place it under ``/emuelec/lib32`` or ``/emuelec/lib``. **The libraries will be applied system-wide, not only for your user session(SSH/service)**
  - Place it anywhere else, and add the path to ``LD_LIBRARY_PATH``, this is suggested if the path is not indexed by ``ld.so.cache``, and you only want to use these libraries for a specific program/user session. Do note this is slow to lookup so don't add too many libraries.
  - **Do not add the paths that's already indexed by ``ld.so.cache`` to ``LD_LIBRARY_PATH``, unless you want to re-write the lookup order, as this will significantly slows down the lookup speed**
-   - Bad practice: (every paths in the following ``LD_LIBRARY_PATH`` is already indexed by ``ld.so.cache`` and this just adds meaningless search time) ``LD_LIBRARY_PATH=/emuelec/lib32:/emuelec/lib:/usr/lib32/pulseaudio:/usr/lib/pulseaudio:/usr/lib32:/usr/lib``
+   - Bad practice: (most paths in the following ``LD_LIBRARY_PATH`` is already indexed by ``ld.so.cache`` and this just adds meaningless search time) ``LD_LIBRARY_PATH=/emuelec/lib32:/emuelec/lib:/usr/lib32/pulseaudio:/usr/lib/pulseaudio:/usr/lib32:/usr/lib``
 ## Daemons
 The systemd units ``ldconfig-boot.service`` and ``ldconfig-watch.path`` are what made it possible to drop ``LD_LIBRARY_PATH`` entirely (note it is still supported for out-of-tree paths like when you load ports). 
 
