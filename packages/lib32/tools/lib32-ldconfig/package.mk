@@ -24,11 +24,10 @@ makeinstall_target() {
   if [ "${PROJECT}" = "Rockchip" ]; then
     mkdir -p ${INSTALL}/etc/profile.d
     # Temporary workaround for faulty libmali until we understand why it is not searched correctly
-    echo 'export LD_LIBRARY_PATH="/emuelec/lib32:/usr/lib32:$LD_LIBRARY_PATH"' > ${INSTALL}/etc/profile.d/99-rk-mali-workaround.conf
+    echo 'export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"' > ${INSTALL}/etc/profile.d/99-rk-mali-workaround.conf
   fi
 }
 
 post_install() {
-  enable_service ldconfig-boot.service
-  enable_service ldconfig-watch.path
+  enable_service ldconfig.service
 }
