@@ -21,11 +21,6 @@ make_target() {
 makeinstall_target() {
   mkdir -p ${INSTALL}/usr/bin
     cp -ra ${PKG_BUILD}/ldconfig ${INSTALL}/usr/bin/
-  if [ "${PROJECT}" = "Rockchip" ]; then
-    mkdir -p ${INSTALL}/etc/profile.d
-    # Temporary workaround for faulty libmali until we understand why it is not searched correctly
-    echo 'export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"' > ${INSTALL}/etc/profile.d/99-rk-mali-workaround.conf
-  fi
 }
 
 post_install() {
