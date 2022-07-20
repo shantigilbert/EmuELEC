@@ -10,7 +10,6 @@ PKG_LICENSE="OSS"
 PKG_SITE="http://www.pcre.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain pcre:host"
-PKG_DEPENDS_UNPACK+=" pcre"
 PKG_PATCH_DIRS+=" $(get_pkg_directory pcre)/patches"
 PKG_LONGDESC="A set of functions that implement regular expression pattern matching."
 PKG_TOOLCHAIN="configure"
@@ -23,6 +22,7 @@ PKG_CONFIGURE_OPTS_TARGET="--enable-static \
              --with-gnu-ld"
 
 unpack() {
+  ${SCRIPTS}/get pcre
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/pcre/pcre-${PKG_VERSION}.tar.bz2 -C ${PKG_BUILD}
 }

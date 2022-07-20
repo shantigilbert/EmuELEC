@@ -10,12 +10,12 @@ PKG_LICENSE="GPL"
 PKG_SITE="https://sourceware.org/bzip2/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" bzip2"
 PKG_PATCH_DIRS+=" $(get_pkg_directory bzip2)/patches"
 PKG_LONGDESC="A high-quality bzip2 data compressor."
 PKG_BUILD_FLAGS="lib32 +pic +pic:host"
 
 unpack() {
+  ${SCRIPTS}/get bzip2
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/bzip2/bzip2-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

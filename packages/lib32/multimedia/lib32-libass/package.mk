@@ -10,7 +10,6 @@ PKG_LICENSE="BSD"
 PKG_SITE="https://github.com/libass/libass"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-freetype lib32-fontconfig lib32-fribidi lib32-harfbuzz"
-PKG_DEPENDS_UNPACK+=" libass"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libass)/patches"
 PKG_LONGDESC="A portable subtitle renderer for the ASS/SSA (Advanced Substation Alpha/Substation Alpha) subtitle format."
 PKG_BUILD_FLAGS="lib32"
@@ -21,6 +20,7 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-test \
                            --with-gnu-ld"
 
 unpack() {
+  ${SCRIPTS}/get libass
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libass/libass-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

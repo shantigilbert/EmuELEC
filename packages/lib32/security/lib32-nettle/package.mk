@@ -10,7 +10,6 @@ PKG_LICENSE="GPL2"
 PKG_SITE="http://www.lysator.liu.se/~nisse/nettle"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-gmp"
-PKG_DEPENDS_UNPACK+=" nettle"
 PKG_PATCH_DIRS+=" $(get_pkg_directory nettle)/patches"
 PKG_LONGDESC="A low-level cryptographic library."
 PKG_BUILD_FLAGS="lib32"
@@ -23,6 +22,7 @@ if target_has_feature neon; then
 fi
 
 unpack() {
+  ${SCRIPTS}/get nettle
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/nettle/nettle-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

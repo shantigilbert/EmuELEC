@@ -9,7 +9,6 @@ PKG_SITE="https://github.com/JohnnyonFlame/gl4es"
 PKG_LICENSE="GPL"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-${OPENGLES}"
-PKG_DEPENDS_UNPACK+=" gl4es"
 PKG_PATCH_DIRS+=" $(get_pkg_directory gl4es)/patches"
 PKG_LONGDESC=" GL4ES is a OpenGL 2.1/1.5 to GL ES 2.0/1.1 translation library, with support for Pandora, ODroid, OrangePI, CHIP, Raspberry PI, Android, Emscripten and AmigaOS4. "
 PKG_TOOLCHAIN="cmake-make"
@@ -22,6 +21,7 @@ else
 fi
 
 unpack() {
+  ${SCRIPTS}/get gl4es
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/gl4es/gl4es-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

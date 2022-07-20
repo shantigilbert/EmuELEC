@@ -10,7 +10,6 @@ PKG_LICENSE="LGPL2.1+"
 PKG_SITE="http://www.freedesktop.org/wiki/Software/systemd"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain Jinja2:host lib32-libcap lib32-util-linux"
-PKG_DEPENDS_UNPACK+=" systemd"
 SD_DIRECTORY="$(get_pkg_directory systemd)"
 PKG_PATCH_DIRS+=" ${SD_DIRECTORY}/patches"
 PKG_LONGDESC="A system and session manager for Linux, compatible with SysV and LSB init scripts."
@@ -116,6 +115,7 @@ if [ "${DEVICE}" != "Amlogic-old" ]; then
 fi
 
 unpack() {
+  ${SCRIPTS}/get systemd
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/systemd/systemd-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

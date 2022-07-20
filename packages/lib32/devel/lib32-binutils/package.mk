@@ -11,7 +11,6 @@ PKG_URL=""
 PKG_DEPENDS_HOST="ccache:host bison:host flex:host lib32-linux-headers"
 PKG_DEPENDS_TARGET="lib32-toolchain binutils"
 PKG_LONGDESC="A GNU collection of binary utilities for multilib ARM."
-PKG_DEPENDS_UNPACK+=" binutils"
 PKG_PATCH_DIRS+=" $(get_pkg_directory binutils)/patches"
 
 PKG_CONFIGURE_OPTS_HOST="--target=${LIB32_TARGET_NAME} \
@@ -32,6 +31,7 @@ PKG_CONFIGURE_OPTS_HOST="--target=${LIB32_TARGET_NAME} \
                          --disable-nls"
 
 unpack() {
+  ${SCRIPTS}/get binutils
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/binutils/binutils-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

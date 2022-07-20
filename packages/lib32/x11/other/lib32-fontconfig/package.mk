@@ -10,7 +10,6 @@ PKG_LICENSE="OSS"
 PKG_SITE="http://www.fontconfig.org"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-util-linux lib32-util-macros lib32-freetype lib32-libxml2 lib32-zlib lib32-expat"
-PKG_DEPENDS_UNPACK+=" fontconfig"
 PKG_PATCH_DIRS+=" $(get_pkg_directory fontconfig)/patches"
 PKG_LONGDESC="Fontconfig is a library for font customization and configuration."
 PKG_TOOLCHAIN="configure"
@@ -25,6 +24,7 @@ PKG_CONFIGURE_OPTS_TARGET="--with-arch=${LIB32_TARGET_ARCH} \
                            --disable-rpath"
 
 unpack() {
+  ${SCRIPTS}/get fontconfig
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/fontconfig/fontconfig-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

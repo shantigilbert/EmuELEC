@@ -11,12 +11,12 @@ PKG_LICENSE="GPL"
 PKG_SITE="https://git.kernel.org/pub/scm/libs/libcap/libcap.git/log/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" libcap"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libcap)/patches"
 PKG_LONGDESC="A library for getting and setting POSIX.1e capabilities."
 PKG_BUILD_FLAGS="+pic lib32"
 
 unpack() {
+  ${SCRIPTS}/get libcap
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libcap/libcap-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

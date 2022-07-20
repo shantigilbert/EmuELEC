@@ -9,13 +9,13 @@ PKG_LICENSE="GNU"
 PKG_SITE="https://github.com/shantigilbert/linux-rga"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-libdrm"
-PKG_DEPENDS_UNPACK+=" librga"
 PKG_PATCH_DIRS+=" $(get_pkg_directory librga)/patches"
 PKG_LONGDESC="The RGA driver userspace"
 PKG_TOOLCHAIN="auto"
 PKG_BUILD_FLAGS="lib32"
 
 unpack() {
+  ${SCRIPTS}/get librga
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/librga/librga-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

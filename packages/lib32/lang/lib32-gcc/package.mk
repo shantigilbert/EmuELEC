@@ -12,7 +12,6 @@ PKG_DEPENDS_BOOTSTRAP="ccache:host autoconf:host lib32-binutils:host gmp:host mp
 PKG_DEPENDS_HOST="ccache:host autoconf:host lib32-binutils:host gmp:host mpfr:host mpc:host zstd:host lib32-glibc"
 PKG_DEPENDS_TARGET="lib32-toolchain"
 PKG_LONGDESC="This package contains the GNU Compiler Collection for multilib ARM."
-PKG_DEPENDS_UNPACK+=" gcc"
 PKG_PATCH_DIRS+=" $(get_pkg_directory gcc)/patches"
 
 GCC_COMMON_CONFIGURE_OPTS="--target=${LIB32_TARGET_NAME} \
@@ -70,6 +69,7 @@ PKG_CONFIGURE_OPTS_HOST="${GCC_COMMON_CONFIGURE_OPTS} \
                          ${LIB32_TARGET_ARCH_GCC_OPTS}"
 
 unpack() {
+  ${SCRIPTS}/get gcc
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/gcc/gcc-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

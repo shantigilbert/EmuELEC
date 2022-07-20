@@ -11,13 +11,13 @@ PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain zlib"
 PKG_LONGDESC="A general purpose (ZIP) data compression library."
 PKG_TOOLCHAIN="cmake-make"
-PKG_DEPENDS_UNPACK+=" zlib"
 PKG_PATCH_DIRS+=" $(get_pkg_directory zlib)/patches"
 PKG_BUILD_FLAGS="lib32"
 
 PKG_CMAKE_OPTS_TARGET="-DINSTALL_PKGCONFIG_DIR=/usr/lib/pkgconfig"
 
 unpack() {
+  ${SCRIPTS}/get zlib
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/zlib/zlib-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

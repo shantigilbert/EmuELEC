@@ -10,12 +10,12 @@ PKG_LICENSE="GPL"
 PKG_SITE="http://www.nih.at/libzip/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-zlib lib32-zstd"
-PKG_DEPENDS_UNPACK+=" libzip"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libzip)/patches"
 PKG_LONGDESC="A C library for reading, creating, and modifying zip archives."
 PKG_BUILD_FLAGS="lib32"
 
 unpack() {
+  ${SCRIPTS}/get libzip
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libzip/libzip-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

@@ -9,7 +9,6 @@ PKG_LICENSE="LibPNG2"
 PKG_SITE="http://www.libpng.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-zlib"
-PKG_DEPENDS_UNPACK+=" libpng"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libpng)/patches"
 PKG_LONGDESC="An extensible file format for the lossless, portable, well-compressed storage of raster images."
 PKG_TOOLCHAIN="configure"
@@ -20,6 +19,7 @@ PKG_CONFIGURE_OPTS_TARGET="ac_cv_lib_z_zlibVersion=yes \
                            --enable-shared"
 
 unpack() {
+  ${SCRIPTS}/get libpng
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libpng/libpng-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

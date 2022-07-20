@@ -10,7 +10,6 @@ PKG_SITE="https://www.libsdl.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-alsa-lib lib32-systemd-libs lib32-dbus lib32-${OPENGLES} lib32-libpulse"
 PKG_LONGDESC="Simple DirectMedia Layer is a cross-platform development library designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware."
-PKG_DEPENDS_UNPACK+=" SDL2"
 PKG_BUILD_FLAGS="lib32"
 
 
@@ -80,6 +79,7 @@ else
 fi
 
 unpack() {
+  ${SCRIPTS}/get SDL2
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/SDL2/SDL2-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

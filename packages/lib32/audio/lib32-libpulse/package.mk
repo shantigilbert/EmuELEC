@@ -10,7 +10,6 @@ PKG_LICENSE="GPL"
 PKG_SITE="http://pulseaudio.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-alsa-lib lib32-dbus lib32-libcap lib32-libsndfile lib32-openssl lib32-systemd-libs glib:host lib32-glib"
-PKG_DEPENDS_UNPACK+=" pulseaudio"
 PKG_PATCH_DIRS+=" $(get_pkg_directory pulseaudio)/patches"
 PKG_LONGDESC="PulseAudio is a sound system for POSIX OSes, meaning that it is a proxy for your sound applications."
 PKG_BUILD_FLAGS="lib32"
@@ -67,6 +66,7 @@ PKG_MESON_OPTS_TARGET="-Ddaemon=false \
 
 
 unpack() {
+  ${SCRIPTS}/get pulseaudio
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/pulseaudio/pulseaudio-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

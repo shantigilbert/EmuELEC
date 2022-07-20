@@ -13,7 +13,6 @@ PKG_DEPENDS_TARGET="ccache:host autotools:host lib32-linux-headers lib32-gcc:boo
 PKG_LONGDESC="The Glibc package contains the main C library, for multilib ARM."
 GLIBC_DIRECTORY="$(get_pkg_directory glibc)"
 PKG_NEED_UNPACK+=" ${GLIBC_DIRECTORY}"
-PKG_DEPENDS_UNPACK+=" glibc"
 PKG_PATCH_DIRS+=" ${GLIBC_DIRECTORY}/patches ${GLIBC_DIRECTORY}/patches/arm"
 PKG_BUILD_FLAGS="-gold lib32"
 
@@ -57,6 +56,7 @@ else
 fi
 
 unpack() {
+  ${SCRIPTS}/get glibc
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/glibc/glibc-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

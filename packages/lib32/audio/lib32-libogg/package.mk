@@ -10,7 +10,6 @@ PKG_LICENSE="BSD"
 PKG_SITE="https://www.xiph.org/ogg/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" libogg"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libogg)/patches"
 PKG_LONGDESC="Libogg contains necessary functionality to create, decode, and work with Ogg bitstreams."
 PKG_BUILD_FLAGS="lib32 +pic"
@@ -18,6 +17,7 @@ PKG_BUILD_FLAGS="lib32 +pic"
 PKG_CMAKE_OPTS_TARGET="-DINSTALL_DOCS=OFF"
 
 unpack() {
+  ${SCRIPTS}/get libogg
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libogg/libogg-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

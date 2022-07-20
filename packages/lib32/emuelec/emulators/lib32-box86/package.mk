@@ -10,7 +10,6 @@ PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/ptitSeb/box86"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-gl4es"
-PKG_DEPENDS_UNPACK+=" box86"
 PKG_PATCH_DIRS+=" $(get_pkg_directory box86)/patches"
 PKG_LONGDESC="Box86 - Linux Userspace x86 Emulator with a twist, targeted at ARM Linux devices"
 PKG_TOOLCHAIN="cmake"
@@ -26,6 +25,7 @@ else
 fi
 
 unpack() {
+  ${SCRIPTS}/get box86
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/box86/box86-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

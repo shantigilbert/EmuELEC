@@ -10,7 +10,6 @@ PKG_LICENSE="GPL"
 PKG_SITE="https://dbus.freedesktop.org"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-expat lib32-systemd-libs"
-PKG_DEPENDS_UNPACK+=" dbus"
 PKG_PATCH_DIRS+=" $(get_pkg_directory dbus)/patches"
 PKG_LONGDESC="D-Bus is a message bus, used for sending messages between applications."
 PKG_TOOLCHAIN="configure"
@@ -39,6 +38,7 @@ PKG_CONFIGURE_OPTS_TARGET="export ac_cv_have_abstract_sockets=yes \
 
 
 unpack() {
+  ${SCRIPTS}/get dbus
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/dbus/dbus-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

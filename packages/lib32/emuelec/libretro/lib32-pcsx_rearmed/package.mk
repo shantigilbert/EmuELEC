@@ -10,13 +10,13 @@ PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/pcsx_rearmed"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-alsa-lib"
-PKG_DEPENDS_UNPACK+=" pcsx_rearmed"
 PKG_PATCH_DIRS+=" $(get_pkg_directory pcsx_rearmed)/patches"
 PKG_SHORTDESC="ARM optimized PCSX fork"
 PKG_TOOLCHAIN="make"
 PKG_BUILD_FLAGS="lib32 +speed -gold"
 
 unpack() {
+  ${SCRIPTS}/get pcsx_rearmed
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/pcsx_rearmed/pcsx_rearmed-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

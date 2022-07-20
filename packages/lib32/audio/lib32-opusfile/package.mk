@@ -9,13 +9,13 @@ PKG_ARCH="aarch64"
 PKG_SITE="https://github.com/xiph/opusfile"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-openssl lib32-opus lib32-libogg"
-PKG_DEPENDS_UNPACK+=" opusfile"
 PKG_PATCH_DIRS+=" $(get_pkg_directory opusfile)/patches"
 PKG_SHORTDESC="Stand-alone decoder library for .opus streams"
 PKG_TOOLCHAIN="configure"
 PKG_BUILD_FLAGS="lib32"
 
 unpack() {
+  ${SCRIPTS}/get opusfile
   mkdir -p ${PKG_BUILD}
   tar cf - -C ${SOURCES}/opusfile/opusfile-${PKG_VERSION} ${PKG_TAR_COPY_OPTS} . | tar xf - -C ${PKG_BUILD}
 }

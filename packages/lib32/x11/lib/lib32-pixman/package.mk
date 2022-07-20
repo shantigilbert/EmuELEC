@@ -10,7 +10,6 @@ PKG_LICENSE="OSS"
 PKG_SITE="http://www.x.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-util-macros"
-PKG_DEPENDS_UNPACK+=" pixman"
 PKG_PATCH_DIRS+=" $(get_pkg_directory pixman)/patches"
 PKG_LONGDESC="Pixman is a generic library for manipulating pixel regions, contains low-level pixel manipulation routines."
 PKG_TOOLCHAIN="configure"
@@ -32,6 +31,7 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-openmp \
                            --with-gnu-ld"
 
 unpack() {
+  ${SCRIPTS}/get pixman
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/pixman/pixman-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

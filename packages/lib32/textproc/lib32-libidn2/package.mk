@@ -9,7 +9,6 @@ PKG_LICENSE="LGPL3"
 PKG_SITE="https://www.gnu.org/software/libidn/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" libidn2"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libidn2)/patches"
 PKG_LONGDESC="Free software implementation of IDNA2008, Punycode and TR46."
 PKG_BUILD_FLAGS="lib32"
@@ -19,6 +18,7 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-doc \
                            --disable-static"
 
 unpack() {
+  ${SCRIPTS}/get libidn2
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libidn2/libidn2-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

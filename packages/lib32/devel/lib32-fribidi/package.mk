@@ -10,7 +10,6 @@ PKG_LICENSE="LGPL"
 PKG_SITE="http://fribidi.freedesktop.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" fribidi"
 PKG_PATCH_DIRS+=" $(get_pkg_directory fribidi)/patches"
 PKG_LONGDESC="A bidirectional algorithm library."
 PKG_TOOLCHAIN="meson"
@@ -21,6 +20,7 @@ PKG_MESON_OPTS_TARGET="-Ddeprecated=false \
                        -Ddefault_library=static"
 
 unpack() {
+  ${SCRIPTS}/get fribidi
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/fribidi/fribidi-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

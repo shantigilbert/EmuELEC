@@ -9,7 +9,6 @@ PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" util-linux"
 PKG_PATCH_DIRS+=" $(get_pkg_directory util-linux)/patches"
 PKG_LONGDESC="A large variety of low-level system utilities that are necessary for a Linux system to function."
 PKG_TOOLCHAIN="autotools"
@@ -49,6 +48,7 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-gtk-doc \
                            --enable-libmount"
 
 unpack() {
+  ${SCRIPTS}/get util-linux
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/util-linux/util-linux-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

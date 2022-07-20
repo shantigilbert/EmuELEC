@@ -10,7 +10,6 @@ PKG_LICENSE="MIT"
 PKG_SITE="http://www.freedesktop.org/wiki/Software/libevdev/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" libevdev"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libevdev)/patches"
 PKG_LONGDESC="libevdev is a wrapper library for evdev devices."
 PKG_BUILD_FLAGS="lib32 +pic"
@@ -22,6 +21,7 @@ PKG_MESON_OPTS_TARGET=" \
   -Dtests=disabled"
 
 unpack() {
+  ${SCRIPTS}/get libevdev
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libevdev/libevdev-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

@@ -10,7 +10,6 @@ PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/flyinghead/flycast"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-${OPENGLES}"
-PKG_DEPENDS_UNPACK+=" flycast"
 PKG_PATCH_DIRS+=" $(get_pkg_directory flycast)/patches" 
 PKG_SHORTDESC="Flycast is a multiplatform Sega Dreamcast emulator"
 PKG_BUILD_FLAGS="lib32 -lto"
@@ -22,6 +21,7 @@ PKG_CMAKE_OPTS_TARGET="-DLIBRETRO=ON \
                         -DUSE_GLES2=ON"
 
 unpack() {
+  ${SCRIPTS}/get flycast
   mkdir -p ${PKG_BUILD}
   tar cf - -C ${SOURCES}/flycast/flycast-${PKG_VERSION} ${PKG_TAR_COPY_OPTS} . | tar xf - -C ${PKG_BUILD}
 }

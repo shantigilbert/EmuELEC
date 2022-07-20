@@ -9,7 +9,6 @@ PKG_LICENSE="LGPL"
 PKG_SITE="https://github.com/OtherCrashOverride/libgo2"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-libevdev lib32-librga lib32-libpng lib32-openal-soft lib32-${OPENGLES}"
-PKG_DEPENDS_UNPACK+=" libgo2"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libgo2)/patches"
 PKG_LONGDESC="Support library for the ODROID-GO Advance "
 PKG_TOOLCHAIN="make"
@@ -22,6 +21,7 @@ fi
 PKG_MAKE_OPTS_TARGET="config=release ARCH= INCLUDES=-I$LIB32_SYSROOT_PREFIX/usr/include/libdrm -I$LIB32_SYSROOT_PREFIX/usr/include"
 
 unpack() {
+  ${SCRIPTS}/get libgo2
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libgo2/libgo2-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

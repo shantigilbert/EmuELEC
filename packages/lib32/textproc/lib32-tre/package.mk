@@ -8,13 +8,13 @@ PKG_ARCH="aarch64"
 PKG_SITE="https://github.com/laurikari/tre"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" tre"
 PKG_PATCH_DIRS+=" $(get_pkg_directory tre)/patches" 
 PKG_SHORTDESC="The approximate regex matching library and agrep command line tool."
 PKG_TOOLCHAIN="autotools"
 PKG_BUILD_FLAGS="lib32"
 
 unpack() {
+  ${SCRIPTS}/get tre
   mkdir -p ${PKG_BUILD}
   tar cf - -C ${SOURCES}/tre/tre-${PKG_VERSION} ${PKG_TAR_COPY_OPTS} . | tar xf - -C ${PKG_BUILD}
 }

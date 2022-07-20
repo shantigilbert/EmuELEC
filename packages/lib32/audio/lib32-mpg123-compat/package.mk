@@ -9,7 +9,6 @@ PKG_LICENSE="LGPLv2"
 PKG_SITE="http://www.mpg123.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-alsa-lib lib32-SDL2"
-PKG_DEPENDS_UNPACK+=" mpg123-compat"
 PKG_PATCH_DIRS+=" $(get_pkg_directory mpg123-compat)/patches"
 PKG_LONGDESC="A console based real time MPEG Audio Player for Layer 1, 2 and 3."
 PKG_BUILD_FLAGS="lib32 -fpic"
@@ -22,6 +21,7 @@ else
 fi
 
 unpack() {
+  ${SCRIPTS}/get mpg123-compat
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/mpg123-compat/mpg123-compat-${PKG_VERSION}.tar.bz2 -C ${PKG_BUILD}
 }

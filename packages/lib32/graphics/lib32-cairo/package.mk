@@ -10,7 +10,6 @@ PKG_LICENSE="LGPL"
 PKG_SITE="http://cairographics.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-zlib lib32-freetype lib32-fontconfig lib32-glib lib32-libpng lib32-pixman lib32-${OPENGLES}"
-PKG_DEPENDS_UNPACK+=" cairo"
 PKG_PATCH_DIRS+=" $(get_pkg_directory cairo)/patches"
 PKG_LONGDESC="Cairo is a vector graphics library with cross-device output support."
 PKG_TOOLCHAIN="configure"
@@ -69,6 +68,7 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-silent-rules \
                             --enable-egl"
 
 unpack() {
+  ${SCRIPTS}/get cairo
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/cairo/cairo-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

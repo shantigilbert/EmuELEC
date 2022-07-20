@@ -10,7 +10,6 @@ PKG_LICENSE="LGPL-2.1-or-later"
 PKG_SITE="https://libsndfile.github.io/libsndfile/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-alsa-lib lib32-flac lib32-libogg lib32-libvorbis lib32-opus"
-PKG_DEPENDS_UNPACK+=" libsndfile"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libsndfile)/patches"
 PKG_LONGDESC="A C library for reading and writing sound files containing sampled audio data."
 PKG_BUILD_FLAGS="lib32 +pic"
@@ -31,6 +30,7 @@ PKG_CMAKE_OPTS_TARGET="-DBUILD_PROGRAMS=OFF \
                        -DINSTALL_PKGCONFIG_MODULE=ON"
 
 unpack() {
+  ${SCRIPTS}/get libsndfile
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libsndfile/libsndfile-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

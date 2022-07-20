@@ -8,8 +8,6 @@ PKG_ARCH="aarch64"
 PKG_LICENSE="BSD/GPLv2"
 PKG_SITE="http://www.zstd.net"
 PKG_URL=""
-PKG_DEPENDS_HOST="ccache:host meson:host ninja:host"
-PKG_DEPENDS_UNPACK+=" zstd"
 PKG_PATCH_DIRS+=" $(get_pkg_directory zstd)/patches"
 PKG_DEPENDS_TARGET="lib32-toolchain"
 PKG_LONGDESC="A fast real-time compression algorithm."
@@ -20,13 +18,8 @@ configure_package() {
   PKG_MESON_SCRIPT="${PKG_BUILD}/build/meson/meson.build"
 }
 
-PKG_MESON_OPTS_HOST="-Dlegacy_level=0 \
-                     -Dbin_programs=false \
-                     -Dzlib=disabled \
-                     -Dlzma=disabled \
-                     -Dlz4=disabled"
-
 unpack() {
+  ${SCRIPTS}/get zstd
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/zstd/zstd-${PKG_VERSION}.tar.zst -C ${PKG_BUILD}
 }

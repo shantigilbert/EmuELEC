@@ -10,7 +10,6 @@ PKG_LICENSE="LGPL2.1"
 PKG_SITE="https://gnutls.org"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-libidn2 lib32-nettle lib32-zlib"
-PKG_DEPENDS_UNPACK+=" gnutls"
 PKG_PATCH_DIRS+=" $(get_pkg_directory gnutls)/patches"
 PKG_LONGDESC="A library which provides a secure layer over a reliable transport layer."
 PKG_BUILD_FLAGS="lib32"
@@ -31,6 +30,7 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-doc \
                            --without-tpm"
 
 unpack() {
+  ${SCRIPTS}/get gnutls
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/gnutls/gnutls-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

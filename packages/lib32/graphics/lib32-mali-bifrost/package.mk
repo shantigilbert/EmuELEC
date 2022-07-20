@@ -10,7 +10,6 @@ PKG_SITE="https://github.com/emuelec/libmali"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-libdrm mali-bifrost"
 PKG_LONGDESC="The Mali GPU library used in Rockchip Platform for Odroidgo Advance"
-PKG_DEPENDS_UNPACK+=" mali-bifrost"
 PKG_PATCH_DIRS+=" $(get_pkg_directory mali-bifrost)/patches"
 PKG_BUILD_FLAGS="lib32"
 
@@ -19,6 +18,7 @@ if [[ "${DEVICE}" =~ ^(OdroidGoAdvance|GameForce)$ ]]; then
 fi
 
 unpack() {
+  ${SCRIPTS}/get mali-bifrost
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/mali-bifrost/mali-bifrost-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
   if [ "${PKG_RK3326}" = "yes" ]; then

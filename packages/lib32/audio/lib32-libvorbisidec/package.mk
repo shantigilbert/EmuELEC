@@ -9,13 +9,13 @@ PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/sezero/tremor"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-libogg lib32-freetype"
-PKG_DEPENDS_UNPACK+=" libvorbisidec"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libvorbisidec)/patches"
 PKG_LONGDESC="libvorbisidec"
 PKG_TOOLCHAIN="make"
 PKG_BUILD_FLAGS="lib32"
 
 unpack() {
+  ${SCRIPTS}/get libvorbisidec
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libvorbisidec/libvorbisidec-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

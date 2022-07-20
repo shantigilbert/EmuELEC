@@ -9,7 +9,6 @@ PKG_LICENSE="GPLv3"
 PKG_SITE="http://www.libsdl.org/projects/SDL_mixer/release"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-alsa-lib lib32-SDL2 lib32-mpg123-compat lib32-libvorbis lib32-libvorbisidec lib32-libogg lib32-opusfile lib32-libmodplug lib32-flac"
-PKG_DEPENDS_UNPACK+=" SDL2_mixer"
 PKG_PATCH_DIRS+=" $(get_pkg_directory SDL2_mixer)/patches"
 PKG_LONGDESC="SDL_mixer 2.0.1"
 PKG_BUILD_FLAGS="lib32"
@@ -23,6 +22,7 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-sdltest \
                            --enable-music-mp3"
 
 unpack() {
+  ${SCRIPTS}/get SDL2_mixer
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/SDL2_mixer/SDL2_mixer-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

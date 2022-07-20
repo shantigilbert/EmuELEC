@@ -11,10 +11,11 @@ PKG_LICENSE="GPL"
 PKG_SITE="http://www.kernel.org"
 PKG_DEPENDS_TARGET="ccache:host rsync:host openssl:host"
 PKG_LONGDESC="This package contains Linux headers."
-PKG_DEPENDS_UNPACK+=" linux"
 PKG_BUILD_FLAGS="lib32"
+PKG_TOOLCHAIN="manual"
 
 unpack() {
+  ${SCRIPTS}/get linux
   mkdir -p ${PKG_BUILD}
   if [ "${LINUX}" = "default" ]; then
     tar --strip-components=1 -xf ${SOURCES}/linux/linux-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}  

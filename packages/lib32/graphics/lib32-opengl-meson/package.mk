@@ -10,12 +10,12 @@ PKG_SITE="http://openlinux.amlogic.com:8000/download/ARM/filesystem/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain opengl-meson"
 PKG_LONGDESC="OpenGL ES pre-compiled libraries for Mali GPUs found in Amlogic Meson SoCs."
-PKG_DEPENDS_UNPACK+=" opengl-meson"
 PKG_PATCH_DIRS+=" $(get_pkg_directory opengl-meson)/patches"
 PKG_TOOLCHAIN="manual"
 PKG_BUILD_FLAGS="lib32"
 
 unpack() {
+  ${SCRIPTS}/get opengl-meson
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/opengl-meson/opengl-meson-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

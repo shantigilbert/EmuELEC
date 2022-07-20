@@ -8,7 +8,6 @@ PKG_ARCH="aarch64"
 PKG_SITE="https://github.com/JohnnyonFlame/droidports"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-SDL2 lib32-SDL2_image lib32-openal-soft lib32-bzip2 lib32-libzip lib32-libpng"
-PKG_DEPENDS_UNPACK+=" droidports"
 PKG_PATCH_DIRS+=" $(get_pkg_directory droidports)/patches" 
 PKG_LONGDESC="A repository for experimenting with elf loading and in-place patching of android native libraries on non-android operating systems."
 PKG_TOOLCHAIN="cmake"
@@ -17,6 +16,7 @@ PKG_BUILD_FLAGS="lib32"
 PKG_CMAKE_OPTS_TARGET=" -DCMAKE_BUILD_TYPE=Release -DPLATFORM=linux -DPORT=gmloader -DUSE_BUILTIN_FREETYPE=ON"
 
 unpack() {
+  ${SCRIPTS}/get droidports
   mkdir -p ${PKG_BUILD}
   tar cf - -C ${SOURCES}/droidports/droidports-${PKG_VERSION} ${PKG_TAR_COPY_OPTS} . | tar xf - -C ${PKG_BUILD}
 }

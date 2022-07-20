@@ -11,7 +11,6 @@ PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/libretro/uae4arm-libretro"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" uae4arm"
 PKG_PATCH_DIRS+=" $(get_pkg_directory uae4arm)/patches"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -24,6 +23,7 @@ PKG_AUTORECONF="no"
 PKG_BUILD_FLAGS="lib32 -lto"
 
 unpack() {
+  ${SCRIPTS}/get uae4arm
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/uae4arm/uae4arm-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

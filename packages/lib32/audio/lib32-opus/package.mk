@@ -9,7 +9,6 @@ PKG_LICENSE="BSD"
 PKG_SITE="http://www.opus-codec.org"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" opus"
 PKG_PATCH_DIRS+=" $(get_pkg_directory opus)/patches"
 PKG_LONGDESC="Codec designed for interactive speech and audio transmission over the Internet."
 PKG_TOOLCHAIN="configure"
@@ -20,6 +19,7 @@ PKG_CONFIGURE_OPTS_TARGET="--enable-static \
                            --enable-fixed-point"
 
 unpack() {
+  ${SCRIPTS}/get opus
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/opus/opus-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

@@ -10,7 +10,6 @@ PKG_LICENSE="LGPL"
 PKG_SITE="https://www.gtk.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-pcre lib32-zlib lib32-libffi Python3:host lib32-util-linux"
-PKG_DEPENDS_UNPACK+=" glib"
 PKG_PATCH_DIRS+=" $(get_pkg_directory glib)/patches"
 PKG_LONGDESC="A library which includes support routines for C such as lists, trees, hashes, memory allocation."
 PKG_TOOLCHAIN="meson"
@@ -30,6 +29,7 @@ PKG_MESON_OPTS_TARGET="-Ddefault_library=shared \
                        -Dtests=false"
 
 unpack() {
+  ${SCRIPTS}/get glib
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/glib/glib-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

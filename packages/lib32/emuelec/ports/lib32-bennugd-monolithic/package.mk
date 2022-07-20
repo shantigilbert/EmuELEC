@@ -8,13 +8,13 @@ PKG_ARCH="aarch64"
 PKG_SITE="https://github.com/christianhaitian/bennugd-monolithic"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-libvorbisidec lib32-SDL2 lib32-SDL2_mixer lib32-libpng lib32-tre"
-PKG_DEPENDS_UNPACK+=" bennugd-monolithic"
 PKG_PATCH_DIRS+=" $(get_pkg_directory bennugd-monolithic)/patches" 
 PKG_SHORTDESC="Use for executing bennugd games like Streets of Rage Remake "
 PKG_TOOLCHAIN="cmake-make"
 PKG_BUILD_FLAGS="lib32"
 
 unpack() {
+  ${SCRIPTS}/get bennugd-monolithic
   mkdir -p ${PKG_BUILD}
   tar cf - -C ${SOURCES}/bennugd-monolithic/bennugd-monolithic-${PKG_VERSION} ${PKG_TAR_COPY_OPTS} . | tar xf - -C ${PKG_BUILD}
 }

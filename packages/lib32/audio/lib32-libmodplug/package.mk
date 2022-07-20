@@ -10,7 +10,6 @@ PKG_LICENSE="GPL"
 PKG_SITE="http://modplug-xmms.sourceforge.net/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" libmodplug"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libmodplug)/patches"
 PKG_LONGDESC="libmodplug renders mod music files as raw audio data, for playing or conversion."
 PKG_BUILD_FLAGS="lib32 +pic"
@@ -18,6 +17,7 @@ PKG_BUILD_FLAGS="lib32 +pic"
 PKG_CONFIGURE_OPTS_TARGET="--enable-static --disable-shared"
 
 unpack() {
+  ${SCRIPTS}/get libmodplug
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libmodplug/libmodplug-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

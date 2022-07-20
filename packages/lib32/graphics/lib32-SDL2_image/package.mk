@@ -10,12 +10,12 @@ PKG_LICENSE="GPL"
 PKG_SITE="http://www.libsdl.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-SDL2"
-PKG_DEPENDS_UNPACK+=" SDL2_image"
 PKG_PATCH_DIRS+=" $(get_pkg_directory SDL2_image)/patches"
 PKG_LONGDESC="SDL_image is an image file loading library. "
 PKG_BUILD_FLAGS="lib32"
 
 unpack() {
+  ${SCRIPTS}/get SDL2_image
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/SDL2_image/SDL2_image-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

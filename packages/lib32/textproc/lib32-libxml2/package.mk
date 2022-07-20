@@ -10,7 +10,6 @@ PKG_LICENSE="MIT"
 PKG_SITE="http://xmlsoft.org"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-zlib"
-PKG_DEPENDS_UNPACK+=" libxml2"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libxml2)/patches"
 PKG_LONGDESC="The libxml package contains an XML library, which allows you to manipulate XML files."
 PKG_TOOLCHAIN="autotools"
@@ -27,6 +26,7 @@ PKG_CONFIGURE_OPTS_TARGET="ac_cv_header_ansidecl_h=no \
                            --with-sysroot=${LIB32_SYSROOT_PREFIX}"
 
 unpack() {
+  ${SCRIPTS}/get libxml2
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libxml2/libxml2-${PKG_VERSION}.tar.bz2 -C ${PKG_BUILD}
 }

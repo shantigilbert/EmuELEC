@@ -10,7 +10,6 @@ PKG_LICENSE="GPL"
 PKG_SITE="http://www.freedesktop.org/wiki/Software/HarfBuzz"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-cairo lib32-freetype lib32-glib"
-PKG_DEPENDS_UNPACK+=" harfbuzz"
 PKG_PATCH_DIRS+=" $(get_pkg_directory harfbuzz)/patches"
 PKG_LONGDESC="HarfBuzz is an OpenType text shaping engine."
 PKG_TOOLCHAIN="meson"
@@ -27,6 +26,7 @@ PKG_MESON_OPTS_TARGET="-Dbenchmark=disabled \
                        -Dtests=disabled"
 
 unpack() {
+  ${SCRIPTS}/get harfbuzz
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/harfbuzz/harfbuzz-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

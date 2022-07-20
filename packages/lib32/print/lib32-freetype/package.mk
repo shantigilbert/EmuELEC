@@ -10,7 +10,6 @@ PKG_LICENSE="GPL"
 PKG_SITE="https://freetype.org"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-zlib lib32-libpng"
-PKG_DEPENDS_UNPACK+=" freetype"
 PKG_PATCH_DIRS+=" $(get_pkg_directory freetype)/patches"
 PKG_LONGDESC="The FreeType engine is a free and portable TrueType font rendering engine."
 PKG_TOOLCHAIN="configure"
@@ -22,6 +21,7 @@ PKG_CONFIGURE_OPTS_TARGET="LIBPNG_CFLAGS=-I${LIB32_SYSROOT_PREFIX}/usr/include \
                            --with-zlib"
 
 unpack() {
+  ${SCRIPTS}/get freetype
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/freetype/freetype-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

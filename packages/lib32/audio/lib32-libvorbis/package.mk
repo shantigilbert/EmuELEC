@@ -10,7 +10,6 @@ PKG_LICENSE="BSD"
 PKG_SITE="http://www.vorbis.com/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-libogg"
-PKG_DEPENDS_UNPACK+=" libvorbis"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libvorbis)/patches"
 PKG_LONGDESC="Lossless audio compression tools using the ogg-vorbis algorithms."
 PKG_TOOLCHAIN="autotools"
@@ -24,6 +23,7 @@ PKG_CONFIGURE_OPTS_TARGET="--enable-shared \
                            --disable-oggtest"
 
 unpack() {
+  ${SCRIPTS}/get libvorbis
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libvorbis/libvorbis-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

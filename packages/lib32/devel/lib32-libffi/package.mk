@@ -10,7 +10,6 @@ PKG_LICENSE="GPL"
 PKG_SITE="http://sourceware.org/${PKG_NAME}/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" libffi"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libffi)/patches"
 PKG_LONGDESC="Foreign Function Interface Library."
 PKG_TOOLCHAIN="autotools"
@@ -25,6 +24,7 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-debug \
                            --with-gnu-ld"
 
 unpack() {
+  ${SCRIPTS}/get libffi
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libffi/libffi-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

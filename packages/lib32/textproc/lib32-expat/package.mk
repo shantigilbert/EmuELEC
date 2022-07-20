@@ -9,7 +9,6 @@ PKG_LICENSE="OSS"
 PKG_SITE="http://expat.sourceforge.net/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" expat"
 PKG_PATCH_DIRS+=" $(get_pkg_directory expat)/patches"
 PKG_LONGDESC="Expat is an XML parser library written in C."
 PKG_BUILD_FLAGS="lib32"
@@ -21,6 +20,7 @@ PKG_CMAKE_OPTS_TARGET="-DEXPAT_BUILD_DOCS=OFF \
                        -DEXPAT_SHARED_LIBS=ON"
 
 unpack() {
+  ${SCRIPTS}/get expat
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/expat/expat-${PKG_VERSION}.tar.bz2 -C ${PKG_BUILD}
 }

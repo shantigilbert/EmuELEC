@@ -10,7 +10,6 @@ PKG_LICENSE="GPL"
 PKG_SITE="http://dri.freedesktop.org"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-libpciaccess"
-PKG_DEPENDS_UNPACK+=" libdrm"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libdrm)/patches"
 PKG_LONGDESC="The userspace interface library to kernel DRM services."
 PKG_TOOLCHAIN="meson"
@@ -30,6 +29,7 @@ PKG_MESON_OPTS_TARGET="-Dnouveau=false \
                        -Dudev=false"
 
 unpack() {
+  ${SCRIPTS}/get libdrm
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libdrm/libdrm-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

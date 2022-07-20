@@ -11,7 +11,6 @@ PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/mupen64plus-libretro"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain nasm:host lib32-$OPENGLES"
-PKG_DEPENDS_UNPACK+=" mupen64plus"
 PKG_PATCH_DIRS+=" $(get_pkg_directory mupen64plus)/patches"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -27,6 +26,7 @@ elif [[ "${DEVICE}" =~ ^(OdroidGoAdvance|GameForce|RK356x|OdroidM1)$ ]]; then
 fi
 
 unpack() {
+  ${SCRIPTS}/get mupen64plus
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/mupen64plus/mupen64plus-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

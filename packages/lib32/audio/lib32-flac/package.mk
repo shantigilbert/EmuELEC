@@ -9,7 +9,6 @@ PKG_LICENSE="GPLv2"
 PKG_SITE="https://xiph.org/flac/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-libogg"
-PKG_DEPENDS_UNPACK+=" flac"
 PKG_PATCH_DIRS+=" $(get_pkg_directory flac)/patches"
 PKG_LONGDESC="An Free Lossless Audio Codec."
 PKG_TOOLCHAIN="autotools"
@@ -36,6 +35,7 @@ else
 fi
 
 unpack() {
+  ${SCRIPTS}/get flac
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/flac/flac-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

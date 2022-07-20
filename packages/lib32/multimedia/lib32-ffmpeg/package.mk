@@ -47,6 +47,7 @@ if [ "${DISPLAYSERVER}" != "x11" ] && [ "${PROJECT}" != "Amlogic-ce" ]; then
 fi
 
 unpack() {
+  ${SCRIPTS}/get ffmpeg
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/ffmpeg/ffmpeg-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

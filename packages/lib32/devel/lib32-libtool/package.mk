@@ -10,7 +10,6 @@ PKG_LICENSE="GPL"
 PKG_SITE="http://www.gnu.org/software/libtool/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" libtool"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libtool)/patches"
 PKG_LONGDESC="A generic library support script."
 PKG_TOOLCHAIN="autotools"
@@ -18,6 +17,7 @@ PKG_BUILD_FLAGS="lib32"
 
 
 unpack() {
+  ${SCRIPTS}/get libtool
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/libtool/libtool-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

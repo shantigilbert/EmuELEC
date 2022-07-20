@@ -10,7 +10,6 @@ PKG_LICENSE="LGPLv3+"
 PKG_SITE="http://gmplib.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" gmp"
 PKG_PATCH_DIRS+=" $(get_pkg_directory gmp)/patches"
 PKG_LONGDESC="A library for arbitrary precision arithmetic, operating on signed integers, rational numbers, and floating point numbers."
 PKG_BUILD_FLAGS="lib32 +pic:host"
@@ -18,6 +17,7 @@ PKG_BUILD_FLAGS="lib32 +pic:host"
 PKG_CONFIGURE_OPTS_HOST="--enable-cxx --enable-static --disable-shared"
 
 unpack() {
+  ${SCRIPTS}/get gmp
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/gmp/gmp-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

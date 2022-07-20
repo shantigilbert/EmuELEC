@@ -10,7 +10,6 @@ PKG_LICENSE="Apache-2.0"
 PKG_SITE="https://www.openssl.org"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" openssl"
 PKG_PATCH_DIRS+=" $(get_pkg_directory openssl)/patches"
 PKG_LONGDESC="The Open Source toolkit for Secure Sockets Layer and Transport Layer Security"
 PKG_TOOLCHAIN="configure"
@@ -36,6 +35,7 @@ PKG_CONFIGURE_OPTS_TARGET="--prefix=/usr \
                            linux-armv4"
 
 unpack() {
+  ${SCRIPTS}/get openssl
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/openssl/openssl-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

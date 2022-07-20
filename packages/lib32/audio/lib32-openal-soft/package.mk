@@ -9,7 +9,6 @@ PKG_LICENSE="GPL"
 PKG_SITE="http://www.openal.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-alsa-lib"
-PKG_DEPENDS_UNPACK+=" openal-soft"
 PKG_PATCH_DIRS+=" $(get_pkg_directory openal-soft)/patches"
 PKG_LONGDESC="OpenAL Soft is a software implementation of the OpenAL 3D audio API."
 PKG_BUILD_FLAGS="lib32"
@@ -21,6 +20,7 @@ PKG_CMAKE_OPTS_TARGET="-DALSOFT_BACKEND_OSS=off \
                        -DALSOFT_UTILS=off"
 
 unpack() {
+  ${SCRIPTS}/get openal-soft
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/openal-soft/openal-soft-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }

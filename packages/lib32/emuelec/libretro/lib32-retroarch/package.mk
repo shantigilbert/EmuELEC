@@ -13,7 +13,6 @@ PKG_LICENSE="GPLv3"
 PKG_DEPENDS_TARGET="retroarch lib32-toolchain lib32-SDL2 lib32-alsa-lib lib32-openssl lib32-freetype lib32-zlib lib32-ffmpeg lib32-libass lib32-$OPENGLES"
 # samba avahi nss-mdns  openal-soft
 PKG_LONGDESC="Reference frontend for the libretro API."
-PKG_DEPENDS_UNPACK+=" retroarch"
 PKG_BUILD_FLAGS="lib32"
 
 RA_DIRECTORY="$(get_pkg_directory retroarch)"
@@ -62,6 +61,7 @@ if [ "${PULSEAUDIO_SUPPORT}" = yes ]; then
 fi
 
 unpack() {
+  ${SCRIPTS}/get retroarch
   mkdir -p ${PKG_BUILD}
   tar cf - -C ${SOURCES}/retroarch/retroarch-${PKG_VERSION} ${PKG_TAR_COPY_OPTS} . | tar xf - -C ${PKG_BUILD}
 }
