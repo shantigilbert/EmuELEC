@@ -92,7 +92,6 @@ To add packages here, the following requirement must be met:
     The corresponding generic package should be depended on if the lib32 version does not provide configs/binaries where the generic version would.
 
     E.g. lib32-retroarch depends on retroarch, as lib32-retroarch only provides binary ``/usr/bin/retroarch32`` and expects configs/libraries installed by retroarch.
- - ``[generic_pkg]`` should be depended as an unpack dependency and it should be added via ``PKG_DEPENDS_UNPACK+=" lib32-[generic_pkg]"``, the ``+=`` is used here as some other packages could be added by the build system without your noticing. If the corresponding generic_pkg can't be unpacked in an aarch64 build, then you can omit this and adpat he ``unpack()`` function (see below)
 
 **PKG_PATCH_DIRS** 
 - At least ``$(get_pkg_directory generic-pkg)/patches`` should be added so the lib32 version can also be patched if the generic version is patched
@@ -103,14 +102,7 @@ To add packages here, the following requirement must be met:
 ### Functions
 **unpack()** 
 - Unless there's no corresponding generic version, the lib32-pkg should extract source from the generic version with a custom function like this:    
-Archive
-  ````
-  unpack() {
-    mkdir -p ${PKG_BUILD}
-    tar --strip-components=1 -xf ${SOURCES}/generic-pkg/generic-pkg-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
-  }
-  ````
-  Archive, if the corresponding generic package can't be added to ``PKG_DEPENDS_UNPACK``
+  Archive
   ````
   unpack() {
     ${SCRIPTS}/get generic-pkg
