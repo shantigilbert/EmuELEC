@@ -23,6 +23,19 @@ unpack() {
   tar --strip-components=1 -xf ${SOURCES}/mali-bifrost/mali-bifrost-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
   if [ "${PKG_RK3326}" = "yes" ]; then
     unzip -o "${SOURCES}/mali-bifrost/rk3326_r13p0_gbm_with_vulkan_and_cl.zip" -d ${PKG_BUILD}
+    safe_remove ${PKG_BUILD}/lib
+  else
+    safe_remove ${PKG_BUILD}/lib/aarch64-linux-gnu
+    local REMOVE_NAME
+    for REMOVE_NAME in 'bifrost-g31*' \
+                      'bifrost-g52-g2p0-dummy*' \
+                      'bifrost-g52-g2p0-wayland.so' \
+                      'bifrost-g52-g2p0-x11.so' \
+                      'bifrost-g52-g2p0.so' \
+                      'midgard*' \
+                      'utgard*'; do
+      safe_remove ${PKG_BUILD}/lib/arm-linux-gnueabihf/libmali-${REMOVE_NAME}
+    done
   fi
 }
 
