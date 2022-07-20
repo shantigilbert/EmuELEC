@@ -113,6 +113,7 @@ To add packages here, the following requirement must be met:
   Git
   ````
   unpack() {
+    ${SCRIPTS}/get generic-pkg
     mkdir -p ${PKG_BUILD}
     tar cf - -C ${SOURCES}/generic-pkg/generic-pkg-${PKG_VERSION} ${PKG_TAR_COPY_OPTS} . | tar xf - -C ${PKG_BUILD}
   }
