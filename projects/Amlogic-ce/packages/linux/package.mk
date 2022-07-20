@@ -68,6 +68,15 @@ for pkg in $(get_pkg_variable initramfs PKG_DEPENDS_TARGET); do
   ! listcontains "${PKG_DEPENDS_TARGET}" "${pkg}" && PKG_DEPENDS_TARGET+=" ${pkg}" || true
 done
 
+post_unpack() {
+  # Add exFAT
+  ${SCRIPTS}/get exfat-linux
+  local PKG_BUILD_EXFAT="${PKG_BUILD}/fs/exfat"
+  [ -e "$PKG_BUILD_EXFAT" ] && rm -rf "$PKG_BUILD_EXFAT"
+  mkdir -p "$PKG_BUILD_EXFAT"
+  tar --strip-components=1 -xf "${SOURCES}/exfat-linux/exfat-linux-$(get_pkg_version exfat-linux).tar.gz" -C "$PKG_BUILD_EXFAT"
+}
+
 post_patch() {
   # linux was already built and its build dir autoremoved - prepare it again for kernel packages
   if [ -d $PKG_INSTALL/.image ]; then
@@ -159,15 +168,6 @@ pre_make_target() {
     FW_LIST="$(find $PKG_BUILD/external-firmware \( -type f -o -type l \) \( -iname '*.bin' -o -iname '*.fw' -o -path '*/intel-ucode/*' \) | sed 's|.*external-firmware/||' | sort | xargs)"
     sed -i "s|CONFIG_EXTRA_FIRMWARE=.*|CONFIG_EXTRA_FIRMWARE=\"${FW_LIST}\"|" $PKG_BUILD/.config
   fi
-
-  # Add exFAT
-  pushd ${BUILD_ROOT} &>/dev/null
-  ${SCRIPTS}/get exfat-linux
-  popd &>/dev/null
-  PKG_BUILD_EXFAT="${PKG_BUILD}/fs/exfat"
-  [ -e "$PKG_BUILD_EXFAT" ] && rm -rf "$PKG_BUILD_EXFAT"
-  mkdir -p "$PKG_BUILD_EXFAT"
-  tar --strip-components=1 -xf "${SOURCES}/exfat-linux/exfat-linux-$(get_pkg_version exfat-linux).tar.gz" -C "$PKG_BUILD_EXFAT"
 
   kernel_make oldconfig
 }
