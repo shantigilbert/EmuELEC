@@ -9,7 +9,6 @@ PKG_DEPENDS_HOST="ccache:host rsync:host openssl:host"
 PKG_DEPENDS_TARGET="toolchain linux:host kmod:host xz:host keyutils ${KERNEL_EXTRA_DEPENDS_TARGET}"
 PKG_NEED_UNPACK="${LINUX_DEPENDS} $(get_pkg_directory initramfs) $(get_pkg_variable initramfs PKG_NEED_UNPACK)"
 PKG_LONGDESC="This package contains a precompiled kernel image and the modules."
-PKG_DEPENDS_UNPACK+=" exfat-linux"
 PKG_IS_KERNEL_PKG="yes"
 PKG_STAMP="${KERNEL_TARGET} ${KERNEL_MAKE_EXTRACMD}"
 
@@ -199,6 +198,7 @@ pre_make_target() {
   fi
 
   # Add exFAT
+  ${SCRIPTS}/get exfat-linux
 	PKG_BUILD_EXFAT="${PKG_BUILD}/fs/exfat"
 	[ -e "$PKG_BUILD_EXFAT" ] && rm -rf "$PKG_BUILD_EXFAT"
 	mkdir -p "$PKG_BUILD_EXFAT"
