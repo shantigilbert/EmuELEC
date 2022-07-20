@@ -92,6 +92,7 @@ To add packages here, the following requirement must be met:
     The corresponding generic package should be depended on if the lib32 version does not provide configs/binaries where the generic version would.
 
     E.g. lib32-retroarch depends on retroarch, as lib32-retroarch only provides binary ``/usr/bin/retroarch32`` and expects configs/libraries installed by retroarch.
+ - ``[generic_pkg]`` should be depended as an unpack dependency and it should be added via ``PKG_DEPENDS_UNPACK+=" lib32-[generic_pkg]"``, the ``+=`` is used here as some other packages could be added by the build system without your noticing. If the corresponding generic_pkg can't be unpacked in an aarch64 build, then you can omit this and adpat he ``unpack()`` function (see below)
 
 **PKG_PATCH_DIRS** 
 - At least ``$(get_pkg_directory generic-pkg)/patches`` should be added so the lib32 version can also be patched if the generic version is patched
@@ -109,6 +110,14 @@ Archive
     tar --strip-components=1 -xf ${SOURCES}/generic-pkg/generic-pkg-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
   }
   ````
+  Archive, if the corresponding generic package can't be added to ``PKG_DEPENDS_UNPACK``
+  ````
+  unpack() {
+    ${SCRIPTS}/get generic-pkg
+    mkdir -p ${PKG_BUILD}
+    tar --strip-components=1 -xf ${SOURCES}/generic-pkg/generic-pkg-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
+  }
+  ````
   Git
   ````
   unpack() {
@@ -116,6 +125,7 @@ Archive
     tar cf - -C ${SOURCES}/generic-pkg/generic-pkg-${PKG_VERSION} ${PKG_TAR_COPY_OPTS} . | tar xf - -C ${PKG_BUILD}
   }
   ````
+  The reason we don't use ``{SCRIPTS}/unpack generic-pkg ${PKG_BUILD}`` is that it will also apply patches from generic-pkg, which is not always what we want, and this may introduce recursive patches. And I want to keep the changes made to the build system as minumum as possible.
 
 **makeinstall_target()** 
 - Since we use ``/usr/lib32`` as actual multilib path, manual tweaks are needed when installing the package
@@ -153,7 +163,7 @@ In the header, please keep the older contributors and then add your name like th
 If you just copy/paste these packages to other projects blindly, **they won't build!!!** They'll most likely corrupt your build folder and toolchain which can only be rescued by ``make clean``
 
 These packages will only work with a build system that recognizes the PKG_BUILD_FLAGS ``lib32`` and/or ``lib32:[target]``, if you come from other distros and want to port these packages, the following part in the build system must also be ported, i.e. these are also what made it possible to build them in EmuELEC itself:
-- ``config/options32`` adds a series of ``LIB32-`` and ``LIB64-`` prefixed variables
+- ``config/options32`` adds a series of ``LIB32_`` and ``LIB64_`` prefixed variables
 - ``config/options`` adds a check to invoke ``config/options32`` for ``aarch64`` build
 - ``config/functions`` adds a function ``use_32_options()`` to replace key variables to 32-bit versions
 - ``scripts/build`` adds a check before ``setup_toolchain()`` that'll call ``use_32_options()`` if a flag ``lib32`` or ``lib32:[target]`` is detected
