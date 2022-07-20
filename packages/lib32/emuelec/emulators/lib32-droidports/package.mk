@@ -29,5 +29,5 @@ pre_configure_target() {
 makeinstall_target() {
   mkdir -p $INSTALL/usr/bin
     cp ${PKG_BUILD}/.${TARGET_NAME}/gmloader $INSTALL/usr/bin
-	cp $(get_pkg_directory droidports)/scripts/* $INSTALL/usr/bin
+  cp $(get_pkg_directory droidports)/scripts/* $INSTALL/usr/bin
 }

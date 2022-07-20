@@ -15,12 +15,12 @@ PKG_LONGDESC="SDL_mixer 2.0.1"
 PKG_BUILD_FLAGS="lib32"
 
 PKG_CONFIGURE_OPTS_TARGET="--disable-sdltest \
-							--disable-music-midi-fluidsynth \
-							--enable-music-flac \
-							--enable-music-mod-modplug \
-							--enable-music-ogg-tremor \
-							--enable-music-ogg \
-							--enable-music-mp3"
+                           --disable-music-midi-fluidsynth \
+                           --enable-music-flac \
+                           --enable-music-mod-modplug \
+                           --enable-music-ogg-tremor \
+                           --enable-music-ogg \
+                           --enable-music-mp3"
 
 unpack() {
   mkdir -p ${PKG_BUILD}

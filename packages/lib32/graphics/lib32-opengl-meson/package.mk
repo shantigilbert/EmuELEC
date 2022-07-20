@@ -21,7 +21,7 @@ unpack() {
 }
 
 makeinstall_target() {
-	mkdir -p ${INSTALL}/usr/lib32
+  mkdir -p ${INSTALL}/usr/lib32
   mkdir -p ${SYSROOT_PREFIX}/usr/lib
   case "${DEVICE}" in 
     Amlogic-ng)
@@ -69,8 +69,8 @@ makeinstall_target() {
   done
 
 # install headers and libraries to TOOLCHAIN
-	cp -rf ${PKG_BUILD}/include/* ${SYSROOT_PREFIX}/usr/include
-	cp -rf $(get_pkg_directory opengl-meson)/sources/pkgconfig/* ${SYSROOT_PREFIX}/usr/lib/pkgconfig
-	cp ${SYSROOT_PREFIX}/usr/include/EGL_platform/platform_fbdev/* ${SYSROOT_PREFIX}/usr/include/EGL
-	rm -rf ${SYSROOT_PREFIX}/usr/include/EGL_platform
+  cp -rf ${PKG_BUILD}/include/* ${SYSROOT_PREFIX}/usr/include
+  cp -rf $(get_pkg_directory opengl-meson)/sources/pkgconfig/* ${SYSROOT_PREFIX}/usr/lib/pkgconfig
+  cp ${SYSROOT_PREFIX}/usr/include/EGL_platform/platform_fbdev/* ${SYSROOT_PREFIX}/usr/include/EGL
+  rm -rf ${SYSROOT_PREFIX}/usr/include/EGL_platform
 }

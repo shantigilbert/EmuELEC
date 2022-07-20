@@ -28,10 +28,10 @@ unpack() {
 
 makeinstall_target() {
   if [ "${PKG_RK3326}" = "yes" ]; then
-	  local BLOB="libmali.so_rk3326_gbm_arm32_r13p0_with_vulkan_and_cl"
+    local BLOB="libmali.so_rk3326_gbm_arm32_r13p0_with_vulkan_and_cl"
     local LIBDIR=${INSTALL}/usr/lib32
   else
-	  local BLOB="lib/arm-linux-gnueabihf/libmali-bifrost-g52-g2p0-gbm.so"
+    local BLOB="lib/arm-linux-gnueabihf/libmali-bifrost-g52-g2p0-gbm.so"
     local LIBDIR=${INSTALL}/usr/lib32/libmali
     mkdir -p ${INSTALL}/etc/profile.d
     # Add it after the existing LD_LIBRARY_PATH, to make sure /emuelec/libs are read before it
@@ -63,8 +63,8 @@ makeinstall_target() {
     ln -sf libmali.so ${SYSROOT_PREFIX}/usr/lib/${LINK_NAME}
   done
   cp -va ${PKG_BUILD}/.${TARGET_NAME}/meson-private/*.pc ${SYSROOT_PREFIX}/usr/lib/pkgconfig/
-	cp -rva ${PKG_BUILD}/include/* \
+  cp -rva ${PKG_BUILD}/include/* \
           ${PKG_BUILD}/include/GBM/gbm.h \
           ${SYSROOT_PREFIX}/usr/include/
-	cp -va ${PKG_BUILD}/include/KHR/mali_khrplatform.h ${SYSROOT_PREFIX}/usr/include/KHR/khrplatform.h
+  cp -va ${PKG_BUILD}/include/KHR/mali_khrplatform.h ${SYSROOT_PREFIX}/usr/include/KHR/khrplatform.h
 }

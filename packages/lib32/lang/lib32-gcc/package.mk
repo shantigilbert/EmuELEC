@@ -79,8 +79,8 @@ pre_configure_host() {
 }
 
 post_make_host() {
-	# fix wrong link
-	ln -sf libgcc_s.so.1 ${LIB32_TARGET_NAME}/libgcc/libgcc_s.so
+  # fix wrong link
+  ln -sf libgcc_s.so.1 ${LIB32_TARGET_NAME}/libgcc/libgcc_s.so
   if [ ! "${BUILD_WITH_DEBUG}" = "yes" ]; then
     ${LIB32_TARGET_PREFIX}strip ${LIB32_TARGET_NAME}/libgcc/libgcc_s.so*
     ${LIB32_TARGET_PREFIX}strip ${LIB32_TARGET_NAME}/libgomp/.libs/libgomp.so*
@@ -138,5 +138,5 @@ makeinstall_target() {
     cp -P ${PKG_BUILD}/.${HOST_NAME}/${LIB32_TARGET_NAME}/libgcc/libgcc_s.so* ${INSTALL}/usr/lib32
     cp -P ${PKG_BUILD}/.${HOST_NAME}/${LIB32_TARGET_NAME}/libgomp/.libs/libgomp.so* ${INSTALL}/usr/lib32
     cp -P ${PKG_BUILD}/.${HOST_NAME}/${LIB32_TARGET_NAME}/libstdc++-v3/src/.libs/libstdc++.so* ${INSTALL}/usr/lib32
-		cp -P ${PKG_BUILD}/.${HOST_NAME}/${LIB32_TARGET_NAME}/libatomic/.libs/libatomic.so* ${INSTALL}/usr/lib32
+    cp -P ${PKG_BUILD}/.${HOST_NAME}/${LIB32_TARGET_NAME}/libatomic/.libs/libatomic.so* ${INSTALL}/usr/lib32
 }

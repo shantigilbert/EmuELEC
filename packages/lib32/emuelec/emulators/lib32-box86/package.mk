@@ -20,9 +20,9 @@ if [ "${PROJECT}" = "Amlogic-ce" ]; then
   if [ "${DEVICE}" = "Amlogic-old" ]; then
     PKG_PATCH_DIRS+=" ${PROJECT_DIR}/Amlogic-ce/devices/Amlogic-old/patches/box86"
   fi
-	PKG_CMAKE_OPTS_TARGET=" -DRK3399=ON -DCMAKE_BUILD_TYPE=Release"
+  PKG_CMAKE_OPTS_TARGET=" -DRK3399=ON -DCMAKE_BUILD_TYPE=Release"
 else
-	PKG_CMAKE_OPTS_TARGET=" -DGOA_CLONE=ON -DCMAKE_BUILD_TYPE=Release"
+  PKG_CMAKE_OPTS_TARGET=" -DGOA_CLONE=ON -DCMAKE_BUILD_TYPE=Release"
 fi
 
 unpack() {
