@@ -18,6 +18,14 @@ unpack() {
   ${SCRIPTS}/get opengl-meson
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/opengl-meson/opengl-meson-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
+  local REMOVE_NAME
+  for REMOVE_NAME in 'arm64' \
+                     'lib*' \
+                     'pkgconfig' \
+                     'r3p2*' \
+                     'r4p*'; do                     
+    safe_remove ${PKG_BUILD}/lib/${REMOVE_NAME}
+  done
 }
 
 makeinstall_target() {
