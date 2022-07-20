@@ -29,11 +29,11 @@ case "$LINUX" in
     PKG_PATCH_DIRS="RK356x"
     ;;
   OdroidM1-4.19)
-	PKG_VERSION="e45b118834e1395eeacbed77e8b8f35e8105663e"
-	PKG_SHA256="3c4f1bea0b8c26d9951c8b46c6c93127fc0929ff9947c5eb8e479fbaf05fa1f4"
-	PKG_URL="https://github.com/hardkernel/linux/archive/$PKG_VERSION.tar.gz"
-	PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
-	PKG_PATCH_DIRS="RK356x"
+    PKG_VERSION="e45b118834e1395eeacbed77e8b8f35e8105663e"
+    PKG_SHA256="3c4f1bea0b8c26d9951c8b46c6c93127fc0929ff9947c5eb8e479fbaf05fa1f4"
+    PKG_URL="https://github.com/hardkernel/linux/archive/$PKG_VERSION.tar.gz"
+    PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
+    PKG_PATCH_DIRS="RK356x"
     ;;
   odroid-go-a-4.4)
     PKG_VERSION="faeb665a41b53ebb386e69fe737ccf0707aaf07b"
@@ -199,10 +199,10 @@ pre_make_target() {
 
   # Add exFAT
   ${SCRIPTS}/get exfat-linux
-	PKG_BUILD_EXFAT="${PKG_BUILD}/fs/exfat"
-	[ -e "$PKG_BUILD_EXFAT" ] && rm -rf "$PKG_BUILD_EXFAT"
-	mkdir -p "$PKG_BUILD_EXFAT"
-	tar --strip-components=1 -xf "${SOURCES}/exfat-linux/exfat-linux-$(get_pkg_version exfat-linux).tar.gz" -C "$PKG_BUILD_EXFAT"
+  PKG_BUILD_EXFAT="${PKG_BUILD}/fs/exfat"
+  [ -e "$PKG_BUILD_EXFAT" ] && rm -rf "$PKG_BUILD_EXFAT"
+  mkdir -p "$PKG_BUILD_EXFAT"
+  tar --strip-components=1 -xf "${SOURCES}/exfat-linux/exfat-linux-$(get_pkg_version exfat-linux).tar.gz" -C "$PKG_BUILD_EXFAT"
   sed -i '/source "fs\/fat\/Kconfig"/a source "fs\/exfat\/Kconfig"' "${PKG_BUILD}/fs/Kconfig"
   sed -i '/obj-$(CONFIG_FAT_FS).*+= fat\//a obj-$(CONFIG_EXFAT_FS)\t\t+= exfat\/' "${PKG_BUILD}/fs/Makefile"
   

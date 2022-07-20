@@ -162,10 +162,10 @@ pre_make_target() {
 
   # Add exFAT
   ${SCRIPTS}/get exfat-linux
-	PKG_BUILD_EXFAT="${PKG_BUILD}/fs/exfat"
-	[ -e "$PKG_BUILD_EXFAT" ] && rm -rf "$PKG_BUILD_EXFAT"
-	mkdir -p "$PKG_BUILD_EXFAT"
-	tar --strip-components=1 -xf "${SOURCES}/exfat-linux/exfat-linux-$(get_pkg_version exfat-linux).tar.gz" -C "$PKG_BUILD_EXFAT"
+  PKG_BUILD_EXFAT="${PKG_BUILD}/fs/exfat"
+  [ -e "$PKG_BUILD_EXFAT" ] && rm -rf "$PKG_BUILD_EXFAT"
+  mkdir -p "$PKG_BUILD_EXFAT"
+  tar --strip-components=1 -xf "${SOURCES}/exfat-linux/exfat-linux-$(get_pkg_version exfat-linux).tar.gz" -C "$PKG_BUILD_EXFAT"
 
   kernel_make oldconfig
 }
