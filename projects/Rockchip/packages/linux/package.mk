@@ -198,7 +198,9 @@ pre_make_target() {
   fi
 
   # Add exFAT
-  ${BUILD_ROOT}/${SCRIPTS}/get exfat-linux
+  pushd ${BUILD_ROOT}
+  ${SCRIPTS}/get exfat-linux
+  popd
   PKG_BUILD_EXFAT="${PKG_BUILD}/fs/exfat"
   [ -e "$PKG_BUILD_EXFAT" ] && rm -rf "$PKG_BUILD_EXFAT"
   mkdir -p "$PKG_BUILD_EXFAT"
