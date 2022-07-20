@@ -9,7 +9,6 @@ PKG_LICENSE="GPL"
 PKG_SITE="https://www.alsa-project.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain"
-PKG_DEPENDS_UNPACK+=" alsa-lib"
 PKG_PATCH_DIRS+=" $(get_pkg_directory alsa-lib)/patches"
 PKG_LONGDESC="ALSA (Advanced Linux Sound Architecture) is the next generation Linux Sound API."
 PKG_TOOLCHAIN="autotools"
@@ -27,6 +26,7 @@ PKG_CONFIGURE_OPTS_TARGET="${PKG_ALSA_DEBUG} \
                            --disable-python"
 
 unpack() {
+  ${SCRIPTS}/get alsa-lib
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/alsa-lib/alsa-lib-${PKG_VERSION}.tar.bz2 -C ${PKG_BUILD}
 }
