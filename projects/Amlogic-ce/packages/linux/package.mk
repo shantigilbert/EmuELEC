@@ -68,15 +68,6 @@ for pkg in $(get_pkg_variable initramfs PKG_DEPENDS_TARGET); do
   ! listcontains "${PKG_DEPENDS_TARGET}" "${pkg}" && PKG_DEPENDS_TARGET+=" ${pkg}" || true
 done
 
-post_unpack() {
-  # Add exFAT
-  ${SCRIPTS}/get exfat-linux
-  local PKG_BUILD_EXFAT="${PKG_BUILD}/fs/exfat"
-  [ -e "$PKG_BUILD_EXFAT" ] && rm -rf "$PKG_BUILD_EXFAT"
-  mkdir -p "$PKG_BUILD_EXFAT"
-  tar --strip-components=1 -xf "${SOURCES}/exfat-linux/exfat-linux-$(get_pkg_version exfat-linux).tar.gz" -C "$PKG_BUILD_EXFAT"
-}
-
 post_patch() {
   # linux was already built and its build dir autoremoved - prepare it again for kernel packages
   if [ -d $PKG_INSTALL/.image ]; then
@@ -128,6 +119,15 @@ post_patch() {
       sed -e "s|^CONFIG_WIREGUARD=.*$|# CONFIG_WIREGUARD is not set|" -i $PKG_BUILD/.config
     fi
   fi
+}
+
+post_unpack() {
+  # Add exFAT
+  ${SCRIPTS}/get exfat-linux
+  local PKG_BUILD_EXFAT="${PKG_BUILD}/fs/exfat"
+  [ -e "$PKG_BUILD_EXFAT" ] && rm -rf "$PKG_BUILD_EXFAT"
+  mkdir -p "$PKG_BUILD_EXFAT"
+  tar --strip-components=1 -xf "${SOURCES}/exfat-linux/exfat-linux-$(get_pkg_version exfat-linux).tar.gz" -C "$PKG_BUILD_EXFAT"
 }
 
 make_host() {
