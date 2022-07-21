@@ -39,9 +39,9 @@ makeinstall_target() {
     HOSTCFLAGS="${HOST_CFLAGS}" \
     HOSTCXXFLAGS="${HOST_CXXFLAGS}" \
     HOSTLDFLAGS="${HOST_LDFLAGS}" \
-    INSTALL_HDR_PATH=dest32 \
+    INSTALL_HDR_PATH=${PKG_BUILD} \
     headers_install
   mkdir -p ${LIB32_SYSROOT_PREFIX}/usr/include
-    cp -R dest32/include/* ${LIB32_SYSROOT_PREFIX}/usr/include
+    cp -R ${PKG_BUILD}/include/* ${LIB32_SYSROOT_PREFIX}/usr/include
   popd &>/dev/null
 }
