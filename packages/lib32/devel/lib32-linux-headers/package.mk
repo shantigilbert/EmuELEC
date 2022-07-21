@@ -12,7 +12,7 @@ PKG_SITE="http://www.kernel.org"
 PKG_DEPENDS_TARGET="ccache:host rsync:host openssl:host"
 PKG_DEPENDS_UNPACK="linux"
 PKG_LONGDESC="This package contains Linux headers."
-PKG_BUILD_FLAGS="lib32"
+# PKG_BUILD_FLAGS="lib32"
 PKG_TOOLCHAIN="manual"
 
 # unpack() {
@@ -31,7 +31,7 @@ PKG_TOOLCHAIN="manual"
 
 makeinstall_target() {
   pushd "$(get_build_dir linux)" &>/dev/null
-  local TARGET_KERNEL_PATCH_ARCH=aarch64
+  # local TARGET_KERNEL_PATCH_ARCH=aarch64
   make \
     ARCH=arm \
     HOSTCC="${TOOLCHAIN}/bin/host-gcc" \
@@ -41,7 +41,7 @@ makeinstall_target() {
     HOSTLDFLAGS="${HOST_LDFLAGS}" \
     INSTALL_HDR_PATH=dest32 \
     headers_install
-  mkdir -p ${SYSROOT_PREFIX}/usr/include
-    cp -R dest32/include/* ${SYSROOT_PREFIX}/usr/include
+  mkdir -p ${LIB32_SYSROOT_PREFIX}/usr/include
+    cp -R dest32/include/* ${LIB32_SYSROOT_PREFIX}/usr/include
   popd &>/dev/null
 }
