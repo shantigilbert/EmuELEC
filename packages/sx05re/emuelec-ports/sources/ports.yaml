@@ -107,7 +107,7 @@ Doom 2:
     - /usr/bin/emuelecRunEmu.sh "/storage/roms/ports/doom2/doom2.wad" -Pports "${2}" -Cprboom "-SC${0}"
 
 Heart of Darkness:
-  description: Hode is a reimplementation of the game Heart of Darkness is a cinematic platformer in the vein of Eric Chahi's previous game Another World. The player controls Andy, who faces various dangers in search of his dog, Whisky. The player progresses through the game's linear storyline by navigating various environments and solving puzzles, all whilst attempting to keep Andy from being killed by evil shadows.e engine of the used by the game "Heart of Darkness" developed. 
+  description: Hode is a reimplementation of the game Heart of Darkness. Heart of Darkness is a cinematic platformer in the vein of Eric Chahi's previous game Another World. The player controls Andy, who faces various dangers in search of his dog, Whisky. The player progresses through the game's linear storyline by navigating various environments and solving puzzles, all whilst attempting to keep Andy from being killed by evil shadows.e engine of the used by the game "Heart of Darkness" developed. 
   rating: 0.9
   release_date: 19980704T000000
   developer: Amazing Studio
