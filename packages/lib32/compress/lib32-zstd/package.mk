@@ -21,7 +21,7 @@ configure_package() {
 unpack() {
   ${SCRIPTS}/get zstd
   mkdir -p ${PKG_BUILD}
-  tar --strip-components=1 -xf ${SOURCES}/zstd/zstd-${PKG_VERSION}.tar.zst -C ${PKG_BUILD}
+  tar -I zstd --strip-components=1 -xf ${SOURCES}/zstd/zstd-${PKG_VERSION}.tar.zst -C ${PKG_BUILD}
 }
 
 post_makeinstall_target() {
