@@ -69,10 +69,9 @@ case $MODE in
 		fbset -fb /dev/fb0 -g 720 576 720 1152 $BPP
 		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
 		echo 0 0 719 575 > /sys/class/graphics/fb0/free_scale_axis
-		echo 0 0 719 575 > /sys/class/graphics/fb0/window_axis
-		#echo 0 > /sys/class/graphics/fb0/free_scale
-		#echo 1 > /sys/class/graphics/fb0/freescale_mode
-    #echo 0 > /sys/class/graphics/fb1/free_scale
+		echo 35 20 680 565 > /sys/class/graphics/fb0/window_axis
+		echo 720 > /sys/class/graphics/fb0/scale_width
+		echo 576 > /sys/class/graphics/fb0/scale_height
     echo 0x10001 > /sys/class/graphics/fb0/free_scale
 		;;
 	480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
@@ -86,7 +85,7 @@ case $MODE in
     W1=$(($W-1))
     H1=$(($H-1))
     fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-    fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+    fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP    
     echo 0 > /sys/class/graphics/fb0/free_scale
     echo 1 > /sys/class/graphics/fb0/freescale_mode
     echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
