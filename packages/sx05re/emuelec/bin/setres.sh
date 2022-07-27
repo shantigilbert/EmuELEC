@@ -55,6 +55,7 @@ show_buffer 1
 
 case $MODE in
   480cvbs)
+    echo $MODE > "${FILE_MODE}"
 		fbset -fb /dev/fb0 -g 640 480 640 960 $BPP
 		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
 		echo 0 0 639 479 > /sys/class/graphics/fb0/free_scale_axis
@@ -64,14 +65,15 @@ case $MODE in
 	  echo 0x10001 > /sys/class/graphics/fb0/free_scale
 		;;
 	576cvbs)
-		fbset -fb /dev/fb0 -g 720 576 720 1152 $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		echo 0 0 719 575 > /sys/class/graphics/fb0/free_scale_axis
-		echo 35 20 680 565 > /sys/class/graphics/fb0/window_axis
-		echo 720 > /sys/class/graphics/fb0/scale_width
-		echo 576 > /sys/class/graphics/fb0/scale_height
+    echo $MODE > "${FILE_MODE}"
+    fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
+    fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+    echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
+    echo 35 20 680 565 > /sys/class/graphics/fb0/window_axis
+    echo 720 > /sys/class/graphics/fb0/scale_width
+    echo 576 > /sys/class/graphics/fb0/scale_height
     echo 0x10001 > /sys/class/graphics/fb0/free_scale
-		;;
+    ;;
 	480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
     echo $HACK1_MODE > "${FILE_MODE}"
     echo $MODE > "${FILE_MODE}"
@@ -109,7 +111,7 @@ case $MODE in
       H1=$(($H-1))
       fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
       fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-      echo 0 > /sys/class/graphics/fb0/free_scale
+      echo 0x10001 > /sys/class/graphics/fb0/free_scale
       echo 1 > /sys/class/graphics/fb0/freescale_mode
       echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
       echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
