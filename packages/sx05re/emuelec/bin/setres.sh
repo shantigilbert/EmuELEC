@@ -77,8 +77,6 @@ case $MODE in
 	480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
     echo $HACK1_MODE > "${FILE_MODE}"
     echo $MODE > "${FILE_MODE}"
-    NEW_MODE=$(cat "${FILE_MODE}")
-    [[ "$MODE" != *"$NEW_MODE" ]] && exit
     W=$(( $H*16/9 ))
     [[ "$MODE" == "480"* ]] && W=640
     DH=$(($H*2))
@@ -95,13 +93,6 @@ case $MODE in
   *x*)
     echo $HACK2_MODE > "${FILE_MODE}"
     echo $MODE > "${FILE_MODE}"
-    NEW_MODE=$(cat "${FILE_MODE}")
-    if [[ "$MODE" != "$NEW_MODE" ]]; then
-      MODE=$(echo $MODE | cut -d'x' -f 2)
-      echo $MODE > "${FILE_MODE}"
-      NEW_MODE=$(cat "${FILE_MODE}")
-    fi
-    [[ "$MODE" != "$NEW_MODE" ]] && exit
     W=$(echo $MODE | cut -d'x' -f 1)
     H=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
     [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
