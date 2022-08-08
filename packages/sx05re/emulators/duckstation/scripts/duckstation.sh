@@ -15,6 +15,18 @@ if [ ! -d "${CONFIG_DIR}" ]; then
 	cp -rf "/usr/config/emuelec/configs/duckstation/*" "${CONFIG_DIR}"
 fi
 
+#Check if textures directory exits, if it is not then create symlink to link textures folder in /storage/roms/psx/textures to enable texture replacement
+if [ ! -d "${CONFIG_DIR}/textures" ]; then
+    ln -s /storage/roms/psx/textures "${CONFIG_DIR}/textures"
+fi
+
+#if texture folder exists and not symlink, remove it and create symlink to link textures folder in /storage/roms/psx/textures to enable texture replacement
+if [ ! -L "${CONFIG_DIR}/textures" ]; then
+    rm -r "${CONFIG_DIR}/textures"
+    ln -s /storage/roms/psx/textures "${CONFIG_DIR}"
+
+fi
+
 if [ -d "${LOCAL_CONFIG}/duckstation" ]; then
 	rm -rf "${LOCAL_CONFIG}"
 fi
