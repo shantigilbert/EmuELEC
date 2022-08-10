@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-linux-headers"
 PKG_VERSION="$(get_pkg_version linux)"
+PKG_NEED_UNPACK="$(get_pkg_directory linux)"
 PKG_ARCH="aarch64"
 PKG_URL=""
 PKG_LICENSE="GPL"

@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-SDL2"
 PKG_VERSION="$(get_pkg_version SDL2)"
+PKG_NEED_UNPACK="$(get_pkg_directory SDL2)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.libsdl.org/"

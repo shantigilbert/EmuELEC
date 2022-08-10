@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-fontconfig"
 PKG_VERSION="$(get_pkg_version fontconfig)"
+PKG_NEED_UNPACK="$(get_pkg_directory fontconfig)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.fontconfig.org"

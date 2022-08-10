@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libmodplug"
 PKG_VERSION="$(get_pkg_version libmodplug)"
+PKG_NEED_UNPACK="$(get_pkg_directory libmodplug)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="http://modplug-xmms.sourceforge.net/"

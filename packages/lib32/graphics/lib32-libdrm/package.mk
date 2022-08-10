@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libdrm"
 PKG_VERSION="$(get_pkg_version libdrm)"
+PKG_NEED_UNPACK="$(get_pkg_directory libdrm)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="http://dri.freedesktop.org"

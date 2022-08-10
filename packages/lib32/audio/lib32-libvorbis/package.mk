@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libvorbis"
 PKG_VERSION="$(get_pkg_version libvorbis)"
+PKG_NEED_UNPACK="$(get_pkg_directory libvorbis)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="BSD"
 PKG_SITE="http://www.vorbis.com/"

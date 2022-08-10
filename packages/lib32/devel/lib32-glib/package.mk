@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-glib"
 PKG_VERSION="$(get_pkg_version glib)"
+PKG_NEED_UNPACK="$(get_pkg_directory glib)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LGPL"
 PKG_SITE="https://www.gtk.org/"

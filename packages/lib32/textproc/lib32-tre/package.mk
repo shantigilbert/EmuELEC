@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-tre"
 PKG_VERSION="$(get_pkg_version tre)"
+PKG_NEED_UNPACK="$(get_pkg_directory tre)"
 PKG_ARCH="aarch64"
 PKG_SITE="https://github.com/laurikari/tre"
 PKG_URL=""

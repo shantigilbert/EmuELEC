@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-libvorbisidec"
 PKG_VERSION="$(get_pkg_version libvorbisidec)"
+PKG_NEED_UNPACK="$(get_pkg_directory libvorbisidec)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/sezero/tremor"

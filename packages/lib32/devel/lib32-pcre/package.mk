@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-pcre"
 PKG_VERSION="$(get_pkg_version pcre)"
+PKG_NEED_UNPACK="$(get_pkg_directory pcre)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.pcre.org/"

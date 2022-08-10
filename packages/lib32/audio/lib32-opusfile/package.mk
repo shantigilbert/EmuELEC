@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-opusfile"
 PKG_VERSION="$(get_pkg_version opusfile)"
+PKG_NEED_UNPACK="$(get_pkg_directory opusfile)"
 PKG_ARCH="aarch64"
 PKG_SITE="https://github.com/xiph/opusfile"
 PKG_URL=""

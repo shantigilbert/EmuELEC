@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-gmp"
 PKG_VERSION="$(get_pkg_version gmp)"
+PKG_NEED_UNPACK="$(get_pkg_directory gmp)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LGPLv3+"
 PKG_SITE="http://gmplib.org/"

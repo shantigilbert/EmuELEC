@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libxml2"
 PKG_VERSION="$(get_pkg_version libxml2)"
+PKG_NEED_UNPACK="$(get_pkg_directory libxml2)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="MIT"
 PKG_SITE="http://xmlsoft.org"

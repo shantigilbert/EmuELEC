@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-parallel-n64"
 PKG_VERSION="$(get_pkg_version parallel-n64)"
+PKG_NEED_UNPACK="$(get_pkg_directory parallel-n64)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/parallel-n64"

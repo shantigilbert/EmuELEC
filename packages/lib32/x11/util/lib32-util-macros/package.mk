@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-util-macros"
 PKG_VERSION="$(get_pkg_version util-macros)"
+PKG_NEED_UNPACK="$(get_pkg_directory util-macros)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.X.org"

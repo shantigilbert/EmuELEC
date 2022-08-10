@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-flycast"
 PKG_VERSION="$(get_pkg_version flycast)"
+PKG_NEED_UNPACK="$(get_pkg_directory flycast)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/flyinghead/flycast"

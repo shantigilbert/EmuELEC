@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-mpg123-compat"
 PKG_VERSION="$(get_pkg_version mpg123-compat)"
+PKG_NEED_UNPACK="$(get_pkg_directory mpg123-compat)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LGPLv2"
 PKG_SITE="http://www.mpg123.org/"

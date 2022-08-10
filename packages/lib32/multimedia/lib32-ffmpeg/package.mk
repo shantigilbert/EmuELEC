@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-ffmpeg"
 PKG_VERSION="$(get_pkg_version ffmpeg)"
+PKG_NEED_UNPACK="$(get_pkg_directory ffmpeg)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LGPLv2.1+"
 PKG_SITE="https://ffmpeg.org"

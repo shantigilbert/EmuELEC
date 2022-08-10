@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-zlib"
 PKG_VERSION="$(get_pkg_version zlib)"
+PKG_NEED_UNPACK="$(get_pkg_directory zlib)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.zlib.net"

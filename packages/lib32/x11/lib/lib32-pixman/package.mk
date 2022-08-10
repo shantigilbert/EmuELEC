@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-pixman"
 PKG_VERSION="$(get_pkg_version pixman)"
+PKG_NEED_UNPACK="$(get_pkg_directory pixman)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.x.org/"

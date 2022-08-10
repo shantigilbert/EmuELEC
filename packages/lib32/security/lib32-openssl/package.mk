@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-openssl"
 PKG_VERSION="$(get_pkg_version openssl)"
+PKG_NEED_UNPACK="$(get_pkg_directory openssl)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="Apache-2.0"
 PKG_SITE="https://www.openssl.org"

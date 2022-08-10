@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-zstd"
 PKG_VERSION="$(get_pkg_version zstd)"
+PKG_NEED_UNPACK="$(get_pkg_directory zstd)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="BSD/GPLv2"
 PKG_SITE="http://www.zstd.net"

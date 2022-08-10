@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-util-linux"
 PKG_VERSION="$(get_pkg_version util-linux)"
+PKG_NEED_UNPACK="$(get_pkg_directory util-linux)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_URL=""

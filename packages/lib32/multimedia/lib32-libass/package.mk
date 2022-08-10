@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libass"
 PKG_VERSION="$(get_pkg_version libass)"
+PKG_NEED_UNPACK="$(get_pkg_directory libass)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="BSD"
 PKG_SITE="https://github.com/libass/libass"

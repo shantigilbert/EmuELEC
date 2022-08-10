@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-mali-bifrost"
 PKG_VERSION="$(get_pkg_version mali-bifrost)"
+PKG_NEED_UNPACK="$(get_pkg_directory mali-bifrost)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="nonfree"
 PKG_SITE="https://github.com/emuelec/libmali"

@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-opengl-meson"
 PKG_VERSION="$(get_pkg_version opengl-meson)"
+PKG_NEED_UNPACK="$(get_pkg_directory opengl-meson)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="nonfree"
 PKG_SITE="http://openlinux.amlogic.com:8000/download/ARM/filesystem/"

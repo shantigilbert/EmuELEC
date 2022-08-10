@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-gnutls"
 PKG_VERSION="$(get_pkg_version gnutls)"
+PKG_NEED_UNPACK="$(get_pkg_directory gnutls)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LGPL2.1"
 PKG_SITE="https://gnutls.org"

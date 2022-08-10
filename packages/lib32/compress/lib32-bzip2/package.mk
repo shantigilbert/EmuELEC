@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-bzip2"
 PKG_VERSION="$(get_pkg_version bzip2)"
+PKG_NEED_UNPACK="$(get_pkg_directory bzip2)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="https://sourceware.org/bzip2/"

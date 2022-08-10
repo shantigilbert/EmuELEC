@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-alsa-lib"
 PKG_VERSION="$(get_pkg_version alsa-lib)"
+PKG_NEED_UNPACK="$(get_pkg_directory alsa-lib)"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.alsa-project.org/"
 PKG_URL=""

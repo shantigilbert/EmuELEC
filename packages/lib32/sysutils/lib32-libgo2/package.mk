@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-libgo2"
 PKG_VERSION="$(get_pkg_version libgo2)"
+PKG_NEED_UNPACK="$(get_pkg_directory libgo2)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LGPL"
 PKG_SITE="https://github.com/OtherCrashOverride/libgo2"

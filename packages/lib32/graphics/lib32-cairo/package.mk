@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-cairo"
 PKG_VERSION="$(get_pkg_version cairo)"
+PKG_NEED_UNPACK="$(get_pkg_directory cairo)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LGPL"
 PKG_SITE="http://cairographics.org/"

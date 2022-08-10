@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-retroarch"
 PKG_VERSION="$(get_pkg_version retroarch)"
+PKG_NEED_UNPACK="$(get_pkg_directory retroarch)"
 PKG_ARCH="aarch64"
 PKG_SITE="https://github.com/libretro/RetroArch"
 PKG_URL=""

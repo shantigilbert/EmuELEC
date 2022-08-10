@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-pcsx_rearmed"
 PKG_VERSION="$(get_pkg_version pcsx_rearmed)"
+PKG_NEED_UNPACK="$(get_pkg_directory pcsx_rearmed)"
 PKG_ARCH="aarch64"
 PKG_REV="1"
 PKG_LICENSE="GPLv2"

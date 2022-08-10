@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-gl4es"
 PKG_VERSION="$(get_pkg_version gl4es)"
+PKG_NEED_UNPACK="$(get_pkg_directory gl4es)"
 PKG_ARCH="aarch64"
 PKG_SITE="https://github.com/JohnnyonFlame/gl4es"
 PKG_LICENSE="GPL"

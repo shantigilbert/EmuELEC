@@ -76,6 +76,9 @@ To add packages here, the following requirement must be met:
 - If the package has a corresponding generic version, the lib32 one must have the same version as the generic one, this can be set with ``PKG_VERSION=$(get_pkg_version generic-pkg)``
  - Otherwise, use the actual one.
 
+**PKG_NEED_UNPACK**
+- If the package relies on another package (e.g. it uses ``PKG_VERSION=$(get_pkg_version generic-pkg)``) then PKG_NEED_UNPACK must be set as well in order for it to update when doing dirty builds, this can be set with ``PKG_NEED_UNPACK="$(get_pkg_directory generic-pkg)``
+
 **PKG_ARCH** 
  - The arch **must** be **aarch64**, to avoid building it in singlelib 32-bit builds.
 

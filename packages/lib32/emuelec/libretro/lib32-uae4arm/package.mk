@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-uae4arm"
 PKG_VERSION="$(get_pkg_version uae4arm)"
+PKG_NEED_UNPACK="$(get_pkg_directory uae4arm)"
 PKG_ARCH="aarch64"
 PKG_REV="1"
 PKG_LICENSE="GPL"

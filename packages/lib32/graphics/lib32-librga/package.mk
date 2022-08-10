@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-librga"
 PKG_VERSION="$(get_pkg_version librga)"
+PKG_NEED_UNPACK="$(get_pkg_directory librga)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GNU"
 PKG_SITE="https://github.com/shantigilbert/linux-rga"

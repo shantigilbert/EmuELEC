@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-libidn2"
 PKG_VERSION="$(get_pkg_version libidn2)"
+PKG_NEED_UNPACK="$(get_pkg_directory libidn2)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LGPL3"
 PKG_SITE="https://www.gnu.org/software/libidn/"

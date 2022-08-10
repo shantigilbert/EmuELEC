@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-systemd-libs"
 PKG_VERSION="$(get_pkg_version systemd)"
+PKG_NEED_UNPACK="$(get_pkg_directory systemd)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LGPL2.1+"
 PKG_SITE="http://www.freedesktop.org/wiki/Software/systemd"

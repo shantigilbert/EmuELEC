@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libsndfile"
 PKG_VERSION="$(get_pkg_version libsndfile)"
+PKG_NEED_UNPACK="$(get_pkg_directory libsndfile)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LGPL-2.1-or-later"
 PKG_SITE="https://libsndfile.github.io/libsndfile/"

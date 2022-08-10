@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-droidports"
 PKG_VERSION="$(get_pkg_version droidports)"
+PKG_NEED_UNPACK="$(get_pkg_directory droidports)"
 PKG_ARCH="aarch64"
 PKG_SITE="https://github.com/JohnnyonFlame/droidports"
 PKG_URL=""

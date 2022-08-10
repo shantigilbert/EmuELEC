@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-expat"
 PKG_VERSION="$(get_pkg_version expat)"
+PKG_NEED_UNPACK="$(get_pkg_directory expat)"
 PKG_LICENSE="OSS"
 PKG_SITE="http://expat.sourceforge.net/"
 PKG_URL=""

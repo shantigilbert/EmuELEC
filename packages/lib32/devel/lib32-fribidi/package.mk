@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-fribidi"
 PKG_VERSION="$(get_pkg_version fribidi)"
+PKG_NEED_UNPACK="$(get_pkg_directory fribidi)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LGPL"
 PKG_SITE="http://fribidi.freedesktop.org/"

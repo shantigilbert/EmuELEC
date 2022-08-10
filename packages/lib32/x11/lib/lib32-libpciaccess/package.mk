@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libpciaccess"
 PKG_VERSION="$(get_pkg_version libpciaccess)"
+PKG_NEED_UNPACK="$(get_pkg_directory libpciaccess)"
 PKG_LICENSE="OSS"
 PKG_SITE="http://freedesktop.org"
 PKG_URL=""

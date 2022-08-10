@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libffi"
 PKG_VERSION="$(get_pkg_version libffi)"
+PKG_NEED_UNPACK="$(get_pkg_directory libffi)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="http://sourceware.org/${PKG_NAME}/"

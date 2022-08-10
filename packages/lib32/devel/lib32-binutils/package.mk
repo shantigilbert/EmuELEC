@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-binutils"
 PKG_VERSION="$(get_pkg_version binutils)"
+PKG_NEED_UNPACK="$(get_pkg_directory binutils)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_URL=""

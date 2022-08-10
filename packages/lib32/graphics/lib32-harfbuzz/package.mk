@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-harfbuzz"
 PKG_VERSION="$(get_pkg_version harfbuzz)"
+PKG_NEED_UNPACK="$(get_pkg_directory harfbuzz)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.freedesktop.org/wiki/Software/HarfBuzz"

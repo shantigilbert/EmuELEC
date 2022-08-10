@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libzip"
 PKG_VERSION="$(get_pkg_version libzip)"
+PKG_NEED_UNPACK="$(get_pkg_directory libzip)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.nih.at/libzip/"

@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-gcc"
 PKG_VERSION="$(get_pkg_version gcc)"
+PKG_NEED_UNPACK="$(get_pkg_directory gcc)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL-2.0-or-later"
 PKG_URL=""

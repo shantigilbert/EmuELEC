@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-retrorun"
 PKG_VERSION="$(get_pkg_version retrorun)"
+PKG_NEED_UNPACK="$(get_pkg_directory retrorun)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/navy1978/retrorun-go2"

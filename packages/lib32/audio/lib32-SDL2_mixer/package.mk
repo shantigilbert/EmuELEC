@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-SDL2_mixer"
 PKG_VERSION="$(get_pkg_version SDL2_mixer)"
+PKG_NEED_UNPACK="$(get_pkg_directory SDL2_mixer)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPLv3"
 PKG_SITE="http://www.libsdl.org/projects/SDL_mixer/release"

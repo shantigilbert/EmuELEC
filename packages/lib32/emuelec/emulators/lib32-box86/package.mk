@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-box86"
 PKG_VERSION="$(get_pkg_version box86)"
+PKG_NEED_UNPACK="$(get_pkg_directory box86)"
 PKG_ARCH="aarch64"
 PKG_REV="1"
 PKG_LICENSE="MIT"

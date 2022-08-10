@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libpulse"
 PKG_VERSION="$(get_pkg_version pulseaudio)"
+PKG_NEED_UNPACK="$(get_pkg_directory pulseaudio)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="http://pulseaudio.org/"

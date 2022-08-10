@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-dbus"
 PKG_VERSION="$(get_pkg_version dbus)"
+PKG_NEED_UNPACK="$(get_pkg_directory dbus)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="https://dbus.freedesktop.org"

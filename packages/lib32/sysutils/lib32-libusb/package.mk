@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libusb"
 PKG_VERSION="$(get_pkg_version libusb)"
+PKG_NEED_UNPACK="$(get_pkg_directory libusb)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LGPLv2.1"
 PKG_SITE="http://libusb.info/"

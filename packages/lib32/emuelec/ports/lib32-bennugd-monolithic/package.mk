@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-bennugd-monolithic"
 PKG_VERSION="$(get_pkg_version bennugd-monolithic)"
+PKG_NEED_UNPACK="$(get_pkg_directory bennugd-monolithic)"
 PKG_ARCH="aarch64"
 PKG_SITE="https://github.com/christianhaitian/bennugd-monolithic"
 PKG_URL=""

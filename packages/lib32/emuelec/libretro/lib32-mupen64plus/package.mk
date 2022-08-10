@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-mupen64plus"
 PKG_VERSION="$(get_pkg_version mupen64plus)"
+PKG_NEED_UNPACK="$(get_pkg_directory mupen64plus)"
 PKG_ARCH="aarch64"
 PKG_REV="1"
 PKG_LICENSE="GPLv2"

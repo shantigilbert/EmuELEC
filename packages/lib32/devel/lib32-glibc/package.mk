@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-glibc"
 PKG_VERSION="$(get_pkg_version glibc)"
+PKG_NEED_UNPACK="$(get_pkg_directory glibc)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.gnu.org/software/libc/"

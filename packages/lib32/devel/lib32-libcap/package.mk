@@ -6,6 +6,7 @@
 
 PKG_NAME="lib32-libcap"
 PKG_VERSION="$(get_pkg_version libcap)"
+PKG_NEED_UNPACK="$(get_pkg_directory libcap)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="https://git.kernel.org/pub/scm/libs/libcap/libcap.git/log/"

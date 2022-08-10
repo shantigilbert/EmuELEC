@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-openal-soft"
 PKG_VERSION="$(get_pkg_version openal-soft)"
+PKG_NEED_UNPACK="$(get_pkg_directory openal-soft)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.openal.org/"

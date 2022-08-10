@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-libpng"
 PKG_VERSION="$(get_pkg_version libpng)"
+PKG_NEED_UNPACK="$(get_pkg_directory libpng)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="LibPNG2"
 PKG_SITE="http://www.libpng.org/"

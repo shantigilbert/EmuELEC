@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-flac"
 PKG_VERSION="$(get_pkg_version flac)"
+PKG_NEED_UNPACK="$(get_pkg_directory flac)"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://xiph.org/flac/"
 PKG_URL=""

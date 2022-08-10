@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-nettle"
 PKG_VERSION="$(get_pkg_version nettle)"
+PKG_NEED_UNPACK="$(get_pkg_directory nettle)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPL2"
 PKG_SITE="http://www.lysator.liu.se/~nisse/nettle"

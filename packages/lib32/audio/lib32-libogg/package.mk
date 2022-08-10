@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libogg"
 PKG_VERSION="$(get_pkg_version libogg)"
+PKG_NEED_UNPACK="$(get_pkg_directory libogg)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="BSD"
 PKG_SITE="https://www.xiph.org/ogg/"

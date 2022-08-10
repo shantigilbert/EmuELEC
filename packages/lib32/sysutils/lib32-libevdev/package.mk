@@ -5,6 +5,7 @@
 
 PKG_NAME="lib32-libevdev"
 PKG_VERSION="$(get_pkg_version libevdev)"
+PKG_NEED_UNPACK="$(get_pkg_directory libevdev)"
 PKG_ARCH="aarch64"
 PKG_LICENSE="MIT"
 PKG_SITE="http://www.freedesktop.org/wiki/Software/libevdev/"
