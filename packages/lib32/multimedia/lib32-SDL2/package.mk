@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2018-2022 5schatten (https://github.com/5schatten)
+# Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 # Copyright (C) 2022-present 7Ji (https://github.com/7Ji)
 
 PKG_NAME="lib32-SDL2"
@@ -10,25 +11,8 @@ PKG_LICENSE="GPL"
 PKG_SITE="https://www.libsdl.org/"
 PKG_URL=""
 PKG_DEPENDS_TARGET="lib32-toolchain lib32-alsa-lib lib32-systemd-libs lib32-dbus lib32-${OPENGLES} lib32-libpulse"
-PKG_LONGDESC="Simple DirectMedia Layer is a cross-platform development library designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware."
+PKG_LONGDESC="Simple DirectMedia Layer is a cross-platform development library designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware. (lib32)"
 PKG_BUILD_FLAGS="lib32"
-
-
-SDL2_DIRECTORY="$(get_pkg_directory SDL2)"
-PKG_PATCH_DIRS+=" $SDL2_DIRECTORY/patches" 
-PKG_RKMISC=
-if [ "${PROJECT}" = "Amlogic-ce" ]; then
-  PKG_PATCH_DIRS+=" $SDL2_DIRECTORY/patches/Amlogic"
-elif [[ "${DEVICE}" =~ ^(OdroidGoAdvance|GameForce|RK356x|OdroidM1)$ ]]; then
-  PKG_RKMISC="yes"
-  PKG_DEPENDS_TARGET+=" lib32-libdrm lib32-mali-bifrost lib32-librga"
-  if [ "${DEVICE}" = "OdroidGoAdvance" ]; then
-    PKG_PATCH_DIRS+=" $SDL2_DIRECTORY/patches/OdroidGoAdvance"
-  fi
-else
-  echo "${PKG_NAME}: Unsupported devices ${DEVICE} when only AmlNG, AmlOld, OGA, GF, RK356X, M1 is supported" 1>&2
-  false
-fi
 
 PKG_CMAKE_OPTS_TARGET="-DSDL_STATIC=OFF \
                        -DSDL_LIBC=ON \
@@ -63,7 +47,6 @@ PKG_CMAKE_OPTS_TARGET="-DSDL_STATIC=OFF \
                        -DSDL_PTHREADS=ON \
                        -DSDL_PTHREADS_SEM=ON \
                        -DSDL_DIRECTX=OFF \
-                       -DSDL_DLOPEN=ON \
                        -DSDL_CLOCK_GETTIME=OFF \
                        -DSDL_RPATH=OFF \
                        -DSDL_RENDER_D3D=OFF \
@@ -72,12 +55,33 @@ PKG_CMAKE_OPTS_TARGET="-DSDL_STATIC=OFF \
                        -DSDL_VULKAN=OFF \
                        -DSDL_PULSEAUDIO=ON \
                        -DSDL_HIDAPI_JOYSTICK=OFF"
-                       
-if [ "$PKG_RKMISC" ]; then
-  PKG_CMAKE_OPTS_TARGET+=" -DSDL_KMSDRM=ON"
-else
-  PKG_CMAKE_OPTS_TARGET+=" -DVIDEO_MALI=ON -DSDL_KMSDRM=OFF"
-fi
+
+SDL2_DIRECTORY="$(get_pkg_directory SDL2)"
+PKG_PATCH_DIRS+=" $SDL2_DIRECTORY/patches" 
+case "${DEVICE}" in
+  'Amlogic-ng'|'Amlogic-old')  # We should've used PROJECT=Amlogic-ce logically, but using these two device names here saves a comparasion (only device needs to be compared)
+    PKG_PATCH_DIRS+=" $SDL2_DIRECTORY/patches/Amlogic"
+    PKG_CMAKE_OPTS_TARGET+=" -DSDL_MALI=ON -DSDL_KMSDRM=OFF"
+  ;;
+  'OdroidGoAdvance'|'GameForce'|'RK356x'|'OdroidM1')
+    PKG_PATCH_DIRS+=" $SDL2_DIRECTORY/patches/Rockchip"
+    PKG_CMAKE_OPTS_TARGET+=" -DSDL_KMSDRM=ON"
+    PKG_DEPENDS_TARGET+=" lib32-libdrm lib32-mali-bifrost"
+    if [ "${DEVICE}" = "OdroidGoAdvance" ]; then
+      PKG_PATCH_DIRS+=" $SDL2_DIRECTORY/patches/OdroidGoAdvance"
+      PKG_DEPENDS_TARGET+=" lib32-librga"
+      # This is evil, but we save multiple comparasions
+      pre_make_host() {
+        sed -i "s| -lrga||g" ${PKG_BUILD}/CMakeLists.txt
+      }
+      pre_make_target() {
+        if ! `grep -rnw "${PKG_BUILD}/CMakeLists.txt" -e '-lrga'`; then
+          sed -i "s|--no-undefined|--no-undefined -lrga|" ${PKG_BUILD}/CMakeLists.txt
+        fi
+      }
+    fi
+  ;;
+esac
 
 unpack() {
   ${SCRIPTS}/get SDL2

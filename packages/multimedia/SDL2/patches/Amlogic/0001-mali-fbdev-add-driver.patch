@@ -1,16 +1,41 @@
+From ac78be4de06f43a8d9d993a6c3d34d6cf7462123 Mon Sep 17 00:00:00 2001
+From: 7Ji <pugokushin@gmail.com>
+Date: Tue, 9 Aug 2022 11:32:34 +0800
+Subject: [PATCH] mali-fbdev: add driver
+
+---
+ CMakeLists.txt                          |   2 +
+ cmake/sdlchecks.cmake                   |  22 ++
+ configure                               |  53 +++++
+ configure.ac                            |  30 +++
+ include/SDL_config.h.cmake              |   1 +
+ include/SDL_config.h.in                 |   1 +
+ src/video/SDL_egl.c                     |   2 +-
+ src/video/SDL_sysvideo.h                |   1 +
+ src/video/SDL_video.c                   |   3 +
+ src/video/mali-fbdev/SDL_maliopengles.c |  20 ++
+ src/video/mali-fbdev/SDL_maliopengles.h |  26 +++
+ src/video/mali-fbdev/SDL_malivideo.c    | 293 ++++++++++++++++++++++++
+ src/video/mali-fbdev/SDL_malivideo.h    |  54 +++++
+ 13 files changed, 507 insertions(+), 1 deletion(-)
+ create mode 100644 src/video/mali-fbdev/SDL_maliopengles.c
+ create mode 100644 src/video/mali-fbdev/SDL_maliopengles.h
+ create mode 100644 src/video/mali-fbdev/SDL_malivideo.c
+ create mode 100644 src/video/mali-fbdev/SDL_malivideo.h
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 73d9407..bcc872f 100644
+index 644715aae..aef556895 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -451,6 +451,7 @@
- set_option(SDL_HIDAPI_JOYSTICK     "Use HIDAPI for low level joystick drivers" ON)
- set_option(SDL_VIRTUAL_JOYSTICK    "Enable the virtual-joystick driver" ON)
- set_option(SDL_ASAN                "Use AddressSanitizer to detect memory errors" OFF)
-+set_option(VIDEO_MALI          "Use Mali EGL video driver" ${UNIX_SYS})
- 
- set(SDL_SHARED ${SDL_SHARED_ENABLED_BY_DEFAULT} CACHE BOOL "Build a shared version of the library")
- set(SDL_STATIC ${SDL_STATIC_ENABLED_BY_DEFAULT} CACHE BOOL "Build a static version of the library")
-@@ -1281,6 +1282,7 @@
+@@ -445,6 +445,7 @@ dep_option(SDL_VULKAN              "Enable Vulkan support" ON "ANDROID OR APPLE
+ set_option(SDL_METAL               "Enable Metal support" ${APPLE})
+ set_option(SDL_KMSDRM              "Use KMS DRM video driver" ${UNIX_SYS})
+ dep_option(SDL_KMSDRM_SHARED       "Dynamically load KMS DRM support" ON "SDL_KMSDRM" OFF)
++set_option(SDL_MALI                "Use Mali EGL video driver" ${UNIX_SYS})
+ set_option(SDL_OFFSCREEN           "Use offscreen video driver" OFF)
+ option_string(SDL_BACKGROUNDING_SIGNAL "number to use for magic backgrounding signal or 'OFF'" OFF)
+ option_string(SDL_FOREGROUNDING_SIGNAL "number to use for magic foregrounding signal or 'OFF'" OFF)
+@@ -1281,6 +1282,7 @@ elseif(UNIX AND NOT APPLE AND NOT ANDROID AND NOT RISCOS AND NOT HAIKU)
      CheckOpenGLES()
      CheckWayland()
      CheckVivante()
@@ -19,22 +44,24 @@ index 73d9407..bcc872f 100644
      if(SDL_VULKAN)
        set(SDL_VIDEO_VULKAN 1)
 diff --git a/cmake/sdlchecks.cmake b/cmake/sdlchecks.cmake
-index e2e89a2..b890f49 100644
+index 8dcb39265..f1fef801d 100644
 --- a/cmake/sdlchecks.cmake
 +++ b/cmake/sdlchecks.cmake
-@@ -768,6 +768,28 @@ endmacro()
+@@ -771,6 +771,28 @@ macro(CheckDirectFB)
+   endif()
+ endmacro()
  
- # Requires:
- # - n/a
++# Requires:
++# - n/a
 +macro(CheckMali)
-+  if(VIDEO_MALI)
++  if(SDL_MALI)
 +    check_c_source_compiles("
 +        #define LINUX
 +        #define EGL_API_FB
 +        #include <EGL/egl.h>
-+        int main(int argc, char** argv) {}" HAVE_VIDEO_MALI_EGL_FB)
-+    if(HAVE_VIDEO_MALI_EGL_FB)
-+      set(HAVE_VIDEO_MALI TRUE)
++        int main(int argc, char** argv) {}" HAVE_MALI_EGL_FB)
++    if(HAVE_MALI_EGL_FB)
++      set(HAVE_MALI TRUE)
 +      set(HAVE_SDL_VIDEO TRUE)
 +
 +      file(GLOB MALI_SOURCES ${SDL2_SOURCE_DIR}/src/video/mali-fbdev/*.c)
@@ -42,20 +69,18 @@ index e2e89a2..b890f49 100644
 +      set(SDL_VIDEO_DRIVER_MALI 1)
 +      set(SDL_CFLAGS "${SDL_CFLAGS} -DLINUX -DEGL_API_FB")
 +      list(APPEND EXTRA_LIBS EGL)
-+    endif(HAVE_VIDEO_MALI_EGL_MALI)
-+  endif(VIDEO_MALI)
-+endmacro(CheckMali)
++    endif()
++  endif()
++endmacro()
 +
-+# Requires:
-+# - n/a
+ # Requires:
+ # - n/a
  macro(CheckVivante)
-   if(VIDEO_VIVANTE)
-     check_c_source_compiles("
 diff --git a/configure b/configure
-index 55e0d4d..cd60ad6 100755
+index f3ea813eb..94f85020f 100755
 --- a/configure
 +++ b/configure
-@@ -878,6 +878,7 @@
+@@ -886,6 +886,7 @@ enable_video_x11_scrnsaver
  enable_video_x11_xshape
  enable_video_x11_vm
  enable_video_vivante
@@ -63,7 +88,7 @@ index 55e0d4d..cd60ad6 100755
  enable_video_cocoa
  enable_video_metal
  enable_render_metal
-@@ -1668,6 +1669,7 @@
+@@ -1684,6 +1685,7 @@ Optional Features:
                            enable X11 XShape support [default=yes]
    --enable-video-x11-vm   use X11 VM extension for fullscreen [default=yes]
    --enable-video-vivante  use Vivante EGL video driver [default=yes]
@@ -71,7 +96,7 @@ index 55e0d4d..cd60ad6 100755
    --enable-video-cocoa    use Cocoa video driver [default=yes]
    --enable-video-metal    include Metal support [default=yes]
    --enable-render-metal   enable the Metal render driver [default=yes]
-@@ -21870,6 +21872,56 @@
+@@ -22685,6 +22687,56 @@ $as_echo "#define SDL_VIDEO_DRIVER_VIVANTE_VDK 1" >>confdefs.h
      fi
  }
  
@@ -128,20 +153,19 @@ index 55e0d4d..cd60ad6 100755
  CheckHaikuVideo()
  {
      if test x$enable_video = xyes; then
-@@ -25042,6 +25094,7 @@
+@@ -25955,6 +26007,7 @@ $as_echo "#define SDL_VIDEO_DRIVER_ANDROID 1" >>confdefs.h
          CheckLinuxVersion
          CheckRPATH
          CheckVivanteVideo
-+	CheckMaliVideo
++        CheckMaliVideo
  
-         SOURCES="$SOURCES $srcdir/src/misc/unix/*.c"
-         have_misc=yes
-
-diff --git a/configure.in b/configure.in
-index 5ac2130..3e67f09 100644
+         # Set up files for the misc library
+         if test x$enable_misc = xyes; then
+diff --git a/configure.ac b/configure.ac
+index 2209c04d7..23bbe4d54 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -2012,6 +2012,35 @@ AC_HELP_STRING([--enable-video-vivante], [use Vivante EGL video driver [[default
+@@ -2162,6 +2162,35 @@ CheckVivanteVideo()
      fi
  }
  
@@ -177,32 +201,31 @@ index 5ac2130..3e67f09 100644
  dnl Set up the Haiku video driver if enabled
  CheckHaikuVideo()
  {
-@@ -3324,6 +3353,7 @@ case "$host" in
+@@ -3747,6 +3776,7 @@ case "$host" in
          CheckLinuxVersion
          CheckRPATH
          CheckVivanteVideo
-+	CheckMaliVideo
++        CheckMaliVideo
  
-         # Set up files for the audio library
-         if test x$enable_audio = xyes; then
+         # Set up files for the misc library
+         if test x$enable_misc = xyes; then
 diff --git a/include/SDL_config.h.cmake b/include/SDL_config.h.cmake
-index 9b20398..a14a92b 100644
+index fcd18e57d..e8844e003 100644
 --- a/include/SDL_config.h.cmake
 +++ b/include/SDL_config.h.cmake
-@@ -401,6 +401,7 @@
+@@ -400,6 +400,7 @@
+ #cmakedefine SDL_VIDEO_DRIVER_RPI @SDL_VIDEO_DRIVER_RPI@
+ #cmakedefine SDL_VIDEO_DRIVER_VIVANTE @SDL_VIDEO_DRIVER_VIVANTE@
+ #cmakedefine SDL_VIDEO_DRIVER_VIVANTE_VDK @SDL_VIDEO_DRIVER_VIVANTE_VDK@
++#cmakedefine SDL_VIDEO_DRIVER_MALI @SDL_VIDEO_DRIVER_MALI@
+ #cmakedefine SDL_VIDEO_DRIVER_OS2 @SDL_VIDEO_DRIVER_OS2@
  #cmakedefine SDL_VIDEO_DRIVER_QNX @SDL_VIDEO_DRIVER_QNX@
  #cmakedefine SDL_VIDEO_DRIVER_RISCOS @SDL_VIDEO_DRIVER_RISCOS@
- #cmakedefine SDL_VIDEO_DRIVER_PSP @SDL_VIDEO_DRIVER_PSP@
-+#cmakedefine SDL_VIDEO_DRIVER_MALI @SDL_VIDEO_DRIVER_MALI@
- 
- #cmakedefine SDL_VIDEO_DRIVER_KMSDRM @SDL_VIDEO_DRIVER_KMSDRM@
- #cmakedefine SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC @SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC@
-
 diff --git a/include/SDL_config.h.in b/include/SDL_config.h.in
-index a28e83f..605a421 100644
+index f912e4112..420fa0e2e 100644
 --- a/include/SDL_config.h.in
 +++ b/include/SDL_config.h.in
-@@ -380,6 +380,7 @@
+@@ -383,6 +383,7 @@
  #undef SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC_GBM
  #undef SDL_VIDEO_DRIVER_ANDROID
  #undef SDL_VIDEO_DRIVER_EMSCRIPTEN
@@ -211,10 +234,10 @@ index a28e83f..605a421 100644
  #undef SDL_VIDEO_DRIVER_X11_DYNAMIC
  #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT
 diff --git a/src/video/SDL_egl.c b/src/video/SDL_egl.c
-index 0daf98a..5295c1c 100644
+index e62fe9931..966c2cf65 100644
 --- a/src/video/SDL_egl.c
 +++ b/src/video/SDL_egl.c
-@@ -51,7 +51,7 @@
+@@ -59,7 +59,7 @@
  #define DEFAULT_OGL_ES_PVR ( vc4 ? "libGLES_CM.so.1" : "libbrcmGLESv2.so" )
  #define DEFAULT_OGL_ES ( vc4 ? "libGLESv1_CM.so.1" : "libbrcmGLESv2.so" )
  
@@ -224,25 +247,24 @@ index 0daf98a..5295c1c 100644
  #define DEFAULT_EGL "libEGL.so"
  #define DEFAULT_OGL_ES2 "libGLESv2.so"
 diff --git a/src/video/SDL_sysvideo.h b/src/video/SDL_sysvideo.h
-index 811fe19..991245e 100644
+index 2384a64ac..5f4ead462 100644
 --- a/src/video/SDL_sysvideo.h
 +++ b/src/video/SDL_sysvideo.h
-@@ -439,6 +439,7 @@
+@@ -455,6 +455,7 @@ extern VideoBootStrap NACL_bootstrap;
+ extern VideoBootStrap VIVANTE_bootstrap;
+ extern VideoBootStrap Emscripten_bootstrap;
+ extern VideoBootStrap QNX_bootstrap;
++extern VideoBootStrap MALI_bootstrap;
  extern VideoBootStrap OFFSCREEN_bootstrap;
  extern VideoBootStrap OS2DIVE_bootstrap;
  extern VideoBootStrap OS2VMAN_bootstrap;
-+extern VideoBootStrap MALI_bootstrap;
- 
- extern SDL_VideoDevice *SDL_GetVideoDevice(void);
- extern int SDL_AddBasicVideoDisplay(const SDL_DisplayMode * desktop_mode);
-
 diff --git a/src/video/SDL_video.c b/src/video/SDL_video.c
-index 8cf195d..7ade62a 100644
+index 93c803e70..9611f432b 100644
 --- a/src/video/SDL_video.c
 +++ b/src/video/SDL_video.c
-@@ -100,6 +100,9 @@ static VideoBootStrap *bootstrap[] = {
- #if SDL_VIDEO_DRIVER_KMSDRM
-     &KMSDRM_bootstrap,
+@@ -103,6 +103,9 @@ static VideoBootStrap *bootstrap[] = {
+ #if SDL_VIDEO_DRIVER_RISCOS
+     &RISCOS_bootstrap,
  #endif
 +#if SDL_VIDEO_DRIVER_MALI
 +    &MALI_bootstrap,
@@ -251,30 +273,11 @@ index 8cf195d..7ade62a 100644
      &RPI_bootstrap,
  #endif
 diff --git a/src/video/mali-fbdev/SDL_maliopengles.c b/src/video/mali-fbdev/SDL_maliopengles.c
-index e69de29..0814ba3 100644
---- a/src/video/mali-fbdev/SDL_maliopengles.c
+new file mode 100644
+index 000000000..e484a4778
+--- /dev/null
 +++ b/src/video/mali-fbdev/SDL_maliopengles.c
-@@ -0,0 +1,42 @@
-+/*
-+  Simple DirectMedia Layer
-+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
-+
-+  This software is provided 'as-is', without any express or implied
-+  warranty.  In no event will the authors be held liable for any damages
-+  arising from the use of this software.
-+
-+  Permission is granted to anyone to use this software for any purpose,
-+  including commercial applications, and to alter it and redistribute it
-+  freely, subject to the following restrictions:
-+
-+  1. The origin of this software must not be misrepresented; you must not
-+     claim that you wrote the original software. If you use this software
-+     in a product, an acknowledgment in the product documentation would be
-+     appreciated but is not required.
-+  2. Altered source versions must be plainly marked as such, and must not be
-+     misrepresented as being the original software.
-+  3. This notice may not be removed or altered from any source distribution.
-+*/
+@@ -0,0 +1,20 @@
 +#include "../../SDL_internal.h"
 +
 +#if SDL_VIDEO_DRIVER_MALI && SDL_VIDEO_OPENGL_EGL
@@ -295,33 +298,12 @@ index e69de29..0814ba3 100644
 +SDL_EGL_MakeCurrent_impl(MALI)
 +
 +#endif /* SDL_VIDEO_DRIVER_MALI && SDL_VIDEO_OPENGL_EGL */
-+
-+/* vi: set ts=4 sw=4 expandtab: */
 diff --git a/src/video/mali-fbdev/SDL_maliopengles.h b/src/video/mali-fbdev/SDL_maliopengles.h
-index e69de29..e9568e3 100644
---- a/src/video/mali-fbdev/SDL_maliopengles.h
+new file mode 100644
+index 000000000..639158f41
+--- /dev/null
 +++ b/src/video/mali-fbdev/SDL_maliopengles.h
-@@ -0,0 +1,48 @@
-+/*
-+  Simple DirectMedia Layer
-+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
-+
-+  This software is provided 'as-is', without any express or implied
-+  warranty.  In no event will the authors be held liable for any damages
-+  arising from the use of this software.
-+
-+  Permission is granted to anyone to use this software for any purpose,
-+  including commercial applications, and to alter it and redistribute it
-+  freely, subject to the following restrictions:
-+
-+  1. The origin of this software must not be misrepresented; you must not
-+     claim that you wrote the original software. If you use this software
-+     in a product, an acknowledgment in the product documentation would be
-+     appreciated but is not required.
-+  2. Altered source versions must be plainly marked as such, and must not be
-+     misrepresented as being the original software.
-+  3. This notice may not be removed or altered from any source distribution.
-+*/
+@@ -0,0 +1,26 @@
 +#include "../../SDL_internal.h"
 +
 +#ifndef _SDL_maliopengles_h
@@ -347,34 +329,13 @@ index e69de29..e9568e3 100644
 +
 +#endif /* SDL_VIDEO_DRIVER_MALI && SDL_VIDEO_OPENGL_EGL */
 +
-+#endif /* _SDL_maliopengles_h */
-+
-+/* vi: set ts=4 sw=4 expandtab: */
++#endif
 diff --git a/src/video/mali-fbdev/SDL_malivideo.c b/src/video/mali-fbdev/SDL_malivideo.c
-index e69de29..d26e766 100644
---- a/src/video/mali-fbdev/SDL_malivideo.c
+new file mode 100644
+index 000000000..557c13f67
+--- /dev/null
 +++ b/src/video/mali-fbdev/SDL_malivideo.c
-@@ -0,0 +1,323 @@
-+/*
-+  Simple DirectMedia Layer
-+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
-+
-+  This software is provided 'as-is', without any express or implied
-+  warranty.  In no event will the authors be held liable for any damages
-+  arising from the use of this software.
-+
-+  Permission is granted to anyone to use this software for any purpose,
-+  including commercial applications, and to alter it and redistribute it
-+  freely, subject to the following restrictions:
-+
-+  1. The origin of this software must not be misrepresented; you must not
-+     claim that you wrote the original software. If you use this software
-+     in a product, an acknowledgment in the product documentation would be
-+     appreciated but is not required.
-+  2. Altered source versions must be plainly marked as such, and must not be
-+     misrepresented as being the original software.
-+  3. This notice may not be removed or altered from any source distribution.
-+*/
+@@ -0,0 +1,293 @@
 +#include "../../SDL_internal.h"
 +
 +#if SDL_VIDEO_DRIVER_MALI
@@ -386,20 +347,13 @@ index e69de29..d26e766 100644
 +#include "SDL_loadso.h"
 +#include "SDL_events.h"
 +#include "../../events/SDL_events_c.h"
-+#include "../../events/SDL_mouse_c.h"
-+#include "../../events/SDL_keyboard_c.h"
-+ // #ifdef SDL_INPUT_LINUXEV
++
++#ifdef SDL_INPUT_LINUXEV
 +#include "../../core/linux/SDL_evdev.h"
-+ // #endif
++#endif
 +
 +#include "SDL_malivideo.h"
 +#include "SDL_maliopengles.h"
-+
-+/*static int
-+MALI_Available(void)
-+{
-+    return 1;
-+}*/
 +
 +static void
 +MALI_Destroy(SDL_VideoDevice * device)
@@ -463,7 +417,6 @@ index e69de29..d26e766 100644
 +    "mali",
 +    "Mali EGL Video Driver",
 +    MALI_Create
-+    
 +};
 +
 +/*****************************************************************************/
@@ -524,11 +477,11 @@ index e69de29..d26e766 100644
 +
 +    SDL_AddVideoDisplay(&display, SDL_FALSE);
 +
-+ // #ifdef SDL_INPUT_LINUXEV
++#ifdef SDL_INPUT_LINUXEV
 +    if (SDL_EVDEV_Init() < 0) {
 +        return -1;
 +    }
-+ // #endif
++#endif
 +
 +    return 0;
 +}
@@ -543,9 +496,9 @@ index e69de29..d26e766 100644
 +    close(fd);
 +    system("setterm -cursor on");
 +
-+ // #ifdef SDL_INPUT_LINUXEV
++#ifdef SDL_INPUT_LINUXEV
 +    SDL_EVDEV_Quit();
-+ // #endif
++#endif
 +
 +}
 +
@@ -669,41 +622,19 @@ index e69de29..d26e766 100644
 +/*****************************************************************************/
 +void MALI_PumpEvents(_THIS)
 +{
-+ // #ifdef SDL_INPUT_LINUXEV
++#ifdef SDL_INPUT_LINUXEV
 +    SDL_EVDEV_Poll();
-+ // #endif
++#endif
 +}
 +
 +#endif /* SDL_VIDEO_DRIVER_MALI */
 +
-+/* vi: set ts=4 sw=4 expandtab: */
-+
 diff --git a/src/video/mali-fbdev/SDL_malivideo.h b/src/video/mali-fbdev/SDL_malivideo.h
-index e69de29..62a2920 100644
---- a/src/video/mali-fbdev/SDL_malivideo.h
+new file mode 100644
+index 000000000..65c81d9a4
+--- /dev/null
 +++ b/src/video/mali-fbdev/SDL_malivideo.h
-@@ -0,0 +1,77 @@
-+/*
-+  Simple DirectMedia Layer
-+  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
-+
-+  This software is provided 'as-is', without any express or implied
-+  warranty.  In no event will the authors be held liable for any damages
-+  arising from the use of this software.
-+
-+  Permission is granted to anyone to use this software for any purpose,
-+  including commercial applications, and to alter it and redistribute it
-+  freely, subject to the following restrictions:
-+
-+  1. The origin of this software must not be misrepresented; you must not
-+     claim that you wrote the original software. If you use this software
-+     in a product, an acknowledgment in the product documentation would be
-+     appreciated but is not required.
-+  2. Altered source versions must be plainly marked as such, and must not be
-+     misrepresented as being the original software.
-+  3. This notice may not be removed or altered from any source distribution.
-+*/
-+
+@@ -0,0 +1,54 @@
 +#ifndef _SDL_malivideo_h
 +#define _SDL_malivideo_h
 +
@@ -717,8 +648,8 @@ index e69de29..62a2920 100644
 +#include <linux/fb.h>
 +#include <sys/types.h>
 +#include <sys/stat.h>
++#include <sys/ioctl.h>
 +#include <fcntl.h>
-+//#include <stropts.h>
 +#include <unistd.h>
 +#include <stdlib.h>
 +
@@ -758,5 +689,6 @@ index e69de29..62a2920 100644
 +
 +#endif /* _SDL_malivideo_h */
 +
-+/* vi: set ts=4 sw=4 expandtab: */
-+
+-- 
+2.37.1
+
