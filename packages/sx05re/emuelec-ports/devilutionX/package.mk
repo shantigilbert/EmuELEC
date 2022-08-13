@@ -16,7 +16,7 @@ PKG_BUILD_FLAGS="-lto"
 pre_configure_target() {
 PKG_CMAKE_OPTS_TARGET=" -DCMAKE_BUILD_TYPE="Release" -DDEVILUTIONX_STATIC_CXX_STDLIB=OFF -DDISABLE_ZERO_TIER=ON -DBUILD_TESTING=OFF -DBUILD_ASSETS_MPQ=OFF -DDEBUG=OFF -DPREFILL_PLAYER_NAME=ON -DDEVILUTIONX_SYSTEM_LIBSODIUM=OFF"
 
-sed -i "s|assets/|assets_dvx/|" $PKG_BUILD/Source/utils/paths.cpp
+sed -i "s|\"assets\"\ DIRECTORY_SEPARATOR_STR|\"assets_dvx\"\ DIRECTORY_SEPARATOR_STR|" $PKG_BUILD/Source/utils/paths.cpp
 }
 
 makeinstall_target() { 
