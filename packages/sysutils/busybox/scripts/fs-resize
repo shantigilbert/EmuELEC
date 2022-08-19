@@ -43,11 +43,12 @@ if [ -e /storage/.please_resize_me ] ; then
     DISK_NAME=$(basename $DISK)
     DISK_SECTORS=$(cat "/sys/block/$DISK_NAME/size") # Obtain the disk sectors count, each sector is always 512 Bytes large, independent of the underlying device, according to https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/linux/types.h#n117
     DISK_SIZE=$(( $DISK_SECTORS * 512 )) # Calculate the disk actual size, in byte
-    if [ $DISK_SIZE -gt 4294967296 ]; then # The optimal behaviour, this will leave 2GiB to storage, and create the EEROMS partition
+    if [ $DISK_SIZE -gt 8589934592 ]; then # The optimal behaviour, this will leave 6GiB to storage, and create the EEROMS partition
       ROMS_CREATE='yes'
-      STORAGE_END='4GiB'
+      STORAGE_END='8GiB'
     elif [ $DISK_SIZE -gt 3221225472 ]; then  # Optionaly omit the EEROMS partition for 4GB cards/drives
       ROMS_CREATE=''
+      ROMS_OMIT_MANUAL=''
       STORAGE_END='100%'
     else
       # The bare minumum a EmuELEC image itself needs is 2186280960, but after adding in user configs things become uncontrollable, so we don't care about disks with size between 2085MiB and 3GiB
@@ -68,40 +69,47 @@ if [ -e /storage/.please_resize_me ] ; then
       StartProgress spinner "Checking layout...      " "sgdisk -e $DISK &>/dev/null"
     fi
     
-    # EmueELEC Get EEROMS filetype
-    ROM_FS_TYPE="vfat"
-    PARTED_FS_TYPE="fat32"
+    if [ "$ROMS_CREATE" ]; then
+      # EmueELEC Get EEROMS filetype
+      ROM_FS_TYPE="vfat"
+      PARTED_FS_TYPE="fat32"
 
-    if [ -e "/flash/ee_fstype" ]; then
-      EE_FS_TYPE=$(cat "/flash/ee_fstype")
-      
-      case $EE_FS_TYPE in
-      "ntfs")
-          ROM_FS_TYPE="ntfs"
-          PARTED_FS_TYPE="ntfs"
-      ;;
-      "ext4")
-          ROM_FS_TYPE="ext4"
-          PARTED_FS_TYPE="ext4"
-      ;;
-      "exfat")
-          ROM_FS_TYPE="exfat"
-          PARTED_FS_TYPE="ntfs"
-      ;;
-      *)
-          # Failsafe
-          ROM_FS_TYPE="vfat"
-          PARTED_FS_TYPE="fat32"
-      ;;
-      esac    
-      
+      if [ -e "/flash/ee_fstype" ]; then
+        EE_FS_TYPE=$(cat "/flash/ee_fstype")
+        
+        case $EE_FS_TYPE in
+        "ntfs")
+            ROM_FS_TYPE="ntfs"
+            PARTED_FS_TYPE="ntfs"
+        ;;
+        "ext4")
+            ROM_FS_TYPE="ext4"
+            PARTED_FS_TYPE="ext4"
+        ;;
+        "exfat")
+            ROM_FS_TYPE="exfat"
+            PARTED_FS_TYPE="ntfs"
+        ;;
+        "no")
+            ROMS_CREATE=''
+            ROMS_OMIT_MANUAL='yes'
+            STORAGE_END='100%'
+        ;;
+        *)
+            # Failsafe
+            ROM_FS_TYPE="vfat"
+            PARTED_FS_TYPE="fat32"
+        ;;
+        esac    
+        
+      fi
     fi
 
     StartProgress spinner "Resizing partition...   " "parted -s -a optimal -m $DISK resizepart 2 $STORAGE_END &>/dev/null"
     StartProgress spinner "Checking file system... " "e2fsck -f -p $PART &>/dev/null"
     StartProgress spinner "Resizing file system... " "resize2fs $PART &>/dev/null"
     if [ "$ROMS_CREATE" ]; then
-      StartProgress spinner "Creating EEROMS partition..." "parted -s -a optimal -m $DISK mkpart primary ${PARTED_FS_TYPE} 4GiB 100% &>/dev/null"
+      StartProgress spinner "Creating EEROMS partition..." "parted -s -a optimal -m $DISK mkpart primary ${PARTED_FS_TYPE} ${STORAGE_END} 100% &>/dev/null"
       partprobe &>/dev/null
       case $ROM_FS_TYPE in 
         "ntfs")
@@ -117,8 +125,11 @@ if [ -e /storage/.please_resize_me ] ; then
         StartProgress spinner "Formatting EEROMS partition as FAT32..." "mkfs.vfat -n EEROMS ${ROMS_PART_NAME} &>/dev/null"
         ;;
       esac   
+    elif [ "$ROMS_OMIT_MANUAL" ]; then
+      echo 'WARNING: EEROMS partition is omitted manually even your drive size is >=8GB, YOU KNOW WHAT YOU ARE DOING'
+      echo > '/flash/ee_fstype' # Mark should be cleaned since the 'no' fstype has no use afterwards
     else
-      echo 'WARNING: EEROMS partition is omitted for 4GB drives'
+      echo 'WARNING: EEROMS partition is omitted for <8GB drives'
     fi
     StartProgress countdown "Rebooting in 5s...     " 5 "NOW"
   fi
