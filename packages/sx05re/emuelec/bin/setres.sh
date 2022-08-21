@@ -28,19 +28,19 @@ blank_buffer()
 }
 
 # By initially setting with these values we can garuntee the file changes, and the mode corrects itself.
-HACK1_MODE="640x480p60hz"
-HACK2_MODE="480p60hz"
+HACK_480_MODE="640x480p60hz"
+HACK_576_MODE="1024x768p60hz"
+HACK2_MODE="720p60hz"
+
 FILE_MODE="/sys/class/display/mode"
-[[ ! -f "$FILE_MODE" ]] && FILE_MODE="/sys/class/display/display0.HDMI/mode" && HACK1_MODE="640x480p-60" && HACK2_MODE="480p-60"
 [[ ! -f "$FILE_MODE" ]] && exit 0;
 
 BPP=32
 
 MODE=$1
-[[ -z "$MODE" ]] && MODE=$(cat $FILE_MODE)
+DEF_MODE=$(cat $FILE_MODE)
 
 # If the current display is the same as the change just exit.
-[ -z "$MODE" ] && exit 0;
 [[ $MODE == "auto" ]] && exit 0;
 
 if [[ ! "$MODE" == *"x"* ]]; then
@@ -53,46 +53,60 @@ fi
 # hides buffer
 show_buffer 1
 
+if [[ ! "$MODE" == "$DEF_MODE" ]]; then
+  case $MODE in
+    480cvbs)
+      echo $HACK_480_MODE > "${FILE_MODE}"
+      echo 480cvbs > "${FILE_MODE}"
+      ;;
+    576cvbs)
+      echo $HACK_576_MODE > "${FILE_MODE}"
+      echo 576cvbs > "${FILE_MODE}"
+      ;;
+    480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
+      echo $MODE > "${FILE_MODE}"
+      ;;
+    *x*)
+      echo $HACK2_MODE > "${FILE_MODE}"
+      echo $MODE > "${FILE_MODE}"
+      ;;
+  esac
+fi
+
 case $MODE in
   480cvbs)
-    echo $MODE > "${FILE_MODE}"
-		fbset -fb /dev/fb0 -g 640 480 640 960 $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		echo 0 0 639 479 > /sys/class/graphics/fb0/free_scale_axis
-	  echo 30 10 669 469 > /sys/class/graphics/fb0/window_axis
-	  echo 640 > /sys/class/graphics/fb0/scale_width
-	  echo 480 > /sys/class/graphics/fb0/scale_height
-	  echo 0x10001 > /sys/class/graphics/fb0/free_scale
-		;;
-	576cvbs)
-    echo $MODE > "${FILE_MODE}"
-    fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
+    fbset -fb /dev/fb0 -g 640 480 640 960 $BPP
     fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-    echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
+    echo 0 0 639 479 > /sys/class/graphics/fb0/free_scale_axis
+    echo 30 10 669 469 > /sys/class/graphics/fb0/window_axis
+    echo 640 > /sys/class/graphics/fb0/scale_width
+    echo 480 > /sys/class/graphics/fb0/scale_height
+    echo 0x10001 > /sys/class/graphics/fb0/free_scale
+    ;;
+  576cvbs)
+    fbset -fb /dev/fb0 -g 1024 768 1024 1536 $BPP
+    fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+    echo 0 0 1023 767 > /sys/class/graphics/fb0/free_scale_axis
     echo 35 20 680 565 > /sys/class/graphics/fb0/window_axis
     echo 720 > /sys/class/graphics/fb0/scale_width
     echo 576 > /sys/class/graphics/fb0/scale_height
     echo 0x10001 > /sys/class/graphics/fb0/free_scale
     ;;
-	480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
-    echo $HACK1_MODE > "${FILE_MODE}"
-    echo $MODE > "${FILE_MODE}"
+  480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
     W=$(( $H*16/9 ))
     [[ "$MODE" == "480"* ]] && W=640
     DH=$(($H*2))
     W1=$(($W-1))
     H1=$(($H-1))
     fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-    fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP    
+    fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
     echo 0 > /sys/class/graphics/fb0/free_scale
-    echo 1 > /sys/class/graphics/fb0/freescale_mode
+    echo 0 > /sys/class/graphics/fb0/freescale_mode
     echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
     echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
     echo 0 > /sys/class/graphics/fb1/free_scale
     ;;
   *x*)
-    echo $HACK2_MODE > "${FILE_MODE}"
-    echo $MODE > "${FILE_MODE}"
     W=$(echo $MODE | cut -d'x' -f 1)
     H=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
     [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
@@ -101,12 +115,10 @@ case $MODE in
       W1=$(($W-1))
       H1=$(($H-1))
       fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-      fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-      echo 0x10001 > /sys/class/graphics/fb0/free_scale
-      echo 1 > /sys/class/graphics/fb0/freescale_mode
+      echo 0 > /sys/class/graphics/fb0/free_scale
+      echo 0 > /sys/class/graphics/fb0/freescale_mode
       echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
-      echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
-      echo 0 > /sys/class/graphics/fb1/free_scale
+      echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis      
     fi
     ;;
 esac
