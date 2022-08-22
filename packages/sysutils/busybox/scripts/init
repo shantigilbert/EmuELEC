@@ -703,45 +703,47 @@ mount_storage() {
 
 # EmuELEC specific
 mount_roms() {
-if /usr/bin/busybox mountpoint -q /storage ; then
+  if /usr/bin/busybox mountpoint -q /storage ; then
     progress "Mounting roms"
-  if [ -L "/storage/roms" ]; then
-   /usr/bin/busybox rm /storage/roms > /dev/null 2>&1
-  fi
+    if [ -L "/storage/roms" ]; then
+      /usr/bin/busybox rm -f /storage/roms > /dev/null 2>&1
+    fi
     /usr/bin/busybox mkdir -p /storage/roms > /dev/null 2>&1
 
-# Get EEROMS filetype
-ROM_FS_TYPE="vfat"
+    # Get EEROMS filetype
+    ROM_FS_TYPE="vfat"
 
-if [ -e "/flash/ee_fstype" ]; then
-    EE_FS_TYPE=$(cat "/flash/ee_fstype")
-    
-    case $EE_FS_TYPE in
-    "ntfs"|"ext4"|"exfat")
-        ROM_FS_TYPE=${EE_FS_TYPE}
-    ;;
-    *)
-        # Failsafe
-        ROM_FS_TYPE="vfat"
-    ;;
-    esac 
-fi
-    
+    if [ -e "/flash/ee_fstype" ]; then
+      EE_FS_TYPE=$(cat "/flash/ee_fstype")
+      
+      case $EE_FS_TYPE in
+        "ntfs"|"ext4"|"exfat")
+          ROM_FS_TYPE=${EE_FS_TYPE}
+        ;;
+        *)
+          # Failsafe
+          ROM_FS_TYPE="vfat"
+        ;;
+      esac 
+    fi
+      
     if [ "${ROM_FS_TYPE}" == "ntfs" ]; then 
-        NTFSMOUNT=$(/sysroot/usr/sbin/blkid --label EEROMS)
-        insmod /sysroot/usr/lib/kernel-overlays/base/lib/modules/$(uname -r)/kernel/fs/fuse/fuse.ko > /dev/null 2>&1
-        LD_LIBRARY_PATH=/sysroot/usr/lib /sysroot/usr/bin/ntfs-3g ${NTFSMOUNT} /storage/roms > /dev/null 2>&1
+      NTFSMOUNT=$(/sysroot/usr/sbin/blkid --label EEROMS)
+      insmod /sysroot/usr/lib/kernel-overlays/base/lib/modules/$(uname -r)/kernel/fs/fuse/fuse.ko > /dev/null 2>&1
+      LD_LIBRARY_PATH=/sysroot/usr/lib /sysroot/usr/bin/ntfs-3g ${NTFSMOUNT} /storage/roms > /dev/null 2>&1
     else
-        mount -t ${ROM_FS_TYPE} "LABEL=EEROMS" /storage/roms > /dev/null 2>&1
+      mount -t ${ROM_FS_TYPE} "LABEL=EEROMS" /storage/roms > /dev/null 2>&1
     fi
 
-# If mounting roms partition was succesful, we bind mount the update folder to use the third partition
+    # If mounting roms partition was succesful, we bind mount the update folder to use the third partition
     if /usr/bin/busybox mountpoint -q /storage/roms ; then
-     /usr/bin/busybox mkdir -p /storage/roms/.update > /dev/null 2>&1
-     /usr/bin/busybox mkdir -p "$UPDATE_ROOT" > /dev/null 2>&1
-     mount --bind /storage/roms/.update "$UPDATE_ROOT" > /dev/null 2>&1
+      /usr/bin/busybox mkdir -p /storage/roms/.update > /dev/null 2>&1
+      /usr/bin/busybox mkdir -p "$UPDATE_ROOT" > /dev/null 2>&1
+      mount --bind /storage/roms/.update "$UPDATE_ROOT" > /dev/null 2>&1
     fi
-fi
+  fi
+  # Disable all enabled systemd mount units for /storage/roms and /storage/roms/*, since we will handle them in userland. Starting them then stopping then optionally restarting... It's a huge waste of time and a headache. Especially if the users want to use the systemd-mount for /storage/roms itself yet don't want to use our mount handler, many of them won't even realize storage-roms.mount is definitely up and running at the moment systemd checks for mount units, so their enabled storage-roms.mount won't work at all
+  rm -f /storage/.config/system.d/*.wants/storage-roms*.mount &>/dev/null
 }
 
 # Make last bootloader label (installer, live, run etc.) as the new default

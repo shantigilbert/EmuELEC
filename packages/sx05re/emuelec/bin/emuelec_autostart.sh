@@ -77,7 +77,11 @@ fi
 setres.sh
 
 # Mounts /storage/roms
-mount_romfs.sh 
+MOUNT_HANDLER=$(get_ee_setting ee_mount.handler)
+if [ -z "$MOUNT_HANDLER" ]; then
+  MOUNT_HANDLER="eemount"
+fi
+$MOUNT_HANDLER &> /emuelec/logs/eemount.log
 
 # copy default bezel to /storage/roms/bezel if it doesn't exists
 if [ ! -f "/storage/roms/bezels/default.cfg" ]; then 

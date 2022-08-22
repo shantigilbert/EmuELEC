@@ -255,21 +255,21 @@ PWDFILE="/flash/ee_defaults.txt"
 [ ! -f "${PWDFILE}" ] && PWDFILE="/storage/roms/ee_defaults.txt"
 [ -f "${PWDFILE}" ] && check_pwd ${PWDFILE}
 
-# Find and mount the ports directory 
-if [ -L "/storage/roms" ]; then
-    LINK=$(readlink /storage/roms)
-else
-    LINK="/storage/roms"
-fi
+# The mounting logic for ports_scripts is now handled in the mount handler
+# # Find and mount the ports directory 
+# if [ -L "/storage/roms" ]; then
+#     LINK=$(readlink /storage/roms)
+# else
+#     LINK="/storage/roms"
+# fi
+# # Just in case
+# mkdir -p "${LINK}/ports_scripts"
+# mkdir -p "/emuelec/ports"
+# mkdir -p "/storage/.tmp/ports-workdir"
+# umount "/storage/roms/ports_scripts" > /dev/null 2>&1
+# umount "/var/media/EEROMS/roms/ports_scripts" > /dev/null 2>&1
 
-# Just in case
-mkdir -p "${LINK}/ports_scripts"
-mkdir -p "/emuelec/ports"
-mkdir -p "/storage/.tmp/ports-workdir"
-umount "/storage/roms/ports_scripts" > /dev/null 2>&1
-umount "/var/media/EEROMS/roms/ports_scripts" > /dev/null 2>&1
-
-mount -t overlay ports -o lowerdir=/usr/bin/ports,upperdir=/emuelec/ports,workdir=/storage/.tmp/ports-workdir "${LINK}/ports_scripts"
+# mount -t overlay ports -o lowerdir=/usr/bin/ports,upperdir=/emuelec/ports,workdir=/storage/.tmp/ports-workdir "${LINK}/ports_scripts"
 
 # wait for all the subshells to finish
 wait

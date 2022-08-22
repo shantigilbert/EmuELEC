@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0
-# Copyright (C) 2022-present 7Ji (pugokushin@gmail.com)
+# Copyright (C) 2022-present 7Ji (https://github.com/7Ji)
 
 PKG_NAME="ampart"
 PKG_VERSION="f0c3cc44ab05586a1b33bbddbf75432de4f1ab58"

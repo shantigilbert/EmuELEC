@@ -204,7 +204,7 @@ migrate_roms() { # $1 source, $2 target
     echo 'ERROR: Refuse to migrate as one of the source/target folder is a mountpoint!'
     return
   elif [[ -L "$2" || ! -d "$2" ]]; then # Easy, just move it
-    rm -f "$2" &>dev/null
+    rm -f "$2" &>/dev/null
     mv "$1" "$2"
   else # We need to move-merge roms_backup into roms
     move_merge "$1" "$2"
@@ -292,6 +292,20 @@ finish_scan() {
   echo "Finished scanning for roms mounts..."
   echo "Bringing back samba..."
   systemctl start smbd.service
+  echo "Mounting ports_scripts..."
+  if [ -L "/storage/roms" ]; then
+    local LINK=$(readlink /storage/roms)
+  else
+    local LINK="/storage/roms"
+  fi
+  # Just in case
+  mkdir -p "${LINK}/ports_scripts"
+  mkdir -p "/emuelec/ports"
+  mkdir -p "/storage/.tmp/ports-workdir"
+  umount "/storage/roms/ports_scripts" &>/dev/null
+  umount "/var/media/EEROMS/roms/ports_scripts" &>/dev/null
+
+  mount -t overlay ports -o lowerdir=/usr/bin/ports,upperdir=/emuelec/ports,workdir=/storage/.tmp/ports-workdir "${LINK}/ports_scripts"
 }
 
 if compgen -G /storage/.config/system.d/storage-roms*.mount &>/dev/null; then
@@ -306,7 +320,7 @@ if compgen -G /storage/.config/system.d/storage-roms*.mount &>/dev/null; then
       BOOL_DAEMON_RELOADED='yes'
       systemctl daemon-reload
     fi
-    systemctl enable --now "$SYSTEMD_UNIT_NAME" &>/dev/null
+    systemctl start "$SYSTEMD_UNIT_NAME" &>/dev/null
     systemctl is-active --quiet "$SYSTEMD_UNIT_NAME" && echo "Mounted '$SYSTEMD_UNIT_PATH' from samba roms"
   }
   # Only try to mount /storage/roms according to systemd if it's not mounted yet

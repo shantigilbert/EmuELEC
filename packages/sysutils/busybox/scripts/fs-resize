@@ -127,7 +127,8 @@ if [ -e /storage/.please_resize_me ] ; then
       esac   
     elif [ "$ROMS_OMIT_MANUAL" ]; then
       echo 'WARNING: EEROMS partition is omitted manually even your drive size is >=8GB, YOU KNOW WHAT YOU ARE DOING'
-      echo > '/flash/ee_fstype' # Mark should be cleaned since the 'no' fstype has no use afterwards
+      mount -o rw,remount /flash
+      rm -f /flash/ee_fstype # Mark should be cleaned since the 'no' fstype has no use afterwards
     else
       echo 'WARNING: EEROMS partition is omitted for <8GB drives'
     fi
