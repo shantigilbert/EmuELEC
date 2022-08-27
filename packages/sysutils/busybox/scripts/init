@@ -743,7 +743,8 @@ mount_roms() {
     fi
   fi
   # Disable all enabled systemd mount units for /storage/roms and /storage/roms/*, since we will handle them in userland. Starting them then stopping then optionally restarting... It's a huge waste of time and a headache. Especially if the users want to use the systemd-mount for /storage/roms itself yet don't want to use our mount handler, many of them won't even realize storage-roms.mount is definitely up and running at the moment systemd checks for mount units, so their enabled storage-roms.mount won't work at all
-  rm -f /storage/.config/system.d/*.wants/storage-roms*.mount &>/dev/null
+  # The pattern is splitted to two parts since 1) storage-roms*.mount matches storage-romswhatever.mount which is not what we want; 2) storage-roms{-*,}.mount is not supported by the ASH implemented in busybox
+  rm -f /storage/.config/system.d/*.wants/storage-roms-*.mount /storage/.config/system.d/*.wants/storage-roms.mount &>/dev/null
 }
 
 # Make last bootloader label (installer, live, run etc.) as the new default
