@@ -2,8 +2,8 @@
 # Copyright (C) 2022-present 7Ji (https://github.com/7Ji)
 
 PKG_NAME="eemount"
-PKG_VERSION="4adf31387a9019cb07db861374839d496f2c95e5"
-PKG_SHA256="84b0acb5f3c34a28ddc9e933b50fb2a395b0c044fcc300c79a97f405b0c03773"
+PKG_VERSION="2321603bdc7a4c09cf805de0e3546512574d8360"
+PKG_SHA256="12cf5fc00291d319f3e598b3b09ac14d591ba86075a61a7a9ed6bd21db16fc78"
 PKG_SITE="https://github.com/7Ji/eemount"
 PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain systemd"
