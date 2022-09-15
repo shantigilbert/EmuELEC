@@ -77,17 +77,17 @@ case $MODE in
   480cvbs)
     fbset -fb /dev/fb0 -g 640 480 640 960 $BPP
     echo 0 0 639 479 > /sys/class/graphics/fb0/free_scale_axis
-    echo 30 10 669 469 > /sys/class/graphics/fb0/window_axis
-    echo 640 > /sys/class/graphics/fb0/scale_width
-    echo 480 > /sys/class/graphics/fb0/scale_height
+    echo 10 10 629 469 > /sys/class/graphics/fb0/window_axis
+    #echo 640 > /sys/class/graphics/fb0/scale_width
+    #echo 480 > /sys/class/graphics/fb0/scale_height
     echo 0x10001 > /sys/class/graphics/fb0/free_scale
     ;;
   576cvbs)
-    fbset -fb /dev/fb0 -g 1024 768 1024 1536 $BPP
-    echo 0 0 1023 767 > /sys/class/graphics/fb0/free_scale_axis
-    echo 35 20 680 565 > /sys/class/graphics/fb0/window_axis
-    echo 720 > /sys/class/graphics/fb0/scale_width
-    echo 576 > /sys/class/graphics/fb0/scale_height
+    fbset -fb /dev/fb0 -g 800 600 800 1200 $BPP
+    echo 0 0 799 599 > /sys/class/graphics/fb0/free_scale_axis
+    echo 20 20 699 555 > /sys/class/graphics/fb0/window_axis
+    #echo 720 > /sys/class/graphics/fb0/scale_width
+    #echo 576 > /sys/class/graphics/fb0/scale_height
     echo 0x10001 > /sys/class/graphics/fb0/free_scale
     ;;
   480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
