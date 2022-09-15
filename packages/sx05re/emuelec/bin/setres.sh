@@ -24,6 +24,7 @@ show_buffer ()
 blank_buffer()
 {
   # Blank the buffer.
+  echo 1 > /sys/class/graphics/fb1/blank
   dd if=/dev/zero of=/dev/fb0 bs=10M > /dev/null 2>&1
 }
 
@@ -49,12 +50,15 @@ if [[ ! "$MODE" == *"x"* ]]; then
   esac
 fi
 
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
-
 # hides buffer
 show_buffer 1
 
-#if [[ ! "$MODE" == "$DEF_MODE" ]]; then
+# This is needed to reset scaling.
+echo 0 > /sys/class/ppmgr/ppscaler
+#echo 0 > /sys/class/graphics/fb0/free_scale
+#echo 1 > /sys/class/graphics/fb0/freescale_mode
+
+if [[ ! "$MODE" == "$DEF_MODE" ]]; then
   case $MODE in
     480cvbs)
       echo $HACK_480_MODE > "${FILE_MODE}"
@@ -71,26 +75,18 @@ show_buffer 1
       echo $MODE > "${FILE_MODE}"
       ;;
   esac
-#fi
+fi
 
 case $MODE in
   480cvbs)
     W1=639
     H1=479  
     fbset -fb /dev/fb0 -g 640 480 640 960 $BPP
-    echo 0 > /sys/class/graphics/fb0/free_scale
-    echo 0 > /sys/class/graphics/fb0/freescale_mode
-    echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
-    echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis    
     ;;
   576cvbs)
     W1=719
     H1=575
     fbset -fb /dev/fb0 -g 720 576 720 1152 $BPP
-    echo 0 > /sys/class/graphics/fb0/free_scale
-    echo 0 > /sys/class/graphics/fb0/freescale_mode
-    echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
-    echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
     ;;
   480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
     W=$(( $H*16/9 ))
@@ -99,10 +95,6 @@ case $MODE in
     W1=$(($W-1))
     H1=$(($H-1))
     fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-    echo 0 > /sys/class/graphics/fb0/free_scale
-    echo 0 > /sys/class/graphics/fb0/freescale_mode
-    echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
-    echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
     ;;
   *x*)
     W=$(echo $MODE | cut -d'x' -f 1)
@@ -113,36 +105,37 @@ case $MODE in
       W1=$(($W-1))
       H1=$(($H-1))
       fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-      echo 0 > /sys/class/graphics/fb0/free_scale
-      echo 0 > /sys/class/graphics/fb0/freescale_mode
-      echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
-      echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/window_axis
     fi
     ;;
 esac
+echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
+echo 0 > /sys/class/graphics/fb0/free_scale
+echo 0 > /sys/class/graphics/fb0/freescale_mode
 
 BORDER_SIZE=$(get_ee_setting ee_videoborder)
 BORDER_SIZE_X=0
 BORDER_SIZE_Y=0
-if [ -n ${BORDER_SIZE} ] & [ ${BORDER_SIZE} > 0 ]; then
+if [[ -n ${BORDER_SIZE} && ${BORDER_SIZE} > 0 ]]; then
   BORDER_SIZE_X=${BORDER_SIZE}
   BORDER_SIZE_Y=${BORDER_SIZE}
 fi
 
-if [ -z ${BORDER_SIZE_X} ]; then
+if [[ ${BORDER_SIZE_X} == 0 ]]; then
   BORDER_SIZE_X=$(get_ee_setting ee_videoborderx)
   BORDER_SIZE_Y=$(get_ee_setting ee_videobordery)
 fi
 
-if [ -n ${BORDER_SIZE_X} ] & [ -n ${BORDER_SIZE_Y} ]; then
-  if [ ${BORDER_SIZE_X} > 0 ] | [ ${BORDER_SIZE_Y} > 0 ]; then
-    SCALE_H=$(( $H1 - $BORDER_SIZE_X ))
-    SCALE_W=$(( $W1 - $BORDER_SIZE_Y ))
+if [[ -n ${BORDER_SIZE_X} && -n ${BORDER_SIZE_Y} ]]; then
+  if [[ ${BORDER_SIZE_X} > 0 || ${BORDER_SIZE_Y} > 0 ]]; then
+    SCALE_W=$(( $W1 - $BORDER_SIZE_X ))
+    SCALE_H=$(( $H1 - $BORDER_SIZE_Y ))
     echo ${BORDER_SIZE_X} ${BORDER_SIZE_Y} ${SCALE_W} ${SCALE_H} > /sys/class/graphics/fb0/window_axis
-    echo 0 > /sys/class/graphics/fb0/freescale_mode
+    echo 1 > /sys/class/graphics/fb0/freescale_mode
     echo 0x10001 > /sys/class/graphics/fb0/free_scale
   fi
 fi
+
+echo 1 > /sys/class/graphics/fb1/blank
 
 blank_buffer
 
