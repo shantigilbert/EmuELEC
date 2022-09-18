@@ -1,0 +1,75 @@
+diff --git a/advance/linux/vfb.c b/advance/linux/vfb.c
+index c25bca05..57edbac7 100644
+--- a/advance/linux/vfb.c
++++ b/advance/linux/vfb.c
+@@ -1707,7 +1726,7 @@ static adv_error fb_wait_vsync_ext(void)
+ 	if (ioctl(fb_state.fd, FBIO_WAITFORVSYNC, 0) != 0) {
+ 		log_std(("WARNING:video:fb: ioctl(FBIO_WAITFORVSYNC) failed\n"));
+ 		/* it may be not supported, it isn't an error */
+-		return -1;
++		return -2;
+ 	}
+ 
+ 	return 0;
+@@ -1727,7 +1746,7 @@ static adv_error fb_wait_vsync_api(void)
+ 	if (ioctl(fb_state.fd, FBIOGET_VBLANK, &blank) != 0) {
+ 		log_std(("WARNING:video:fb: ioctl(FBIOGET_VBLANK) failed\n"));
+ 		/* it may be not supported, it isn't an error */
+-		return -1;
++		return -2;
+ 	}
+ 
+ 	if ((blank.flags & FB_VBLANK_HAVE_COUNT) != 0) {
+@@ -1803,9 +1822,13 @@ static adv_error fb_wait_vsync_vga(void)
+ 
+ void fb_wait_vsync(void)
+ {
++	adv_error res = 0;
+ 	switch (fb_state.wait) {
+-	case fb_wait_ext:
+-		if (fb_wait_vsync_ext() != 0) {
++	case fb_wait_ext: 
++		res = fb_wait_vsync_ext();
++		if (res != 0) {
++			if (res == -2)
++				break;
+ 			++fb_state.wait_error;
+ 			if (fb_state.wait_error > WAIT_ERROR_MAX)
+ 				fb_state.wait = fb_wait_none;
+@@ -1814,7 +1837,10 @@ void fb_wait_vsync(void)
+ 		}
+ 		break;
+ 	case fb_wait_api:
+-		if (fb_wait_vsync_api() != 0) {
++		res = fb_wait_vsync_api();
++		if (res != 0) {
++			if (res == -2)
++				break;
+ 			++fb_state.wait_error;
+ 			if (fb_state.wait_error > WAIT_ERROR_MAX)
+ 				fb_state.wait = fb_wait_none;
+@@ -1834,18 +1860,21 @@ void fb_wait_vsync(void)
+ 		break;
+ #endif
+ 	case fb_wait_detect:
+-		if (fb_wait_vsync_ext() == 0) {
++		res = fb_wait_vsync_ext();
++		if (res == 0) {
+ 			fb_state.wait = fb_wait_ext;
+ 			fb_state.wait_error = 0;
+-		} else if (fb_wait_vsync_api() == 0) {
++		} else if ((res = fb_wait_vsync_api()) && res == 0) {
+ 			fb_state.wait = fb_wait_api;
+ 			fb_state.wait_error = 0;
+ #ifdef __i386__
+-		} else if (fb_wait_vsync_vga() == 0) {
++		} else if ((res = fb_wait_vsync_vga()) && res == 0) {
+ 			fb_state.wait = fb_wait_vga;
+ 			fb_state.wait_error = 0;
+ #endif
+ 		} else {
++			if (res==-2)
++				break;
+ 			++fb_state.wait_error;
+ 			if (fb_state.wait_error > WAIT_ERROR_MAX)
+ 				fb_state.wait = fb_wait_none;
