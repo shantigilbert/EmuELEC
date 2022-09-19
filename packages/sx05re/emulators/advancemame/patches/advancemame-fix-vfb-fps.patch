@@ -74,7 +74,7 @@ index c25bca05..7886f78c 100644
  			if (fb_state.wait_error > WAIT_ERROR_MAX)
  				fb_state.wait = fb_wait_none;
 diff --git a/advance/osd/glue.c b/advance/osd/glue.c
-index f6990e46..5d2c5ff0 100644
+index f6990e46..6d3e6102 100644
 --- a/advance/osd/glue.c
 +++ b/advance/osd/glue.c
 @@ -100,6 +100,7 @@ struct advance_glue_context {
@@ -97,13 +97,7 @@ index f6990e46..5d2c5ff0 100644
  #ifdef MESS
  const char* crcfile;
  const char* pcrcfile;
-@@ -777,11 +783,18 @@ int mame_game_run(struct advance_context* context, const struct mame_option* adv
- 			break;
- 	assert(drivers[game_index] != 0);
- 	if (!drivers[game_index])
--		return -1;
-+		return -1;	
- 
+@@ -782,6 +788,13 @@ int mame_game_run(struct advance_context* context, const struct mame_option* adv
  	GLUE.sound_speed = context->video.config.fps_speed_factor;
  	GLUE.sound_fps = context->video.config.fps_fixed;
  
@@ -111,14 +105,14 @@ index f6990e46..5d2c5ff0 100644
 +	globals.sound_speed = &(GLUE.sound_speed);
 +	globals.sound_fps = &(GLUE.sound_fps);
 +	globals.fps_speed_factor = &(context->video.config.fps_speed_factor);
-+	globals.fps_fixed = (context->video.config.fps_fixed > 0.0) ? context->video.config.fps_fixed : globals.mode_vclock;
++	globals.fps_fixed = context->video.config.fps_fixed;
 +#endif
 +
  	hardware_script_info(mame_game_description(context->game), mame_game_manufacturer(context->game), mame_game_year(context->game), "Loading");
  
  	r = run_game(game_index);
 diff --git a/src/mame.c b/src/mame.c
-index 2d7eb97a..65405e53 100644
+index 2d7eb97a..013df92f 100644
 --- a/src/mame.c
 +++ b/src/mame.c
 @@ -229,6 +229,9 @@ const char *memory_region_names[REGION_MAX] =
@@ -136,7 +130,7 @@ index 2d7eb97a..65405e53 100644
  			init_machine();
  
 +			printf("globals.fps_fixed: %f",globals.fps_fixed);
-+			if (Machine->refresh_rate != globals.fps_fixed) {
++			if (globals.fps_fixed > 0.0 && Machine->refresh_rate != globals.fps_fixed) {
 +				*(globals.sound_fps) = globals.fps_fixed;
 +				*(globals.fps_speed_factor) = Machine->refresh_rate / globals.fps_fixed;
 +				*(globals.sound_speed) = globals.fps_fixed / Machine->refresh_rate;
