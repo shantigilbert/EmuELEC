@@ -1,8 +1,8 @@
 diff --git a/advance/linux/vfb.c b/advance/linux/vfb.c
-index c25bca05..57edbac7 100644
+index c25bca05..7886f78c 100644
 --- a/advance/linux/vfb.c
 +++ b/advance/linux/vfb.c
-@@ -1707,7 +1726,7 @@ static adv_error fb_wait_vsync_ext(void)
+@@ -1707,7 +1707,7 @@ static adv_error fb_wait_vsync_ext(void)
  	if (ioctl(fb_state.fd, FBIO_WAITFORVSYNC, 0) != 0) {
  		log_std(("WARNING:video:fb: ioctl(FBIO_WAITFORVSYNC) failed\n"));
  		/* it may be not supported, it isn't an error */
@@ -11,7 +11,7 @@ index c25bca05..57edbac7 100644
  	}
  
  	return 0;
-@@ -1727,7 +1746,7 @@ static adv_error fb_wait_vsync_api(void)
+@@ -1727,7 +1727,7 @@ static adv_error fb_wait_vsync_api(void)
  	if (ioctl(fb_state.fd, FBIOGET_VBLANK, &blank) != 0) {
  		log_std(("WARNING:video:fb: ioctl(FBIOGET_VBLANK) failed\n"));
  		/* it may be not supported, it isn't an error */
@@ -20,7 +20,7 @@ index c25bca05..57edbac7 100644
  	}
  
  	if ((blank.flags & FB_VBLANK_HAVE_COUNT) != 0) {
-@@ -1803,9 +1822,13 @@ static adv_error fb_wait_vsync_vga(void)
+@@ -1803,9 +1803,13 @@ static adv_error fb_wait_vsync_vga(void)
  
  void fb_wait_vsync(void)
  {
@@ -36,7 +36,7 @@ index c25bca05..57edbac7 100644
  			++fb_state.wait_error;
  			if (fb_state.wait_error > WAIT_ERROR_MAX)
  				fb_state.wait = fb_wait_none;
-@@ -1814,7 +1837,10 @@ void fb_wait_vsync(void)
+@@ -1814,7 +1818,10 @@ void fb_wait_vsync(void)
  		}
  		break;
  	case fb_wait_api:
@@ -48,7 +48,7 @@ index c25bca05..57edbac7 100644
  			++fb_state.wait_error;
  			if (fb_state.wait_error > WAIT_ERROR_MAX)
  				fb_state.wait = fb_wait_none;
-@@ -1834,18 +1860,21 @@ void fb_wait_vsync(void)
+@@ -1834,18 +1841,21 @@ void fb_wait_vsync(void)
  		break;
  #endif
  	case fb_wait_detect:
@@ -73,3 +73,104 @@ index c25bca05..57edbac7 100644
  			++fb_state.wait_error;
  			if (fb_state.wait_error > WAIT_ERROR_MAX)
  				fb_state.wait = fb_wait_none;
+diff --git a/advance/osd/glue.c b/advance/osd/glue.c
+index f6990e46..5d2c5ff0 100644
+--- a/advance/osd/glue.c
++++ b/advance/osd/glue.c
+@@ -100,6 +100,7 @@ struct advance_glue_context {
+ 	char software_buffer[256]; /**< Buffer for software name. */
+ 
+ 	unsigned input; /**< Last user interface input. */
++
+ };
+ 
+ static struct advance_glue_context GLUE;
+@@ -110,6 +111,11 @@ static struct advance_glue_context GLUE;
+ /* MAME internal variables */
+ extern char* cheatfile;
+ extern const char *db_filename;
++
++#ifndef MESS
++	extern _globals globals;
++#endif
++
+ #ifdef MESS
+ const char* crcfile;
+ const char* pcrcfile;
+@@ -777,11 +783,18 @@ int mame_game_run(struct advance_context* context, const struct mame_option* adv
+ 			break;
+ 	assert(drivers[game_index] != 0);
+ 	if (!drivers[game_index])
+-		return -1;
++		return -1;	
+ 
+ 	GLUE.sound_speed = context->video.config.fps_speed_factor;
+ 	GLUE.sound_fps = context->video.config.fps_fixed;
+ 
++#ifndef MESS
++	globals.sound_speed = &(GLUE.sound_speed);
++	globals.sound_fps = &(GLUE.sound_fps);
++	globals.fps_speed_factor = &(context->video.config.fps_speed_factor);
++	globals.fps_fixed = (context->video.config.fps_fixed > 0.0) ? context->video.config.fps_fixed : globals.mode_vclock;
++#endif
++
+ 	hardware_script_info(mame_game_description(context->game), mame_game_manufacturer(context->game), mame_game_year(context->game), "Loading");
+ 
+ 	r = run_game(game_index);
+diff --git a/src/mame.c b/src/mame.c
+index 2d7eb97a..65405e53 100644
+--- a/src/mame.c
++++ b/src/mame.c
+@@ -229,6 +229,9 @@ const char *memory_region_names[REGION_MAX] =
+ 	"REGION_PLDS"
+ };
+ 
++_globals globals = {
++	.mode_vclock = 60
++};
+ 
+ /***************************************************************************
+     PROTOTYPES
+@@ -303,6 +306,14 @@ int run_game(int game)
+ 			/* then finish setting up our local machine */
+ 			init_machine();
+ 
++			printf("globals.fps_fixed: %f",globals.fps_fixed);
++			if (Machine->refresh_rate != globals.fps_fixed) {
++				*(globals.sound_fps) = globals.fps_fixed;
++				*(globals.fps_speed_factor) = Machine->refresh_rate / globals.fps_fixed;
++				*(globals.sound_speed) = globals.fps_fixed / Machine->refresh_rate;
++				Machine->refresh_rate = globals.fps_fixed;
++			}
++
+ 			/* load the configuration settings and NVRAM */
+ 			settingsloaded = config_load_settings();
+ 			nvram_load();
+@@ -1047,6 +1058,8 @@ static void destroy_machine(void)
+ static void init_machine(void)
+ {
+ 	int num;
++	
++
+ 
+ 	/* initialize basic can't-fail systems here */
+ 	cpuintrf_init();
+diff --git a/src/mame.h b/src/mame.h
+index 2b920a1b..6ae9835b 100644
+--- a/src/mame.h
++++ b/src/mame.h
+@@ -182,6 +182,14 @@ struct ImageFile
+ };
+ #endif /* MESS */
+ 
++typedef struct __globals _globals;
++struct __globals {
++	double fps_fixed;
++	double mode_vclock;
++	double* fps_speed_factor;
++	double* sound_speed;
++	double* sound_fps;
++};
+ 
+ /* The host platform should fill these fields with the preferences specified in the GUI */
+ /* or on the commandline. */

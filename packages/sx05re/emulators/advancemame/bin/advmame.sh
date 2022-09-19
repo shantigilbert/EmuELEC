@@ -37,6 +37,8 @@ if [ "$EE_DEVICE" != "OdroidGoAdvance" ] && [ "$EE_DEVICE" != "GameForce" ]; the
     sed -i '/device_video_clock/d' $CONFIG_DIR/advmame.rc
     sed -i 's/display_vsync no/display_vsync yes/g' $CONFIG_DIR/advmame.rc
     sed -i 's/misc_smp no/misc_smp yes/g' $CONFIG_DIR/advmame.rc
+    sed -i 's/sync_speed*/sync_speed 1.0/g' $CONFIG_DIR/advmame.rc
+    sed -i 's/sync_fps*/sync_fps auto/g' $CONFIG_DIR/advmame.rc
 
     if [[ -f "/ee_s905" && "$MODE" == "1080p"* ]]; then
         MODE="720p60hz"
