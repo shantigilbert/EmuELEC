@@ -120,9 +120,11 @@ if [[ -n ${BORDER_SIZE} && ${BORDER_SIZE} > 0 ]]; then
   BORDER_SIZE_Y=${BORDER_SIZE}
 fi
 
-if [[ ${BORDER_SIZE_X} == 0 ]]; then
+if [[ -z ${BORDER_SIZE} || ${BORDER_SIZE} == 0 ]]; then
   BORDER_SIZE_X=$(get_ee_setting ee_videoborderx)
   BORDER_SIZE_Y=$(get_ee_setting ee_videobordery)
+  [[ -z ${BORDER_SIZE_X} ]] && BORDER_SIZE_X=0
+  [[ -z ${BORDER_SIZE_Y} ]] && BORDER_SIZE_Y=0
 fi
 
 if [[ -n ${BORDER_SIZE_X} && -n ${BORDER_SIZE_Y} ]]; then
