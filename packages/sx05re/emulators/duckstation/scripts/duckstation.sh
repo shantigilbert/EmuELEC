@@ -37,7 +37,7 @@ fi
 
 AUTOGP=$(get_ee_setting duckstation_auto_gamepad)
 if [[ "${AUTOGP}" != "0" ]]; then
-	/usr/bin/set_duckstation_joy.sh
+	set_duckstation_joy.sh
 fi
 
 if [[ "${1}" == *"duckstation_gui.pbp"* ]]; then
