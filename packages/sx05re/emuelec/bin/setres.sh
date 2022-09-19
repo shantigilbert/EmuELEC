@@ -58,24 +58,22 @@ echo 0 > /sys/class/ppmgr/ppscaler
 #echo 0 > /sys/class/graphics/fb0/free_scale
 #echo 1 > /sys/class/graphics/fb0/freescale_mode
 
-if [[ ! "$MODE" == "$DEF_MODE" ]]; then
-  case $MODE in
-    480cvbs)
-      echo $HACK_480_MODE > "${FILE_MODE}"
-      echo 480cvbs > "${FILE_MODE}"
-      ;;
-    576cvbs)
-      echo $HACK_576_MODE > "${FILE_MODE}"
-      echo 576cvbs > "${FILE_MODE}"
-      ;;
-    480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
-      echo $MODE > "${FILE_MODE}"
-      ;;
-    *x*)
-      echo $MODE > "${FILE_MODE}"
-      ;;
-  esac
-fi
+case $MODE in
+  480cvbs)
+    echo $HACK_480_MODE > "${FILE_MODE}"
+    echo 480cvbs > "${FILE_MODE}"
+    ;;
+  576cvbs)
+    echo $HACK_576_MODE > "${FILE_MODE}"
+    echo 576cvbs > "${FILE_MODE}"
+    ;;
+  480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
+    echo $MODE > "${FILE_MODE}"
+    ;;
+  *x*)
+    echo $MODE > "${FILE_MODE}"
+    ;;
+esac
 
 case $MODE in
   480cvbs)
