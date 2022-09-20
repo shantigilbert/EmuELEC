@@ -446,6 +446,37 @@ else
    ret_error=$?
 fi 
 
+RUNSYNC=$(get_ee_setting rclone_save)
+if [[ "${RUNSYNC}" == "1" && "${LIBRETRO}" == "yes" ]]; then
+  SRM_CONTENT=$(cat /storage/.config/retroarch/retroarch.cfg | grep savefiles_in_content_dir | cut -d'"' -f2)
+  if [[ "$SRM_CONTENT" == "true" ]]; then
+    RA_LSAVES="${ROMNAME%.*}.srm"
+  else
+    SAVEFILE_PATH=$(cat /storage/.config/retroarch/retroarch.cfg | grep savefile_directory | cut -d'"' -f2 | sed -e "s/\/${PLATFORM}$//g" | sed -e "s/^~/\/storage/g" )    
+    echo "SAVEFILE_PATH=${SAVEFILE_PATH}"
+    RA_LSAVES="${SAVEFILE_PATH}/"
+  fi
+  SAVESTATE_PATH=$(cat /storage/.config/retroarch/retroarch.cfg | grep savestate_directory | cut -d'"' -f2 | sed -e "s/\/${PLATFORM}$//g" | sed -e "s/^~/\/storage/g" )
+  echo "SAVESTATE_PATH=${SAVESTATE_PATH}"
+
+  BASENAME="${ROMNAME##*/}"
+  ROMSTEM="${BASENAME%.*}"
+  echo "ROMSTEM=${ROMSTEM}"
+	RA_RBASE="ra-drive:/retroarch-saves"
+
+  echo "RA_LSAVES=\"${RA_LSAVES}\""
+	RA_LSTATES="${SAVESTATE_PATH}/${PLATFORM}/"
+  echo "RA_LSTATES=\"${RA_LSTATES}\""
+	
+	RA_RSAVES=${RA_RBASE}/saves/${PLATFORM}
+  echo "RA_RSAVES=${RA_RBASE}/saves/${PLATFORM}"
+	RA_RSTATES=${RA_RBASE}/states/${PLATFORM}
+  echo "RA_RSTATES=${RA_RBASE}/states/${PLATFORM}"
+	RCLONE_ARGS=" --update --verbose --transfers 4 --checkers 4 --contimeout 30s --timeout 120s --retries 3 --low-level-retries 10 --stats 1s"
+  rclone copy ${RCLONE_ARGS} "${RA_LSAVES}/${ROMSTEM}.srm" ${RA_RSAVES}
+  rclone copy ${RCLONE_ARGS} "${RA_LSTATES}" --include "/${ROMSTEM}.state*" ${RA_RSTATES}
+fi
+
 # clear terminal window
 	reset > /dev/tty < /dev/null 2>&1
 	reset > /dev/tty0 < /dev/null 2>&1
