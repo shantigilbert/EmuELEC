@@ -2,7 +2,7 @@
 # Copyright (C) 2022-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="fbneoSA"
-PKG_VERSION="668b8ccba8089111c0afd55002eda2f01fed6724"
+PKG_VERSION="7f5ee72ef5333eb53a5ec8755ab0c8c2948495b0"
 PKG_ARCH="aarch64"
 PKG_LICENSE="Custom"
 PKG_SITE="https://github.com/finalburnneo/FBNeo"
