@@ -27,12 +27,7 @@ jc_get_players() {
     | grep -Ew -B 8 "B: KEY\=[0-9a-f ]+" > /tmp/input_devices
 
 # Determine how many gamepads/players are connected
-  JOYS=$(ls -A1 /dev/input/js* | sed -e 's|.*/||g' | sort)
-  if [[ -f "/storage/.config/EE_JOY_ORDER_NEW" ]]; then
-    JOYS=$(cat /tmp/input_devices | grep -A2 "S: Sysfs=" \
-      | awk '/^S:/ {s=$0} /^H:/ {print s "\t" $0}' | sort -t $'\t' -k2 \
-      | sed 's,.*\(.\{4\}\)$,\1,' | sed 's/ //g')
-  fi
+  JOYS=$(cat /proc/bus/input/devices | grep -E -B 5 -A 3 "H\: Handlers=(js[0-9] event[0-9]+)|(event[0-9]+ js[0-9])" | grep -Ew -B 8 "B: KEY\=[0-9a-f ]+" | grep Handlers | cut -d' ' -f3)
 
   declare -a PLAYER_CFGS=()
 
