@@ -136,6 +136,9 @@ SPL=$(get_ee_setting ee_splash.enabled)
 # Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
+CONTROLLERCONFIG="${arguments#*--controllers=*}"
+echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
+
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
 # Read the first argument in order to set the right emulator
@@ -324,7 +327,6 @@ fi
 
 RUNTHIS='${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
 CONTROLLERCONFIG="${arguments#*--controllers=*}"
-echo "${CONTROLLERCONFIG}" > /tmp/controllerconfig.txt
 
 if [[ "$arguments" == *"-state_slot"* ]] && [[ "$arguments" == *"-autosave"* ]]; then
     CONTROLLERCONFIG="${CONTROLLERCONFIG%% -state_slot*}"  # until -state is found
