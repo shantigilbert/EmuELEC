@@ -203,6 +203,6 @@ else
 	/usr/bin/retrorun --triggers $FPS_CMD $GPIO_JOYPAD -s /storage/roms/"$4" -d /roms/bios "$2" "$3"
 fi
 sleep 0.5
-rm ${JOY_FILE}
+
 #kill $(pidof rg351p-js2xbox)
 echo 'end!'
