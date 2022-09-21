@@ -324,6 +324,7 @@ fi
 
 RUNTHIS='${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
 CONTROLLERCONFIG="${arguments#*--controllers=*}"
+echo "${CONTROLLERCONFIG}" > /tmp/controllerconfig.txt
 
 if [[ "$arguments" == *"-state_slot"* ]] && [[ "$arguments" == *"-autosave"* ]]; then
     CONTROLLERCONFIG="${CONTROLLERCONFIG%% -state_slot*}"  # until -state is found

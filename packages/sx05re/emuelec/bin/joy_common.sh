@@ -63,6 +63,42 @@ jc_get_players() {
     return
   fi
 
+  MANUAL_CONFIG=$(cat "/tmp/controllerconfig.txt")  
+  if [[ ! -z "$MANUAL_CONFIG" && ! -f "/storage/.config/EE_CONTROLLER_OVERIDE_OFF" ]]; then
+    declare -a GUID_ORDER=($MANUAL_CONFIG)
+    echo "GUID_ORDER[0]=$GUID_ORDER[0]"
+    echo "GUID_ORDER_ALL=${GUID_ORDER[@]}"
+
+    local index=0
+    local row=0
+    local i=0
+    for i in ${GUID_ORDER[@]}; do
+      row=$(( index % 4 ))
+      [[ $row != 3 ]] && unset GUID_ORDER[$index]
+      (( index++ ))
+    done
+    echo "MANUAL_CONFIG=${MANUAL_CONFIG[0]}"
+    echo "GUID_ORDER[0]=$GUID_ORDER[0]"
+    echo "GUID_ORDER_ALL=${GUID_ORDER[@]}"
+    
+    local cfgCount=${#PLAYER_CFGS[@]}
+    
+    local si=0
+    for tGUID in ${GUID_ORDER[@]}; do
+      for (( c=$si; c<$cfgCount; c++ )); do
+        cfgGUID=$(echo "${PLAYER_CFGS[$c]}" | cut -d' ' -f3)
+        if [[ $tGUID == $cfgGUID ]]; then
+          echo "PLAYER_CFGS[0]=${PLAYER_CFGS[$si]}"
+          local tmp="${PLAYER_CFGS[$c]}"
+          PLAYER_CFGS[$c]="${PLAYER_CFGS[$si]}"
+          PLAYER_CFGS[$si]=$tmp
+          (( si++ ))
+          break
+        fi
+      done
+    done
+  fi
+
   declare -i PLAYERS=${#PLAYER_CFGS[@]}
   local PLAYER_CFG=0
   for PLAYER in {1..4}; do
