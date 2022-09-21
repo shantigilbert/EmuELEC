@@ -11,8 +11,7 @@ CONFIG_DIR="/storage/.config/flycast"
 EMU_FILE="${CONFIG_DIR}/emu.cfg"
 MAPPING_DIR="${CONFIG_DIR}/mappings"
 
-
-source /usr/bin/joy_common.sh "flycast"
+source joy_common.sh "flycast"
 
 CONFIG_TMP_A="/tmp/jc/SDLflycastA.tmp"
 CONFIG_TMP_D="/tmp/jc/SDLflycastD.tmp"

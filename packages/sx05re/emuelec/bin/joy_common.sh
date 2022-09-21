@@ -49,9 +49,8 @@ jc_get_players() {
 
     # Add the joy config to array if guid and joyname set.
     if [[ ! -z "${DEVICE_GUID}" && ! -z "$JOY_NAME" ]]; then
-      local PLAYER_CFG="${PLAYER} ${JSI} ${DEVICE_GUID} ${JOY_NAME}"
-
-      PLAYER_CFGS+=("${PLAYER_CFG}")
+      local PLAYER_CFG="${JSI} ${DEVICE_GUID} ${JOY_NAME}"
+      PLAYER_CFGS[$((PLAYER-1))]="${PLAYER_CFG}"
       ((PLAYER++))
     fi
   done
@@ -63,8 +62,9 @@ jc_get_players() {
     return
   fi
 
+  local cfgCount=${#PLAYER_CFGS[@]}
   MANUAL_CONFIG=$(cat "/tmp/controllerconfig.txt")  
-  if [[ ! -z "$MANUAL_CONFIG" && ! -f "/storage/.config/EE_CONTROLLER_OVERIDE_OFF" ]]; then
+  if [[ ! -z "${MANUAL_CONFIG}" && ! -f "/storage/.config/EE_CONTROLLER_OVERIDE_OFF" ]]; then
     declare -a GUID_ORDER=($MANUAL_CONFIG)
 
     local index=0
@@ -75,16 +75,15 @@ jc_get_players() {
       [[ $row != 3 ]] && unset GUID_ORDER[$index]
       (( index++ ))
     done
-    
-    local cfgCount=${#PLAYER_CFGS[@]}
+  
     local si=0
     for tGUID in ${GUID_ORDER[@]}; do
       for (( c=$si; c<$cfgCount; c++ )); do
-        cfgGUID=$(echo "${PLAYER_CFGS[$c]}" | cut -d' ' -f3)
+        cfgGUID=$(echo "${PLAYER_CFGS[$c]}" | cut -d' ' -f2)
         if [[ $tGUID == $cfgGUID ]]; then
           local tmp="${PLAYER_CFGS[$c]}"
           PLAYER_CFGS[$c]="${PLAYER_CFGS[$si]}"
-          PLAYER_CFGS[$si]="$si ${tmp:2}"
+          PLAYER_CFGS[$si]="$tmp"
           (( si++ ))
           break
         fi
@@ -92,43 +91,20 @@ jc_get_players() {
     done
   fi
 
-  declare -i PLAYERS=${#PLAYER_CFGS[@]}
-  local PLAYER_CFG=0
-  for PLAYER in {1..4}; do
-    local PINDEX=$(( PLAYER - 1 ))
-    PLAYER_CFG=$PLAYER
-    if [[ "$PINDEX" -lt "$PLAYERS" ]]; then
-      PLAYER_CFG="${PLAYER_CFGS[$PINDEX]}"
-      jc_setup_gamecontroller "${PLAYER_CFG}"
-    else
-      clean_pad ${PLAYER_CFG}
+  local PLAYER_CFG=
+  for p in {1..4}; do
+    PLAYER_CFG="${PLAYER_CFGS[$(( p-1 ))]}"
+    local INFO=
+    local NAME=
+    if [[ $p -le $cfgCount ]]; then
+      echo "PLAYER_CFG=${PLAYER_CFG}"
+      INFO=$(echo "$PLAYER_CFG" | cut -d' ' -f1-2)
+      NAME=$(echo "$PLAYER_CFG" | cut -d' ' -f3-)
+      echo "${p} ${INFO} \"${NAME}\""
+      set_pad ${p} ${INFO} "${NAME}"
     fi
+    clean_pad ${p} ${INFO} "${NAME}"
   done
-}
-
-jc_setup_gamecontroller() {
-  local PLAYER_CFG="$1"
-  local JOY_INFO=$(echo "$1" | cut -d' ' -f1-3)
-  local JOY_NAME=$(echo "$1" | cut -d' ' -f4-)
-
-  [[ -z "${CACHE_FILE}" ]] && return
-
-  local USE_CACHE=$(get_ee_setting ${EMULATOR}_joy_cache)
-  if [[ "${USE_CACHE}" == "1" ]]; then
-    local CACHE=""
-    [[ -f "${CACHE_FILE}" ]] && CACHE=$(cat $CACHE_FILE | grep "$PLAYER_CFG")
-
-    if [[ ! -z "$CACHE" || "$CACHE" == "${PLAYER_CFG}" ]]; then
-      return
-    fi
-  fi
-
-  echo "CONTROLLER: ${PLAYER_CFG}"
-  clean_pad ${JOY_INFO} "${JOY_NAME}"
-  set_pad ${JOY_INFO} "${JOY_NAME}"
-
-  [[ -f "${CACHE_FILE}" ]] && sed -i "/^${PLAYER_CFG:0:1} js.*$/d" ${CACHE_FILE}
-  echo "${PLAYER_CFG}" >> "${CACHE_FILE}"
 }
 
 jc_generate_guid() {
@@ -146,4 +122,3 @@ jc_generate_guid() {
 
   echo "$v"
 }
-

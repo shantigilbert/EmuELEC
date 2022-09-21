@@ -11,7 +11,7 @@ CONFIG_DIR="/storage/.config/emuelec/configs/mupen64plussa"
 CONFIG="${CONFIG_DIR}/mupen64plus.cfg"
 CONFIG_TMP="/tmp/jc/mupen64.tmp"
 
-source /usr/bin/joy_common.sh "mupen64plus"
+source joy_common.sh "mupen64plus"
 
 BTN_H0=$(get_ee_setting mupen_btn_h0)
 [[ -z "$BTN_H0" ]] && BTN_H0=0
