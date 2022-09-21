@@ -446,7 +446,7 @@ else
    ret_error=$?
 fi 
 
-ra_rclone.sh set "${PLATFORM}" "${ROMNAME}"
+ra_rclone.sh set "${PLATFORM}" "${ROMNAME}" &
 
 # clear terminal window
 	reset > /dev/tty < /dev/null 2>&1

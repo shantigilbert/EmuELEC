@@ -56,9 +56,9 @@ if [[ "${RUNSYNC}" == "1" ]]; then
   fi
   if [[ "$ACTION" == "set" ]]; then
     SRM="${RA_LSAVES}/${ROMSTEM}.srm"
-    [[ -f "$SRM" ]] && rclone copy ${RCLONE_ARGS} "${SRM}" ${RA_RSAVES} &
+    [[ -f "$SRM" ]] && rclone copy ${RCLONE_ARGS} "${SRM}" ${RA_RSAVES}
     SF_FILES="${RA_LSTATES}${ROMSTEM}.state"
     SF_OK=$(ls "$SF_FILES"*)
-    [[ ! -z "$SF_OK" ]] && rclone copy ${RCLONE_ARGS} "${RA_LSTATES}" --include "/${ROMSTEM}.state*" ${RA_RSTATES} &         
+    [[ ! -z "$SF_OK" ]] && rclone copy ${RCLONE_ARGS} "${RA_LSTATES}" --include "/${ROMSTEM}.state*" ${RA_RSTATES}
   fi
 fi
