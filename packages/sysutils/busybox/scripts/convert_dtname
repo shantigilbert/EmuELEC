@@ -3,52 +3,48 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2020-present Team CoreELEC (https://coreelec.org)
 
-DT_ID=$1
-MULTIDTB_CONF="$SYSTEM_ROOT/usr/share/bootloader/dtb.conf"
+DT_ID=${1}
 
-if [ -n "$DT_ID" -a -f $MULTIDTB_CONF ]; then
+if [ -z "${SYSTEM_ROOT}" ]; then
+  MULTIDTB_CONF="/usr/share/bootloader/dtb.conf"
+else
+  MULTIDTB_CONF="${SYSTEM_ROOT}/usr/share/bootloader/dtb.conf"
+  export PATH="$PATH:${SYSTEM_ROOT}/usr/bin:${SYSTEM_ROOT}/usr/sbin"
+  export LD_LIBRARY_PATH="${SYSTEM_ROOT}/usr/lib"
+fi
+
+if [ -n "${DT_ID}" -a -f ${MULTIDTB_CONF} ]; then
   # filter obsolete dtb by dtb.conf and migrate to new DT_ID
-  migratedtb_cnt=$(LD_LIBRARY_PATH=/usr/lib:$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
-    sel -t -c "count(//dtb/migratedtb)" $MULTIDTB_CONF)
+  migratedtb_cnt=$(xmlstarlet sel -t -c "count(//dtb/migratedtb)" ${MULTIDTB_CONF})
   cnt_m=1
-  while [ $cnt_m -le $migratedtb_cnt ]; do
-    migratedtb=$(LD_LIBRARY_PATH=/usr/lib:$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
-      sel -t -v "//dtb/migratedtb[$cnt_m]/@coreelec-dt-id" $MULTIDTB_CONF)
-    if [ "$DT_ID" == "$migratedtb" ]; then
-      subdevice=$(LD_LIBRARY_PATH=/usr/lib:$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
-        sel -t -v "//dtb/migratedtb[$cnt_m]/@subdevice" $MULTIDTB_CONF)
-      migratedtid=$(LD_LIBRARY_PATH=/usr/lib:$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
-        sel -t -v "//dtb/migratedtb[$cnt_m]/migratedtid" $MULTIDTB_CONF)
-      migratecmd=$(LD_LIBRARY_PATH=/usr/lib:$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
-        sel -t -v "//dtb/migratedtb[$cnt_m]/migratecmd" $MULTIDTB_CONF)
-      DT_ID="$migratedtid"
-      [ -n "$subdevice" ] && SUBDEVICE="$subdevice"
-      [ -n "$migratecmd" ] && MIGRATE_DTB="$migratecmd"
+  while [ ${cnt_m} -le ${migratedtb_cnt} ]; do
+    migratedtb=$(xmlstarlet sel -t -v "//dtb/migratedtb[${cnt_m}]/@coreelec-dt-id" ${MULTIDTB_CONF})
+    if [ "${DT_ID}" == "${migratedtb}" ]; then
+      subdevice=$(xmlstarlet sel -t -v "//dtb/migratedtb[${cnt_m}]/@subdevice" ${MULTIDTB_CONF})
+      migratedtid=$(xmlstarlet sel -t -v "//dtb/migratedtb[${cnt_m}]/migratedtid" ${MULTIDTB_CONF})
+      migratecmd=$(xmlstarlet sel -t -v "//dtb/migratedtb[${cnt_m}]/migratecmd" ${MULTIDTB_CONF})
+      DT_ID="${migratedtid}"
+      [ -n "${subdevice}" ] && SUBDEVICE="${subdevice}"
+      [ -n "${migratecmd}" ] && MIGRATE_DTB=$(echo ${migratecmd} | xmlstarlet unesc)
       break
     fi
     cnt_m=$((cnt_m+1))
   done
 
   # modify DT_ID and SUBDEVICE by dtb.conf if available
-  multidtb_cnt=$(LD_LIBRARY_PATH=/usr/lib:$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
-    sel -t -c "count(//dtb/multidtb)" $MULTIDTB_CONF)
+  multidtb_cnt=$(xmlstarlet sel -t -c "count(//dtb/multidtb)" ${MULTIDTB_CONF})
   cnt_m=1
-  while [ $cnt_m -le $multidtb_cnt ]; do
-    multidtb=$(LD_LIBRARY_PATH=/usr/lib:$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
-      sel -t -v "//dtb/multidtb[$cnt_m]/@name" $MULTIDTB_CONF)
-    subdevice=$(LD_LIBRARY_PATH=/usr/lib:$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
-      sel -t -v "//dtb/multidtb[$cnt_m]/@subdevice" $MULTIDTB_CONF)
-    files_cnt=$(LD_LIBRARY_PATH=/usr/lib:$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
-      sel -t -c "count(//dtb/multidtb[$cnt_m]/file)" $MULTIDTB_CONF)
+  while [ ${cnt_m} -le ${multidtb_cnt} ]; do
+    multidtb=$(xmlstarlet sel -t -v "//dtb/multidtb[${cnt_m}]/@name" ${MULTIDTB_CONF})
+    subdevice=$(xmlstarlet sel -t -v "//dtb/multidtb[${cnt_m}]/@subdevice" ${MULTIDTB_CONF})
+    files_cnt=$(xmlstarlet sel -t -c "count(//dtb/multidtb[${cnt_m}]/file)" ${MULTIDTB_CONF})
     cnt_f=1
-    while [ $cnt_f -le $files_cnt ]; do
-      file=$(LD_LIBRARY_PATH=/usr/lib:$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
-        sel -t -v "//dtb/multidtb[$cnt_m]/file[$cnt_f]" $MULTIDTB_CONF)
+    while [ ${cnt_f} -le ${files_cnt} ]; do
+      file=$(xmlstarlet sel -t -v "//dtb/multidtb[${cnt_m}]/file[${cnt_f}]" ${MULTIDTB_CONF})
       cnt_f=$((cnt_f+1))
-
-      if [ "${DT_ID}.dtb" = "$file" ]; then
+      if [ "${DT_ID}.dtb" = "${file}" ]; then
         DT_ID="${multidtb%%.*}"
-        [ -n "$subdevice" ] && SUBDEVICE="$subdevice"
+        [ -n "${subdevice}" ] && SUBDEVICE="${subdevice}"
         break 2
       fi
     done

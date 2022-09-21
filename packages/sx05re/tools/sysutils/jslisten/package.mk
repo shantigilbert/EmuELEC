@@ -8,7 +8,7 @@ PKG_LICENSE="GPL3"
 PKG_SITE="https://github.com/shantigilbert/jslisten"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
 PKG_GIT_CLONE_BRANCH="EmuELEC"
-PKG_DEPENDS_TARGET="toolchain"
+PKG_DEPENDS_TARGET="toolchain systemd"
 PKG_LONGDESC="listen to gamepad inputs and trigger a command, cloned from https://github.com/workinghard/jslisten"
 PKG_TOOLCHAIN="make"
 

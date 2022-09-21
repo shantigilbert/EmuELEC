@@ -1,0 +1,138 @@
+From 0c0e3b8ec413a5b8151ad111b08c84ad07f1891b Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Tue, 7 May 2019 18:51:26 -0400
+Subject: [PATCH 1/3] random-util: rename "err" to "success"
+
+After all rdrand returns 1 on success, and 0 on failure, hence let's
+name this accordingly.
+---
+ src/basic/random-util.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/basic/random-util.c b/src/basic/random-util.c
+index ca25fd2..f992c0c 100644
+--- a/src/basic/random-util.c
++++ b/src/basic/random-util.c
+@@ -34,7 +34,7 @@ int rdrand(unsigned long *ret) {
+ 
+ #if defined(__i386__) || defined(__x86_64__)
+         static int have_rdrand = -1;
+-        unsigned char err;
++        uint8_t success;
+ 
+         if (have_rdrand < 0) {
+                 uint32_t eax, ebx, ecx, edx;
+@@ -54,9 +54,9 @@ int rdrand(unsigned long *ret) {
+         asm volatile("rdrand %0;"
+                      "setc %1"
+                      : "=r" (*ret),
+-                       "=qm" (err));
+-        msan_unpoison(&err, sizeof(err));
+-        if (!err)
++                       "=qm" (success));
++        msan_unpoison(&success, sizeof(sucess));
++        if (!success)
+                 return -EAGAIN;
+ 
+         return 0;
+-- 
+2.14.1
+
+
+From 78b5b76ad2c82a9d184dfa777ac116bdf22189eb Mon Sep 17 00:00:00 2001
+From: Evgeny Vereshchagin <evvers@ya.ru>
+Date: Wed, 8 May 2019 15:50:53 +0200
+Subject: [PATCH 2/3] util-lib: fix a typo in rdrand
+
+Otherwise, the fuzzers will fail to compile with MSan:
+```
+../../src/systemd/src/basic/random-util.c:64:40: error: use of undeclared identifier 'sucess'; did you mean 'success'?
+        msan_unpoison(&success, sizeof(sucess));
+                                       ^~~~~~
+                                       success
+../../src/systemd/src/basic/alloc-util.h:169:50: note: expanded from macro 'msan_unpoison'
+                                                 ^
+../../src/systemd/src/basic/random-util.c:38:17: note: 'success' declared here
+        uint8_t success;
+                ^
+1 error generated.
+[80/545] Compiling C object 'src/basic/a6ba3eb@@basic@sta/process-util.c.o'.
+ninja: build stopped: subcommand failed.
+Fuzzers build failed
+```
+---
+ src/basic/random-util.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/basic/random-util.c b/src/basic/random-util.c
+index f992c0c..d67aa09 100644
+--- a/src/basic/random-util.c
++++ b/src/basic/random-util.c
+@@ -55,7 +55,7 @@ int rdrand(unsigned long *ret) {
+                      "setc %1"
+                      : "=r" (*ret),
+                        "=qm" (success));
+-        msan_unpoison(&success, sizeof(sucess));
++        msan_unpoison(&success, sizeof(success));
+         if (!success)
+                 return -EAGAIN;
+ 
+-- 
+2.14.1
+
+
+From b0497c3005cc3a7975362d7e70d9ae2d0ffa6154 Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Fri, 10 May 2019 15:16:16 -0400
+Subject: [PATCH 3/3] random-util: eat up bad RDRAND values seen on AMD CPUs
+
+An ugly, ugly work-around for #11810. And no, we shouldn't have to do
+this. This is something for AMD, the firmware or the kernel to
+fix/work-around, not us. But nonetheless, this should do it for now.
+
+Fixes: #11810
+---
+ src/basic/random-util.c | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/src/basic/random-util.c b/src/basic/random-util.c
+index d67aa09..bd148ee 100644
+--- a/src/basic/random-util.c
++++ b/src/basic/random-util.c
+@@ -34,6 +34,7 @@ int rdrand(unsigned long *ret) {
+ 
+ #if defined(__i386__) || defined(__x86_64__)
+         static int have_rdrand = -1;
++        unsigned long v;
+         uint8_t success;
+ 
+         if (have_rdrand < 0) {
+@@ -53,12 +54,24 @@ int rdrand(unsigned long *ret) {
+ 
+         asm volatile("rdrand %0;"
+                      "setc %1"
+-                     : "=r" (*ret),
++                     : "=r" (v),
+                        "=qm" (success));
+         msan_unpoison(&success, sizeof(success));
+         if (!success)
+                 return -EAGAIN;
+ 
++        /* Apparently on some AMD CPUs RDRAND will sometimes (after a suspend/resume cycle?) report success
++         * via the carry flag but nonetheless return the same fixed value -1 in all cases. This appears to be
++         * a bad bug in the CPU or firmware. Let's deal with that and work-around this by explicitly checking
++         * for this special value (and also 0, just to be sure) and filtering it out. This is a work-around
++         * only however and something AMD really should fix properly. The Linux kernel should probably work
++         * around this issue by turning off RDRAND altogether on those CPUs. See:
++         * https://github.com/systemd/systemd/issues/11810 */
++        if (v == 0 || v == ULONG_MAX)
++                return log_debug_errno(SYNTHETIC_ERRNO(EUCLEAN),
++                                       "RDRAND returned suspicious value %lx, assuming bad hardware RNG, not using value.", v);
++
++        *ret = v;
+         return 0;
+ #else
+         return -EOPNOTSUPP;
+-- 
+2.14.1
+

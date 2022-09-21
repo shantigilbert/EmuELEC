@@ -1,0 +1,66 @@
+diff -Nur a/x86-64/src/shared/linux_osl.c b/x86-64/src/shared/linux_osl.c
+--- a/x86-64/src/shared/linux_osl.c	2022-04-24 11:17:29.148114284 +0000
++++ b/x86-64/src/shared/linux_osl.c	2022-04-24 11:38:38.493710528 +0000
+@@ -600,7 +600,11 @@
+ 	if (va)
+ 		*pap = (ulong)__virt_to_phys(va);
+ #else
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0)
+ 	va = pci_alloc_consistent(osh->pdev, size, (dma_addr_t*)pap);
++#else
++	va = dma_alloc_coherent(&((struct pci_dev *)osh->pdev)->dev, size, (dma_addr_t*)pap, GFP_ATOMIC);
++#endif
+ #endif
+ 	return va;
+ }
+@@ -613,7 +617,11 @@
+ #ifdef __ARM_ARCH_7A__
+ 	kfree(va);
+ #else
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0)
+ 	pci_free_consistent(osh->pdev, size, va, (dma_addr_t)pa);
++#else
++	dma_free_coherent(&((struct pci_dev *)osh->pdev)->dev, size, va, (dma_addr_t)pa);
++#endif
+ #endif
+ }
+ 
+@@ -623,7 +631,11 @@
+ 	int dir;
+ 
+ 	ASSERT((osh && (osh->magic == OS_HANDLE_MAGIC)));
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0)
+ 	dir = (direction == DMA_TX)? PCI_DMA_TODEVICE: PCI_DMA_FROMDEVICE;
++#else
++	dir = (direction == DMA_TX)? DMA_TO_DEVICE: DMA_FROM_DEVICE;
++#endif
+ 
+ #if defined(__ARM_ARCH_7A__) && defined(BCMDMASGLISTOSL)
+ 	if (dmah != NULL) {
+@@ -656,7 +668,12 @@
+ 	}
+ #endif 
+ 
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0)
+ 	return (pci_map_single(osh->pdev, va, size, dir));
++#else
++	return (dma_map_single(&((struct pci_dev *)osh->pdev)->dev, va, size, dir));
++#endif 
++	return 0;
+ }
+ 
+ void BCMFASTPATH
+@@ -665,8 +681,13 @@
+ 	int dir;
+ 
+ 	ASSERT((osh && (osh->magic == OS_HANDLE_MAGIC)));
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0)
+ 	dir = (direction == DMA_TX)? PCI_DMA_TODEVICE: PCI_DMA_FROMDEVICE;
+ 	pci_unmap_single(osh->pdev, (uint32)pa, size, dir);
++#else
++	dir = (direction == DMA_TX)? DMA_TO_DEVICE: DMA_FROM_DEVICE;
++	dma_unmap_single(&((struct pci_dev *)osh->pdev)->dev, (uint32)pa, size, dir);
++#endif
+ }
+ 
+ #if defined(BCMDBG_ASSERT)

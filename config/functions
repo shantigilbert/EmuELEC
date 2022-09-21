@@ -150,6 +150,34 @@ build_msg() {
   fi
 }
 
+print_qa_checks() {
+[[ -d "${BUILD}/qa_checks" ]] || mkdir -p "${BUILD}/qa_checks"
+  if [ -n "${PKG_NAME}" ]; then
+    if [ -d "${PKG_QA_CHECKS}" ]; then
+      for qa_check in ${PKG_QA_CHECKS}/*; do
+        print_color CLR_WARNING "[QA CHECK] [${PKG_NAME}] [$(basename ${qa_check})]:\n$(cat ${qa_check})\n\n"
+      done
+    fi
+  fi
+}
+
+log_qa_check() {
+  local qa_check_title="${1}"
+  local qa_check_message="${2}"
+
+  if [ -n "${qa_check_title}" -a -n "${qa_check_message}" ]; then
+    if [ -n "${PKG_NAME}" ]; then
+      print_color CLR_WARNING "[QA CHECK] [${PKG_NAME}] [${qa_check_title}]:\n${qa_check_message}\n"
+      mkdir -p "${PKG_QA_CHECKS}"
+      echo -e "${qa_check_message}" >> ${PKG_QA_CHECKS}/${qa_check_title}
+    else
+      print_color CLR_WARNING "[QA CHECK] [general] [${qa_check_title}]:\n${qa_check_message}\n"
+      mkdir -p "${BUILD}/qa_checks/general"
+      echo -e "${qa_check_message}" >> ${BUILD}/qa_checks/general/${qa_check_title}
+    fi
+  fi
+}
+
 # prints a warning if the file slated for removal doesn't exist
 # this allows us to continue instead of bailing out with just "rm"
 safe_remove() {
@@ -158,10 +186,8 @@ safe_remove() {
   for path in "$@" ; do
     if [ -e "${path}" -o -L "${path}" ]; then
       rm -r "${path}"
-    elif [ -n "${PKG_NAME}" ]; then
-      print_color CLR_WARNING "safe_remove: path does not exist: [${PKG_NAME}]: ${path}\n"
     else
-      print_color CLR_WARNING "safe_remove: path does not exist: ${path}\n"
+     log_qa_check "safe_remove" "path does not exist: ${path}"
     fi
   done
 }
@@ -416,6 +442,12 @@ setup_toolchain() {
       export _python_sysroot="$SYSROOT_PREFIX"
       export _python_prefix=/usr
       export _python_exec_prefix=/usr
+
+      # rust
+      export CARGO_TARGET_DIR="${PKG_BUILD}/.${TARGET_NAME}/target"
+      export CARGO_HOME="$(get_build_dir rust)/cargo_home"
+      export RUST_TARGET_PATH="${TOOLCHAIN}/lib/rustlib/"
+
       ;;
     host:*|bootstrap:*)
       export DESTIMAGE="host"
@@ -467,6 +499,23 @@ setup_toolchain() {
       export _python_sysroot="$TOOLCHAIN"
       export _python_prefix=/
       export _python_exec_prefix=/
+
+      # rust
+      case "${MACHINE_HARDWARE_NAME}" in
+        "arm")
+          RUST_HOST="arm-unknown-linux-gnueabihf"
+          ;;
+        "aarch64")
+          RUST_HOST="aarch64-unknown-linux-gnu"
+          ;;
+        "x86_64")
+          RUST_HOST="x86_64-unknown-linux-gnu"
+          ;;
+      esac
+
+      export CARGO_TARGET_DIR="${PKG_BUILD}/.${RUST_HOST}/target"
+      export CARGO_HOME="$(get_build_dir rust)/cargo_home"
+      export RUST_TARGET_PATH="${TOOLCHAIN}/lib/rustlib/"
       ;;
   esac
 }
@@ -482,19 +531,19 @@ cpp = '$CXX'
 ar = '$AR'
 strip = '$STRIP'
 pkgconfig = '$PKG_CONFIG'
-llvm-config = '$TOOLCHAIN/bin/llvm-config-host'
+llvm-config = '$TOOLCHAIN/bin/llvm-config'
 libgcrypt-config = '$SYSROOT_PREFIX/usr/bin/libgcrypt-config'
 
 [build_machine]
 system = 'linux'
 cpu_family = '${MACHINE_HARDWARE_NAME}'
-cpu = '${MACHINE_HARDWARE_CPU}'
+cpu = '${MACHINE_HARDWARE_NAME}'
 endian = 'little'
 
 [host_machine]
 system = 'linux'
 cpu_family = '${MACHINE_HARDWARE_NAME}'
-cpu = '${MACHINE_HARDWARE_CPU}'
+cpu = '${MACHINE_HARDWARE_NAME}'
 endian = 'little'
 
 [built-in options]
@@ -520,13 +569,13 @@ cpp = '$TARGET_CXX'
 ar = '$TARGET_AR'
 strip = '$TARGET_STRIP'
 pkgconfig = '$PKG_CONFIG'
-llvm-config = '$TOOLCHAIN/bin/llvm-config-host'
+llvm-config = '$SYSROOT_PREFIX/usr/bin/llvm-config'
 libgcrypt-config = '$SYSROOT_PREFIX/usr/bin/libgcrypt-config'
 
 [build_machine]
 system = 'linux'
 cpu_family = '${MACHINE_HARDWARE_NAME}'
-cpu = '${MACHINE_HARDWARE_CPU}'
+cpu = '${MACHINE_HARDWARE_NAME}'
 endian = 'little'
 
 [host_machine]
@@ -774,8 +823,15 @@ check_project() {
 
 check_device() {
   local dashes="===========================" device_err_msg
-  if [ \( -z "${DEVICE}" -a -d "${PROJECT_DIR}/${PROJECT}/devices" \) -o \
-       \( -n "${DEVICE}" -a ! -d "${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}" \) ]; then
+  if [ -n "${DEVICE}" -a ! -d "${PROJECT_DIR}/${PROJECT}/devices" ]; then
+    device_err_msg="\n $dashes$dashes$dashes"
+    device_err_msg+="\n ERROR: You must not specify DEVICE for the $PROJECT project"
+    device_err_msg+="\n $dashes$dashes$dashes"
+    device_err_msg+="\n\n There are no devices for project: ${PROJECT}"
+
+    die "${device_err_msg}"
+  elif [ \( -z "${DEVICE}" -a -d "${PROJECT_DIR}/${PROJECT}/devices" \) -o \
+         \( -n "${DEVICE}" -a ! -d "${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}" \) ]; then
     device_err_msg="\n ${dashes}${dashes}${dashes}"
     device_err_msg+="\n ERROR: Specify a valid device for the ${PROJECT} project"
     device_err_msg+="\n ${dashes}${dashes}${dashes}"
@@ -1252,6 +1308,8 @@ source_package() {
     elif [[ "${1}" =~ :init$ ]]; then
       PKG_INSTALL="$BUILD/install_init/${PKG_NAME}-${PKG_VERSION}"
     fi
+
+    PKG_QA_CHECKS="${BUILD}/qa_checks/${PKG_NAME}-${PKG_VERSION}"
   fi
 
   build_with_debug && BUILD_WITH_DEBUG="yes" || BUILD_WITH_DEBUG="no"
@@ -1770,6 +1828,20 @@ release_update_lock() {
   is_sequential_build && return 0
 
   flock --unlock 97 2>/dev/null
+}
+
+# Multilib support
+use_32_options() {
+  LIB64_TARGET_NAME="${TARGET_NAME}"
+  TARGET_NAME="${LIB32_TARGET_NAME}"
+  TARGET_ARCH="arm"
+  TARGET_SUBARCH="${LIB32_TARGET_SUBARCH}"
+  LIB64_TARGET_PREFIX="${TARGET_PREFIX}"
+  TARGET_PREFIX="${LIB32_TARGET_PREFIX}"
+  TARGET_CFLAGS="${LIB32_TARGET_CFLAGS}"
+  TARGET_CXXFLAGS="${LIB32_TARGET_CXXFLAGS}"
+  TARGET_LDFLAGS="${LIB32_TARGET_LDFLAGS}"
+  SYSROOT_PREFIX="${LIB32_SYSROOT_PREFIX}"
 }
 
 # Use distribution functions if any

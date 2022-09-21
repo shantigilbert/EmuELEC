@@ -1,0 +1,10 @@
+Hardware Database Files
+
+The hwdb files are read from the files located in the system hwdb directory
+/usr/lib/udev/hwdb.d and the user runtime directory /storage/.config/hwdb.d
+All hwdb files are collectively sorted and processed in lexical order, regardless of
+the directories in which they live. However, files with identical filenames
+replace each other. /usr/lib/udev/hwdb.d/* takes precedence over /storage/.config/hwdb.d/*
+
+your files must be named 99-xxxxx.hwdb
+

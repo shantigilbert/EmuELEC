@@ -1,0 +1,75 @@
+From 4856beb5186760419bafd1f5686d6492d2d36907 Mon Sep 17 00:00:00 2001
+From: Stefan Saraev <stefan@saraev.ca>
+Date: Sat, 16 Aug 2014 13:40:57 +0300
+Subject: [PATCH] fix pkgconf
+
+---
+ libblkid/blkid.pc.in         |    6 +++---
+ libmount/mount.pc.in         |    6 +++---
+ libsmartcols/smartcols.pc.in |    6 +++---
+ libuuid/uuid.pc.in           |    6 +++---
+ 4 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/libblkid/blkid.pc.in b/libblkid/blkid.pc.in
+index 40ec8a9..056ae64 100644
+--- a/libblkid/blkid.pc.in
++++ b/libblkid/blkid.pc.in
+@@ -1,7 +1,7 @@
+ prefix=@prefix@
+-exec_prefix=@exec_prefix@
+-libdir=@usrlib_execdir@
+-includedir=@includedir@
++exec_prefix=${prefix}
++libdir=${exec_prefix}/lib
++includedir=${prefix}/include
+ 
+ Name: blkid
+ Description: Block device id library
+diff --git a/libmount/mount.pc.in b/libmount/mount.pc.in
+index 2c32797..c8112c6 100644
+--- a/libmount/mount.pc.in
++++ b/libmount/mount.pc.in
+@@ -1,7 +1,7 @@
+ prefix=@prefix@
+-exec_prefix=@exec_prefix@
+-libdir=@usrlib_execdir@
+-includedir=@includedir@
++exec_prefix=${prefix}
++libdir=${exec_prefix}/lib
++includedir=${prefix}/include
+ 
+ Name: mount
+ Description: mount library
+diff --git a/libsmartcols/smartcols.pc.in b/libsmartcols/smartcols.pc.in
+index 0b16739..8f474ef 100644
+--- a/libsmartcols/smartcols.pc.in
++++ b/libsmartcols/smartcols.pc.in
+@@ -1,7 +1,7 @@
+ prefix=@prefix@
+-exec_prefix=@exec_prefix@
+-libdir=@usrlib_execdir@
+-includedir=@includedir@
++exec_prefix=${prefix}
++libdir=${exec_prefix}/lib
++includedir=${prefix}/include
+ 
+ Name: smartcols
+ Description: table or tree library
+diff --git a/libuuid/uuid.pc.in b/libuuid/uuid.pc.in
+index 875de19..ef1009e 100644
+--- a/libuuid/uuid.pc.in
++++ b/libuuid/uuid.pc.in
+@@ -1,7 +1,7 @@
+ prefix=@prefix@
+-exec_prefix=@exec_prefix@
+-libdir=@usrlib_execdir@
+-includedir=@includedir@
++exec_prefix=${prefix}
++libdir=${exec_prefix}/lib
++includedir=${prefix}/include
+ 
+ Name: uuid
+ Description: Universally unique id library
+-- 
+1.7.2.5
+

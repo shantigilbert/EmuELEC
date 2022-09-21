@@ -1,0 +1,11 @@
+--- a/libxtables/xtables.c	2022-05-13 13:26:26.000000000 +0000
++++ b/libxtables/xtables.c	2022-05-14 09:53:20.593250503 +0000
+@@ -49,7 +49,7 @@
+ #include <linux/netfilter_ipv4/ip_tables.h>
+ #include <linux/netfilter_ipv6/ip6_tables.h>
+ #include <libiptc/libxtc.h>
+-#include <libiptc/linux_list.h>
++#include "../libiptc/linux_list.h"
+ 
+ #ifndef NO_SHARED_LIBS
+ #include <dlfcn.h>

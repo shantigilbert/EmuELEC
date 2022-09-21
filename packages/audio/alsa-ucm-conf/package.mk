@@ -2,11 +2,11 @@
 # Copyright (C) 2020-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="alsa-ucm-conf"
-PKG_VERSION="1.2.6.3"
-PKG_SHA256="b8a03aa387a624a2f65edc201bf777421190b60529a92087646823afbd96c5cd"
+PKG_VERSION="1.2.7.2"
+PKG_SHA256="53ef5639c4097b228e8f5cfaa2e7b829d04b5de2dc9a38d54efa8aa350d3f5fd"
 PKG_LICENSE="BSD-3c"
-PKG_SITE="http://www.alsa-project.org/"
-PKG_URL="ftp://ftp.alsa-project.org/pub/lib/alsa-ucm-conf-${PKG_VERSION}.tar.bz2"
+PKG_SITE="https://www.alsa-project.org/"
+PKG_URL="https://www.alsa-project.org/files/pub/lib/alsa-ucm-conf-${PKG_VERSION}.tar.bz2"
 PKG_LONGDESC="ALSA Use Case Manager configuration (and topologies)"
 PKG_TOOLCHAIN="manual"
 

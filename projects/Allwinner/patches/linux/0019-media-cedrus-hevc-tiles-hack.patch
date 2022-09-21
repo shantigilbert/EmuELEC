@@ -144,7 +144,7 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
  	/* Decoded picture size. */
  
  	reg = VE_DEC_H265_DEC_PIC_SIZE_WIDTH(ctx->src_fmt.width) |
-@@ -674,6 +741,17 @@ static int cedrus_h265_start(struct cedr
+@@ -674,6 +741,18 @@ static int cedrus_h265_start(struct cedr
  	if (!ctx->codec.h265.neighbor_info_buf)
  		return -ENOMEM;
  
@@ -153,16 +153,17 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 +				   &ctx->codec.h265.entry_points_buf_addr,
 +				   GFP_KERNEL);
 +	if (!ctx->codec.h265.entry_points_buf) {
-+		dma_free_coherent(dev->dev, CEDRUS_H265_NEIGHBOR_INFO_BUF_SIZE,
-+			          ctx->codec.h265.neighbor_info_buf,
-+			          ctx->codec.h265.neighbor_info_buf_addr);
++		dma_free_attrs(dev->dev, CEDRUS_H265_NEIGHBOR_INFO_BUF_SIZE,
++			       ctx->codec.h265.neighbor_info_buf,
++			       ctx->codec.h265.neighbor_info_buf_addr,
++			       DMA_ATTR_NO_KERNEL_MAPPING);
 +		return -ENOMEM;
 +	}
 +
  	return 0;
  }
  
-@@ -693,6 +771,9 @@ static void cedrus_h265_stop(struct cedr
+@@ -693,6 +772,9 @@ static void cedrus_h265_stop(struct cedr
  		       ctx->codec.h265.neighbor_info_buf,
  		       ctx->codec.h265.neighbor_info_buf_addr,
  		       DMA_ATTR_NO_KERNEL_MAPPING);

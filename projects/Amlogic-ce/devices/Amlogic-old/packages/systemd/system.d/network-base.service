@@ -1,0 +1,12 @@
+[Unit]
+Description=Base Network Configuration
+DefaultDependencies=no
+After=local-fs.target systemd-tmpfiles-setup.service userconfig.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/network-base-setup
+RemainAfterExit=yes
+
+[Install]
+WantedBy=network.target

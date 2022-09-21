@@ -1,0 +1,232 @@
+Name
+
+systemd.unit — Unit configuration
+
+Synopsis
+
+service.service, socket.socket, device.device, mount.mount, automount.automount, swap.swap, target.target, path.path, timer.timer, snapshot.snapshot, slice.slice, scope.scope
+
+/etc/systemd/system/*
+/run/systemd/system/*
+/usr/lib/systemd/system/*
+...
+                
+
+$HOME/.config/systemd/user/*
+/etc/systemd/user/*
+/run/systemd/user/*
+/usr/lib/systemd/user/*
+...
+                
+Description
+
+A unit configuration file encodes information about a service, a socket, a device, a mount point, an automount point, a swap file or partition, a start-up target, a watched file system path, a timer controlled and supervised by systemd(1), a temporary system state snapshot, a resource management slice or a group of externally created processes. The syntax is inspired by XDG Desktop Entry Specification .desktop files, which are in turn inspired by Microsoft Windows .ini files.
+
+This man page lists the common configuration options of all the unit types. These options need to be configured in the [Unit] or [Install] sections of the unit files.
+
+In addition to the generic [Unit] and [Install] sections described here, each unit may have a type-specific section, e.g. [Service] for a service unit. See the respective man pages for more information: systemd.service(5), systemd.socket(5), systemd.device(5), systemd.mount(5), systemd.automount(5), systemd.swap(5), systemd.target(5), systemd.path(5), systemd.timer(5), systemd.snapshot(5). systemd.slice(5). systemd.scope(5).
+
+Unit files are loaded from a set of paths determined during compilation, described in the next section.
+
+Unit files may contain additional options on top of those listed here. If systemd encounters an unknown option it will write a warning log message but continue loading the unit. If an option is prefixed with X- it is ignored completely by systemd. Applications may use this to include additional information in the unit files.
+
+Boolean arguments used in unit files can be written in various formats. For positive settings the strings 1, yes, true and on are equivalent. For negative settings the strings 0, no, false and off are equivalent.
+
+Time span values encoded in unit files can be written in various formats. A stand-alone number specifies a time in seconds. If suffixed with a time unit, the unit is honored. A concatenation of multiple values with units is supported, in which case the values are added up. Example: "50" refers to 50 seconds; "2min 200ms" refers to 2 minutes plus 200 milliseconds, i.e. 120200ms. The following time units are understood: s, min, h, d, w, ms, us. For details see systemd.time(7).
+
+Empty lines and lines starting with # or ; are ignored. This may be used for commenting. Lines ending in a backslash are concatenated with the following line while reading and the backslash is replaced by a space character. This may be used to wrap long lines.
+
+Along with a unit file foo.service the directory foo.service.wants/ may exist. All unit files symlinked from such a directory are implicitly added as dependencies of type Wanted= to the unit. This is useful to hook units into the start-up of other units, without having to modify their unit files. For details about the semantics of Wanted= see below. The preferred way to create symlinks in the .wants/ directory of a unit file is with the enable command of the systemctl(1) tool which reads information from the [Install] section of unit files (see below). A similar functionality exists for Requires= type dependencies as well, the directory suffix is .requires/ in this case.
+
+Along with a unit file foo.service a directory foo.service.d/ may exist. All files with the suffix ".conf" from this directory will be parsed after the file itself is parsed. This is useful to alter or add configuration settings to a unit, without having to modify their unit files. Make sure that the file that is included has the appropriate section headers before any directive.
+
+If a line starts with .include followed by a filename, the specified file will be parsed at this point. Make sure that the file that is included has the appropriate section headers before any directives.
+
+Note that while systemd offers a flexible dependency system between units it is recommended to use this functionality only sparingly and instead rely on techniques such as bus-based or socket-based activation which make dependencies implicit, resulting in a both simpler and more flexible system.
+
+Some unit names reflect paths existing in the file system namespace. Example: a device unit dev-sda.device refers to a device with the device node /dev/sda in the file system namespace. If this applies a special way to escape the path name is used, so that the result is usable as part of a filename. Basically, given a path, "/" is replaced by "-", and all unprintable characters and the "-" are replaced by C-style "\x20" escapes. The root directory "/" is encoded as single dash, while otherwise the initial and ending "/" is removed from all paths during transformation. This escaping is reversible.
+
+Optionally, units may be instantiated from a template file at runtime. This allows creation of multiple units from a single configuration file. If systemd looks for a unit configuration file it will first search for the literal unit name in the filesystem. If that yields no success and the unit name contains an "@" character, systemd will look for a unit template that shares the same name but with the instance string (i.e. the part between the "@" character and the suffix) removed. Example: if a service getty@tty3.service is requested and no file by that name is found, systemd will look for getty@.service and instantiate a service from that configuration file if it is found.
+
+To refer to the instance string from within the configuration file you may use the special "%i" specifier in many of the configuration options. See below for details.
+
+If a unit file is empty (i.e. has the file size 0) or is symlinked to /dev/null its configuration will not be loaded and it appears with a load state of "masked", and cannot be activated. Use this as an effective way to fully disable a unit, making it impossible to start it even manually.
+
+The unit file format is covered by the Interface Stability Promise.
+Unit Load Path
+
+Unit files are loaded from a set of paths determined during compilation, described in the two tables below. Unit files found in directories listed earlier override files with the same name in directories lower in the list.
+
+When systemd is running in user mode (--user) and the variable $SYSTEMD_UNIT_PATH is set, this contents of this variable overrides the unit load path.
+
+Table 1.  Load path when running in system mode (--system).
+Path				Description
+/etc/systemd/system		Local configuration
+/run/systemd/systemd		Runtime units
+/usr/lib/systemd/system		Units of installed packages
+
+Table 2.  Load path when running in user mode (--user).
+Path				Description
+$HOME/.config/systemd/user	User configuration
+/etc/systemd/user		Local configuration
+/run/systemd/user		Runtime units
+/usr/lib/systemd/user		Units of installed packages
+
+Additional units might be loaded into systemd ("linked") from directories not on the unit load path. See the link command for systemctl(1). Also, some units are dynamically created via generators Generators.
+Options
+
+Unit file may include a [Unit] section, which carries generic information about the unit that is not dependent on the type of unit:
+
+Description=
+    A free-form string describing the unit. This is intended for use in UIs to show descriptive information along with the unit name.
+
+Documentation=
+    A space-separated list of URIs referencing documentation for this unit or its configuration. Accepted are only URIs of the types "http://", "https://", "file:", "info:", "man:". For more information about the syntax of these URIs, see uri(7). The URIs should be listed in order of relevance, starting with the most relevant. It is a good idea to first reference documentation that explains what the unit's purpose is, followed by how it is configured, followed by any other related documentation. This option may be specified more than once in which case the specified list of URIs is merged. If the empty string is assigned to this option, the list is reset and all prior assignments will have no effect.
+Requires=
+
+    Configures requirement dependencies on other units. If this unit gets activated, the units listed here will be activated as well. If one of the other units gets deactivated or its activation fails, this unit will be deactivated. This option may be specified more than once, in which case requirement dependencies for all listed names are created. Note that requirement dependencies do not influence the order in which services are started or stopped. This has to be configured independently with the After= or Before= options. If a unit foo.service requires a unit bar.service as configured with Requires= and no ordering is configured with After= or Before=, then both units will be started simultaneously and without any delay between them if foo.service is activated. Often it is a better choice to use Wants= instead of Requires= in order to achieve a system that is more robust when dealing with failing services.
+
+    Note that dependencies of this type may also be configured outside of the unit configuration file by adding a symlink to a .requires/ directory accompanying the unit file. For details see above.
+
+RequiresOverridable=
+    Similar to Requires=. Dependencies listed in RequiresOverridable= which cannot be fulfilled or fail to start are ignored if the startup was explicitly requested by the user. If the start-up was pulled in indirectly by some dependency or automatic start-up of units that is not requested by the user this dependency must be fulfilled and otherwise the transaction fails. Hence, this option may be used to configure dependencies that are normally honored unless the user explicitly starts up the unit, in which case whether they failed or not is irrelevant.
+
+Requisite=, RequisiteOverridable=
+    Similar to Requires= and RequiresOverridable=, respectively. However, if a unit listed here is not started already it will not be started and the transaction fails immediately.
+
+Wants=
+    A weaker version of Requires=. A unit listed in this option will be started if the configuring unit is. However, if the listed unit fails to start up or cannot be added to the transaction this has no impact on the validity of the transaction as a whole. This is the recommended way to hook start-up of one unit to the start-up of another unit.
+
+    Note that dependencies of this type may also be configured outside of the unit configuration file by adding a symlink to a .wants/ directory accompanying the unit file. For details see above.
+
+BindsTo=
+    Configures requirement dependencies, very similar in style to Requires=, however in addition to this behavior it also declares that this unit is stopped when any of the units listed suddenly disappears. Units can suddenly, unexpectedly disappear if a service terminates on its own choice, a device is unplugged or a mount point unmounted without involvement of systemd.
+
+PartOf=
+    Configures dependencies similar to Requires=, but limited to stopping and restarting of units. When systemd stops or restarts the units listed here, the action is propagated to this unit. Note that this is a one way dependency - changes to this unit do not affect the listed units. 
+
+Conflicts=
+    Configures negative requirement dependencies. If a unit has a Conflicts= setting on another unit, starting the former will stop the latter and vice versa. Note that this setting is independent of and orthogonal to the After= and Before= ordering dependencies.
+
+    If a unit A that conflicts with a unit B is scheduled to be started at the same time as B, the transaction will either fail (in case both are required part of the transaction) or be modified to be fixed (in case one or both jobs are not a required part of the transaction). In the latter case the job that is not the required will be removed, or in case both are not required the unit that conflicts will be started and the unit that is conflicted is stopped.
+
+Before=, After=
+    Configures ordering dependencies between units. If a unit foo.service contains a setting Before=bar.service and both units are being started, bar.service's start-up is delayed until foo.service is started up. Note that this setting is independent of and orthogonal to the requirement dependencies as configured by Requires=. It is a common pattern to include a unit name in both the After= and Requires= option in which case the unit listed will be started before the unit that is configured with these options. This option may be specified more than once, in which case ordering dependencies for all listed names are created. After= is the inverse of Before=, i.e. while After= ensures that the configured unit is started after the listed unit finished starting up, Before= ensures the opposite, i.e. that the configured unit is fully started up before the listed unit is started. Note that when two units with an ordering dependency between them are shut down, the inverse of the start-up order is applied. i.e. if a unit is configured with After= on another unit, the former is stopped before the latter if both are shut down. If one unit with an ordering dependency on another unit is shut down while the latter is started up, the shut down is ordered before the start-up regardless whether the ordering dependency is actually of type After= or Before=. If two units have no ordering dependencies between them they are shut down or started up simultaneously, and no ordering takes place. 
+
+OnFailure=
+    Lists one or more units that are activated when this unit enters the "failed" state.
+
+PropagatesReloadTo=, ReloadPropagatedFrom=
+    Lists one or more units where reload requests on the unit will be propagated to/on the other unit will be propagated from. Issuing a reload request on a unit will automatically also enqueue a reload request on all units that the reload request shall be propagated to via these two settings.
+
+RequiresMountsFor=
+    Takes a space-separated list of absolute paths. Automatically adds dependencies of type Requires= and After= for all mount units required to access the specified path.
+
+OnFailureIsolate=
+    Takes a boolean argument. If true the unit listed in OnFailure= will be enqueued in isolation mode, i.e. all units that are not its dependency will be stopped. If this is set only a single unit may be listed in OnFailure=. Defaults to false.
+
+IgnoreOnIsolate=
+    Takes a boolean argument. If true this unit will not be stopped when isolating another unit. Defaults to false.
+
+IgnoreOnSnapshot=
+    Takes a boolean argument. If true this unit will not be included in snapshots. Defaults to true for device and snapshot units, false for the others.
+
+StopWhenUnneeded=
+    Takes a boolean argument. If true this unit will be stopped when it is no longer used. Note that in order to minimize the work to be executed, systemd will not stop units by default unless they are conflicting with other units, or the user explicitly requested their shut down. If this option is set, a unit will be automatically cleaned up if no other active unit requires it. Defaults to false.
+
+RefuseManualStart=, RefuseManualStop=
+    Takes a boolean argument. If true this unit can only be activated or deactivated indirectly. In this case explicit start-up or termination requested by the user is denied, however if it is started or stopped as a dependency of another unit, start-up or termination will succeed. This is mostly a safety feature to ensure that the user does not accidentally activate units that are not intended to be activated explicitly, and not accidentally deactivate units that are not intended to be deactivated. These options default to false.
+
+AllowIsolate=
+    Takes a boolean argument. If true this unit may be used with the systemctl isolate command. Otherwise this will be refused. It probably is a good idea to leave this disabled except for target units that shall be used similar to runlevels in SysV init systems, just as a precaution to avoid unusable system states. This option defaults to false.
+
+DefaultDependencies=
+    Takes a boolean argument. If true (the default), a few default dependencies will implicitly be created for the unit. The actual dependencies created depend on the unit type. For example, for service units, these dependencies ensure that the service is started only after basic system initialization is completed and is properly terminated on system shutdown. See the respective man pages for details. Generally, only services involved with early boot or late shutdown should set this option to false. It is highly recommended to leave this option enabled for the majority of common units. If set to false, this option does not disable all implicit dependencies, just non-essential ones.
+
+JobTimeoutSec=
+    When clients are waiting for a job of this unit to complete, time out after the specified time. If this time limit is reached the job will be cancelled, the unit however will not change state or even enter the "failed" mode. This value defaults to 0 (job timeouts disabled), except for device units. NB: this timeout is independent from any unit-specific timeout (for example, the timeout set with Timeout= in service units) as the job timeout has no effect on the unit itself, only on the job that might be pending for it. Or in other words: unit-specific timeouts are useful to abort unit state changes, and revert them. The job timeout set with this option however is useful to abort only the job waiting for the unit state to change.
+
+ConditionPathExists=, ConditionPathExistsGlob=, ConditionPathIsDirectory=, ConditionPathIsSymbolicLink=, ConditionPathIsMountPoint=, ConditionPathIsReadWrite=, ConditionDirectoryNotEmpty=, ConditionFileNotEmpty=, ConditionFileIsExecutable=, ConditionKernelCommandLine=, ConditionVirtualization=, ConditionSecurity=, ConditionCapability=, ConditionHost=, ConditionACPower=, ConditionNull=
+    Before starting a unit verify that the specified condition is true. If it is not true the starting of the unit will be skipped, however all ordering dependencies of it are still respected. A failing condition will not result in the unit being moved into a failure state. The condition is checked at the time the queued start job is to be executed.
+
+    With ConditionPathExists= a file existence condition is checked before a unit is started. If the specified absolute path name does not exist the condition will fail. If the absolute path name passed to ConditionPathExists= is prefixed with an exclamation mark ("!"), the test is negated, and the unit is only started if the path does not exist.
+
+    ConditionPathExistsGlob= is similar to ConditionPathExists=, but checks for the existence of at least one file or directory matching the specified globbing pattern.
+
+    ConditionPathIsDirectory= is similar to ConditionPathExists= but verifies whether a certain path exists and is a directory.
+
+    ConditionPathIsSymbolicLink= is similar to ConditionPathExists= but verifies whether a certain path exists and is a symbolic link.
+
+    ConditionPathIsMountPoint= is similar to ConditionPathExists= but verifies whether a certain path exists and is a mount point.
+
+    ConditionPathIsReadWrite= is similar to ConditionPathExists= but verifies whether the underlying file system is readable and writable (i.e. not mounted read-only).
+
+    ConditionDirectoryNotEmpty= is similar to ConditionPathExists= but verifies whether a certain path exists and is a non-empty directory.
+
+    ConditionFileNotEmpty= is similar to ConditionPathExists= but verifies whether a certain path exists and refers to a regular file with a non-zero size.
+
+    ConditionFileIsExecutable= is similar to ConditionPathExists= but verifies whether a certain path exists, is a regular file and marked executable.
+
+    Similar, ConditionKernelCommandLine= may be used to check whether a specific kernel command line option is set (or if prefixed with the exclamation mark unset). The argument must either be a single word, or an assignment (i.e. two words, separated "="). In the former case the kernel command line is searched for the word appearing as is, or as left hand side of an assignment. In the latter case the exact assignment is looked for with right and left hand side matching.
+
+    ConditionVirtualization= may be used to check whether the system is executed in a virtualized environment and optionally test whether it is a specific implementation. Takes either boolean value to check if being executed in any virtualized environment, or one of vm and container to test against a generic type of virtualization solution, or one of qemu, kvm, vmware, microsoft, oracle, xen, bochs, chroot, uml, openvz, lxc, lxc-libvirt, systemd-nspawn to test against a specific implementation. If multiple virtualization technologies are nested only the innermost is considered. The test may be negated by prepending an exclamation mark.
+
+    ConditionSecurity= may be used to check whether the given security module is enabled on the system. Currently the recognized values values are selinux, apparmor, ima and smack. The test may be negated by prepending an exclamation mark.
+
+    ConditionCapability= may be used to check whether the given capability exists in the capability bounding set of the service manager (i.e. this does not check whether capability is actually available in the permitted or effective sets, see capabilities(7) for details). Pass a capability name such as "CAP_MKNOD", possibly prefixed with an exclamation mark to negate the check.
+
+    ConditionHost= may be used to match against the hostname or machine ID of the host. This either takes a hostname string (optionally with shell style globs) which is tested against the locally set hostname as returned by gethostname(2), or a machine ID formatted as string (see machine-id(5)). The test may be negated by prepending an exclamation mark.
+
+    ConditionACPower= may be used to check whether the system has AC power, or is exclusively battery powered at the time of activation of the unit. This takes a boolean argument. If set to true the condition will hold only if at least one AC connector of the system is connected to a power source, or if no AC connectors are known. Conversely, if set to false the condition will hold only if there is at least one AC connector known and all AC connectors are disconnected from a power source.
+
+    Finally, ConditionNull= may be used to add a constant condition check value to the unit. It takes a boolean argument. If set to false the condition will always fail, otherwise succeed.
+
+    If multiple conditions are specified the unit will be executed if all of them apply (i.e. a logical AND is applied). Condition checks can be prefixed with a pipe symbol (|) in which case a condition becomes a triggering condition. If at least one triggering condition is defined for a unit then the unit will be executed if at least one of the triggering conditions apply and all of the non-triggering conditions. If you prefix an argument with the pipe symbol and an exclamation mark the pipe symbol must be passed first, the exclamation second. Except for ConditionPathIsSymbolicLink=, all path checks follow symlinks. If any of these options is assigned the empty string the list of conditions is reset completely, all previous condition settings (of any kind) will have no effect.
+
+SourcePath=
+    A path to a configuration file this unit has been generated from. This is primarily useful for implementation of generator tools that convert configuration from an external configuration file format into native unit files. Thus functionality should not be used in normal units.
+
+Unit file may include a [Install] section, which carries installation information for the unit. This section is not interpreted by systemd(1) during runtime. It is used exclusively by the enable and disable commands of the systemctl(1) tool during installation of a unit:
+
+Alias=
+    Additional names this unit shall be installed under. The names listed here must have the same suffix (i.e. type) as the unit file name. This option may be specified more than once, in which case all listed names are used. At installation time, systemctl enable will create symlinks from these names to the unit filename.
+
+WantedBy=, RequiredBy=
+    A symbolic link is created in the .wants/ or .requires/ directory of the listed unit when this unit is activated by systemctl enable. This has the effect that a dependency of type Wants= or Requires= is added from the listed unit to the current unit. The primary result is that the current unit will be started when the listed unit is started. See the description of Wants= and Requires= in the [Unit] section for details.
+
+    WantedBy=foo.service in a service bar.service is mostly equivalent to Alias=foo.service.wants/bar.service in the same file. In case of template units, systemctl enable must be called with an instance name, and this instance will be added to the .wants/ or .requires/ list of the listed unit. E.g. WantedBy=getty.target in a service getty@.service will result in systemctl enable getty@tty2.service creating a getty.target.wants/getty@tty2.service link to getty@.service. 
+
+Also=
+    Additional units to install/deinstall when this unit is installed/deinstalled. If the user requests installation/deinstallation of a unit with this option configured, systemctl enable and systemctl disable will automatically install/uninstall units listed in this option as well.
+
+The following specifiers are interpreted in the Install section: %n, %N, %p, %i, %U, %u, %m, %H, %b, %v. For their meaning see the next section.
+Specifiers
+
+Many settings resolve specifiers which may be used to write generic unit files referring to runtime or unit parameters that are replaced when the unit files are loaded. The following specifiers are understood:
+
+Table 3. Specifiers available in unit files
+Specifier	Meaning	Details
+"%n"		Full unit name	 
+"%N"		Unescaped full unit name	 
+"%p"		Prefix name	For instantiated units this refers to the string before the @. For non-instantiated units this refers to to the name of the unit with the type suffix removed.
+"%P"		Unescaped prefix name	 
+"%i"		Instance name	For instantiated units: this is the string between the "@" character and the suffix.
+"%I"		Unescaped instance name	 
+"%f"		Unescaped filename	This is either the unescaped instance name (if applicable) with / prepended (if applicable), or the prefix name similarly prepended with /.
+"%c"		Control group path of the unit	 
+"%r"		Root control group path where units are placed.	For system instances this usually resolves to /system, except in containers, where the path might be prefixed with the container's root control group.
+"%R"		Parent directory of the control group path where units are placed.	For system instances this usually resolves to /, except in containers, where this resolves to the container's root directory. This specifier is particularly useful in the ControlGroup= setting (see systemd.exec(5)).
+"%t"		Runtime socket dir	This is either /run (for the system manager) or "$XDG_RUNTIME_DIR" (for user managers).
+"%u"		User name	This is the name of the configured user of the unit, or (if none is set) the user running the systemd instance.
+"%U"		User UID	This is the UID of the configured user of the unit, or (if none is set) the user running the systemd instance.
+"%h"		User home directory	This is the home directory of the configured user of the unit, or (if none is set) the user running the systemd instance.
+"%s"		User shell	This is the shell of the configured user of the unit, or (if none is set) the user running the systemd instance. If the user is "root" (UID equal to 0), the shell configured in account database is ignored and /bin/sh is always used.
+"%m"		Machine ID	The machine ID of the running system, formatted as string. See machine-id(5) for more information.
+"%b"		Boot ID	The boot ID of the running system, formatted as string. See random(4) for more information.
+"%H"		Host name	The hostname of the running system.
+"%v"		Kernel release	Identical to uname -r output.
+"%%"		Escaped %	Single percent sign.
+
+See Also
+
+systemd(1), systemctl(8), systemd.special(7), systemd.service(5), systemd.socket(5), systemd.device(5), systemd.mount(5), systemd.automount(5), systemd.swap(5), systemd.target(5), systemd.path(5), systemd.timer(5), systemd.snapshot(5), systemd.scope(5), systemd.slice(5), systemd.time(7), capabilities(7), systemd.directives(7), uname(1) 

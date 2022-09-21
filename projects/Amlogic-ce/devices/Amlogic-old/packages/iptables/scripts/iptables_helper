@@ -1,0 +1,99 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
+
+IPTABLES4="/usr/sbin/iptables"
+IPTABLES6="/usr/sbin/ip6tables"
+IPTABLES_CMDS="$IPTABLES4 $IPTABLES6"
+PUBLIC_RULES="/etc/iptables/public.v"
+HOME_RULES="/etc/iptables/home.v"
+CUSTOM_RULES="/storage/.config/iptables/rules.v"
+DOCKER="service.system.docker.service"
+SYSTEMCTL="/usr/bin/systemctl"
+CONNMANCTL="/usr/bin/connmanctl"
+
+check_docker() {
+  $SYSTEMCTL is-active --quiet $DOCKER && $SYSTEMCTL restart $DOCKER
+}
+
+get_technology_config() {
+  $CONNMANCTL technologies | awk -v pattern="^/.*/technology/$1$" -e 'BEGIN {S=0}; /^\/.*/ {S=0}; $0 ~ pattern {S=1}; S==1 {print $0}'
+}
+
+check_tether() {
+  for technology in wifi ethernet; do
+    if get_technology_config $technology | grep -q 'Tethering = True'; then
+      $CONNMANCTL tether $technology off
+      sleep 1
+      $CONNMANCTL tether $technology on
+      break
+    fi
+  done
+}
+
+flush() {
+  for cmd in $IPTABLES_CMDS; do
+    $cmd -F
+    $cmd -X
+    $cmd -t nat -F
+    $cmd -t nat -X
+    $cmd -t mangle -F
+    $cmd -t mangle -X
+    $cmd -P INPUT ACCEPT
+    $cmd -P FORWARD ACCEPT
+    $cmd -P OUTPUT ACCEPT
+  done
+  check_docker
+  check_tether
+}
+
+enable() {
+  for cmd in $IPTABLES_CMDS; do
+    case "$cmd" in
+      *6*) 
+         rules="$RULES6"
+	 ipv="6"
+	 ;;
+        *) 
+         rules="$RULES4"
+	 ipv="4"
+	 ;;
+    esac
+    if [ -e "$rules" ]; then
+      "$cmd-restore" "$rules" 
+    fi
+  done
+  check_docker
+  check_tether
+}
+
+if [ "$1" = "enable" ]; then
+  case "${RULES}" in
+    "none") 
+       flush
+       ;;
+    "public") 
+       RULES4="${PUBLIC_RULES}4"
+       RULES6="${PUBLIC_RULES}6"
+       ;;
+    "home") 
+       RULES4="${HOME_RULES}4"
+       RULES6="${HOME_RULES}6"
+       ;;
+    "custom") 
+       RULES4="${CUSTOM_RULES}4"
+       RULES6="${CUSTOM_RULES}6"
+       ;;
+    *) 
+       exit 1
+       ;;
+  esac
+  enable
+elif [ "$1" = "disable" ]; then
+  flush
+else
+  exit 1
+fi
+
+exit 0

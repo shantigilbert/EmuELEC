@@ -13,6 +13,7 @@ PKG_LONGDESC="A small C library that is supposed to make it easy to run an HTTP 
 
 PKG_CONFIGURE_OPTS_TARGET="--disable-shared \
                            --enable-static \
+                           --disable-examples \
                            --disable-curl \
                            --enable-https"
 

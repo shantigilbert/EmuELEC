@@ -1,0 +1,56 @@
+From ac2a3feefad549814f5e7cca30be07a255c8494a Mon Sep 17 00:00:00 2001
+From: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
+Date: Tue, 5 Apr 2022 19:49:26 +0200
+Subject: Revert ACPI: bus: Eliminate acpi_bus_get_device()
+
+Revert d017a3167bcb76caedf2b444645bf4db75f775a5
+
+  Replace the last instance of acpi_bus_get_device(), added recently
+  by commit 87e59b36e5e2 ("spi: Support selection of the index of the
+  ACPI Spi Resource before alloc"), with acpi_fetch_acpi_dev() and
+  finally drop acpi_bus_get_device() that has no more users.
+
+---
+ drivers/acpi/scan.c     | 13 +++++++++++++
+ include/acpi/acpi_bus.h |  1 +
+ 2 files changed, 14 insertions(+)
+
+diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
+index 9efbfe087de76..762b61f67e6c6 100644
+--- a/drivers/acpi/scan.c
++++ b/drivers/acpi/scan.c
+@@ -588,6 +588,19 @@ static struct acpi_device *handle_to_device(acpi_handle handle,
+ 	return adev;
+ }
+ 
++int acpi_bus_get_device(acpi_handle handle, struct acpi_device **device)
++{
++	if (!device)
++		return -EINVAL;
++
++	*device = handle_to_device(handle, NULL);
++	if (!*device)
++		return -ENODEV;
++
++	return 0;
++}
++EXPORT_SYMBOL(acpi_bus_get_device);
++
+ /**
+  * acpi_fetch_acpi_dev - Retrieve ACPI device object.
+  * @handle: ACPI handle associated with the requested ACPI device object.
+diff --git a/include/acpi/acpi_bus.h b/include/acpi/acpi_bus.h
+index 3f7f01f038690..c4b78c21d7930 100644
+--- a/include/acpi/acpi_bus.h
++++ b/include/acpi/acpi_bus.h
+@@ -509,6 +509,7 @@ extern int unregister_acpi_notifier(struct notifier_block *);
+  * External Functions
+  */
+ 
++int acpi_bus_get_device(acpi_handle handle, struct acpi_device **device);
+ struct acpi_device *acpi_fetch_acpi_dev(acpi_handle handle);
+ acpi_status acpi_bus_get_status_handle(acpi_handle handle,
+ 				       unsigned long long *sta);
+-- 
+cgit 1.2.3-1.el7
+

@@ -1,0 +1,42 @@
+--- a/src/basic/missing_syscall.h	2018-05-22 17:52:31.996229634 +0200
++++ b/src/basic/missing_syscall.h	2018-05-23 00:23:03.774696689 +0200
+@@ -414,37 +414,14 @@
+ 
+ /* ======================================================================= */
+ 
+-#if !HAVE_STATX
+-#  ifndef __NR_statx
+-#    if defined __aarch64__ || defined __arm__
+-#      define __NR_statx 397
+-#    elif defined __alpha__
+-#      define __NR_statx 522
+-#    elif defined __i386__ || defined __powerpc64__
+-#      define __NR_statx 383
+-#    elif defined __sparc__
+-#      define __NR_statx 360
+-#    elif defined __x86_64__
+-#      define __NR_statx 332
+-#    else
+-#      warning "__NR_statx not defined for your architecture"
+-#    endif
+-#  endif
+-
+-struct statx;
+-#endif
+-
+ /* This typedef is supposed to be always defined. */
+ typedef struct statx struct_statx;
+ 
+ #if !HAVE_STATX
++struct statx;
+ static inline ssize_t missing_statx(int dfd, const char *filename, unsigned flags, unsigned int mask, struct statx *buffer) {
+-#  ifdef __NR_statx
+-        return syscall(__NR_statx, dfd, filename, flags, mask, buffer);
+-#  else
+         errno = ENOSYS;
+         return -1;
+-#  endif
+ }
+ 
+ #  define statx missing_statx
+

@@ -1,0 +1,27 @@
+From 49285dae6756b22bc6881c04939f7c43c35b5506 Mon Sep 17 00:00:00 2001
+From: MilhouseVH <milhouseVH.github@nmacleod.com>
+Date: Sat, 29 Jun 2019 00:26:41 +0100
+Subject: [PATCH] debug-shell: configure environment, unhide cursor
+
+---
+ units/debug-shell.service.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/units/debug-shell.service.in b/units/debug-shell.service.in
+index 1127e68..4c3e971 100644
+--- a/units/debug-shell.service.in
++++ b/units/debug-shell.service.in
+@@ -16,8 +16,8 @@ IgnoreOnIsolate=yes
+ ConditionPathExists=@DEBUGTTY@
+ 
+ [Service]
+-Environment=TERM=linux
+-ExecStart=@SUSHELL@
++Environment=ENV=/etc/profile
++ExecStart=/bin/sh -c 'echo -en "\033[?25h"; exec /bin/sh'
+ Restart=always
+ RestartSec=0
+ StandardInput=tty
+-- 
+2.14.1
+

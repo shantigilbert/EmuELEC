@@ -19,14 +19,14 @@
 ################################################################################
 
 PKG_NAME="vecx"
-PKG_VERSION="141af284202c86ed0d4ce9030c76954a144287cf"
-PKG_SHA256="8fc8055a4f55c42d352dd2d82d3775996f604ad101f8c4f3140c20108f3d1b92"
+PKG_VERSION="b5c17bb7fd4a704f58160bc699322a16d0643396"
+PKG_SHA256="2ea4e397ed0339f1cb28a0ecd0c1ab74e60f99e0923e6d6bee66aeb4ff2fa4a8"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2|LGPLv2.1"
 PKG_SITE="https://github.com/libretro/libretro-vecx"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain"
+PKG_DEPENDS_TARGET="toolchain SDL2"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
 PKG_SHORTDESC="libretro adaptation of vecx"

@@ -1,8 +1,8 @@
-From c3460fb372cf068a2d2285c2211ac53f0e872b74 Mon Sep 17 00:00:00 2001
+From 3c9aed114551a975e42d68feea7689710644f038 Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Tue, 20 Apr 2021 05:19:43 +0000
-Subject: [PATCH 04/11] WIP: ARM: dts: import WeTek Hub/Play2 DTs from Linux
- 5.17
+Subject: [PATCH 04/15] WIP: ARM: dts: import WeTek Hub/Play2 DTs from Linux
+ 5.19
 
 Import the WeTek common dtsi and Hub/Play2 device-trees.
 
@@ -22,10 +22,10 @@ Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
  create mode 100644 arch/arm/dts/meson-gxbb-wetek.dtsi
 
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index b3e2a9c9d7..c752d2bd18 100644
+index a7e0d9f6c0..05aac1b447 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -173,6 +173,8 @@ dtb-$(CONFIG_ARCH_MESON) += \
+@@ -181,6 +181,8 @@ dtb-$(CONFIG_ARCH_MESON) += \
  	meson-gxbb-nanopi-k2.dtb \
  	meson-gxbb-p200.dtb \
  	meson-gxbb-p201.dtb \

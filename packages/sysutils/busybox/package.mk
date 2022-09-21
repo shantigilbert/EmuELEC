@@ -156,6 +156,9 @@ makeinstall_target() {
 
   # create /etc/hostname
     ln -sf /proc/sys/kernel/hostname ${INSTALL}/etc/hostname
+
+  # remove bash symbolic link because we use real bash
+  rm ${INSTALL}/usr/bin/bash
 }
 
 post_install() {

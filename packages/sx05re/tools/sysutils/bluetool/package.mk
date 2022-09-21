@@ -3,11 +3,10 @@
 # Based on libreelec pycryptodome package
 
 PKG_NAME="bluetool"
-PKG_VERSION="0.2.3"
-PKG_SHA256="09aca1174ea9d8b402f2231aa2277726174c30482710fc887ebbda7eb820f614"
+PKG_VERSION="29570c71ed77d0db0ef19ac8d2172e8989fcecac"
 PKG_LICENSE="GPL"
-PKG_SITE="https://pypi.org/project/bluetool"
-PKG_URL="https://files.pythonhosted.org/packages/source/${PKG_NAME:0:1}/$PKG_NAME/$PKG_NAME-$PKG_VERSION.tar.gz"
+PKG_SITE="https://github.com/emlid/bluetool"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="Python3 dbus-python tcpbridge"
 PKG_LONGDESC="A simple Python API for Bluetooth D-Bus calls. Allows easy pairing, connecting and scanning.Also provides a TCP-to-RFCOMM socket bridge for data transfer."
 PKG_TOOLCHAIN="manual"

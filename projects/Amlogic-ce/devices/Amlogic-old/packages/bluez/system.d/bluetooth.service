@@ -1,0 +1,24 @@
+[Unit]
+Description=Bluetooth service
+After=syslog.target bluetooth-defaults.service
+Requires=bluetooth-defaults.service
+
+ConditionPathExists=/storage/.cache/services/bluez.conf
+
+[Service]
+Type=dbus
+BusName=org.bluez
+NotifyAccess=main
+EnvironmentFile=/storage/.cache/services/bluez.conf
+EnvironmentFile=-/run/libreelec/debug/bluez.conf
+ExecStart=/usr/lib/bluetooth/bluetoothd $BLUEZ_ARGS $BLUEZ_DEBUG
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_RAW
+LimitNPROC=1
+TimeoutStopSec=1s
+Restart=on-failure
+RestartSec=2
+StartLimitInterval=0
+
+[Install]
+WantedBy=bluetooth.target
+Alias=dbus-org.bluez.service

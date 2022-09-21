@@ -9,10 +9,10 @@ Signed-off-by: memeka <mihailescu2m@gmail.com>
  drivers/media/platform/s5p-jpeg/jpeg-core.c | 45 ++++++++++++++++-----
  1 file changed, 35 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/media/platform/s5p-jpeg/jpeg-core.c b/drivers/media/platform/s5p-jpeg/jpeg-core.c
+diff --git a/drivers/media/platform/samsung/s5p-jpeg/jpeg-core.c b/drivers/media/platform/samsung/s5p-jpeg/jpeg-core.c
 index 86bda3947110..3015a9c350f2 100644
---- a/drivers/media/platform/s5p-jpeg/jpeg-core.c
-+++ b/drivers/media/platform/s5p-jpeg/jpeg-core.c
+--- a/drivers/media/platform/samsung/s5p-jpeg/jpeg-core.c
++++ b/drivers/media/platform/samsung/s5p-jpeg/jpeg-core.c
 @@ -1797,6 +1797,31 @@ static int exynos3250_jpeg_try_crop(struct s5p_jpeg_ctx *ctx,
   * V4L2 controls
   */

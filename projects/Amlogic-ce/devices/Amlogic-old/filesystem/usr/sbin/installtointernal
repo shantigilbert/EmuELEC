@@ -1,0 +1,126 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2016-2018 kszaq (kszaquitto@gmail.com)
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
+
+IMAGE_KERNEL="/flash/kernel.img"
+IMAGE_SYSTEM="/flash/SYSTEM"
+IMAGE_DTB="/flash/dtb.img"
+BACKUP_DATE=$(date +%Y%m%d%H%M%S)
+
+install_to_nand() {
+  if [ -f $IMAGE_KERNEL -a -f $IMAGE_SYSTEM ] ; then
+
+    if grep -q /dev/system /proc/mounts ; then
+      echo "Unmounting SYSTEM partiton."
+      umount -f /dev/system
+    fi
+    mkdir -p /tmp/system
+
+    mount -o rw,remount /flash
+    if [ -e /dev/dtb ] ; then
+      echo -n "Backing up device tree..."
+      dd if=/dev/dtb of="/flash/dtb$BACKUP_DATE.img" bs=256k conv=fsync 2> /dev/null
+      echo "done."
+    fi
+
+    if [ -e /dev/recovery ] ; then
+      echo -n "Backing up recovery partition..."
+      dd if=/dev/recovery of="/flash/recovery$BACKUP_DATE.img" bs=64k conv=fsync 2> /dev/null
+      echo "done."
+    fi
+
+    echo -n "Formatting SYSTEM partition..."
+    mke2fs -F -q -t ext4 -m 0 /dev/system || exit 1
+    e2fsck -n /dev/system || exit 1
+    echo "done."
+
+    echo -n "Writing kernel image..."
+    dd if="$IMAGE_KERNEL" of=/dev/boot bs=1M 2> /dev/null
+    echo "done."
+
+    echo -n "Copying SYSTEM files..."
+    mount -o rw /dev/system /tmp/system
+    cp $IMAGE_SYSTEM /tmp/system && sync
+    echo "done."
+
+    umount /tmp/system
+
+    if [ -f $IMAGE_DTB ] ; then
+      echo -n "Writing device tree image..."
+      dd if=/dev/zero of=/dev/dtb bs=256k count=1 2> /dev/null
+      dd if="$IMAGE_DTB" of=/dev/dtb bs=256k 2> /dev/null
+      echo "done."
+    fi
+
+    read -p "Do you want to copy your user data to internal data partition? [Y/n] " choice
+    case "$choice" in
+      [nN]*)
+        read -p "Do you want to format DATA partition? [Y/n] " choice
+        case "$choice" in
+          [nN]*)
+            ;;
+          *)
+            echo -n "Formatting DATA partition..."
+            mke2fs -F -q -t ext4 -m 0 /dev/data > /dev/null
+            e2fsck -n /dev/data &> /dev/null
+            echo "done."
+        esac  
+        ;;
+      *)
+        echo -n "Formatting DATA partition..."
+        mke2fs -F -q -t ext4 -m 0 /dev/data > /dev/null
+        e2fsck -n /dev/data &> /dev/null
+        echo "done."
+
+        echo -n "Stopping Kodi..."
+        systemctl stop kodi
+        echo "done."
+        echo "Copying user data..."
+        mkdir -p /tmp/data
+        mount -o rw /dev/data /tmp/data
+        cp -pPRv /storage/. /tmp/data
+        ;;
+    esac
+
+    echo "All done!"
+    echo "WARNING: If your internal memory layout is different from standard Amlogic, you have to perform this operation again!"
+    echo "Your system will reboot from internal memory."
+    echo ""
+
+    read -p "Would you like to reboot now [y/N]? " choice
+    case "$choice" in
+      [yY]*)
+        if /usr/sbin/fw_printenv whereToBootFrom > /dev/null 2>&1; then /usr/sbin/fw_setenv whereToBootFrom internal; fi
+        /usr/sbin/fw_setenv bootfromnand 1
+        /usr/sbin/reboot switch_system
+        ;;
+    esac
+
+  else
+    echo "No EmuELEC image found on /flash! Exiting..."
+  fi
+}
+
+if [ ! -e /dev/boot -o ! -e /dev/system -o ! -e /dev/data -o ! -e /dev/dtb ]; then
+  echo "One of BOOT, SYTEM, DATA or DTB partitions is missing."
+  echo "Make sure that you are using a correct device tree and a device with internal memory!"
+  echo ""
+  echo "Not all devices are compatible with installtointernal due to unsupported NAND/eMMC"
+  echo "chips being used by some manufacturers."
+  exit 0
+fi
+
+echo "This script will erase BOOT, SYSTEM, DATA and DTB on your device"
+echo "and install EmuELEC that you booted from SD card/USB drive."
+echo ""
+echo "It will create a backup of device tree and recovery partition on your boot media."
+echo ""
+echo "WARNING: The script does not have any safeguards, you will not receive any"
+echo "support for problems that you may encounter if you proceed!"
+echo ""
+read -p "Type \"yes\" if you know what you are doing or anything else to exit: " choice
+case "$choice" in
+  yes) install_to_nand ;;
+esac

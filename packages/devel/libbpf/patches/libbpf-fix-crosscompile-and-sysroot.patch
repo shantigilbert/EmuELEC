@@ -1,6 +1,8 @@
---- a/src/Makefile	2021-09-09 09:01:51.000000000 +1000
-+++ b/src/Makefile	2021-10-17 17:49:02.868557327 +1100
-@@ -61,15 +61,12 @@
+diff --git a/src/Makefile b/src/Makefile
+index 81ea6b8..7ab5f13 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -67,15 +67,12 @@ INSTALL = install
  
  DESTDIR ?=
  
@@ -18,18 +20,20 @@
  	LIBDIR_PC := $$\{prefix\}/$(LIBSUBDIR)
  else
  	LIBDIR_PC := $(LIBDIR)
-@@ -100,7 +97,7 @@
+@@ -106,7 +103,7 @@ $(OBJDIR)/libbpf.so.$(LIBBPF_VERSION): $(SHARED_OBJS)
  		  $^ $(ALL_LDFLAGS) -o $@
  
- $(OBJDIR)/libbpf.pc:
+ $(OBJDIR)/libbpf.pc: force
 -	$(Q)sed -e "s|@PREFIX@|$(PREFIX)|" \
 +	$(Q)sed -e "s|@PREFIX@|$(PREFIX_PC)|" \
  		-e "s|@LIBDIR@|$(LIBDIR_PC)|" \
  		-e "s|@VERSION@|$(LIBBPF_VERSION)|" \
  		< libbpf.pc.template > $@
---- a/src/libbpf.pc.template	2021-09-09 09:01:51.000000000 +1000
-+++ b/src/libbpf.pc.template	2021-10-17 18:03:19.681346272 +1100
-@@ -7,6 +7,6 @@
+diff --git a/src/libbpf.pc.template b/src/libbpf.pc.template
+index b45ed53..fe6ddde 100644
+--- a/src/libbpf.pc.template
++++ b/src/libbpf.pc.template
+@@ -7,6 +7,6 @@ includedir=${prefix}/include
  Name: libbpf
  Description: BPF library
  Version: @VERSION@

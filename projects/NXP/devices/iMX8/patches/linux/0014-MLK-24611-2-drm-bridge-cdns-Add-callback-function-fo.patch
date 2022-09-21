@@ -126,7 +126,7 @@ index 1f8fd024cdfa..6bfd82a3d9a2 100644
 --- a/include/drm/bridge/cdns-mhdp.h
 +++ b/include/drm/bridge/cdns-mhdp.h
 @@ -22,6 +22,7 @@
- #include <drm/drm_dp_mst_helper.h>
+ #include <drm/display/drm_dp_mst_helper.h>
  #include <media/cec.h>
  #include <linux/bitops.h>
 +#include <sound/hdmi-codec.h>

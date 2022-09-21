@@ -51,4 +51,8 @@ fi
 fi
 clear > /dev/console < /dev/null 2>&1
 ee_console disable
+
+# We make sure we are using the provided jar
+cp -rf /usr/lib/libretro/freej2me-lr.jar ${HOME}/roms/bios
+
 exit 0

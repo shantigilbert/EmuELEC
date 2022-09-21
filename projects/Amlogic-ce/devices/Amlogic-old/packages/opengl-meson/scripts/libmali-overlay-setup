@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
+
+mkdir -p /var/lib32
+ln -sf /usr/lib/libMali.so /var/lib/libMali.so
+ln -sf /usr/lib32/libMali.m450.so /var/lib32/libMali.so

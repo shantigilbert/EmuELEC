@@ -1,0 +1,12 @@
+[Unit]
+Description=Update hwdb.bin
+DefaultDependencies=no
+After=systemd-tmpfiles-setup.service
+Before=systemd-udevd.service
+
+[Service]
+Type=oneshot
+ExecStart=-/usr/bin/udevadm hwdb --update
+
+[Install]
+WantedBy=basic.target

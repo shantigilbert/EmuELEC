@@ -2,13 +2,13 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="chocolate-doom"
-PKG_VERSION="8237514e5f550a161f8ba243bd1515a4415a1c3a"
+PKG_VERSION="d18f5fc27da373c0711b365dcfe22144faebb767"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/chocolate-doom/chocolate-doom"
 PKG_URL="$PKG_SITE.git"
-PKG_DEPENDS_TARGET="toolchain"
+PKG_DEPENDS_TARGET="toolchain SDL2"
 PKG_LONGDESC="Chocolate Doom is a Doom source port that is minimalist and historically accurate."
 GET_HANDLER_SUPPORT="git"
 PKG_TOOLCHAIN="auto"

@@ -8,7 +8,8 @@ PKG_ARCH="x86_64"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/libretro-fsuae"
 PKG_URL="https://github.com/libretro/libretro-fsuae/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain glib libmpeg2 openal-soft libpng"
+PKG_DEPENDS_HOST="toolchain:host libmpeg2:host glib:host libpng:host"
+PKG_DEPENDS_TARGET="toolchain glib libmpeg2 openal-soft libpng libretro-fsuae:host"
 PKG_LONGDESC="FS-UAE amiga emulator."
 PKG_BUILD_FLAGS="-lto"
 PKG_TOOLCHAIN="autotools"
@@ -21,6 +22,22 @@ if [ "${TARGET_ARCH}" = "arm" ] && target_has_feature neon; then
   PKG_CONFIGURE_OPTS_TARGET="--disable-jit --enable-neon"
 fi
 
+pre_configure_host() {
+  cd ${PKG_BUILD}
+  rm -rf .${HOST_NAME}
+  # check if this flag is still needed when this package is updated
+  export CFLAGS="${CFLAGS} -fcommon"
+  export ac_cv_func_realloc_0_nonnull=yes
+}
+
+make_host() {
+  make -j1 CC="${CC}" gen
+}
+
+makeinstall_host() {
+  :
+}
+
 pre_configure_target() {
   cd ${PKG_BUILD}
   rm -rf .${TARGET_NAME}
@@ -30,7 +47,6 @@ pre_configure_target() {
 }
 
 make_target() {
-  make -j1 CC="${CC}" gen
   make CC="${CC}"
 }
 

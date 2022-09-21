@@ -1,3 +1,11 @@
+115
+- irssi: update to 1.4.2 and meson build
+- ngrep: update to using pcre2
+
+114
+- iperf: update to 3.11
+- nmap: update to 7.92 and HSTS
+
 112
 - rsync: add lchmod workaround patches
 

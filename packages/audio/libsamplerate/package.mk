@@ -3,13 +3,14 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libsamplerate"
-PKG_VERSION="0.1.9"
-PKG_SHA256="0a7eb168e2f21353fb6d84da152e4512126f7dc48ccb0be80578c565413444c1"
+PKG_VERSION="0.2.2"
+PKG_SHA256="3258da280511d24b49d6b08615bbe824d0cacc9842b0e4caf11c52cf2b043893"
 PKG_LICENSE="GPL"
-PKG_SITE="http://www.mega-nerd.com/SRC/"
-PKG_URL="http://www.mega-nerd.com/SRC/${PKG_NAME}-${PKG_VERSION}.tar.gz"
+PKG_SITE="http://libsndfile.github.io/libsamplerate/"
+PKG_URL="https://github.com/libsndfile/libsamplerate/releases/download/${PKG_VERSION}/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="A Sample Rate Converter for audio."
+PKG_TOOLCHAIN="autotools"
 
 # package specific configure options
 PKG_CONFIGURE_OPTS_TARGET="--disable-shared \

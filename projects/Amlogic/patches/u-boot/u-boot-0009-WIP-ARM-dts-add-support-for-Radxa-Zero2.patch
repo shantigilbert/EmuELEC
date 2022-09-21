@@ -1,7 +1,7 @@
-From 2eb1f5fbbaa40bb3c54189cad4298c1d6b949608 Mon Sep 17 00:00:00 2001
+From c808f39045b742949d3e1a11666eebb3a08dcfd8 Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Sat, 15 Jan 2022 06:17:23 +0000
-Subject: [PATCH 09/11] WIP: ARM: dts: add support for Radxa Zero2
+Subject: [PATCH 09/15] WIP: ARM: dts: add support for Radxa Zero2
 
 Import the initial dts (WIP) from chewitt/amlogic-5.16.y
 
@@ -15,10 +15,10 @@ Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
  create mode 100644 arch/arm/dts/meson-g12b-radxa-zero2.dts
 
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index c752d2bd18..44241fafee 100644
+index 05aac1b447..abe3a67420 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -194,6 +194,7 @@ dtb-$(CONFIG_ARCH_MESON) += \
+@@ -202,6 +202,7 @@ dtb-$(CONFIG_ARCH_MESON) += \
  	meson-g12b-gsking-x.dtb \
  	meson-g12b-odroid-n2.dtb \
  	meson-g12b-odroid-n2-plus.dtb \

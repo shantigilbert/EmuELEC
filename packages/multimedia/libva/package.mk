@@ -3,8 +3,8 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libva"
-PKG_VERSION="2.14.0"
-PKG_SHA256="f21152a2170edda9d1c4dd463d52eaf62b553e83e553c0a946654523cca86d5e"
+PKG_VERSION="2.15.0"
+PKG_SHA256="869aaa9b9eccb1cde63e1c5b0ac0881cefc00156010bb49f6dce152471770ba8"
 PKG_ARCH="x86_64"
 PKG_LICENSE="GPL"
 PKG_SITE="https://01.org/linuxmedia"

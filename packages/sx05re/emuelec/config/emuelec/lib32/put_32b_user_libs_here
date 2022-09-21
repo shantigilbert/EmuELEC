@@ -1,0 +1,3 @@
+Place 32bit user libs here, they will take priority over /usr
+
+Please take care of the added libraries by yourself and remember to clean/update them if neccessary for each update as they may be outdated and break some programs

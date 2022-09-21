@@ -33,8 +33,8 @@ diff --git a/arch/arm/cpu/armv7/sunxi/Makefile b/arch/arm/cpu/armv7/sunxi/Makefi
 index 1d40d6a18dca..4a0c16deb459 100644
 --- a/arch/arm/cpu/armv7/sunxi/Makefile
 +++ b/arch/arm/cpu/armv7/sunxi/Makefile
-@@ -11,7 +11,7 @@ obj-$(CONFIG_MACH_SUN6I)	+= tzpc.o
- obj-$(CONFIG_MACH_SUN8I_H3)	+= tzpc.o
+@@ -13,7 +13,7 @@ obj-$(CONFIG_MACH_SUN6I)	+= tzpc.o
+ obj-$(CONFIG_MACH_SUN8I)	+= sram.o
  
  ifndef CONFIG_SPL_BUILD
 -obj-$(CONFIG_ARMV7_PSCI)	+= psci.o

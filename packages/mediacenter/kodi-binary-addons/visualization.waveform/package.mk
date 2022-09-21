@@ -5,7 +5,7 @@
 PKG_NAME="visualization.waveform"
 PKG_VERSION="20.1.0-Nexus"
 PKG_SHA256="27583183341f789572b4420195cfa3931dd81433314638c5b08821cd499202d9"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/visualization.waveform"

@@ -5,7 +5,7 @@
  DEFINES += -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
  
 -LIBS    += $(shell cxxtools-config --libs) -lcxxtools-http
-+LIBS    +=  -lcxxtools-http $(shell cxxtools-config --libs)
++LIBS    +=  -lcxxtools-http $(shell cxxtools-config --libs) -lssl
  CONFDIR  = $(call PKGCFG,configdir)
  PLGCONFDIR = $(CONFDIR)/plugins/$(PLUGIN)
  

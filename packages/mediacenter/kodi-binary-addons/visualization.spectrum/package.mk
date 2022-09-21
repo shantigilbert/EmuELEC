@@ -5,7 +5,7 @@
 PKG_NAME="visualization.spectrum"
 PKG_VERSION="20.1.0-Nexus"
 PKG_SHA256="45b8bbaad2f794917e0e88a8a538a3f8188c5f0aa5c6e830f0549d2adfaeff24"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/visualization.spectrum"

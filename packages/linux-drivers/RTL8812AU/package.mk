@@ -16,6 +16,7 @@ pre_make_target() {
 }
 
 make_target() {
+export KCFLAGS+=" -Wno-array-bounds -Wno-stringop-overflow -Wno-restrict -Wno-address -Wno-stringop-overread"
   make V=1 \
        ARCH=${TARGET_KERNEL_ARCH} \
        KSRC=$(kernel_path) \

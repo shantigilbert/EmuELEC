@@ -13,7 +13,9 @@
 DEFAULTTHEME="Crystal"
 CONFIGDIR="/storage/.emulationstation/themes"
 
-if mountpoint -q /var/media/EEROMS; then 
+if mountpoint -q /emuelec/themes; then 
+CONFIGDIR="/emuelec/themes"
+elif mountpoint -q /var/media/EEROMS; then 
 [[ -d "/var/media/EEROMS/themes" ]] && CONFIGDIR="/var/media/EEROMS/themes"
 elif mountpoint -q /storage/roms; then 
 [[ -d "/storage/roms/themes" ]] && CONFIGDIR="/storage/roms/themes"
@@ -21,7 +23,7 @@ fi
 
 #echo $CONFIGDIR
 
-THEMESLIST="https://pastebin.com/raw/yXcJ9h1W"
+THEMESLIST="https://raw.githubusercontent.com/EmuELEC/emuelec.github.io/master/settings/EE_themes"
 LOCALTHEMESLIST="/storage/.config/emuelec/configs/themes.txt"
 # themes.txt must be a plain file with the format 'theme_name https://githubURL' (spaces or tabs)
 # Example of a themes.txt file: 

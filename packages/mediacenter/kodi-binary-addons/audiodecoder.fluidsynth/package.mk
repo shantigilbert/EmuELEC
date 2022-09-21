@@ -5,7 +5,7 @@
 PKG_NAME="audiodecoder.fluidsynth"
 PKG_VERSION="20.0.1-Nexus"
 PKG_SHA256="3236440a2248711859ba61945ec6785b829e52f563c8c8bb40900103a248a651"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/audiodecoder.fluidsynth"

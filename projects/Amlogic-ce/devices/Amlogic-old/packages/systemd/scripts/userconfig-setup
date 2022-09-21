@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
+
+# Remove those sample files that we manage
+for sample in $(find /storage/.config -name '*.sample' 2>/dev/null); do
+  [ -f /usr/config/${sample:16} ] && rm -f ${sample}
+done
+
+# Copy config files, but don't overwrite - this should replace our sample files
+false | cp -iRp /usr/config/* /storage/.config/ &>/dev/null

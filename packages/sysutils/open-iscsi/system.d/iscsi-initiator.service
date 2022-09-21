@@ -1,0 +1,9 @@
+[Unit]
+Description=Open-iSCSI initiator (i.e. client) service
+After=syslog.target
+
+[Service]
+ExecStart=/usr/sbin/iscsid -f
+
+[Install]
+WantedBy=multi-user.target

@@ -1,2 +1,4 @@
 #!/bin/sh
-exec /storage/.kodi/addons/virtual.system-tools/lib/p7zip/7z "$@"
+file=/storage/.kodi/addons/virtual.system-tools/lib/p7zip/7z
+[ ! -x ${file} ] && chmod +x ${file}
+exec ${file} "$@"

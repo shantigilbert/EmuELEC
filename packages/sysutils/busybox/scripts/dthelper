@@ -52,7 +52,7 @@ do_dtflag(){
   else
     DTFLAG="unknown"
     if [ -f /proc/device-tree/coreelec-dt-id ]; then
-      DTFLAG=$(cat /proc/device-tree/coreelec-dt-id | tail -n 1)
+      DTFLAG=$(tr -d '\0' < /proc/device-tree/coreelec-dt-id)
     fi
     MEMSIZE=$(awk -F " " '/MemTotal:/ {print $2}' /proc/meminfo)
     if [ "${MEMSIZE}" -lt "524288" ]; then
@@ -67,7 +67,7 @@ do_dtflag(){
 do_dtname(){
   DTNAME="unknown"
   if [ -f /proc/device-tree/coreelec-dt-id ]; then
-    DTNAME=$(cat /proc/device-tree/coreelec-dt-id | tail -n 1)
+    DTNAME=$(tr -d '\0' < /proc/device-tree/coreelec-dt-id)
   fi
   echo "${DTNAME}"
 }

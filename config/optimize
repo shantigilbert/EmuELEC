@@ -65,9 +65,7 @@ if [ -z "$HOST_LIBDIR" ]; then
   HOST_LIBDIR="$TOOLCHAIN/lib"
 
   # ubuntu/debian specific "multiarch support"
-  export MACHINE_HARDWARE_CPU="$(uname -p)"
   export MACHINE_HARDWARE_NAME="$(uname -m)"
-  export MACHINE_HARDWARE_PLATFORM="$(uname -i)"
   FAMILY_TRIPLET=$($LOCAL_CC -print-multiarch)
   if [ -n "$FAMILY_TRIPLET" ]; then
     if [ -d /lib/$FAMILY_TRIPLET ]; then

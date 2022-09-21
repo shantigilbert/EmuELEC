@@ -12,6 +12,6 @@ PKG_SOURCE_DIR="FreeImage"
 PKG_LONGDESC="FreeImage library"
 
 pre_make_target() {
-  export CXXFLAGS="$CXXFLAGS -Wno-narrowing"
+  export CXXFLAGS="$CXXFLAGS -Wno-narrowing -std=c++11"
   export CFLAGS="$CFLAGS -DPNG_ARM_NEON_OPT=0"
 }

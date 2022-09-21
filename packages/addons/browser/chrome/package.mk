@@ -4,8 +4,8 @@
 PKG_NAME="chrome"
 PKG_VERSION="1.0"
 # curl -s http://dl.google.com/linux/chrome/deb/dists/stable/main/binary-amd64/Packages | grep -B 1 Version
-PKG_VERSION_NUMBER="97.0.4692.71"
-PKG_REV="111"
+PKG_VERSION_NUMBER="103.0.5060.134"
+PKG_REV="113"
 PKG_ARCH="x86_64"
 PKG_LICENSE="Custom"
 PKG_SITE="http://www.google.com/chrome"
@@ -29,13 +29,10 @@ make_target() {
 }
 
 addon() {
-  mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/{bin,config,gdk-pixbuf-modules,lib}
+  mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/{bin,config,lib}
 
   # config
   cp -P ${PKG_DIR}/config/* ${ADDON_BUILD}/${PKG_ADDON_ID}/config
-
-  # gdk-pixbuf modules
-  cp -PL $(get_install_dir gdk-pixbuf)/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/* ${ADDON_BUILD}/${PKG_ADDON_ID}/gdk-pixbuf-modules
 
   # unclutter
   cp -P $(get_install_dir unclutter)/usr/bin/unclutter ${ADDON_BUILD}/${PKG_ADDON_ID}/bin

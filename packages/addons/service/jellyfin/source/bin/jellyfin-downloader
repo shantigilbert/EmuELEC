@@ -42,7 +42,7 @@ echo "Downloading Jellyfin"
 # download Jellyfin
 rm -f ${CONTROL_FILE} ${DATA_FILE}
 (
-  curl -L -# -O -C - https://repo.jellyfin.org/releases/server/portable/stable-pre/@JELLYFIN_VERSION@/combined/${JELLYFIN_FILE} 2>${DATA_FILE}
+  curl -L -# -O -C - https://repo.jellyfin.org/releases/server/portable/versions/stable/combined/@JELLYFIN_VERSION@/${JELLYFIN_FILE} 2>${DATA_FILE}
   touch ${CONTROL_FILE}
 ) | \
   while [ : ]; do

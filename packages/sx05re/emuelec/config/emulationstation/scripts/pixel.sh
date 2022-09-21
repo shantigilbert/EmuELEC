@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 fbdev=/dev/fb0 ;   width=1280 ; bpp=4
 color="\x00\x00\x00\x00" #black colored

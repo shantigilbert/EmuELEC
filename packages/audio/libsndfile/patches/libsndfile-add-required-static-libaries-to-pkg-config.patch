@@ -1,9 +1,10 @@
---- a/sndfile.pc	2021-01-24 23:22:23.000000000 +1100
+--- a/sndfile.pc.in	2021-01-24 23:22:23.000000000 +1100
 +++ b/sndfile.pc.in	2021-09-12 14:30:47.763655089 +1000
-@@ -8,5 +8,5 @@
+@@ -8,6 +8,6 @@
  Requires:
- Requires.private: @EXTERNAL_XIPH_REQUIRE@
+ Requires.private: @EXTERNAL_XIPH_REQUIRE@ @EXTERNAL_MPEG_REQUIRE@
  Version: @VERSION@
 -Libs: -L${libdir} -lsndfile
 +Libs: -L${libdir} -lsndfile -lFLAC -lvorbis -logg -lvorbisenc -lopus
+ Libs.private: @EXTERNAL_MPEG_LIBS@
  Cflags: -I${includedir}

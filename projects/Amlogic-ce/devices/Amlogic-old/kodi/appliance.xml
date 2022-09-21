@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<settings version="1">
+  <section id="system">
+    <category id="display">
+      <group id="1">
+        <setting id="videoscreen.limitedrange">
+          <visible>false</visible>
+        </setting>
+      </group>
+    </category>
+    <category id="audio">
+      <group id="1">
+        <setting id="audiooutput.config">
+          <default>3</default>
+        </setting>
+        <setting id="audiooutput.streamsilence">
+          <default>0</default>
+        </setting>
+        <setting id="audiooutput.streamnoise">
+          <default>false</default>
+        </setting>
+      </group>
+    </category>
+  </section>
+  <section id="player">
+    <category id="videoplayer">
+      <group id="2">
+        <setting id="videoplayer.adjustrefreshrate">
+          <default>2</default> <!-- ADJUST_REFRESHRATE_ON_STARTSTOP -->
+          <constraints>
+            <options>
+              <option label="351">0</option> <!-- ADJUST_REFRESHRATE_OFF -->
+              <option label="36036">2</option> <!-- ADJUST_REFRESHRATE_ON_STARTSTOP -->
+              <option label="36050">3</option> <!-- ADJUST_REFRESHRATE_ON_START -->
+            </options>
+          </constraints>
+        </setting>
+      </group>
+    </category>
+  </section>
+</settings>

@@ -66,9 +66,6 @@
 # setup project defaults
 ################################################################################
 
-  # build and install ALSA Audio support (yes / no)
-    ALSA_SUPPORT="yes"
-
   # OpenGL(X) implementation to use (no / mesa)
     OPENGL="no"
 
@@ -110,7 +107,11 @@
   # for a list of additional drivers see packages/linux-drivers
   # Space separated list is supported,
   # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
-    ADDITIONAL_DRIVERS="$ADDITIONAL_DRIVERS rpi-cirrus-config bcm2835-driver"
+    ADDITIONAL_DRIVERS="$ADDITIONAL_DRIVERS bcm2835-driver"
+
+    if [ "${ALSA_SUPPORT}" = "yes" ]; then
+      ADDITIONAL_DRIVERS+=" rpi-cirrus-config"
+    fi
 
   # build and install driver addons (yes / no)
     DRIVER_ADDONS_SUPPORT="no"

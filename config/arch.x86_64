@@ -1,24 +1,30 @@
 # determines TARGET_CPU, if not forced by user
-  if [ -z "$TARGET_CPU" ]; then
-    TARGET_CPU=core2
-  fi
-
-  # 64bit userland
-  if [ -z "${TARGET_FEATURES}" ]; then
-    TARGET_FEATURES="64bit"
-  else
-    TARGET_FEATURES+=" 64bit"
+  if [ -z "${TARGET_CPU}" ]; then
+    TARGET_CPU="x86-64"
   fi
 
 # determine architecture's family
-  TARGET_SUBARCH=x86_64
+  TARGET_SUBARCH="x86_64"
 
   TARGET_GCC_ARCH="${TARGET_SUBARCH/-/}"
-  TARGET_KERNEL_ARCH=x86
+  TARGET_KERNEL_ARCH="x86"
 
 # setup ARCH specific *FLAGS
-  TARGET_CFLAGS="-march=$TARGET_CPU"
-  TARGET_LDFLAGS="-march=$TARGET_CPU"
+  TARGET_CFLAGS="-march=${TARGET_CPU}"
+  TARGET_LDFLAGS="-march=${TARGET_CPU}"
 
-# build with SIMD support ( yes / no )
-  TARGET_FEATURES+=" mmx sse sse2"
+# build with microarchitecture feature support defined by the TARGET_CPU value
+# see https://gitlab.com/x86-psABIs/x86-64-ABI/-/wikis/home for further details
+  TARGET_FEATURES="64bit cmov cx8 fpu fxsr mmx osfxsr sce sse sse2"
+  TARGET_FEATURES_X86_64_V2="cmpxchg16b lahf-sahf popcnt sse3 sse4_1 sse4_2 ssse3"
+  TARGET_FEATURES_X86_64_V3="avx avx2 bmi1 bmi2 f16c fma lzcnt movbe osxsave"
+  if [ "${TARGET_CPU}" = "x86-64" ]; then
+    TARGET_FEATURES+=" no_sahf"
+  elif [ "${TARGET_CPU}" = "x86-64-v2" ]; then
+    TARGET_FEATURES+=" ${TARGET_FEATURES_X86_64_V2}"
+  elif [ "${TARGET_CPU}" = "x86-64-v3" ]; then
+    TARGET_FEATURES+=" ${TARGET_FEATURES_X86_64_V2} ${TARGET_FEATURES_X86_64_V3}"
+  else
+    TARGET_FEATURES+=" UNKNOWN_ADDITIONAL_CPU_SPECIFIC_FEATURES"
+  fi
+  TARGET_FEATURES="$(echo ${TARGET_FEATURES} | xargs -n1 | sort -u | xargs)"

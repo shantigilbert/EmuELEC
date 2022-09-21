@@ -1,0 +1,1 @@
+ACTION=="add|change", SUBSYSTEM=="net", ENV{INTERFACE}=="wlan*", ATTRS{vendor}=="0x0271", RUN+="/usr/bin/systemctl restart connman.service"

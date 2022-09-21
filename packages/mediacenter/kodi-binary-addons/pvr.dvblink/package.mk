@@ -5,7 +5,7 @@
 PKG_NAME="pvr.dvblink"
 PKG_VERSION="20.2.0-Nexus"
 PKG_SHA256="1d42ae678e4062365ac76a360ff54aab81104467c7d4c7f0ed8f6743fd0114fb"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.dvblink"

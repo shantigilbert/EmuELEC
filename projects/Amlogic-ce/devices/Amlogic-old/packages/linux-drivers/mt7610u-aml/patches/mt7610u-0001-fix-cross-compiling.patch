@@ -1,0 +1,29 @@
+diff --git a/Makefile b/Makefile
+index 38fcc3e..91a6aec 100644
+--- a/Makefile
++++ b/Makefile
+@@ -24,7 +24,7 @@ OSABL = NO
+ 
+ ifneq ($(TARGET),THREADX)
+ #RT28xx_DIR = home directory of RT28xx source code
+-RT28xx_DIR = $(shell pwd)
++RT28xx_DIR ?= $(shell pwd)
+ endif
+ 
+ include $(RT28xx_DIR)/os/linux/config.mk
+@@ -196,11 +196,12 @@ endif
+ 
+ ifeq ($(PLATFORM),PC)
+ # Linux 2.6
+-LINUX_SRC = /lib/modules/$(shell uname -r)/build
++LINUX_SRC ?= /lib/modules/$(shell uname -r)/build
+ # Linux 2.4 Change to your local setting
+ #LINUX_SRC = /usr/src/linux-2.4
+-LINUX_SRC_MODULE = /lib/modules/$(shell uname -r)/kernel/drivers/net/wireless/
+-CROSS_COMPILE = 
++LINUX_SRC_MODULE ?= /lib/modules/$(shell uname -r)/kernel/drivers/net/wireless/
++CROSS_COMPILE ?=aarch64-linux-gnu-
++ARCH ?=arm64
+ endif
+ 
+ ifeq ($(PLATFORM),INTELP6)

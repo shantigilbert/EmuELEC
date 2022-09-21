@@ -16,20 +16,11 @@ diff --git a/drivers/clk/imx/clk-imx8mq.c b/drivers/clk/imx/clk-imx8mq.c
 index 06292d4a98ff..6bd2fe0ae71d 100644
 --- a/drivers/clk/imx/clk-imx8mq.c
 +++ b/drivers/clk/imx/clk-imx8mq.c
-@@ -25,7 +25,7 @@ static u32 share_count_sai6;
- static u32 share_count_dcss;
- static u32 share_count_nand;
- 
--static const char * const pll_ref_sels[] = { "osc_25m", "osc_27m", "dummy", "dummy", };
-+static const char * const pll_ref_sels[] = { "osc_25m", "osc_27m", "phy_27m", "dummy", };
- static const char * const arm_pll_bypass_sels[] = {"arm_pll", "arm_pll_ref_sel", };
- static const char * const gpu_pll_bypass_sels[] = {"gpu_pll", "gpu_pll_ref_sel", };
- static const char * const vpu_pll_bypass_sels[] = {"vpu_pll", "vpu_pll_ref_sel", };
 @@ -304,6 +304,7 @@ static int imx8mq_clocks_probe(struct platform_device *pdev)
  	hws[IMX8MQ_CLK_EXT2] = imx_obtain_fixed_clk_hw(np, "clk_ext2");
  	hws[IMX8MQ_CLK_EXT3] = imx_obtain_fixed_clk_hw(np, "clk_ext3");
  	hws[IMX8MQ_CLK_EXT4] = imx_obtain_fixed_clk_hw(np, "clk_ext4");
-+	hws[IMX8MQ_CLK_PHY_27MHZ] = imx_clk_hw_fixed("phy_27m", 27000000);
++	hws[IMX8MQ_CLK_PHY_27MHZ] = imx_obtain_fixed_clk_hw(np, "hdmi_phy_27m");
  
  	np = of_find_compatible_node(NULL, NULL, "fsl,imx8mq-anatop");
  	base = of_iomap(np, 0);

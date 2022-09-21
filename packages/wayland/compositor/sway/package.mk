@@ -24,7 +24,7 @@ PKG_MESON_OPTS_TARGET="-Ddefault-wallpaper=false \
 
 pre_configure_target() {
   # sway does not build without -Wno flags as all warnings being treated as errors
-  export TARGET_CFLAGS=$(echo "${TARGET_CFLAGS} -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-function -Wno-maybe-uninitialized")
+  export TARGET_CFLAGS=$(echo "${TARGET_CFLAGS} -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-function -Wno-maybe-uninitialized -Wno-stringop-truncation -Wno-address")
 }
 
 post_makeinstall_target() {

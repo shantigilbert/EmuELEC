@@ -1,0 +1,48 @@
+From: Szymon Janc <szymon.janc@...>
+Subject: [PATCH 1/5] sixaxis: Fix PID for Navigation Controller
+Newsgroups: gmane.linux.bluez.kernel
+Date: 2015-06-15 18:28:26 GMT (36 weeks, 4 days, 21 hours and 32 minutes ago)
+
+Navigation Controller is using PID 0x042f over USB but PID 0x0268
+(same as Dualshock 3) over BT.
+---
+ plugins/sixaxis.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+--- a/plugins/sixaxis.c
++++ b/plugins/sixaxis.c
+@@ -363,7 +363,13 @@
+ 	info("sixaxis: setting up new device");
+ 
+ 	btd_device_device_set_name(device, cp->name);
+-	btd_device_set_pnpid(device, cp->source, cp->vid, cp->pid, cp->version);
++
++	/* if device reports different pid/vid on BT prefer those over USB */
++	if (cp->bt_pid)
++		btd_device_set_pnpid(device, cp->source, cp->vid, cp->bt_pid, cp->version);
++	else
++		btd_device_set_pnpid(device, cp->source, cp->vid, cp->pid, cp->version);
++
+ 	btd_device_set_temporary(device, true);
+ 
+ 	closure = g_new0(struct authentication_closure, 1);
+--- a/profiles/input/sixaxis.h
++++ b/profiles/input/sixaxis.h
+@@ -38,6 +38,7 @@
+ 	uint16_t vid;
+ 	uint16_t pid;
+ 	uint16_t version;
++	uint16_t bt_pid;
+ 	CablePairingType type;
+ };
+ 
+@@ -59,6 +60,7 @@
+ 			.vid = 0x054c,
+ 			.pid = 0x042f,
+ 			.version = 0x0000,
++			.bt_pid = 0x0268,
+ 			.type = CABLE_PAIRING_SIXAXIS,
+ 		},
+ 		{
+--
+2.1.4

@@ -2,8 +2,8 @@
 # Copyright (C) 2021-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="nvidia"
-PKG_VERSION="510.54"
-PKG_SHA256="c115b57363bbc3e35c43914a9fadca360603c22c17bf42cc02604a7ed21c841a"
+PKG_VERSION="515.65.01"
+PKG_SHA256="89e9c22b3903a2360bb18a7f1220dc52234b2cb928bb9dd6690236cf2b024695"
 PKG_ARCH="x86_64"
 PKG_LICENSE="nonfree"
 PKG_SITE="https://www.nvidia.com/en-us/drivers/unix/"
@@ -88,7 +88,7 @@ makeinstall_target() {
   # Vulkan
   if [ "${VULKAN_SUPPORT}" = "yes" ]; then
     mkdir -p ${INSTALL}/usr/lib
-      cp -P libnvidia-glvkspirv.so.${PKG_VERSION}  ${INSTALL}/usr/lib 
+      cp -P libnvidia-glvkspirv.so.${PKG_VERSION}  ${INSTALL}/usr/lib
       ln -sf libnvidia-glvkspirv.so.${PKG_VERSION} ${INSTALL}/usr/lib/libnvidia-glvkspirv.so
 
       cp -p libnvidia-vulkan-producer.so.${PKG_VERSION}  ${INSTALL}/usr/lib
@@ -118,7 +118,7 @@ makeinstall_target() {
     cp -P libnvidia-tls.so.${PKG_VERSION}  ${INSTALL}/usr/lib
     ln -sf libnvidia-tls.so.${PKG_VERSION} ${INSTALL}/usr/lib/libnvidia-tls.so
 
-  # NVML
+  # NVIDIA Management Library (NVML) / System Management Interface
   mkdir -p ${INSTALL}/usr/bin
     cp -P nvidia-smi ${INSTALL}/usr/bin
 

@@ -11,7 +11,7 @@ export HOME="/storage"
 export romdir="/storage/roms/"
 # export configdir="/usr/bin/scripts"
 export scriptdir="/usr/bin/scripts"
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/emuelec/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/emuelec/lib
 export PATH=$PATH:/emuelec/bin:/emuelec/scripts
 
 user="root"

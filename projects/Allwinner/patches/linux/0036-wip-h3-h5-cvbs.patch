@@ -216,8 +216,8 @@ Subject: [PATCH] wip h3/h5 cvbs
  static const struct de2_fmt_info de2_formats[] = {
  	{
  		.drm_fmt = DRM_FORMAT_ARGB8888,
-@@ -341,9 +347,28 @@ static struct drm_plane **sun8i_layers_i
- 	return planes;
+@@ -341,10 +347,29 @@ static void sun8i_mixer_mode_set(struct
+ 			 interlaced ? "on" : "off");
  }
  
 +static void sun8i_mixer_apply_color_correction(struct sunxi_engine *engine)
@@ -240,8 +240,10 @@ Subject: [PATCH] wip h3/h5 cvbs
  static const struct sunxi_engine_ops sun8i_engine_ops = {
 -	.commit		= sun8i_mixer_commit,
 -	.layers_init	= sun8i_layers_init,
+-	.mode_set	= sun8i_mixer_mode_set,
 +	.commit				= sun8i_mixer_commit,
 +	.layers_init			= sun8i_layers_init,
++	.mode_set			= sun8i_mixer_mode_set,
 +	.apply_color_correction		= sun8i_mixer_apply_color_correction,
 +	.disable_color_correction	= sun8i_mixer_disable_color_correction,
  };

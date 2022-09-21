@@ -87,7 +87,7 @@ case "${BUILD_PERIODIC}" in
 esac
 
 # Get origin url, fix git:// and git@github.com: urls if necessary
-ORIGIN_URL="$(git remote -v | awk '$1 == "origin" { print $2 }' | head -1 | sed 's#\.git$##;s#^git:#https:#;s#^git@github\.com:#https://github.com/#')"
+ORIGIN_URL="$(git remote -v | awk '$1 == "origin" { print $2 }' | head -1 | sed -e 's#\.git$##' -e 's#^git:#https:#' -e 's#^git@github\.com:#https://github.com/#' -e 's#://.*@#://#')"
 
 [ "${BUILDER_NAME,,}" = "official" ] && BUILDER_NAME=
 if [ "${OFFICIAL}" = "yes" ]; then
@@ -140,6 +140,7 @@ chmod +x ${FAKEROOT_SCRIPT} # make ${FAKEROOT_SCRIPT} executable
 echo "chown -R 0:0 ${INSTALL}" >> ${FAKEROOT_SCRIPT}
 
 # Clean old install dirs
+rm -rf ${BUILD}/qa_checks/general
 rm -rf ${INSTALL}
 rm -rf ${STAMPS_INSTALL}
 mkdir -p ${INSTALL}
@@ -509,6 +510,10 @@ if [ "${1}" = "release" -o "${1}" = "mkimage" -o "${1}" = "noobs" ]; then
     # Cleanup release dir
     rm -rf ${RELEASE_DIR}
   fi
+fi
+
+if [ -d "${BUILD}/qa_checks" -a -n "$(ls -1 ${BUILD}/qa_checks/)" ]; then
+  log_qa_check "qa_issues" "QA issues present, please fix!\n$(find ${BUILD}/qa_checks/* -type f ! -name qa_issues)\n"
 fi
 
 # remove unneeded files in target folder

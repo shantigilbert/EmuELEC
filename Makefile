@@ -1,5 +1,3 @@
-BUILD_DIRS=build.*
-
 all: release
 
 system:
@@ -15,10 +13,10 @@ noobs:
 	./scripts/image noobs
 
 clean:
-	rm -rf $(BUILD_DIRS)/* $(BUILD_DIRS)/.stamps
+	./scripts/makefile_helper --clean
 
 distclean:
-	rm -rf ./.ccache ./$(BUILD_DIRS)
+	./scripts/makefile_helper --distclean
 
 src-pkg:
 	tar cvJf sources.tar.xz sources

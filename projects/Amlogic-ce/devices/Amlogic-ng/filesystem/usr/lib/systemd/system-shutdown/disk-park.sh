@@ -24,8 +24,8 @@ function disk_park() {
   fi
 }
 
-[ -e /run/disk-park.dat ] && . /run/disk-park.dat || exit
-[ -z "$PARK_HDD" ] && exit
+[ -e /run/disk-park.dat ] && . /run/disk-park.dat || exit 0
+[ -z "$PARK_HDD" ] && exit 0
 
 case "$1" in
   reboot|post)

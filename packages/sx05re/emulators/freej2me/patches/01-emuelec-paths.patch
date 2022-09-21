@@ -1,0 +1,31 @@
+--- a/src/javax/microedition/rms/RecordStore.java
++++ b/src/javax/microedition/rms/RecordStore.java
+@@ -70,8 +70,8 @@
+ 
+ 		appname = Mobile.getPlatform().loader.suitename;
+ 
+-		rmsPath = "rms/"+appname;
+-		rmsFile = "rms/"+appname+"/"+recordStoreName;
++		rmsPath = "/storage/roms/freej2me/freej2me/rms/"+appname;
++		rmsFile = "/storage/roms/freej2me/freej2me/rms/"+appname+"/"+recordStoreName;
+ 
+ 		try
+ 		{
+@@ -244,7 +244,7 @@
+ 	{
+ 		try
+ 		{
+-			File fstore = new File("rms/"+Mobile.getPlatform().loader.suitename+"/"+recordStoreName);
++			File fstore = new File("/storage/roms/freej2me/freej2me/rms/"+Mobile.getPlatform().loader.suitename+"/"+recordStoreName);
+ 			fstore.delete();
+ 		}
+ 		catch (Exception e)
+@@ -347,7 +347,7 @@
+ 		//System.out.println("List Record Stores");
+ 		if(rmsPath==null)
+ 		{
+-			rmsPath = "rms/"+Mobile.getPlatform().loader.name;
++			rmsPath = "/storage/roms/freej2me/freej2me/rms/"+Mobile.getPlatform().loader.name;
+ 			try
+ 			{
+ 				Files.createDirectories(Paths.get(rmsPath));

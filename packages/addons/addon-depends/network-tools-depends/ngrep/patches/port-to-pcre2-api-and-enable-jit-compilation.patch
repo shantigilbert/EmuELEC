@@ -1,0 +1,252 @@
+From cfcf1e6e9c4f8a2404810d8d1d90e6d1eaa0abdd Mon Sep 17 00:00:00 2001
+From: Romain Francoise <romain@rfr.io>
+Date: Sat, 20 Nov 2021 23:28:15 +0100
+Subject: [PATCH] Port to PCRE2 API and enable JIT compilation
+
+The original PCRE API provided on most systems by libpcre3 is no longer
+maintained upstream and is superseded by the new PCRE2 API, which was
+first released in 2015. pcre3 will be removed from Debian in 2023, as
+noted in this bug report: https://bugs.debian.org/1000080
+
+This commit replaces the existing PCRE implementation with a new one
+using PCRE2, which is quite similar. One benefit is that PCRE2 provides
+a JIT compiler which can replace the interpretive regular expression
+evaluation code with native machine code on most modern platforms:
+https://pcre.org/current/doc/html/pcre2jit.html
+
+Depending on the length and complexity of the pattern used, enabling JIT
+compilation makes Ngrep 50x to 150x faster, testing in quiet mode on a
+multi-gigabyte PCAP file stored on tmpfs.
+---
+ configure.in |  24 ++++++------
+ ngrep.c      | 106 ++++++++++++++++++++++++++++++++++-----------------
+ 2 files changed, 82 insertions(+), 48 deletions(-)
+
+diff --git a/configure.in b/configure.in
+index dbef39b..0806a62 100644
+--- a/configure.in
++++ b/configure.in
+@@ -141,16 +141,16 @@ dnl
+ REGEX_DIR=''
+ REGEX_OBJS=''
+ 
+-AC_ARG_ENABLE(pcre,
+-[  --enable-pcre           use PCRE instead of GNU regex (default GNU)],
+-[ use_pcre="$enableval" ],
+-[ use_pcre="no" ])
+-
+-if test $use_pcre = yes; then
+-  USE_PCRE="1"
+-  EXTRA_LIBS="$EXTRA_LIBS -lpcre"
++AC_ARG_ENABLE(pcre2,
++[  --enable-pcre2           use PCRE2 instead of GNU regex (default GNU)],
++[ use_pcre2="$enableval" ],
++[ use_pcre2="no" ])
++
++if test $use_pcre2 = yes; then
++  USE_PCRE2="1"
++  EXTRA_LIBS="$EXTRA_LIBS -lpcre2-8"
+ else
+-  USE_PCRE="0"
++  USE_PCRE2="0"
+ 
+   AC_MSG_RESULT
+   AC_MSG_RESULT(Configuring GNU Regular Expression library ...)
+@@ -476,7 +476,7 @@ dnl
+ AC_DEFINE_UNQUOTED(USE_PCAP_RESTART,          $USE_PCAP_RESTART,          [whether to call the BPF lexer restart function between multiple BPF filter compilation attempts (default no)])
+ AC_DEFINE_UNQUOTED(PCAP_RESTART_FUNC,         $PCAP_RESTART_FUNC,         [routine used for restarting the BPF lexer])
+ 
+-AC_DEFINE_UNQUOTED(USE_PCRE,                  $USE_PCRE,                  [whether to use PCRE (default GNU Regex)])
++AC_DEFINE_UNQUOTED(USE_PCRE2,                 $USE_PCRE2,                 [whether to use PCRE2 (default GNU Regex)])
+ AC_DEFINE_UNQUOTED(USE_IPv6,                  $USE_IPv6,                  [whether to use IPv6 (default off)])
+ AC_DEFINE_UNQUOTED(USE_TCPKILL,               $USE_TCPKILL,               [whether to enable tcpkill functionality (default off)])
+ AC_DEFINE_UNQUOTED(USE_VLAN_HACK,             $USE_VLAN_HACK,             [whether to automatically include VLAN frames (default on)])
+@@ -524,8 +524,8 @@ else
+     AC_MSG_RESULT(CONFIG: privilege dropping DISABLED)
+ fi
+ 
+-if test "$USE_PCRE" = "1"; then
+-    AC_MSG_RESULT(CONFIG: using PCRE regex library)
++if test "$USE_PCRE2" = "1"; then
++    AC_MSG_RESULT(CONFIG: using PCRE2 regex library)
+ else
+     AC_MSG_RESULT(CONFIG: using GNU regex library)
+ fi
+diff --git a/ngrep.c b/ngrep.c
+index 3df9389..dcf0555 100644
+--- a/ngrep.c
++++ b/ngrep.c
+@@ -91,8 +91,9 @@
+ #include <netinet/icmp6.h>
+ #endif
+ 
+-#if USE_PCRE
+-#include <pcre.h>
++#if USE_PCRE2
++#define PCRE2_CODE_UNIT_WIDTH 8
++#include <pcre2.h>
+ #else
+ #include <regex.h>
+ #endif
+@@ -128,12 +129,14 @@ char nonprint_char = '.';
+  * GNU Regex/PCRE
+  */
+ 
+-#if USE_PCRE
+-int32_t err_offset;
+-char *re_err = NULL;
++#if USE_PCRE2
++PCRE2_SIZE err_offset;
++int re_err;
+ 
+-pcre *pattern = NULL;
+-pcre_extra *pattern_extra = NULL;
++pcre2_code *re;
++pcre2_match_data *pcre2_md;
++PCRE2_SPTR pattern;
++uint32_t pcre2_jit_on = 0;
+ #else
+ const char *re_err = NULL;
+ 
+@@ -189,6 +192,7 @@ uint32_t ws_row, ws_col = 80, ws_col_forced = 0;
+ 
+ int main(int argc, char **argv) {
+     int32_t c;
++    const char *extra = "";
+ 
+     signal(SIGINT,   clean_exit);
+     signal(SIGABRT,  clean_exit);
+@@ -394,8 +398,12 @@ int main(int argc, char **argv) {
+         if (setup_matcher())
+             clean_exit(2);
+ 
++#if USE_PCRE2
++        if (pcre2_jit_on)
++            extra = " (JIT)";
++#endif
+         if (quiet < 2 && strlen(match_data))
+-            printf("%smatch: %s%s\n", invert_match?"don't ":"",
++            printf("%smatch%s: %s%s\n", invert_match?"don't ":"", extra,
+                    (bin_data && !strchr(match_data, 'x'))?"0x":"", match_data);
+ 
+         if (re_match_word) free(match_data);
+@@ -631,14 +639,14 @@ int setup_matcher(void) {
+ 
+     } else {
+ 
+-#if USE_PCRE
+-        uint32_t pcre_options = PCRE_UNGREEDY;
++#if USE_PCRE2
++        uint32_t pcre_options = PCRE2_UNGREEDY;
+ 
+         if (re_ignore_case)
+-            pcre_options |= PCRE_CASELESS;
++            pcre_options |= PCRE2_CASELESS;
+ 
+         if (re_multiline_match)
+-            pcre_options |= PCRE_DOTALL;
++            pcre_options |= PCRE2_DOTALL;
+ #else
+         re_syntax_options = RE_CHAR_CLASSES | RE_NO_BK_PARENS | RE_NO_BK_VBAR |
+             RE_CONTEXT_INDEP_ANCHORS | RE_CONTEXT_INDEP_OPS;
+@@ -673,15 +681,36 @@ int setup_matcher(void) {
+             match_data = word_regex;
+         }
+ 
+-#if USE_PCRE
+-        pattern = pcre_compile(match_data, pcre_options, (const char **)&re_err, &err_offset, 0);
++#if USE_PCRE2
++        re = pcre2_compile((PCRE2_SPTR8)match_data, PCRE2_ZERO_TERMINATED,
++            pcre_options, &re_err, &err_offset, NULL);
++        if (!re) {
++            PCRE2_UCHAR buffer[256];
++            pcre2_get_error_message(re_err, buffer, sizeof(buffer));
++            fprintf(stderr, "regex compile failed: %s (offset: %zd)\n", buffer,
++                err_offset);
++            return 1;
++        }
+ 
+-        if (!pattern) {
+-            fprintf(stderr, "compile failed: %s\n", re_err);
++        pcre2_md = pcre2_match_data_create_from_pattern(re, NULL);
++        if (!pcre2_md) {
++            fprintf(stderr, "unable to alloc pcre2 match data\n");
+             return 1;
+         }
+ 
+-        pattern_extra = pcre_study(pattern, 0, (const char **)&re_err);
++        pcre2_config(PCRE2_CONFIG_JIT, &pcre2_jit_on);
++        if (pcre2_jit_on) {
++            int rc;
++            size_t jitsz;
++
++            if (pcre2_jit_compile(re, PCRE2_JIT_COMPLETE) != 0) {
++                fprintf(stderr, "unable to JIT-compile pcre2 regular expression\n");
++                return 1;
++            }
++            rc = pcre2_pattern_info(re, PCRE2_INFO_JITSIZE, &jitsz);
++            if (rc || jitsz == 0)
++                pcre2_jit_on = 0;
++        }
+ #else
+         re_err = re_compile_pattern(match_data, strlen(match_data), &pattern);
+         if (re_err) {
+@@ -990,24 +1019,29 @@ void dump_packet(struct pcap_pkthdr *h, u_char *p, uint8_t proto, unsigned char
+ }
+ 
+ int8_t re_match_func(unsigned char *data, uint32_t len, uint16_t *mindex, uint16_t *msize) {
+-#if USE_PCRE
+-
+-    static int sub[2];
+-    switch(pcre_exec(pattern, 0, (char const *)data, (int32_t)len, 0, 0, 0, 0)) {
+-        case PCRE_ERROR_NULL:
+-        case PCRE_ERROR_BADOPTION:
+-        case PCRE_ERROR_BADMAGIC:
+-        case PCRE_ERROR_UNKNOWN_NODE:
+-        case PCRE_ERROR_NOMEMORY:
+-            perror("she's dead, jim\n");
+-            clean_exit(2);
++#if USE_PCRE2
++    int rc;
++    PCRE2_SIZE *ovector;
++    PCRE2_UCHAR errbuf[256];
+ 
+-        case PCRE_ERROR_NOMATCH:
+-            return 0;
++    if (pcre2_jit_on)
++        rc = pcre2_jit_match(re, data, len, 0, 0, pcre2_md, NULL);
++    else
++        rc = pcre2_match(re, data, len, 0, 0, pcre2_md, NULL);
+ 
+-        default:
+-            *mindex = sub[0];
+-            *msize  = sub[1] - sub[0];
++    if (rc < 0) {
++        switch (rc) {
++            case PCRE2_ERROR_NOMATCH:
++                return 0;
++            default:
++                pcre2_get_error_message(rc, errbuf, sizeof(errbuf));
++                fprintf(stderr, "she's dead, jim: %s (error %d)\n", errbuf, rc);
++                clean_exit(2);
++        }
++    } else {
++        ovector = pcre2_get_ovector_pointer(pcre2_md);
++        *mindex = ovector[0];
++        *msize = ovector[1] - ovector[0];
+     }
+ #else
+ 
+@@ -1479,9 +1513,9 @@ void clean_exit(int32_t sig) {
+     if (quiet < 1 && sig >= 0)
+         printf("exit\n");
+ 
+-#if USE_PCRE
+-    if (pattern)       pcre_free(pattern);
+-    if (pattern_extra) pcre_free(pattern_extra);
++#if USE_PCRE2
++    if (re)       pcre2_code_free(re);
++    if (pcre2_md) pcre2_match_data_free(pcre2_md);
+ #else
+     if (pattern.translate) free(pattern.translate);
+     if (pattern.fastmap)   free(pattern.fastmap);

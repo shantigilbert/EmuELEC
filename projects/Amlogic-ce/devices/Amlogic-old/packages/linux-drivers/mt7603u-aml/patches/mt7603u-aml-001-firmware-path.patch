@@ -1,0 +1,38 @@
+diff --git a/include/os/rt_linux.h b/include/os/rt_linux.h
+index 9ddc4ea..258907a 100755
+--- a/include/os/rt_linux.h
++++ b/include/os/rt_linux.h
+@@ -201,7 +201,7 @@ typedef struct usb_ctrlrequest devctrlrequest;
+ 
+ #ifdef CONFIG_STA_SUPPORT
+ #ifdef RTMP_MAC_PCI
+-#define STA_PROFILE_PATH			"/system/etc/wifi/RT2870STA_7603.dat"
++#define STA_PROFILE_PATH			"/lib/firmware/RT2870STA_7603.dat"
+ #define STA_DRIVER_VERSION			"3.0.0.0"
+ #ifdef MULTIPLE_CARD_SUPPORT
+ #define CARD_INFO_PATH			"/etc/Wireless/RT2860STA/RT2860STACard.dat"
+@@ -210,12 +210,12 @@ typedef struct usb_ctrlrequest devctrlrequest;
+ 
+ #ifdef RTMP_MAC_USB
+ #ifdef HE_BD_CFG80211_SUPPORT 
+-#define STA_PROFILE_PATH			"/system/etc/wifi/RT2870STA_7603.dat"
++#define STA_PROFILE_PATH			"/lib/firmware/RT2870STA_7603.dat"
+ #else
+ #ifdef USE_CHIP_DEPENDENT_PROFILE_NAME
+-#define STA_PROFILE_PATH                        "/system/etc/wifi/RT2870STA_7603.dat"
++#define STA_PROFILE_PATH                        "/lib/firmware/RT2870STA_7603.dat"
+ #else
+-#define STA_PROFILE_PATH                        "/system/etc/wifi/RT2870STA_7603.dat"
++#define STA_PROFILE_PATH                        "/lib/firmware/RT2870STA_7603.dat"
+ #endif /* USE_CHIP_DEPENDENT_PROFILE_NAME */
+ #endif /* HE_BD_CFG80211_SUPPORT */
+ #define STA_DRIVER_VERSION			"JEDI.L0.MP1.mt7603u.v1.8"
+@@ -227,7 +227,7 @@ typedef struct usb_ctrlrequest devctrlrequest;
+ 
+ 
+ #ifdef RTMP_MAC_SDIO
+-#define STA_PROFILE_PATH			"/system/etc/wifi/RT2870STA_7603.dat"
++#define STA_PROFILE_PATH			"/lib/firmware/RT2870STA_7603.dat"
+ #define STA_DRIVER_VERSION			"3.0.0.0"
+ #ifdef MULTIPLE_CARD_SUPPORT
+ #define CARD_INFO_PATH			"/etc/Wireless/RT2870STA/RT2870STACard.dat"

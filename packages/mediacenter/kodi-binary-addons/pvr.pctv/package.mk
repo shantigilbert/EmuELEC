@@ -5,7 +5,7 @@
 PKG_NAME="pvr.pctv"
 PKG_VERSION="20.3.0-Nexus"
 PKG_SHA256="34c064f91295477ecdab680c4fd8baa2b82597be6dc9fe4896a1d977679f4537"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.pctv"

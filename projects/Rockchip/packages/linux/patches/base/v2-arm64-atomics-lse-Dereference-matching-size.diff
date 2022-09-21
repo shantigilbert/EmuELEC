@@ -1,0 +1,26 @@
+diff --git a/arch/arm64/include/asm/atomic_lse.h b/arch/arm64/include/asm/atomic_lse.h
+index d955ade5df7c..5d460f6b7675 100644
+--- a/arch/arm64/include/asm/atomic_lse.h
++++ b/arch/arm64/include/asm/atomic_lse.h
+@@ -249,7 +249,7 @@ __lse__cmpxchg_case_##name##sz(volatile void *ptr,			\
+ 	"	mov	%" #w "[tmp], %" #w "[old]\n"			\
+ 	"	cas" #mb #sfx "\t%" #w "[tmp], %" #w "[new], %[v]\n"	\
+ 	"	mov	%" #w "[ret], %" #w "[tmp]"			\
+-	: [ret] "+r" (x0), [v] "+Q" (*(unsigned long *)ptr),		\
++	: [ret] "+r" (x0), [v] "+Q" (*(u##sz *)ptr),			\
+ 	  [tmp] "=&r" (tmp)						\
+ 	: [old] "r" (x1), [new] "r" (x2)				\
+ 	: cl);								\
+diff --git a/arch/arm64/include/asm/cmpxchg.h b/arch/arm64/include/asm/cmpxchg.h
+index f9bef42c1411..497acf134d99 100644
+--- a/arch/arm64/include/asm/cmpxchg.h
++++ b/arch/arm64/include/asm/cmpxchg.h
+@@ -243,7 +243,7 @@ static inline void __cmpwait_case_##sz(volatile void *ptr,		\
+ 	"	cbnz	%" #w "[tmp], 1f\n"				\
+ 	"	wfe\n"							\
+ 	"1:"								\
+-	: [tmp] "=&r" (tmp), [v] "+Q" (*(unsigned long *)ptr)		\
++	: [tmp] "=&r" (tmp), [v] "+Q" (*(u##sz *)ptr)			\
+ 	: [val] "r" (val));						\
+ }
+ 

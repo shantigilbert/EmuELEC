@@ -1,0 +1,24 @@
+From c38a2fc53e5ebb3fc4637a168408591003aad0fb Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Mon, 30 Sep 2019 12:20:00 +0200
+Subject: [PATCH] Add working directory '/storage' for debug-shell
+
+---
+ units/debug-shell.service.in | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/units/debug-shell.service.in b/units/debug-shell.service.in
+index 9f3868e106..d5f93f18a6 100644
+--- a/units/debug-shell.service.in
++++ b/units/debug-shell.service.in
+@@ -16,6 +16,7 @@ IgnoreOnIsolate=yes
+ ConditionPathExists=@DEBUGTTY@
+ 
+ [Service]
++WorkingDirectory=/storage
+ Environment=ENV=/etc/profile
+ ExecStart=/bin/sh -c 'echo -en "\033[?25h"; exec /bin/sh'
+ Restart=always
+-- 
+2.17.1
+

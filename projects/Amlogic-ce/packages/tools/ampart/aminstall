@@ -7,17 +7,11 @@
 # Even this script is placed in ampart package in the EmuELEC source code
 # Issues regarding this script should NOT be opened on ampart's project page
 
-# This script should NEVER be used in CoreELEC. 
+# This script should NEVER be used in CoreELEC
+# This script ONLY works on EmuELEC's partition layout
 # If you can see this, that means you are trying to modify this script
-# I'll NEVER EVER test and debug on CoreELEC as it already has ceemmc
-# Even if you made it to work on there, you should debug it yourself.
-# If you want to extract and run ampart on CoreELEC, save it
-# ampart is hard-coded not to run on CoreELEC
-# Don't even think about opening issue on ampart to allow CoreELEC, I'll close it
-
-
-# Note: It is possible to applay a global offset to ampart via an alias on the top of the script, e.g. alias ampart='ampart --offset 4M', this would only be useful if you are using a Xiaomi device as they modify the offset from standard 36M to 4M to avoid the 32M wasted between bootloader and reserved. You surely need some patches to the kernel's mmc driver for it to correctly recognize the internel emmc partition table, though. https://github.com/7Ji/HybridELEC/tree/coreelec-9.2/projects/Amlogic/devices/mibox3/patches/linux. Please be noted this is only a personal advice from me(7Ji) and doing so will end up with no support from neither Team EmuELEC nor myself.
-
+# I'll NEVER test and debug on CoreELEC as it already has ceemmc
+# which is the approved way to install to internal and is tested more
 
 PART_RESIZED=''
 PART_MOUNTED=''
@@ -34,7 +28,8 @@ PART_ROMS_NAME='EEROMS'
 
 DIR_SYSTEM='/flash'
 DIR_STORAGE='/storage'
-DIR_ROMS="$DIR_STORAGE/roms"
+DIR_ROMS_NAME='roms'
+DIR_ROMS="$DIR_STORAGE/$DIR_ROMS_NAME"
 
 PART_SYSTEM_SIZE=$(( 2 * $SIZE_1G ))
 PART_SYSTEM_SIZE_HUMAN='2G'   # This is not used in any processing, just for reporting to users
@@ -62,8 +57,6 @@ ACTION_SINGLE_BOOT_OLDSCHOOL=''
 ESSENTIAL_FILES='aml_autoscript cfgload config.ini dtb.img kernel.img SYSTEM'
 ESSENTIAL_DEVICES="$DISK_DEVICE bootloader reserved env logo misc dtb"
 
-DIR_CACHE="$(mktemp -d)" || die 'Failed to create temporary dir for installation'  # If non-conflicting name can be ensured, it can be hard-coded here
-
 UBOOT_EMMC_SINGLE_BOOT='run cfgloademmc'
 
 TEA_TIME=60
@@ -84,6 +77,8 @@ die() {
   echo $*
   exit 1
 }
+
+DIR_CACHE="$(mktemp -d)" || die 'Failed to create temporary dir for installation'  # If non-conflicting name can be ensured, it can be hard-coded here
 
 revert_and_die() {
   printf "ERROR: "
@@ -245,7 +240,7 @@ update_table() {
       else
         echo "Oh no! You emmc is smaller than 4G! This is impossible!"
         echo "Every Amlogic S9xxx device should have at least 4G emmc onboard!"
-        echo "I'm afraid you can not install EmuELEC to internal storage :("
+        echo "I'm afraid you can not install $DISTRO_NAME to internal storage :("
         echo "As this only works on emmc at least 4G :<"
         exit 1
       fi
@@ -349,7 +344,7 @@ notice_populate_start() {
   echo "Populating internal $PART_NAME partition..."
 }
 notice_populate_end() {
-  echo "Populated internal $PART_NAME partition..."
+  echo "Populated internal $PART_NAME partition"
 }
 notice_format() {
   echo "Formatting internal $PART_NAME partition..."
@@ -366,15 +361,35 @@ umount_and_sync() {
   sync
 }
 
-format_or_not() {
+is_fs() { # $1 part type
+  if [ "$(blkid "$PART_PATH" | sed -e 's/.* TYPE="\([a-z0-9]\+\)".*/\1/')" == "$1" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+
+format_or_not() { # $1 part path, $2 part type
   if [ "$ACTION_UPDATE" ]; then
-    printf "Should we reformat $1 partition? This is only useful if your want a totally new installation "
-    if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
-      printf "(running in old-school system+data single-boot mode, cannot properly figure out if its a $DISTRO_NAME installation or not, you need to select Y for installation to continue if you are sure it's the stock Android on emmc) "
-    fi
-    read -p '[y/N]' CHOICE
-    if [[ "$CHOICE" =~ ^[yY] ]]; then
-      FORMAT='yes'
+    if is_fs "$2"; then
+      printf "Should we reformat $1 partition? This is only useful if your want a totally new installation "
+      if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
+        printf "(running in old-school system+data single-boot mode, cannot properly figure out if its a $DISTRO_NAME installation or not, you need to select Y for installation to continue if you are sure it's the stock Android on emmc) "
+      fi
+      printf 'YOU WILL LOSE ALL DATA ON THE PARTITION IF WE REFORMAT IT '
+      read -p '[y/N]' CHOICE
+      if [[ "$CHOICE" =~ ^[yY] ]]; then
+        FORMAT='yes'
+      fi
+    else
+      echo "Warning: Actual fs type on '$PART_PATH' is different from the one it should be ($2), we have to reformat this partition. YOU WILL LOSE ALL DATA ON THE PARTITION IF WE REFORMAT IT"
+      read -p 'Should we reformat the partition? If not, you cannot install to internal and we have to exit [y/N]' CHOICE
+      if [[ "$CHOICE" =~ ^[yY] ]]; then
+        FORMAT='yes'
+      else
+        revert_and_die 'User aborted installation'
+      fi
     fi
   else
     FORMAT='yes'
@@ -386,16 +401,22 @@ populate_system() {
   notice_populate_start
   local PART_PATH="/dev/$PART_SYSTEM_NAME"
   local FORMAT=''
-  format_or_not "$PART_SYSTEM_NAME"
+  format_or_not "$PART_SYSTEM_NAME" 'vfat'
   if [ "$FORMAT" ]; then
     notice_format
     mkfs.fat -n "$PART_SYSTEM_NAME" "$PART_PATH" &>/dev/null || revert_and_die "Failed to create a fat fs on '$PART_PATH'"
+  fi
+  fatlabel "$PART_PATH" "$PART_NAME" &>/dev/null || revert_and_die "Failed to check and fix fat label on '$PART_PATH'"
+  if ! is_fs 'vfat'; then
+    revert_and_die "Can't proceed installation: fs on partition '$PART_PATH' is not vfat (fat32)"
   fi
   local DIR_CACHE="$DIR_CACHE/$PART_SYSTEM_NAME"
   mount_part_cache
   echo "Copying all system files (kernel, SYSTEM, dtb, etc) under $DIR_SYSTEM to internal $PART_SYSTEM_NAME partition..."
   cp -raf "$DIR_SYSTEM/"* "$DIR_CACHE" || die 'Failed to copy system files'
-  [ "$ACTION_CREATE_ROMS" ] && echo 'ext4' > "$DIR_CACHE/ee_fstype"  # Internal roms fs type should 
+  if [[ "$ACTION_CREATE_ROMS" || "$ACTION_UPDATE_ROMS" ]]; then
+    echo 'ext4' > "$DIR_CACHE/ee_fstype"  # Internal roms fs type should always be ext4
+  fi
   if [ "$ACTION_SINGLE_BOOT_OLDSCHOOL" ]; then
     [ ! -f '/usr/share/ampart/oldschool_cfgload' ] && revert_and_die "Failed to find corresponding oldschool_cfgload"
     cp -f '/usr/share/ampart/oldschool_cfgload' "$DIR_CACHE/cfgload"
@@ -411,11 +432,15 @@ populate_storage() {
   local DIR_CACHE="$DIR_CACHE/$PART_STORAGE_NAME"
   if [ "$ACTION_SINGLE_BOOT" == 'yes' ]; then
     local FORMAT=''
-    format_or_not "$PART_STORAGE_NAME"
+    format_or_not "$PART_STORAGE_NAME" 'ext4'
     if [ "$FORMAT" ]; then
       notice_format
       create_ext4 "$PART_STORAGE_NAME"
     fi
+    tune2fs -L "$PART_STORAGE_NAME" "$PART_PATH" &>/dev/null
+  fi
+  if ! is_fs 'ext4'; then
+    revert_and_die "Can't proceed installation: fs on partition '$PART_PATH' is not ext4"
   fi
   mount_part_cache
   if [ "$PART_STORAGE_SUBDIR" ]; then
@@ -436,7 +461,7 @@ populate_storage() {
   fi
   if [ "$EMPTY" ]; then
     printf "Do you want to copy your user data under $DIR_STORAGE to internal $PART_STORAGE_NAME partition? "
-    [ "$ACTION_CREATE_ROMS" ] && printf "(This will not include all of the stuffs under $DIR_ROMS, they will be copied to $PART_ROMS_NAME partition later) "
+    [[ "$ACTION_CREATE_ROMS" || "$ACTION_UPDATE_ROMS" ]] && printf "(This will not include all of the stuffs under $DIR_ROMS, they will be copied to $PART_ROMS_NAME partition later) "
     read -p '[Y/n] ' CHOICE
     if [[ "$CHOICE" =~ ^[nN] ]]; then
       :
@@ -444,7 +469,17 @@ populate_storage() {
       echo "Stopping EmulationStation so we can make sure configs are flushed onto disk... You can run 'systemctl start emustation.service' later to bring EmulationStation back up"
       systemctl stop emustation.service
       echo "Copying user data..."
-      rsync -qaHSx "$DIR_STORAGE/". "$DIR_CACHE"
+      if [[ "$ACTION_CREATE_ROMS" || "$ACTION_UPDATE_ROMS" ]]; then
+        rsync -qaHSx --exclude="$DIR_ROMS_NAME/*" "$DIR_STORAGE/". "$DIR_CACHE"
+      else
+        rsync -qaHSx "$DIR_STORAGE/". "$DIR_CACHE"
+      fi
+      if [[ -z "$ACTION_CREATE_ROMS" && -z "$ACTION_UPDATE_ROMS" ]]; then
+        if grep -qs " $DIR_ROMS " /proc/mounts; then 
+          mkdir -p "$DIR_CACHE/$DIR_ROMS_NAME"
+          rsync -qaHSx "$DIR_ROMS/". "$DIR_CACHE/$DIR_ROMS_NAME"
+        fi
+      fi
       sync
     fi
   fi
@@ -459,16 +494,20 @@ populate_roms() {
   local PART_PATH="/dev/$PART_ROMS_NAME"
   local FORMAT=''
   local EMPTY=''
-  format_or_not "$PART_ROMS_NAME"
+  format_or_not "$PART_ROMS_NAME" 'ext4'
   if [ "$FORMAT" ]; then
     notice_format
     echo "Note: $PART_ROMS_NAME on the emmc will always be formatted as EXT4, Since you can not plug the emmc to a Windows PC just like you would for a SD card/USB drive"
     create_ext4 "$PART_ROMS_NAME"
     EMPTY='yes'
   fi
+  tune2fs -L "$PART_STORAGE_NAME" "$PART_PATH" &>/dev/null
+  if ! is_fs 'ext4'; then
+    revert_and_die "Can't proceed installation: fs on partition '$PART_PATH' is not ext4"
+  fi
   local DIR_CACHE="$DIR_CACHE/$PART_ROMS_NAME"
   mount_part_cache
-  if [ -e "$DIR_CACHE/nes" ]; then  # Why would I choose NES? Because Nintendo ruled the fucking world (Ahem, AVGN meme)
+  if [ -z "$(find "$DIR_CACHE" -maxdepth 0 -empty)" ]; then
     echo "Warning: roms/savedata found in internal $PART_STORAGE_NAME partitions"
     read -p "Should we clean everything under this internal installation? You can then populate it with roms/savedata from your the current external boot, or leave it empty to have a fresh installtion (y/N)" CHOICE
     if [[ "$CHOICE" =~ ^[yY] ]]; then
@@ -484,7 +523,7 @@ populate_roms() {
       :
     else
       echo "Copying Roms, savestates, etc..."
-      rsync -qaHSx "$DIR_ROMS/". "$DIR_CACHE"
+      rsync -qaHSx "$DIR_ROMS/". "$DIR_CACHE" || echo 'Error encountered, maybe disk space used up? Installation will continue anyway'
     fi
   fi
   umount_and_sync
@@ -522,11 +561,10 @@ install_to_internal() {  # $1 single boot or not
 }
 
 no_coreelec() {
-  if grep -q "^NAME=\"CoreELEC\"$" /etc/os-release ; then
-    echo "Hello, Mr naughty naughty. You are trying to run this script on CoreELEC right?"
-    echo "Sorry but it does not work in that way. Both the script and the tool ampart it relies"
-    echo "does not work on CoreELEC and I have no interest on providing support there"
-    echo "You should use ceemmc as it's the official method for CoreELEC"
+  if ! grep -q "^NAME=\"EmuELEC\"$" /etc/os-release ; then
+    echo "Hello, Mr naughty naughty. You are trying to run this script outside EmuELEC right?"
+    echo "Sorry but it does not work in that way. The script only works on EmuELEC"
+    echo "because it will only work with the 3-partition layout for EmuELEC"
     exit 1
   fi
 }
@@ -584,7 +622,7 @@ confirm_method() {
       echo "(reserved partitions like bootloader, reserved, env, logo and misc will be kept)"
       echo "You Android installation will be COMPLETELY erased and can not be recovered"
       echo "Unless you use Amlogic USB Burning Tool to flash a stock image"
-      echo "This script will install EmuELEC that you booted from SD card/USB drive."
+      echo "This script will install $DISTRO_NAME that you booted from SD card/USB drive."
       ACTION_SINGLE_BOOT='yes'
       ;;
     '--revert')
@@ -617,10 +655,11 @@ confirm_method() {
 
 regret_pill() {
   echo "Warning: from this point onward, all of the changes are IRREVERSIBLE since new data will be written to emmc. Make sure you keep the power pluged in."
-  echo "If anything breaks apart, you can revert your partition table with the following command, but changes to the data are IRREVERSIBLE"
+  echo "If anything breaks apart, you can revert your partition table and ONLY your partition table with the following command to what it looks like before this run of aminstall, but changes to the data are IRREVERSIBLE"
   echo
   echo "ampart --clone $DISK_DEVICE_PATH $SNAPSHOT_HUMAN"
   echo
+  echo "Please take a note of the above command on your PC/notebooks/any paper in case you mistakenly closed the SSH/Serial client and couldn't find it in the history"
 }
 main() {
   no_coreelec
@@ -632,7 +671,9 @@ main() {
   snapshot
   check_parts
   if [[ -z "$ACTION_SINGLE_BOOT_OLDSCHOOL" && -z "$ACTION_UPDATE" ]]; then
+    echo "Updating partition table on emmc... Please keep the box powered on, interruption during this session will be fatal and will most likely brick your device"
     update_table
+    echo "Partition table updated on emmc"
   fi
   regret_pill
   install_to_internal

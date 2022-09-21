@@ -1,0 +1,30 @@
+From ff48479612dc8f64b27d0579700f96eb72623dd6 Mon Sep 17 00:00:00 2001
+From: 7Ji <pugokushin@gmail.com>
+Date: Wed, 10 Aug 2022 14:24:00 +0800
+Subject: [PATCH] fheroes2: init game controller unconditionally
+
+---
+ src/fheroes2/game/fheroes2.cpp | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/src/fheroes2/game/fheroes2.cpp b/src/fheroes2/game/fheroes2.cpp
+index d1a03c95..7d277b13 100644
+--- a/src/fheroes2/game/fheroes2.cpp
++++ b/src/fheroes2/game/fheroes2.cpp
+@@ -239,11 +239,8 @@ int main( int argc, char ** argv )
+         }
+ 
+         std::set<fheroes2::SystemInitializationComponent> coreComponents{ fheroes2::SystemInitializationComponent::Audio,
+-                                                                          fheroes2::SystemInitializationComponent::Video };
+-
+-#if defined( TARGET_PS_VITA ) || defined( TARGET_NINTENDO_SWITCH )
+-        coreComponents.emplace( fheroes2::SystemInitializationComponent::GameController );
+-#endif
++                                                                          fheroes2::SystemInitializationComponent::Video,
++                                                                          fheroes2::SystemInitializationComponent::GameController };
+ 
+         const fheroes2::CoreInitializer coreInitializer( coreComponents );
+ 
+-- 
+2.37.1
+

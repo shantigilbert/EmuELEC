@@ -30,7 +30,7 @@ configure_target() {
 }
 
 make_target() {
-  ${GOLANG} build -a -ldflags "${LDFLAGS}" -o bin/prometheus-node-exporter -v 
+  ${GOLANG} build -a -ldflags "${LDFLAGS}" -o bin/prometheus-node-exporter -v
 }
 
 addon() {

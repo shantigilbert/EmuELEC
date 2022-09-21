@@ -2,9 +2,9 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="tinc"
-PKG_VERSION="1.1pre17"
-PKG_SHA256="4c3107381f6998a62c6f0e32eb2101707f32d1cf0d9e29d9d380faa906ed64e0"
-PKG_REV="105"
+PKG_VERSION="1.1pre18"
+PKG_SHA256="bd2d010a1bdeb1dd767f6fbc769fce2a2169119fb3d177df928c27d1f20b5775"
+PKG_REV="106"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="http://www.tinc-vpn.org/"

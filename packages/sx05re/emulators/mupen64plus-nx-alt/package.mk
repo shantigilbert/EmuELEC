@@ -2,7 +2,7 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="mupen64plus-nx-alt"
-PKG_VERSION="6e9dcd2cd9d23d3e79eaf2349bf7e9f25ad45bf1"
+PKG_VERSION="de17151b4dc53767c71f0739d6248e217d615fb8"
 PKG_SHA256="eab353fe5834d256af96f1fdac328b0656bdeeebde111860067a88bf5442bfe2"
 PKG_REV="1"
 PKG_ARCH="any"
@@ -14,7 +14,7 @@ PKG_SECTION="libretro"
 PKG_LONGDESC="Improved mupen64plus libretro core reimplementation"
 PKG_TOOLCHAIN="make"
 PKG_BUILD_FLAGS="-lto"
-
+PKG_EE_UPDATE=no
 
 pre_configure_target() {
   sed -e "s|^GIT_VERSION ?.*$|GIT_VERSION := \" ${PKG_VERSION:0:7}\"|" -i Makefile
@@ -22,19 +22,23 @@ pre_configure_target() {
 if [ $ARCH == "arm" ]; then
 	if [ "${DEVICE}" = "Amlogic-ng" ]; then
 		PKG_MAKE_OPTS_TARGET+=" platform=AMLG12B"
-	elif [ "${DEVICE}" = "Amlogic" ]; then
-		PKG_MAKE_OPTS_TARGET+=" platform=amlogic"
+	elif [ "${DEVICE}" = "Amlogic-old" ]; then
+		PKG_MAKE_OPTS_TARGET+=" platform=emuelec BOARD=OLD32BIT"
 	elif [ "${DEVICE}" = "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 		sed -i "s|cortex-a53|cortex-a35|g" Makefile
 		PKG_MAKE_OPTS_TARGET+=" platform=odroidgoa"
+	elif [ "$DEVICE" == "OdroidM1" ] || [ "$DEVICE" == "RK356x" ]; then
+		PKG_MAKE_OPTS_TARGET+=" platform=emuelec BOARD=NGRK32BIT"
 	fi
 else
 	if [ "${DEVICE}" = "Amlogic-ng" ]; then
 		PKG_MAKE_OPTS_TARGET+=" platform=odroid64 BOARD=N2"
-	elif [ "${DEVICE}" = "Amlogic" ]; then 
-		PKG_MAKE_OPTS_TARGET+=" platform=amlogic64"
-	elif [ "${DEVICE}" = "OdroidGoAdvance" ] || [ "$DEVICE" == "OdroidM1" ] || [ "$DEVICE" == "GameForce" ] || [ "$DEVICE" == "RK356x" ]; then
-		PKG_MAKE_OPTS_TARGET+=" platform=amlogic64"
+	elif [ "${DEVICE}" = "Amlogic-old" ]; then 
+		PKG_MAKE_OPTS_TARGET+=" platform=emuelec BOARD=OLD"
+	elif [ "$DEVICE" == "OdroidM1" ] || [ "$DEVICE" == "RK356x" ]; then
+		PKG_MAKE_OPTS_TARGET+=" platform=emuelec BOARD=NGRK"
+	elif [ "${DEVICE}" = "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
+		PKG_MAKE_OPTS_TARGET+=" platform=emuelec BOARD=NGHH"
 	fi
 fi
 }

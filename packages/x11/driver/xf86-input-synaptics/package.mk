@@ -2,11 +2,11 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="xf86-input-synaptics"
-PKG_VERSION="1.9.1"
-PKG_SHA256="7af83526eff1c76e8b9e1553b34245c203d029028d8044dd9dcf71eef1001576"
+PKG_VERSION="1.9.2"
+PKG_SHA256="b8fa4aab913fc63754bbd6439e020658c412743a055201ddf212760593962c38"
 PKG_LICENSE="GPL"
-PKG_SITE="http://lists.freedesktop.org/mailman/listinfo/xorg"
-PKG_URL="http://xorg.freedesktop.org/archive/individual/driver/${PKG_NAME}-${PKG_VERSION}.tar.bz2"
+PKG_SITE="https://lists.freedesktop.org/mailman/listinfo/xorg"
+PKG_URL="https://xorg.freedesktop.org/archive/individual/driver/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_TARGET="toolchain xorg-server libXi libXext libevdev"
 PKG_LONGDESC="Synaptics touchpad driver for X.Org."
 PKG_TOOLCHAIN="autotools"

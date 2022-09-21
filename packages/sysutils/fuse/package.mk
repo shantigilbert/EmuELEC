@@ -12,6 +12,7 @@ PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="FUSE provides a simple interface for userspace programs to export a virtual filesystem to the Linux kernel."
 # fuse fails to build with GOLD linker on gcc-4.9
 PKG_BUILD_FLAGS="-gold"
+PKG_TOOLCHAIN="autotools"
 
 PKG_CONFIGURE_OPTS_TARGET="MOUNT_FUSE_PATH=/usr/sbin \
                            --enable-lib \

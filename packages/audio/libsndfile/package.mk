@@ -3,8 +3,8 @@
 # Copyright (C) 2021-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libsndfile"
-PKG_VERSION="1.0.31"
-PKG_SHA256="8cdee0acb06bb0a3c1a6ca524575643df8b1f3a55a0893b4dd9f829d08263785"
+PKG_VERSION="1.1.0"
+PKG_SHA256="642a876bd61b63f9346628dba5f8a0356a3ad750c7f6f42019d26ce60ba6a15b"
 PKG_LICENSE="LGPL-2.1-or-later"
 PKG_SITE="https://libsndfile.github.io/libsndfile/"
 PKG_URL="https://github.com/libsndfile/libsndfile/archive/${PKG_VERSION}.tar.gz"

@@ -7,7 +7,7 @@ PKG_SHA256="06b10a183ce5371f915c6bb15b7b1fffbe046e8275099c96affc29e17645d909"
 PKG_LICENSE="LGPLv2.1+"
 PKG_SITE="https://ffmpeg.org"
 PKG_URL="https://ffmpeg.org/releases/ffmpeg-${PKG_VERSION}.tar.xz"
-PKG_DEPENDS_TARGET="toolchain aom bzip2 gnutls lame libvorbis opus x264 x265 zlib"
+PKG_DEPENDS_TARGET="toolchain aom bzip2 gnutls lame libvorbis opus x264 zlib"
 PKG_LONGDESC="FFmpegx is an complete FFmpeg build to support encoding and decoding."
 PKG_BUILD_FLAGS="-gold -sysroot"
 
@@ -99,6 +99,12 @@ pre_configure_target() {
     --enable-libxcb-shm \
     --enable-libxcb-xfixes \
     --enable-libxcb-shape"
+  else
+    PKG_FFMPEG_X11_GRAB="\
+    --disable-libxcb \
+    --disable-libxcb-shm \
+    --disable-libxcb-xfixes \
+    --disable-libxcb-shape"
   fi
 }
 

@@ -1,0 +1,41 @@
+diff -Naur bluez-5.29/src/bluetooth.conf bluez-5.29.patch/src/bluetooth.conf
+--- bluez-5.29/src/bluetooth.conf	2015-03-11 11:01:57.000000000 +0100
++++ bluez-5.29.patch/src/bluetooth.conf	2015-03-31 12:02:20.128341381 +0200
+@@ -22,20 +22,37 @@
+     <allow send_interface="org.bluez.GattDescriptor1"/>
+     <allow send_interface="org.freedesktop.DBus.ObjectManager"/>
+     <allow send_interface="org.freedesktop.DBus.Properties"/>
++
++    <allow own="org.bluez.obex"/>
++    <allow send_destination="org.bluez.obex"/>
++    <allow send_interface="org.bluez.obex.Agent1"/>
++    <allow send_interface="org.bluez.obex.Client1"/>
++    <allow send_interface="org.bluez.obex.Session1"/>
++    <allow send_interface="org.bluez.obex.Transfer1"/>
++    <allow send_interface="org.bluez.obex.ObjectPush1"/>
++    <allow send_interface="org.bluez.obex.FileTransfer1"/>
++    <allow send_interface="org.bluez.obex.PhonebookAccess1"/>
++    <allow send_interface="org.bluez.obex.Synchronization1"/>
++    <allow send_interface="org.bluez.obex.MessageAccess1"/>
++    <allow send_interface="org.bluez.obex.Message1"/>
+   </policy>
+ 
++
+   <policy at_console="true">
+     <allow send_destination="org.bluez"/>
++    <allow send_destination="org.bluez.obex"/>
+   </policy>
+ 
+   <!-- allow users of lp group (printing subsystem) to 
+        communicate with bluetoothd -->
+   <policy group="lp">
+     <allow send_destination="org.bluez"/>
++    <allow send_destination="org.bluez.obex"/>
+   </policy>
+ 
+   <policy context="default">
+     <deny send_destination="org.bluez"/>
++    <deny send_destination="org.bluez.obex"/>
+   </policy>
+ 
+ </busconfig>

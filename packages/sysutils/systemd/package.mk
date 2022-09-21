@@ -3,8 +3,8 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="systemd"
-PKG_VERSION="250.4"
-PKG_SHA256="d2bda9d225da11dc9ff48b48e59fc36798d3e66902ed400a9f78fa370c596864"
+PKG_VERSION="251.4"
+PKG_SHA256="3459239979f52b8c4ace33734d31c2fb69fa13cf81d04b1b982f7d8d4651e015"
 PKG_LICENSE="LGPL2.1+"
 PKG_SITE="http://www.freedesktop.org/wiki/Software/systemd"
 PKG_URL="https://github.com/systemd/systemd-stable/archive/v${PKG_VERSION}.tar.gz"
@@ -15,7 +15,7 @@ PKG_MESON_OPTS_TARGET="--libdir=/usr/lib \
                        -Drootprefix=/usr \
                        -Dsplit-usr=false \
                        -Dsplit-bin=true \
-                       -Ddefault-hierarchy=hybrid \
+                       -Ddefault-hierarchy=unified \
                        -Dtty-gid=5 \
                        -Dtests=false \
                        -Dseccomp=false \
@@ -259,7 +259,7 @@ post_install() {
   add_group systemd-network 193
   add_user systemd-network x 193 193 "systemd-network" "/" "/bin/sh"
 
-  add_group audio 63
+  add_group audio 63 pipewire
   add_group cdrom 11
   add_group dialout 18
   add_group disk 6
@@ -270,7 +270,7 @@ post_install() {
   add_group render 12
   add_group tape 33
   add_group tty 5
-  add_group video 39
+  add_group video 39 pipewire
   add_group utmp 22
   add_group input 199
 

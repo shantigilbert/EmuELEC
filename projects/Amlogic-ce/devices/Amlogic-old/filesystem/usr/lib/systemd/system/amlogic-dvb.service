@@ -1,0 +1,11 @@
+[Unit]
+Description=Amlogic DVB module loader
+ConditionPathExists=/proc/device-tree/dvbfe/dtv_demod0
+After=kernel-overlays.service
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c '[ `cat /proc/device-tree/dvbfe/dtv_demod0` = "Avl6211" ] && /sbin/modprobe aml_fe'
+
+[Install]
+WantedBy=basic.target

@@ -1,0 +1,10 @@
+--- a/plugins/sixaxis.c
++++ b/plugins/sixaxis.c
+@@ -370,6 +370,7 @@
+ 	else
+ 		btd_device_set_pnpid(device, cp->source, cp->vid, cp->pid, cp->version);
+ 
++	btd_device_set_trusted(device, true);
+ 	btd_device_set_temporary(device, true);
+ 
+ 	closure = g_new0(struct authentication_closure, 1);

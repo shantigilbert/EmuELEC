@@ -2,7 +2,7 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="abuse"
-PKG_VERSION="eb33c63145587454d9d6ce9e5d0d535208bc15e5"
+PKG_VERSION="56e390846baa0c259c0e4705362ba57471164392"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
@@ -21,6 +21,7 @@ pre_configure_target() {
 	fi
 
 	tar -xf ${SOURCES}/${PKG_NAME}/abuse-0.8.tar.gz -C ${SOURCES}/${PKG_NAME}/
+	rm -rf ${PKG_BUILD}/data/{music,sfx}
 	mv ${SOURCES}/${PKG_NAME}/abuse-0.8/data/music ${PKG_BUILD}/data
 	mv ${SOURCES}/${PKG_NAME}/abuse-0.8/data/sfx ${PKG_BUILD}/data
 	rm -rf ${SOURCES}/${PKG_NAME}/abuse-0.8/

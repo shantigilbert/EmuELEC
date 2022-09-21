@@ -1,0 +1,35 @@
+Name
+
+sysctl.d — Configure kernel parameters at boot
+
+Synopsis
+
+/etc/sysctl.d/*.conf
+
+/run/sysctl.d/*.conf
+
+/usr/lib/sysctl.d/*.conf
+
+Description
+
+At boot, systemd-sysctl.service(8) reads configuration files from the above directories to configure sysctl(8) kernel parameters.
+Configuration Format
+
+The configuration files contain a list of variable assignments, separated by newlines. Empty lines and lines whose first non-whitespace character is # or ; are ignored.
+
+Note that both / and . are accepted as label separators within sysctl variable names. "kernel.domainname=foo" and "kernel/domainname=foo" hence are entirely equivalent.
+
+Each configuration file shall be named in the style of program.conf. Files in /etc/ override files with the same name in /usr/lib/ and /run/. Files in /run/ override files with the same name in /usr/lib/. Packages should install their configuration files in /usr/lib/. Files in /etc/ are reserved for the local administrator, who may use this logic to override the configuration files installed by vendor packages. All configuration files are sorted by their filename in alphabetical order, regardless in which of the directories they reside, to guarantee that a specific configuration file takes precedence over another file with an alphabetically later name, if both files contain the same variable setting.
+
+If the administrator wants to disable a configuration file supplied by the vendor, the recommended way is to place a symlink to /dev/null in /etc/sysctl.d/ bearing the same filename.
+Example
+
+Example 1. /etc/sysctl.d/domain-name.conf example:
+
+# Set kernel YP domain name
+kernel.domainname=example.com
+
+
+See Also
+
+systemd(1), systemd-sysctl.service(8), systemd-delta(1), sysctl(8), sysctl.conf(5) 

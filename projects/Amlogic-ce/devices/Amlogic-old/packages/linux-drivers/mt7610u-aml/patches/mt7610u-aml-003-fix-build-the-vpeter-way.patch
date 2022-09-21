@@ -1,0 +1,116 @@
+diff --git a/Makefile b/Makefile
+index 38fcc3e..3836bb3 100644
+--- a/Makefile
++++ b/Makefile
+@@ -340,7 +340,7 @@ THREADX:
+ 	$(MAKE) -C $(RT28xx_DIR)/os/Threadx -f $(RT28xx_DIR)/os/ThreadX/Makefile
+ 
+ LINUX:
+-ifneq (,$(findstring 2.4,$(LINUX_SRC)))
++ifneq (,)
+ 
+ ifeq ($(OSABL),YES)
+ 	cp -f os/linux/Makefile.4.util $(RT28xx_DIR)/os/linux/Makefile
+@@ -468,7 +468,7 @@ endif
+ 
+ uninstall:
+ ifeq ($(TARGET), LINUX)
+-ifneq (,$(findstring 2.4,$(LINUX_SRC)))
++ifneq (,)
+ 	$(MAKE) -C $(RT28xx_DIR)/os/linux -f Makefile.4 uninstall
+ else
+ 	$(MAKE) -C $(RT28xx_DIR)/os/linux -f Makefile.6 uninstall
+@@ -477,7 +477,7 @@ endif
+ 
+ install:
+ ifeq ($(TARGET), LINUX)
+-ifneq (,$(findstring 2.4,$(LINUX_SRC)))
++ifneq (,)
+ 	$(MAKE) -C $(RT28xx_DIR)/os/linux -f Makefile.4 install
+ else
+ 	$(MAKE) -C $(RT28xx_DIR)/os/linux -f Makefile.6 install
+@@ -485,7 +485,7 @@ endif
+ endif
+ 
+ libwapi:
+-ifneq (,$(findstring 2.4,$(LINUX_SRC)))
++ifneq (,)
+ 	cp -f os/linux/Makefile.libwapi.4 $(RT28xx_DIR)/os/linux/Makefile
+ 	$(MAKE) -C $(RT28xx_DIR)/os/linux/
+ else
+@@ -495,7 +495,7 @@ endif
+ 
+ osutil:
+ ifeq ($(OSABL),YES)
+-ifneq (,$(findstring 2.4,$(LINUX_SRC)))
++ifneq (,)
+ 	cp -f os/linux/Makefile.4.util $(RT28xx_DIR)/os/linux/Makefile
+ 	$(MAKE) -C $(RT28xx_DIR)/os/linux/
+ else
+@@ -506,7 +506,7 @@ endif
+ 
+ osnet:
+ ifeq ($(OSABL),YES)
+-ifneq (,$(findstring 2.4,$(LINUX_SRC)))
++ifneq (,)
+ 	cp -f os/linux/Makefile.4.netif $(RT28xx_DIR)/os/linux/Makefile
+ 	$(MAKE) -C $(RT28xx_DIR)/os/linux/
+ else
+@@ -516,7 +516,7 @@ endif
+ endif
+ 
+ osdrv:
+-ifneq (,$(findstring 2.4,$(LINUX_SRC)))
++ifneq (,)
+ 	cp -f os/linux/Makefile.4 $(RT28xx_DIR)/os/linux/Makefile
+ 	$(MAKE) -C $(RT28xx_DIR)/os/linux/
+ else
+diff --git a/os/linux/config.mk b/os/linux/config.mk
+index 4ffdfd7..956fe85 100644
+--- a/os/linux/config.mk
++++ b/os/linux/config.mk
+@@ -894,7 +894,7 @@ WFLAGS += -DRT_BIG_ENDIAN -DINF_TWINPASS
+ endif
+ 
+ ifeq ($(PLATFORM),INF_DANUBE)
+-ifneq (,$(findstring 2.4,$(LINUX_SRC)))
++ifneq (,)
+ # Linux 2.4
+ WFLAGS += -DINF_DANUBE -DRT_BIG_ENDIAN
+ else
+@@ -998,7 +998,7 @@ export CFLAGS
+ endif
+ 
+ ifeq ($(PLATFORM),INF_DANUBE)
+-	ifneq (,$(findstring 2.4,$(LINUX_SRC)))
++	ifneq (,)
+ 	CFLAGS := $(WFLAGS) -Wundef -fno-strict-aliasing -fno-common -ffreestanding -Os -fomit-frame-pointer -G 0 -mno-abicalls -fno-pic -pipe -msoft-float  -mabi=32 -march=mips32 -Wa,-32 -Wa,-march=mips32 -Wa,-mips32 -Wa,--trap -I$(LINUX_SRC)/include/asm-mips/mach-generic
+ 	else
+ 	CFLAGS := $(WFLAGS) -Wundef -fno-strict-aliasing -fno-common -ffreestanding -Os -fomit-frame-pointer -G 0 -mno-abicalls -fno-pic -pipe -msoft-float  -mabi=32 -march=mips32r2 -Wa,-32 -Wa,-march=mips32r2 -Wa,-mips32r2 -Wa,--trap -I$(LINUX_SRC)/include/asm-mips/mach-generic
+@@ -1032,7 +1032,7 @@ export CFLAGS
+ endif
+ 
+ ifeq ($(PLATFORM),PC)
+-    ifneq (,$(findstring 2.4,$(LINUX_SRC)))
++    ifneq (,)
+ 	# Linux 2.4
+ 	CFLAGS := -D__KERNEL__ -I$(LINUX_SRC)/include -O2 -fomit-frame-pointer -fno-strict-aliasing -fno-common -pipe -mpreferred-stack-boundary=2 -march=i686 -DMODULE -DMODVERSIONS -include $(LINUX_SRC)/include/linux/modversions.h $(WFLAGS)
+ 	export CFLAGS
+@@ -1098,7 +1098,7 @@ export CFLAGS
+ endif
+ 
+ ifeq ($(PLATFORM),MT85XX)
+-    ifneq (,$(findstring 2.4,$(LINUX_SRC)))
++    ifneq (,)
+ 	# Linux 2.4
+ 	CFLAGS := -D__KERNEL__ -I$(LINUX_SRC)/include -O2 -fomit-frame-pointer -fno-strict-aliasing -fno-common -pipe -mpreferred-stack-boundary=2 -march=i686 -DMODULE -DMODVERSIONS -include $(LINUX_SRC)/include/linux/modversions.h $(WFLAGS)
+ 	export CFLAGS
+@@ -1120,7 +1120,7 @@ ifeq ($(PLATFORM),MT85XX)
+ endif
+ 
+ ifeq ($(PLATFORM),NXP_TV550)
+-    ifneq (,$(findstring 2.4,$(LINUX_SRC)))
++    ifneq (,)
+         # Linux 2.4
+         CFLAGS := -D__KERNEL__ -I$(LINUX_SRC)/include -O2 -fomit-frame-pointer -fno-strict-aliasing -fno-common -pipe -mpreferred-stack-boundary=2 -march=mips -DMODULE -DMODVERSIONS -include $(LINUX_SRC)/include/linux/modversions.h $(WFLAGS)
+         export CFLAGS

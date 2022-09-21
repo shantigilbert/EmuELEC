@@ -1,0 +1,171 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
+
+DISTRO_BOOTLABEL="COREELEC"
+DISTRO_DISKLABEL="STORAGE"
+SYSTEM_PART_START=8192
+SYSTEM_SIZE=512
+SYSTEM_PART_END=$(( ${SYSTEM_PART_START} + (${SYSTEM_SIZE} * 1024 * 1024 / 512) - 1 ))
+STORAGE_PART_START=$(( ${SYSTEM_PART_END} + 1 ))
+
+SYSTEM_BLKDEV=$(readlink -f /dev/block/$(mountpoint -d /flash))
+BLKDEVNAME=$(ls /sys/class/mmc_host/emmc/emmc*/block 2> /dev/null)
+BLKDEV="/dev/${BLKDEVNAME}"
+BOOT_PART="${BLKDEV}p1"
+STORAGE_PART="${BLKDEV}p2"
+NEWBOOT=/var/media/NEWBOOT
+NEWSTORAGE=/var/media/NEWSTORAGE
+LE_DT_ID=$(cat /proc/device-tree/le-dt-id)
+
+toggle_emmc_timeout(){
+  mount -o remount,rw /flash
+  if ! $(grep "^emmc_timeout=1$" /flash/config.ini >/dev/null); then
+    echo "Enabling eMMC timeout..."
+    echo "emmc_timeout=1" >> /flash/config.ini
+    echo "Please reboot with eMMC removed and insert when the boot splash appears."
+  else
+    echo "Disabling eMMC timeout..."
+    sed -i '/^emmc_timeout\=1$/d' /flash/config.ini
+  fi
+  mount -o remount,ro /flash
+}
+
+umount_all() {
+  mounted=$(cat /proc/mounts | grep "${BLKDEV}" | awk '{ print $1 }')
+  if [ -n "$mounted" ]; then
+    echo "Unmount all partitions from ${BLKDEVNAME}..."
+    umount $mounted
+    sleep 2
+  fi
+}
+
+install_to_emmc() {
+  # disable emmc_timeout
+  toggle_emmc_timeout
+
+  #stop kodi
+  echo "Stopping Kodi..."
+  systemctl stop kodi
+
+  # umount
+  umount_all
+
+  # nuke it
+  echo "Delete all partitions..."
+  dd if=/dev/zero of=${BLKDEV} bs=512 count=1
+
+  # create partitions
+  echo "Create new partitions..."
+  parted -s "${BLKDEV}" mklabel "msdos"
+  parted -s "${BLKDEV}" -a min unit s mkpart primary fat32 "${SYSTEM_PART_START}" "${SYSTEM_PART_END}"
+  parted -s "${BLKDEV}" set 1 boot on
+  parted -s "${BLKDEV}" -a min unit s mkpart primary ext4 "${STORAGE_PART_START}" "100%"
+  sync
+
+  # Flash u-boot
+  echo "Flash Bootloader..."
+  dd if=/usr/share/bootloader/LePotato_u-boot of=$BLKDEV conv=fsync bs=1 count=112 status=none
+  dd if=/usr/share/bootloader/LePotato_u-boot of=$BLKDEV conv=fsync bs=512 skip=1 seek=1 status=none
+  sync
+
+  # create fs for new /flash
+  echo "Create Filesystem for new flash partition..."
+  mkfs.vfat -n "${DISTRO_BOOTLABEL}" "${BOOT_PART}" ; sync
+
+  # create fs for new /storage
+  echo "Create Filesystem for new storage partition..."
+  mke2fs -F -q -L "${DISTRO_DISKLABEL}" -t ext4 -m 0 "${STORAGE_PART}" ; sync
+
+  # umount again
+  umount_all
+
+  # mount
+  echo "Mount new partitions..."
+  mkdir -p "${NEWBOOT}" "${NEWSTORAGE}"
+  mount "${BOOT_PART}" "${NEWBOOT}"
+  mount "${STORAGE_PART}" "${NEWSTORAGE}"
+
+  # cp /flash files
+  echo "Copy /flash files to new flash partition..."
+  cp -a /flash/kernel.img /flash/SYSTEM /flash/dtb.img ${NEWBOOT}
+  echo "Copy template boot.ini..."
+  cp -a /usr/share/bootloader/${DEVICE}_boot.ini ${NEWBOOT}/boot.ini
+  echo "Copy config.ini..."
+  if [ -e /flash/config.ini ]; then
+    cp -a /flash/config.ini ${NEWBOOT}
+  else
+    cp -a /usr/share/bootloader/config.ini ${NEWBOOT}
+  fi
+  sync
+
+  # set our new UUID's
+  BOOT_UUID="$(blkid ${BOOT_PART} | sed 's/.* UUID="//;s/".*//g')"
+  STORAGE_UUID="$(blkid ${STORAGE_PART} | sed 's/.* UUID="//;s/".*//g')"
+  echo "Set UUIDs in new boot.ini..."
+  sed -e "s/@BOOT_UUID@/$BOOT_UUID/" \
+      -e "s/@DISK_UUID@/$STORAGE_UUID/" \
+      -i ${NEWBOOT}/boot.ini
+
+  # check if there is enough space
+  space_available=$(df "${NEWSTORAGE}" | awk 'NR==2 { print $4 }')
+  space_required=$(df "/storage/" | awk 'NR==2 { print $3 }')
+  if [ $space_available -ge $space_required ]; then
+    # rsync userdata
+    echo "Rsync /storage files to new storage partition..."
+    rsync -Pa /storage/ $NEWSTORAGE/
+  else
+    echo "Not enough space on the new storage partition. Skipping... "
+  fi
+
+  umount_all
+
+  echo "All done! Please poweroff your device and remove the SD/USB."
+  echo "Enjoy!"
+}
+
+if [ "$SYSTEM_BLKDEV" = "/dev/block" -o "$SYSTEM_BLKDEV" = "$BOOT_PART" ]; then
+  echo "No no no no no! Don't use that script from eMMC otherwise it will eat your data!"
+  exit 1
+fi
+
+case $LE_DT_ID in
+  *lepotato)
+    DEVICE="LePotato"
+    ;;
+  *)
+    echo "This script is only for LePotato. It won't work on other devices!"
+    exit 1
+    ;;
+esac
+
+if ! $(grep "^emmc_timeout=1$" /flash/config.ini >/dev/null); then
+  echo "This script will help you to install CoreELEC on a LePotato eMMC from"
+  echo "within a running CE on SD card or USB drive."
+  echo ""
+  echo "First we will set a 30s timout for u-boot."
+  echo "Please reboot CoreELEC from SD/USB without the eMMC plugged in."
+  echo "You will see the boot splash with the words: 30s: Please insert the eMMC."
+  echo "After the 30s timeout CoreELEC will boot as normal and you will have to run this"
+  echo "script again to continue. If you don't manage to insert the eMMC in time just reboot and try again."
+  read -p "Type \"yes\" if you know what you are doing or anything else to exit: " choice
+  case "$choice" in
+    yes) toggle_emmc_timeout && exit 0;;
+      *) exit 0 ;;
+  esac
+fi
+
+if [ -z "$BLKDEVNAME" ]; then
+  echo "eMMC not found. Please reboot with your eMMC removed and insert it after the bootsplash appears."
+  exit 0
+fi
+
+echo "This script will now erase the eMMC on your device"
+echo "All data on this eMMC will be lost forever!"
+echo ""
+read -p "Type \"yes\" if you know what you are doing or anything else to exit: " choice
+case "$choice" in
+  yes) install_to_emmc ;;
+    *) exit 0 ;;
+esac

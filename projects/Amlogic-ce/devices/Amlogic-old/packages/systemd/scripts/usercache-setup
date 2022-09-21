@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
+
+# Fix bug in older versions creating file /storage/.cache/services
+[ -f /storage/.cache/services ] && rm /storage/.cache/services && mkdir -p /storage/.cache/services
+
+# Copy cache files, but don't overwrite
+false | cp -iRp /usr/cache/* /storage/.cache/ &>/dev/null
+
+# Merge default and custom shadow file details
+if [ -f /storage/.cache/shadow -a -f /usr/cache/shadow ]; then
+  # Get existing root details (possibly user defined)
+  userroot="$(grep "^root:" /storage/.cache/shadow)"
+
+  # Overwrite users shadow file with default details, replacing root with any existing value
+  # If current file is garbage (ie. missing root) then replace it
+  if [ -n "${userroot}" ]; then
+    sed -e "s ^root:.* ${userroot} " /usr/cache/shadow >/storage/.cache/shadow
+  else
+    cp -fp /usr/cache/shadow /storage/.cache/shadow
+  fi
+
+  # Make sure we have the correct permission
+  chmod 000 /storage/.cache/shadow
+fi

@@ -1,0 +1,53 @@
+diff -Naur a/usr/idbm.c b/usr/idbm.c
+--- a/usr/idbm.c	2013-07-29 12:13:36.000000000 -0700
++++ b/usr/idbm.c	2022-05-03 15:16:35.006014572 -0700
+@@ -2647,9 +2647,9 @@
+ int idbm_init(idbm_get_config_file_fn *fn)
+ {
+ 	/* make sure root db dir is there */
+-	if (access(ISCSI_CONFIG_ROOT, F_OK) != 0) {
+-		if (mkdir(ISCSI_CONFIG_ROOT, 0660) != 0) {
+-			log_error("Could not make %s %d\n", ISCSI_CONFIG_ROOT,
++	if (access(ISCSIVAR, F_OK) != 0) {
++		if (mkdir(ISCSIVAR, 0770) != 0) {
++			log_error("Could not make %s %d", ISCSIVAR,
+ 				   errno);
+ 			return errno;
+ 		}
+diff -Naur a/usr/idbm.h b/usr/idbm.h
+--- a/usr/idbm.h	2013-07-29 12:13:36.000000000 -0700
++++ b/usr/idbm.h	2022-05-03 15:17:18.700644189 -0700
+@@ -29,12 +29,13 @@
+ #include "list.h"
+ #include "flashnode.h"
+ 
+-#define NODE_CONFIG_DIR		ISCSI_CONFIG_ROOT"nodes"
+-#define SLP_CONFIG_DIR		ISCSI_CONFIG_ROOT"slp"
+-#define ISNS_CONFIG_DIR		ISCSI_CONFIG_ROOT"isns"
+-#define STATIC_CONFIG_DIR	ISCSI_CONFIG_ROOT"static"
+-#define FW_CONFIG_DIR		ISCSI_CONFIG_ROOT"fw"
+-#define ST_CONFIG_DIR		ISCSI_CONFIG_ROOT"send_targets"
++#define ISCSIVAR		"/run/iscsi/"
++#define NODE_CONFIG_DIR		ISCSIVAR"nodes"
++#define SLP_CONFIG_DIR		ISCSIVAR"slp"
++#define ISNS_CONFIG_DIR		ISCSIVAR"isns"
++#define STATIC_CONFIG_DIR	ISCSIVAR"static"
++#define FW_CONFIG_DIR		ISCSIVAR"fw"
++#define ST_CONFIG_DIR		ISCSIVAR"send_targets"
+ #define ST_CONFIG_NAME		"st_config"
+ #define ISNS_CONFIG_NAME	"isns_config"
+ 
+diff -Naur a/usr/iface.h b/usr/iface.h
+--- a/usr/iface.h	2013-07-29 12:13:36.000000000 -0700
++++ b/usr/iface.h	2022-05-03 15:18:31.164688356 -0700
+@@ -20,7 +20,9 @@
+ #ifndef ISCSI_IFACE_H
+ #define ISCSI_IFACE_H
+ 
+-#define IFACE_CONFIG_DIR	ISCSI_CONFIG_ROOT"ifaces"
++#include "idbm.h"
++
++#define IFACE_CONFIG_DIR	ISCSIVAR"ifaces"
+ 
+ struct iface_rec;
+ struct list_head;

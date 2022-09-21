@@ -84,7 +84,7 @@ VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
 
 if [[ "${CORE}" == *"_32b"* ]]; then
     BIT32="yes"
-    LD_LIBRARY_PATH="/emuelec/lib32:$LD_LIBRARY_PATH"
+    #LD_LIBRARY_PATH="/emuelec/lib32:$LD_LIBRARY_PATH"
     RABIN="retroarch32"
 else
     BIT32="No"

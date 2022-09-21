@@ -17,9 +17,9 @@ index 8dc2f85c514b..09d0ac28e28a 100644
 --- a/drivers/gpu/drm/imx/dcss/dcss-drv.c
 +++ b/drivers/gpu/drm/imx/dcss/dcss-drv.c
 @@ -6,6 +6,7 @@
- #include <linux/module.h>
  #include <linux/kernel.h>
  #include <linux/platform_device.h>
+ #include <drm/drm_module.h>
 +#include <linux/component.h>
  #include <drm/drm_of.h>
  

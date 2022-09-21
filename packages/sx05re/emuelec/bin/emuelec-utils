@@ -38,7 +38,7 @@ function clearconfig() {
         unmount_all
 		systemctl stop emustation
 		ee_backup backup no
-		find /storage -mindepth 1 \( ! -regex '^/storage/.config/emulationstation/themes.*' -a ! -regex '^/storage/.update.*' -a ! -regex '^/storage/download.*' -a ! -regex '^/storage/roms.*' -a ! -regex '^/storage/.cache/bluetooth.*' \) -delete
+		find /storage -mindepth 1 \( ! -regex '^/storage/.config/emuelec/themes.*' -a ! -regex '^/storage/.config/emulationstation/themes.*' -a ! -regex '^/storage/.update.*' -a ! -regex '^/storage/download.*' -a ! -regex '^/storage/roms.*' -a ! -regex '^/storage/.cache/bluetooth.*' \) -delete
 		mkdir /storage/.config/
 		sync
         small-cores enable
@@ -51,7 +51,7 @@ function clearconfig() {
 	"ALL")
         unmount_all
 		systemctl stop emustation
-		find /storage -mindepth 1 \( ! -regex '^/storage/.update.*' -a ! -regex '^/storage/roms.*' -a ! -regex '^/storage/.cache/bluetooth.*' \) -delete
+		find /storage -mindepth 1 \( ! -regex '^/storage/.config/emuelec/themes.*' -a ! -regex '^/storage/.update.*' -a ! -regex '^/storage/roms.*' -a ! -regex '^/storage/.cache/bluetooth.*' \) -delete
 		mkdir /storage/.config/
 		sync
         small-cores enable

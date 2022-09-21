@@ -12,9 +12,9 @@ diff -Naur cxxtools-2.2/configure cxxtools-2.2.patch/configure
  
  
  
-diff -Naur cxxtools-2.2/configure.in cxxtools-2.2.patch/configure.in
---- cxxtools-2.2/configure.in	2013-04-20 23:31:50.000000000 +0200
-+++ cxxtools-2.2.patch/configure.in	2014-01-03 20:26:32.064005192 +0100
+diff -Naur cxxtools-2.2/configure.ac cxxtools-2.2.patch/configure.ac
+--- cxxtools-2.2/configure.ac	2013-04-20 23:31:50.000000000 +0200
++++ cxxtools-2.2.patch/configure.ac	2014-01-03 20:26:32.064005192 +0100
 @@ -106,8 +106,8 @@
  
  AC_PROG_LIBTOOL

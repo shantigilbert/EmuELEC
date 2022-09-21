@@ -1,0 +1,33 @@
+diff --git a/common/rtusb_dev_id.c b/common/rtusb_dev_id.c
+index 1855e06..8146402 100644
+--- a/common/rtusb_dev_id.c
++++ b/common/rtusb_dev_id.c
+@@ -36,7 +36,27 @@
+ /* module table */
+ USB_DEVICE_ID rtusb_dev_id[] = {
+ #ifdef MT76x0
+-	{USB_DEVICE(0x0E8D,0x7610)}, /* MT7610U */
++	{ USB_DEVICE(0x148F, 0x7610) }, /* MT7610U */
++	{ USB_DEVICE(0x13B1, 0x003E) }, /* Linksys AE6000 */
++	{ USB_DEVICE(0x0E8D, 0x7610) }, /* Sabrent NTWLAC */
++	{ USB_DEVICE(0x7392, 0xa711) }, /* Edimax 7711mac */
++	{ USB_DEVICE(0x7392, 0xb711) }, /* Edimax / Elecom  */
++	{ USB_DEVICE(0x148f, 0x761a) }, /* TP-Link TL-WDN5200 */
++	{ USB_DEVICE(0x148f, 0x760a) }, /* TP-Link unknown */
++	{ USB_DEVICE(0x0b05, 0x17d1) }, /* Asus USB-AC51 */
++	{ USB_DEVICE(0x0b05, 0x17db) }, /* Asus USB-AC50 */
++	{ USB_DEVICE(0x0df6, 0x0075) }, /* Sitecom WLA-3100 */
++	{ USB_DEVICE(0x2019, 0xab31) }, /* Planex GW-450D */
++	{ USB_DEVICE(0x2001, 0x3d02) }, /* D-LINK DWA-171 rev B1 */
++	{ USB_DEVICE(0x0586, 0x3425) }, /* Zyxel NWD6505 */
++	{ USB_DEVICE(0x07b8, 0x7610) }, /* AboCom AU7212 */
++	{ USB_DEVICE(0x04bb, 0x0951) }, /* I-O DATA WN-AC433UK */
++	{ USB_DEVICE(0x057c, 0x8502) }, /* AVM FRITZ!WLAN USB Stick AC 430 */
++	{ USB_DEVICE(0x293c, 0x5702) }, /* Comcast Xfinity KXW02AAA  */
++	{ USB_DEVICE(0x20f4, 0x806b) }, /* TRENDnet TEW-806UBH  */
++	{ USB_DEVICE(0x7392, 0xc711) }, /* Devolo Wifi ac Stick */
++	{ USB_DEVICE(0x0df6, 0x0079) }, /* Sitecom Europe B.V. ac  Stick */
++	{ USB_DEVICE(0x2357, 0x0105) }, /* TP-LINK Archer T1U */
+ #endif
+ 	{ }/* Terminating entry */
+ };

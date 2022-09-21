@@ -87,6 +87,9 @@
 # build and install PulseAudio support (yes / no)
   PULSEAUDIO_SUPPORT="yes"
 
+# build and install pipewire support (yes / no)
+  PIPEWIRE_SUPPORT="no"
+
 # build and install eSpeak-NG support (yes / no)
   ESPEAK_SUPPORT="no"
 
@@ -135,6 +138,14 @@
 # build with Samba Client support (mounting SAMBA shares with KODI) (yes / no)
   KODI_SAMBA_SUPPORT="yes"
 
+# build kodi with alsa support (yes/no)
+  KODI_ALSA_SUPPORT="yes"
+
+# build kodi with pulseaudio support (yes/no)
+  KODI_PULSEAUDIO_SUPPORT="yes"
+
+# build kodi with pipewire support (yes/no)
+  KODI_PIPEWIRE_SUPPORT="no"
 
 ### KODI ADDONS ###
 
@@ -164,10 +175,10 @@
   DEBUG_GROUP_YES="kodi+"
 
 # wireless daemon to use (wpa_supplicant/iwd)
-  WIRELESS_DAEMON="wpa_supplicant"
+  WIRELESS_DAEMON="iwd"
 
 # build and install iSCSI support - iscsistart (yes / no)
-  ISCSI_SUPPORT="yes"
+  ISCSI_SUPPORT="no"
 
 # build with NFS support (mounting nfs shares via the OS) (yes / no)
   NFS_SUPPORT="yes"
@@ -225,6 +236,9 @@
 
 # OEM packages for OEM's (yes / no)
   OEM_SUPPORT="no"
+
+# build and install ALSA Audio support (yes / no)
+  ALSA_SUPPORT="yes"
 
 # additional packages to install:
 # Space separated list is supported,

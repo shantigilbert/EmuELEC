@@ -11,10 +11,10 @@ Signed-off-by: memeka <mihailescu2m@gmail.com>
  drivers/media/platform/s5p-mfc/s5p_mfc.c | 5 +++++
  1 file changed, 5 insertions(+)
 
-diff --git a/drivers/media/platform/s5p-mfc/s5p_mfc.c b/drivers/media/platform/s5p-mfc/s5p_mfc.c
+diff --git a/drivers/media/platform/samsung/s5p-mfc/s5p_mfc.c b/drivers/media/platform/samsung/s5p-mfc/s5p_mfc.c
 index 37f2113a00ec..8c39528be39e 100644
---- a/drivers/media/platform/s5p-mfc/s5p_mfc.c
-+++ b/drivers/media/platform/s5p-mfc/s5p_mfc.c
+--- a/drivers/media/platform/samsung/s5p-mfc/s5p_mfc.c
++++ b/drivers/media/platform/samsung/s5p-mfc/s5p_mfc.c
 @@ -941,6 +941,11 @@ static int s5p_mfc_release(struct file *file)
  	mfc_debug_enter();
  	if (dev)

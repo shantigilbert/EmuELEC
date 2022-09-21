@@ -1,0 +1,25 @@
+The files in this directory are read by udev(7) and used when events
+are performed by the kernel.  The udev daemon watches this directory
+with inotify so that changes to these files are automatically picked
+up, for this reason they must be files and not symlinks to another
+location as in the case in Debian.
+
+Packages do not generally install rules here, this directory is for
+local rules.  If you want to override behaviour of package-supplied
+rules, which can be found in /usr/lib/udev/rules.d, you can do one of
+two things:
+
+ 1) Write your own rules in this directory that assign the name,
+    symlinks, permissions, etc. that you want.  Pick a number higher
+    than the rules you want to override, and yours will be used.
+
+ 2) Copy the file from /usr/lib/udev/rules.d and edit it here; you
+    should generally only do this if you want to prevent a program
+    from being run.
+
+
+If the ordering of files in this directory are not important to you,
+it's recommended that you simply name your files "descriptive-name.rules"
+such that they are processed AFTER all numbered rules in both this
+directory and /usr/lib/udev/rules.d and thus override anything set there.
+

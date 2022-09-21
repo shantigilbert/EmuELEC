@@ -1,7 +1,7 @@
-From 18bfa4ae63357f81e7f09d70c619e87c1f60696f Mon Sep 17 00:00:00 2001
+From 8ddf1b4cee0fb1a804b7cc82a7a1c69019a8e18f Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Tue, 20 Apr 2021 05:29:19 +0000
-Subject: [PATCH 05/11] WIP: ARM: dts: use snps,reset on WeTek devices to fix
+Subject: [PATCH 05/15] WIP: ARM: dts: use snps,reset on WeTek devices to fix
  Ethernet
 
 The sync of the device tree and dt-bindings from Linux v5.6-rc2

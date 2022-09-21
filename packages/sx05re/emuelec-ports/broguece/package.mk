@@ -2,7 +2,7 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="broguece"
-PKG_VERSION="b209ecde1b512fce31e23485abe3faec668a14ef"
+PKG_VERSION="31ced99b16981ca1b5d5f47ecbd15b26a27b0217"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="AGPL3"

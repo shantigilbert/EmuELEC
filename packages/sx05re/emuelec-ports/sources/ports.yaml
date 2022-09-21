@@ -107,7 +107,7 @@ Doom 2:
     - /usr/bin/emuelecRunEmu.sh "/storage/roms/ports/doom2/doom2.wad" -Pports "${2}" -Cprboom "-SC${0}"
 
 Heart of Darkness:
-  description: Hode is a reimplementation of the game Heart of Darkness is a cinematic platformer in the vein of Eric Chahi's previous game Another World. The player controls Andy, who faces various dangers in search of his dog, Whisky. The player progresses through the game's linear storyline by navigating various environments and solving puzzles, all whilst attempting to keep Andy from being killed by evil shadows.e engine of the used by the game "Heart of Darkness" developed. 
+  description: Hode is a reimplementation of the game Heart of Darkness. Heart of Darkness is a cinematic platformer in the vein of Eric Chahi's previous game Another World. The player controls Andy, who faces various dangers in search of his dog, Whisky. The player progresses through the game's linear storyline by navigating various environments and solving puzzles, all whilst attempting to keep Andy from being killed by evil shadows.e engine of the used by the game "Heart of Darkness" developed. 
   rating: 0.9
   release_date: 19980704T000000
   developer: Amazing Studio
@@ -298,6 +298,7 @@ Sonic 1:
   audio: "alsa"
   check_bios: sonic1
   commands:
+    - /usr/bin/show_splash.sh "ports" "sonic1"
     - '[ ! -e "/storage/roms/ports/sonic1/settings.ini" ] && cp "/emuelec/configs/sonic/settings.ini" "/storage/roms/ports/sonic1/settings.ini"'
     - cd /storage/roms/ports/sonic1/
     - ${PORT} >> $EE_LOG 2>&1
@@ -314,6 +315,7 @@ Sonic 2:
   audio: "alsa"
   check_bios: sonic2
   commands:
+    - /usr/bin/show_splash.sh "ports" "sonic2"
     - '[ ! -e "/storage/roms/ports/sonic2/settings.ini" ] && cp "/emuelec/configs/sonic/settings.ini" "/storage/roms/ports/sonic2/settings.ini"'
     - cd /storage/roms/ports/sonic2/
     - ${PORT} >> $EE_LOG 2>&1
@@ -330,8 +332,27 @@ Sonic CD:
   audio: "alsa"
   check_bios: soniccd
   commands:
+    - /usr/bin/show_splash.sh "ports" "soniccd"
     - '[ ! -e "/storage/roms/ports/soniccd/settings.ini" ] && cp "/emuelec/configs/sonic/settings.ini" "/storage/roms/ports/soniccd/settings.ini"'
     - cd /storage/roms/ports/soniccd/
+    - ${PORT} >> $EE_LOG 2>&1
+
+Sonic Mania:
+  description: Sonic Mania is a 2017 platform game published by Sega. Produced in commemoration of the Sonic the Hedgehog series' 25th anniversary, Sonic Mania pays homage to the original Sega Genesis Sonic games, featuring speedy side-scrolling gameplay.
+  rating: 1.0
+  release_date: 2017 
+  developer: SEGA
+  publisher: SEGA
+
+  init_port: true
+  port_exe: "sonicmania"
+  audio: "alsa"
+  check_bios: sonicmania
+  commands:
+    - /usr/bin/show_splash.sh "ports" "sonicmania"
+    - '[ ! -e "/storage/roms/ports/sonicmania/Settings.ini" ] && cp "/emuelec/configs/sonicmania/Settings.ini" "/storage/roms/ports/sonicmania/Settings.ini"'
+    - '[ ! -e "/storage/roms/ports/sonicmania/Game.so" ] && cp "/usr/bin/sonic_mania/Game.so" "/storage/roms/ports/sonicmania/Game.so"'
+    - cd /storage/roms/ports/sonicmania/
     - ${PORT} >> $EE_LOG 2>&1
 
 SuperTux:
@@ -476,3 +497,31 @@ Blake Stone Planet Strike:
   commands:
     - /usr/bin/show_splash.sh "ports" "bstone"
     - bstone.sh ps >> $EE_LOG 2>&1
+
+Shovel Knight:
+  description: 'Shovel Knight is a 2D side-scrolling platform game developed and published by Yacht Club Games. '
+  rating: 1.0
+  release_date: 2014
+  developer: Yacht Club Games
+  publisher: Yacht Club Games
+
+  init_port: true
+  port_exe: "ShovelKnight"
+  audio: "alsa"
+  commands:
+    - /usr/bin/show_splash.sh "ports" "shovelknight"
+    - shovelknight.sh >> $EE_LOG 2>&1
+
+TMNTSR:
+  description: "Teenage Mutant Ninja Turtles: Shredder's Revenge is a beat'em up game developed by Tribute Games and published by Dotemu."
+  rating: 1.0
+  release_date: 2022
+  developer: Tribute Games
+  publisher: Dotemu
+
+  init_port: true
+  port_exe: "mono"
+  audio: "alsa"
+  commands:
+    - /usr/bin/show_splash.sh "ports" "tmntsr"
+    - tmntsr.sh >> $EE_LOG 2>&1

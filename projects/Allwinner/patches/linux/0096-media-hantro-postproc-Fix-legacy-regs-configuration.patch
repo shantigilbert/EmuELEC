@@ -38,9 +38,9 @@ index 1a76628d5754..11ae663f11b7 100644
 --- a/drivers/staging/media/hantro/hantro_postproc.c
 +++ b/drivers/staging/media/hantro/hantro_postproc.c
 @@ -113,6 +113,16 @@ static void hantro_postproc_g2_enable(struct hantro_ctx *ctx)
- 
- 	hantro_write_addr(vpu, G2_RS_OUT_LUMA_ADDR, dst_dma);
- 	hantro_write_addr(vpu, G2_RS_OUT_CHROMA_ADDR, dst_dma + chroma_offset);
+ 		hantro_write_addr(vpu, G2_RS_OUT_LUMA_ADDR, dst_dma);
+ 		hantro_write_addr(vpu, G2_RS_OUT_CHROMA_ADDR, dst_dma + chroma_offset);
+ 	}
 +	if (ctx->dev->variant->legacy_regs) {
 +		int out_depth = hantro_get_formath_depth(ctx->dst_fmt.pixelformat);
 +		u8 pp_shift = 0;

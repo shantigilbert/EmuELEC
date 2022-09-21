@@ -4,7 +4,7 @@
 PKG_NAME="pvr.octonet"
 PKG_VERSION="20.2.0-Nexus"
 PKG_SHA256="99222d5ee4fe204b4df4afae9bc26cdc05f4604bb3c1f846692a8adf7a48caea"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/DigitalDevices/pvr.octonet"

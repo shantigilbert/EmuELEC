@@ -1,0 +1,41 @@
+From 0e112d627d96e89fdd39f28b8d3c35b0663d816b Mon Sep 17 00:00:00 2001
+From: 7Ji <pugokushin@gmail.com>
+Date: Wed, 22 Jun 2022 09:37:15 +0800
+Subject: [PATCH 1/2] obexd/client/sync.c: fix conflict with unistd.c
+
+---
+ obexd/client/sync.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/obexd/client/sync.c b/obexd/client/sync.c
+index 548c318c3..55fed759d 100644
+--- a/obexd/client/sync.c
++++ b/obexd/client/sync.c
+@@ -222,7 +222,7 @@ static void sync_remove(struct obc_session *session)
+ 	g_dbus_unregister_interface(conn, path, SYNC_INTERFACE);
+ }
+ 
+-static struct obc_driver sync = {
++static struct obc_driver sync_driver = {
+ 	.service = "SYNC",
+ 	.uuid = SYNC_UUID,
+ 	.target = OBEX_SYNC_UUID,
+@@ -241,7 +241,7 @@ int sync_init(void)
+ 	if (!conn)
+ 		return -EIO;
+ 
+-	err = obc_driver_register(&sync);
++	err = obc_driver_register(&sync_driver);
+ 	if (err < 0) {
+ 		dbus_connection_unref(conn);
+ 		conn = NULL;
+@@ -258,5 +258,5 @@ void sync_exit(void)
+ 	dbus_connection_unref(conn);
+ 	conn = NULL;
+ 
+-	obc_driver_unregister(&sync);
++	obc_driver_unregister(&sync_driver);
+ }
+-- 
+2.36.1
+

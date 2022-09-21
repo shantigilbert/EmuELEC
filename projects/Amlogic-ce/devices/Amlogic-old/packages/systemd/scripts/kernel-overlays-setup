@@ -1,0 +1,85 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
+
+SYSTEM_OVERLAYS_DIR=/usr/lib/kernel-overlays
+OVERLAY_CONFIG_DIR=/storage/.cache/kernel-overlays
+KVER=$(uname -r)
+MODULES_DIR="/var/lib/modules/${KVER}"
+FIRMWARE_DIR="/var/lib/firmware"
+USER_FIRMWARE_DIR="/storage/.config/firmware"
+
+mkdir -p "${MODULES_DIR}"
+mkdir -p "${FIRMWARE_DIR}"
+mkdir -p "${OVERLAY_CONFIG_DIR}"
+
+log() {
+  echo "kernel-overlays-setup: $@" > /dev/kmsg
+}
+
+apply_overlay() {
+  case "$1" in
+    /*)
+      modules_overlay_dir="${1}/lib/modules/${KVER}"
+      firmware_overlay_dir="${1}/lib/firmware"
+      ;;
+    *)
+      modules_overlay_dir="${SYSTEM_OVERLAYS_DIR}/${1}/lib/modules/${KVER}"
+      firmware_overlay_dir="${SYSTEM_OVERLAYS_DIR}/${1}/lib/firmware"
+      ;;
+  esac
+
+  if [ -d "${modules_overlay_dir}" ] ; then
+    GOT_MODULE_OVERLAY="yes"
+
+    if cp -rfs "${modules_overlay_dir}"/* "${MODULES_DIR}" ; then
+      log "added modules from $modules_overlay_dir"
+    else
+      log "failed to add modules from $modules_overlay_dir"
+    fi
+  fi
+
+  if [ -d "${firmware_overlay_dir}" ] ; then
+    if cp -rfs "${firmware_overlay_dir}"/* "${FIRMWARE_DIR}" ; then
+      log "added firmware from $firmware_overlay_dir"
+    else
+      log "failed to add firmware from $firmware_overlay_dir"
+    fi
+  fi
+}
+
+# setup system base modules
+
+log "setup base modules"
+apply_overlay base
+
+# apply user-configured module overlays
+
+if [ -d "${OVERLAY_CONFIG_DIR}" ] ; then
+  log "adding overlays from ${OVERLAY_CONFIG_DIR}"
+  GOT_MODULE_OVERLAY="no"
+
+  for conf in "${OVERLAY_CONFIG_DIR}/"*.conf ; do
+    if [ -e "$conf" ] ; then
+      log "processing conf $conf"
+      overlay=$(cat "$conf")
+      [ -n "$overlay" ] && apply_overlay "$overlay"
+    fi
+  done
+
+  if [ "yes" = "$GOT_MODULE_OVERLAY" ] ; then
+    log "running depmod"
+    /usr/sbin/depmod -a
+  fi
+fi
+
+if [ -d "${USER_FIRMWARE_DIR}" ] && [ -n "$(ls ${USER_FIRMWARE_DIR})" ] ; then
+  if cp -rfs "${USER_FIRMWARE_DIR}"/* "${FIRMWARE_DIR}" ; then
+    log "added firmware from ${USER_FIRMWARE_DIR}"
+  else
+    log "failed to add firmware from ${USER_FIRMWARE_DIR}"
+  fi
+fi
+
+log "done"

@@ -1,6 +1,19 @@
+113
+- at-spi2-core: update to 2.45.1
+- atk: update to 2.38.0
+- chrome: update to 103.0.5060.134
+- cups: update to 2.4.2
+- gdk-pixbuf: update to 2.42.8
+- gtk3: update to 3.24.34
+- harfbuzz: update to 5.0.1
+- icu: update to 71.1
+- jasper: update to 3.0.6
+- libXcursor: update to 1.2.1
+- pango: update to 1.50.8
+
 112
 - chrome: update to 97.0.4692.71
-- cups: update to 2.4.02
+- cups: update to 2.4.0
 - gtk3: update to 3.24.31
 - harfbuzz: update to 3.2.0
 - icu: update to 70.1 and PKG_SITE

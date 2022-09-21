@@ -1,0 +1,10 @@
+[Unit]
+Description=Kodi Amlogic HDMI connection monitor
+After=kodi.service
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/kodi/aml-hdmimonitor.sh
+
+[Install]
+WantedBy=kodi.target

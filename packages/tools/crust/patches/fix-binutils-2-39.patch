@@ -1,0 +1,12 @@
+--- a/Makefile	2022-08-09 08:48:15.390323604 +0000
++++ b/Makefile	2022-08-09 08:49:45.623098723 +0000
+@@ -84,7 +84,8 @@
+ 		   -Wl,--fatal-warnings \
+ 		   -Wl,--gc-sections \
+ 		   -Wl,--no-dynamic-linker \
+-		   -Wl,--no-undefined
++		   -Wl,--no-undefined \
++		   -Wl,--no-warn-rwx-segments
+ 
+ ###############################################################################
+ 

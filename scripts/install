@@ -64,6 +64,8 @@ pkg_lock_status "ACTIVE" "${PKG_NAME}:${TARGET}" "install"
 
 build_msg "CLR_INSTALL" "INSTALL" "${PKG_NAME} $(print_color CLR_TARGET "(${TARGET})")" "indent"
 
+print_qa_checks
+
 acquire_update_lock image
 
 mkdir -p ${INSTALL}
@@ -154,6 +156,8 @@ if [ -n "${PKG_INSTALL}" -a -d "${PKG_INSTALL}" ]; then
     --exclude=./usr/include \
     --exclude=./usr/lib/cmake \
     --exclude=./usr/lib/pkgconfig \
+    --exclude=./usr/lib32/cmake \
+    --exclude=./usr/lib32/pkgconfig \
     --exclude=./usr/share/aclocal \
     --exclude=./usr/share/pkgconfig \
     --exclude=./include \

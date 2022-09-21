@@ -1,19 +1,6 @@
-diff --git a/Makefile b/Makefile
-index 54a6f648c8..4a933d1d01 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -132,8 +132,8 @@ ifneq (,$(findstring unix,$(platform)))
-       LIBS += -lGL
-    endif
-    LDFLAGS +=  $(fpic) $(SHARED)
--   REALCC ?= gcc
--   NATIVECC ?= g++
-+   REALCC ?= $(CC)
-+   NATIVECC ?= $(CXX)
-    NATIVECFLAGS ?= -std=gnu99
-    BASELIBS += -lpthread
-    CXX ?= g++
-@@ -142,13 +142,13 @@ ifneq (,$(findstring unix,$(platform)))
+@@ -146,23 +146,23 @@
     AR ?= @ar
     LD := $(CXX)
     LIBS += -lstdc++ -lpthread -ldl
@@ -25,20 +12,21 @@ index 54a6f648c8..4a933d1d01 100644
 +   ifeq ($(firstword $(filter amd64,$(ARCH))),amd64)
        PTR64 = 1
     endif
+-   ifeq ($(firstword $(filter aarch64,$(UNAME))),aarch64)
++   ifeq ($(firstword $(filter aarch64,$(ARCH))),aarch64)
+       PTR64 = 1
+       PLATCFLAGS += -DSDLMAME_NO64BITIO -DSDLMAME_ARM -DFORCE_DRC_C_BACKEND
+    endif
 -   ifeq ($(firstword $(filter ppc64,$(UNAME))),ppc64)
 +   ifeq ($(firstword $(filter ppc64,$(ARCH))),ppc64)
        PTR64 = 1
     endif
-    ifneq (,$(findstring ppc,$(UNAME)))
-@@ -487,7 +487,7 @@ endif
- # utilities
- MD = -mkdir$(EXE_EXT)
- RM = @rm -f
--OBJDUMP = @objdump
-+OBJDUMP ?= @objdump
- PYTHON ?= @python2
- 
- #-------------------------------------------------
--- 
-2.17.1
-
+-   ifneq (,$(findstring ppc,$(UNAME)))
++   ifneq (,$(findstring ppc,$(ARCH)))
+       BIGENDIAN=1
+    endif
+-   ifneq (,$(findstring armv,$(UNAME) $(platform)))
++   ifneq (,$(findstring armv,$(ARCH) $(platform)))
+       CCOMFLAGS += -mstructure-size-boundary=32
+       PLATCFLAGS += -DSDLMAME_NO64BITIO -DSDLMAME_ARM -DRETRO_SETJMP_HACK -DARM
+       LDFLAGS += -Wl,--fix-cortex-a8 -Wl,--no-as-needed

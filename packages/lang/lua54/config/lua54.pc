@@ -1,0 +1,10 @@
+prefix=/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/lua@@VERSION_MM@@
+
+Name: Lua
+Description: An Extensible Extension Language
+Version: @@VERSION@@
+Requires:
+Libs: -L${libdir} -llua@@VERSION_MM@@ -lm
+Cflags: -I${includedir}

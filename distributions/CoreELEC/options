@@ -132,6 +132,11 @@
 # build with Samba Client support (mounting SAMBA shares with KODI) (yes / no)
   KODI_SAMBA_SUPPORT="yes"
 
+# build kodi with alsa support (yes/no)
+  KODI_ALSA_SUPPORT="yes"
+
+# build kodi with pulseaudio support (yes/no)
+  KODI_PULSEAUDIO_SUPPORT="yes"
 
 ### KODI ADDONS ###
 
@@ -245,6 +250,9 @@
 
 # OEM packages for OEM's (yes / no)
   OEM_SUPPORT="no"
+
+# build and install ALSA Audio support (yes / no)
+  ALSA_SUPPORT="yes"
 
 # additional packages to install:
 # Space separated list is supported,

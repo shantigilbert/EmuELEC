@@ -10,8 +10,6 @@ PKG_URL="https://github.com/LibVNC/libvncserver/archive/LibVNCServer-${PKG_VERSI
 PKG_DEPENDS_TARGET="toolchain libjpeg-turbo libpng openssl systemd"
 PKG_LONGDESC="A C library that allow you to easily implement VNC server or client functionality."
 
-PKG_MAINTAINER="Lukas Rusak (lrusak at irc.freenode.net)"
-
 PKG_CMAKE_OPTS_TARGET="-DWITH_GCRYPT=0 \
                        -DWITH_GNUTLS=0 \
                        -DWITH_GTK=0 \

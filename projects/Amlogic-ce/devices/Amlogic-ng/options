@@ -110,10 +110,10 @@
   # for a list of additinoal drivers see packages/linux-drivers
   # Space separated list is supported,
   # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
-    ADDITIONAL_DRIVERS="$ADDITIONAL_DRIVERS gpu-aml openvfd-driver wifi_dummy-aml media_modules-aml
+    ADDITIONAL_DRIVERS+=" gpu-aml openvfd-driver wifi_dummy-aml media_modules-aml
                         ap6xxx-aml ssv6xxx-aml mt7668-aml RTL8188FTV-aml RTL8189ES-aml RTL8189FS-aml
                         RTL8723BS-aml RTL8814AU RTL8822BU-aml RTL8822BS-aml RTL8822CS-aml RTL8152-aml
-                        RTL8821CS-aml qca9377-aml qca6174-aml smartchip"
+                        RTL8821CS-aml qca9377-aml qca6174-aml smartchip uwe5631-aml"
 
   # additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware)
   # Space separated list is supported,
@@ -143,11 +143,11 @@
   # additional packages to install:
   # Space separated list is supported,
   # e.g. ADDITIONAL_PACKAGES="PACKAGE1 PACKAGE2"
-    ADDITIONAL_PACKAGES="u-boot-script dtc CoreELEC-Debug-Scripts inject_bl301"
-    ADDITIONAL_PACKAGES+=" nfs-utils dtb-xml megatools ampart"
+    ADDITIONAL_PACKAGES="u-boot-script dtc CoreELEC-Debug-Scripts inject_bl301 ampart
+                         nfs-utils dtb-xml megatools"
 
   # add OOTB support for IR remote
-    IR_REMOTE_KEYMAPS="$IR_REMOTE_KEYMAPS odroid wetek_hub wetek_play_2 tanix"
+    IR_REMOTE_KEYMAPS+=" odroid wetek_hub wetek_play_2 tanix"
 
   # build with entware installer
     ENTWARE_SUPPORT="yes"

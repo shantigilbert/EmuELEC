@@ -5,7 +5,7 @@ After=multi-user.target
 ConditionKernelCommandLine=!installer
 
 [Service]
-ExecStart=/usr/bin/seatd -u root -s /var/run/seatd.sock
+ExecStart=/usr/bin/seatd -u root
 Restart=always
 RestartSec=1
 

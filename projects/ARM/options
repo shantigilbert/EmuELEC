@@ -135,9 +135,6 @@
   # cron support (yes / no)
     CRON_SUPPORT="no"
 
-  # build and install ALSA Audio support (yes / no)
-    ALSA_SUPPORT="no"
-
   # OpenGL(X) implementation to use (no / mesa)
     OPENGL="no"
 

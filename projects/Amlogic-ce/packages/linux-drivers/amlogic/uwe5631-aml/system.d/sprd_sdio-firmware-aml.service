@@ -1,0 +1,11 @@
+[Unit]
+Description=Attach /dev/ttyBT0 to BlueZ stack using sprd type
+Wants=bluetooth.service
+Before=bluetooth.service
+After=dev-ttyBT0.device
+
+[Service]
+Type=forking
+ExecStartPre=/usr/sbin/rfkill unblock bluetooth
+ExecStart=/usr/bin/hciattach -s 1500000 /dev/ttyBT0 sprd
+ExecStopPost=/usr/sbin/rfkill block bluetooth

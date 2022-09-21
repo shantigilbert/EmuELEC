@@ -13,7 +13,7 @@ Subject: disable online check
      {"uptime", SYSTEM_UPTIME},
 --- a/xbmc/utils/SystemInfo.cpp
 +++ b/xbmc/utils/SystemInfo.cpp
-@@ -273,7 +273,6 @@ bool CSysInfoJob::DoWork()
+@@ -275,7 +275,6 @@ bool CSysInfoJob::DoWork()
  {
    m_info.systemUptime      = GetSystemUpTime(false);
    m_info.systemTotalUptime = GetSystemUpTime(true);
@@ -21,7 +21,7 @@ Subject: disable online check
    m_info.videoEncoder      = GetVideoEncoder();
    m_info.cpuFrequency =
        StringUtils::Format("{:4.0f} MHz", CServiceBroker::GetCPUInfo()->GetCPUFrequency());
-@@ -1016,9 +1015,7 @@ int CSysInfo::GetXbmcBitness(void)
+@@ -1021,9 +1020,7 @@ int CSysInfo::GetXbmcBitness(void)
  
  bool CSysInfo::HasInternet()
  {

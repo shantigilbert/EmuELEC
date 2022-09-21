@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
+
+. /etc/swap.conf
+. /etc/profile
+
+if [ -f /storage/.config/swap.conf ]; then
+  . /storage/.config/swap.conf
+fi
+
+if [ -e /dev/.storage_netboot ] ; then
+  logger -t Boot "### netbooting... swap disabled ###"
+  exit 0
+fi
+
+if [ ! "$SWAP_ENABLED" = yes ] ; then
+  logger -t Boot "### swap disabled via configfile ###"
+  exit 0
+fi
+
+SWAP=`blkid -t TYPE="swap" -o device`
+
+case $1 in
+  create)
+    if [ -z "$SWAP" -a ! -f "$SWAPFILE" ]; then
+      mkdir -p `dirname $SWAPFILE`
+      dd if=/dev/zero of=$SWAPFILE bs=1M count=$SWAPFILESIZE
+      chmod 0600 $SWAPFILE
+      mkswap $SWAPFILE
+    fi
+    ;;
+  mount)
+    [ -z "$SWAP" -a -f "$SWAPFILE" ] && SWAP=$SWAPFILE
+    for i in $SWAP; do
+      swapon -p 10000 $i
+    done
+    ;;
+  unmount)
+    swapoff -a
+    ;;
+esac

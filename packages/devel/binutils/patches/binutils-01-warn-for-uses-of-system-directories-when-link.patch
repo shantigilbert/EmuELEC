@@ -10,9 +10,9 @@ From: Khem Raj <raj.khem@gmail.com>
 Date: Fri, 15 Jan 2016 06:31:09 +0000
 Subject: [PATCH 09/13] warn for uses of system directories when cross linking
 
---- a/ld/ldfile.c	2015-11-13 09:27:42.000000000 +0100
-+++ b/ld/ldfile.c	2016-11-15 19:09:31.658371254 +0100
-@@ -102,6 +102,17 @@ ldfile_add_library_path (const char *nam
+--- a/ld/ldfile.c
++++ b/ld/ldfile.c
+@@ -103,6 +103,17 @@ ldfile_add_library_path (const char *nam
    if (!cmdline && config.only_cmd_line_lib_dirs)
      return;
  

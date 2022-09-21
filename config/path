@@ -53,18 +53,12 @@ XORG_PATH_DRIVERS=/usr/lib/xorg/modules/drivers
 
 . config/optimize
 
-# use ARM toolchain on 64/32 split builds
+# use different toolchain for 64/32 split builds
 if [ -z "$KERNEL_TOOLCHAIN" -a "$TARGET_KERNEL_ARCH" = "arm64" -a "$TARGET_ARCH" = "arm" ]; then
-  if [ "${MACHINE_HARDWARE_NAME}" = "x86_64" ]; then
-    KERNEL_TOOLCHAIN="aarch64-none-linux-gnu"
-  elif [ "${MACHINE_HARDWARE_NAME}" = "aarch64" ]; then
-    KERNEL_TOOLCHAIN="aarch64-none-elf"
-  else
-    die "No known toolchain available for ${MACHINE_HARDWARE_NAME}."
-  fi
+  KERNEL_TOOLCHAIN="aarch64"
 fi
 if [ -n "$KERNEL_TOOLCHAIN" ]; then
-  TARGET_KERNEL_PREFIX=$TOOLCHAIN/lib/gcc-arm-$KERNEL_TOOLCHAIN/bin/$KERNEL_TOOLCHAIN-
+  TARGET_KERNEL_PREFIX=$KERNEL_TOOLCHAIN-none-elf-
 else
   TARGET_KERNEL_PREFIX=$TARGET_PREFIX
 fi

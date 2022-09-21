@@ -1,0 +1,11 @@
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -173,7 +173,7 @@ libcxxtools_la_LIBADD = $(LIBICONV)
+ libcxxtools_la_LDFLAGS = -version-info @sonumber@ @SHARED_LIB_FLAG@
+ 
+ if MAKE_OPENSSL
+-libcxxtools_la_LDFLAGS += -lssl
++libcxxtools_la_LIBADD += -lssl -lcrypto
+ libcxxtools_la_SOURCES += \
+ 	sslcertificateimpl.cpp
+ endif

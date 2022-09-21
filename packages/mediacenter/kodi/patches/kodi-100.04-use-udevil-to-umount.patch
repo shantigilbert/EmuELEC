@@ -10,7 +10,7 @@ Subject: [PATCH] use udevil to mount
 
 --- a/xbmc/platform/linux/storage/UDevProvider.cpp
 +++ b/xbmc/platform/linux/storage/UDevProvider.cpp
-@@ -194,7 +194,7 @@ bool CUDevProvider::Eject(const std::str
+@@ -202,7 +202,7 @@ bool CUDevProvider::Eject(const std::str
  {
    // just go ahead and try to umount the disk
    // if it does umount, life is good, if not, no loss.

@@ -14,7 +14,7 @@
   OS_STAGE="alpha"
 
 # BUILD_NUM: Build number
-  BUILD_NUM="1"
+  BUILD_NUM="2"
 
 # ADDON_VERSION: Addon version
   ADDON_VERSION=${OS_VERSION}

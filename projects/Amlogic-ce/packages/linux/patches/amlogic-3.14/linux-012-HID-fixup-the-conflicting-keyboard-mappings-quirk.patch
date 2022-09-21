@@ -1,0 +1,34 @@
+From 8e7b341037db1835ee6eea64663013cbfcf33575 Mon Sep 17 00:00:00 2001
+From: Jiri Kosina <jkosina@suse.cz>
+Date: Tue, 6 Jan 2015 22:34:19 +0100
+Subject: [PATCH] HID: fixup the conflicting keyboard mappings quirk
+
+The ignore check that got added in 6ce901eb61 ("HID: input: fix confusion
+on conflicting mappings") needs to properly check for VARIABLE reports
+as well (ARRAY reports should be ignored), otherwise legitimate keyboards
+might break.
+
+Cc: <stable@vger.kernel.org>
+Fixes: 6ce901eb61 ("HID: input: fix confusion on conflicting mappings")
+Reported-by: Fredrik Hallenberg <megahallon@gmail.com>
+Reported-by: David Herrmann <dh.herrmann@gmail.com>
+Signed-off-by: Jiri Kosina <jkosina@suse.cz>
+---
+ drivers/hid/hid-input.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/hid/hid-input.c b/drivers/hid/hid-input.c
+index 84b6899..a758900 100644
+--- a/drivers/hid/hid-input.c
++++ b/drivers/hid/hid-input.c
+@@ -1113,6 +1113,7 @@ void hidinput_hid_event(struct hid_device *hid, struct hid_field *field, struct
+ 	 */
+ 	if (!(field->flags & (HID_MAIN_ITEM_RELATIVE |
+ 	                      HID_MAIN_ITEM_BUFFERED_BYTE)) &&
++			      (field->flags & HID_MAIN_ITEM_VARIABLE) &&
+ 	    usage->usage_index < field->maxusage &&
+ 	    value == field->value[usage->usage_index])
+ 		return;
+-- 
+2.9.5
+

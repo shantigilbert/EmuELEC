@@ -9,10 +9,10 @@ Signed-off-by: memeka <mihailescu2m@gmail.com>
  drivers/media/platform/s5p-mfc/s5p_mfc_enc.c | 9 +++++++++
  1 file changed, 9 insertions(+)
 
-diff --git a/drivers/media/platform/s5p-mfc/s5p_mfc_enc.c b/drivers/media/platform/s5p-mfc/s5p_mfc_enc.c
+diff --git a/drivers/media/platform/samsung/s5p-mfc/s5p_mfc_enc.c b/drivers/media/platform/samsung/s5p-mfc/s5p_mfc_enc.c
 index 912fe0c5ab18..d48e7b57d96a 100644
---- a/drivers/media/platform/s5p-mfc/s5p_mfc_enc.c
-+++ b/drivers/media/platform/s5p-mfc/s5p_mfc_enc.c
+--- a/drivers/media/platform/samsung/s5p-mfc/s5p_mfc_enc.c
++++ b/drivers/media/platform/samsung/s5p-mfc/s5p_mfc_enc.c
 @@ -1208,6 +1208,7 @@ static int enc_post_frame_start(struct s5p_mfc_ctx *ctx)
  {
  	struct s5p_mfc_dev *dev = ctx->dev;

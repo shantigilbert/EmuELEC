@@ -11,7 +11,7 @@ case $DT_ID in
     ;;
 esac
 
-if [ `cat $PROC_DT/openvfd/compatible` = "open,vfd" ]; then
+if [ "$(tr -d '\0' < $PROC_DT/openvfd/compatible)" = "open,vfd" ]; then
   if [ -f "$USRCONFFILE" ]; then
     source "$USRCONFFILE"
   elif [ -f "$SYSCONFFILE" ]; then

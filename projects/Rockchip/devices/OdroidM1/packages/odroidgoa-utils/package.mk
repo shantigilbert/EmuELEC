@@ -12,12 +12,16 @@ PKG_URL=""
 PKG_LONGDESC="Support scripts for the ODROID-GO Advance"
 PKG_TOOLCHAIN="manual"
 
+if [ "${ARCH}" = "aarch64" ]; then
+  PKG_DEPENDS_TARGET+=" lib32-retrorun"
+fi
+
 makeinstall_target() {
-	mkdir -p $INSTALL/usr/bin
-	cp * $INSTALL/usr/bin
+  mkdir -p $INSTALL/usr/bin
+  cp * $INSTALL/usr/bin
 }
 
 post_install() {  
-	enable_service odroidgoa-hotkeys.service
-	enable_service odroidgoa-headphones.service
+  enable_service odroidgoa-hotkeys.service
+  enable_service odroidgoa-headphones.service
 }

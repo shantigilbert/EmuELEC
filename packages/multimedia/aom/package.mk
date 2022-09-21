@@ -2,11 +2,11 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="aom"
-PKG_VERSION="287164de79516c25c8c84fd544f67752c170082a" # 3.2.0
-PKG_SHA256="2c644da19e5c9d70bc9425e0b23aaf37999822b2a0269e38f91bfb3d6362e528"
+PKG_VERSION="3.4.0"
+PKG_SHA256="bd754b58c3fa69f3ffd29da77de591bd9c26970e3b18537951336d6c0252e354"
 PKG_LICENSE="BSD"
 PKG_SITE="https://www.webmproject.org"
-PKG_URL="https://repo.or.cz/aom.git/snapshot/${PKG_VERSION}.tar.gz"
+PKG_URL="https://storage.googleapis.com/aom-releases/libaom-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="AV1 Codec Library"
 PKG_BUILD_FLAGS="+pic"

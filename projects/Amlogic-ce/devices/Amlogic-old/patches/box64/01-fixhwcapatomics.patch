@@ -1,0 +1,13 @@
+--- a/src/main.c
++++ b/src/main.c
+@@ -15,6 +15,10 @@
+ #include <linux/auxvec.h>
+ #include <asm/hwcap.h>
+ #endif
++#endif
++
++#ifndef HWCAP_ATOMICS
++#define HWCAP_ATOMICS (1<<8)
+ #endif
+ 
+ #include "build_info.h"

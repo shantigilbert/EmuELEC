@@ -50,7 +50,7 @@ pre_configure_target() {
 		PKG_MAKE_OPTS_TARGET="platform=emuelec64 BOARD=N2"
       fi
     ;;
-    Amlogic)
+    Amlogic-old)
     if [ $ARCH == "arm" ]; then
 		PKG_MAKE_OPTS_TARGET="platform=odroid BOARD=c2"
       else
@@ -59,7 +59,7 @@ pre_configure_target() {
     ;;
   esac
  
- if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then 
+ if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ] || [ "$DEVICE" == "RK356x" ]; then 
 	if [[ "$ARCH" == "arm" ]]; then
 		PKG_MAKE_OPTS_TARGET=" platform=unix GLES=1 FORCE_GLES=1 HAVE_NEON=1 WITH_DYNAREC=arm"
 	else 

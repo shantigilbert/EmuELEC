@@ -1,0 +1,62 @@
+From d4eafedce242f6c96b46b5a3122a39cc8d2f1373 Mon Sep 17 00:00:00 2001
+From: meijjaa <jjmeijer88@gmail.com>
+Date: Mon, 23 Jan 2017 22:35:33 +0100
+Subject: [PATCH] hciattach: retry device reset when no response
+
+Some bcm chips need a couple of retries to reset. Currently init will just
+timeout after a failed reset.
+
+Signed-off-by: meijjaa <jjmeijer88@gmail.com>
+---
+ tools/hciattach_bcm43xx.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/tools/hciattach_bcm43xx.c b/tools/hciattach_bcm43xx.c
+index 81f38cb..4fd01e2 100644
+--- a/tools/hciattach_bcm43xx.c
++++ b/tools/hciattach_bcm43xx.c
+@@ -35,6 +35,7 @@
+ #include <dirent.h>
+ #include <time.h>
+ #include <limits.h>
++#include <signal.h>
+ 
+ #include "lib/bluetooth.h"
+ #include "lib/hci.h"
+@@ -97,21 +98,31 @@ fail:
+ 	return -1;
+ }
+ 
++int _fd;
++void expired(int sig)
++{
++	unsigned char cmd[] = { HCI_COMMAND_PKT, 0x03, 0x0C, 0x00 };
++	write(_fd, cmd, sizeof(cmd)) != sizeof(cmd);
++	alarm(4);
++}
++
+ static int bcm43xx_reset(int fd)
+ {
+ 	unsigned char cmd[] = { HCI_COMMAND_PKT, 0x03, 0x0C, 0x00 };
+ 	unsigned char resp[CC_MIN_SIZE];
+ 
++	_fd = fd;
++	signal(SIGALRM, expired);
+ 	if (write(fd, cmd, sizeof(cmd)) != sizeof(cmd)) {
+ 		fprintf(stderr, "Failed to write reset command\n");
+ 		return -1;
+ 	}
+-
++	alarm(4);
+ 	if (read_hci_event(fd, resp, sizeof(resp)) < CC_MIN_SIZE) {
+ 		fprintf(stderr, "Failed to reset chip, invalid HCI event\n");
+ 		return -1;
+ 	}
+-
++	alarm(0);
+ 	if (resp[4] != cmd[1] || resp[5] != cmd[2] || resp[6] != CMD_SUCCESS) {
+ 		fprintf(stderr, "Failed to reset chip, command failure\n");
+ 		return -1;
+-- 
+2.7.4
+

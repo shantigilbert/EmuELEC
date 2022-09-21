@@ -3,8 +3,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="pulseaudio"
-PKG_VERSION="15.0"
-PKG_SHA256="a40b887a3ba98cc26976eb11bdb6613988f145b19024d1b6555c6a03c9cba1a0"
+PKG_VERSION="16.1"
+PKG_SHA256="8eef32ce91d47979f95fd9a935e738cd7eb7463430dabc72863251751e504ae4"
 PKG_LICENSE="GPL"
 PKG_SITE="http://pulseaudio.org/"
 PKG_URL="http://www.freedesktop.org/software/pulseaudio/releases/${PKG_NAME}-${PKG_VERSION}.tar.xz"
@@ -76,6 +76,10 @@ PKG_MESON_OPTS_TARGET="-Ddaemon=true \
 pre_configure_target() {
   sed -e 's|; remixing-use-all-sink-channels = yes|; remixing-use-all-sink-channels = no|' \
       -i ${PKG_BUILD}/src/daemon/daemon.conf.in
+
+# for some reason I have to add this when rebuilding or the compilation will fail, this is not a proper fix but a workaround  
+      rm -rf ${SYSROOT_PREFIX}/usr/share/bash-completion/completions/pulseaudio
+      rm -rf ${SYSROOT_PREFIX}/usr/share/bash-completion/completions/pa*
 }
 
 post_makeinstall_target() {

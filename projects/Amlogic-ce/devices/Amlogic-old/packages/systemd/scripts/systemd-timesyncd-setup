@@ -1,0 +1,22 @@
+#!/bin/sh
+KERNEL_NTP="${1:-/proc/net/ipconfig/ntp_servers}"
+NTP_SERVERS=""
+if [ -f /proc/net/ipconfig/ntp_servers ]; then
+  for srv in $(cat /proc/net/ipconfig/ntp_servers); do
+    if [ -n "$srv" -a "$srv" != "0.0.0.0" ]; then
+      if [ -z "$NTP_SERVERS" ]; then
+        NTP_SERVERS="$srv"
+      else
+        NTP_SERVERS="${NTP_SERVERS} $srv"
+      fi
+    fi
+  done
+  if [ -n "$NTP_SERVERS" ]; then
+    mkdir -p /run/systemd/timesyncd.conf.d/
+    cat << EOF > /run/systemd/timesyncd.conf.d/kernel-ntp-servers.conf
+[Time]
+NTP=$NTP_SERVERS
+EOF
+  fi
+fi
+

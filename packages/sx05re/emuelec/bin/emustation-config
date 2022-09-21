@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
@@ -210,9 +210,6 @@ if [[ -e "/storage/roms/bios/pico-8" ]]; then
     rm -rf /storage/roms/bios/pico-8
     chmod +x /emuelec/bin/pico-8/pico8_dyn
     touch /storage/roms/pico-8/splore.p8
-
-# This may no longer be required, but for lack of testing time I will leave it
-    patchelf --set-interpreter /emuelec/lib32/ld-linux-armhf.so.3 /emuelec/bin/pico-8/pico8_dyn
 fi 
 
 # If Pico-8 binary does not exist remove the splore.p8
@@ -258,17 +255,21 @@ PWDFILE="/flash/ee_defaults.txt"
 [ ! -f "${PWDFILE}" ] && PWDFILE="/storage/roms/ee_defaults.txt"
 [ -f "${PWDFILE}" ] && check_pwd ${PWDFILE}
 
-# Find and mount the ports directory 
-[[ -L "/storage/roms" ]] && LINK=$(readlink /storage/roms) || LINK="/storage/roms/"
+# The mounting logic for ports_scripts is now handled in the mount handler
+# # Find and mount the ports directory 
+# if [ -L "/storage/roms" ]; then
+#     LINK=$(readlink /storage/roms)
+# else
+#     LINK="/storage/roms"
+# fi
+# # Just in case
+# mkdir -p "${LINK}/ports_scripts"
+# mkdir -p "/emuelec/ports"
+# mkdir -p "/storage/.tmp/ports-workdir"
+# umount "/storage/roms/ports_scripts" > /dev/null 2>&1
+# umount "/var/media/EEROMS/roms/ports_scripts" > /dev/null 2>&1
 
-# Just in case
-mkdir -p "${LINK}ports_scripts"
-mkdir -p "/emuelec/ports"
-mkdir -p "/storage/.tmp/ports-workdir"
-umount "/storage/roms/ports_scripts" > /dev/null 2>&1
-umount "/var/media/EEROMS/roms/ports_scripts" > /dev/null 2>&1
-
-mount -t overlay ports -o lowerdir=/usr/bin/ports,upperdir=/emuelec/ports,workdir=/storage/.tmp/ports-workdir "${LINK}ports_scripts"
+# mount -t overlay ports -o lowerdir=/usr/bin/ports,upperdir=/emuelec/ports,workdir=/storage/.tmp/ports-workdir "${LINK}/ports_scripts"
 
 # wait for all the subshells to finish
 wait

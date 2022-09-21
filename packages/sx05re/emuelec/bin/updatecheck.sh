@@ -115,6 +115,8 @@ if [[ "${EE_DEVICE}" == "OdroidGoAdvance" ]]; then
     UFILE+="-odroidgo2.tar"
 elif [[ "${EE_DEVICE}" == "GameForce" ]]; then
     UFILE+="-chi.tar"
+elif [[ "${EE_DEVICE}" == "RK356x" ]]; then
+    UFILE+="-rk356x.tar"
 else
     UFILE+=".tar"
 fi

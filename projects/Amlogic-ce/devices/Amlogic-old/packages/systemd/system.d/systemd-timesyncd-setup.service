@@ -1,0 +1,12 @@
+[Unit]
+Description=Setup NTP servers for timesyncd
+DefaultDependencies=no
+After=systemd-remount-fs.service systemd-sysusers.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/systemd-timesyncd-setup
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target

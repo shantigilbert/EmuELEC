@@ -36,3 +36,11 @@ msgstr ""
 msgctxt "#30007"
 msgid "HTTP server bind address"
 msgstr ""
+
+msgctxt "#30008"
+msgid "Librespot devicename"
+msgstr ""
+
+msgctxt "#30009"
+msgid "Librespot zeroconf-port"
+msgstr ""

@@ -1,0 +1,37 @@
+From dfa29317dd78f3a18f37ef8063efe9d2659e6387 Mon Sep 17 00:00:00 2001
+From: Mario Limonciello <mario.limonciello@amd.com>
+Date: Fri, 8 Jul 2022 11:09:51 -0500
+Subject: WHENCE: Correct dangling symlinks
+
+The symlink direction was wrong for some brcm firmware.
+
+Fixes: f8a2651a ("Link some devices that ship with the AW-CM256SM")
+Signed-off-by: Mario Limonciello <mario.limonciello@amd.com>
+Reviewed-by: Peter Robinson <pbrobinson@gmail.com>
+Signed-off-by: Josh Boyer <jwboyer@kernel.org>
+---
+ WHENCE | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/WHENCE b/WHENCE
+index 14f3472..14d0a87 100644
+--- a/WHENCE
++++ b/WHENCE
+@@ -2820,10 +2820,10 @@ Link: brcm/brcmfmac4356-sdio.firefly,firefly-rk3399.txt -> brcmfmac4356-sdio.AP6
+ Link: brcm/brcmfmac4356-sdio.khadas,vim2.txt -> brcmfmac4356-sdio.AP6356S.txt
+ Link: brcm/brcmfmac4356-sdio.vamrs,rock960.txt -> brcmfmac4356-sdio.AP6356S.txt
+ File: brcm/brcmfmac43455-sdio.AW-CM256SM.txt
+-Link: brcm/brcmfmac43455-sdio.AW-CM256SM.txt -> brcmfmac43455-sdio.beagle,am5729-beagleboneai.txt
+-Link: brcm/brcmfmac43455-sdio.AW-CM256SM.txt -> brcmfmac43455-sdio.pine64,pinebook-pro.txt
+-Link: brcm/brcmfmac43455-sdio.AW-CM256SM.txt -> brcmfmac43455-sdio.pine64,pinephone-pro.txt
+-Link: brcm/brcmfmac43455-sdio.AW-CM256SM.txt -> brcmfmac43455-sdio.pine64,quartz64-b.txt
++Link: brcmfmac43455-sdio.beagle,am5729-beagleboneai.txt -> brcm/brcmfmac43455-sdio.AW-CM256SM.txt
++Link: brcmfmac43455-sdio.pine64,pinebook-pro.txt -> brcm/brcmfmac43455-sdio.AW-CM256SM.txt
++Link: brcmfmac43455-sdio.pine64,pinephone-pro.txt -> brcm/brcmfmac43455-sdio.AW-CM256SM.txt
++Link: brcmfmac43455-sdio.pine64,quartz64-b.txt -> brcm/brcmfmac43455-sdio.AW-CM256SM.txt
+ 
+ Licence: GPLv2. See GPL-2 for details.
+ 
+-- 
+cgit 1.2.3-1.el7
+

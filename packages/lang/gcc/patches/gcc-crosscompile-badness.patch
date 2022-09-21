@@ -1,7 +1,7 @@
-Index: gcc-4.4+svnr145550/gcc/incpath.c
+Index: gcc-4.4+svnr145550/gcc/incpath.cc
 ===================================================================
---- gcc-4.4+svnr145550.orig/gcc/incpath.c	2009-04-04 13:48:31.000000000 -0700
-+++ gcc-4.4+svnr145550/gcc/incpath.c	2009-04-04 14:49:29.000000000 -0700
+--- gcc-4.4+svnr145550.orig/gcc/incpath.cc	2009-04-04 13:48:31.000000000 -0700
++++ gcc-4.4+svnr145550/gcc/incpath.cc	2009-04-04 14:49:29.000000000 -0700
 @@ -417,6 +417,26 @@
    p->construct = 0;
    p->user_supplied_p = user_supplied_p;

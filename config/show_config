@@ -33,8 +33,8 @@ show_config() {
   config_message+="\n - GOLD (Google Linker) Support:\t ${GOLD_SUPPORT}"
   config_message+="\n - LLVM support:\t\t\t ${LLVM_SUPPORT}"
   config_message+="\n - DEBUG:\t\t\t\t ${DEBUG:-no}"
-  config_message+="\n - CFLAGS:\t ${TARGET_CFLAGS}"
-  config_message+="\n - LDFLAGS:\t ${TARGET_LDFLAGS}"
+  config_message+="\n - CFLAGS:\t\t\t\t ${TARGET_CFLAGS}"
+  config_message+="\n - LDFLAGS:\t\t\t\t ${TARGET_LDFLAGS}"
 
   # Misc. hardware configuration
 
