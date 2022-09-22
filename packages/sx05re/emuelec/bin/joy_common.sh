@@ -99,12 +99,12 @@ jc_get_players() {
 
   local PLAYER_CFG=
   for p in {1..4}; do
-    local CFG="${PLAYER_CFGS[$(( p-1 ))]}"
+    local CFG="${p} ${PLAYER_CFGS[$(( p-1 ))]}"
     if [[ $p -le $cfgCount ]]; then
       echo "PLAYER_CFG=${CFG}"
-      eval set_pad "${CFG}"
     fi
-    clean_pad ${p} ${INFO} "${NAME}"
+    eval clean_pad "${CFG}"
+    [[ "${CFG}" != "${p} " ]] && eval set_pad "${CFG}"
   done
 }
 
