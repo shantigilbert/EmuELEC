@@ -103,8 +103,8 @@ jc_get_players() {
     if [[ $p -le $cfgCount ]]; then
       echo "PLAYER_CFG=${CFG}"
     fi
-    eval clean_pad "${CFG}"
-    [[ "${CFG}" != "${p} " ]] && eval set_pad "${CFG}"
+    eval clean_pad ${CFG}
+    [[ "${CFG}" != "${p} " ]] && eval set_pad ${CFG}
   done
 }
 

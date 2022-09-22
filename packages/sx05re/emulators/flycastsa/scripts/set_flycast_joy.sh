@@ -100,6 +100,8 @@ clean_pad() {
 # $4 = Device Name
 
 set_pad() {
+  echo "set_pad params: $1 $2 $3 $4"
+  local JSI="$2"
   local DEVICE_GUID=$3
   local JOY_NAME="$4"
 
@@ -110,7 +112,7 @@ set_pad() {
   sed -i "/device${1}/d" "$EMU_FILE"
   sed -i "/maple_sdl_joystick_${index}/d" "$EMU_FILE"
 
-  local DEVICE="maple_sdl_joystick_${index} = ${index}\ndevice${1} = 0\ndevice${1}.1 = 1\ndevice${1}.2 = 1\n"
+  local DEVICE="maple_sdl_joystick_${index} = ${JSI:2}\ndevice${1} = 0\ndevice${1}.1 = 1\ndevice${1}.2 = 1\n"
   [[ "$LN" -gt "0" ]] && LN=$(( LN+1 )) && sed -i "${LN} i ${DEVICE}" "$EMU_FILE"
 
 

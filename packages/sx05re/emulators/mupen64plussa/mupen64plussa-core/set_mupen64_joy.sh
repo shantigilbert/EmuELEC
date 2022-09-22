@@ -115,6 +115,7 @@ clean_pad() {
 # $4 = Device Name
 
 set_pad() {
+  local JSI=$2
   local DEVICE_GUID=$3
   local JOY_NAME="$4"
 
@@ -174,7 +175,7 @@ set_pad() {
   echo "version = 2.000000" >> ${CONFIG}
   echo "mode = 0" >> ${CONFIG}
   local index=$(( $1 - 1 ))
-  echo "device = $index" >> ${CONFIG}
+  echo "device = ${JSI:2:1}" >> ${CONFIG}
   echo "name = \"$JOY_NAME\"" >> ${CONFIG}
   echo "plugged = True" >> ${CONFIG}
   echo "plugin = 2" >> ${CONFIG}
