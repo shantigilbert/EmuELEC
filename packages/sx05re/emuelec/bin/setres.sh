@@ -24,8 +24,7 @@ show_buffer ()
 blank_buffer()
 {
   # Blank the buffer.
-  echo 1 > /sys/class/graphics/fb1/blank
-  dd if=/dev/zero of=/dev/fb0 bs=10M > /dev/null 2>&1
+  dd if=/dev/zero of=/dev/fb${1} bs=32M > /dev/null 2>&1
 }
 
 # By initially setting with these values we can garuntee the file changes, and the mode corrects itself.
@@ -52,11 +51,11 @@ fi
 
 # hides buffer
 show_buffer 1
+blank_buffer 1
+blank_buffer 0
 
 # This is needed to reset scaling.
 echo 0 > /sys/class/ppmgr/ppscaler
-#echo 0 > /sys/class/graphics/fb0/free_scale
-#echo 1 > /sys/class/graphics/fb0/freescale_mode
 
 case $MODE in
   480cvbs)
@@ -74,6 +73,9 @@ case $MODE in
     echo $MODE > "${FILE_MODE}"
     ;;
 esac
+
+BUFF=64
+fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP
 
 case $MODE in
   480cvbs)
@@ -124,7 +126,9 @@ fi
 
 if [[ ! -z "${BORDERS}" ]]; then
     PX=${BORDERS[0]}
+    [[ -z "${PX}" ]] && PX=0
     PY=${BORDERS[1]}
+    [[ -z "${PY}" ]] && PY=0
     PW=${BORDERS[2]}
     [[ -z "${PW}" ]] && PW=$W
     PH=${BORDERS[3]}
@@ -134,20 +138,26 @@ if [[ ! -z "${BORDERS}" ]]; then
       exit 0
     elif [[ ! -n "$PX" || ! -n "$PY" || ! -n "$PW" || ! -n "$PH" ]]; then
       exit 0
-    elif [[ "$PX" == "0" || "$PY" == "0" || "$PW" == "0" || "$PH" == "0" ]]; then
+    elif [[ "$PW" == "0" || "$PH" == "0" ]]; then
       exit 0
-    else
-      echo "All parameters passed: $PX $PY $PW $PH. Autogen: $(( PW-PX-1 )) $(( PH-PY-1 ))"
     fi
 
-    echo ${PX} ${PY} $(( PW-PX-1 )) $(( PH-PY-1 )) > /sys/class/graphics/fb0/window_axis
+    echo "All parameters passed: $PX $PY $PW $PH. Autogen: $(( PW-PX-1 )) $(( PH-PY-1 ))"
+
+    PX2=$(( PW-PX-1 ))
+    PY2=$(( PH-PY-1 ))
+    if [[ "$PX2" -gt "$W" ]]; then
+      PX2=$(( W-1 )) 
+    fi
+    [[ "$PY2" > "$H" ]] && PY2=$(( H-1 ))
+
+    echo "${PX} ${PY} ${PX2} ${PY2}" > /sys/class/graphics/fb0/window_axis
     echo 1 > /sys/class/graphics/fb0/freescale_mode
     echo 0x10001 > /sys/class/graphics/fb0/free_scale
 fi
 
-echo 1 > /sys/class/graphics/fb1/blank
-
-blank_buffer
+blank_buffer 1
+blank_buffer 0
 
 # shows buffer
 show_buffer 0
