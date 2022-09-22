@@ -110,29 +110,30 @@ echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
 echo 0 > /sys/class/graphics/fb0/free_scale
 echo 0 > /sys/class/graphics/fb0/freescale_mode
 
-BORDER_SIZE=$(get_ee_setting ee_videoborder)
-BORDER_SIZE_X=0
-BORDER_SIZE_Y=0
-if [[ -n ${BORDER_SIZE} && ${BORDER_SIZE} > 0 ]]; then
-  BORDER_SIZE_X=${BORDER_SIZE}
-  BORDER_SIZE_Y=${BORDER_SIZE}
+BORDER_VALS=$(get_ee_setting ee_videowindow)
+if [[ ! -z "${BORDER_VALS}" ]]; then
+  BORDERS=(${BORDER_SIZE})
+  COUNT_ARGS=${#PLAYER_CFGS[@]}
+  if [[ "${COUNT_ARGS}" != 4 ]]; then
+    exit 0;
+  fi
+else
+  if [[ "${MODE}" == "480cvbs" ]];
+    BORDERS=(30 10 669 469)
+  fi
+  if [[ "${MODE}" == "576cvbs" ]];
+    BORDERS=(35 20 680 565)
+  fi    
 fi
 
-if [[ -z ${BORDER_SIZE} || ${BORDER_SIZE} == 0 ]]; then
-  BORDER_SIZE_X=$(get_ee_setting ee_videoborderx)
-  BORDER_SIZE_Y=$(get_ee_setting ee_videobordery)
-  [[ -z ${BORDER_SIZE_X} ]] && BORDER_SIZE_X=0
-  [[ -z ${BORDER_SIZE_Y} ]] && BORDER_SIZE_Y=0
-fi
-
-if [[ -n ${BORDER_SIZE_X} && -n ${BORDER_SIZE_Y} ]]; then
-  if [[ ${BORDER_SIZE_X} > 0 || ${BORDER_SIZE_Y} > 0 ]]; then
-    SCALE_W=$(( $W1 - $BORDER_SIZE_X ))
-    SCALE_H=$(( $H1 - $BORDER_SIZE_Y ))
-    echo ${BORDER_SIZE_X} ${BORDER_SIZE_Y} ${SCALE_W} ${SCALE_H} > /sys/class/graphics/fb0/window_axis
+if [[ ! -z "${BORDERS}" ]]; then
+    PX=$BORDERS[0]
+    PY=$BORDERS[1]
+    PW=$BORDERS[2]
+    PH=$BORDERS[3]
+    echo ${PX} ${PY} ${PW} ${PH} > /sys/class/graphics/fb0/window_axis
     echo 1 > /sys/class/graphics/fb0/freescale_mode
     echo 0x10001 > /sys/class/graphics/fb0/free_scale
-  fi
 fi
 
 echo 1 > /sys/class/graphics/fb1/blank
