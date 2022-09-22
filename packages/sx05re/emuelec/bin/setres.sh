@@ -115,10 +115,10 @@ if [[ ! -z "${BORDER_VALS}" ]]; then
   fi
 else
   if [[ "${MODE}" == "480cvbs" ]]; then
-    BORDERS=(10 10 620 480)
+    BORDERS=(10 10)
   fi
   if [[ "${MODE}" == "576cvbs" ]]; then
-    BORDERS=(15 15 690 546)
+    BORDERS=(15 15)
   fi    
 fi
 
@@ -130,11 +130,16 @@ if [[ ! -z "${BORDERS}" ]]; then
     PH=${BORDERS[3]}
     [[ -z "${PH}" ]] && PH=$H
     
-    if [[ -n $PX && -n $PY && -n $PW && -n $PH ]]; then
-      echo "window params all numbers."
-    else
+    if [[ -z "$PX" || -z "$PY" || -z "$PW" || -z "$PH" ]]; then
       exit 0
+    elif [[ ! -n "$PX" || ! -n "$PY" || ! -n "$PW" || ! -n "$PH" ]]; then
+      exit 0
+    elif [[ "$PX" == "0" || "$PY" == "0" || "$PW" == "0" || "$PH" == "0" ]]; then
+      exit 0
+    else
+      echo "All parameters passed: $PX $PY $PW $PH. Autogen: $(( PW-PX-1 )) $(( PH-PY-1 ))"
     fi
+
     echo ${PX} ${PY} $(( PW-PX-1 )) $(( PH-PY-1 )) > /sys/class/graphics/fb0/window_axis
     echo 1 > /sys/class/graphics/fb0/freescale_mode
     echo 0x10001 > /sys/class/graphics/fb0/free_scale
