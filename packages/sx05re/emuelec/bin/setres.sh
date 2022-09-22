@@ -77,21 +77,19 @@ esac
 
 case $MODE in
   480cvbs)
-    W1=639
-    H1=479
+    W=640
+    H=480
     fbset -fb /dev/fb0 -g 640 480 640 960 $BPP
     ;;
   576cvbs)
-    W1=719
-    H1=575
+    W=720
+    H=576
     fbset -fb /dev/fb0 -g 720 576 720 1152 $BPP
     ;;
   480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
     W=$(( $H*16/9 ))
     [[ "$MODE" == "480"* ]] && W=640
     DH=$(($H*2))
-    W1=$(($W-1))
-    H1=$(($H-1))
     fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
     ;;
   *x*)
@@ -100,13 +98,11 @@ case $MODE in
     [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
     if [ -n "$W" ] && [ -n "$H" ]; then
       DH=$(($H*2))
-      W1=$(($W-1))
-      H1=$(($H-1))
       fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
     fi
     ;;
 esac
-echo 0 0 $W1 $H1 > /sys/class/graphics/fb0/free_scale_axis
+echo 0 0 $(( W-1 )) $(( H-1 )) > /sys/class/graphics/fb0/free_scale_axis
 echo 0 > /sys/class/graphics/fb0/free_scale
 echo 0 > /sys/class/graphics/fb0/freescale_mode
 
@@ -114,7 +110,7 @@ BORDER_VALS=$(get_ee_setting ee_videowindow)
 if [[ ! -z "${BORDER_VALS}" ]]; then
   declare -a BORDERS=(${BORDER_VALS})
   COUNT_ARGS=${#BORDERS[@]}
-  if [[ "${COUNT_ARGS}" != 4 ]]; then
+  if [[ ${COUNT_ARGS} != 4 && ${COUNT_ARGS} != 2 ]]; then
     exit 0;
   fi
 else
@@ -130,8 +126,16 @@ if [[ ! -z "${BORDERS}" ]]; then
     PX=${BORDERS[0]}
     PY=${BORDERS[1]}
     PW=${BORDERS[2]}
+    [[ -z "${PW}" ]] && PW=$W
     PH=${BORDERS[3]}
-    echo ${PX} ${PY} ${PW} ${PH} > /sys/class/graphics/fb0/window_axis
+    [[ -z "${PH}" ]] && PH=$H
+    
+    if [[ -n $PX && -n $PY && -n $PW && -n $PH ]]; then
+      echo "window params all numbers."
+    else
+      exit 0
+    fi
+    echo ${PX} ${PY} $(( PW-PX-1 )) $(( PH-PY-1 )) > /sys/class/graphics/fb0/window_axis
     echo 1 > /sys/class/graphics/fb0/freescale_mode
     echo 0x10001 > /sys/class/graphics/fb0/free_scale
 fi
