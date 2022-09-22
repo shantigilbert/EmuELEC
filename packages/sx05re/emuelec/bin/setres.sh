@@ -115,10 +115,10 @@ if [[ ! -z "${BORDER_VALS}" ]]; then
   fi
 else
   if [[ "${MODE}" == "480cvbs" ]]; then
-    BORDERS=(30 10 669 469)
+    BORDERS=(10 10 620 480)
   fi
   if [[ "${MODE}" == "576cvbs" ]]; then
-    BORDERS=(35 20 680 565)
+    BORDERS=(15 15 690 546)
   fi    
 fi
 
