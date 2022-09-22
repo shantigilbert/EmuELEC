@@ -112,25 +112,25 @@ echo 0 > /sys/class/graphics/fb0/freescale_mode
 
 BORDER_VALS=$(get_ee_setting ee_videowindow)
 if [[ ! -z "${BORDER_VALS}" ]]; then
-  BORDERS=(${BORDER_SIZE})
-  COUNT_ARGS=${#PLAYER_CFGS[@]}
+  declare -a BORDERS=(${BORDER_VALS})
+  COUNT_ARGS=${#BORDERS[@]}
   if [[ "${COUNT_ARGS}" != 4 ]]; then
     exit 0;
   fi
 else
-  if [[ "${MODE}" == "480cvbs" ]];
+  if [[ "${MODE}" == "480cvbs" ]]; then
     BORDERS=(30 10 669 469)
   fi
-  if [[ "${MODE}" == "576cvbs" ]];
+  if [[ "${MODE}" == "576cvbs" ]]; then
     BORDERS=(35 20 680 565)
   fi    
 fi
 
 if [[ ! -z "${BORDERS}" ]]; then
-    PX=$BORDERS[0]
-    PY=$BORDERS[1]
-    PW=$BORDERS[2]
-    PH=$BORDERS[3]
+    PX=${BORDERS[0]}
+    PY=${BORDERS[1]}
+    PW=${BORDERS[2]}
+    PH=${BORDERS[3]}
     echo ${PX} ${PY} ${PW} ${PH} > /sys/class/graphics/fb0/window_axis
     echo 1 > /sys/class/graphics/fb0/freescale_mode
     echo 0x10001 > /sys/class/graphics/fb0/free_scale
