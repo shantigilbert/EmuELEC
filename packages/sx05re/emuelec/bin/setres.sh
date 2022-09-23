@@ -44,10 +44,10 @@ MODE=$1
 # original value.
 FILE_MODE="/sys/class/display/mode"
 
-# H=Height in pixels, W=Width in pixels, BPP=Bits Per Pixel.
+# SH=Height in pixels, SW=Width in pixels, BPP=Bits Per Pixel.
 BPP=32
-H=0
-W=0
+SH=0
+SW=0
 
 # The current display mode before it may get changed below.
 OLD_MODE=$( cat ${FILE_MODE} )
@@ -67,8 +67,8 @@ fi
 # *p* stand for progressive and *i* stand for interlaced.
 if [[ ! "$MODE" == *"x"* ]]; then
   case $MODE in
-    *p*) H=$(echo $MODE | cut -d'p' -f 1) ;;
-    *i*) H=$(echo $MODE | cut -d'i' -f 1) ;;
+    *p*) SH=$(echo $MODE | cut -d'p' -f 1) ;;
+    *i*) SH=$(echo $MODE | cut -d'i' -f 1) ;;
   esac
 fi
 
@@ -79,8 +79,8 @@ if [[ "$MODE" == *"cvbs" ]]; then
   if [[ -f "${CVBS_RES_FILE}" ]]; then
     declare -a CVBS_RES=($(cat "${CVBS_RES_FILE}"))
     if [[ ! -z "${CVBS_RES[@]}" ]]; then
-        W=${CVBS_RES[0]}
-        H=${CVBS_RES[1]}
+        SW=${CVBS_RES[0]}
+        SH=${CVBS_RES[1]}
     fi
   fi
 fi
@@ -130,33 +130,32 @@ case $MODE in
   480cvbs)
     RW=640
     RH=480
-    [[ -z "$W" ]] && W=1024
-    [[ -z "$H" ]] && H=768
-    DH=$(($H*2))
-    fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
+    [[ -z "$SW" ]] && SW=1024
+    [[ -z "$SH" ]] && SH=768
     ;;
   576cvbs)
     RW=720
     RH=576
-    [[ -z "$W" ]] && W=1024
-    [[ -z "$H" ]] && H=768
+    [[ -z "$SW" ]] && SW=1024
+    [[ -z "$SH" ]] && SH=768
+    ;;
   480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
-    W=$(( $H*16/9 ))
-    [[ "$MODE" == "480"* ]] && W=640
+    SW=$(( $SH*16/9 ))
+    [[ "$MODE" == "480"* ]] && SW=640
     ;;
   *x*)
-    W=$(echo $MODE | cut -d'x' -f 1)
-    H=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
-    [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
+    SW=$(echo $MODE | cut -d'x' -f 1)
+    SH=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
+    [ ! -n "$SH" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
     ;;
 esac
 
 # Once we know the Width and Height is valid numbers we set the primary display
 # buffer, and we multiply the 2nd height by a factor of 2 I assume for interlaced 
 # support.
-if [[ -n "$W" && "$W" > 0 && -n "$H" && "$H" > 0 ]]; then
-  MH=$(( H*2 ))
-  fbset -fb /dev/fb0 -g $W $H $W $MH $BPP
+if [[ -n "$SW" && "$SW" > 0 && -n "$SH" && "$SH" > 0 ]]; then
+  MSH=$(( SH*2 ))
+  fbset -fb /dev/fb0 -g $SW $SH $SW $MSH $BPP
   echo 0 0 $(( W-1 )) $(( H-1 )) > /sys/class/graphics/fb0/free_scale_axis
   echo 0 > /sys/class/graphics/fb0/free_scale
   echo 0 > /sys/class/graphics/fb0/freescale_mode
@@ -189,7 +188,6 @@ if [[ ! -z "${BORDER_VALS}" ]]; then
   if [[ ${COUNT_ARGS} != 4 && ${COUNT_ARGS} != 2 ]]; then
     exit 0;
   fi
-else
 fi
 
 # If border values have been supplied then we can check the offsets and the
@@ -226,8 +224,8 @@ if [[ ! -z "${BORDERS}" ]]; then
     [[ ! -z "${RW}" ]] && PY2=$(( RW-PX-1 ))
     [[ ! -z "${RH}" ]] && PY2=$(( RH-PY-1 ))
 
-    [[ "$PX2" -gt "$W" ]] && PX2=$(( W-1 ))
-    [[ "$PY2" -gt "$H" ]] && PY2=$(( H-1 ))
+    [[ "$PX2" -gt "$SW" ]] && PX2=$(( SW-1 ))
+    [[ "$PY2" -gt "$SH" ]] && PY2=$(( SH-1 ))
 
     echo "PX:${PX} PY:${PY} PX2:${PX2} PY2:${PY2}"
     echo 1 > /sys/class/graphics/fb0/freescale_mode
