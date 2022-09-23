@@ -18,13 +18,13 @@ PKG_BUILD_FLAGS="lib32"
 
 get_graphicdrivers
 
-PKG_MESON_OPTS_TARGET="-Dnouveau=false \
-                       -Domap=false \
-                       -Dexynos=false \
-                       -Dtegra=false \
-                       -Dcairo-tests=false \
-                       -Dman-pages=false \
-                       -Dvalgrind=false \
+PKG_MESON_OPTS_TARGET="-Dnouveau=disabled \
+                       -Domap=disabled \
+                       -Dexynos=disabled \
+                       -Dtegra=disabled \
+                       -Dcairo-tests=disabled \
+                       -Dman-pages=disabled \
+                       -Dvalgrind=disabled \
                        -Dfreedreno-kgsl=false \
                        -Dinstall-test-programs=true \
                        -Dudev=false"
