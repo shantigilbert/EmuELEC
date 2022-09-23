@@ -543,7 +543,9 @@ if [[ "$ret_error" != "0" ]]; then
 
     # Since the error was not because of missing BIOS but we did get an error, display the log to find out
     [[ "$ret_bios" == "0" ]] && text_viewer -e -w -t "Error! ${PLATFORM}-${EMULATOR}-${CORE}-${ROMNAME}" -f 24 ${EMUELECLOG}
+    hide_buffer 1
     blank_buffer
+    hide_buffer 0
     exit 1
 else
     echo "exit 0" >> $EMUELECLOG
