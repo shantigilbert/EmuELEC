@@ -34,7 +34,6 @@ if [ "$EE_DEVICE" != "OdroidGoAdvance" ] && [ "$EE_DEVICE" != "GameForce" ]; the
     MODE=`cat /sys/class/display/mode`;
     sed -i '/device_video_modeline/d' $CONFIG_DIR/advmame.rc
 
-    sed -i '/device_video_clock/d' $CONFIG_DIR/advmame.rc
     if [[ -f "/ee_s905" && "$MODE" == "1080p"* ]]; then
         MODE="720p60hz"
     fi
@@ -62,7 +61,6 @@ if [ "$EE_DEVICE" != "OdroidGoAdvance" ] && [ "$EE_DEVICE" != "GameForce" ]; the
             echo "device_video_modeline 640x480_60.00 23.86 640 656 720 800 480 481 484 497 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
         ;;
     esac
-    echo "device_video_clock 1-200 / 1-200 / 25-60" >> $CONFIG_DIR/advmame.rc
 fi
 
 ROMNAME=$(basename $1)
