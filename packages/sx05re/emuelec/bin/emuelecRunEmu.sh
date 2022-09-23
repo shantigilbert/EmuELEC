@@ -78,7 +78,7 @@ ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
 GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
-[ -f "/emuelec/bin/setres.sh" ] && SET_DISPLAY_SH="/emuelec/bin/setres.sh" || SET_DISPLAY_SH="/usr/bin/setres.sh"
+SET_DISPLAY_SH="setres.sh"
 VIDEO="$(cat /sys/class/display/mode)"
 VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
 
@@ -131,7 +131,7 @@ fi
 
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
-[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}"
+[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}" && sleep 2
 
 # Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
@@ -459,7 +459,9 @@ $TBASH $SET_DISPLAY_SH $VIDEO
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # Show exit splash
-${TBASH} show_splash.sh exit
+${TBASH} show_splash.sh exit && sleep 2
+
+hide_buffer 1
 
 # Just in case
 kill_video_controls
@@ -519,6 +521,8 @@ fi
 # Temp fix for libretro scummvm always erroing out on exit
 [[ "${EMU}" == *"scummvm_libretro"* ]] && ret_error=0
 
+hide_buffer 0
+
 if [[ "$ret_error" != "0" ]]; then
     echo "exit $ret_error" >> $EMUELECLOG
     ret_bios=0
@@ -539,8 +543,10 @@ if [[ "$ret_error" != "0" ]]; then
 
     # Since the error was not because of missing BIOS but we did get an error, display the log to find out
     [[ "$ret_bios" == "0" ]] && text_viewer -e -w -t "Error! ${PLATFORM}-${EMULATOR}-${CORE}-${ROMNAME}" -f 24 ${EMUELECLOG}
+    blank_buffer
     exit 1
 else
     echo "exit 0" >> $EMUELECLOG
+    blank_buffer
     exit 0
 fi

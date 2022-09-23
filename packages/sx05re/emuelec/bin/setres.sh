@@ -14,33 +14,21 @@
 # Source predefined functions and variables
 . /etc/profile
 
-# arg1, 1 = Hides, 0 = Show.
-show_buffer ()
-{
-  echo $1 > /sys/class/graphics/fb0/blank
-  echo $1 > /sys/class/graphics/fb1/blank
-}
-
-blank_buffer()
-{
-  # Blank the buffer.
-  dd if=/dev/zero of=/dev/fb${1} bs=32M > /dev/null 2>&1
-}
-
-# By initially setting with these values we can garuntee the file changes, and the mode corrects itself.
-HACK_480_MODE="640x480p60hz"
-HACK_576_MODE="800x600p60hz"
-
-FILE_MODE="/sys/class/display/mode"
-[[ ! -f "$FILE_MODE" ]] && exit 0;
-
 BPP=32
+BUFF=32
 
 MODE=$1
-DEF_MODE=$(cat $FILE_MODE)
+FILE_MODE="/sys/class/display/mode"
 
 # If the current display is the same as the change just exit.
-[[ $MODE == "auto" ]] && exit 0;
+if [[ ! -f "$FILE_MODE" || $MODE == "auto" ]]; then
+  hide_buffer 1
+  blank_buffer
+  hide_buffer 0
+  exit 0
+fi
+
+OLD_MODE=$( cat ${FILE_MODE} )
 
 if [[ ! "$MODE" == *"x"* ]]; then
   case $MODE in
@@ -49,64 +37,67 @@ if [[ ! "$MODE" == *"x"* ]]; then
   esac
 fi
 
-# hides buffer
-show_buffer 1
-blank_buffer 1
-blank_buffer 0
-
 # This is needed to reset scaling.
 echo 0 > /sys/class/ppmgr/ppscaler
 
-case $MODE in
-  480cvbs)
-    echo $HACK_480_MODE > "${FILE_MODE}"
-    echo 480cvbs > "${FILE_MODE}"
-    ;;
-  576cvbs)
-    echo $HACK_576_MODE > "${FILE_MODE}"
-    echo 576cvbs > "${FILE_MODE}"
-    ;;
-  480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
-    echo $MODE > "${FILE_MODE}"
-    ;;
-  *x*)
-    echo $MODE > "${FILE_MODE}"
-    ;;
-esac
+if [[ "$OLD_MODE" != "$MODE" ]]; then
+  hide_buffer 1
+  blank_buffer
+  case $MODE in
+    480cvbs)
+      echo 480cvbs > "${FILE_MODE}"
+      ;;
+    576cvbs)
+      echo 576cvbs > "${FILE_MODE}"
+      ;;
+    480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
+      echo $MODE > "${FILE_MODE}"
+      ;;
+    *x*)
+      echo $MODE > "${FILE_MODE}"
+      ;;
+  esac
+  NEW_MODE=$(cat $FILE_MODE)
+  if [[ "$NEW_MODE" != "$MODE" ]]; then
+    hide_buffer 0
+    exit 0
+  fi
 
-BUFF=64
-fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP
-
-case $MODE in
-  480cvbs)
-    W=640
-    H=480
-    fbset -fb /dev/fb0 -g 640 480 640 960 $BPP
-    ;;
-  576cvbs)
-    W=720
-    H=576
-    fbset -fb /dev/fb0 -g 720 576 720 1152 $BPP
-    ;;
-  480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
-    W=$(( $H*16/9 ))
-    [[ "$MODE" == "480"* ]] && W=640
-    DH=$(($H*2))
-    fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-    ;;
-  *x*)
-    W=$(echo $MODE | cut -d'x' -f 1)
-    H=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
-    [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
-    if [ -n "$W" ] && [ -n "$H" ]; then
+  case $MODE in
+    480cvbs)
+      W=640
+      H=480
+      fbset -fb /dev/fb0 -g 640 480 640 960 $BPP
+      ;;
+    576cvbs)
+      W=720
+      H=576
+      fbset -fb /dev/fb0 -g 720 576 720 1152 $BPP
+      ;;
+    480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
+      W=$(( $H*16/9 ))
+      [[ "$MODE" == "480"* ]] && W=640
       DH=$(($H*2))
       fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
-    fi
-    ;;
-esac
-echo 0 0 $(( W-1 )) $(( H-1 )) > /sys/class/graphics/fb0/free_scale_axis
-echo 0 > /sys/class/graphics/fb0/free_scale
-echo 0 > /sys/class/graphics/fb0/freescale_mode
+      ;;
+    *x*)
+      W=$(echo $MODE | cut -d'x' -f 1)
+      H=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
+      [ ! -n "$H" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
+      if [ -n "$W" ] && [ -n "$H" ]; then
+        DH=$(($H*2))
+        fbset -fb /dev/fb0 -g $W $H $W $DH $BPP
+      fi
+      ;;
+  esac
+  echo 0 0 $(( W-1 )) $(( H-1 )) > /sys/class/graphics/fb0/free_scale_axis
+  echo 0 > /sys/class/graphics/fb0/free_scale
+  echo 0 > /sys/class/graphics/fb0/freescale_mode
+  
+#  fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP  
+  blank_buffer
+  hide_buffer 0
+fi
 
 BORDER_VALS=$(get_ee_setting ee_videowindow)
 if [[ ! -z "${BORDER_VALS}" ]]; then
@@ -155,12 +146,6 @@ if [[ ! -z "${BORDERS}" ]]; then
     echo 1 > /sys/class/graphics/fb0/freescale_mode
     echo 0x10001 > /sys/class/graphics/fb0/free_scale
 fi
-
-blank_buffer 1
-blank_buffer 0
-
-# shows buffer
-show_buffer 0
 
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
