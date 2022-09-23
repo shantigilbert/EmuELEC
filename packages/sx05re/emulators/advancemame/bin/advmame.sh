@@ -67,7 +67,7 @@ if [ "$EE_DEVICE" != "OdroidGoAdvance" ] && [ "$EE_DEVICE" != "GameForce" ]; the
             echo "device_video_modeline 640x480_60.00 23.86 640 656 720 800 480 481 484 497 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
         ;;
     esac
-    echo "device_video_clock 1-200 / 1-200 / 30-60" >> $CONFIG_DIR/advmame.rc
+    echo "device_video_clock 1-200 / 1-200 / 25-60" >> $CONFIG_DIR/advmame.rc
 fi
 
 ROMNAME=$(basename $1)
