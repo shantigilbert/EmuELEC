@@ -119,8 +119,8 @@ fi
 
 # Legacy code, we use to set the buffer that is used for small parts of graphics
 # like Cursors and Fonts but setting default 32 made ES Fonts dissappear.
-# BUFF=32
-#  fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP  
+BUFF=64
+fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP  
 
 # Here we set the Height and Width of the particular resolution, RH and RW stands
 # for Real Width and Real Height respectively.
@@ -156,7 +156,7 @@ esac
 if [[ -n "$SW" && "$SW" > 0 && -n "$SH" && "$SH" > 0 ]]; then
   MSH=$(( SH*2 ))
   fbset -fb /dev/fb0 -g $SW $SH $SW $MSH $BPP
-  echo 0 0 $(( W-1 )) $(( H-1 )) > /sys/class/graphics/fb0/free_scale_axis
+  echo 0 0 $(( SW-1 )) $(( SH-1 )) > /sys/class/graphics/fb0/free_scale_axis
   echo 0 > /sys/class/graphics/fb0/free_scale
   echo 0 > /sys/class/graphics/fb0/freescale_mode
 fi
