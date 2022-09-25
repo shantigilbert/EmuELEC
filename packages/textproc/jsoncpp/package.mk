@@ -10,11 +10,7 @@ PKG_SITE="https://github.com/open-source-parsers/jsoncpp/"
 PKG_URL="https://github.com/open-source-parsers/jsoncpp/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="A C++ library for interacting with JSON."
-PKG_TOOLCHAIN="cmake"
 PKG_BUILD_FLAGS="+pic"
 
-PKG_CMAKE_OPTS_TARGET="-DJSONCPP_WITH_TESTS=OFF \
-                       -DJSONCPP_WITH_EXAMPLE=OFF \
-                       -DBUILD_SHARED_LIBS=OFF \
-                       -DBUILD_STATIC_LIBS=ON \
-                       -DBUILD_OBJECT_LIBS=OFF"
+PKG_MESON_OPTS_TARGET="-Dtests=false \
+                       --default-library static"

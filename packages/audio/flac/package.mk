@@ -3,8 +3,8 @@
 # Copyright (C) 2020-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="flac"
-PKG_VERSION="1.3.4"
-PKG_SHA256="8ff0607e75a322dd7cd6ec48f4f225471404ae2730d0ea945127b1355155e737"
+PKG_VERSION="1.4.0"
+PKG_SHA256="af41c0733c93c237c3e52f64dd87e3b0d9af38259f1c7d11e8cbf583c48c2506"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://xiph.org/flac/"
 PKG_URL="https://downloads.xiph.org/releases/flac/${PKG_NAME}-${PKG_VERSION}.tar.xz"

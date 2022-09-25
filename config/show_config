@@ -99,9 +99,12 @@ show_config() {
     config_message+="\n - X.Org Composite support:\t\t ${COMPOSITE_SUPPORT}"
   fi
   config_message+="\n - Window Manager / Compositor:\t\t ${WINDOWMANAGER}"
-  config_message+="\n - OpenGL (GLX) support (provider):\t ${OPENGL_SUPPORT} (${OPENGL})"
-  config_message+="\n - OpenGL ES support (provider):\t ${OPENGLES_SUPPORT} (${OPENGLES})"
-  config_message+="\n - Vulkan API support (provider):\t ${VULKAN_SUPPORT} (${VULKAN})"
+  config_message+="\n - OpenGL (GLX) support (provider):\t ${OPENGL_SUPPORT}"
+    [ "${OPENGL}" != "no" ] && config_message+=" (${OPENGL})"
+  config_message+="\n - OpenGL ES support (provider):\t ${OPENGLES_SUPPORT}"
+    [ "${OPENGLES}" != "no" ] && config_message+=" (${OPENGLES})"
+  config_message+="\n - Vulkan API support (provider):\t ${VULKAN_SUPPORT}"
+    [ "${VULKAN}" != "no" ] && config_message+=" (${VULKAN})"
   if [ "${VULKAN_SUPPORT}" = "yes" ]; then
     config_message+="\n - Vulkan Graphic Drivers:\t\t ${VULKAN_DRIVERS_CONFIG}"
   fi

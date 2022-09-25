@@ -1,4 +1,6 @@
-OPTIONS32=$(
+# This command requires BASH >= v4.0, since we're using Ubuntu 20 as a baseline, this should not be a problem
+# This reads those options into an array, one element per line, and keep empty line as is, also removing trailing \n
+readarray -t OPTIONS32 < <(
   ARCH=arm
   TARGET_ARCH=arm
   # read DEVICE options
@@ -18,12 +20,6 @@ OPTIONS32=$(
   echo $TARGET_FPU
   echo $TARGET_SUBARCH
 )
-
-SAVED_IFS=$IFS
-IFS=$'\n' 
-OPTIONS32=( $OPTIONS32 )
-IFS=$SAVED_IFS
-unset SAVED_IFS
 
 LIB32_TARGET_ABI="${OPTIONS32[0]}"
 LIB32_TARGET_GCC_ARCH="${OPTIONS32[1]}"

@@ -1,3 +1,6 @@
+109
+- update to 5.19
+
 108
 - update to 5.18.1
 

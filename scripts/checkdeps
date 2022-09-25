@@ -166,14 +166,14 @@ case "${DISTRO}" in
         [XML::Parser]=XML-Parser
       )
       ;;
-    arch)
+    arch|endeavouros)
       dep_map+=(
         [g++]=g++
         [mkfontscale]=xorg-mkfontscale
         [mkfontdir]=xorg-mkfontdir
         [bdftopcf]=xorg-bdftopcf
         [xsltproc]=libxslt
-        [java]="java-runtime-common jdk8-openjdk"
+        [java]=jdk8-openjdk
         [python3]=python3
         [rpcgen]=rpcsvc-proto
       )
@@ -269,7 +269,7 @@ if [ "${#need_map[@]}" -gt 0 ]; then
       mageia)
         get_yes_no && sudo urpmi "${need_map[@]}"
         ;;
-      arch)
+      arch|endeavouros)
         get_yes_no && sudo pacman -Sy "${need_map[@]}"
         ;;
       opensuse)

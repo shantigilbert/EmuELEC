@@ -1,0 +1,264 @@
+From eb476ae718b8433402547bad0e3fa2ba69e1c1ee Mon Sep 17 00:00:00 2001
+From: Christian Hewitt <christianshewitt@gmail.com>
+Date: Fri, 24 Jun 2022 18:04:13 +0000
+Subject: [PATCH 2/2] LOCAL: changes for Odroid XU3/XU4
+
+---
+ cmake/modules/FindGBM.cmake                   | 12 ++--
+ system/settings/linux.xml                     |  2 +-
+ .../DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp   | 66 +++++++++++++++++--
+ .../DVDCodecs/Video/DVDVideoCodecFFmpeg.h     |  1 +
+ xbmc/windowing/Resolution.cpp                 |  2 +
+ xbmc/windowing/gbm/GBMUtils.cpp               | 28 ++++----
+ xbmc/windowing/gbm/WinSystemGbmEGLContext.cpp |  2 +-
+ xbmc/windowing/gbm/drm/DRMUtils.cpp           |  2 +-
+ 8 files changed, 90 insertions(+), 25 deletions(-)
+
+diff --git a/cmake/modules/FindGBM.cmake b/cmake/modules/FindGBM.cmake
+index 37a26a7bc4..53cc04663e 100644
+--- a/cmake/modules/FindGBM.cmake
++++ b/cmake/modules/FindGBM.cmake
+@@ -51,12 +51,12 @@ if(GBM_FOUND)
+   set(GBM_LIBRARIES ${GBM_LIBRARY})
+   set(GBM_INCLUDE_DIRS ${GBM_INCLUDE_DIR})
+   set(GBM_DEFINITIONS -DHAVE_GBM=1)
+-  if(GBM_HAS_BO_MAP)
+-    list(APPEND GBM_DEFINITIONS -DHAS_GBM_BO_MAP=1)
+-  endif()
+-  if(GBM_HAS_MODIFIERS)
+-    list(APPEND GBM_DEFINITIONS -DHAS_GBM_MODIFIERS=1)
+-  endif()
++  #if(GBM_HAS_BO_MAP)
++  #  list(APPEND GBM_DEFINITIONS -DHAS_GBM_BO_MAP=1)
++  #endif()
++  #if(GBM_HAS_MODIFIERS)
++  #  list(APPEND GBM_DEFINITIONS -DHAS_GBM_MODIFIERS=1)
++  #endif()
+   if(NOT TARGET GBM::GBM)
+     add_library(GBM::GBM UNKNOWN IMPORTED)
+     set_target_properties(GBM::GBM PROPERTIES
+diff --git a/system/settings/linux.xml b/system/settings/linux.xml
+index 531974f3f4..6244ef7515 100644
+--- a/system/settings/linux.xml
++++ b/system/settings/linux.xml
+@@ -177,7 +177,7 @@
+             </dependency>
+           </dependencies>
+           <level>3</level>
+-          <default>true</default>
++          <default>false</default>
+           <control type="toggle" />
+         </setting>
+         <setting id="videoplayer.useprimerenderer" type="integer" label="13462" help="13463">
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp
+index a7dc0890e8..ad8c41dcf0 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp
+@@ -42,6 +42,16 @@ extern "C" {
+ #define RINT lrint
+ #endif
+ 
++/* define the FFMPEG codecs to use */
++#define MPEG2TS_FFMPEG_CODEC "mpeg2_v4l2m2m"
++#define H263_FFMPEG_CODEC    "h263_v4l2m2m"
++#define H264_FFMPEG_CODEC    "h264_v4l2m2m"
++#define MPEG4_FFMPEG_CODEC   "mpeg4_v4l2m2m"
++#define MPEG1_FFMPEG_CODEC   "mpeg1_v4l2m2m"
++#define MPEG2_FFMPEG_CODEC   "mpeg2_v4l2m2m"
++#define VC1_FFMPEG_CODEC     "vc1_v4l2m2m"
++#define VP8_FFMPEG_CODEC     "vp8_v4l2m2m"
++
+ enum DecoderState
+ {
+   STATE_NONE,
+@@ -346,6 +356,41 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
+     pCodec = avcodec_find_decoder_by_name("av1");
+ 
+   if (!pCodec)
++  if(!m_useSoftDecoder)
++  {
++    switch(hints.codec)
++    {
++      case AV_CODEC_ID_MPEG4:
++        pCodec = avcodec_find_decoder_by_name(MPEG4_FFMPEG_CODEC);
++        break;
++      case AV_CODEC_ID_MPEG2TS:
++        pCodec = avcodec_find_decoder_by_name(MPEG2TS_FFMPEG_CODEC);
++        break;
++      case AV_CODEC_ID_H263:
++        pCodec = avcodec_find_decoder_by_name(H263_FFMPEG_CODEC);
++        break;
++      case AV_CODEC_ID_H264:
++        pCodec = avcodec_find_decoder_by_name(H264_FFMPEG_CODEC);
++        break;
++      case AV_CODEC_ID_MPEG1VIDEO:
++        pCodec = avcodec_find_decoder_by_name(MPEG1_FFMPEG_CODEC);
++        break;
++      case AV_CODEC_ID_MPEG2VIDEO:
++        pCodec = avcodec_find_decoder_by_name(MPEG2_FFMPEG_CODEC);
++        break;
++      case AV_CODEC_ID_VC1:
++        pCodec = avcodec_find_decoder_by_name(VC1_FFMPEG_CODEC);
++        break;
++      case AV_CODEC_ID_VP8:
++        pCodec = avcodec_find_decoder_by_name(VP8_FFMPEG_CODEC);
++        break;
++      default:
++        pCodec = avcodec_find_decoder(hints.codec);
++        break;
++    }
++  }
++
++  if(pCodec == NULL)
+     pCodec = avcodec_find_decoder(hints.codec);
+ 
+   if(pCodec == NULL)
+@@ -446,7 +491,7 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
+   }
+ 
+   UpdateName();
+-  const char* pixFmtName = av_get_pix_fmt_name(m_pCodecContext->pix_fmt);
++  const char* pixFmtName = av_get_pix_fmt_name(GetFormat(m_pCodecContext, &m_pCodecContext->pix_fmt));
+   m_processInfo.SetVideoDimensions(m_pCodecContext->coded_width, m_pCodecContext->coded_height);
+   m_processInfo.SetVideoPixelFormat(pixFmtName ? pixFmtName : "");
+ 
+@@ -529,15 +574,22 @@ void CDVDVideoCodecFFmpeg::SetFilters()
+ 
+ void CDVDVideoCodecFFmpeg::UpdateName()
+ {
++  bool isHW = false;
+   if(m_pCodecContext->codec->name)
++  {
+     m_name = std::string("ff-") + m_pCodecContext->codec->name;
++    if(strstr(m_pCodecContext->codec->name, "v4l2m2m") != NULL)
++      isHW = true;
++  }
+   else
+     m_name = "ffmpeg";
+ 
+   if(m_pHardware)
++  {
+     m_name += "-" + m_pHardware->Name();
+-
+-  m_processInfo.SetVideoDecoderName(m_name, m_pHardware ? true : false);
++    isHW = true;
++  }
++  m_processInfo.SetVideoDecoderName(m_name, isHW ? true : false);
+ 
+   CLog::Log(LOGDEBUG, "CDVDVideoCodecFFmpeg - Updated codec: {}", m_name);
+ }
+@@ -784,8 +836,14 @@ CDVDVideoCodec::VCReturn CDVDVideoCodecFFmpeg::GetPicture(VideoPicture* pVideoPi
+   if (m_pDecodedFrame->interlaced_frame)
+     m_interlaced = true;
+   else
++  {
+     m_interlaced = false;
+-
++    if (m_useSoftDecoder)
++    {
++      m_useSoftDecoder = false;
++      return VC_REOPEN;
++    }
++  }
+   if (!m_processInfo.GetVideoInterlaced() && m_interlaced)
+     m_processInfo.SetVideoInterlaced(m_interlaced);
+ 
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.h b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.h
+index 86c83cd1a0..a5552d3350 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.h
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.h
+@@ -95,6 +95,7 @@ protected:
+   bool m_requestSkipDeint = false;
+   int m_codecControlFlags = 0;
+   bool m_interlaced = false;
++  bool m_useSoftDecoder = true;
+   double m_DAR = 1.0;
+   CDVDStreamInfo m_hints;
+   CDVDCodecOptions m_options;
+diff --git a/xbmc/windowing/Resolution.cpp b/xbmc/windowing/Resolution.cpp
+index 4dcd2480ff..78e37add98 100644
+--- a/xbmc/windowing/Resolution.cpp
++++ b/xbmc/windowing/Resolution.cpp
+@@ -70,6 +70,8 @@ float RESOLUTION_INFO::DisplayRatio() const
+ 
+ RESOLUTION CResolutionUtils::ChooseBestResolution(float fps, int width, int height, bool is3D)
+ {
++  fps = static_cast<float>(std::round(fps));
++
+   RESOLUTION res = CServiceBroker::GetWinSystem()->GetGfxContext().GetVideoResolution();
+   float weight;
+ 
+diff --git a/xbmc/windowing/gbm/GBMUtils.cpp b/xbmc/windowing/gbm/GBMUtils.cpp
+index 5267c93c8f..bc0a9b1c96 100644
+--- a/xbmc/windowing/gbm/GBMUtils.cpp
++++ b/xbmc/windowing/gbm/GBMUtils.cpp
+@@ -74,24 +74,28 @@ CGBMUtils::CGBMDevice::CGBMSurface::CGBMSurface(gbm_surface* surface) : m_surfac
+ {
+ }
+ 
++#define MAX_SURFACE_BUFFERS 3
+ CGBMUtils::CGBMDevice::CGBMSurface::CGBMSurfaceBuffer* CGBMUtils::CGBMDevice::CGBMSurface::
+     LockFrontBuffer()
+ {
+-  m_buffers.emplace(std::make_unique<CGBMSurfaceBuffer>(m_surface));
+-
+-  if (!static_cast<bool>(gbm_surface_has_free_buffers(m_surface)))
++ /* Fix for ODROID XU4, gbm_surface_has_free_buffers doesn't seem to report if there
++  * are no buffers available instead GEM buffers are running out, so we manually empty
++  * the buffers here for a maximum of three
++  */
++  std::call_once(
++     flag, [this]() { CLog::Log(LOGDEBUG, "CGBMUtils - using {} buffers", MAX_SURFACE_BUFFERS); });
++
++  if (m_buffers.size() >= MAX_SURFACE_BUFFERS)
+   {
+-    /*
+-     * We want to use call_once here because we want it to be logged the first time that
+-     * we have to release buffers. This means that the maximum amount of buffers had been reached.
+-     * For mesa this should be 4 buffers but it may vary across other implementations.
+-     */
+-    std::call_once(
+-        flag, [this]() { CLog::Log(LOGDEBUG, "CGBMUtils - using {} buffers", m_buffers.size()); });
+-
+-    m_buffers.pop();
++     while (!m_buffers.empty())
++     {
++       m_buffers.front();
++       m_buffers.pop();
++     }
+   }
+ 
++  m_buffers.emplace(std::make_unique<CGBMSurfaceBuffer>(m_surface));
++
+   return m_buffers.back().get();
+ }
+ 
+diff --git a/xbmc/windowing/gbm/WinSystemGbmEGLContext.cpp b/xbmc/windowing/gbm/WinSystemGbmEGLContext.cpp
+index 83a59413f7..dbddbbbd55 100644
+--- a/xbmc/windowing/gbm/WinSystemGbmEGLContext.cpp
++++ b/xbmc/windowing/gbm/WinSystemGbmEGLContext.cpp
+@@ -23,7 +23,7 @@ bool CWinSystemGbmEGLContext::InitWindowSystemEGL(EGLint renderableType, EGLint
+     return false;
+   }
+ 
+-  if (!m_eglContext.CreatePlatformDisplay(m_GBM->GetDevice()->Get(), m_GBM->GetDevice()->Get()))
++  if (!m_eglContext.CreatePlatformDisplay(m_GBM->GetDevice()->Get(), reinterpret_cast<EGLNativeDisplayType>(m_GBM->GetDevice()->Get())))
+   {
+     return false;
+   }
+diff --git a/xbmc/windowing/gbm/drm/DRMUtils.cpp b/xbmc/windowing/gbm/drm/DRMUtils.cpp
+index b424dffe80..9924756b7a 100644
+--- a/xbmc/windowing/gbm/drm/DRMUtils.cpp
++++ b/xbmc/windowing/gbm/drm/DRMUtils.cpp
+@@ -189,7 +189,7 @@ bool CDRMUtils::FindPlanes()
+     auto videoPlane = std::find_if(m_planes.begin(), m_planes.end(), [&i](auto& plane) {
+       if (plane->GetPossibleCrtcs() & (1 << i))
+       {
+-        return plane->SupportsFormat(DRM_FORMAT_NV12);
++	return (plane->SupportsFormat(DRM_FORMAT_NV12) || plane->SupportsFormat(DRM_FORMAT_XRGB8888));
+       }
+       return false;
+     });
+-- 
+2.17.1
+

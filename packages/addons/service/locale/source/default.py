@@ -38,8 +38,20 @@ class Monitor(xbmc.Monitor):
 
       if os.path.isdir(localepath) == False:
          os.environ['I18NPATH'] = i18npath
-         subprocess.call([os.path.join(path, 'bin/localedef'), '-f', charmap,
-                         '-i', locale, localepath])
+         rc = subprocess.run([os.path.join(path, 'bin/localedef'), '-v', '-f', charmap,
+                              '-i', locale, localepath], capture_output=True,
+                             stdin=subprocess.DEVNULL)
+
+         if rc.returncode not in [0, 1]:
+            xbmc.log(repr(rc), xbmc.LOGERROR)
+            try:
+               os.rmdir(localepath)
+            except OSError as e:
+               pass
+            if os.path.isfile(profile):
+               os.unlink(profile)
+            xbmcgui.Dialog().ok('Locale', strings(30004).format(lang))
+            return
 
       if os.path.isdir(profiled) == False:
          os.makedirs(profiled)
