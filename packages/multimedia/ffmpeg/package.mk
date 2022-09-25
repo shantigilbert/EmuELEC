@@ -5,7 +5,7 @@
 PKG_NAME="ffmpeg"
 PKG_LICENSE="LGPLv2.1+"
 PKG_SITE="https://ffmpeg.org"
-PKG_DEPENDS_TARGET="toolchain zlib bzip2 openssl speex SDL2 lame"
+PKG_DEPENDS_TARGET="toolchain zlib bzip2 openssl speex SDL2 lame x264"
 PKG_LONGDESC="FFmpeg is a complete, cross-platform solution to record, convert and stream audio and video."
 PKG_BUILD_FLAGS="-gold"
 
