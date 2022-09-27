@@ -5,4 +5,4 @@ SRCDIR="$BUILD/image/system/usr/share/bootloader"
 DSTDIR="$RELEASE_DIR/3rdparty/bootloader"
 
 mkdir -p "$DSTDIR/dtb"
-  cp -a "$SRCDIR"/*xu4.dtb "$DSTDIR/dtb"
+  cp -a "$SRCDIR"/*xu{3,4}.dtb "$DSTDIR/dtb"

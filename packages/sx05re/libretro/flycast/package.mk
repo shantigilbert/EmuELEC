@@ -19,7 +19,8 @@
 ################################################################################
 
 PKG_NAME="flycast"
-PKG_VERSION="7457db8bba3277dcc9b4ec0c3556847f5082a455"
+PKG_VERSION="$(get_pkg_version flycastsa)"
+PKG_NEED_UNPACK="$(get_pkg_directory flycastsa)"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/flyinghead/flycast"

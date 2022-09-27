@@ -2,11 +2,11 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libidn2"
-PKG_VERSION="2.3.2"
-PKG_SHA256="76940cd4e778e8093579a9d195b25fff5e936e9dc6242068528b437a76764f91"
+PKG_VERSION="2.3.3"
+PKG_SHA256="f3ac987522c00d33d44b323cae424e2cffcb4c63c6aa6cd1376edacbf1c36eb0"
 PKG_LICENSE="LGPL3"
 PKG_SITE="https://www.gnu.org/software/libidn/"
-PKG_URL="http://ftpmirror.gnu.org/gnu/libidn/libidn2-${PKG_VERSION}.tar.gz"
+PKG_URL="https://ftpmirror.gnu.org/gnu/libidn/libidn2-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="Free software implementation of IDNA2008, Punycode and TR46."
 

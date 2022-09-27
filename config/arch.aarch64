@@ -39,5 +39,5 @@
   TARGET_CFLAGS="-march=${TARGET_VARIANT}${TARGET_CPU_FLAGS} -mabi=lp64 -Wno-psabi -mtune=$TARGET_CPU"
 # Disable runtime checking support of ARMv8.0's optional LSE feature. Breaks gdb and mesa compile.
   TARGET_CFLAGS="${TARGET_CFLAGS} -mno-outline-atomics"
-  TARGET_LDFLAGS="-march=${TARGET_VARIANT}${TARGET_CPU_FLAGS} -mtune=$TARGET_CPU"
+  TARGET_LDFLAGS=""
   TARGET_ARCH_GCC_OPTS="--with-abi=lp64 --with-arch=$TARGET_VARIANT"

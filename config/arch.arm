@@ -71,5 +71,5 @@
 # setup ARCH specific *FLAGS
   TARGET_CFLAGS="-march=$TARGET_VARIANT -mtune=$TARGET_CPU -mabi=aapcs-linux -Wno-psabi -Wa,-mno-warn-deprecated"
   [ -n "$TARGET_FPU" ] && TARGET_CFLAGS="$TARGET_CFLAGS $TARGET_FPU_FLAGS"
-  TARGET_LDFLAGS="-march=$TARGET_VARIANT -mtune=$TARGET_CPU"
+  TARGET_LDFLAGS=""
   TARGET_ARCH_GCC_OPTS="--with-abi=aapcs-linux --with-arch=$TARGET_SUBARCH --with-float=$TARGET_FLOAT --with-fpu=$TARGET_FPU"

@@ -3,11 +3,11 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="xz"
-PKG_VERSION="5.2.5"
-PKG_SHA256="5117f930900b341493827d63aa910ff5e011e0b994197c3b71c08a20228a42df"
+PKG_VERSION="5.2.6"
+PKG_SHA256="e076ba3439cb7cfc45b908c869f51a8c89f3c9ee9ee982fde28849c015e723a7"
 PKG_LICENSE="GPL"
-PKG_SITE="http://tukaani.org/xz/"
-PKG_URL="http://tukaani.org/xz/${PKG_NAME}-${PKG_VERSION}.tar.bz2"
+PKG_SITE="https://tukaani.org/xz/"
+PKG_URL="https://tukaani.org/xz/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_HOST="ccache:host"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="A free general-purpose data compression software with high compression ratio."

@@ -24,27 +24,6 @@ diff --git a/Core/Config.h b/Core/Config.h
  	int iAnalogFpsLimit;
  	int iAnalogFpsMode; // 0 = auto, 1 = single direction, 2 = mapped to opposite
  	int iMaxRecent;
-diff --git a/Core/HLE/sceDisplay.cpp b/Core/HLE/sceDisplay.cpp
---- b/Core/HLE/sceDisplay.cpp
-+++ a/Core/HLE/sceDisplay.cpp
-@@ -928,7 +928,7 @@ u32 sceDisplaySetFramebuf(u32 topaddr, int linesize, int pixelformat, int sync)
- 
- 	s64 delayCycles = 0;
- 	// Don't count transitions between display off and display on.
-+	if (topaddr != 0 && topaddr != framebuf.topaddr && framebuf.topaddr != 0 && g_Config.iForceMaxEmulatedFPS > 0) {
--	if (topaddr != 0 && topaddr != framebuf.topaddr && framebuf.topaddr != 0 && PSP_CoreParameter().compat.flags().ForceMax60FPS) {
- 		// sceDisplaySetFramebuf() isn't supposed to delay threads at all.  This is a hack.
- 		// So let's only delay when it's more than 1ms.
- 		const s64 FLIP_DELAY_CYCLES_MIN = usToCycles(1000);
-@@ -952,7 +952,7 @@ u32 sceDisplaySetFramebuf(u32 topaddr, int linesize, int pixelformat, int sync)
- 		}
- 
- 		// 1001 to account for NTSC timing (59.94 fps.)
-+		u64 expected = msToCycles(1001) / g_Config.iForceMaxEmulatedFPS - LEEWAY_CYCLES_PER_FLIP;
--		u64 expected = msToCycles(1001) / 60 - LEEWAY_CYCLES_PER_FLIP;
- 		lastFlipCycles = now;
- 		nextFlipCycles = std::max(lastFlipCycles, nextFlipCycles) + expected;
- 	}
 diff --git a/UI/GameSettingsScreen.cpp b/UI/GameSettingsScreen.cpp
 --- b/UI/GameSettingsScreen.cpp
 +++ a/UI/GameSettingsScreen.cpp
@@ -183,27 +162,31 @@ diff --git a/libretro/libretro.cpp b/libretro/libretro.cpp
 MRFIXIT: Add logic for "Auto" (default PSP behavior - pull value from compat.ini)
 --- b/Core/HLE/sceDisplay.cpp
 +++ a/Core/HLE/sceDisplay.cpp
-@@ -998,8 +998,13 @@
+@@ -821,12 +821,16 @@
+ 
  	hleEatCycles(290);
  
- 	s64 delayCycles = 0;
-+
 +	int MaxFPS = g_Config.iForceMaxEmulatedFPS;
 +	if (MaxFPS == 0 && PSP_CoreParameter().compat.flags().ForceMax60FPS) {
 +		MaxFPS = 60;
 +	}
+ 	s64 delayCycles = 0;
  	// Don't count transitions between display off and display on.
--	if (topaddr != 0 && topaddr != framebuf.topaddr && framebuf.topaddr != 0 && g_Config.iForceMaxEmulatedFPS > 0) {
-+	if (topaddr != 0 && topaddr != framebuf.topaddr && framebuf.topaddr != 0 && MaxFPS > 0) {
+ 	if (topaddr != 0 &&
+ 		(topaddr != framebuf.topaddr || PSP_CoreParameter().compat.flags().SplitFramebufferMargin) &&
+ 		framebuf.topaddr != 0 &&
+-		PSP_CoreParameter().compat.flags().ForceMax60FPS) {
++		MaxFPS > 0) {
  		// sceDisplaySetFramebuf() isn't supposed to delay threads at all.  This is a hack.
  		// So let's only delay when it's more than 1ms.
  		const s64 FLIP_DELAY_CYCLES_MIN = usToCycles(1000);
-@@ -1023,7 +1028,7 @@
+@@ -850,7 +854,7 @@
  		}
  
  		// 1001 to account for NTSC timing (59.94 fps.)
--		u64 expected = msToCycles(1001) / g_Config.iForceMaxEmulatedFPS - LEEWAY_CYCLES_PER_FLIP;
-+		u64 expected = msToCycles(1001) / MaxFPS - LEEWAY_CYCLES_PER_FLIP;
+-		u64 expected = msToCycles(1001) / framerate - LEEWAY_CYCLES_PER_FLIP;
++		u64 expected = msToCycles(1001) / g_Config.iForceMaxEmulatedFPS - LEEWAY_CYCLES_PER_FLIP;
  		lastFlipCycles = now;
  		nextFlipCycles = std::max(lastFlipCycles, nextFlipCycles) + expected;
  	}
+

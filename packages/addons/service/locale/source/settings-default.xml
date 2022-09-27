@@ -1,4 +1,4 @@
-<settings>
-    <setting id="charmap" value="UTF-8" />
-    <setting id="locale" value="en_GB" />
+<settings version="2">
+    <setting id="charmap" default="true">UTF-8</setting>
+    <setting id="locale" default="true>en_GB</setting>
 </settings>

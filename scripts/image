@@ -512,7 +512,7 @@ if [ "${1}" = "release" -o "${1}" = "mkimage" -o "${1}" = "noobs" ]; then
   fi
 fi
 
-if [ -d "${BUILD}/qa_checks" -a -n "$(ls -1 ${BUILD}/qa_checks/)" ]; then
+if [ -n "$(ls -1 ${BUILD}/qa_checks/ 2>/dev/null)" ]; then
   log_qa_check "qa_issues" "QA issues present, please fix!\n$(find ${BUILD}/qa_checks/* -type f ! -name qa_issues)\n"
 fi
 
