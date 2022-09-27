@@ -74,9 +74,9 @@ RUNTHIS='/usr/bin/retroarch $VERBOSE -L /tmp/cores/${EMU}_libretro.so --config $
 # very WIP {
 
 BEZ=$(get_ee_setting bezels.enabled)
-[ "$BEZ" == "1" ] && ${TBASH} /usr/bin/bezels.sh "$PLATFORM" "${ROMNAME}" || ${TBASH} /usr/bin/bezels.sh "default"
+[ "$BEZ" == "1" ] && ${TBASH} /usr/bin/bezels.sh gameloading "$PLATFORM" "${ROMNAME}" || ${TBASH} gameloading /usr/bin/bezels.sh "default"
 SPL=$(get_ee_setting splash.enabled)
-[ "$SPL" == "1" ] && ${TBASH} /usr/bin/show_splash.sh "$PLATFORM" "${ROMNAME}" || ${TBASH} /usr/bin/show_splash.sh "default" 
+[ "$SPL" == "1" ] && ${TBASH} /usr/bin/show_splash.sh gameloading "$PLATFORM" "${ROMNAME}" || ${TBASH} gameloading /usr/bin/show_splash.sh "default" 
 
 # } very WIP 
 
