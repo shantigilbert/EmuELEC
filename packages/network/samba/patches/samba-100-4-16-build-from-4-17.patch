@@ -1,0 +1,733 @@
+From cf43283d9dac9116e178364b1005a32756fffa75 Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Sat, 19 Feb 2022 08:52:17 +0100
+Subject: [PATCH 1/8] buildtools: Reformat shell scripts
+
+shfmt -f buildtools | xargs shfmt -w -p -i 0 -fn
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Andrew Bartlett <abartlet@samba.org>
+(cherry picked from commit 2d5d88ff34532ba2d78997467e5720bba480f07e)
+---
+ buildtools/compare_config_h4.sh   |  4 +-
+ buildtools/compare_generated.sh   | 59 ++++++++++++++-------------
+ buildtools/compare_install.sh     |  4 +-
+ buildtools/scripts/abi_gen.sh     | 22 +++++------
+ buildtools/scripts/autogen-waf.sh |  6 +--
+ buildtools/testwaf.sh             | 66 +++++++++++++++----------------
+ 6 files changed, 80 insertions(+), 81 deletions(-)
+
+diff --git a/buildtools/compare_config_h4.sh b/buildtools/compare_config_h4.sh
+index b78b36fdd0fa..fee8abfbd503 100755
+--- a/buildtools/compare_config_h4.sh
++++ b/buildtools/compare_config_h4.sh
+@@ -3,8 +3,8 @@
+ # compare the generated config.h from a waf build with existing samba
+ # build
+ 
+-grep "^.define" bin/default/source4/include/config.h | sort > waf-config.h
+-grep "^.define" $HOME/samba_old/source4/include/config.h | sort > old-config.h
++grep "^.define" bin/default/source4/include/config.h | sort >waf-config.h
++grep "^.define" $HOME/samba_old/source4/include/config.h | sort >old-config.h
+ 
+ comm -23 old-config.h waf-config.h
+ 
+diff --git a/buildtools/compare_generated.sh b/buildtools/compare_generated.sh
+index ebef8a979bde..e62657958139 100755
+--- a/buildtools/compare_generated.sh
++++ b/buildtools/compare_generated.sh
+@@ -10,41 +10,40 @@ gen_files=$(cd bin/default && find . -type f -name '*.[ch]')
+ 
+ strip_file()
+ {
+-    in_file=$1
+-    out_file=$2
+-    cat $in_file |
+-                   grep -v 'The following definitions come from' |
+-		   grep -v 'Automatically generated at' |
+-		   grep -v 'Generated from' |
+-                   sed 's|/home/tnagy/samba/source4||g' |
+-                   sed 's|/home/tnagy/samba/|../|g' |
+-                   sed 's|bin/default/source4/||g' |
+-                   sed 's|bin/default/|../|g' |
+-                   sed 's/define _____/define ___/g' |
+-                   sed 's/define __*/define _/g' |
+-                   sed 's/define _DEFAULT_/define _/g' |
+-                   sed 's/define _SOURCE4_/define ___/g' |
+-                   sed 's/define ___/define _/g' |
+-                   sed 's/ifndef ___/ifndef _/g' |
+-                   sed 's|endif /* ____|endif /* __|g' |
+-		   sed s/__DEFAULT_SOURCE4/__/ |
+-                   sed s/__DEFAULT_SOURCE4/__/ |
+-		   sed s/__DEFAULT/____/  	   > $out_file
++	in_file=$1
++	out_file=$2
++	cat $in_file |
++		grep -v 'The following definitions come from' |
++		grep -v 'Automatically generated at' |
++		grep -v 'Generated from' |
++		sed 's|/home/tnagy/samba/source4||g' |
++		sed 's|/home/tnagy/samba/|../|g' |
++		sed 's|bin/default/source4/||g' |
++		sed 's|bin/default/|../|g' |
++		sed 's/define _____/define ___/g' |
++		sed 's/define __*/define _/g' |
++		sed 's/define _DEFAULT_/define _/g' |
++		sed 's/define _SOURCE4_/define ___/g' |
++		sed 's/define ___/define _/g' |
++		sed 's/ifndef ___/ifndef _/g' |
++		sed 's|endif /* ____|endif /* __|g' |
++		sed s/__DEFAULT_SOURCE4/__/ |
++		sed s/__DEFAULT_SOURCE4/__/ |
++		sed s/__DEFAULT/____/ >$out_file
+ }
+ 
+ compare_file()
+ {
+-    f=$f
+-    bname=$(basename $f)
+-    t1=/tmp/$bname.old.$$
+-    t2=/tmp/$bname.new.$$
+-    strip_file $old_build/$f $t1
+-    strip_file bin/default/$f     $t2
+-    diff -u -b $t1 $t2 2>&1
+-    rm -f $t1 $t2
++	f=$f
++	bname=$(basename $f)
++	t1=/tmp/$bname.old.$$
++	t2=/tmp/$bname.new.$$
++	strip_file $old_build/$f $t1
++	strip_file bin/default/$f $t2
++	diff -u -b $t1 $t2 2>&1
++	rm -f $t1 $t2
+ }
+ 
+ for f in $gen_files; do
+-    compare_file $f
++	compare_file $f
+ done
+-
+diff --git a/buildtools/compare_install.sh b/buildtools/compare_install.sh
+index b964117550b6..37772a46a4ca 100755
+--- a/buildtools/compare_install.sh
++++ b/buildtools/compare_install.sh
+@@ -3,6 +3,6 @@
+ prefix1="$1"
+ prefix2="$2"
+ 
+-(cd $prefix1 && find . ) | sort > p1.txt
+-(cd $prefix2 && find . ) | sort > p2.txt
++(cd $prefix1 && find .) | sort >p1.txt
++(cd $prefix2 && find .) | sort >p2.txt
+ diff -u p[12].txt
+diff --git a/buildtools/scripts/autogen-waf.sh b/buildtools/scripts/autogen-waf.sh
+index 7a6e94c5ec4d..a0ed80c33fa6 100755
+--- a/buildtools/scripts/autogen-waf.sh
++++ b/buildtools/scripts/autogen-waf.sh
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+ 
+-p=`dirname $0`
++p=$(dirname $0)
+ 
+ echo "Setting up for waf build"
+ 
+@@ -13,12 +13,12 @@ echo "Found buildtools in $p/$d"
+ 
+ echo "Setting up configure"
+ rm -f $p/configure $p/include/config*.h*
+-sed "s|BUILDTOOLS|$d|g;s|BUILDPATH|$p|g" < "$p/$d/scripts/configure.waf" > $p/configure
++sed "s|BUILDTOOLS|$d|g;s|BUILDPATH|$p|g" <"$p/$d/scripts/configure.waf" >$p/configure
+ chmod +x $p/configure
+ 
+ echo "Setting up Makefile"
+ rm -f $p/makefile $p/Makefile
+-sed "s|BUILDTOOLS|$d|g" < "$p/$d/scripts/Makefile.waf" > $p/Makefile
++sed "s|BUILDTOOLS|$d|g" <"$p/$d/scripts/Makefile.waf" >$p/Makefile
+ 
+ echo "done. Now run $p/configure or $p/configure.developer then make."
+ if [ $p != "." ]; then
+diff --git a/buildtools/testwaf.sh b/buildtools/testwaf.sh
+index 127e52589103..3e8e6431c783 100755
+--- a/buildtools/testwaf.sh
++++ b/buildtools/testwaf.sh
+@@ -9,52 +9,52 @@ cd $d/..
+ PREFIX=$HOME/testprefix
+ 
+ if [ $# -gt 0 ]; then
+-    tests="$*"
++	tests="$*"
+ else
+-    tests="lib/replace lib/talloc lib/tevent lib/tdb lib/ldb"
++	tests="lib/replace lib/talloc lib/tevent lib/tdb lib/ldb"
+ fi
+ 
+ echo "testing in dirs $tests"
+ 
+ for d in $tests; do
+-    echo "`date`: testing $d"
+-    pushd $d
+-    rm -rf bin
+-    type waf
+-    waf dist
+-    ./configure -C --enable-developer --prefix=$PREFIX
+-    time make
+-    make install
+-    make distcheck
+-    case $d in
++	echo "$(date): testing $d"
++	pushd $d
++	rm -rf bin
++	type waf
++	waf dist
++	./configure -C --enable-developer --prefix=$PREFIX
++	time make
++	make install
++	make distcheck
++	case $d in
+ 	"lib/ldb")
+-	    ldd bin/ldbadd
+-	    ;;
++		ldd bin/ldbadd
++		;;
+ 	"lib/replace")
+-	    ldd bin/replace_testsuite
+-	    ;;
++		ldd bin/replace_testsuite
++		;;
+ 	"lib/talloc")
+-	    ldd bin/talloc_testsuite
+-	    ;;
++		ldd bin/talloc_testsuite
++		;;
+ 	"lib/tdb")
+-	    ldd bin/tdbtool
+-	    ;;
+-    esac
+-    popd
++		ldd bin/tdbtool
++		;;
++	esac
++	popd
+ done
+ 
+ echo "testing python portability"
+ pushd lib/talloc
+ versions="python2.4 python2.5 python2.6 python3.0 python3.1"
+ for p in $versions; do
+-    ret=$(which $p || echo "failed")
+-    if [ $ret = "failed" ]; then
+-        echo "$p not found, skipping"
+-        continue
+-    fi
+-    echo "Testing $p"
+-    $p ../../buildtools/bin/waf configure -C --enable-developer --prefix=$PREFIX
+-    $p ../../buildtools/bin/waf build install
++	ret=$(which $p || echo "failed")
++	if [ $ret = "failed" ]; then
++		echo "$p not found, skipping"
++		continue
++	fi
++	echo "Testing $p"
++	$p ../../buildtools/bin/waf configure -C --enable-developer --prefix=$PREFIX
++	$p ../../buildtools/bin/waf build install
+ done
+ popd
+ 
+@@ -62,9 +62,9 @@ echo "testing cross compiling"
+ pushd lib/talloc
+ ret=$(which arm-linux-gnueabi-gcc || echo "failed")
+ if [ $ret != "failed" ]; then
+-    CC=arm-linux-gnueabi-gcc ./configure -C --prefix=$PREFIX  --cross-compile --cross-execute='runarm'
+-    make && make install
++	CC=arm-linux-gnueabi-gcc ./configure -C --prefix=$PREFIX --cross-compile --cross-execute='runarm'
++	make && make install
+ else
+-    echo "Cross-compiler not installed, skipping test"
++	echo "Cross-compiler not installed, skipping test"
+ fi
+ popd
+-- 
+2.25.1
+
+
+From bccb8b807bb1c00ffc2cd95cadfee253eb0d0cff Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Mon, 28 Mar 2022 12:38:02 +0200
+Subject: [PATCH 2/8] buildtools: remove unused testwaf.sh
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Andrew Bartlett <abartlet@samba.org>
+(cherry picked from commit 42eeed05f1aed10b48f7008a18e47cf15ac2c010)
+---
+ buildtools/testwaf.sh | 70 -------------------------------------------
+ 1 file changed, 70 deletions(-)
+ delete mode 100755 buildtools/testwaf.sh
+
+diff --git a/buildtools/testwaf.sh b/buildtools/testwaf.sh
+deleted file mode 100755
+index 3e8e6431c783..000000000000
+--- a/buildtools/testwaf.sh
++++ /dev/null
+@@ -1,70 +0,0 @@
+-#!/bin/bash
+-
+-set -e
+-set -x
+-
+-d=$(dirname $0)
+-
+-cd $d/..
+-PREFIX=$HOME/testprefix
+-
+-if [ $# -gt 0 ]; then
+-	tests="$*"
+-else
+-	tests="lib/replace lib/talloc lib/tevent lib/tdb lib/ldb"
+-fi
+-
+-echo "testing in dirs $tests"
+-
+-for d in $tests; do
+-	echo "$(date): testing $d"
+-	pushd $d
+-	rm -rf bin
+-	type waf
+-	waf dist
+-	./configure -C --enable-developer --prefix=$PREFIX
+-	time make
+-	make install
+-	make distcheck
+-	case $d in
+-	"lib/ldb")
+-		ldd bin/ldbadd
+-		;;
+-	"lib/replace")
+-		ldd bin/replace_testsuite
+-		;;
+-	"lib/talloc")
+-		ldd bin/talloc_testsuite
+-		;;
+-	"lib/tdb")
+-		ldd bin/tdbtool
+-		;;
+-	esac
+-	popd
+-done
+-
+-echo "testing python portability"
+-pushd lib/talloc
+-versions="python2.4 python2.5 python2.6 python3.0 python3.1"
+-for p in $versions; do
+-	ret=$(which $p || echo "failed")
+-	if [ $ret = "failed" ]; then
+-		echo "$p not found, skipping"
+-		continue
+-	fi
+-	echo "Testing $p"
+-	$p ../../buildtools/bin/waf configure -C --enable-developer --prefix=$PREFIX
+-	$p ../../buildtools/bin/waf build install
+-done
+-popd
+-
+-echo "testing cross compiling"
+-pushd lib/talloc
+-ret=$(which arm-linux-gnueabi-gcc || echo "failed")
+-if [ $ret != "failed" ]; then
+-	CC=arm-linux-gnueabi-gcc ./configure -C --prefix=$PREFIX --cross-compile --cross-execute='runarm'
+-	make && make install
+-else
+-	echo "Cross-compiler not installed, skipping test"
+-fi
+-popd
+-- 
+2.25.1
+
+
+From 8b609eb416bd737578a79beabb3bd736d341e326 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Mon, 28 Mar 2022 12:49:24 +0200
+Subject: [PATCH 3/8] lib/fuzzing/README.md: don't use waf directly
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Andrew Bartlett <abartlet@samba.org>
+(cherry picked from commit 10d69da1d34b2b11920d9bf051f5a26dbbcadf02)
+---
+ lib/fuzzing/README.md | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/lib/fuzzing/README.md b/lib/fuzzing/README.md
+index 33d33b923905..d3e34bd79a36 100644
+--- a/lib/fuzzing/README.md
++++ b/lib/fuzzing/README.md
+@@ -17,9 +17,9 @@ Example command line to build binaries for use with
+ [honggfuzz](https://github.com/google/honggfuzz/):
+ 
+ ```sh
+-buildtools/bin/waf -C --without-gettext --enable-debug --enable-developer \
++./configure -C --without-gettext --enable-debug --enable-developer \
+ 	--address-sanitizer --enable-libfuzzer --abi-check-disable \
+-	CC=.../honggfuzz/hfuzz_cc/hfuzz-clang configure \
++	CC=.../honggfuzz/hfuzz_cc/hfuzz-clang \
+ 	LINK_CC=.../honggfuzz/hfuzz_cc/hfuzz-clang
+ ```
+ 
+@@ -30,7 +30,7 @@ Example for fuzzing `tiniparser` using `honggfuzz` (see `--help` for more
+ options):
+ 
+ ```sh
+-buildtools/bin/waf --targets=fuzz_tiniparser build && \
++make bin/fuzz_tiniparser && \
+ .../honggfuzz/honggfuzz --sanitizers --timeout 3 --max_file_size 256 \
+   --rlimit_rss 100 -f .../tiniparser-corpus -- bin/fuzz_tiniparser
+ ```
+@@ -43,9 +43,9 @@ Example command line to build binaries for use with
+ [afl](http://lcamtuf.coredump.cx/afl/)
+ 
+ ```sh
+-buildtools/bin/waf -C --without-gettext --enable-debug --enable-developer \
++./configure -C --without-gettext --enable-debug --enable-developer \
+ 	--enable-afl-fuzzer --abi-check-disable \
+-	CC=afl-gcc configure
++	CC=afl-gcc
+ ```
+ 
+ ## Fuzzing tiniparser
+@@ -54,7 +54,7 @@ Example for fuzzing `tiniparser` using `afl-fuzz` (see `--help` for more
+ options):
+ 
+ ```sh
+-buildtools/bin/waf --targets=fuzz_tiniparser build && \
++make bin/fuzz_tiniparser build && \
+ afl-fuzz -m 200 -i inputdir -o outputdir -- bin/fuzz_tiniparser
+ ```
+ 
+-- 
+2.25.1
+
+
+From 16d566b1139f56686fac969d3bc362be162bad28 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Mon, 28 Mar 2022 12:50:55 +0200
+Subject: [PATCH 5/8] wafsamba: let test_duplicate_symbol.sh export
+ PYTHONHASHSEED=1
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Andrew Bartlett <abartlet@samba.org>
+(cherry picked from commit a6b1e4b5766205b7337e0e4b00944184289bfc36)
+---
+ buildtools/wafsamba/test_duplicate_symbol.sh | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/buildtools/wafsamba/test_duplicate_symbol.sh b/buildtools/wafsamba/test_duplicate_symbol.sh
+index 46f44a67dcf8..dffac7570022 100755
+--- a/buildtools/wafsamba/test_duplicate_symbol.sh
++++ b/buildtools/wafsamba/test_duplicate_symbol.sh
+@@ -5,6 +5,9 @@
+ 
+ subunit_start_test duplicate_symbols
+ 
++PYTHONHASHSEED=1
++export PYTHONHASHSEED
++
+ if $PYTHON ./buildtools/bin/waf build --dup-symbol-check; then
+ 	subunit_pass_test duplicate_symbols
+ else
+-- 
+2.25.1
+
+
+From 73295e83a14b1ed662ca842b531c1f84143301ca Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Mon, 28 Mar 2022 12:59:12 +0200
+Subject: [PATCH 6/8] configure/Makefile: export PYTHONHASHSEED=1 in all
+ 'configure/Makefile' scripts
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Andrew Bartlett <abartlet@samba.org>
+(cherry picked from commit 22c46d9f41876d9ec7187148e658d1692bf37cdd)
+---
+ buildtools/scripts/Makefile.waf  |  4 ++--
+ buildtools/scripts/configure.waf | 11 +++++++++--
+ configure                        |  4 ++++
+ ctdb/Makefile                    |  2 +-
+ ctdb/configure                   |  7 +++++++
+ lib/ldb/configure                |  7 +++++++
+ lib/replace/configure            |  7 +++++++
+ lib/talloc/configure             |  7 +++++++
+ lib/tdb/configure                |  7 +++++++
+ lib/tevent/configure             |  7 +++++++
+ 10 files changed, 58 insertions(+), 5 deletions(-)
+
+diff --git a/buildtools/scripts/Makefile.waf b/buildtools/scripts/Makefile.waf
+index 5fc939c99e03..a15a5f87607e 100644
+--- a/buildtools/scripts/Makefile.waf
++++ b/buildtools/scripts/Makefile.waf
+@@ -1,7 +1,7 @@
+ # simple makefile wrapper to run waf
+ 
+-WAF_BINARY=BUILDTOOLS/bin/waf
+-WAF=WAF_MAKE=1 $(WAF_BINARY)
++WAF_BINARY=$(PYTHON) BUILDTOOLS/bin/waf
++WAF=PYTHONHASHSEED=1 WAF_MAKE=1 $(WAF_BINARY)
+ 
+ all:
+ 	$(WAF) build
+diff --git a/buildtools/scripts/configure.waf b/buildtools/scripts/configure.waf
+index a7d8d1dbd641..ccb62849a54f 100755
+--- a/buildtools/scripts/configure.waf
++++ b/buildtools/scripts/configure.waf
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+ 
+-PREVPATH=`dirname $0`
++PREVPATH=$(dirname $0)
+ 
+ WAF=BUILDTOOLS/bin/waf
+ 
+@@ -9,6 +9,13 @@ WAF=BUILDTOOLS/bin/waf
+ JOBS=1
+ export JOBS
+ 
++# Make sure we don't have any library preloaded.
++unset LD_PRELOAD
++
++# Make sure we get stable hashes
++PYTHONHASHSEED=1
++export PYTHONHASHSEED
++
+ cd BUILDPATH || exit 1
+-$WAF configure "$@" || exit 1
++$PYTHON $WAF configure "$@" || exit 1
+ cd $PREVPATH
+diff --git a/configure b/configure
+index a6ca50feb470..9153c0e5f784 100755
+--- a/configure
++++ b/configure
+@@ -12,6 +12,10 @@ export JOBS
+ # Make sure we don't have any library preloaded.
+ unset LD_PRELOAD
+ 
++# Make sure we get stable hashes
++PYTHONHASHSEED=1
++export PYTHONHASHSEED
++
+ cd . || exit 1
+ $PYTHON $WAF configure "$@" || exit 1
+ cd $PREVPATH
+diff --git a/ctdb/Makefile b/ctdb/Makefile
+index ec362e294082..5dbc7acdc54e 100644
+--- a/ctdb/Makefile
++++ b/ctdb/Makefile
+@@ -1,7 +1,7 @@
+ # simple makefile wrapper to run waf
+ 
+ WAF_BINARY=$(PYTHON) ../buildtools/bin/waf
+-WAF=WAF_MAKE=1 $(WAF_BINARY)
++WAF=PYTHONHASHSEED=1 WAF_MAKE=1 $(WAF_BINARY)
+ 
+ all:
+ 	$(WAF) build
+diff --git a/ctdb/configure b/ctdb/configure
+index dbb0c1446b51..48b786b1612d 100755
+--- a/ctdb/configure
++++ b/ctdb/configure
+@@ -10,6 +10,13 @@ WAF=buildtools/bin/waf
+ JOBS=1
+ export JOBS
+ 
++# Make sure we don't have any library preloaded.
++unset LD_PRELOAD
++
++# Make sure we get stable hashes
++PYTHONHASHSEED=1
++export PYTHONHASHSEED
++
+ cd . || exit 1
+ $PYTHON $WAF configure "$@" || exit 1
+ cd $PREVPATH
+diff --git a/lib/ldb/configure b/lib/ldb/configure
+index 6c931bfbf5e2..28d62ab27ae2 100755
+--- a/lib/ldb/configure
++++ b/lib/ldb/configure
+@@ -16,6 +16,13 @@ fi
+ JOBS=1
+ export JOBS
+ 
++# Make sure we don't have any library preloaded.
++unset LD_PRELOAD
++
++# Make sure we get stable hashes
++PYTHONHASHSEED=1
++export PYTHONHASHSEED
++
+ cd . || exit 1
+ $PYTHON $WAF configure "$@" || exit 1
+ cd $PREVPATH
+diff --git a/lib/replace/configure b/lib/replace/configure
+index d8a8d2ac2f39..091f814e5f2c 100755
+--- a/lib/replace/configure
++++ b/lib/replace/configure
+@@ -16,6 +16,13 @@ fi
+ JOBS=1
+ export JOBS
+ 
++# Make sure we don't have any library preloaded.
++unset LD_PRELOAD
++
++# Make sure we get stable hashes
++PYTHONHASHSEED=1
++export PYTHONHASHSEED
++
+ cd . || exit 1
+ $PYTHON $WAF configure "$@" || exit 1
+ cd $PREVPATH
+diff --git a/lib/talloc/configure b/lib/talloc/configure
+index d8a8d2ac2f39..091f814e5f2c 100755
+--- a/lib/talloc/configure
++++ b/lib/talloc/configure
+@@ -16,6 +16,13 @@ fi
+ JOBS=1
+ export JOBS
+ 
++# Make sure we don't have any library preloaded.
++unset LD_PRELOAD
++
++# Make sure we get stable hashes
++PYTHONHASHSEED=1
++export PYTHONHASHSEED
++
+ cd . || exit 1
+ $PYTHON $WAF configure "$@" || exit 1
+ cd $PREVPATH
+diff --git a/lib/tdb/configure b/lib/tdb/configure
+index d8a8d2ac2f39..091f814e5f2c 100755
+--- a/lib/tdb/configure
++++ b/lib/tdb/configure
+@@ -16,6 +16,13 @@ fi
+ JOBS=1
+ export JOBS
+ 
++# Make sure we don't have any library preloaded.
++unset LD_PRELOAD
++
++# Make sure we get stable hashes
++PYTHONHASHSEED=1
++export PYTHONHASHSEED
++
+ cd . || exit 1
+ $PYTHON $WAF configure "$@" || exit 1
+ cd $PREVPATH
+diff --git a/lib/tevent/configure b/lib/tevent/configure
+index c3c444754e3d..0dc9bace4356 100755
+--- a/lib/tevent/configure
++++ b/lib/tevent/configure
+@@ -16,6 +16,13 @@ fi
+ JOBS=1
+ export JOBS
+ 
++# Make sure we don't have any library preloaded.
++unset LD_PRELOAD
++
++# Make sure we get stable hashes
++PYTHONHASHSEED=1
++export PYTHONHASHSEED
++
+ cd . || exit 1
+ $PYTHON $WAF configure "$@" || exit 1
+ cd $PREVPATH
+-- 
+2.25.1
+
+
+From 2cd1e53284c0c212c62d909028c5bd9872493934 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Mon, 28 Mar 2022 12:38:36 +0200
+Subject: [PATCH 7/8] ctdb/packaging/RPM: don't use waf directly
+
+./configure && make && make install is will always work.
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Andrew Bartlett <abartlet@samba.org>
+(cherry picked from commit aa02cf3c4449cb0a22da8f359f0b3edc4f1d9bb7)
+---
+ ctdb/packaging/RPM/ctdb.spec.in | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/ctdb/packaging/RPM/ctdb.spec.in b/ctdb/packaging/RPM/ctdb.spec.in
+index 80eb2945e419..ea5c5a256ec9 100644
+--- a/ctdb/packaging/RPM/ctdb.spec.in
++++ b/ctdb/packaging/RPM/ctdb.spec.in
+@@ -88,7 +88,7 @@ fi
+ export CC
+ 
+ CFLAGS="$RPM_OPT_FLAGS $EXTRA -D_GNU_SOURCE" \
+-$PYTHON ./buildtools/bin/waf configure \
++./configure \
+ 	--builtin-libraries=replace,popt \
+ 	--bundled-libraries=!talloc,!tevent,!tdb \
+ 	--minimum-library-version=talloc:%libtalloc_version,tdb:%libtdb_version,tevent:%libtevent_version \
+@@ -103,7 +103,7 @@ $PYTHON ./buildtools/bin/waf configure \
+ 	--mandir=%{_mandir} \
+ 	--localstatedir=%{_localstatedir}
+ 
+-$PYTHON ./buildtools/bin/waf build
++make -j
+ 
+ %install
+ # Clean up in case there is trash left from a previous build
+@@ -112,7 +112,7 @@ rm -rf $RPM_BUILD_ROOT
+ # Create the target build directory hierarchy
+ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/sudoers.d
+ 
+-DESTDIR=$RPM_BUILD_ROOT $PYTHON ./buildtools/bin/waf install
++DESTDIR=$RPM_BUILD_ROOT make -j install
+ 
+ install -m644 config/ctdb.conf $RPM_BUILD_ROOT%{_sysconfdir}/ctdb
+ install -m644 config/ctdb.tunables $RPM_BUILD_ROOT%{_sysconfdir}/ctdb
+-- 
+2.25.1
+
+
+From 5a6029aa55d806647fe1e2e0c3a6ca58aaf79ca0 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Mon, 28 Mar 2022 13:00:03 +0200
+Subject: [PATCH 8/8] wafsamba: require PYTHONHASHSEED=1 to be exported
+
+This avoids a lot of trouble with random build failures,
+if people try to use waf directly.
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Andrew Bartlett <abartlet@samba.org>
+
+Autobuild-User(master): Andrew Bartlett <abartlet@samba.org>
+Autobuild-Date(master): Tue Mar 29 23:31:38 UTC 2022 on sn-devel-184
+
+(cherry picked from commit 420bbb1d92fd2a28725b53f425ba3d214831b660)
+
+The last 8 patches are backported to avoid people running into:
+https://bugzilla.samba.org/show_bug.cgi?id=15033
+and
+https://bugzilla.samba.org/show_bug.cgi?id=15037
+---
+ buildtools/wafsamba/wscript | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/buildtools/wafsamba/wscript b/buildtools/wafsamba/wscript
+index a4d6f3e5c49e..8729b0829daa 100644
+--- a/buildtools/wafsamba/wscript
++++ b/buildtools/wafsamba/wscript
+@@ -8,6 +8,10 @@ import wafsamba
+ from samba_utils import symlink
+ from optparse import SUPPRESS_HELP
+ 
++phs = os.environ.get("PYTHONHASHSEED", None)
++if phs != "1":
++    raise Errors.WafError('''PYTHONHASHSEED=1 missing! Don't use waf directly, use ./configure and make!''')
++
+ # this forces configure to be re-run if any of the configure
+ # sections of the build scripts change. We have to check
+ # for this in sys.argv as options have not yet been parsed when
+-- 
+2.25.1
+

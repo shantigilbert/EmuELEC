@@ -10,5 +10,7 @@ PKG_URL="https://github.com/mm2/Little-CMS/releases/download/lcms${PKG_VERSION}/
 PKG_DEPENDS_TARGET="toolchain tiff"
 PKG_LONGDESC="An small-footprint color management engine, with special focus on accuracy and performance."
 PKG_BUILD_FLAGS="+pic"
+PKG_TOOLCHAIN="autotools"
 
-PKG_MESON_OPTS_TARGET="--default-library static"
+PKG_CONFIGURE_OPTS_TARGET="--disable-shared \
+                           --enable-static"

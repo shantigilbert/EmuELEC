@@ -1,0 +1,22 @@
+From c4cff6859d183a40fb35a76e2bc1ce084b3a6d67 Mon Sep 17 00:00:00 2001
+From: Luke Howard <lukeh@padl.com>
+Date: Mon, 24 Dec 2018 02:21:32 +0000
+Subject: [PATCH] hx509: fix dependency, hxtool requires ASN.1 headers
+
+---
+ lib/hx509/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/hx509/Makefile.am b/lib/hx509/Makefile.am
+index c7ef53182d..b21d85202c 100644
+--- a/lib/hx509/Makefile.am
++++ b/lib/hx509/Makefile.am
+@@ -164,7 +164,7 @@ hxtool-commands.c hxtool-commands.h: hxtool-commands.in $(SLC)
+ dist_hxtool_SOURCES = hxtool.c
+ nodist_hxtool_SOURCES = hxtool-commands.c hxtool-commands.h
+ 
+-$(hxtool_OBJECTS): hxtool-commands.h hx509_err.h
++$(hxtool_OBJECTS): hxtool-commands.h $(nodist_include_HEADERS)
+ 
+ hxtool_LDADD = \
+ 	libhx509.la \

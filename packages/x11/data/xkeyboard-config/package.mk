@@ -3,13 +3,14 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="xkeyboard-config"
-PKG_VERSION="2.36"
-PKG_SHA256="1f1bb1292a161d520a3485d378609277d108cd07cde0327c16811ff54c3e1595"
+PKG_VERSION="2.34"
+PKG_SHA256="b321d27686ee7e6610ffe7b56e28d5bbf60625a1f595124cd320c0caa717b8ce"
 PKG_LICENSE="MIT"
-PKG_SITE="https://www.X.org"
-PKG_URL="https://www.x.org/releases/individual/data/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+PKG_SITE="http://www.X.org"
+PKG_URL="http://www.x.org/releases/individual/data/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.tar.bz2"
 PKG_DEPENDS_TARGET="toolchain util-macros"
 PKG_LONGDESC="X keyboard extension data files."
+PKG_TOOLCHAIN="autotools"
 
 configure_package() {
   if [ "${DISPLAYSERVER}" = "x11" ]; then
@@ -18,13 +19,17 @@ configure_package() {
 }
 
 pre_configure_target() {
-  PKG_MESON_OPTS_TARGET="-Dcompat-rules=true \
-                         -Ddatadir=lib"
+  PKG_CONFIGURE_OPTS_TARGET="--without-xsltproc \
+                             --enable-compat-rules \
+                             --disable-runtime-deps \
+                             --enable-nls \
+                             --disable-rpath \
+                             --datadir=/usr/lib \
+                             --with-gnu-ld"
 
   if [ "${DISPLAYSERVER}" = "x11" ]; then
-    PKG_MESON_OPTS_TARGET+=" -Dxkb-base=${XORG_PATH_XKB} \
-                            -Dxorg-rules-symlinks=true"
-  else
-    PKG_MESON_OPTS_TARGET+=" -Dxorg-rules-symlinks=false"
+    PKG_CONFIGURE_OPTS_TARGET+=" XKBCOMP=/usr/bin/xkbcomp \
+                               --with-xkb-base=${XORG_PATH_XKB} \
+                               --with-xkb-rules-symlink=xorg"
   fi
 }

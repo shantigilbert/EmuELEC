@@ -1,0 +1,29 @@
+From 22352b90e78e2d162b98b5ef6c84672c397be40a Mon Sep 17 00:00:00 2001
+From: Lars Wendler <polynomial-c@gentoo.org>
+Date: Wed, 17 Mar 2021 17:49:18 +0100
+Subject: [PATCH] autoconf-2.70 fix
+
+autoconf-2.70 and newer are more strict with quoting etc. and thus generate
+a broken configure file:
+
+  configure: 20855: Syntax error: ")" unexpected (expecting "fi")
+
+Gentoo-bug: https://bugs.gentoo.org/776241
+Signed-off-by: Lars Wendler <polynomial-c@gentoo.org>
+---
+ cf/check-var.m4 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cf/check-var.m4 b/cf/check-var.m4
+index 2fd7bca6f0..71d6f70ca8 100644
+--- a/cf/check-var.m4
++++ b/cf/check-var.m4
+@@ -20,7 +20,7 @@ AC_MSG_RESULT($ac_foo)
+ if test "$ac_foo" = yes; then
+ 	AC_DEFINE_UNQUOTED(AS_TR_CPP(HAVE_[]$1), 1, 
+ 		[Define if you have the `]$1[' variable.])
+-	m4_ifval([$2], AC_CHECK_DECLS([$1],[],[],[$2]))
++	m4_ifval([$2], [AC_CHECK_DECLS([$1],[],[],[$2])])
+ fi
+ ])
+ 

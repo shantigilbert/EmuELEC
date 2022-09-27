@@ -62,14 +62,7 @@ fi
 
 ROMNAME=$(basename $1)
 AUTOGP=$(get_ee_setting advmame_auto_gamepad)
-
-# Hack - Set the crash stack size to 0 to prevent program doing a large dump of poo.
-CRASH_STACK_SIZE=$( ulimit -c )
-
 [[ "${AUTOGP}" != "0" ]] && set_advmame_joy.sh "$ROMNAME"
-
-# Hack - Revert crash stack size so it can poo nicely.
-ulimit -c $CRASH_STACK_SIZE
 
 ARG=$(echo basename $1 | sed 's/\.[^.]*$//')
 ARG="$(echo $1 | sed 's=.*/==;s/\.[^.]*$//')"

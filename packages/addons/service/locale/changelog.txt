@@ -1,6 +1,3 @@
-103:
-- Fix localedef call, add error detection
-
 102:
 - Include localedef
 

@@ -9,6 +9,7 @@ PKG_SITE="https://github.com/FFmpeg/nv-codec-headers"
 PKG_URL="https://github.com/FFmpeg/nv-codec-headers/archive/n${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="FFmpeg version of headers required to interface with Nvidias codec APIs."
+PKG_TOOLCHAIN="make"
 
 makeinstall_target(){
   make DESTDIR=${SYSROOT_PREFIX} PREFIX=/usr install

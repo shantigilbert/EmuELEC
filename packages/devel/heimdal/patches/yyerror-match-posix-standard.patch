@@ -1,0 +1,83 @@
+From 79b8337d54b2d85f73eff2d033ca592447ac5fce Mon Sep 17 00:00:00 2001
+From: heitbaum <rudi@heitbaum.com>
+Date: Fri, 10 Sep 2021 00:28:16 +1000
+Subject: [PATCH] yyerror: update to POSIX standard
+
+To comply with the latest POSIX standard, in Yacc compatibility mode
+(options `-y`/`--yacc`) Bison now generates prototypes for yyerror and
+yylex.  In some situations, this is breaking compatibility: if the user
+has already declared these functions but with some differences (e.g., to
+declare them as static, or to use specific attributes), the generated
+parser will fail to compile.  To disable these prototypes, #define yyerror
+(to `yyerror`), and likewise for yylex.
+
+refer: https://git.savannah.gnu.org/cgit/bison.git/tree/NEWS
+
+GNU Bison 3.8
+---
+ lib/asn1/asn1parse.y | 1 +
+ lib/com_err/parse.y  | 5 +++--
+ lib/sl/slc-lex.l     | 2 +-
+ lib/sl/slc.h         | 3 ++-
+ 4 files changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/lib/asn1/asn1parse.y b/lib/asn1/asn1parse.y
+index 9d8b76f582..91b163a28b 100644
+--- a/lib/asn1/asn1parse.y
++++ b/lib/asn1/asn1parse.y
+@@ -65,6 +65,7 @@ static void validate_object_set(IOSObjectSet *);
+ static struct constraint_spec *new_constraint_spec(enum ctype);
+ static Type *new_tag(int tagclass, int tagvalue, int tagenv, Type *oldtype);
+ void yyerror (const char *);
++#define yyerror yyerror
+ static struct objid *new_objid(const char *label, int value);
+ static void add_oid_to_tail(struct objid *, struct objid *);
+ static void fix_labels(Symbol *s);
+diff --git a/lib/com_err/parse.y b/lib/com_err/parse.y
+index 0c2e5084b5..bcb9b05204 100644
+--- a/lib/com_err/parse.y
++++ b/lib/com_err/parse.y
+@@ -35,7 +35,8 @@
+ #include "compile_et.h"
+ #include "lex.h"
+ 
+-void yyerror (char *s);
++void yyerror (const char *s);
++#define yyerror yyerror
+ static long name2number(const char *str);
+ 
+ extern char *yytext;
+@@ -168,7 +169,7 @@ name2number(const char *str)
+ }
+ 
+ void
+-yyerror (char *s)
++yyerror (const char *s)
+ {
+      _lex_error_message ("%s\n", s);
+ }
+diff --git a/lib/sl/slc-lex.l b/lib/sl/slc-lex.l
+index 50965bccd7..3a37302336 100644
+--- a/lib/sl/slc-lex.l
++++ b/lib/sl/slc-lex.l
+@@ -78,7 +78,7 @@ error_message (const char *format, ...)
+ }
+ 
+ void
+-yyerror (char *s)
++yyerror (const char *s)
+ {
+     error_message("%s\n", s);
+ }
+diff --git a/lib/sl/slc.h b/lib/sl/slc.h
+index 6e45ed2f15..e4dc2cba6b 100644
+--- a/lib/sl/slc.h
++++ b/lib/sl/slc.h
+@@ -51,5 +51,6 @@ extern char *filename;
+ extern int error_flag;
+ void error_message (const char *format, ...);
+ int yylex(void);
+-void yyerror (char *s);
++void yyerror (const char *s);
++#define yyerror yyerror
+ extern unsigned lineno;

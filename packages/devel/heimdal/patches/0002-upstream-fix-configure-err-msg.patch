@@ -1,0 +1,24 @@
+From 5e7bc8d8811fa401fa14adb9787504c0b460c7df Mon Sep 17 00:00:00 2001
+From: Earl Chew <earl_chew@yahoo.com>
+Date: Wed, 20 May 2020 09:46:28 -0700
+Subject: [PATCH] [libedit/configure.ac] Refactor tgetent message to reflect
+ libraries searched
+
+Signed-off-by: Earl Chew <earl_chew@yahoo.com>
+---
+ lib/libedit/configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/libedit/configure.ac b/lib/libedit/configure.ac
+index 89a9376b06..b94bafc6b9 100644
+--- a/lib/libedit/configure.ac
++++ b/lib/libedit/configure.ac
+@@ -37,7 +37,7 @@ EL_MANTYPE
+ AC_CHECK_LIB(curses, tgetent,,
+    [AC_CHECK_LIB(ncurses, tgetent,,
+       [AC_CHECK_LIB(tinfo, tgetent,,
+-         [AC_MSG_ERROR([libcurses or libncurses are required!])] )] )] )
++         [AC_MSG_ERROR([libcurses, libncurses, or tinfo are required!])] )] )] )
+ 
+ 
+ # Checks for header files.

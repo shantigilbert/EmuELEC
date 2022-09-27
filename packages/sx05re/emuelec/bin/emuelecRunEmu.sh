@@ -8,8 +8,6 @@
 
 # This whole file has become very hacky, I am sure there is a better way to do all of this, but for now, this works.
 
-blank_buffer
-
 if [ -f "/usr/bin/odroidgoa_utils.sh" ]; then
     DEFBRIGHT=$(get_ee_setting brightness.level)
     RACONF=/storage/.config/retroarch/retroarch.cfg
@@ -80,7 +78,7 @@ ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
 GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
-SET_DISPLAY_SH="setres.sh"
+[ -f "/emuelec/bin/setres.sh" ] && SET_DISPLAY_SH="/emuelec/bin/setres.sh" || SET_DISPLAY_SH="/usr/bin/setres.sh"
 VIDEO="$(cat /sys/class/display/mode)"
 VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
 
@@ -128,13 +126,15 @@ if [[ $arguments != *"--NOLOG"* ]]; then
     VERBOSE="-v"
 fi
 
-# Show splash screen if enabled
-SPL=$(get_ee_setting ee_splash.enabled)
-[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh gameloading "$PLATFORM" "${ROMNAME}" || sleep 3
-
 # Set the display video to that of the emulator setting.
 [ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
 
+# Show splash screen if enabled
+SPL=$(get_ee_setting ee_splash.enabled)
+[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}"
+
+# Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
@@ -431,13 +431,9 @@ if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do al
     eval echo ${RUNTHIS} >> $EMUELECLOG
 fi
 
-if [[ "${KILLTHIS}" == "advmame" ]]; then
-    gptokeyb 1 ${KILLTHIS} -killsignal 3 &
-else
+if [[ "${KILLTHIS}" != "none" ]]; then
     gptokeyb 1 ${KILLTHIS} &
 fi
-
-blank_buffer
 
 # Execute the command and try to output the results to the log file if it was not disabled.
 if [[ $LOGEMU == "Yes" ]]; then
@@ -448,9 +444,7 @@ else
    echo "Emulator log was dissabled" >> $EMUELECLOG
    eval ${RUNTHIS} > /dev/null 2>&1
    ret_error=$?
-fi
-
-blank_buffer
+fi 
 
 # clear terminal window
 	reset > /dev/tty < /dev/null 2>&1
@@ -461,12 +455,11 @@ blank_buffer
 # Return to default mode
 $TBASH $SET_DISPLAY_SH $VIDEO
 
-sleep 3 && check_hard_kill "${KILL_THIS}" &
+# Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # Show exit splash
 ${TBASH} show_splash.sh exit
-sleep 4
-
 
 # Just in case
 kill_video_controls
@@ -546,10 +539,8 @@ if [[ "$ret_error" != "0" ]]; then
 
     # Since the error was not because of missing BIOS but we did get an error, display the log to find out
     [[ "$ret_bios" == "0" ]] && text_viewer -e -w -t "Error! ${PLATFORM}-${EMULATOR}-${CORE}-${ROMNAME}" -f 24 ${EMUELECLOG}
-    blank_buffer
     exit 1
 else
     echo "exit 0" >> $EMUELECLOG
-    blank_buffer
     exit 0
 fi

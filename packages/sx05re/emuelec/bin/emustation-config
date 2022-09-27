@@ -11,7 +11,6 @@
 
 function check_pwd() {
 
-CONFIG_FLASH="/flash/config.ini"
 EE_CONF="${EE_DIR}/configs/emuelec.conf"
 ESSETTINGS="/storage/.config/emulationstation/es_settings.cfg"
 
@@ -285,31 +284,5 @@ if [[ "$BTENABLED" == "1" ]]; then
 fi
 
 emuelec-utils setauddev
-
-DEFE=""
-
-# If the video-mode is contained in flash config.
-if [ -s "${CONFIG_FLASH}" ]; then
-  CFG_VAL=$(get_config_value "$CONFIG_FLASH" "vout")
-  [ ! -z "$CFG_VAL" ] && DEFE="$CFG_VAL" && set_ee_setting ee_videomode $DEFE
-fi
-
-# Otherwise retrieve via normal methods.
-if [ -z "$DEFE" ]; then
-  if [ -s "/storage/.config/EE_VIDEO_MODE" ]; then
-      DEFE=$(cat /storage/.config/EE_VIDEO_MODE) && \
-        set_ee_setting ee_videomode $DEFE && \
-        mv /storage/.config/EE_VIDEO_MODE /storage/.config/EE_VIDEO_MODE_2
-  fi
-fi
-
-if [ -z "$DEFE" ]; then
-  # Set video mode, this has to be done before starting ES
-  DEFE=$(get_ee_setting ee_videomode)
-fi
-
-# finally we correct the FB according to video mode
-[[ ! -z "$DEFE" ]] && setres.sh ${DEFE}
-
 
 exit 0

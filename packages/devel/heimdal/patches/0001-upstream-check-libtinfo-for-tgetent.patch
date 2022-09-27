@@ -1,0 +1,52 @@
+From 872222db35384f343a8a566a56a28c4eb73d38ed Mon Sep 17 00:00:00 2001
+From: Damir Franusic <df@release14.org>
+Date: Sun, 9 Dec 2018 19:50:47 +0100
+Subject: [PATCH] AC_FIND_FUNC_NO_LIBS should check libtinfo for tgetent
+
+---
+ configure.ac             | 2 +-
+ lib/libedit/config.h.in  | 3 +++
+ lib/libedit/configure.ac | 3 ++-
+ 3 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index f1e8d7b15e..f98a3c555e 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -456,7 +456,7 @@ AC_FIND_FUNC_NO_LIBS(openpty, util,[
+ #endif
+ ],[0,0,0,0,0])
+ 
+-AC_FIND_FUNC_NO_LIBS(tgetent, termcap ncurses curses,[
++AC_FIND_FUNC_NO_LIBS(tgetent, termcap ncurses curses tinfo,[
+ #ifdef HAVE_TERMCAP_H
+ #include <termcap.h>
+ #endif
+diff --git a/lib/libedit/config.h.in b/lib/libedit/config.h.in
+index ba283cc39f..059e5abc6a 100644
+--- a/lib/libedit/config.h.in
++++ b/lib/libedit/config.h.in
+@@ -42,6 +42,9 @@
+ /* Define to 1 if you have the `ncurses' library (-lncurses). */
+ #undef HAVE_LIBNCURSES
+ 
++/* Define to 1 if you have the `tinfo' library (-ltinfo). */
++#undef HAVE_LIBTINFO
++
+ /* Define to 1 if you have the <limits.h> header file. */
+ #undef HAVE_LIMITS_H
+ 
+diff --git a/lib/libedit/configure.ac b/lib/libedit/configure.ac
+index 90c8ca57d7..89a9376b06 100644
+--- a/lib/libedit/configure.ac
++++ b/lib/libedit/configure.ac
+@@ -36,7 +36,8 @@ EL_MANTYPE
+ 
+ AC_CHECK_LIB(curses, tgetent,,
+    [AC_CHECK_LIB(ncurses, tgetent,,
+-      [AC_MSG_ERROR([libcurses or libncurses are required!])] )] )
++      [AC_CHECK_LIB(tinfo, tgetent,,
++         [AC_MSG_ERROR([libcurses or libncurses are required!])] )] )] )
+ 
+ 
+ # Checks for header files.

@@ -1,0 +1,19 @@
+# Kodi Media Center language file
+msgid ""
+msgstr ""
+
+msgctxt "#30000"
+msgid "Configuration"
+msgstr ""
+
+msgctxt "#30001"
+msgid "Charmap"
+msgstr ""
+
+msgctxt "#30002"
+msgid "Locale"
+msgstr ""
+
+msgctxt "#30003"
+msgid "Locale changed to {}. Please reboot to apply globally."
+msgstr ""

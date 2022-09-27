@@ -1,0 +1,39 @@
+diff -Naur a/configure.ac b/configure.ac
+--- a/configure.ac	2018-01-31 11:06:08.000000000 -0800
++++ b/configure.ac	2018-12-05 16:32:04.016734637 -0800
+@@ -2,13 +2,6 @@
+ AC_CONFIG_SRCDIR(rules/base.xml.in)
+ AM_INIT_AUTOMAKE([foreign dist-bzip2])
+ 
+-# Require X.Org macros 1.12 or later for XORG_WITH_XSLTPROC
+-m4_ifndef([XORG_MACROS_VERSION],
+-          [m4_fatal([must install xorg-macros 1.12 or later before
+-          running autoconf/autogen])])
+-XORG_MACROS_VERSION(1.12)
+-XORG_MANPAGE_SECTIONS
+-XORG_WITH_XSLTPROC
+ AC_PROG_SED
+ 
+ AC_SUBST(VERSION)
+diff -Naur a/man/Makefile.am b/man/Makefile.am
+--- a/man/Makefile.am	2018-01-31 11:06:08.000000000 -0800
++++ b/man/Makefile.am	2018-12-05 16:35:35.787618428 -0800
+@@ -1,18 +1,2 @@
+ EXTRA_DIST = man.xsl
+ 
+-if HAVE_XSLTPROC
+-miscmandir = $(MISC_MAN_DIR)
+-miscman_PRE = xkeyboard-config.man
+-miscman_DATA = $(miscman_PRE:man=@MISC_MAN_SUFFIX@)
+-CLEANFILES = $(miscman_DATA) $(miscman_PRE)
+-SUFFIXES = .$(MISC_MAN_SUFFIX) .man
+-MAN_SUBSTS += -e 's|__xkb_base__|$(xkb_base)|g'
+-
+-xkeyboard-config.man: $(top_srcdir)/rules/evdev.xml $(srcdir)/man.xsl
+-	$(XSLTPROC) -nonet $(srcdir)/man.xsl $(top_srcdir)/rules/evdev.xml > $@
+-
+-# First sed swaps @appmansuffix@ back to __appmansuffix__ for the MAN_SUBSTS
+-.man.$(MISC_MAN_SUFFIX):
+-	$(SED) -e 's|@\(\<[a-z_]*\>\)@|__\1__|g' < $< | $(SED) $(MAN_SUBSTS) > $@
+-
+-endif

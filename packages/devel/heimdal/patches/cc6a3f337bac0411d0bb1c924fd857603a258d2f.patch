@@ -1,0 +1,22 @@
+From cc6a3f337bac0411d0bb1c924fd857603a258d2f Mon Sep 17 00:00:00 2001
+From: Nicolas Williams <nico@twosigma.com>
+Date: Tue, 17 Mar 2020 19:46:37 -0500
+Subject: [PATCH] hcrypto: Fix Makefile build race
+
+---
+ lib/hcrypto/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/hcrypto/Makefile.am b/lib/hcrypto/Makefile.am
+index 195117d174..3c6ee3ca84 100644
+--- a/lib/hcrypto/Makefile.am
++++ b/lib/hcrypto/Makefile.am
+@@ -298,7 +298,7 @@ ltmsources = \
+ 	libtommath/bn_mp_to_unsigned_bin_n.c
+ 
+ 
+-$(libhcrypto_la_OBJECTS): hcrypto-link
++$(libhcrypto_la_OBJECTS) $(test_rand_OBJECTS): hcrypto-link
+ 
+ libhcrypto_la_CPPFLAGS = -DBUILD_HCRYPTO_LIB $(AM_CPPFLAGS)
+ 

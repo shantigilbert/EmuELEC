@@ -10,9 +10,7 @@
 
 . /etc/profile
 
-ACTION_TYPE="$1"
-PLATFORM="$2"
-
+PLATFORM="$1"
 GAMELOADINGSPLASH="/storage/.config/splash/loading-game.png"
 BLANKSPLASH="/storage/.config/splash/blank.png"
 DEFAULTSPLASH="/storage/.config/splash/splash-1080.png"
@@ -38,20 +36,13 @@ case $PLATFORM in
   ;;
 esac
 
-MODE=`cat /sys/class/display/mode`;
-SPLASHDIR="/storage/roms/splash"
-  
-if [ "$ACTION_TYPE" == "intro" ] || [ "$ACTION_TYPE" == "exit" ]; then
+if [ "$PLATFORM" == "intro" ] || [ "$PLATFORM" == "exit" ]; then
 	SPLASH=${DEFAULTSPLASH}
-elif [ "$ACTION_TYPE" == "blank" ]; then
+elif [ "$PLATFORM" == "blank" ]; then
   SPLASH=${BLANKSPLASH}
-elif [ "$ACTION_TYPE" == "gameloading" ]; then
-  if [[ "$MODE" == *"x"* ]]; then
-    GAMELOADINGSPLASH="${SPLASHDIR}/loading-game-2.png"
-    SIZE="NONE"
-  fi
-
-	ROMNAME=$(basename "${3%.*}")
+else
+	SPLASHDIR="/storage/roms/splash"
+	ROMNAME=$(basename "${2%.*}")
 	SPLMAP="/emuelec/bezels/arcademap.cfg"
 	SPLNAME=$(sed -n "/`echo ""$PLATFORM"_"${ROMNAME}" = "`/p" "$SPLMAP")
 	REALSPL="${SPLNAME#*\"}"
@@ -91,66 +82,57 @@ SPLASHVID5="$SPLASHDIR/launching.mp4"
 	elif [ -f "$SPLASH5" ]; then
 		SPLASH="$SPLASH5"
 	else
-		SPLASH="${GAMELOADINGSPLASH}"
+		SPLASH=${GAMELOADINGSPLASH}
 	fi
 fi
 
 # Odroid Go Advance still does not support splash screens
 SS_DEVICE=0
-if [[ "$EE_DEVICE" == "OdroidGoAdvance" ]] || [[ "$EE_DEVICE" == "GameForce" ]]; then
+if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
   SS_DEVICE=1
   clear > /dev/console
   echo "Loading ..." > /dev/console
   PLAYER="mpv"
 fi
 
-if [[ "$SIZE" != "NONE" ]]; then
-  case "$MODE" in
-  		480*)
-  			SIZE=" -x 720 -y 480"
-  		;;
-  		576*)
-  			SIZE=" -x 768 -y 576"
-  		;;
-  		720*)
-  			SIZE=" -x 1280 -y 720"
-  		;;
-  		1080*)
-  			SIZE=" -x 1920 -y 1080"
-  		;;
-      2160*)
-        SIZE=" -x 3840 -y 2160"
-        ;;
-  		1280x1024*)
-  			SIZE=" -x 1280 -y 1024"
-  		;;
-  		1024x768*)
-  			SIZE=" -x 1024 -y 768"
-  		;;
-      800x600*)
-  			SIZE=" -x 800 -y 600"
-  		;;      
-  		640x480*)
-  			SIZE=" -x 640 -y 480"
-  		;;
-  		*)
-  			SIZE=" -x 1920 -y 1080"
-  		;;
-  esac
-else
-  SIZE=""
-fi
+MODE=`cat /sys/class/display/mode`;
+case "$MODE" in
+		480*)
+			SIZE=" -x 720 -y 480"
+		;;
+		576*)
+			SIZE=" -x 768 -y 576"
+		;;
+		720*)
+			SIZE=" -x 1280 -y 720"
+		;;
+		1080*)
+			SIZE=" -x 1920 -y 1080"
+		;;
+		1280x1024*)
+			SIZE=" -x 1280 -y 1024"
+		;;
+		1024x768*)
+			SIZE=" -x 1024 -y 768"
+		;;
+		640x480*)
+			SIZE=" -x 640 -y 480"
+		;;
+		*)
+			SIZE=" -x 1920 -y 1080"
+		;;
+esac
 
 # Blank screen needs to fill entire screen.
-if [ "$ACTION_TYPE" == "blank" ]; then
+if [ "$PLATFORM" == "blank" ]; then
   SIZE=" -x 3840 -y 2160"
 fi
 
 
-[[ "${ACTION_TYPE}" != "intro" ]] && VIDEO=0 || VIDEO=$(get_ee_setting ee_bootvideo.enabled)
+[[ "${PLATFORM}" != "intro" ]] && VIDEO=0 || VIDEO=$(get_ee_setting ee_bootvideo.enabled)
 
 if [[ -f "/storage/.config/emuelec/configs/novideo" ]] && [[ ${VIDEO} != "1" ]]; then
-	if [ "$ACTION_TYPE" != "intro" ]; then
+	if [ "$PLATFORM" != "intro" ]; then
 	if [ "$SS_DEVICE" == 1 ]; then
         $PLAYER "$SPLASH" > /dev/null 2>&1
     else
