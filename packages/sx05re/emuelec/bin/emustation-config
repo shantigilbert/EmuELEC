@@ -10,7 +10,6 @@
 
 function check_pwd() {
 
-EE_CONF="${EE_DIR}/configs/emuelec.conf"
 ESSETTINGS="/storage/.config/emulationstation/es_settings.cfg"
 
 PWDFILE="${1}"
