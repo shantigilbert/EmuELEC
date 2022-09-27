@@ -8,15 +8,6 @@
 
 # This whole file has become very hacky, I am sure there is a better way to do all of this, but for now, this works.
 
-killemulator() {
-  PNAME="$1"
-  blank_buffer
-  killall "$P_NAME"
-  blank_buffer
-  sleep 2
-}
-
-
 blank_buffer
 
 if [ -f "/usr/bin/odroidgoa_utils.sh" ]; then
