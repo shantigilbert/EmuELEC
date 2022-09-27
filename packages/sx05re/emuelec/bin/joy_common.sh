@@ -23,34 +23,27 @@ jc_get_players() {
 
 # Dump gamepad information
   cat /proc/bus/input/devices \
-    | grep -E -B 5 -A 3 "H\: Handlers=(js[0-9] event[0-9]+)|(event[0-9]+ js[0-9])" \
+    | grep -E -B 5 -A 3 "H\: Handlers=(js[0-9] event[0-9])|(event[0-9] js[0-9])" \
     | grep -Ew -B 8 "B: KEY\=[0-9a-f ]+" > /tmp/input_devices
 
 # Determine how many gamepads/players are connected
-  JOYS=$(ls -A1 /dev/input/js* | sort )
-  if [[ -f "/storage/.config/EE_JOY_ORDER_NEW" ]]; then
-    JOYS=$(cat /tmp/input_devices | grep -A2 "S: Sysfs=" \
-      | awk '/^S:/ {s=$0} /^H:/ {print s "\t" $0}' | sort -t $'\t' -k2 \
-      | sed 's,.*\(.\{4\}\)$,\1,' | sed 's/ //g')
-  fi
-
+  JOYS=$(ls -A1 /dev/input/js*| sort )
+  
   declare -a PLAYER_CFGS=()
-
+  
   for dev in $(echo $JOYS); do
-    local JSI=$dev
-    local DETAILS=$(cat /tmp/input_devices \
-        | grep -E "H\: Handlers=(${JSI} event[0-9]+)|(event[0-9]+ ${JSI})" -B 5)
-    
-    local PROC_GUID=$(echo "${DETAILS}" | grep I: | sed "s|I:\ Bus=||" | sed "s|\ Vendor=||" | sed "s|\ Product=||" | sed "s|\ Version=||")
+   
+    JOY_INDEX=$(basename $dev)
+   
+    PROC_GUID=$(cat /tmp/input_devices | grep ${JOY_INDEX} -B 5 | grep I: | sed "s|I:\ Bus=||" | sed "s|\ Vendor=||" | sed "s|\ Product=||" | sed "s|\ Version=||")
     local DEVICE_GUID=$(jc_generate_guid ${PROC_GUID})
+
     [[ -z "${DEVICE_GUID}" ]] && continue
 
-    local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep "platform:Linux" | head -1)
-    echo "GC_CONFIG=$GC_CONFIG"
-    [[ -z $GC_CONFIG ]] && continue
-
-    local JOY_NAME=$(echo "${DETAILS}" | grep -E "^N\: Name.*[\= ]?.*$" | cut -d "=" -f 2 | tr -d '"')
-    [[ -z "$JOY_NAME" ]] && continue
+    local JOY_DETAIL=$(jc_get_device_detail "${DEVICE_GUID}")
+    [[ "$JOY_DETAIL" == 0 ]] && continue
+    local JSI=$(echo "$JOY_DETAIL" | cut -d' ' -f1)
+    local JOY_NAME=$(echo "$JOY_DETAIL" | cut -d' ' -f2-)
 
     # Add the joy config to array if guid and joyname set.
     if [[ ! -z "${DEVICE_GUID}" && ! -z "$JOY_NAME" ]]; then
@@ -123,3 +116,36 @@ jc_generate_guid() {
   echo "$v"
 }
 
+jc_get_device_detail() {
+  local GUID="${1}"
+
+  v=${DEVICE_GUID:0:8}
+  local p1=$(echo ${v:6:2}${v:4:2}${v:2:2}${v:0:2}) # Bus, generally not needed
+  local v=${GUID:8:8}
+  local p2=$(echo ${v:6:2}${v:4:2}${v:2:2}${v:0:2}) # Vendor
+  v=${GUID:16:8}
+  local p3=$(echo ${v:6:2}${v:4:2}${v:2:2}${v:0:2}) # Product
+  v=${GUID:24:8}
+  local p4=$(echo ${v:6:2}${v:4:2}${v:2:2}${v:0:2}) # Version
+
+  local vendor=$(echo ${p2:4})
+  local product=$(echo ${p3:4})
+  local version=$(echo ${p4:4})
+
+  local I_REGEX="^I\: .* Vendor\=${vendor} Product\=${product} Version\=${version}$"
+  local EE_DEV=$(cat /tmp/input_devices | grep -Ew -A 8 "$I_REGEX" | head -n8)
+
+  declare -i REC_INDEX=$(cat /tmp/input_devices | grep -n -E "$I_REGEX" | cut -d':' -f1 | head -n1 )
+  declare -i REC_LENGTH=$(( REC_INDEX + 9 ))
+  sed -i "${REC_INDEX},${REC_LENGTH}d" /tmp/input_devices
+
+  local JSI=$(echo -e "${EE_DEV}" | grep "H: Handlers" | sed -E 's/.*H: Handlers=.*(js[0-9]).*/\1/' | head -n1 )
+  
+  if [[ ! -z "${EE_DEV}" ]]; then
+    local JOY_NAME=$(echo "${EE_DEV}" | grep -E "^N\: Name.*[\= ]?.*$" \
+      | cut -d "=" -f 2 | tr -d '"')
+    echo "${JSI} ${JOY_NAME}"
+    return
+  fi
+  echo "0"
+}
