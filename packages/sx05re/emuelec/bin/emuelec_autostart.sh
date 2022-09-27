@@ -12,6 +12,8 @@
 CONFIG_FLASH="/flash/config.ini"
 CONFIG_DIR="/storage/.emulationstation"
 CONFIG_DIR2="/storage/.config/emulationstation"
+VIDEO_FILE="/storage/.config/EE_VIDEO_MODE"
+VIDEO_MODE="/sys/class/display/mode"
 
 if [ ! -L "$CONFIG_DIR" ]; then
 ln -sf $CONFIG_DIR2 $CONFIG_DIR
@@ -117,8 +119,37 @@ case "$DEFE" in
 	;;
 esac
 
-FILE_MODE="/sys/class/display/mode"
-[[ -f "$FILE_MODE" ]] && setres.sh
+# If the video-mode is contained in flash config.
+DEFE=""
+
+# FLASH CONFIG hdmimode takes priority 1.
+if [ -z "$DEFE" ]; then
+  CFG_VAL=$(get_config_value "$CONFIG_FLASH" "hdmimode")
+  if [[ ! -z "$CFG_VAL" ]]; then
+    DEFE="$CFG_VAL"
+    echo $DEFE > $VIDEO_FILE
+    set_ee_setting ee_videomode $DEFE
+  fi
+fi
+
+# Check for EE_VIDEO_MODE override 2nd.
+if [[ -z "$DEFE" && -f "$VIDEO_FILE" ]]; then
+  DEFE=$(cat $VIDEO_FILE)
+  set_ee_setting ee_videomode $DEFE
+fi
+
+# 3rd check ES for it's preferred resolution.
+if [ -z "$DEFE" ]; then
+  DEFE=$(get_ee_setting ee_videomode)
+  if [ "${DEFE}" == "Custom" ]; then
+      DEFE=$(cat $VIDEO_MODE)
+  fi
+  [[ ! -z "$DEFE" ]] && echo $DEFE > $VIDEO_FILE
+fi
+
+# Set video mode, this has to be done before starting ES
+# finally we correct the FB according to video mode
+[[ ! -z "$DEFE" ]] && [[ -f "$VIDEO_MODE" ]] && setres.sh ${DEFE}
 
 # Show splash creen 
 show_splash.sh intro

@@ -14,6 +14,8 @@ function check_pwd() {
 CONFIG_FLASH="/flash/config.ini"
 EE_CONF="${EE_DIR}/configs/emuelec.conf"
 ESSETTINGS="/storage/.config/emulationstation/es_settings.cfg"
+VIDEO_FILE="/storage/.config/EE_VIDEO_MODE"
+VIDEO_MODE="/sys/class/display/mode"
 
 PWDFILE="${1}"
 
@@ -286,30 +288,37 @@ fi
 
 emuelec-utils setauddev
 
+# If the video-mode is contained in flash config.
 DEFE=""
 
-# If the video-mode is contained in flash config.
-if [ -s "${CONFIG_FLASH}" ]; then
-  CFG_VAL=$(get_config_value "$CONFIG_FLASH" "vout")
-  [ ! -z "$CFG_VAL" ] && DEFE="$CFG_VAL" && set_ee_setting ee_videomode $DEFE
-fi
-
-# Otherwise retrieve via normal methods.
+# FLASH CONFIG hdmimode takes priority 1.
 if [ -z "$DEFE" ]; then
-  if [ -s "/storage/.config/EE_VIDEO_MODE" ]; then
-      DEFE=$(cat /storage/.config/EE_VIDEO_MODE) && \
-        set_ee_setting ee_videomode $DEFE && \
-        mv /storage/.config/EE_VIDEO_MODE /storage/.config/EE_VIDEO_MODE_2
+  CFG_VAL=$(get_config_value "$CONFIG_FLASH" "hdmimode")
+  if [[ ! -z "$CFG_VAL" ]]; then
+    DEFE="$CFG_VAL"
+    echo $DEFE > $VIDEO_FILE
+    set_ee_setting ee_videomode $DEFE
   fi
 fi
 
-if [ -z "$DEFE" ]; then
-  # Set video mode, this has to be done before starting ES
-  DEFE=$(get_ee_setting ee_videomode)
+# Check for EE_VIDEO_MODE override 2nd.
+if [[ -z "$DEFE" && -f "$VIDEO_FILE" ]]; then
+  DEFE=$(cat $VIDEO_FILE)
+  set_ee_setting ee_videomode $DEFE
 fi
 
+# 3rd check ES for it's preferred resolution.
+if [ -z "$DEFE" ]; then
+  DEFE=$(get_ee_setting ee_videomode)
+  if [ "${DEFE}" == "Custom" ]; then
+      DEFE=$(cat $VIDEO_MODE)
+  fi
+  [[ ! -z "$DEFE" ]] && echo $DEFE > $VIDEO_FILE
+fi
+
+# Set video mode, this has to be done before starting ES
 # finally we correct the FB according to video mode
-[[ ! -z "$DEFE" ]] && setres.sh ${DEFE}
+[[ ! -z "$DEFE" ]] && [[ -f "$VIDEO_MODE" ]] && setres.sh ${DEFE}
 
 
 exit 0
