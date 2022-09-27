@@ -14,29 +14,27 @@
 # Source predefined functions and variables
 . /etc/profile
 
-# Functions that are included in 99-emuelec.conf however since this file is
-# going to be tested by itself we need to include the dependent functions.
 
-# Hides the primary display buffer of having any colors by stopping to copy 
-# across chunks of data when the blank flag file is set too 1. When hide_buffer
-# is 0 it copies across chunks to the display.
-# arg1, 1 = Hides, 0 = Show.
-hide_buffer ()
-{
-  echo $1 > /sys/class/graphics/fb1/blank
-}
-
-# Basically sets all the data in the primary display buffer to zero so it does
-# not show any colors.
 blank_buffer()
 {
   # Blank the buffer.
-  dd if=/dev/zero of=/dev/fb0 bs=8M > /dev/null 2>&1
+  echo 1 > /sys/class/graphics/fb1/blank
+  dd if=/dev/zero of=/dev/fb1 bs=8M > /dev/null 2>&1
+  echo 0 > /sys/class/graphics/fb1/blank
+  echo 1 > /sys/class/graphics/fb0/blank
+  dd if=/dev/zero of=/dev/fb0 bs=32M > /dev/null 2>&1
+  echo 0 > /sys/class/graphics/fb0/blank
+  [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 }
+
 
 # Here we initialize any arguments and variables to be used in the script.
 # The Mode we want the display to change too.
 MODE=$1
+FORCE_RUN=$2
+
+
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # File location of the file that when written to switches the display to match
 # that screen resolution. Note - You do not have to alter anything else, if it's
@@ -52,14 +50,19 @@ SW=0
 # The current display mode before it may get changed below.
 OLD_MODE=$( cat ${FILE_MODE} )
 
+BORDER_VALS=$(get_ee_setting ee_videowindow)
+
 # If the current display is the same as the change just exit. First we hide the
 # primary display buffer by setting the fb1 blank flag so it stops copying chunks
 # of data on to the image, then we blank the buffer by setting all the bits to 0.
-if [[ ! -f "$FILE_MODE" || $MODE == "auto" ]]; then
-  hide_buffer 1
-  blank_buffer
-  hide_buffer 0
+if [[ ! -f "$FILE_MODE" ]] || [[ $MODE == "auto" ]]; then
   exit 0
+fi
+
+if [[ "$FORCE_RUN" == "" ]] && [[ "$MODE" == "$OLD_MODE" ]]; then
+  if [[ -z "${BORDER_VALS}" ]]; then
+    exit 0
+  fi
 fi
 
 
@@ -88,14 +91,17 @@ fi
 # This is needed to reset scaling.
 echo 0 > /sys/class/ppmgr/ppscaler
 
-# Here we first clear the primary display buffer of leftover artifacts then set
-# the secondary small buffers flag to stop copying across.
-blank_buffer
-hide_buffer 1
+[[ "$OLD_MODE" != "$MODE" ]] && 
+
+SWITCHED_MODES=0
 
 # This first checks that if you need to change the resolution and if so update
 # the file that switches the mode automatically if the value is valid if not exit.
 if [[ "$OLD_MODE" != "$MODE" ]]; then
+  # Here we first clear the primary display buffer of leftover artifacts then set
+  # the secondary small buffers flag to stop copying across.
+  blank_buffer
+
   case $MODE in
     480cvbs)
       echo 480cvbs > "${FILE_MODE}"
@@ -112,15 +118,17 @@ if [[ "$OLD_MODE" != "$MODE" ]]; then
   esac
   NEW_MODE=$(cat $FILE_MODE)
   if [[ "$NEW_MODE" != "$MODE" ]]; then
-    hide_buffer 0
     exit 0
+  else
+    SWITCHED_MODES=1
   fi  
 fi
 
 # Legacy code, we use to set the buffer that is used for small parts of graphics
 # like Cursors and Fonts but setting default 32 made ES Fonts dissappear.
-BUFF=64
-fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP  
+#BUFF=64
+#fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP  
+
 
 # Here we set the Height and Width of the particular resolution, RH and RW stands
 # for Real Width and Real Height respectively.
@@ -153,23 +161,23 @@ esac
 # Once we know the Width and Height is valid numbers we set the primary display
 # buffer, and we multiply the 2nd height by a factor of 2 I assume for interlaced 
 # support.
-if [[ -n "$SW" && "$SW" > 0 && -n "$SH" && "$SH" > 0 ]]; then
-  MSH=$(( SH*2 ))
-  fbset -fb /dev/fb0 -g $SW $SH $SW $MSH $BPP
-  echo 0 0 $(( SW-1 )) $(( SH-1 )) > /sys/class/graphics/fb0/free_scale_axis
-  echo 0 > /sys/class/graphics/fb0/free_scale
-  echo 0 > /sys/class/graphics/fb0/freescale_mode
+if [[ $SWITCHED_MODES == 1 ]]; then
+  if [[ -n "$SW" && "$SW" > 0 && -n "$SH" && "$SH" > 0 ]]; then
+    MSH=$(( SH*2 ))
+    fbset -fb /dev/fb0 -g $SW $SH $SW $MSH $BPP
+    echo 0 0 $(( SW-1 )) $(( SH-1 )) > /sys/class/graphics/fb0/free_scale_axis
+    echo 0 > /sys/class/graphics/fb0/free_scale
+    echo 0 > /sys/class/graphics/fb0/freescale_mode
+  fi
+  [[ ${SWITCHED_MODES} == 1 ]] && blank_buffer
 fi
 
 # Now that the primary buffer has been acquired we blank it again because the new
 # memory allocated, may contain garbage artifact data.
-blank_buffer
-hide_buffer 0
 
 # Gets the default X, and Y position offsets for cvbs so the display can fit 
 # inside the actual analog diplay resolution which is a bit smaller than the 
 # resolution it's usually transmitted as.
-#  if [[ "${MODE}" == "480cvbs" || "${MODE}" == "640x480p60hz" ]]; then
 if [[ "${MODE}" == "480cvbs" ]]; then
   BORDERS=(30 10)
 fi
