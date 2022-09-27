@@ -1,0 +1,26 @@
+commit 657a6ea9161d1afe780bb46c4df0e95473353e6b
+Author: Rudi Heitbaum <rudi@heitbaum.com>
+Date:   Sun Sep 4 00:45:25 2022 +0000
+
+    Add CMake options ENABLE_DECODER and ENABLE_ENCODER
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ff93c52..160dbb1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -68,6 +68,13 @@ if(MSVC)
+   add_definitions(-DHAVE_STDBOOL_H)
+ endif()
+ 
++option(ENABLE_DECODER "Enable Decoder" ON)
++option(ENABLE_ENCODER "Enable Encoder" ON)
++
+ add_subdirectory (libde265)
+-add_subdirectory (dec265)
+-add_subdirectory (enc265)
++if (ENABLE_DECODER)
++  add_subdirectory (dec265)
++endif()
++if (ENABLE_ENCODER)
++  add_subdirectory (enc265)
++endif()

@@ -1,5 +1,5 @@
 diff --git a/configure b/configure
-index d7a3f507e8..9b7435ec79 100755
+index d7a3f507e8..7c2dd7161c 100755
 --- a/configure
 +++ b/configure
 @@ -207,6 +207,7 @@ External library support:
@@ -57,7 +57,7 @@ index d7a3f507e8..9b7435ec79 100755
  "
  
  DOCUMENT_LIST="
-@@ -1884,12 +1896,16 @@ FEATURE_LIST="
+@@ -1884,12 +1896,17 @@ FEATURE_LIST="
      gray
      hardcoded_tables
      omx_rpi
@@ -71,10 +71,11 @@ index d7a3f507e8..9b7435ec79 100755
      swscale_alpha
 +    vout_drm
 +    vout_egl
++    v4l2_req_hevc_vx
  "
  
  # this list should be kept in linking order
-@@ -1930,6 +1946,7 @@ SUBSYSTEM_LIST="
+@@ -1930,6 +1947,7 @@ SUBSYSTEM_LIST="
      pixelutils
      network
      rdft
@@ -82,7 +83,7 @@ index d7a3f507e8..9b7435ec79 100755
  "
  
  # COMPONENT_LIST needs to come last to ensure correct dependency checking
-@@ -2416,9 +2433,11 @@ CONFIG_EXTRA="
+@@ -2416,9 +2434,11 @@ CONFIG_EXTRA="
      rangecoder
      riffdec
      riffenc
@@ -94,7 +95,7 @@ index d7a3f507e8..9b7435ec79 100755
      scene_sad
      sinewin
      snappy
-@@ -2750,6 +2769,8 @@ hap_decoder_select="snappy texturedsp"
+@@ -2750,6 +2770,8 @@ hap_decoder_select="snappy texturedsp"
  hap_encoder_deps="libsnappy"
  hap_encoder_select="texturedspenc"
  hevc_decoder_select="atsc_a53 bswapdsp cabac golomb hevcparse videodsp"
@@ -103,7 +104,7 @@ index d7a3f507e8..9b7435ec79 100755
  huffyuv_decoder_select="bswapdsp huffyuvdsp llviddsp"
  huffyuv_encoder_select="bswapdsp huffman huffyuvencdsp llvidencdsp"
  hymt_decoder_select="huffyuv_decoder"
-@@ -2919,6 +2940,7 @@ d3d11va_deps="dxva_h ID3D11VideoDecoder ID3D11VideoContext"
+@@ -2919,6 +2941,7 @@ d3d11va_deps="dxva_h ID3D11VideoDecoder ID3D11VideoContext"
  dxva2_deps="dxva2api_h DXVA2_ConfigPictureDecode ole32 user32"
  ffnvcodec_deps_any="libdl LoadLibrary"
  nvdec_deps="ffnvcodec"
@@ -111,7 +112,7 @@ index d7a3f507e8..9b7435ec79 100755
  vaapi_x11_deps="xlib"
  videotoolbox_hwaccel_deps="videotoolbox pthreads"
  videotoolbox_hwaccel_extralibs="-framework QuartzCore"
-@@ -2960,6 +2982,12 @@ hevc_dxva2_hwaccel_deps="dxva2 DXVA_PicParams_HEVC"
+@@ -2960,6 +2983,12 @@ hevc_dxva2_hwaccel_deps="dxva2 DXVA_PicParams_HEVC"
  hevc_dxva2_hwaccel_select="hevc_decoder"
  hevc_nvdec_hwaccel_deps="nvdec"
  hevc_nvdec_hwaccel_select="hevc_decoder"
@@ -124,7 +125,7 @@ index d7a3f507e8..9b7435ec79 100755
  hevc_vaapi_hwaccel_deps="vaapi VAPictureParameterBufferHEVC"
  hevc_vaapi_hwaccel_select="hevc_decoder"
  hevc_vdpau_hwaccel_deps="vdpau VdpPictureInfoHEVC"
-@@ -3437,8 +3465,13 @@ sndio_indev_deps="sndio"
+@@ -3437,8 +3466,13 @@ sndio_indev_deps="sndio"
  sndio_outdev_deps="sndio"
  v4l2_indev_deps_any="linux_videodev2_h sys_videoio_h"
  v4l2_indev_suggest="libv4l2"
@@ -138,7 +139,7 @@ index d7a3f507e8..9b7435ec79 100755
  vfwcap_indev_deps="vfw32 vfwcap_defines"
  xcbgrab_indev_deps="libxcb"
  xcbgrab_indev_suggest="libxcb_shm libxcb_shape libxcb_xfixes"
-@@ -3657,6 +3690,7 @@ tonemap_vaapi_filter_deps="vaapi VAProcFilterParameterBufferHDRToneMapping"
+@@ -3657,6 +3691,7 @@ tonemap_vaapi_filter_deps="vaapi VAProcFilterParameterBufferHDRToneMapping"
  tonemap_opencl_filter_deps="opencl const_nan"
  transpose_opencl_filter_deps="opencl"
  transpose_vaapi_filter_deps="vaapi VAProcPipelineCaps_rotation_flags"
@@ -146,7 +147,7 @@ index d7a3f507e8..9b7435ec79 100755
  unsharp_opencl_filter_deps="opencl"
  uspp_filter_deps="gpl avcodec"
  vaguedenoiser_filter_deps="gpl"
-@@ -6154,6 +6188,12 @@ check_func_headers glob.h glob
+@@ -6154,6 +6189,12 @@ check_func_headers glob.h glob
  enabled xlib &&
      check_lib xlib "X11/Xlib.h X11/extensions/Xvlib.h" XvGetPortAttribute -lXv -lX11 -lXext
  
@@ -159,7 +160,7 @@ index d7a3f507e8..9b7435ec79 100755
  check_headers direct.h
  check_headers dirent.h
  check_headers dxgidebug.h
-@@ -6491,11 +6531,12 @@ enabled mbedtls           && { check_pkg_config mbedtls mbedtls mbedtls/x509_crt
+@@ -6491,11 +6532,12 @@ enabled mbedtls           && { check_pkg_config mbedtls mbedtls mbedtls/x509_crt
                                 check_lib mbedtls mbedtls/ssl.h mbedtls_ssl_init -lmbedtls -lmbedx509 -lmbedcrypto ||
                                 die "ERROR: mbedTLS not found"; }
  enabled mediacodec        && { enabled jni || die "ERROR: mediacodec requires --enable-jni"; }
@@ -174,7 +175,7 @@ index d7a3f507e8..9b7435ec79 100755
                                 die "ERROR: mmal not found" &&
                                 check_func_headers interface/mmal/mmal.h "MMAL_PARAMETER_VIDEO_MAX_NUM_CALLBACKS"; }
  enabled openal            && { { for al_extralibs in "${OPENAL_LIBS}" "-lopenal" "-lOpenAL32"; do
-@@ -6536,8 +6577,16 @@ enabled rkmpp             && { require_pkg_config rkmpp rockchip_mpp  rockchip/r
+@@ -6536,8 +6578,16 @@ enabled rkmpp             && { require_pkg_config rkmpp rockchip_mpp  rockchip/r
                                 { enabled libdrm ||
                                   die "ERROR: rkmpp requires --enable-libdrm"; }
                               }
@@ -191,12 +192,20 @@ index d7a3f507e8..9b7435ec79 100755
  
  if enabled gcrypt; then
      GCRYPT_CONFIG="${cross_prefix}libgcrypt-config"
-@@ -6617,6 +6666,8 @@ if enabled v4l2_m2m; then
+@@ -6617,6 +6667,16 @@ if enabled v4l2_m2m; then
      check_cc vp9_v4l2_m2m linux/videodev2.h "int i = V4L2_PIX_FMT_VP9;"
  fi
  
 +check_func_headers "linux/media.h linux/videodev2.h" v4l2_timeval_to_ns
 +check_cc hevc_v4l2_request linux/videodev2.h "int i = V4L2_PIX_FMT_HEVC_SLICE;"
++disable v4l2_req_hevc_vx
++if enabled hevc_v4l2request_hwaccel; then
++    enable v4l2_req_hevc_vx
++fi
++if enabled hevc_v4l2_request; then
++    disable v4l2_req_hevc_vx
++fi
++
  check_headers sys/videoio.h
  test_code cc sys/videoio.h "struct v4l2_frmsizeenum vfse; vfse.discrete.width = 0;" && enable_sanitized struct_v4l2_frmivalenum_discrete
  
@@ -375,7 +384,7 @@ index 807e783422..456d4f349b 100644
        "write program-readable progress information", "url" },
      { "stdin",          OPT_BOOL | OPT_EXPERT,                       { &stdin_interaction },
 diff --git a/libavcodec/Makefile b/libavcodec/Makefile
-index 33a280cf69..a403dc41d6 100644
+index 33a280cf69..1372d3981d 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
 @@ -19,6 +19,7 @@ HEADERS = ac3_parser.h                                                  \
@@ -427,8 +436,8 @@ index 33a280cf69..a403dc41d6 100644
  OBJS-$(CONFIG_HEVC_QSV_HWACCEL)           += qsvdec.o
 +OBJS-$(CONFIG_HEVC_RPI4_8_HWACCEL)        += rpivid_hevc.o
 +OBJS-$(CONFIG_HEVC_RPI4_10_HWACCEL)       += rpivid_hevc.o
-+OBJS-$(CONFIG_HEVC_V4L2REQUEST_HWACCEL)   += v4l2_request_hevc.o v4l2_req_decode_q.o\
-+                                             v4l2_req_hevc_v1.o v4l2_req_hevc_v2.o v4l2_req_hevc_v3.o  v4l2_req_hevc_v4.o
++OBJS-$(CONFIG_HEVC_V4L2REQUEST_HWACCEL)   += v4l2_request_hevc.o v4l2_req_decode_q.o v4l2_req_hevc_v4.o
++OBJS-$(CONFIG_V4L2_REQ_HEVC_VX)           += v4l2_req_hevc_v1.o v4l2_req_hevc_v2.o v4l2_req_hevc_v3.o
  OBJS-$(CONFIG_HEVC_VAAPI_HWACCEL)         += vaapi_hevc.o h265_profile_level.o
  OBJS-$(CONFIG_HEVC_VDPAU_HWACCEL)         += vdpau_hevc.o h265_profile_level.o
  OBJS-$(CONFIG_MJPEG_NVDEC_HWACCEL)        += nvdec_mjpeg.o
@@ -18880,10 +18889,10 @@ index 0000000000..4e35bd583d
 +#endif
 diff --git a/libavcodec/hevc-ctrls-v4.h b/libavcodec/hevc-ctrls-v4.h
 new file mode 100644
-index 0000000000..7e05f6e7c3
+index 0000000000..7829d82084
 --- /dev/null
 +++ b/libavcodec/hevc-ctrls-v4.h
-@@ -0,0 +1,515 @@
+@@ -0,0 +1,517 @@
 +/* SPDX-License-Identifier: ((GPL-2.0+ WITH Linux-syscall-note) OR BSD-3-Clause) */
 +/*
 + *  Video for Linux Two controls header file
@@ -18938,6 +18947,8 @@ index 0000000000..7e05f6e7c3
 +
 +#include <linux/const.h>
 +#include <linux/types.h>
++
++#define V4L2_PIX_FMT_HEVC_SLICE v4l2_fourcc('S', '2', '6', '5') /* HEVC parsed slices */
 +
 +#define V4L2_CID_STATELESS_HEVC_SPS		(V4L2_CID_CODEC_STATELESS_BASE + 400)
 +#define V4L2_CID_STATELESS_HEVC_PPS		(V4L2_CID_CODEC_STATELESS_BASE + 401)
@@ -52820,7 +52831,7 @@ index b67b216331..ee72beb052 100644
 +
  #endif /* AVCODEC_V4L2_M2M_H */
 diff --git a/libavcodec/v4l2_m2m_dec.c b/libavcodec/v4l2_m2m_dec.c
-index ab07c0a24a..545651e560 100644
+index ab07c0a24a..9312afdf56 100644
 --- a/libavcodec/v4l2_m2m_dec.c
 +++ b/libavcodec/v4l2_m2m_dec.c
 @@ -23,6 +23,10 @@
@@ -52834,7 +52845,7 @@ index ab07c0a24a..545651e560 100644
  #include "libavutil/pixfmt.h"
  #include "libavutil/pixdesc.h"
  #include "libavutil/opt.h"
-@@ -30,75 +34,107 @@
+@@ -30,75 +34,111 @@
  #include "libavcodec/decode.h"
  #include "libavcodec/internal.h"
  
@@ -52847,23 +52858,15 @@ index ab07c0a24a..545651e560 100644
  #include "v4l2_fmt.h"
  
 -static int v4l2_try_start(AVCodecContext *avctx)
-+// Pick 64 for max last count - that is >1sec at 60fps
-+#define STATS_LAST_COUNT_MAX 64
-+#define STATS_INTERVAL_MAX (1 << 30)
-+
-+static int64_t pts_stats_guess(const pts_stats_t * const stats)
- {
+-{
 -    V4L2m2mContext *s = ((V4L2m2mPriv*)avctx->priv_data)->context;
 -    V4L2Context *const capture = &s->capture;
 -    V4L2Context *const output = &s->output;
 -    struct v4l2_selection selection = { 0 };
 -    int ret;
-+    if (stats->last_pts == AV_NOPTS_VALUE ||
-+            stats->last_interval == 0 ||
-+            stats->last_count >= STATS_LAST_COUNT_MAX)
-+        return AV_NOPTS_VALUE;
-+    return stats->last_pts + (int64_t)(stats->last_count - 1) * (int64_t)stats->last_interval;
-+}
++// Pick 64 for max last count - that is >1sec at 60fps
++#define STATS_LAST_COUNT_MAX 64
++#define STATS_INTERVAL_MAX (1 << 30)
  
 -    /* 1. start the output process */
 -    if (!output->streamon) {
@@ -52871,27 +52874,74 @@ index ab07c0a24a..545651e560 100644
 -        if (ret < 0) {
 -            av_log(avctx, AV_LOG_DEBUG, "VIDIOC_STREAMON on output context\n");
 -            return ret;
+-        }
+-    }
++#ifndef FF_API_BUFFER_SIZE_T
++#define FF_API_BUFFER_SIZE_T 1
++#endif
+ 
+-    if (capture->streamon)
+-        return 0;
++static int64_t pts_stats_guess(const pts_stats_t * const stats)
++{
++    if (stats->last_pts == AV_NOPTS_VALUE ||
++            stats->last_interval == 0 ||
++            stats->last_count >= STATS_LAST_COUNT_MAX)
++        return AV_NOPTS_VALUE;
++    return stats->last_pts + (int64_t)(stats->last_count - 1) * (int64_t)stats->last_interval;
++}
+ 
+-    /* 2. get the capture format */
+-    capture->format.type = capture->type;
+-    ret = ioctl(s->fd, VIDIOC_G_FMT, &capture->format);
+-    if (ret) {
+-        av_log(avctx, AV_LOG_WARNING, "VIDIOC_G_FMT ioctl\n");
+-        return ret;
 +static void pts_stats_add(pts_stats_t * const stats, int64_t pts)
 +{
 +    if (pts == AV_NOPTS_VALUE || pts == stats->last_pts) {
 +        if (stats->last_count < STATS_LAST_COUNT_MAX)
 +            ++stats->last_count;
 +        return;
-+    }
-+
+     }
+ 
+-    /* 2.1 update the AVCodecContext */
+-    avctx->pix_fmt = ff_v4l2_format_v4l2_to_avfmt(capture->format.fmt.pix_mp.pixelformat, AV_CODEC_ID_RAWVIDEO);
+-    capture->av_pix_fmt = avctx->pix_fmt;
 +    if (stats->last_pts != AV_NOPTS_VALUE) {
 +        const int64_t interval = pts - stats->last_pts;
-+
+ 
+-    /* 3. set the crop parameters */
+-    selection.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+-    selection.r.height = avctx->coded_height;
+-    selection.r.width = avctx->coded_width;
+-    ret = ioctl(s->fd, VIDIOC_S_SELECTION, &selection);
+-    if (!ret) {
+-        ret = ioctl(s->fd, VIDIOC_G_SELECTION, &selection);
+-        if (ret) {
+-            av_log(avctx, AV_LOG_WARNING, "VIDIOC_G_SELECTION ioctl\n");
+-        } else {
+-            av_log(avctx, AV_LOG_DEBUG, "crop output %dx%d\n", selection.r.width, selection.r.height);
+-            /* update the size of the resulting frame */
+-            capture->height = selection.r.height;
+-            capture->width  = selection.r.width;
 +        if (interval < 0 || interval >= STATS_INTERVAL_MAX ||
 +            stats->last_count >= STATS_LAST_COUNT_MAX) {
 +            if (stats->last_interval != 0)
 +                av_log(stats->logctx, AV_LOG_DEBUG, "%s: %s: Bad interval: %" PRId64 "/%d\n",
 +                       __func__, stats->name, interval, stats->last_count);
 +            stats->last_interval = 0;
-+        }
+         }
+-    }
 +        else {
 +            const int64_t frame_time = interval / (int64_t)stats->last_count;
-+
+ 
+-    /* 4. init the capture context now that we have the capture format */
+-    if (!capture->buffers) {
+-        ret = ff_v4l2_context_init(capture);
+-        if (ret) {
+-            av_log(avctx, AV_LOG_ERROR, "can't request capture buffers\n");
+-            return AVERROR(ENOMEM);
 +            if (frame_time != stats->last_interval)
 +                av_log(stats->logctx, AV_LOG_DEBUG, "%s: %s: New interval: %u->%" PRId64 "/%d=%" PRId64 "\n",
 +                       __func__, stats->name, stats->last_interval, interval, stats->last_count, frame_time);
@@ -52899,7 +52949,10 @@ index ab07c0a24a..545651e560 100644
          }
      }
  
--    if (capture->streamon)
+-    /* 5. start the capture process */
+-    ret = ff_v4l2_context_set_status(capture, VIDIOC_STREAMON);
+-    if (ret) {
+-        av_log(avctx, AV_LOG_DEBUG, "VIDIOC_STREAMON, on capture context\n");
 +    stats->last_pts = pts;
 +    stats->last_count = 1;
 +}
@@ -52924,76 +52977,38 @@ index ab07c0a24a..545651e560 100644
 +    };
 +
 +    if (s->output.streamon)
-         return 0;
- 
--    /* 2. get the capture format */
--    capture->format.type = capture->type;
--    ret = ioctl(s->fd, VIDIOC_G_FMT, &capture->format);
--    if (ret) {
--        av_log(avctx, AV_LOG_WARNING, "VIDIOC_G_FMT ioctl\n");
++        return 0;
++
 +    ret = ff_v4l2_context_set_status(&s->output, VIDIOC_STREAMON);
 +    if (ret != 0) {
 +        av_log(avctx, AV_LOG_ERROR, "VIDIOC_STREAMON on output context: %s\n", av_err2str(ret));
          return ret;
      }
  
--    /* 2.1 update the AVCodecContext */
--    avctx->pix_fmt = ff_v4l2_format_v4l2_to_avfmt(capture->format.fmt.pix_mp.pixelformat, AV_CODEC_ID_RAWVIDEO);
--    capture->av_pix_fmt = avctx->pix_fmt;
--
--    /* 3. set the crop parameters */
--    selection.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
--    selection.r.height = avctx->coded_height;
--    selection.r.width = avctx->coded_width;
--    ret = ioctl(s->fd, VIDIOC_S_SELECTION, &selection);
--    if (!ret) {
--        ret = ioctl(s->fd, VIDIOC_G_SELECTION, &selection);
--        if (ret) {
--            av_log(avctx, AV_LOG_WARNING, "VIDIOC_G_SELECTION ioctl\n");
--        } else {
--            av_log(avctx, AV_LOG_DEBUG, "crop output %dx%d\n", selection.r.width, selection.r.height);
--            /* update the size of the resulting frame */
--            capture->height = selection.r.height;
--            capture->width  = selection.r.width;
--        }
 +    // STREAMON should do implicit START so this just for those that don't.
 +    // It is optional so don't worry if it fails
 +    if (ioctl(s->fd, VIDIOC_DECODER_CMD, &cmd) < 0) {
 +        ret = AVERROR(errno);
 +        av_log(avctx, AV_LOG_WARNING, "VIDIOC_DECODER_CMD start error: %s\n", av_err2str(ret));
-     }
--
--    /* 4. init the capture context now that we have the capture format */
--    if (!capture->buffers) {
--        ret = ff_v4l2_context_init(capture);
--        if (ret) {
--            av_log(avctx, AV_LOG_ERROR, "can't request capture buffers\n");
--            return AVERROR(ENOMEM);
--        }
++    }
 +    else {
 +        av_log(avctx, AV_LOG_TRACE, "VIDIOC_DECODER_CMD start OK\n");
-     }
++    }
 +    return 0;
 +}
- 
--    /* 5. start the capture process */
--    ret = ff_v4l2_context_set_status(capture, VIDIOC_STREAMON);
--    if (ret) {
--        av_log(avctx, AV_LOG_DEBUG, "VIDIOC_STREAMON, on capture context\n");
--        return ret;
--    }
++
 +static int v4l2_try_start(AVCodecContext *avctx)
 +{
 +    V4L2m2mContext * const s = ((V4L2m2mPriv*)avctx->priv_data)->context;
 +    int ret;
- 
++
 +    /* 1. start the output process */
 +    if ((ret = check_output_streamon(avctx, s)) != 0)
 +        return ret;
      return 0;
  }
  
-@@ -133,58 +169,552 @@ static int v4l2_prepare_decoder(V4L2m2mContext *s)
+@@ -133,58 +173,555 @@ static int v4l2_prepare_decoder(V4L2m2mContext *s)
      return 0;
  }
  
@@ -53107,8 +53122,11 @@ index ab07c0a24a..545651e560 100644
 +
 +        for (i = 0; i < 256; ++i) {
 +            uint8_t * side_data;
++#if FF_API_BUFFER_SIZE_T
++            int side_size;
++#else
 +            size_t side_size;
-+
++#endif
 +            ret = ff_decode_get_packet(avctx, &s->buf_pkt);
 +            if (ret != 0)
 +                break;
@@ -53119,7 +53137,7 @@ index ab07c0a24a..545651e560 100644
 +                av_log(avctx, AV_LOG_DEBUG, "New extradata\n");
 +                av_freep(&s->extdata_data);
 +                if ((s->extdata_data = av_malloc(side_size ? side_size : 1)) == NULL) {
-+                    av_log(avctx, AV_LOG_ERROR, "Failed to alloc %zd bytes of extra data\n", side_size);
++                    av_log(avctx, AV_LOG_ERROR, "Failed to alloc %d bytes of extra data\n", (int)side_size);
 +                    return AVERROR(ENOMEM);
 +                }
 +                memcpy(s->extdata_data, side_data, side_size);
@@ -53193,22 +53211,22 @@ index ab07c0a24a..545651e560 100644
 +
 +    if (!s->buf_pkt.size)
 +        return NQ_NONE;
++
++    if ((ret = check_output_streamon(avctx, s)) != 0)
++        return ret;
  
 -    ret = ff_v4l2_context_enqueue_packet(output, &s->buf_pkt);
 -    if (ret < 0 && ret != AVERROR(EAGAIN))
 -        goto fail;
-+    if ((ret = check_output_streamon(avctx, s)) != 0)
-+        return ret;
- 
--    /* if EAGAIN don't unref packet and try to enqueue in the next iteration */
--    if (ret != AVERROR(EAGAIN))
 +    if (s->extdata_sent)
 +        ret = ff_v4l2_context_enqueue_packet(&s->output, &s->buf_pkt, NULL, 0);
 +    else if (s->extdata_data)
 +        ret = ff_v4l2_context_enqueue_packet(&s->output, &s->buf_pkt, s->extdata_data, s->extdata_size);
 +    else
 +        ret = ff_v4l2_context_enqueue_packet(&s->output, &s->buf_pkt, avctx->extradata, avctx->extradata_size);
-+
+ 
+-    /* if EAGAIN don't unref packet and try to enqueue in the next iteration */
+-    if (ret != AVERROR(EAGAIN))
 +    if (ret == AVERROR(EAGAIN)) {
 +        // Out of input buffers - keep packet
 +        ret = NQ_Q_FULL;
@@ -53227,15 +53245,6 @@ index ab07c0a24a..545651e560 100644
 -            goto fail;
 +            av_log(avctx, AV_LOG_ERROR, "Packet enqueue failure: err=%d\n", ret);
 +            return ret;
-+        }
-+    }
-+
-+    // Start if we haven't
-+    {
-+        const int ret2 = v4l2_try_start(avctx);
-+        if (ret2) {
-+            av_log(avctx, AV_LOG_DEBUG, "Start failure: err=%d\n", ret2);
-+            ret = (ret2 == AVERROR(ENOMEM)) ? ret2 : NQ_DEAD;
          }
      }
  
@@ -53243,9 +53252,18 @@ index ab07c0a24a..545651e560 100644
 -    return ff_v4l2_context_dequeue_frame(capture, frame, -1);
 -fail:
 -    av_packet_unref(&s->buf_pkt);
-     return ret;
- }
- 
++    // Start if we haven't
++    {
++        const int ret2 = v4l2_try_start(avctx);
++        if (ret2) {
++            av_log(avctx, AV_LOG_DEBUG, "Start failure: err=%d\n", ret2);
++            ret = (ret2 == AVERROR(ENOMEM)) ? ret2 : NQ_DEAD;
++        }
++    }
++
++    return ret;
++}
++
 +static int qbuf_wait(AVCodecContext * const avctx, V4L2Context * const ctx)
 +{
 +    int rv = 0;
@@ -53415,8 +53433,8 @@ index ab07c0a24a..545651e560 100644
 +    ret = v4l2_receive_frame2(avctx, frame);
 +    done = us_time();
 +    av_log(avctx, AV_LOG_TRACE, ">>> %s: rx time=%" PRId64 ", rv=%d\n", __func__, done - now, ret);
-+    return ret;
-+}
+     return ret;
+ }
 +#endif
 +
 +static int
@@ -53538,7 +53556,7 @@ index ab07c0a24a..545651e560 100644
 +    // with small WxH
 +    return size + (1 << 16);
 +}
-+
+ 
  static av_cold int v4l2_decode_init(AVCodecContext *avctx)
  {
      V4L2Context *capture, *output;
@@ -53570,7 +53588,7 @@ index ab07c0a24a..545651e560 100644
      capture = &s->capture;
      output = &s->output;
  
-@@ -192,14 +722,51 @@ static av_cold int v4l2_decode_init(AVCodecContext *avctx)
+@@ -192,14 +729,51 @@ static av_cold int v4l2_decode_init(AVCodecContext *avctx)
       * by the v4l2 driver; this event will trigger a full pipeline reconfig and
       * the proper values will be retrieved from the kernel driver.
       */
@@ -53624,7 +53642,7 @@ index ab07c0a24a..545651e560 100644
  
      s->avctx = avctx;
      ret = ff_v4l2_m2m_codec_init(priv);
-@@ -208,12 +775,74 @@ static av_cold int v4l2_decode_init(AVCodecContext *avctx)
+@@ -208,12 +782,74 @@ static av_cold int v4l2_decode_init(AVCodecContext *avctx)
          return ret;
      }
  
@@ -53701,7 +53719,7 @@ index ab07c0a24a..545651e560 100644
  }
  
  #define OFFSET(x) offsetof(V4L2m2mPriv, x)
-@@ -222,10 +851,16 @@ static av_cold int v4l2_decode_close(AVCodecContext *avctx)
+@@ -222,10 +858,16 @@ static av_cold int v4l2_decode_close(AVCodecContext *avctx)
  static const AVOption options[] = {
      V4L_M2M_DEFAULT_OPTS,
      { "num_capture_buffers", "Number of buffers in the capture context",
@@ -53719,7 +53737,7 @@ index ab07c0a24a..545651e560 100644
  #define M2MDEC_CLASS(NAME) \
      static const AVClass v4l2_m2m_ ## NAME ## _dec_class = { \
          .class_name = #NAME "_v4l2m2m_decoder", \
-@@ -246,9 +881,15 @@ static const AVOption options[] = {
+@@ -246,9 +888,15 @@ static const AVOption options[] = {
          .init           = v4l2_decode_init, \
          .receive_frame  = v4l2_receive_frame, \
          .close          = v4l2_decode_close, \
@@ -54701,10 +54719,10 @@ index 0000000000..0baef36535
 +#endif
 diff --git a/libavcodec/v4l2_req_dmabufs.c b/libavcodec/v4l2_req_dmabufs.c
 new file mode 100644
-index 0000000000..ae6c648369
+index 0000000000..c4bbed18c6
 --- /dev/null
 +++ b/libavcodec/v4l2_req_dmabufs.c
-@@ -0,0 +1,266 @@
+@@ -0,0 +1,288 @@
 +#include <stdio.h>
 +#include <stdlib.h>
 +#include <unistd.h>
@@ -54742,6 +54760,26 @@ index 0000000000..ae6c648369
 +static unsigned int total_bufs = 0;
 +static size_t total_size = 0;
 +#endif
++
++struct dmabuf_h * dmabuf_import_mmap(void * mapptr, size_t size)
++{
++    struct dmabuf_h *dh;
++
++    if (mapptr == MAP_FAILED)
++        return NULL;
++
++    dh = malloc(sizeof(*dh));
++    if (!dh)
++        return NULL;
++
++    *dh = (struct dmabuf_h) {
++        .fd = -1,
++        .size = size,
++        .mapptr = mapptr
++    };
++
++    return dh;
++}
 +
 +struct dmabuf_h * dmabuf_import(int fd, size_t size)
 +{
@@ -54829,6 +54867,8 @@ index 0000000000..ae6c648369
 +    struct dma_buf_sync sync = {
 +        .flags = flags
 +    };
++    if (dh->fd == -1)
++        return 0;
 +    while (ioctl(dh->fd, DMA_BUF_IOCTL_SYNC, &sync) == -1) {
 +        const int err = errno;
 +        if (errno == EINTR)
@@ -54973,10 +55013,10 @@ index 0000000000..ae6c648369
 +
 diff --git a/libavcodec/v4l2_req_dmabufs.h b/libavcodec/v4l2_req_dmabufs.h
 new file mode 100644
-index 0000000000..8d909c4297
+index 0000000000..e36aa0a712
 --- /dev/null
 +++ b/libavcodec/v4l2_req_dmabufs.h
-@@ -0,0 +1,38 @@
+@@ -0,0 +1,41 @@
 +#ifndef DMABUFS_H
 +#define DMABUFS_H
 +
@@ -54995,6 +55035,9 @@ index 0000000000..8d909c4297
 +}
 +/* Create from existing fd - dups(fd) */
 +struct dmabuf_h * dmabuf_import(int fd, size_t size);
++/* Import an MMAP - return NULL if mapptr = MAP_FAIL */
++struct dmabuf_h * dmabuf_import_mmap(void * mapptr, size_t size);
++
 +void * dmabuf_map(struct dmabuf_h * const dh);
 +
 +/* flags from linux/dmabuf.h DMA_BUF_SYNC_xxx */
@@ -55053,10 +55096,10 @@ index 0000000000..c35579d8e0
 +
 diff --git a/libavcodec/v4l2_req_hevc_vx.c b/libavcodec/v4l2_req_hevc_vx.c
 new file mode 100644
-index 0000000000..9ff5592e61
+index 0000000000..b98d8464ca
 --- /dev/null
 +++ b/libavcodec/v4l2_req_hevc_vx.c
-@@ -0,0 +1,1365 @@
+@@ -0,0 +1,1360 @@
 +// File included by v4l2_req_hevc_v* - not compiled on its own
 +
 +#include "decode.h"
@@ -55095,11 +55138,6 @@ index 0000000000..9ff5592e61
 +#define V4L2_STATELESS_HEVC_DECODE_MODE_FRAME_BASED     V4L2_MPEG_VIDEO_HEVC_DECODE_MODE_FRAME_BASED
 +#define V4L2_STATELESS_HEVC_START_CODE_NONE             V4L2_MPEG_VIDEO_HEVC_START_CODE_NONE
 +#define V4L2_STATELESS_HEVC_START_CODE_ANNEX_B          V4L2_MPEG_VIDEO_HEVC_START_CODE_ANNEX_B
-+#endif
-+
-+// Should be in videodev2 but we might not have a good enough one
-+#ifndef V4L2_PIX_FMT_HEVC_SLICE
-+#define V4L2_PIX_FMT_HEVC_SLICE v4l2_fourcc('S', '2', '6', '5') /* HEVC parsed slices */
 +#endif
 +
 +#include "v4l2_request_hevc.h"
@@ -56424,10 +56462,10 @@ index 0000000000..9ff5592e61
 +
 diff --git a/libavcodec/v4l2_req_media.c b/libavcodec/v4l2_req_media.c
 new file mode 100644
-index 0000000000..980b306b8a
+index 0000000000..1a9944774a
 --- /dev/null
 +++ b/libavcodec/v4l2_req_media.c
-@@ -0,0 +1,1601 @@
+@@ -0,0 +1,1802 @@
 +/*
 + * Copyright (C) 2018 Paul Kocialkowski <paul.kocialkowski@bootlin.com>
 + *
@@ -56463,9 +56501,11 @@ index 0000000000..980b306b8a
 +#include <string.h>
 +#include <unistd.h>
 +#include <linux/media.h>
++#include <linux/mman.h>
 +#include <sys/ioctl.h>
 +#include <sys/select.h>
 +#include <sys/ioctl.h>
++#include <sys/mman.h>
 +
 +#include <linux/videodev2.h>
 +
@@ -56525,6 +56565,32 @@ index 0000000000..980b306b8a
 +    struct polltask * pt;
 +};
 +
++static inline enum v4l2_memory
++mediabufs_memory_to_v4l2(const enum mediabufs_memory m)
++{
++    return (enum v4l2_memory)m;
++}
++
++const char *
++mediabufs_memory_name(const enum mediabufs_memory m)
++{
++    switch (m) {
++    case MEDIABUFS_MEMORY_UNSET:
++        return "Unset";
++    case MEDIABUFS_MEMORY_MMAP:
++        return "MMap";
++    case MEDIABUFS_MEMORY_USERPTR:
++        return "UserPtr";
++    case MEDIABUFS_MEMORY_OVERLAY:
++        return "Overlay";
++    case MEDIABUFS_MEMORY_DMABUF:
++        return "DMABuf";
++    default:
++        break;
++    }
++    return "Unknown";
++}
++
 +
 +static inline int do_trywait(sem_t *const sem)
 +{
@@ -56545,14 +56611,14 @@ index 0000000000..980b306b8a
 +}
 +
 +static int request_buffers(int video_fd, unsigned int type,
-+                           enum v4l2_memory memory, unsigned int buffers_count)
++                           enum mediabufs_memory memory, unsigned int buffers_count)
 +{
 +    struct v4l2_requestbuffers buffers;
 +    int rc;
 +
 +    memset(&buffers, 0, sizeof(buffers));
 +    buffers.type = type;
-+    buffers.memory = memory;
++    buffers.memory = mediabufs_memory_to_v4l2(memory);
 +    buffers.count = buffers_count;
 +
 +    rc = ioctl(video_fd, VIDIOC_REQBUFS, &buffers);
@@ -56754,6 +56820,7 @@ index 0000000000..980b306b8a
 +    struct qent_base *next;
 +    struct qent_base *prev;
 +    enum qent_status status;
++    enum mediabufs_memory memtype;
 +    uint32_t index;
 +    struct dmabuf_h *dh[VIDEO_MAX_PLANES];
 +    struct timeval timestamp;
@@ -56778,9 +56845,9 @@ index 0000000000..980b306b8a
 +};
 +
 +struct buf_pool {
++    enum mediabufs_memory memtype;
 +    pthread_mutex_t lock;
 +    sem_t free_sem;
-+    enum v4l2_buf_type buf_type;
 +    struct qe_list_head free;
 +    struct qe_list_head inuse;
 +};
@@ -56797,9 +56864,10 @@ index 0000000000..980b306b8a
 +}
 +
 +
-+#define QENT_BASE_INITIALIZER {\
++#define QENT_BASE_INITIALIZER(mtype) {\
 +    .ref_count = ATOMIC_VAR_INIT(0),\
 +    .status = QENT_NEW,\
++    .memtype = (mtype),\
 +    .index  = INDEX_UNSET\
 +}
 +
@@ -56820,13 +56888,13 @@ index 0000000000..980b306b8a
 +    free(be_src);
 +}
 +
-+static struct qent_src * qe_src_new(void)
++static struct qent_src * qe_src_new(enum mediabufs_memory mtype)
 +{
 +    struct qent_src *const be_src = malloc(sizeof(*be_src));
 +    if (!be_src)
 +        return NULL;
 +    *be_src = (struct qent_src){
-+        .base = QENT_BASE_INITIALIZER
++        .base = QENT_BASE_INITIALIZER(mtype)
 +    };
 +    return be_src;
 +}
@@ -56843,13 +56911,13 @@ index 0000000000..980b306b8a
 +    free(be_dst);
 +}
 +
-+static struct qent_dst* qe_dst_new(struct ff_weak_link_master * const wl)
++static struct qent_dst* qe_dst_new(struct ff_weak_link_master * const wl, const enum mediabufs_memory memtype)
 +{
 +    struct qent_dst *const be_dst = malloc(sizeof(*be_dst));
 +    if (!be_dst)
 +        return NULL;
 +    *be_dst = (struct qent_dst){
-+        .base = QENT_BASE_INITIALIZER,
++        .base = QENT_BASE_INITIALIZER(memtype),
 +        .lock = PTHREAD_MUTEX_INITIALIZER,
 +        .cond = PTHREAD_COND_INITIALIZER,
 +        .mbc_wl = ff_weak_link_ref(wl)
@@ -56983,14 +57051,14 @@ index 0000000000..980b306b8a
 +    return buf;
 +}
 +
-+static struct qent_base * queue_find_extract_fd(struct buf_pool *const bp, const int fd)
++static struct qent_base * queue_find_extract_index(struct buf_pool *const bp, const unsigned int index)
 +{
 +    struct qent_base *be;
 +
 +    pthread_mutex_lock(&bp->lock);
 +    /* Expect 1st in Q, but allow anywhere */
 +    for (be = bp->inuse.head; be; be = be->next) {
-+        if (dmabuf_fd(be->dh[0]) == fd) {
++        if (be->index == index) {
 +            bq_extract_inuse(bp, be);
 +            break;
 +        }
@@ -57032,6 +57100,8 @@ index 0000000000..980b306b8a
 +    struct pollqueue * pq;
 +    struct ff_weak_link_master * this_wlm;
 +
++    enum mediabufs_memory src_memtype;
++    enum mediabufs_memory dst_memtype;
 +    struct v4l2_format src_fmt;
 +    struct v4l2_format dst_fmt;
 +    struct v4l2_capability capability;
@@ -57044,7 +57114,7 @@ index 0000000000..980b306b8a
 +{
 +    struct v4l2_buffer buffer = {
 +        .type = fmt->type,
-+        .memory = V4L2_MEMORY_DMABUF,
++        .memory = mediabufs_memory_to_v4l2(be->memtype),
 +        .index = be->index
 +    };
 +    struct v4l2_plane planes[VIDEO_MAX_PLANES] = {{0}};
@@ -57058,7 +57128,10 @@ index 0000000000..980b306b8a
 +            /* *** Really need a pixdesc rather than a format so we can fill in data_offset */
 +            planes[i].length = dmabuf_size(be->dh[i]);
 +            planes[i].bytesused = dmabuf_len(be->dh[i]);
-+            planes[i].m.fd = dmabuf_fd(be->dh[i]);
++            if (be->memtype == MEDIABUFS_MEMORY_DMABUF)
++                planes[i].m.fd = dmabuf_fd(be->dh[i]);
++            else
++                planes[i].m.mem_offset = 0;
 +        }
 +        buffer.m.planes = planes;
 +        buffer.length = i;
@@ -57069,7 +57142,10 @@ index 0000000000..980b306b8a
 +
 +        buffer.bytesused = dmabuf_len(be->dh[0]);
 +        buffer.length = dmabuf_size(be->dh[0]);
-+        buffer.m.fd = dmabuf_fd(be->dh[0]);
++        if (be->memtype == MEDIABUFS_MEMORY_DMABUF)
++            buffer.m.fd = dmabuf_fd(be->dh[0]);
++        else
++            buffer.m.offset = 0;
 +    }
 +
 +    if (!is_dst && mreq) {
@@ -57098,14 +57174,13 @@ index 0000000000..980b306b8a
 +                     const int vfd,
 +                     const struct v4l2_format * const f)
 +{
-+    int fd;
 +    struct qent_base *be;
 +    int rc;
 +    const bool mp = V4L2_TYPE_IS_MULTIPLANAR(f->type);
 +    struct v4l2_plane planes[VIDEO_MAX_PLANES] = {{0}};
 +    struct v4l2_buffer buffer = {
 +        .type =  f->type,
-+        .memory = V4L2_MEMORY_DMABUF
++        .memory = mediabufs_memory_to_v4l2(bp->memtype)
 +    };
 +    if (mp) {
 +        buffer.length = f->fmt.pix_mp.num_planes;
@@ -57120,12 +57195,19 @@ index 0000000000..980b306b8a
 +        return NULL;
 +    }
 +
-+    fd = mp ? planes[0].m.fd : buffer.m.fd;
-+    be = queue_find_extract_fd(bp, fd);
++    be = queue_find_extract_index(bp, buffer.index);
 +    if (!be) {
-+        request_log("Failed to find fd %d in Q\n", fd);
++        request_log("Failed to find index %d in Q\n", buffer.index);
 +        return NULL;
 +    }
++
++    if (mp) {
++        unsigned int i;
++        for (i = 0; i != buffer.length; ++i)
++            dmabuf_len_set(be->dh[i], V4L2_TYPE_IS_CAPTURE(f->type) ? planes[i].bytesused : 0);
++    }
++    else
++        dmabuf_len_set(be->dh[0], V4L2_TYPE_IS_CAPTURE(f->type) ? buffer.length : 0);
 +
 +    be->timestamp = buffer.timestamp;
 +    be->status = (buffer.flags & V4L2_BUF_FLAG_ERROR) ? QENT_ERROR : QENT_DONE;
@@ -57534,7 +57616,7 @@ index 0000000000..980b306b8a
 +
 +    struct v4l2_create_buffers cbuf = {
 +        .count = n,
-+        .memory = V4L2_MEMORY_DMABUF,
++        .memory = mediabufs_memory_to_v4l2(mbc->dst->memtype),
 +        .format = mbc->dst_fmt,
 +    };
 +
@@ -57555,12 +57637,97 @@ index 0000000000..980b306b8a
 +    return cbuf.count;
 +}
 +
++static MediaBufsStatus
++qe_import_from_buf(struct mediabufs_ctl *const mbc, struct qent_base * const be, const struct v4l2_format *const fmt,
++                   const unsigned int n, const bool x_dmabuf)
++{
++    struct v4l2_buffer buf = {
++        .index = n,
++        .type = fmt->type,
++    };
++    struct v4l2_plane planes[VIDEO_MAX_PLANES];
++    int ret;
++
++    if (be->dh[0])
++        return 0;
++
++    if (V4L2_TYPE_IS_MULTIPLANAR(fmt->type)) {
++        memset(planes, 0, sizeof(planes));
++        buf.m.planes = planes;
++        buf.length = VIDEO_MAX_PLANES;
++    }
++
++    if ((ret = ioctl(mbc->vfd, VIDIOC_QUERYBUF, &buf)) != 0) {
++        request_err(mbc->dc, "VIDIOC_QUERYBUF failed");
++        return MEDIABUFS_ERROR_OPERATION_FAILED;
++    }
++
++    if (V4L2_TYPE_IS_MULTIPLANAR(fmt->type))
++    {
++        unsigned int i;
++        for (i = 0; i != buf.length; ++i) {
++            if (x_dmabuf) {
++                struct v4l2_exportbuffer xbuf = {
++                    .type = buf.type,
++                    .index = buf.index,
++                    .plane = i,
++                    .flags = O_RDWR, // *** Arguably O_RDONLY would be fine
++                };
++                if (ioctl(mbc->vfd, VIDIOC_EXPBUF, &xbuf) == 0)
++                    be->dh[i] = dmabuf_import(xbuf.fd, planes[i].length);
++            }
++            else {
++                be->dh[i] = dmabuf_import_mmap(
++                    mmap(NULL, planes[i].length,
++                        PROT_READ | PROT_WRITE,
++                        MAP_SHARED | MAP_POPULATE,
++                        mbc->vfd, planes[i].m.mem_offset),
++                    planes[i].length);
++            }
++            /* On failure tidy up and die */
++            if (!be->dh[i]) {
++                while (i--) {
++                    dmabuf_free(be->dh[i]);
++                    be->dh[i] = NULL;
++                }
++                return MEDIABUFS_ERROR_OPERATION_FAILED;
++            }
++        }
++    }
++    else
++    {
++        if (x_dmabuf) {
++            struct v4l2_exportbuffer xbuf = {
++                .type = buf.type,
++                .index = buf.index,
++                .flags = O_RDWR, // *** Arguably O_RDONLY would be fine
++            };
++            if (ioctl(mbc->vfd, VIDIOC_EXPBUF, &xbuf) == 0)
++                be->dh[0] = dmabuf_import(xbuf.fd, buf.length);
++        }
++        else {
++            be->dh[0] = dmabuf_import_mmap(
++                mmap(NULL, buf.length,
++                    PROT_READ | PROT_WRITE,
++                    MAP_SHARED | MAP_POPULATE,
++                    mbc->vfd, buf.m.offset),
++                buf.length);
++        }
++        /* On failure tidy up and die */
++        if (!be->dh[0]) {
++            return MEDIABUFS_ERROR_OPERATION_FAILED;
++        }
++    }
++
++    return 0;
++}
++
 +struct qent_dst* mediabufs_dst_qent_alloc(struct mediabufs_ctl *const mbc, struct dmabufs_ctl *const dbsc)
 +{
 +    struct qent_dst * be_dst;
 +
 +    if (mbc == NULL) {
-+        be_dst = qe_dst_new(NULL);
++        be_dst = qe_dst_new(NULL, MEDIABUFS_MEMORY_DMABUF);
 +        if (be_dst)
 +            be_dst->base.status = QENT_IMPORT;
 +        return be_dst;
@@ -57574,7 +57741,7 @@ index 0000000000..980b306b8a
 +    else {
 +        be_dst = base_to_dst(queue_tryget_free(mbc->dst));
 +        if (!be_dst) {
-+            be_dst = qe_dst_new(mbc->this_wlm);
++            be_dst = qe_dst_new(mbc->this_wlm, mbc->dst->memtype);
 +            if (!be_dst)
 +                return NULL;
 +
@@ -57585,12 +57752,21 @@ index 0000000000..980b306b8a
 +        }
 +    }
 +
-+    if (qe_alloc_from_fmt(&be_dst->base, dbsc, &mbc->dst_fmt)) {
-+        /* Given  how create buf works we can't uncreate it on alloc failure
-+         * all we can do is put it on the free Q
-+        */
-+        queue_put_free(mbc->dst, &be_dst->base);
-+        return NULL;
++    if (mbc->dst->memtype == MEDIABUFS_MEMORY_MMAP) {
++        if (qe_import_from_buf(mbc, &be_dst->base, &mbc->dst_fmt, be_dst->base.index, true)) {
++            request_err(mbc->dc, "Failed to export as dmabuf\n");
++            queue_put_free(mbc->dst, &be_dst->base);
++            return NULL;
++        }
++    }
++    else {
++        if (qe_alloc_from_fmt(&be_dst->base, dbsc, &mbc->dst_fmt)) {
++            /* Given  how create buf works we can't uncreate it on alloc failure
++             * all we can do is put it on the free Q
++            */
++            queue_put_free(mbc->dst, &be_dst->base);
++            return NULL;
++        }
 +    }
 +
 +    be_dst->base.status = QENT_PENDING;
@@ -57638,7 +57814,7 @@ index 0000000000..980b306b8a
 +
 +// ** This is a mess if we get partial alloc but without any way to remove
 +//    individual V4L2 Q members we are somewhat stuffed
-+MediaBufsStatus mediabufs_dst_slots_create(struct mediabufs_ctl *const mbc, const unsigned int n, const bool fixed)
++MediaBufsStatus mediabufs_dst_slots_create(struct mediabufs_ctl *const mbc, const unsigned int n, const bool fixed, const enum mediabufs_memory memtype)
 +{
 +    unsigned int i;
 +    int a = 0;
@@ -57648,10 +57824,12 @@ index 0000000000..980b306b8a
 +    if (n > 32)
 +        return MEDIABUFS_ERROR_ALLOCATION_FAILED;
 +
++    mbc->dst->memtype = memtype;
++
 +    // Create qents first as it is hard to get rid of the V4L2 buffers on error
 +    for (qc = 0; qc != n; ++qc)
 +    {
-+        if ((qes[qc] = qe_dst_new(mbc->this_wlm)) == NULL)
++        if ((qes[qc] = qe_dst_new(mbc->this_wlm, mbc->dst->memtype)) == NULL)
 +            goto fail;
 +    }
 +
@@ -57690,19 +57868,61 @@ index 0000000000..980b306b8a
 +    queue_put_free(mbc->src, &qe_src->base);
 +}
 +
++static MediaBufsStatus
++chk_memory_type(struct mediabufs_ctl *const mbc,
++    const struct v4l2_format * const f,
++    const enum mediabufs_memory m)
++{
++    struct v4l2_create_buffers cbuf = {
++        .count = 0,
++        .memory = V4L2_MEMORY_MMAP,
++        .format = *f
++    };
++
++    if (ioctl(mbc->vfd, VIDIOC_CREATE_BUFS, &cbuf) != 0)
++        return MEDIABUFS_ERROR_OPERATION_FAILED;
++
++    switch (m) {
++    case MEDIABUFS_MEMORY_DMABUF:
++        // 0 = Unknown but assume not in that case
++        if ((cbuf.capabilities & V4L2_BUF_CAP_SUPPORTS_DMABUF) == 0)
++            return MEDIABUFS_ERROR_UNSUPPORTED_MEMORY;
++        break;
++    case MEDIABUFS_MEMORY_MMAP:
++        break;
++    default:
++        return MEDIABUFS_ERROR_UNSUPPORTED_MEMORY;
++    }
++
++    return MEDIABUFS_STATUS_SUCCESS;
++}
++
++MediaBufsStatus
++mediabufs_src_chk_memtype(struct mediabufs_ctl *const mbc, const enum mediabufs_memory memtype)
++{
++    return chk_memory_type(mbc, &mbc->src_fmt, memtype);
++}
++
++MediaBufsStatus
++mediabufs_dst_chk_memtype(struct mediabufs_ctl *const mbc, const enum mediabufs_memory memtype)
++{
++    return chk_memory_type(mbc, &mbc->dst_fmt, memtype);
++}
++
 +/* src format must have been set up before this */
 +MediaBufsStatus mediabufs_src_pool_create(struct mediabufs_ctl *const mbc,
 +                  struct dmabufs_ctl * const dbsc,
-+                  unsigned int n)
++                  unsigned int n, const enum mediabufs_memory memtype)
 +{
 +    unsigned int i;
 +    struct v4l2_requestbuffers req = {
 +        .count = n,
 +        .type = mbc->src_fmt.type,
-+        .memory = V4L2_MEMORY_DMABUF
++        .memory = mediabufs_memory_to_v4l2(memtype)
 +    };
 +
 +    bq_free_all_free_src(mbc->src);
++
 +    while (ioctl(mbc->vfd, VIDIOC_REQBUFS, &req) == -1) {
 +        if (errno != EINTR) {
 +            request_err(mbc->dc, "%s: Failed to request src bufs\n", __func__);
@@ -57716,21 +57936,36 @@ index 0000000000..980b306b8a
 +    }
 +
 +    for (i = 0; i != n; ++i) {
-+        struct qent_src *const be_src = qe_src_new();
++        struct qent_src *const be_src = qe_src_new(memtype);
 +        if (!be_src) {
 +            request_err(mbc->dc, "Failed to create src be %d\n", i);
 +            goto fail;
 +        }
-+        if (qe_alloc_from_fmt(&be_src->base, dbsc, &mbc->src_fmt)) {
-+            qe_src_free(be_src);
++        switch (memtype) {
++        case MEDIABUFS_MEMORY_MMAP:
++            if (qe_import_from_buf(mbc, &be_src->base, &mbc->src_fmt, i, false)) {
++                qe_src_free(be_src);
++                goto fail;
++            }
++            be_src->fixed_size = 1;
++            break;
++        case MEDIABUFS_MEMORY_DMABUF:
++            if (qe_alloc_from_fmt(&be_src->base, dbsc, &mbc->src_fmt)) {
++                qe_src_free(be_src);
++                goto fail;
++            }
++            be_src->fixed_size = !mediabufs_src_resizable(mbc);
++            break;
++        default:
++            request_err(mbc->dc, "Unexpected memorty type\n");
 +            goto fail;
 +        }
 +        be_src->base.index = i;
-+        be_src->fixed_size = !mediabufs_src_resizable(mbc);
 +
 +        queue_put_free(mbc->src, &be_src->base);
 +    }
 +
++    mbc->src->memtype = memtype;
 +    return MEDIABUFS_STATUS_SUCCESS;
 +
 +fail:
@@ -57867,9 +58102,13 @@ index 0000000000..980b306b8a
 +
 +int mediabufs_src_resizable(const struct mediabufs_ctl *const mbc)
 +{
++#if 1
++    return 0;
++#else
 +    // Single planar OUTPUT can only take exact size buffers
 +    // Multiplanar will take larger than negotiated
 +    return V4L2_TYPE_IS_MULTIPLANAR(mbc->src_fmt.type);
++#endif
 +}
 +
 +static void mediabufs_ctl_delete(struct mediabufs_ctl *const mbc)
@@ -58031,10 +58270,10 @@ index 0000000000..980b306b8a
 +
 diff --git a/libavcodec/v4l2_req_media.h b/libavcodec/v4l2_req_media.h
 new file mode 100644
-index 0000000000..0307a831de
+index 0000000000..890947b2e2
 --- /dev/null
 +++ b/libavcodec/v4l2_req_media.h
-@@ -0,0 +1,154 @@
+@@ -0,0 +1,171 @@
 +/*
 +e.h
 +*
@@ -58080,6 +58319,7 @@ index 0000000000..0307a831de
 +    MEDIABUFS_ERROR_UNSUPPORTED_BUFFERTYPE,
 +    MEDIABUFS_ERROR_UNSUPPORTED_RT_FORMAT,
 +    MEDIABUFS_ERROR_ALLOCATION_FAILED,
++    MEDIABUFS_ERROR_UNSUPPORTED_MEMORY,
 +} MediaBufsStatus;
 +
 +struct media_pool * media_pool_new(const char * const media_path,
@@ -58107,6 +58347,15 @@ index 0000000000..0307a831de
 +struct dmabuf_h;
 +struct dmabufs_ctl;
 +
++// 1-1 mammping to V4L2 type - just defined separetely to avoid some include versioning difficulties
++enum mediabufs_memory {
++   MEDIABUFS_MEMORY_UNSET            = 0,
++   MEDIABUFS_MEMORY_MMAP             = 1,
++   MEDIABUFS_MEMORY_USERPTR          = 2,
++   MEDIABUFS_MEMORY_OVERLAY          = 3,
++   MEDIABUFS_MEMORY_DMABUF           = 4,
++};
++
 +int qent_src_params_set(struct qent_src *const be, const struct timeval * timestamp);
 +struct timeval qent_dst_timestamp_get(const struct qent_dst *const be_dst);
 +
@@ -58130,6 +58379,8 @@ index 0000000000..0307a831de
 +                unsigned int plane,
 +                int fd, size_t size);
 +
++const char * mediabufs_memory_name(const enum mediabufs_memory m);
++
 +MediaBufsStatus mediabufs_start_request(struct mediabufs_ctl *const mbc,
 +                struct media_request **const pmreq,
 +                struct qent_src **const psrc_be,
@@ -58143,7 +58394,7 @@ index 0000000000..0307a831de
 +// Create dst slots without alloc
 +// If fixed true then qent_alloc will only get slots from this pool and will
 +// block until a qent has been unrefed
-+MediaBufsStatus mediabufs_dst_slots_create(struct mediabufs_ctl *const mbc, const unsigned int n, const bool fixed);
++MediaBufsStatus mediabufs_dst_slots_create(struct mediabufs_ctl *const mbc, const unsigned int n, const bool fixed, const enum mediabufs_memory memtype);
 +
 +MediaBufsStatus mediabufs_stream_on(struct mediabufs_ctl *const mbc);
 +MediaBufsStatus mediabufs_stream_off(struct mediabufs_ctl *const mbc);
@@ -58177,7 +58428,12 @@ index 0000000000..0307a831de
 +
 +MediaBufsStatus mediabufs_src_pool_create(struct mediabufs_ctl *const rw,
 +                  struct dmabufs_ctl * const dbsc,
-+                  unsigned int n);
++                  unsigned int n,
++                  const enum mediabufs_memory memtype);
++
++// Want to have appropriate formats set first
++MediaBufsStatus mediabufs_src_chk_memtype(struct mediabufs_ctl *const mbc, const enum mediabufs_memory memtype);
++MediaBufsStatus mediabufs_dst_chk_memtype(struct mediabufs_ctl *const mbc, const enum mediabufs_memory memtype);
 +
 +#define MEDIABUFS_DRIVER_VERSION(a, b, c) (((a) << 16) | ((b) << 8) | (c))
 +unsigned int mediabufs_ctl_driver_version(struct mediabufs_ctl *const mbc);
@@ -58610,10 +58866,10 @@ index 0000000000..cb4bd164b4
 +
 diff --git a/libavcodec/v4l2_request_hevc.c b/libavcodec/v4l2_request_hevc.c
 new file mode 100644
-index 0000000000..27b1b8dd6d
+index 0000000000..ebeb7bc6f6
 --- /dev/null
 +++ b/libavcodec/v4l2_request_hevc.c
-@@ -0,0 +1,315 @@
+@@ -0,0 +1,345 @@
 +/*
 + * This file is part of FFmpeg.
 + *
@@ -58633,7 +58889,7 @@ index 0000000000..27b1b8dd6d
 + */
 +
 +
-+
++#include "config.h"
 +#include "decode.h"
 +#include "hevcdec.h"
 +#include "hwconfig.h"
@@ -58757,8 +59013,10 @@ index 0000000000..27b1b8dd6d
 +    const HEVCSPS * const sps = h->ps.sps;
 +    int ret;
 +    const struct decdev * decdev;
-+    const uint32_t src_pix_fmt = V2(ff_v4l2_req_hevc, 1).src_pix_fmt_v4l2;  // Assuming constant for all APIs but avoiding V4L2 includes
++    const uint32_t src_pix_fmt = V2(ff_v4l2_req_hevc, 4).src_pix_fmt_v4l2;  // Assuming constant for all APIs but avoiding V4L2 includes
 +    size_t src_size;
++    enum mediabufs_memory src_memtype;
++    enum mediabufs_memory dst_memtype;
 +
 +    av_log(avctx, AV_LOG_DEBUG, "<<< %s\n", __func__);
 +
@@ -58789,8 +59047,14 @@ index 0000000000..27b1b8dd6d
 +           decdev_media_path(decdev), decdev_video_path(decdev));
 +
 +    if ((ctx->dbufs = dmabufs_ctl_new()) == NULL) {
-+        av_log(avctx, AV_LOG_ERROR, "Unable to open dmabufs\n");
-+        goto fail0;
++        av_log(avctx, AV_LOG_DEBUG, "Unable to open dmabufs - try mmap buffers\n");
++        src_memtype = MEDIABUFS_MEMORY_MMAP;
++        dst_memtype = MEDIABUFS_MEMORY_MMAP;
++    }
++    else {
++        av_log(avctx, AV_LOG_DEBUG, "Dmabufs opened - try dmabuf buffers\n");
++        src_memtype = MEDIABUFS_MEMORY_DMABUF;
++        dst_memtype = MEDIABUFS_MEMORY_DMABUF;
 +    }
 +
 +    if ((ctx->pq = pollqueue_new()) == NULL) {
@@ -58811,8 +59075,9 @@ index 0000000000..27b1b8dd6d
 +    // Ask for an initial bitbuf size of max size / 4
 +    // We will realloc if we need more
 +    // Must use sps->h/w as avctx contains cropped size
++retry_src_memtype:
 +    src_size = bit_buf_size(sps->width, sps->height, sps->bit_depth - 8);
-+    if (mediabufs_src_resizable(ctx->mbufs))
++    if (src_memtype == MEDIABUFS_MEMORY_DMABUF && mediabufs_src_resizable(ctx->mbufs))
 +        src_size /= 4;
 +    // Kludge for conformance tests which break Annex A limits
 +    else if (src_size < 0x40000)
@@ -58825,10 +59090,20 @@ index 0000000000..27b1b8dd6d
 +        goto fail4;
 +    }
 +
++    if (mediabufs_src_chk_memtype(ctx->mbufs, src_memtype)) {
++        if (src_memtype == MEDIABUFS_MEMORY_DMABUF) {
++            src_memtype = MEDIABUFS_MEMORY_MMAP;
++            goto retry_src_memtype;
++        }
++        av_log(avctx, AV_LOG_ERROR, "Failed to get src memory type\n");
++        goto fail4;
++    }
++
 +    if (V2(ff_v4l2_req_hevc, 4).probe(avctx, ctx) == 0) {
 +        av_log(avctx, AV_LOG_DEBUG, "HEVC API version 4 probed successfully\n");
 +        ctx->fns = &V2(ff_v4l2_req_hevc, 4);
 +    }
++#if CONFIG_V4L2_REQ_HEVC_VX
 +    else if (V2(ff_v4l2_req_hevc, 3).probe(avctx, ctx) == 0) {
 +        av_log(avctx, AV_LOG_DEBUG, "HEVC API version 3 probed successfully\n");
 +        ctx->fns = &V2(ff_v4l2_req_hevc, 3);
@@ -58841,6 +59116,7 @@ index 0000000000..27b1b8dd6d
 +        av_log(avctx, AV_LOG_DEBUG, "HEVC API version 1 probed successfully\n");
 +        ctx->fns = &V2(ff_v4l2_req_hevc, 1);
 +    }
++#endif
 +    else {
 +        av_log(avctx, AV_LOG_ERROR, "No HEVC version probed successfully\n");
 +        ret = AVERROR(EINVAL);
@@ -58853,7 +59129,7 @@ index 0000000000..27b1b8dd6d
 +        goto fail4;
 +    }
 +
-+    if (mediabufs_src_pool_create(ctx->mbufs, ctx->dbufs, 6)) {
++    if (mediabufs_src_pool_create(ctx->mbufs, ctx->dbufs, 6, src_memtype)) {
 +        av_log(avctx, AV_LOG_ERROR, "Failed to create source pool\n");
 +        goto fail4;
 +    }
@@ -58865,8 +59141,17 @@ index 0000000000..27b1b8dd6d
 +               sps->temporal_layer[sps->max_sub_layers - 1].max_dec_pic_buffering,
 +               avctx->thread_count, avctx->extra_hw_frames);
 +
++        if (mediabufs_dst_chk_memtype(ctx->mbufs, dst_memtype)) {
++            if (dst_memtype != MEDIABUFS_MEMORY_DMABUF) {
++                av_log(avctx, AV_LOG_ERROR, "Failed to get dst memory type\n");
++                goto fail4;
++            }
++            av_log(avctx, AV_LOG_DEBUG, "Dst DMABUF not supported - trying mmap\n");
++            dst_memtype = MEDIABUFS_MEMORY_MMAP;
++        }
++
 +        // extra_hw_frames is -1 if unset
-+        if (mediabufs_dst_slots_create(ctx->mbufs, dst_slots, (avctx->extra_hw_frames > 0))) {
++        if (mediabufs_dst_slots_create(ctx->mbufs, dst_slots, (avctx->extra_hw_frames > 0), dst_memtype)) {
 +            av_log(avctx, AV_LOG_ERROR, "Failed to create destination slots\n");
 +            goto fail4;
 +        }
@@ -58892,9 +59177,10 @@ index 0000000000..27b1b8dd6d
 +    // Set our s/w format
 +    avctx->sw_pix_fmt = ((AVHWFramesContext *)avctx->hw_frames_ctx->data)->sw_format;
 +
-+    av_log(avctx, AV_LOG_INFO, "Hwaccel %s; devices: %s,%s\n",
++    av_log(avctx, AV_LOG_INFO, "Hwaccel %s; devices: %s,%s; buffers: src %s, dst %s\n",
 +           ctx->fns->name,
-+           decdev_media_path(decdev), decdev_video_path(decdev));
++           decdev_media_path(decdev), decdev_video_path(decdev),
++           mediabufs_memory_name(src_memtype), mediabufs_memory_name(dst_memtype));
 +
 +    return 0;
 +
@@ -61505,10 +61791,10 @@ index da1cf9941e..c588ed23cb 100644
          case AVMEDIA_TYPE_AUDIO:
 diff --git a/libavfilter/vf_deinterlace_v4l2m2m.c b/libavfilter/vf_deinterlace_v4l2m2m.c
 new file mode 100644
-index 0000000000..d1c714b805
+index 0000000000..49fab3158d
 --- /dev/null
 +++ b/libavfilter/vf_deinterlace_v4l2m2m.c
-@@ -0,0 +1,1282 @@
+@@ -0,0 +1,1336 @@
 +/*
 + * This file is part of FFmpeg.
 + *
@@ -61884,14 +62170,16 @@ index 0000000000..d1c714b805
 +		 fmt->fmt.pix_mp.plane_fmt[0].sizeimage, fmt->fmt.pix_mp.plane_fmt[0].bytesperline);
 +
 +    if (V4L2_TYPE_IS_MULTIPLANAR(fmt->type)) {
-+        if (fmt->fmt.pix_mp.pixelformat != V4L2_PIX_FMT_YUV420 ||
++        if ((fmt->fmt.pix_mp.pixelformat != V4L2_PIX_FMT_YUV420 &&
++             fmt->fmt.pix_mp.pixelformat != V4L2_PIX_FMT_NV12) ||
 +            fmt->fmt.pix_mp.field != field) {
 +            av_log(ctx->logctx, AV_LOG_DEBUG, "format not supported for type %d\n", fmt->type);
 +
 +            return AVERROR(EINVAL);
 +        }
 +    } else {
-+        if (fmt->fmt.pix.pixelformat != V4L2_PIX_FMT_YUV420 ||
++        if ((fmt->fmt.pix.pixelformat != V4L2_PIX_FMT_YUV420 &&
++             fmt->fmt.pix.pixelformat != V4L2_PIX_FMT_NV12) ||
 +            fmt->fmt.pix.field != field) {
 +            av_log(ctx->logctx, AV_LOG_DEBUG, "format not supported for type %d\n", fmt->type);
 +
@@ -61902,7 +62190,7 @@ index 0000000000..d1c714b805
 +    return 0;
 +}
 +
-+static int deint_v4l2m2m_set_format(V4L2Queue *queue, uint32_t field, int width, int height, int pitch, int ysize)
++static int deint_v4l2m2m_set_format(V4L2Queue *queue, uint32_t pixelformat, uint32_t field, int width, int height, int pitch, int ysize)
 +{
 +    struct v4l2_format *fmt        = &queue->format;
 +    DeintV4L2M2MContextShared *ctx = queue->ctx;
@@ -61913,13 +62201,16 @@ index 0000000000..d1c714b805
 +        .target = V4L2_TYPE_IS_OUTPUT(fmt->type) ? V4L2_SEL_TGT_CROP_BOUNDS : V4L2_SEL_TGT_COMPOSE_BOUNDS,
 +    };
 +
++    // This works for most single object 4:2:0 types
 +    if (V4L2_TYPE_IS_MULTIPLANAR(fmt->type)) {
++        fmt->fmt.pix_mp.pixelformat = pixelformat;
 +        fmt->fmt.pix_mp.field = field;
 +        fmt->fmt.pix_mp.width = width;
 +        fmt->fmt.pix_mp.height = ysize / pitch;
 +        fmt->fmt.pix_mp.plane_fmt[0].bytesperline = pitch;
 +        fmt->fmt.pix_mp.plane_fmt[0].sizeimage = ysize + (ysize >> 1);
 +    } else {
++        fmt->fmt.pix.pixelformat = pixelformat;
 +        fmt->fmt.pix.field = field;
 +        fmt->fmt.pix.width = width;
 +        fmt->fmt.pix.height = height;
@@ -61928,12 +62219,22 @@ index 0000000000..d1c714b805
 +    }
 +
 +    ret = ioctl(ctx->fd, VIDIOC_S_FMT, fmt);
-+    if (ret)
++    if (ret) {
++        ret = AVERROR(errno);
 +        av_log(ctx->logctx, AV_LOG_ERROR, "VIDIOC_S_FMT failed: %d\n", ret);
++        return ret;
++    }
++
++    if (pixelformat != fmt->fmt.pix.pixelformat) {
++        av_log(ctx->logctx, AV_LOG_ERROR, "Format not supported: %s; S_FMT returned %s\n", av_fourcc2str(pixelformat), av_fourcc2str(fmt->fmt.pix.pixelformat));
++        return AVERROR(EINVAL);
++    }
 +
 +    ret = ioctl(ctx->fd, VIDIOC_G_SELECTION, &sel);
-+    if (ret)
-+        av_log(ctx->logctx, AV_LOG_ERROR, "VIDIOC_G_SELECTION failed: %d\n", ret);
++    if (ret) {
++        ret = AVERROR(errno);
++        av_log(ctx->logctx, AV_LOG_WARNING, "VIDIOC_G_SELECTION failed: %d\n", ret);
++    }
 +
 +    sel.r.width = width;
 +    sel.r.height = height;
@@ -61943,10 +62244,12 @@ index 0000000000..d1c714b805
 +    sel.flags = V4L2_SEL_FLAG_LE;
 +
 +    ret = ioctl(ctx->fd, VIDIOC_S_SELECTION, &sel);
-+    if (ret)
-+        av_log(ctx->logctx, AV_LOG_ERROR, "VIDIOC_S_SELECTION failed: %d\n", ret);
++    if (ret) {
++        ret = AVERROR(errno);
++        av_log(ctx->logctx, AV_LOG_WARNING, "VIDIOC_S_SELECTION failed: %d\n", ret);
++    }
 +
-+    return ret;
++    return 0;
 +}
 +
 +static int deint_v4l2m2m_probe_device(DeintV4L2M2MContextShared *ctx, char *node)
@@ -62028,10 +62331,25 @@ index 0000000000..d1c714b805
 +    return 0;
 +}
 +
-+static int v4l2_buffer_export_drm(V4L2Buffer* avbuf)
++static int v4l2_buffer_export_drm(V4L2Buffer* avbuf, const uint32_t pixelformat)
 +{
 +    struct v4l2_exportbuffer expbuf;
 +    int i, ret;
++    uint64_t mod = DRM_FORMAT_MOD_LINEAR;
++    uint32_t fmt = 0;
++
++    switch (pixelformat) {
++    case V4L2_PIX_FMT_NV12:
++        fmt = DRM_FORMAT_NV12;
++        break;
++    case V4L2_PIX_FMT_YUV420:
++        fmt = DRM_FORMAT_YUV420;
++        break;
++    default:
++        return AVERROR(EINVAL);
++    }
++
++    avbuf->drm_frame.layers[0].format = fmt;
 +
 +    for (i = 0; i < avbuf->num_planes; i++) {
 +        memset(&expbuf, 0, sizeof(expbuf));
@@ -62050,12 +62368,12 @@ index 0000000000..d1c714b805
 +            /* drm frame */
 +            avbuf->drm_frame.objects[i].size = avbuf->buffer.m.planes[i].length;
 +            avbuf->drm_frame.objects[i].fd = expbuf.fd;
-+            avbuf->drm_frame.objects[i].format_modifier = DRM_FORMAT_MOD_LINEAR;
++            avbuf->drm_frame.objects[i].format_modifier = mod;
 +        } else {
 +            /* drm frame */
 +            avbuf->drm_frame.objects[0].size = avbuf->buffer.length;
 +            avbuf->drm_frame.objects[0].fd = expbuf.fd;
-+            avbuf->drm_frame.objects[0].format_modifier = DRM_FORMAT_MOD_LINEAR;
++            avbuf->drm_frame.objects[0].format_modifier = mod;
 +        }
 +    }
 +
@@ -62140,7 +62458,7 @@ index 0000000000..d1c714b805
 +            if (ret)
 +                goto fail;
 +
-+            ret = v4l2_buffer_export_drm(buf);
++            ret = v4l2_buffer_export_drm(buf, multiplanar ? fmt->fmt.pix_mp.pixelformat : fmt->fmt.pix.pixelformat);
 +            if (ret)
 +                goto fail;
 +        }
@@ -62389,7 +62707,6 @@ index 0000000000..d1c714b805
 +
 +static uint8_t * v4l2_get_drm_frame(V4L2Buffer *avbuf, int height)
 +{
-+    int av_pix_fmt = AV_PIX_FMT_YUV420P;
 +    AVDRMFrameDescriptor *drm_desc = &avbuf->drm_frame;
 +    AVDRMLayerDescriptor *layer;
 +
@@ -62406,20 +62723,13 @@ index 0000000000..d1c714b805
 +        layer->planes[i].pitch = avbuf->plane_info[i].bytesperline;
 +    }
 +
-+    switch (av_pix_fmt) {
-+    case AV_PIX_FMT_YUYV422:
-+
-+        layer->format = DRM_FORMAT_YUYV;
++    switch (layer->format) {
++    case DRM_FORMAT_YUYV:
 +        layer->nb_planes = 1;
-+
 +        break;
 +
-+    case AV_PIX_FMT_NV12:
-+    case AV_PIX_FMT_NV21:
-+
-+        layer->format = av_pix_fmt == AV_PIX_FMT_NV12 ?
-+            DRM_FORMAT_NV12 : DRM_FORMAT_NV21;
-+
++    case DRM_FORMAT_NV12:
++    case DRM_FORMAT_NV21:
 +        if (avbuf->num_planes > 1)
 +            break;
 +
@@ -62431,10 +62741,7 @@ index 0000000000..d1c714b805
 +        layer->planes[1].pitch = avbuf->plane_info[0].bytesperline;
 +        break;
 +
-+    case AV_PIX_FMT_YUV420P:
-+
-+        layer->format = DRM_FORMAT_YUV420;
-+
++    case DRM_FORMAT_YUV420:
 +        if (avbuf->num_planes > 1)
 +            break;
 +
@@ -62554,6 +62861,26 @@ index 0000000000..d1c714b805
 +    return ff_set_common_formats(avctx, ff_make_format_list(pixel_formats));
 +}
 +
++static uint32_t desc_pixelformat(const AVDRMFrameDescriptor * const drm_desc)
++{
++    const int is_linear = (drm_desc->objects[0].format_modifier == DRM_FORMAT_MOD_LINEAR ||
++            drm_desc->objects[0].format_modifier == DRM_FORMAT_MOD_INVALID);
++
++    switch (drm_desc->layers[0].format) {
++    case DRM_FORMAT_YUV420:
++        if (is_linear)
++            return drm_desc->nb_objects == 1 ? V4L2_PIX_FMT_YUV420 : 0;
++        break;
++    case DRM_FORMAT_NV12:
++        if (is_linear)
++            return drm_desc->nb_objects == 1 ? V4L2_PIX_FMT_NV12 : 0;
++        break;
++    default:
++        break;
++    }
++    return 0;
++}
++
 +static int deint_v4l2m2m_filter_frame(AVFilterLink *link, AVFrame *in)
 +{
 +    AVFilterContext *avctx         = link->dst;
@@ -62569,23 +62896,27 @@ index 0000000000..d1c714b805
 +           avctx->inputs[0]->status_in, avctx->inputs[0]->status_out, avctx->outputs[0]->status_in, avctx->outputs[0]->status_out);
 +
 +    if (ctx->field_order == V4L2_FIELD_ANY) {
-+        AVDRMFrameDescriptor *drm_desc = (AVDRMFrameDescriptor *)in->data[0];
++        const AVDRMFrameDescriptor * const drm_desc = (AVDRMFrameDescriptor *)in->data[0];
++        const uint32_t pixelformat = desc_pixelformat(drm_desc);
++
++        if (pixelformat == 0) {
++            av_log(avctx, AV_LOG_ERROR, "Unsupported DRM format %s in %d objects, modifier %#" PRIx64 "\n",
++                   av_fourcc2str(drm_desc->layers[0].format),
++                   drm_desc->nb_objects, drm_desc->objects[0].format_modifier);
++            return AVERROR(EINVAL);
++        }
++
 +        ctx->orig_width = drm_desc->layers[0].planes[0].pitch;
 +        ctx->orig_height = drm_desc->layers[0].planes[1].offset / ctx->orig_width;
 +
-+        av_log(priv, AV_LOG_DEBUG, "%s: %dx%d (%d,%d)\n", __func__, ctx->width, ctx->height,
++        av_log(priv, AV_LOG_DEBUG, "%s: %dx%d (%td,%td)\n", __func__, ctx->width, ctx->height,
 +           drm_desc->layers[0].planes[0].pitch, drm_desc->layers[0].planes[1].offset);
 +
-+        if (in->top_field_first)
-+            ctx->field_order = V4L2_FIELD_INTERLACED_TB;
-+        else
-+            ctx->field_order = V4L2_FIELD_INTERLACED_BT;
-+
-+        ret = deint_v4l2m2m_set_format(output, ctx->field_order, ctx->width, ctx->height, ctx->orig_width, drm_desc->layers[0].planes[1].offset);
++        ret = deint_v4l2m2m_set_format(output, pixelformat, ctx->field_order, ctx->width, ctx->height, ctx->orig_width, drm_desc->layers[0].planes[1].offset);
 +        if (ret)
 +            return ret;
 +
-+        ret = deint_v4l2m2m_set_format(capture, V4L2_FIELD_NONE, ctx->width, ctx->height, ctx->orig_width, drm_desc->layers[0].planes[1].offset);
++        ret = deint_v4l2m2m_set_format(capture, pixelformat, V4L2_FIELD_NONE, ctx->width, ctx->height, ctx->orig_width, drm_desc->layers[0].planes[1].offset);
 +        if (ret)
 +            return ret;
 +
@@ -62604,6 +62935,12 @@ index 0000000000..d1c714b805
 +        ret = deint_v4l2m2m_streamon(output);
 +        if (ret)
 +            return ret;
++
++        if (in->top_field_first)
++            ctx->field_order = V4L2_FIELD_INTERLACED_TB;
++        else
++            ctx->field_order = V4L2_FIELD_INTERLACED_BT;
++
 +    }
 +
 +    ret = deint_v4l2m2m_enqueue_frame(output, in);
@@ -62679,28 +63016,31 @@ index 0000000000..d1c714b805
 +        return 0;
 +    }
 +
-+    {
++    recycle_q(&s->output);
++    n = count_enqueued(&s->output);
++
++    while (n < 6) {
 +        AVFrame * frame;
 +        int rv;
 +
-+        recycle_q(&s->output);
-+        n = count_enqueued(&s->output);
-+
-+        while (n < 6) {
-+            if ((rv = ff_inlink_consume_frame(inlink, &frame)) < 0) {
-+                av_log(priv, AV_LOG_ERROR, "%s: consume in failed: %s\n", __func__, av_err2str(rv));
-+                return rv;
-+            }
-+
-+            if (frame == NULL) {
-+                av_log(priv, AV_LOG_TRACE, "%s: No frame\n", __func__);
-+                break;
-+            }
-+
-+            deint_v4l2m2m_filter_frame(inlink, frame);
-+            av_log(priv, AV_LOG_TRACE, "%s: Q frame\n", __func__);
-+            ++n;
++        if ((rv = ff_inlink_consume_frame(inlink, &frame)) < 0) {
++            av_log(priv, AV_LOG_ERROR, "%s: consume in failed: %s\n", __func__, av_err2str(rv));
++            return rv;
 +        }
++
++        if (frame == NULL) {
++            av_log(priv, AV_LOG_TRACE, "%s: No frame\n", __func__);
++            break;
++        }
++
++        rv = deint_v4l2m2m_filter_frame(inlink, frame);
++        av_frame_free(&frame);
++
++        if (rv != 0)
++            return rv;
++
++        av_log(priv, AV_LOG_TRACE, "%s: Q frame\n", __func__);
++        ++n;
 +    }
 +
 +    if (n < 6) {
@@ -65320,10 +65660,10 @@ index 7a9fdbd263..2f825b7e16 100644
      map = av_frame_alloc();
      if (!map)
 diff --git a/libavutil/pixdesc.c b/libavutil/pixdesc.c
-index 18c7a0efc8..cada39e92f 100644
+index 18c7a0efc8..bab13a4d50 100644
 --- a/libavutil/pixdesc.c
 +++ b/libavutil/pixdesc.c
-@@ -2395,6 +2395,38 @@ static const AVPixFmtDescriptor av_pix_fmt_descriptors[AV_PIX_FMT_NB] = {
+@@ -2395,6 +2395,50 @@ static const AVPixFmtDescriptor av_pix_fmt_descriptors[AV_PIX_FMT_NB] = {
          .name = "vulkan",
          .flags = AV_PIX_FMT_FLAG_HWACCEL,
      },
@@ -65351,12 +65691,24 @@ index 18c7a0efc8..cada39e92f 100644
 +        },
 +        .flags = 0,
 +    },
++    [AV_PIX_FMT_SAND64_16] = {
++        .name = "sand64_16",
++        .nb_components = 3,
++        .log2_chroma_w = 1,
++        .log2_chroma_h = 1,
++        .comp = {
++            { 0, 2, 0, 0, 16, 0, 15, 1 },        /* Y */
++            { 1, 4, 0, 0, 16, 3, 15, 1 },        /* U */
++            { 1, 4, 2, 0, 16, 3, 15, 3 },        /* V */
++        },
++        .flags = 0,
++    },
 +    [AV_PIX_FMT_RPI4_8] = {
-+        .name = "rpi",
++        .name = "rpi4_8",
 +        .flags = AV_PIX_FMT_FLAG_HWACCEL,
 +    },
 +    [AV_PIX_FMT_RPI4_10] = {
-+        .name = "rpi",
++        .name = "rpi4_10",
 +        .flags = AV_PIX_FMT_FLAG_HWACCEL,
 +    },
  };

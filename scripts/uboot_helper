@@ -373,6 +373,10 @@ devices = \
   },
   'Samsung': {
     'Exynos': {
+      'odroid-xu3': {
+        'dtb': 'exynos5422-odroidxu3.dtb',
+        'config': 'odroid-xu3_defconfig'
+      },
       'odroid-xu4': {
         'dtb': 'exynos5422-odroidxu4.dtb',
         'config': 'odroid-xu4_defconfig'

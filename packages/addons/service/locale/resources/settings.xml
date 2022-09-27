@@ -1,7 +1,37 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<settings>
-   <category   label="30000">
-      <setting label="30001" id="charmap" type="select" default="UTF-8" values="UTF-8" enable="false" />
-      <setting label="30002" id="locale"  type="select" default="en_GB" values="@LOCALES@" />
+<?xml version="1.0" ?>
+<settings version="1">
+  <section id="service.locale">
+    <category id="configuration" label="30000" help="">
+      <group id="1">
+        <setting id="charmap" type="string" label="30001" help="">
+          <level>0</level>
+          <default>UTF-8</default>
+          <constraints>
+            <options>
+              <option>UTF-8</option>
+            </options>
+          </constraints>
+          <dependencies>
+            <dependency type="enable">
+              <condition on="property" name="InfoBool">false</condition>
+            </dependency>
+          </dependencies>
+          <control type="list" format="string">
+            <heading>30001</heading>
+          </control>
+        </setting>
+        <setting id="locale" type="string" label="30002" help="">
+          <level>0</level>
+          <default>en_GB</default>
+          <constraints>
+            <options>@LOCALES@
+            </options>
+          </constraints>
+          <control type="list" format="string">
+            <heading>30002</heading>
+          </control>
+        </setting>
+      </group>
     </category>
+  </section>
 </settings>
