@@ -5,31 +5,41 @@
 PKG_NAME="ffmpeg"
 PKG_LICENSE="LGPLv2.1+"
 PKG_SITE="https://ffmpeg.org"
-PKG_DEPENDS_TARGET="toolchain zlib bzip2 gnutls speex SDL2 lame x264"
+PKG_DEPENDS_TARGET="toolchain zlib bzip2 openssl speex SDL2 lame x264"
 PKG_LONGDESC="FFmpeg is a complete, cross-platform solution to record, convert and stream audio and video."
 PKG_BUILD_FLAGS="-gold"
 
 case "${PROJECT}" in
   Amlogic)
-    PKG_VERSION="0e5290bcac015e52f6a65dafaf41ea125816257f" # dev/4.4/rpi_import_1
+    PKG_VERSION="0e5290bcac015e52f6a65dafaf41ea125816257f"
+    PKG_FFMPEG_BRANCH="dev/4.4/rpi_import_1"
     PKG_SHA256="4bd6e56920b90429bc09e43cda554f5bb9125c4ac090b4331fc459bb709eea68"
     PKG_URL="https://github.com/jc-kynesim/rpi-ffmpeg/archive/${PKG_VERSION}.tar.gz"
-    PKG_PATCH_DIRS="libreelec"
+    PKG_PATCH_DIRS="libreelec dav1d"
     ;;
   RPi)
-    PKG_VERSION="4.4-N-Alpha1"
-    PKG_SHA256="eb396f46ef7c5ac01b67818d0f2c0516fd4ab32aa9065a9ffa71eebede67ff20"
+    PKG_VERSION="4.4.1-Nexus-Alpha1"
+    PKG_SHA256="abbce62231baffe237e412689c71ffe01bfc83135afd375f1e538caae87729ed"
     PKG_URL="https://github.com/xbmc/FFmpeg/archive/${PKG_VERSION}.tar.gz"
     PKG_FFMPEG_RPI="--disable-mmal --disable-rpi --enable-sand"
     PKG_PATCH_DIRS="libreelec rpi"
     ;;
   *)
-    PKG_VERSION="4.4-N-Alpha1"
-    PKG_SHA256="eb396f46ef7c5ac01b67818d0f2c0516fd4ab32aa9065a9ffa71eebede67ff20"
+    PKG_VERSION="4.4.1-Nexus-Alpha1"
+    PKG_SHA256="abbce62231baffe237e412689c71ffe01bfc83135afd375f1e538caae87729ed"
     PKG_URL="https://github.com/xbmc/FFmpeg/archive/${PKG_VERSION}.tar.gz"
     PKG_PATCH_DIRS="libreelec v4l2-request v4l2-drmprime"
     ;;
 esac
+
+post_unpack() {
+  # Fix FFmpeg version
+  if [ "${PROJECT}" = "Amlogic" ]; then
+    echo "${PKG_FFMPEG_BRANCH}-${PKG_VERSION:0:7}" > ${PKG_BUILD}/VERSION
+  else
+    echo "${PKG_VERSION}" > ${PKG_BUILD}/RELEASE
+  fi
+}
 
 # Dependencies
 get_graphicdrivers
@@ -152,7 +162,7 @@ fi
               --disable-static \
               --enable-shared \
               --enable-gpl \
-              --disable-version3 \
+              --enable-version3 \
               --enable-logging \
               --disable-doc \
               ${PKG_FFMPEG_DEBUG} \
@@ -168,7 +178,7 @@ fi
               --enable-avfilter \
               --enable-pthreads \
               --enable-network \
-              --enable-gnutls --disable-openssl \
+              --disable-gnutls --enable-openssl \
               --disable-gray \
               --enable-swscale-alpha \
               --disable-small \

@@ -3,8 +3,8 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="pvr.iptvsimple"
-PKG_VERSION="20.5.0-Nexus"
-PKG_SHA256="55456760c56f1212c182d4e8595d14521e4a32ee176f16b19c5cce9b593fb0bb"
+PKG_VERSION="20.6.0-Nexus"
+PKG_SHA256="e760543065fb9fc29d35f20bc6ff617b4a24e337a5d276ab05476a6bb6a95f0d"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

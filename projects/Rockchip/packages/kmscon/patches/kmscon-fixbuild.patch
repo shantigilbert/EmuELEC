@@ -1,0 +1,32 @@
+--- a/src/pty.c
++++ b/src/pty.c
+@@ -45,6 +45,7 @@
+ #define LOG_SUBSYSTEM "pty"
+ 
+ #define KMSCON_NREAD 16384
++#define SIGUNUSED 31
+ 
+ struct kmscon_pty {
+ 	unsigned long ref;
+--- a/src/uterm_vt.c
++++ b/src/uterm_vt.c
+@@ -40,6 +40,7 @@
+ #include <sys/ioctl.h>
+ #include <sys/signalfd.h>
+ #include <sys/stat.h>
++#include <sys/sysmacros.h>
+ #include <termios.h>
+ #include <time.h>
+ #include <unistd.h>
+--- a/configure.ac
++++ a/configure.ac
+@@ -761,7 +761,7 @@
+ 
+ # check for offline man-pages stylesheet
+ AC_MSG_CHECKING([for docbook manpages stylesheet])
+-BUILD_MANPAGES_STYLESHEET="http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl"
++BUILD_MANPAGES_STYLESHEET="https://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl"
+ AC_PATH_PROGS_FEATURE_CHECK([XSLTPROC_TMP], [xsltproc],
+                             AS_IF([`"$ac_path_XSLTPROC_TMP" --nonet "$BUILD_MANPAGES_STYLESHEET" > /dev/null 2>&1`],
+                                   [BUILD_HAVE_MANPAGES_STYLESHEET=yes]))
+

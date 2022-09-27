@@ -2,8 +2,8 @@
 # Copyright (C) 2021-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="tllist"
-PKG_VERSION="1.0.5"
-PKG_SHA256="b0f32c9b2c2015c8d8dd068fd4e8b586aa91ca1670badc274ec962559ee0aadd"
+PKG_VERSION="1.1.0"
+PKG_SHA256="0e7b7094a02550dd80b7243bcffc3671550b0f1d8ba625e4dff52517827d5d23"
 PKG_LICENSE="MIT"
 PKG_SITE="https://codeberg.org/dnkl/tllist"
 PKG_URL="https://codeberg.org/dnkl/tllist/archive/${PKG_VERSION}.tar.gz"

@@ -11,6 +11,16 @@ PKG_SOURCE_DIR="glm"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="OpenGL Mathematics (GLM)"
 
+# Not needed by GLM itself, but users will need it. So instead of adding this
+# to every user, put it here once.
+if [ "${OPENGLES_SUPPORT}" = "yes" ]; then
+  PKG_DEPENDS_TARGET+=" ${OPENGLES}"
+fi
+
+if [ "${OPENGL_SUPPORT}" = "yes" ]; then
+  PKG_DEPENDS_TARGET+=" ${OPENGL}"
+fi
+
 # Hack install solution until cmake install restored in upstream package
 makeinstall_target() {
   target_has_feature 32bit && PKG_VOID_SIZE=4 || PKG_VOID_SIZE=8

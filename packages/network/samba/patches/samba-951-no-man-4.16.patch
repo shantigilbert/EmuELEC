@@ -1,0 +1,36 @@
+diff --git a/docs-xml/wscript_build b/docs-xml/wscript_build
+--- a/docs-xml/wscript_build	2020-12-05 09:01:19.652459634 +0000
++++ b/docs-xml/wscript_build	2020-12-05 09:10:10.639446971 +0000
+@@ -175,32 +175,3 @@
+                     target=path_entities,
+                     rule=generate_path_entity_file,
+                     dep_vars=bld.dynconfig_varnames())
+-
+-
+-def SMBDOTCONF_MANPAGE(bld, target):
+-    ''' assemble and build smb.conf.5 manual page'''
+-    bld.SAMBAMANPAGES(target, parameter_all)
+-
+-if ('XSLTPROC_MANPAGES' in bld.env and bld.env['XSLTPROC_MANPAGES']):
+-
+-    SMBDOTCONF_MANPAGE(bld, 'manpages/smb.conf.5')
+-    bld.SAMBAMANPAGES(manpages)
+-
+-    if bld.CONFIG_SET('WITH_PAM_MODULES') and bld.CONFIG_SET('HAVE_PAM_START'):
+-        bld.SAMBAMANPAGES(pam_winbind_manpages)
+-
+-    if bld.CONFIG_SET('HAVE_KRB5_LOCATE_PLUGIN_H'):
+-        bld.SAMBAMANPAGES(krb5_locator_manpages)
+-
+-    if bld.CONFIG_SET('HAVE_KRB5_LOCALAUTH_PLUGIN_H'):
+-        bld.SAMBAMANPAGES(krb5_localauth_manpages)
+-
+-    if conf.env.build_winexe == True:
+-        bld.SAMBAMANPAGES(winexe_manpages)
+-
+-    if bld.CONFIG_SET('ENABLE_SELFTEST'):
+-        bld.SAMBAMANPAGES('manpages/vfstest.1')
+-
+-    for manpage in vfs_module_manpages:
+-        if bld.SAMBA3_IS_ENABLED_MODULE(manpage):
+-            bld.SAMBAMANPAGES('manpages/%s.8' % manpage)

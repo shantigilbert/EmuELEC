@@ -60,7 +60,7 @@ case "${PKG_SOURCE_NAME}" in
     7z x -o"${2}/${1}" "${FULL_SOURCE_PATH}"
     ;;
   *.zip)
-    unzip -q "${FULL_SOURCE_PATH}" -d "${2}"
+    unzip -o -q "${FULL_SOURCE_PATH}" -d "${2}"
     ;;
   *.diff | *.patch)
     patch -d "${2}" -p1 < "${FULL_SOURCE_PATH}"
