@@ -8,14 +8,10 @@
 
 # odroidgoa
 
-
 function check_pwd() {
 
-CONFIG_FLASH="/flash/config.ini"
 EE_CONF="${EE_DIR}/configs/emuelec.conf"
 ESSETTINGS="/storage/.config/emulationstation/es_settings.cfg"
-VIDEO_FILE="/storage/.config/EE_VIDEO_MODE"
-VIDEO_MODE="/sys/class/display/mode"
 
 PWDFILE="${1}"
 
