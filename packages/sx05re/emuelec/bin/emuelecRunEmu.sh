@@ -129,9 +129,14 @@ fi
 # Set the display video to that of the emulator setting.
 [ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
 
+# Get the latest save files if there is any
+CLOUD_SYNC=$(get_ee_setting "${PLATFORM}.cloud_sync")
+[[ "$CLOUD_SYNC" == "1" ]] && ra_rclone.sh get "${PLATFORM}" "${ROMNAME}" &
+CLOUD_PID=$!
+
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
-[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}"
+[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}" || sleep 3
 
 # Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
@@ -435,6 +440,8 @@ if [[ "${KILLTHIS}" != "none" ]]; then
     gptokeyb 1 ${KILLTHIS} &
 fi
 
+[[ "$CLOUD_SYNC" == "1" ]] && wait $CLOUD_PID
+
 # Execute the command and try to output the results to the log file if it was not disabled.
 if [[ $LOGEMU == "Yes" ]]; then
    echo "Emulator Output is:" >> $EMUELECLOG
@@ -445,6 +452,9 @@ else
    eval ${RUNTHIS} > /dev/null 2>&1
    ret_error=$?
 fi 
+
+[[ "$CLOUD_SYNC" == "1" ]] && ra_rclone.sh get "${PLATFORM}" "${ROMNAME}" &
+CLOUD_PID=$!
 
 ra_rclone.sh set "${PLATFORM}" "${ROMNAME}" &
 
@@ -462,6 +472,7 @@ $TBASH $SET_DISPLAY_SH $VIDEO
 
 # Show exit splash
 ${TBASH} show_splash.sh exit
+sleep 3
 
 # Just in case
 kill_video_controls
@@ -520,6 +531,8 @@ fi
 
 # Temp fix for libretro scummvm always erroing out on exit
 [[ "${EMU}" == *"scummvm_libretro"* ]] && ret_error=0
+
+[[ "$CLOUD_SYNC" == "1" ]] && wait $CLOUD_PID
 
 if [[ "$ret_error" != "0" ]]; then
     echo "exit $ret_error" >> $EMUELECLOG
