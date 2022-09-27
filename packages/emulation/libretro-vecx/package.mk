@@ -14,6 +14,14 @@ PKG_LIBNAME="vecx_libretro.so"
 PKG_LIBPATH="${PKG_LIBNAME}"
 PKG_LIBVAR="VECX_LIB"
 
+if [ "${OPENGLES_SUPPORT}" = "yes" ]; then
+  PKG_DEPENDS_TARGET+=" ${OPENGLES}"
+fi
+
+if [ "${OPENGL_SUPPORT}" = "yes" ]; then
+  PKG_DEPENDS_TARGET+=" ${OPENGL}"
+fi
+
 make_target() {
   if [ "${OPENGL_SUPPORT}" = no ]; then
     HAS_GLES=1 make

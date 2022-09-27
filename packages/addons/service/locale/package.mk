@@ -2,7 +2,7 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="locale"
-PKG_REV="102"
+PKG_REV="103"
 PKG_ARCH="any"
 PKG_DEPENDS_TARGET="toolchain glibc"
 PKG_SECTION="service"
@@ -34,10 +34,9 @@ addon() {
     if [ "${l}" = "POSIX" ]; then
       continue
     fi
-    locales+="|${l}"
+    locales+="$(echo -e '\\\n              <option>'"${l}"'</option>')"
   done
-  locales="${locales:1}"
 
-  sed -e "s/@LOCALES@/${locales}/" \
+  sed -e "s|@LOCALES@|${locales}|" \
       -i ${ADDON_BUILD}/${PKG_ADDON_ID}/resources/settings.xml
 }

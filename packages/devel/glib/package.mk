@@ -11,7 +11,6 @@ PKG_URL="https://download.gnome.org/sources/glib/$(get_pkg_version_maj_min)/${PK
 PKG_DEPENDS_HOST="libffi:host pcre2:host Python3:host meson:host ninja:host"
 PKG_DEPENDS_TARGET="toolchain pcre2 zlib libffi Python3:host util-linux"
 PKG_LONGDESC="A library which includes support routines for C such as lists, trees, hashes, memory allocation."
-PKG_TOOLCHAIN="meson"
 
 PKG_MESON_OPTS_HOST="-Ddefault_library=shared \
                      -Dinstalled_tests=false \

@@ -37,7 +37,6 @@ post_makeinstall_target() {
 
   safe_remove ${INSTALL}/usr/bin
   safe_remove ${INSTALL}/usr/include
-  safe_remove ${INSTALL}/usr/lib/xml2Conf.sh
   safe_remove ${INSTALL}/usr/share
   mv ${INSTALL}/usr/lib ${INSTALL}/usr/lib32
 }
