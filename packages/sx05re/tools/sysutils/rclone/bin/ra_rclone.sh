@@ -16,6 +16,7 @@ RCLONE_ARGS=" --verbose --transfers 4 --checkers 4 --contimeout 30s --timeout 12
 RC_LOG="/emuelec/logs/rclone.log"
 DEBUG=1
 
+rm "$RC_LOG"
 [[ ! -f "${RC_LOG}" ]] && touch "${RC_LOG}"
 
 [[ $DEBUG == 1 ]] && echo "ROMNAME=${ROMNAME}"
@@ -51,14 +52,18 @@ fi
 RUNSYNC=$(get_ee_setting rclone_save "$PLATFORM"  "${ROMNAME}")
 if [[ "${RUNSYNC}" == "1" ]]; then
   if [[ "$ACTION" == "get" ]]; then
-    rclone copy ${RCLONE_ARGS} "${RA_RSAVES}/" --include "/${ROMSTEM}.srm" "${RA_LSAVES}"
-    rclone copy ${RCLONE_ARGS} "${RA_RSTATES}/" --include "/${ROMSTEM}.state*" "${RA_LSTATES}"
+    rclone copy ${RCLONE_ARGS} "${RA_RSAVES}/" --include "/${ROMSTEM}.srm" "${RA_LSAVES}" >> "$RC_LOG" &
+    rclone copy ${RCLONE_ARGS} "${RA_RSTATES}/" --include "/${ROMSTEM}.state*" "${RA_LSTATES}" >> "$RC_LOG" &
   fi
   if [[ "$ACTION" == "set" ]]; then
     SRM="${RA_LSAVES}/${ROMSTEM}.srm"
-    [[ -f "$SRM" ]] && rclone copy ${RCLONE_ARGS} "${SRM}" ${RA_RSAVES}
+    [[ -f "$SRM" ]] && rclone copy ${RCLONE_ARGS} "${SRM}" ${RA_RSAVES} >> "$RC_LOG" &
     SF_FILES="${RA_LSTATES}${ROMSTEM}.state"
     SF_OK=$(ls "$SF_FILES"*)
-    [[ ! -z "$SF_OK" ]] && rclone copy ${RCLONE_ARGS} "${RA_LSTATES}" --include "/${ROMSTEM}.state*" ${RA_RSTATES}
+    [[ ! -z "$SF_OK" ]] && rclone copy ${RCLONE_ARGS} "${RA_LSTATES}" --include "/${ROMSTEM}.state*" ${RA_RSTATES} >> "$RC_LOG" &
   fi
+  wait
+  LOGTEXT=$(cat ${RC_LOG} | grep -i ERROR)
+  [[ ! -z "$LOGTEXT" ]] && exit 1
+  exit 0  
 fi
