@@ -130,7 +130,7 @@ fi
 [ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
 
 # Get the latest save files if there is any
-CLOUD_SYNC=$(get_ee_setting "${PLATFORM}.cloud_sync")
+CLOUD_SYNC=$(get_ee_setting "${PLATFORM}.cloudsave")
 [[ "$CLOUD_SYNC" == "1" ]] && ra_rclone.sh get "${PLATFORM}" "${ROMNAME}" &
 CLOUD_PID=$!
 
@@ -453,10 +453,7 @@ else
    ret_error=$?
 fi 
 
-[[ "$CLOUD_SYNC" == "1" ]] && ra_rclone.sh get "${PLATFORM}" "${ROMNAME}" &
-CLOUD_PID=$!
-
-ra_rclone.sh set "${PLATFORM}" "${ROMNAME}" &
+[[ "$CLOUD_SYNC" == "1" ]] && ra_rclone.sh set "${PLATFORM}" "${ROMNAME}" &
 
 # clear terminal window
 	reset > /dev/tty < /dev/null 2>&1
