@@ -102,8 +102,6 @@ fi
 # This is needed to reset scaling.
 echo 0 > /sys/class/ppmgr/ppscaler
 
-[[ "$OLD_MODE" != "$MODE" ]] && 
-
 SWITCHED_MODES=0
 
 # This first checks that if you need to change the resolution and if so update
