@@ -27,6 +27,128 @@ blank_buffer()
   [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 }
 
+switch_resolution()
+{
+  local OLD_MODE=$1
+  local MODE=$2
+
+  # This first checks that if you need to change the resolution and if so update
+  # the file that switches the mode automatically if the value is valid if not exit.
+  if [[ "$OLD_MODE" != "$MODE" ]]; then
+    # Here we first clear the primary display buffer of leftover artifacts then set
+    # the secondary small buffers flag to stop copying across.
+    blank_buffer >> /dev/null
+
+    case $MODE in
+      480cvbs)
+        echo 480cvbs > "${FILE_MODE}"
+        ;;
+      576cvbs)
+        echo 576cvbs > "${FILE_MODE}"
+        ;;
+      480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
+        echo $MODE > "${FILE_MODE}"
+        ;;
+      *x*)
+        echo $MODE > "${FILE_MODE}"
+        ;;
+    esac
+    local NEW_MODE=$(cat $FILE_MODE)
+    if [[ "$NEW_MODE" == "$MODE" ]]; then
+      echo "1"
+      return
+    fi
+  fi
+  echo "0"
+}
+
+get_resolution_size()
+{
+  local MODE=$1
+
+  # Here we set the Height and Width of the particular resolution, RH and RW stands
+  # for Real Width and Real Height respectively.
+  local RW=0
+  local RH=0
+  case $MODE in
+    480cvbs)
+      RW=640
+      RH=480
+      [[ -z "$SW" ]] && SW=1024
+      [[ -z "$SH" ]] && SH=768
+      ;;
+    576cvbs)
+      RW=720
+      RH=576
+      [[ -z "$SW" ]] && SW=1024
+      [[ -z "$SH" ]] && SH=768
+      ;;
+    480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
+      SW=$(( $SH*16/9 ))
+      [[ "$MODE" == "480"* ]] && SW=640
+      RW=$SW
+      RH=$SH
+      ;;
+    *x*)
+      SW=$(echo $MODE | cut -d'x' -f 1)
+      SH=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
+      [ ! -n "$SH" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
+      RW=$SW
+      RH=$SH      
+      ;;
+  esac
+  echo "$SW $SH $RW $RH"
+}
+
+set_main_framebuffer() {
+  local SW=$1
+  local SH=$2
+  local BPP=32
+
+  if [[ -n "$SW" && "$SW" > 0 && -n "$SH" && "$SH" > 0 ]]; then
+    MSH=$(( SH*2 ))
+    fbset -fb /dev/fb0 -g $SW $SH $SW $MSH $BPP
+    echo 0 0 $(( SW-1 )) $(( SH-1 )) > /sys/class/graphics/fb0/free_scale_axis
+    echo 0 > /sys/class/graphics/fb0/free_scale
+    echo 0 > /sys/class/graphics/fb0/freescale_mode
+  fi
+}
+
+set_display_borders() {
+  local PX=$1
+  local PY=$2
+  local PW=$3
+  local PH=$4
+  local RW=$5
+  local RH=$6
+  
+  if [[ -z "$PX" || -z "$PY" || -z "$PW" || -z "$PH" ]]; then
+    return 1
+  elif [[ ! -n "$PX" || ! -n "$PY" || ! -n "$PW" || ! -n "$PH" ]]; then
+    return 2
+  elif [[ "$PW" == "0" || "$PH" == "0" ]]; then
+    return 3
+  fi
+  echo "PX:$PX PY:$PY PW:$PW PH:$PH"
+
+  # Sets the default 2nd point of the display which should always be slightly
+  # smaller then the acual size of the screen display.
+  PX2=$(( RW-PX-1 ))
+  PY2=$(( RH-PY-1 ))
+
+  # If the real width and height are defined particularly for cvbs then use
+  # the real values of the screen resolution not the display buffers resolution
+  # which may differ and generally be allot bigger so all the gui objects are
+  # kept in perspective.
+  [[ ${RW} != ${PW} ]] && PX2=$(( PW+PX-1 ))
+  [[ ${RH} != ${PH} ]] && PY2=$(( PH+PY-1 ))
+
+  echo "PX:${PX} PY:${PY} PX2:${PX2} PY2:${PY2}"
+  echo 1 > /sys/class/graphics/fb0/freescale_mode
+  echo "${PX} ${PY} ${PX2} ${PY2}" > /sys/class/graphics/fb0/window_axis
+  echo 0x10001 > /sys/class/graphics/fb0/free_scale
+  return 0
+}
 
 # Here we initialize any arguments and variables to be used in the script.
 # The Mode we want the display to change too.
@@ -102,77 +224,24 @@ fi
 # This is needed to reset scaling.
 echo 0 > /sys/class/ppmgr/ppscaler
 
-SWITCHED_MODES=0
+SWITCHED_MODES=$(switch_resolution $OLD_MODE $MODE)
 
-# This first checks that if you need to change the resolution and if so update
-# the file that switches the mode automatically if the value is valid if not exit.
-if [[ "$OLD_MODE" != "$MODE" ]]; then
-  # Here we first clear the primary display buffer of leftover artifacts then set
-  # the secondary small buffers flag to stop copying across.
-  blank_buffer
+declare -a SIZE=($( get_resolution_size $MODE ))
 
-  case $MODE in
-    480cvbs)
-      echo 480cvbs > "${FILE_MODE}"
-      ;;
-    576cvbs)
-      echo 576cvbs > "${FILE_MODE}"
-      ;;
-    480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
-      echo $MODE > "${FILE_MODE}"
-      ;;
-    *x*)
-      echo $MODE > "${FILE_MODE}"
-      ;;
-  esac
-  NEW_MODE=$(cat $FILE_MODE)
-  if [[ "$NEW_MODE" != "$MODE" ]]; then
-    exit 0
-  else
-    SWITCHED_MODES=1
-  fi  
-fi
+SW=${SIZE[0]}
+SH=${SIZE[1]}
+RW=${SIZE[2]}
+RH=${SIZE[3]}
 
-# Here we set the Height and Width of the particular resolution, RH and RW stands
-# for Real Width and Real Height respectively.
-RW=0
-RH=0
-case $MODE in
-  480cvbs)
-    RW=640
-    RH=480
-    [[ -z "$SW" ]] && SW=1024
-    [[ -z "$SH" ]] && SH=768
-    ;;
-  576cvbs)
-    RW=720
-    RH=576
-    [[ -z "$SW" ]] && SW=1024
-    [[ -z "$SH" ]] && SH=768
-    ;;
-  480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
-    SW=$(( $SH*16/9 ))
-    [[ "$MODE" == "480"* ]] && SW=640
-    ;;
-  *x*)
-    SW=$(echo $MODE | cut -d'x' -f 1)
-    SH=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
-    [ ! -n "$SH" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
-    ;;
-esac
+echo "SWITCHED_MODES=$SWITCHED_MODES"
 
 # Once we know the Width and Height is valid numbers we set the primary display
 # buffer, and we multiply the 2nd height by a factor of 2 I assume for interlaced 
 # support.
-if [[ $SWITCHED_MODES == 1 ]]; then
-  if [[ -n "$SW" && "$SW" > 0 && -n "$SH" && "$SH" > 0 ]]; then
-    MSH=$(( SH*2 ))
-    fbset -fb /dev/fb0 -g $SW $SH $SW $MSH $BPP
-    echo 0 0 $(( SW-1 )) $(( SH-1 )) > /sys/class/graphics/fb0/free_scale_axis
-    echo 0 > /sys/class/graphics/fb0/free_scale
-    echo 0 > /sys/class/graphics/fb0/freescale_mode
-  fi
-  [[ ${SWITCHED_MODES} == 1 ]] && blank_buffer
+if [[ "$SWITCHED_MODES" == "1" ]]; then
+  echo "SET MAIN FRAME BUFFER"
+  set_main_framebuffer $RW $RH
+  blank_buffer
 fi
 
 # Now that the primary buffer has been acquired we blank it again because the new
@@ -197,7 +266,7 @@ if [[ ! -z "${BORDER_VALS}" ]]; then
   declare -a BORDERS=(${BORDER_VALS})
   COUNT_ARGS=${#BORDERS[@]}
   if [[ ${COUNT_ARGS} != 4 && ${COUNT_ARGS} != 2 ]]; then
-    exit 0;
+    exit 0
   fi
 fi
 
@@ -205,40 +274,11 @@ fi
 # width and height and make sure they are all valid and will not cause issues for
 # when we set the borders, and allow the primary display buffer to resize the screen.
 if [[ ! -z "${BORDERS}" ]]; then
-    PX=${BORDERS[0]}
-    [[ -z "${PX}" ]] && PX=0
-    PY=${BORDERS[1]}
-    [[ -z "${PY}" ]] && PY=0
-    PW=${BORDERS[2]}
-    [[ -z "${PW}" ]] && PW=$SW
-    PH=${BORDERS[3]}
-    [[ -z "${PH}" ]] && PH=$SH
-
-    if [[ -z "$PX" || -z "$PY" || -z "$PW" || -z "$PH" ]]; then
-      exit 0
-    elif [[ ! -n "$PX" || ! -n "$PY" || ! -n "$PW" || ! -n "$PH" ]]; then
-      exit 0
-    elif [[ "$PW" == "0" || "$PH" == "0" ]]; then
-      exit 0
-    fi
-    echo "PX:$PX PY:$PY PW:$PW PH:$PH"
-
-    # Sets the default 2nd point of the display which should always be slightly
-    # smaller then the acual size of the screen display.
-    PX2=$(( PW-PX-1 ))
-    PY2=$(( PH-PY-1 ))
-
-    # If the real width and height are defined particularly for cvbs then use
-    # the real values of the screen resolution not the display buffers resolution
-    # which may differ and generally be allot bigger so all the gui objects are
-    # kept in perspective.
-    [[ ! -z "${RW}" ]] && PX2=$(( RW-PX-1 ))
-    [[ ! -z "${RH}" ]] && PY2=$(( RH-PY-1 ))
-
-    echo "PX:${PX} PY:${PY} PX2:${PX2} PY2:${PY2}"
-    echo 1 > /sys/class/graphics/fb0/freescale_mode
-    echo "${PX} ${PY} ${PX2} ${PY2}" > /sys/class/graphics/fb0/window_axis
-    echo 0x10001 > /sys/class/graphics/fb0/free_scale
+  PW=${BORDERS[2]}
+  [[ -z "$PW" ]] && PW=$RW
+  PH=${BORDERS[3]}
+  [[ -z "$PH" ]] && PH=$RH
+  set_display_borders ${BORDERS[0]} ${BORDERS[1]} $PW $PH $RW $RH
 fi
 
 # Lastly we call fbfix to reset its known memory offsets so when the primary 
