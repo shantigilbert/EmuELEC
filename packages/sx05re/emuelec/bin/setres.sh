@@ -251,10 +251,10 @@ fi
 # inside the actual analog diplay resolution which is a bit smaller than the 
 # resolution it's usually transmitted as.
 if [[ "${MODE}" == "480cvbs" ]]; then
-  BORDERS=(30 10)
+  BORDERS=(4 0)
 fi
 if [[ "${MODE}" == "576cvbs" ]]; then
-  BORDERS=(33 12)
+  BORDERS=(12 0)
 fi
 
 # This monolith slab of code basically gets the users preference of if they want 
