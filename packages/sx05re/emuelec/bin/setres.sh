@@ -52,6 +52,17 @@ OLD_MODE=$( cat ${FILE_MODE} )
 
 BORDER_VALS=$(get_ee_setting ee_videowindow)
 
+
+# Legacy code, we use to set the buffer that is used for small parts of graphics
+# like Cursors and Fonts but setting default 32 made ES Fonts dissappear.
+BUFF=$(get_ee_setting ee_video_fb1_size)
+[[ -z "$BUFF" ]] && BUFF=0
+
+if [[ -n "$BUFF" ]] && [[ $BUFF > 0 ]]; then
+  fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP
+fi
+
+
 # If the current display is the same as the change just exit. First we hide the
 # primary display buffer by setting the fb1 blank flag so it stops copying chunks
 # of data on to the image, then we blank the buffer by setting all the bits to 0.
@@ -123,12 +134,6 @@ if [[ "$OLD_MODE" != "$MODE" ]]; then
     SWITCHED_MODES=1
   fi  
 fi
-
-# Legacy code, we use to set the buffer that is used for small parts of graphics
-# like Cursors and Fonts but setting default 32 made ES Fonts dissappear.
-#BUFF=64
-#fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP  
-
 
 # Here we set the Height and Width of the particular resolution, RH and RW stands
 # for Real Width and Real Height respectively.
@@ -207,9 +212,9 @@ if [[ ! -z "${BORDERS}" ]]; then
     PY=${BORDERS[1]}
     [[ -z "${PY}" ]] && PY=0
     PW=${BORDERS[2]}
-    [[ -z "${PW}" ]] && PW=$W
+    [[ -z "${PW}" ]] && PW=$SW
     PH=${BORDERS[3]}
-    [[ -z "${PH}" ]] && PH=$H
+    [[ -z "${PH}" ]] && PH=$SH
 
     if [[ -z "$PX" || -z "$PY" || -z "$PW" || -z "$PH" ]]; then
       exit 0
@@ -229,11 +234,8 @@ if [[ ! -z "${BORDERS}" ]]; then
     # the real values of the screen resolution not the display buffers resolution
     # which may differ and generally be allot bigger so all the gui objects are
     # kept in perspective.
-    [[ ! -z "${RW}" ]] && PY2=$(( RW-PX-1 ))
+    [[ ! -z "${RW}" ]] && PX2=$(( RW-PX-1 ))
     [[ ! -z "${RH}" ]] && PY2=$(( RH-PY-1 ))
-
-    [[ "$PX2" -gt "$SW" ]] && PX2=$(( SW-1 ))
-    [[ "$PY2" -gt "$SH" ]] && PY2=$(( SH-1 ))
 
     echo "PX:${PX} PY:${PY} PX2:${PX2} PY2:${PY2}"
     echo 1 > /sys/class/graphics/fb0/freescale_mode
