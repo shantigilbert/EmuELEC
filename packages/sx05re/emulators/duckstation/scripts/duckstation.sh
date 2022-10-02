@@ -36,7 +36,7 @@ if [ ! -L "${LOCAL_CONFIG}/duckstation" ]; then
 fi
 
 AUTOGP=$(get_ee_setting duckstation_auto_gamepad)
-if [[ "${AUTOGP}" != "0" ]]; then
+if [[ "${AUTOGP}" == "1" ]]; then
 	set_duckstation_joy.sh
 fi
 
