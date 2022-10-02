@@ -9,7 +9,6 @@ PKG_SITE="https://github.com/fhvwy/vadumpcaps"
 PKG_URL="https://github.com/fhvwy/vadumpcaps/archive/${PKG_VERSION}.tar.gz"
 PKG_LONGDESC="This is a utility to show all capabilities of a VAAPI device/driver."
 PKG_DEPENDS_TARGET="toolchain libva"
-PKG_TOOLCHAIN="make"
 
 makeinstall_target() {
   mkdir -p ${INSTALL}/usr/bin

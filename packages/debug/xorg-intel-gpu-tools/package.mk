@@ -9,7 +9,6 @@ PKG_DEPENDS_TARGET="toolchain cairo procps-ng"
 PKG_SITE="https://gitlab.freedesktop.org/drm/igt-gpu-tools"
 PKG_URL="https://www.x.org/releases/individual/app/igt-gpu-tools-${PKG_VERSION}.tar.xz"
 PKG_LONGDESC="Test suite and tools for DRM/KMS drivers"
-PKG_TOOLCHAIN="meson"
 
 PKG_MESON_OPTS_TARGET="-Dchamelium=disabled \
                        -Ddocs=disabled \

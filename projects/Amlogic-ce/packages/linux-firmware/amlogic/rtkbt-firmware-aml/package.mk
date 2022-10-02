@@ -2,8 +2,8 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="rtkbt-firmware-aml"
-PKG_VERSION="763c7195bb0328b45a5679e212ab05150361cc3a"
-PKG_SHA256="2996dd867990a14b8d431c789285363ff35f4f2304ce8c92db401122ec43db9a"
+PKG_VERSION="4d95579f256383af2df39d796f38a91ee6ec0b80"
+PKG_SHA256="7a2884532969f84596f469cde599b8ecc026e80263ae64c9faf0e22a0332f569"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/CoreELEC/rtkbt-firmware-aml"
 PKG_URL="https://github.com/CoreELEC/rtkbt-firmware-aml/archive/$PKG_VERSION.tar.gz"

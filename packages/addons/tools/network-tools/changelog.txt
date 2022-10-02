@@ -1,3 +1,6 @@
+116
+- rsync: update to 3.2.5
+
 115
 - irssi: update to 1.4.2 and meson build
 - ngrep: update to using pcre2
