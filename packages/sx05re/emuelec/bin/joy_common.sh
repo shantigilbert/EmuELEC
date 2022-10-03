@@ -27,10 +27,10 @@ jc_get_players() {
     | grep -Ew -B 8 "B: KEY\=[0-9a-f ]+" > /tmp/input_devices
 
 # Determine how many gamepads/players are connected
-  JOYS=$(ls -A1 /dev/input/js*| sort | sed "s|/dev/input/||g")
-  if [[ ! -f "/storage/.config/JOY_LEGACY_ORDER" ]]; then
-    JOYS=$(ls -lt /dev/input/js* | awk '{print $9"\t"$10}' \
-      | cut -d\t -f2 | sed 's|/||g')
+  JOYS=$(ls -ltr /dev/input/js* | awk '{print $8"\t"$9"\t"$10}' | sort \
+    | awk '{print $3}' | cut -d'/' -f4)
+  if [[ -f "/storage/.config/JOY_LEGACY_ORDER" ]]; then
+    JOYS=$(ls -A1 /dev/input/js*| sort | sed "s|/dev/input/||g")
   fi
 
   declare -a PLAYER_CFGS=()
