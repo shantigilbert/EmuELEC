@@ -136,7 +136,7 @@ CLOUD_PID=$!
 
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
-[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}" || sleep 3
+[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh "$PLATFORM" "${ROMNAME}"
 
 # Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
@@ -469,7 +469,6 @@ $TBASH $SET_DISPLAY_SH $VIDEO
 
 # Show exit splash
 ${TBASH} show_splash.sh exit
-sleep 3
 
 # Just in case
 kill_video_controls
