@@ -2,8 +2,8 @@
 # Copyright (C) 2022-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="gstreamer"
-PKG_VERSION="1.18.5"
-PKG_SHA256="55862232a63459bbf56abebde3085ca9aec211b478e891dacea4d6df8cafe80a"
+PKG_VERSION="1.20.3"
+PKG_SHA256="607daf64bbbd5fb18af9d17e21c0d22c4d702fffe83b23cb22d1b1af2ca23a2a"
 PKG_LICENSE="GPL-2.1-or-later"
 PKG_SITE="https://gstreamer.freedesktop.org"
 PKG_URL="https://gstreamer.freedesktop.org/src/gstreamer/${PKG_NAME}-${PKG_VERSION}.tar.xz"
@@ -27,7 +27,7 @@ pre_configure_target() {
                          -Dtests=disabled \
                          -Dbenchmarks=disabled \
                          -Dtools=disabled \
-                         -Dgtk_doc=disabled \
+                         -Ddoc=disabled \
                          -Dintrospection=disabled \
                          -Dnls=disabled \
                          -Dgobject-cast-checks=disabled \
@@ -38,7 +38,7 @@ pre_configure_target() {
                          -Dpackage-origin="LibreELEC.tv"
                          -Ddoc=disabled"
 }
-  
+
 post_makeinstall_target() {
   # clean up
   safe_remove ${INSTALL}/usr/share

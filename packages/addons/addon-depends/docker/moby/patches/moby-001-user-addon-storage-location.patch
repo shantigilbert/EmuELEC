@@ -1,0 +1,284 @@
+# when updating this patch just create it from scratch using this command
+#
+# find . -name "*.go" -print | xargs sed -i 's/\/etc\/docker/\/storage\/.kodi\/userdata\/addon_data\/service.system.docker\/config/g'
+#
+#
+diff -Naur a/cmd/dockerd/daemon_unix.go b/cmd/dockerd/daemon_unix.go
+--- a/cmd/dockerd/daemon_unix.go	2022-06-03 10:30:24.000000000 -0700
++++ b/cmd/dockerd/daemon_unix.go	2022-06-07 14:28:05.510327911 -0700
+@@ -25,7 +25,7 @@
+ 
+ func getDefaultDaemonConfigDir() (string, error) {
+ 	if !honorXDG {
+-		return "/etc/docker", nil
++		return "/storage/.kodi/userdata/addon_data/service.system.docker/config", nil
+ 	}
+ 	// NOTE: CLI uses ~/.docker while the daemon uses ~/.config/docker, because
+ 	// ~/.docker was not designed to store daemon configurations.
+diff -Naur a/integration/plugin/authz/authz_plugin_test.go b/integration/plugin/authz/authz_plugin_test.go
+--- a/integration/plugin/authz/authz_plugin_test.go	2022-06-03 10:30:24.000000000 -0700
++++ b/integration/plugin/authz/authz_plugin_test.go	2022-06-07 14:28:05.570328822 -0700
+@@ -56,15 +56,15 @@
+ 	ctrl = &authorizationController{}
+ 	teardown := setupTest(t)
+ 
+-	err := os.MkdirAll("/etc/docker/plugins", 0755)
++	err := os.MkdirAll("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins", 0755)
+ 	assert.NilError(t, err)
+ 
+-	fileName := fmt.Sprintf("/etc/docker/plugins/%s.spec", testAuthZPlugin)
++	fileName := fmt.Sprintf("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins/%s.spec", testAuthZPlugin)
+ 	err = os.WriteFile(fileName, []byte(server.URL), 0644)
+ 	assert.NilError(t, err)
+ 
+ 	return func() {
+-		err := os.RemoveAll("/etc/docker/plugins")
++		err := os.RemoveAll("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins")
+ 		assert.NilError(t, err)
+ 
+ 		teardown()
+diff -Naur a/integration/plugin/graphdriver/external_test.go b/integration/plugin/graphdriver/external_test.go
+--- a/integration/plugin/graphdriver/external_test.go	2022-06-03 10:30:24.000000000 -0700
++++ b/integration/plugin/graphdriver/external_test.go	2022-06-07 14:28:05.570328822 -0700
+@@ -80,7 +80,7 @@
+ 
+ 	sserver.Close()
+ 	jserver.Close()
+-	err := os.RemoveAll("/etc/docker/plugins")
++	err := os.RemoveAll("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins")
+ 	assert.NilError(t, err)
+ }
+ 
+@@ -345,10 +345,10 @@
+ 		respond(w, &graphDriverResponse{Size: size})
+ 	})
+ 
+-	err = os.MkdirAll("/etc/docker/plugins", 0755)
++	err = os.MkdirAll("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins", 0755)
+ 	assert.NilError(t, err)
+ 
+-	specFile := "/etc/docker/plugins/" + name + "." + ext
++	specFile := "/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins/" + name + "." + ext
+ 	err = os.WriteFile(specFile, b, 0644)
+ 	assert.NilError(t, err)
+ }
+diff -Naur a/integration-cli/docker_cli_daemon_test.go b/integration-cli/docker_cli_daemon_test.go
+--- a/integration-cli/docker_cli_daemon_test.go	2022-06-03 10:30:24.000000000 -0700
++++ b/integration-cli/docker_cli_daemon_test.go	2022-06-07 14:28:05.556328610 -0700
+@@ -558,12 +558,12 @@
+ 
+ func (s *DockerDaemonSuite) TestDaemonKeyGeneration(c *testing.T) {
+ 	// TODO: skip or update for Windows daemon
+-	os.Remove("/etc/docker/key.json")
++	os.Remove("/storage/.kodi/userdata/addon_data/service.system.docker/config/key.json")
+ 	c.Setenv("DOCKER_ALLOW_SCHEMA1_PUSH_DONOTUSE", "1")
+ 	s.d.Start(c)
+ 	s.d.Stop(c)
+ 
+-	k, err := libtrust.LoadKeyFile("/etc/docker/key.json")
++	k, err := libtrust.LoadKeyFile("/storage/.kodi/userdata/addon_data/service.system.docker/config/key.json")
+ 	if err != nil {
+ 		c.Fatalf("Error opening key file")
+ 	}
+@@ -1212,13 +1212,13 @@
+ 		Y   string `json:"y"`
+ 	}
+ 
+-	os.Remove("/etc/docker/key.json")
++	os.Remove("/storage/.kodi/userdata/addon_data/service.system.docker/config/key.json")
+ 	c.Setenv("DOCKER_ALLOW_SCHEMA1_PUSH_DONOTUSE", "1")
+ 	s.d.Start(c)
+ 	s.d.Stop(c)
+ 
+ 	config := &Config{}
+-	bytes, err := os.ReadFile("/etc/docker/key.json")
++	bytes, err := os.ReadFile("/storage/.kodi/userdata/addon_data/service.system.docker/config/key.json")
+ 	if err != nil {
+ 		c.Fatalf("Error reading key.json file: %s", err)
+ 	}
+@@ -1238,11 +1238,11 @@
+ 	}
+ 
+ 	// write back
+-	if err := os.WriteFile("/etc/docker/key.json", newBytes, 0400); err != nil {
++	if err := os.WriteFile("/storage/.kodi/userdata/addon_data/service.system.docker/config/key.json", newBytes, 0400); err != nil {
+ 		c.Fatalf("Error os.WriteFile: %s", err)
+ 	}
+ 
+-	defer os.Remove("/etc/docker/key.json")
++	defer os.Remove("/storage/.kodi/userdata/addon_data/service.system.docker/config/key.json")
+ 
+ 	if err := s.d.StartWithError(); err == nil {
+ 		c.Fatalf("It should not be successful to start daemon with wrong key: %v", err)
+diff -Naur a/integration-cli/docker_cli_external_volume_driver_test.go b/integration-cli/docker_cli_external_volume_driver_test.go
+--- a/integration-cli/docker_cli_external_volume_driver_test.go	2022-06-03 10:30:24.000000000 -0700
++++ b/integration-cli/docker_cli_external_volume_driver_test.go	2022-06-07 14:28:05.556328610 -0700
+@@ -258,10 +258,10 @@
+ 		send(w, `{"Capabilities": { "Scope": "global" }}`)
+ 	})
+ 
+-	err := os.MkdirAll("/etc/docker/plugins", 0755)
++	err := os.MkdirAll("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins", 0755)
+ 	assert.NilError(c, err)
+ 
+-	err = os.WriteFile("/etc/docker/plugins/"+name+".spec", []byte(s.Server.URL), 0644)
++	err = os.WriteFile("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins/"+name+".spec", []byte(s.Server.URL), 0644)
+ 	assert.NilError(c, err)
+ 	return s
+ }
+@@ -269,7 +269,7 @@
+ func (s *DockerExternalVolumeSuite) TearDownSuite(c *testing.T) {
+ 	s.volumePlugin.Close()
+ 
+-	err := os.RemoveAll("/etc/docker/plugins")
++	err := os.RemoveAll("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins")
+ 	assert.NilError(c, err)
+ }
+ 
+@@ -359,7 +359,7 @@
+ 
+ // Make sure a request to use a down driver doesn't block other requests
+ func (s *DockerExternalVolumeSuite) TestExternalVolumeDriverLookupNotBlocked(c *testing.T) {
+-	specPath := "/etc/docker/plugins/down-driver.spec"
++	specPath := "/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins/down-driver.spec"
+ 	err := os.WriteFile(specPath, []byte("tcp://127.0.0.7:9999"), 0644)
+ 	assert.NilError(c, err)
+ 	defer os.RemoveAll(specPath)
+diff -Naur a/integration-cli/docker_cli_network_unix_test.go b/integration-cli/docker_cli_network_unix_test.go
+--- a/integration-cli/docker_cli_network_unix_test.go	2022-06-03 10:30:24.000000000 -0700
++++ b/integration-cli/docker_cli_network_unix_test.go	2022-06-07 14:28:05.558328640 -0700
+@@ -196,14 +196,14 @@
+ 		}
+ 	})
+ 
+-	err := os.MkdirAll("/etc/docker/plugins", 0755)
++	err := os.MkdirAll("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins", 0755)
+ 	assert.NilError(c, err)
+ 
+-	fileName := fmt.Sprintf("/etc/docker/plugins/%s.spec", netDrv)
++	fileName := fmt.Sprintf("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins/%s.spec", netDrv)
+ 	err = os.WriteFile(fileName, []byte(url), 0644)
+ 	assert.NilError(c, err)
+ 
+-	ipamFileName := fmt.Sprintf("/etc/docker/plugins/%s.spec", ipamDrv)
++	ipamFileName := fmt.Sprintf("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins/%s.spec", ipamDrv)
+ 	err = os.WriteFile(ipamFileName, []byte(url), 0644)
+ 	assert.NilError(c, err)
+ }
+@@ -215,7 +215,7 @@
+ 
+ 	s.server.Close()
+ 
+-	err := os.RemoveAll("/etc/docker/plugins")
++	err := os.RemoveAll("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins")
+ 	assert.NilError(c, err)
+ }
+ 
+diff -Naur a/integration-cli/docker_cli_swarm_test.go b/integration-cli/docker_cli_swarm_test.go
+--- a/integration-cli/docker_cli_swarm_test.go	2022-06-03 10:30:24.000000000 -0700
++++ b/integration-cli/docker_cli_swarm_test.go	2022-06-07 14:28:05.561328685 -0700
+@@ -770,14 +770,14 @@
+ 		}
+ 	})
+ 
+-	err := os.MkdirAll("/etc/docker/plugins", 0755)
++	err := os.MkdirAll("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins", 0755)
+ 	assert.NilError(c, err)
+ 
+-	fileName := fmt.Sprintf("/etc/docker/plugins/%s.spec", netDrv)
++	fileName := fmt.Sprintf("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins/%s.spec", netDrv)
+ 	err = os.WriteFile(fileName, []byte(url), 0644)
+ 	assert.NilError(c, err)
+ 
+-	ipamFileName := fmt.Sprintf("/etc/docker/plugins/%s.spec", ipamDrv)
++	ipamFileName := fmt.Sprintf("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins/%s.spec", ipamDrv)
+ 	err = os.WriteFile(ipamFileName, []byte(url), 0644)
+ 	assert.NilError(c, err)
+ }
+@@ -789,7 +789,7 @@
+ 	setupRemoteGlobalNetworkPlugin(c, mux, s.server.URL, globalNetworkPlugin, globalIPAMPlugin)
+ 	defer func() {
+ 		s.server.Close()
+-		err := os.RemoveAll("/etc/docker/plugins")
++		err := os.RemoveAll("/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins")
+ 		assert.NilError(c, err)
+ 	}()
+ 
+diff -Naur a/libnetwork/drivers/remote/driver_test.go b/libnetwork/drivers/remote/driver_test.go
+--- a/libnetwork/drivers/remote/driver_test.go	2022-06-03 10:30:24.000000000 -0700
++++ b/libnetwork/drivers/remote/driver_test.go	2022-06-07 14:28:05.586329065 -0700
+@@ -41,7 +41,7 @@
+ }
+ 
+ func setupPlugin(t *testing.T, name string, mux *http.ServeMux) func() {
+-	specPath := "/etc/docker/plugins"
++	specPath := "/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins"
+ 	if runtime.GOOS == "windows" {
+ 		specPath = filepath.Join(os.Getenv("programdata"), "docker", "plugins")
+ 	}
+diff -Naur a/libnetwork/ipams/remote/remote_test.go b/libnetwork/ipams/remote/remote_test.go
+--- a/libnetwork/ipams/remote/remote_test.go	2022-06-03 10:30:24.000000000 -0700
++++ b/libnetwork/ipams/remote/remote_test.go	2022-06-07 14:28:05.591329141 -0700
+@@ -36,7 +36,7 @@
+ }
+ 
+ func setupPlugin(t *testing.T, name string, mux *http.ServeMux) func() {
+-	specPath := "/etc/docker/plugins"
++	specPath := "/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins"
+ 	if runtime.GOOS == "windows" {
+ 		specPath = filepath.Join(os.Getenv("programdata"), "docker", "plugins")
+ 	}
+diff -Naur a/libnetwork/libnetwork_unix_test.go b/libnetwork/libnetwork_unix_test.go
+--- a/libnetwork/libnetwork_unix_test.go	2022-06-03 10:30:24.000000000 -0700
++++ b/libnetwork/libnetwork_unix_test.go	2022-06-07 14:28:05.592329156 -0700
+@@ -3,4 +3,4 @@
+ 
+ package libnetwork_test
+ 
+-var specPath = "/etc/docker/plugins"
++var specPath = "/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins"
+diff -Naur a/pkg/plugins/discovery_unix.go b/pkg/plugins/discovery_unix.go
+--- a/pkg/plugins/discovery_unix.go	2022-06-03 10:30:24.000000000 -0700
++++ b/pkg/plugins/discovery_unix.go	2022-06-07 14:28:05.615329505 -0700
+@@ -3,4 +3,4 @@
+ 
+ package plugins // import "github.com/docker/docker/pkg/plugins"
+ 
+-var specsPaths = []string{"/etc/docker/plugins", "/usr/lib/docker/plugins"}
++var specsPaths = []string{"/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins", "/usr/lib/docker/plugins"}
+diff -Naur a/pkg/plugins/plugins.go b/pkg/plugins/plugins.go
+--- a/pkg/plugins/plugins.go	2022-06-03 10:30:24.000000000 -0700
++++ b/pkg/plugins/plugins.go	2022-06-07 14:28:05.616329521 -0700
+@@ -4,7 +4,7 @@
+ // Docker discovers plugins by looking for them in the plugin directory whenever
+ // a user or container tries to use one by name. UNIX domain socket files must
+ // be located under /run/docker/plugins, whereas spec files can be located
+-// either under /etc/docker/plugins or /usr/lib/docker/plugins. This is handled
++// either under /storage/.kodi/userdata/addon_data/service.system.docker/config/plugins or /usr/lib/docker/plugins. This is handled
+ // by the Registry interface, which lets you list all plugins or get a plugin by
+ // its name if it exists.
+ //
+diff -Naur a/registry/config_unix.go b/registry/config_unix.go
+--- a/registry/config_unix.go	2022-06-03 10:30:24.000000000 -0700
++++ b/registry/config_unix.go	2022-06-07 14:28:05.626329672 -0700
+@@ -6,7 +6,7 @@
+ // defaultCertsDir is the platform-specific default directory where certificates
+ // are stored. On Linux, it may be overridden through certsDir, for example, when
+ // running in rootless mode.
+-const defaultCertsDir = "/etc/docker/certs.d"
++const defaultCertsDir = "/storage/.kodi/userdata/addon_data/service.system.docker/config/certs.d"
+ 
+ // cleanPath is used to ensure that a directory name is valid on the target
+ // platform. It will be passed in something *similar* to a URL such as
+diff -Naur a/registry/endpoint_v1.go b/registry/endpoint_v1.go
+--- a/registry/endpoint_v1.go	2022-06-03 10:30:24.000000000 -0700
++++ b/registry/endpoint_v1.go	2022-06-07 14:28:05.627329688 -0700
+@@ -63,7 +63,7 @@
+ 		if endpoint.IsSecure {
+ 			// If registry is secure and HTTPS failed, show user the error and tell them about `--insecure-registry`
+ 			// in case that's what they need. DO NOT accept unknown CA certificates, and DO NOT fallback to HTTP.
+-			return invalidParamf("invalid registry endpoint %s: %v. If this private registry supports only HTTP or HTTPS with an unknown CA certificate, please add `--insecure-registry %s` to the daemon's arguments. In the case of HTTPS, if you have access to the registry's CA certificate, no need for the flag; simply place the CA certificate at /etc/docker/certs.d/%s/ca.crt", endpoint, err, endpoint.URL.Host, endpoint.URL.Host)
++			return invalidParamf("invalid registry endpoint %s: %v. If this private registry supports only HTTP or HTTPS with an unknown CA certificate, please add `--insecure-registry %s` to the daemon's arguments. In the case of HTTPS, if you have access to the registry's CA certificate, no need for the flag; simply place the CA certificate at /storage/.kodi/userdata/addon_data/service.system.docker/config/certs.d/%s/ca.crt", endpoint, err, endpoint.URL.Host, endpoint.URL.Host)
+ 		}
+ 
+ 		// If registry is insecure and HTTPS failed, fallback to HTTP.

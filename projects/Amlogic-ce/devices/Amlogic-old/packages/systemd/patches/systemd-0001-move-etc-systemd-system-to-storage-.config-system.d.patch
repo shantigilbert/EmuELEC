@@ -1,0 +1,19 @@
+commit abce2c21148f981034acf143a3c12e5919949198
+Author: Lukas Rusak <lorusak@gmail.com>
+Date:   Mon Oct 9 15:26:58 2017 -0700
+
+    move /etc/systemd/system to /storage/.config/system.d
+
+diff --git a/meson.build b/meson.build
+index f7a610a..b1144a6 100644
+--- a/meson.build
++++ b/meson.build
+@@ -146,7 +146,7 @@ if pamconfdir == ''
+ endif
+ 
+ conf.set_quoted('PKGSYSCONFDIR',                              pkgsysconfdir)
+-conf.set_quoted('SYSTEM_CONFIG_UNIT_PATH',                    join_paths(pkgsysconfdir, 'system'))
++conf.set_quoted('SYSTEM_CONFIG_UNIT_PATH',                    '/storage/.config/system.d')
+ conf.set_quoted('SYSTEM_DATA_UNIT_PATH',                      systemunitdir)
+ conf.set_quoted('SYSTEM_SYSVINIT_PATH',                       sysvinit_path)
+ conf.set_quoted('SYSTEM_SYSVRCND_PATH',                       sysvrcnd_path)

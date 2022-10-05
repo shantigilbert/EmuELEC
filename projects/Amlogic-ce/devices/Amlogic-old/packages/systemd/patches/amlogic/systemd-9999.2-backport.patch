@@ -1,0 +1,41 @@
+From 76566792e33f054dd02df84db044f5ae747afe67 Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Sat, 13 Apr 2019 18:33:34 +0900
+Subject: [PATCH] linux: move netdevice.h from shared/linux to basic/linux
+
+As the header linux/if_arp.h includes linux/netdevice.h.
+---
+ src/{shared => basic}/linux/netdevice.h | 0
+ src/basic/meson.build                   | 1 +
+ src/shared/meson.build                  | 1 -
+ 3 files changed, 1 insertion(+), 1 deletion(-)
+ rename src/{shared => basic}/linux/netdevice.h (100%)
+
+diff --git a/src/shared/linux/netdevice.h b/src/basic/linux/netdevice.h
+similarity index 100%
+rename from src/shared/linux/netdevice.h
+rename to src/basic/linux/netdevice.h
+diff --git a/src/basic/meson.build b/src/basic/meson.build
+index 524f3785dc0..81c3d0f3e80 100644
+--- a/src/basic/meson.build
++++ b/src/basic/meson.build
+@@ -99,6 +99,7 @@ basic_sources = files('''
+         linux/if_tun.h
+         linux/if_tunnel.h
+         linux/libc-compat.h
++        linux/netdevice.h
+         linux/netlink.h
+         linux/rtnetlink.h
+         linux/wireguard.h
+diff --git a/src/shared/meson.build b/src/shared/meson.build
+index 15466bcaf1f..c80a67cdde4 100644
+--- a/src/shared/meson.build
++++ b/src/shared/meson.build
+@@ -102,7 +102,6 @@ shared_sources = files('''
+         linux/bpf_insn.h
+         linux/dm-ioctl.h
+         linux/ethtool.h
+-        linux/netdevice.h
+         lockfile-util.c
+         lockfile-util.h
+         log-link.h

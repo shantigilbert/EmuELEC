@@ -1,3 +1,27 @@
+121
+- Update ASP.NET Core Runtime 6.0.8
+
+120
+- Update ASP.NET Core Runtime 6.0.7
+
+119
+- Update ASP.NET Core Runtime 6.0.6
+
+118
+- Repackaged to only include ASP.NET 6 (as .NET 6 Runtime is included within ASP.NET.)
+- LibreELEC now only includes OpenSSL 3 and not OpenSSL 1.x.
+  - .NET 6 is the first .NET version to support OpenSSL 3.
+  - If your .NET Core 3.1 application requires OpenSSL - it will not work with
+    this release of LibreELEC.
+
+117
+- Update .NET Runtime 6.0.5
+- Update ASP.NET Core Runtime 6.0.5
+
+116
+- Update .NET Runtime 6.0.4
+- Update ASP.NET Core Runtime 6.0.4
+
 115
 - Add .NET Runtime 6.0.1
 - Add ASP.NET Core Runtime 6.0.1

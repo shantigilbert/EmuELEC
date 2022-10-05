@@ -2,8 +2,8 @@
 # Copyright (C) 2021-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="fcft"
-PKG_VERSION="2.5.1"
-PKG_SHA256="1b9e9346c884f16bce9548806ea89c5e34ccc98ce27ec6ecff1f5011235de112"
+PKG_VERSION="3.1.4"
+PKG_SHA256="37363f7af0430161902b8d194016366b0fbca3b8353ee26b70c5b7ad8e9602c8"
 PKG_LICENSE="MIT"
 PKG_SITE="https://codeberg.org/dnkl/fcft"
 PKG_URL="https://codeberg.org/dnkl/fcft/archive/${PKG_VERSION}.tar.gz"

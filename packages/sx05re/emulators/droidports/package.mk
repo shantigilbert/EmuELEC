@@ -11,6 +11,9 @@ PKG_LONGDESC="A repository for experimenting with elf loading and in-place patch
 PKG_TOOLCHAIN="cmake"
 
 pre_configure_target() {
+# Just a small workaround for GCC 11 until upstream is fixed
+sed -i "s|usleep|usleep2|g" ${PKG_BUILD}/bridges/misc_bridges.c
+
 	PKG_CMAKE_OPTS_TARGET=" -DCMAKE_BUILD_TYPE=Release -DPLATFORM=linux -DPORT=gmloader -DUSE_BUILTIN_FREETYPE=ON"
 }
 

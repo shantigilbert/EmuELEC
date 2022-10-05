@@ -5,7 +5,7 @@ Subject: [PATCH 40/44] wip: H6 deinterlace
 
 Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 ---
- drivers/media/platform/Kconfig                |   13 +
+ .../media/platform/sunxi/sunxi50i-di/Kconfig  |   14 +
  drivers/media/platform/sunxi/Makefile         |    1 +
  .../media/platform/sunxi/sun50i-di/Makefile   |    2 +
  .../platform/sunxi/sun50i-di/sun50i-di.c      | 1134 +++++++++++++++++
@@ -15,15 +15,14 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
  create mode 100644 drivers/media/platform/sunxi/sun50i-di/sun50i-di.c
  create mode 100644 drivers/media/platform/sunxi/sun50i-di/sun50i-di.h
 
---- a/drivers/media/platform/Kconfig
-+++ b/drivers/media/platform/Kconfig
-@@ -574,6 +574,19 @@ config VIDEO_QCOM_VENUS
- 	  on various Qualcomm SoCs.
- 	  To compile this driver as a module choose m here.
- 
+--- /dev/null
++++ b/drivers/media/platform/sunxi/sun50i-di/Kconfig
+@@ -0,0 +1,14 @@
++# SPDX-License-Identifier: GPL-2.0-only
 +config VIDEO_SUN50I_DEINTERLACE
 +	tristate "Allwinner Deinterlace v2 driver"
-+	depends on VIDEO_DEV && VIDEO_V4L2
++	depends on V4L_MEM2MEM_DRIVERS
++	depends on VIDEO_DEV
 +	depends on ARCH_SUNXI || COMPILE_TEST
 +	depends on COMMON_CLK && OF
 +	depends on PM
@@ -33,10 +32,6 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 +	   Support for the Allwinner deinterlace v2 unit found on
 +	   some SoCs, like H6.
 +	   To compile this driver as a module choose m here.
-+
- config VIDEO_SUN8I_DEINTERLACE
- 	tristate "Allwinner Deinterlace driver"
- 	depends on VIDEO_DEV && VIDEO_V4L2
 --- a/drivers/media/platform/sunxi/Makefile
 +++ b/drivers/media/platform/sunxi/Makefile
 @@ -3,4 +3,5 @@
@@ -1362,3 +1357,11 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 +};
 +
 +#endif
+--- a/drivers/media/platform/sunxi/Kconfig	2022-04-17 20:57:31.000000000 +0000
++++ b/drivers/media/platform/sunxi/Kconfig	2022-04-23 13:22:19.652398021 +0000
+@@ -5,4 +5,5 @@
+ source "drivers/media/platform/sunxi/sun4i-csi/Kconfig"
+ source "drivers/media/platform/sunxi/sun6i-csi/Kconfig"
+ source "drivers/media/platform/sunxi/sun8i-di/Kconfig"
++source "drivers/media/platform/sunxi/sun50i-di/Kconfig"
+ source "drivers/media/platform/sunxi/sun8i-rotate/Kconfig"

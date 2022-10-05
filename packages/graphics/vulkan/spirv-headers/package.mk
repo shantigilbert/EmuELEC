@@ -3,10 +3,11 @@
 # Copyright (C) 2021-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="spirv-headers"
-# The SPIRV-Headers have to be specific versions matching the glslang pkg version
-# https://github.com/KhronosGroup/glslang/blob/master/known_good.json
-PKG_VERSION="814e728b30ddd0f4509233099a3ad96fd4318c07"
-PKG_SHA256="c262d3c0c36ad5c87fbe3572aa292d2aed4dcd9b1ca4868eff9ec180e3f994f2"
+# The SPIRV-Headers pkg_version needs to match the compatible (known_good) glslang pkg_version.
+# https://raw.githubusercontent.com/KhronosGroup/glslang/${PKG_VERSION}/known_good.json
+# When updating glslang pkg_version please update to the known_good spirv-headers pkg_version.
+PKG_VERSION="b2a156e1c0434bc8c99aaebba1c7be98be7ac580"
+PKG_SHA256="b200990e1c07894906e298368e7e56d5ab9d728d851f9292587ec740c2b4d409"
 PKG_LICENSE="Apache-2.0"
 PKG_SITE="https://github.com/KhronosGroup/SPIRV-headers"
 PKG_URL="https://github.com/KhronosGroup/SPIRV-headers/archive/${PKG_VERSION}.tar.gz"

@@ -5,22 +5,18 @@ Subject: [PATCH] sunxi: Don't enable referenced regulators
 
 This break certain devices which need appropriate power on sequence.
 ---
- drivers/allwinner/axp/common.c | 2 --
- 1 file changed, 2 deletions(-)
+ drivers/allwinner/axp/common.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
-diff --git a/drivers/allwinner/axp/common.c b/drivers/allwinner/axp/common.c
-index e98b16fdb2ec..45c6507e0e23 100644
 --- a/drivers/allwinner/axp/common.c
 +++ b/drivers/allwinner/axp/common.c
-@@ -98,8 +98,6 @@ static int setup_regulator(const void *fdt, int node,
- 
- static bool should_enable_regulator(const void *fdt, int node)
- {
--	if (fdt_getprop(fdt, node, "phandle", NULL) != NULL)
+@@ -112,9 +112,6 @@ static bool should_enable_regulator(const void *fdt,
+ 	if (is_node_disabled(fdt, node)) {
+ 		return false;
+ 	}
+-	if (fdt_getprop(fdt, node, "phandle", NULL) != NULL) {
 -		return true;
- 	if (fdt_getprop(fdt, node, "regulator-always-on", NULL) != NULL)
+-	}
+ 	if (fdt_getprop(fdt, node, "regulator-always-on", NULL) != NULL) {
  		return true;
- 	return false;
--- 
-2.30.0
-
+ 	}

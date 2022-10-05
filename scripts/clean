@@ -33,6 +33,12 @@ clean_package() {
       fi
     fi
   done
+
+  for i in "${BUILD}/qa_checks/${1}-"*; do
+    build_msg "CLR_WARNING" "*" "$(print_color "CLR_WARNING_DIM" "Removing ${i} ...")"
+    rm -rf "${i}"
+  done
+
   rm -f "${STAMPS}/${1}/build_"*
 }
 

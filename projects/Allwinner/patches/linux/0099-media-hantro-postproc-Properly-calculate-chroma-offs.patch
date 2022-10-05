@@ -18,12 +18,13 @@ diff --git a/drivers/staging/media/hantro/hantro_postproc.c b/drivers/staging/me
 index 11ae663f11b7..d8358d3289dc 100644
 --- a/drivers/staging/media/hantro/hantro_postproc.c
 +++ b/drivers/staging/media/hantro/hantro_postproc.c
-@@ -105,11 +105,13 @@ static void hantro_postproc_g2_enable(struct hantro_ctx *ctx)
+@@ -105,12 +105,14 @@ static void hantro_postproc_g2_enable(struct hantro_ctx *ctx)
  {
  	struct hantro_dev *vpu = ctx->dev;
  	struct vb2_v4l2_buffer *dst_buf;
 -	size_t chroma_offset = ctx->dst_fmt.width * ctx->dst_fmt.height;
 +	size_t chroma_offset;
+ 	int down_scale = down_scale_factor(ctx);
  	dma_addr_t dst_dma;
  
  	dst_buf = hantro_get_dst_buf(ctx);
@@ -31,5 +32,5 @@ index 11ae663f11b7..d8358d3289dc 100644
 +	chroma_offset = ctx->dst_fmt.plane_fmt[0].bytesperline *
 +			ctx->dst_fmt.height;
  
- 	hantro_write_addr(vpu, G2_RS_OUT_LUMA_ADDR, dst_dma);
- 	hantro_write_addr(vpu, G2_RS_OUT_CHROMA_ADDR, dst_dma + chroma_offset);
+ 	if (down_scale) {
+ 		hantro_reg_write(vpu, &g2_down_scale_e, 1);

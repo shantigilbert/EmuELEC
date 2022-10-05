@@ -26,8 +26,8 @@ Signed-off-by: Ondrej Jirman <megous@megous.com>
   * @rst_ephy:			reference to the optional EPHY reset for
   *				the internal PHY
   * @variant:			reference to the current board variant
-@@ -73,6 +75,7 @@ struct sunxi_priv_data {
- 	struct clk *tx_clk;
+@@ -73,6 +75,7 @@
+ struct sunxi_priv_data {
  	struct clk *ephy_clk;
  	struct regulator *regulator_phy;
 +	struct regulator *regulator_phy_io;

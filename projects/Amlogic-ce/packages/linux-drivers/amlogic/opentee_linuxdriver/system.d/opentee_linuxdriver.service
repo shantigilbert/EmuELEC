@@ -1,0 +1,18 @@
+[Unit]
+# load optee_linuxdriver if SoC is minimum SC2 (0x32) architecture
+Description=Optee TEE-Supplicant
+ConditionPathExists=/usr/sbin/tee-supplicant
+Before=video-firmware-preload.service
+Wants=video-firmware-preload.service
+DefaultDependencies=no
+
+[Service]
+ExecCondition=/bin/sh -c '[ $(awk \'/^Serial/ {printf "%%d", "0x" substr($3,0,2)}\' /proc/cpuinfo) -lt $(printf "%%d" "0x32") ] && echo 1 > $(realpath /sys/module/*tee/parameters/disable_flag) && exit 1 || exit 0'
+ExecStartPre=/sbin/modprobe -q optee_armtz
+ExecStart=/usr/sbin/tee-supplicant
+ExecStop=/bin/kill -KILL $MAINPID
+ExecStopPost=/sbin/modprobe -r optee_armtz
+
+[Install]
+WantedBy=video-firmware-preload.service
+RequiredBy=video-firmware-preload.service

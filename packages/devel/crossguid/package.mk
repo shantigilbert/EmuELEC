@@ -10,16 +10,6 @@ PKG_SITE="https://github.com/graeme-hill/crossguid"
 PKG_URL="https://github.com/graeme-hill/crossguid/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain util-linux"
 PKG_LONGDESC="minimal, cross platform, C++ GUID library"
-PKG_TOOLCHAIN="manual"
 
-make_target() {
-  ${CXX} -c ../src/guid.cpp -o guid.o ${CXXFLAGS} -I../include --std=c++17 -DGUID_LIBUUID
-  ${AR} rvs libcrossguid.a guid.o
-}
-
-makeinstall_target() {
-  mkdir -p ${SYSROOT_PREFIX}/usr/lib/
-  cp libcrossguid.a ${SYSROOT_PREFIX}/usr/lib/
-  mkdir -p ${SYSROOT_PREFIX}/usr/include/crossguid/
-  cp ../include/crossguid/guid.hpp ${SYSROOT_PREFIX}/usr/include/crossguid
-}
+PKG_CMAKE_OPTS_TARGET="-DCROSSGUID_TESTS=OFF \
+                       -Wno-dev"

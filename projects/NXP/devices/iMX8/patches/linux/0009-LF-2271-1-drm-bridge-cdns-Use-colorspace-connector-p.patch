@@ -80,14 +80,14 @@ index 1e5130e295f7..2796252adf68 100644
 -	}
 +		video->color_fmt = YCBCR_4_2_2;
 +
-+		if (!(di->edid_hdmi_dc_modes & DRM_EDID_HDMI_DC_36))
++		if (!(di->edid_hdmi_rgb444_dc_modes & DRM_EDID_HDMI_DC_36))
 +			return false;
  
 -	/* Any defined maximum tmds clock limit we must not exceed*/
--	if ((di->edid_hdmi_dc_modes & DRM_EDID_HDMI_DC_36) &&
+-	if ((di->edid_hdmi_rgb444_dc_modes & DRM_EDID_HDMI_DC_36) &&
 -	    (mode->clock * 3 / 2 <= di->max_tmds_clock))
  		video->color_depth = 12;
--	else if ((di->edid_hdmi_dc_modes & DRM_EDID_HDMI_DC_30) &&
+-	else if ((di->edid_hdmi_rgb444_dc_modes & DRM_EDID_HDMI_DC_30) &&
 -		 (mode->clock * 5 / 4 <= di->max_tmds_clock))
 -		video->color_depth = 10;
  

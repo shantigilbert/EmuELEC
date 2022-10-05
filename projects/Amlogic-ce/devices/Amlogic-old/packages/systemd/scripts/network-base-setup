@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# setup hostname
+if [ -f /storage/.cache/hostname ]; then
+  cat /storage/.cache/hostname > /proc/sys/kernel/hostname
+fi
+
+# setup /etc/hosts
+rm -f /run/libreelec/hosts
+if [ -f /storage/.config/hosts.conf ]; then
+  cat /storage/.config/hosts.conf > /run/libreelec/hosts
+fi
+
+# setup /etc/resolv.conf
+rm -f /run/libreelec/resolv.conf
+if [ -f /storage/.config/resolv.conf ]; then
+  cat /storage/.config/resolv.conf > /run/libreelec/resolv.conf
+elif [ -f /dev/.kernel_ipconfig -a -f /proc/net/pnp ]; then
+  cat /proc/net/pnp > /run/libreelec/resolv.conf
+else
+  cat << EOF > /run/libreelec/resolv.conf
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+EOF
+fi
+

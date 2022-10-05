@@ -3,7 +3,36 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
-[ -z "$SYSTEM_ROOT" ] && SYSTEM_ROOT=""
+# use chroot because of running xmlstarlet and other binaries build with newer glibc
+if [ "${SYSTEM_ROOT}" = "/update" ]; then
+  # run from init
+  # unset SYSTEM_ROOT because we are chroot-ing and /update become new / anyway
+  unset SYSTEM_ROOT
+
+  # mount some folders from old root
+  mount -o bind /tmp /update/var
+
+  for folder in proc sys dev tmp run flash storage; do
+    [ -d /${folder} ] && mount -o bind /${folder} /update/${folder}
+  done
+
+  /usr/bin/busybox chroot /update /usr/share/bootloader/update.sh
+
+  # umount folders
+  for folder in proc sys dev tmp run flash storage; do
+    [ -d /${folder} ] && umount /update/${folder}
+  done
+
+  umount /update/var
+
+  # set it back just in case
+  SYSTEM_ROOT="/update"
+  exit 0
+fi
+
+# change to writable folder
+cd /tmp
+
 [ -z "$BOOT_ROOT" ] && BOOT_ROOT="/flash"
 [ -z "$BOOT_PART" ] && BOOT_PART=$(df "$BOOT_ROOT" | tail -1 | awk {' print $1 '})
 if [ -z "$BOOT_DISK" ]; then
@@ -38,12 +67,12 @@ for arg in $(cat /proc/cmdline); do
           ;;
       esac
 
-      DT_ID=$(sh $SYSTEM_ROOT/usr/bin/dtname)
+      DT_ID=$(dtname)
       MIGRATE_DTB=""
       if [ -n "$DT_ID" ]; then
         SUBDEVICE="Generic"
         # modify DT_ID, SUBDEVICE and MIGRATE_DTB by dtb.conf
-        [ -f $SYSTEM_ROOT/usr/bin/convert_dtname ] && . $SYSTEM_ROOT/usr/bin/convert_dtname $DT_ID
+        [ -f /usr/bin/convert_dtname ] && . /usr/bin/convert_dtname $DT_ID
 
         case $DT_ID in
           *odroid_c4*)
@@ -64,7 +93,7 @@ for arg in $(cat /proc/cmdline); do
         esac
       fi
 
-      UPDATE_DTB_SOURCE="$SYSTEM_ROOT/usr/share/bootloader/device_trees/$DT_ID.dtb"
+      UPDATE_DTB_SOURCE="/usr/share/bootloader/device_trees/$DT_ID.dtb"
       if [ -n "$DT_ID" -a -f "$UPDATE_DTB_SOURCE" ]; then
         echo "Updating device tree with $DT_ID.dtb..."
         case $BOOT_PART in
@@ -83,9 +112,9 @@ for arg in $(cat /proc/cmdline); do
       for all_dtb in /flash/*.dtb ; do
         if [ -f $all_dtb ]; then
           dtb=$(basename $all_dtb)
-          if [ -f $SYSTEM_ROOT/usr/share/bootloader/$dtb ]; then
+          if [ -f /usr/share/bootloader/$dtb ]; then
             echo "Updating $dtb..."
-            cp -p $SYSTEM_ROOT/usr/share/bootloader/$dtb $BOOT_ROOT
+            cp -p /usr/share/bootloader/$dtb $BOOT_ROOT
           fi
         fi
       done
@@ -111,92 +140,92 @@ done
 if [ -d $BOOT_ROOT/device_trees ]; then
   echo "Updating device_trees folder..."
   rm $BOOT_ROOT/device_trees/*.dtb
-  cp -p $SYSTEM_ROOT/usr/share/bootloader/device_trees/*.dtb $BOOT_ROOT/device_trees/
+  cp -p /usr/share/bootloader/device_trees/*.dtb $BOOT_ROOT/device_trees/
 fi
 
-if [ -f $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_boot.ini ]; then
+if [ -f /usr/share/bootloader/${SUBDEVICE}_boot.ini ]; then
   echo "Updating boot.ini with ${SUBDEVICE}_boot.ini..."
-  cp -p $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_boot.ini $BOOT_ROOT/boot.ini
+  cp -p /usr/share/bootloader/${SUBDEVICE}_boot.ini $BOOT_ROOT/boot.ini
   sed -e "s/@BOOT_UUID@/$BOOT_UUID/" \
       -e "s/@DISK_UUID@/$DISK_UUID/" \
       -i $BOOT_ROOT/boot.ini
 fi
 
-if [ -f $SYSTEM_ROOT/usr/share/bootloader/config.ini ]; then
+if [ -f /usr/share/bootloader/config.ini ]; then
   if [ ! -f $BOOT_ROOT/config.ini ]; then
     echo "Creating config.ini..."
-    cp -p $SYSTEM_ROOT/usr/share/bootloader/config.ini $BOOT_ROOT/config.ini
+    cp -p /usr/share/bootloader/config.ini $BOOT_ROOT/config.ini
   fi
 fi
 
 if [ -f $BOOT_ROOT/dtb.xml ]; then
-  if [ -f $SYSTEM_ROOT/usr/lib/coreelec/dtb-xml ]; then
+  if [ -f /usr/lib/coreelec/dtb-xml ]; then
     echo "Updating dtb.img by dtb.xml..."
-    LD_LIBRARY_PATH=/usr/lib:$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/lib/coreelec/dtb-xml -s $SYSTEM_ROOT
+    /usr/lib/coreelec/dtb-xml
   fi
 fi
 
 if [ "${SUBDEVICE}" == "Odroid_N2" -o "${SUBDEVICE}" == "Odroid_C4" -o "${SUBDEVICE}" == "Odroid_HC4" ]; then
-  if [ -f $SYSTEM_ROOT/usr/share/bootloader/hk-boot-logo-1080.bmp.gz ]; then
+  if [ -f /usr/share/bootloader/hk-boot-logo-1080.bmp.gz ]; then
     echo "Updating boot logos..."
-    cp -p $SYSTEM_ROOT/usr/share/bootloader/hk-boot-logo-1080.bmp.gz $BOOT_ROOT/boot-logo-1080.bmp.gz
+    cp -p /usr/share/bootloader/hk-boot-logo-1080.bmp.gz $BOOT_ROOT/boot-logo-1080.bmp.gz
   fi
 fi
 
 if [ "${SUBDEVICE}" == "LePotato" -o "${SUBDEVICE}" == "LaFrite" ]; then
-  if [ -f $SYSTEM_ROOT/usr/share/bootloader/boot-logo-1080.bmp.gz ]; then
+  if [ -f /usr/share/bootloader/boot-logo-1080.bmp.gz ]; then
     echo "Updating boot logos..."
-    cp -p $SYSTEM_ROOT/usr/share/bootloader/boot-logo-1080.bmp.gz $BOOT_ROOT/boot-logo-1080.bmp.gz
+    cp -p /usr/share/bootloader/boot-logo-1080.bmp.gz $BOOT_ROOT/boot-logo-1080.bmp.gz
   fi
 fi
 
 if [ "${SUBDEVICE:0:10}" == "Radxa_Zero" ]; then
-  if [ -f $SYSTEM_ROOT/usr/share/bootloader/radxa-boot-logo-1080.bmp.gz ]; then
+  if [ -f /usr/share/bootloader/radxa-boot-logo-1080.bmp.gz ]; then
     echo "Updating boot logos..."
-    cp -p $SYSTEM_ROOT/usr/share/bootloader/radxa-boot-logo-1080.bmp.gz $BOOT_ROOT/boot-logo-1080.bmp.gz
+    cp -p /usr/share/bootloader/radxa-boot-logo-1080.bmp.gz $BOOT_ROOT/boot-logo-1080.bmp.gz
   fi
 fi
 
-if [ -f $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_u-boot -a ! -e /dev/env ]; then
+if [ -f /usr/share/bootloader/${SUBDEVICE}_u-boot -a ! -e /dev/env ]; then
   echo "Updating u-boot on: $BOOT_DISK..."
-  dd if=$SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_u-boot of=$BOOT_DISK conv=fsync bs=1 count=112 status=none
-  dd if=$SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_u-boot of=$BOOT_DISK conv=fsync bs=512 skip=1 seek=1 status=none
+  dd if=/usr/share/bootloader/${SUBDEVICE}_u-boot of=$BOOT_DISK conv=fsync bs=1 count=112 status=none
+  dd if=/usr/share/bootloader/${SUBDEVICE}_u-boot of=$BOOT_DISK conv=fsync bs=512 skip=1 seek=1 status=none
 fi
 
 if [ -f $BOOT_ROOT/boot.scr ]; then
-  if [ -f $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_chain_u-boot ]; then
+  if [ -f /usr/share/bootloader/${SUBDEVICE}_chain_u-boot ]; then
     echo "Updating chain loaded u-boot..."
-    cp -p $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_chain_u-boot $BOOT_ROOT/u-boot.bin
+    cp -p /usr/share/bootloader/${SUBDEVICE}_chain_u-boot $BOOT_ROOT/u-boot.bin
   fi
   if [ "${SUBDEVICE}" == "LePotato"  -o "${SUBDEVICE}" == "LaFrite" ]; then
-    if [ -f $SYSTEM_ROOT/usr/share/bootloader/libretech_chain_boot ]; then
+    if [ -f /usr/share/bootloader/libretech_chain_boot ]; then
       echo "Updating boot.scr..."
-      cp -p $SYSTEM_ROOT/usr/share/bootloader/libretech_chain_boot $BOOT_ROOT/boot.scr
+      cp -p /usr/share/bootloader/libretech_chain_boot $BOOT_ROOT/boot.scr
     fi
   fi
 fi
 
 if [ -f $BOOT_ROOT/aml_autoscript ]; then
-  if [ -f $SYSTEM_ROOT/usr/share/bootloader/aml_autoscript ]; then
+  if [ -f /usr/share/bootloader/aml_autoscript ]; then
     echo "Updating aml_autoscript..."
-    cp -p $SYSTEM_ROOT/usr/share/bootloader/aml_autoscript $BOOT_ROOT
+    cp -p /usr/share/bootloader/aml_autoscript $BOOT_ROOT
     if [ -e /dev/env ]; then
       mkdir -p /var/lock
       dd if=$BOOT_ROOT/aml_autoscript bs=72 skip=1 status=none | \
       while read line; do
-        cmd=$(echo $line | sed -n "s|^setenv \(.*\)|$SYSTEM_ROOT/usr/sbin/fw_setenv -c $SYSTEM_ROOT/etc/fw_env.config \1|gp")
+        cmd=$(echo $line | sed -n "s|^setenv \(.*\)|fw_setenv -c /etc/fw_env.config \1|gp")
         [ -n "$cmd" ] && eval $cmd
       done
     fi
   fi
-  if [ -f $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_cfgload ]; then
+  if [ -f /usr/share/bootloader/${SUBDEVICE}_cfgload ]; then
     echo "Updating cfgload..."
-    cp -p $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_cfgload $BOOT_ROOT/cfgload
+    cp -p /usr/share/bootloader/${SUBDEVICE}_cfgload $BOOT_ROOT/cfgload
   fi
-  $SYSTEM_ROOT/usr/lib/coreelec/check-bl301
+  /usr/lib/coreelec/check-bl301
   if [ ${?} = 1 ]; then
     echo "Found custom CoreELEC BL301, running inject_bl301 tool..."
-    LD_LIBRARY_PATH=/usr/lib:$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/sbin/inject_bl301 -s $SYSTEM_ROOT -Y &>/dev/null
+    inject_bl301 -Y &>/dev/null
   fi
 fi
 

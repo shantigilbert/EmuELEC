@@ -1,0 +1,12 @@
+[Unit]
+Description=Setup machine-id
+DefaultDependencies=no
+Before=systemd-journald.service systemd-tmpfiles-setup-dev.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemd-machine-id-setup
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target

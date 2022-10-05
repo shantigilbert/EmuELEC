@@ -1,0 +1,21 @@
+--- a/drivers/gpu/drm/bridge/cadence/cdns-hdmi-core.c	2022-06-28 15:48:27.254022595 +0000
++++ b/drivers/gpu/drm/bridge/cadence/cdns-hdmi-core.c	2022-06-28 15:46:14.919939083 +0000
+@@ -14,6 +14,8 @@
+ #include <drm/drm_edid.h>
+ #include <drm/drm_encoder_slave.h>
+ #include <drm/display/drm_hdcp.h>
++#include <drm/display/drm_hdcp_helper.h>
++#include <drm/display/drm_hdmi_helper.h>
+ #include <drm/drm_of.h>
+ #include <drm/drm_probe_helper.h>
+ #include <drm/drm_print.h>
+--- a/drivers/gpu/drm/bridge/cadence/cdns-hdmi-hdcp.c	2022-06-28 15:53:59.618466556 +0000
++++ b/drivers/gpu/drm/bridge/cadence/cdns-hdmi-hdcp.c	2022-06-28 15:56:01.987635836 +0000
+@@ -11,6 +11,7 @@
+  */
+ #include <drm/bridge/cdns-mhdp.h>
+ #include <drm/display/drm_hdcp.h>
++#include <drm/display/drm_hdcp_helper.h>
+ #include <drm/drm_print.h>
+ #include <linux/firmware.h>
+ 

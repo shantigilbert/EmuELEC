@@ -1,9 +1,10 @@
 --- a/Makefile
 +++ b/Makefile
-@@ -280,6 +280,59 @@
+@@ -284,7 +284,66 @@
     PLATFORM_EXT := unix
     WITH_DYNAREC=arm
     HAVE_NEON=1
+-
 +   
 +# Emuelec Amlogic
 +else ifneq (,$(findstring Amlogic,$(platform)))
@@ -47,8 +48,11 @@
 +   PLATFORM_EXT := unix
 +   WITH_DYNAREC=arm
 +   HAVE_NEON=1
++   ifneq (,$(findstring RK356x,$(platform)))
++   ASFLAGS += -D__ARM_NEON__ -marm -mcpu=cortex-a55 -mtune=cortex-a55 -mfpu=neon-fp-armv8 -mfloat-abi=hard
++  else
 +   ASFLAGS += -D__ARM_NEON__ -marm -mcpu=cortex-a35 -mtune=cortex-a35 -mfpu=neon-fp-armv8 -mfloat-abi=hard
-+  
++  endif
 +   CPUFLAGS += -O2 \
 +      -fno-lto -fuse-linker-plugin -fno-semantic-interposition -fno-trapping-math \
 +      -fdata-sections -ffunction-sections -Wl,--gc-sections \
@@ -56,7 +60,11 @@
 +      -falign-functions=32 -falign-jumps=1 -falign-loops=1 \
 +      -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-unroll-loops \
 +      -fno-strict-aliasing -fmerge-all-constants -fno-math-errno -fcommon
-+   CPUFLAGS += -marm -mtune=cortex-a35 -mfpu=neon-fp-armv8 -mfloat-abi=hard   
- 
++   ifneq (,$(findstring RK356x,$(platform)))
++   CPUFLAGS += -marm -mtune=cortex-a55 -mfpu=neon-fp-armv8 -mfloat-abi=hard
++  else
++   CPUFLAGS += -marm -mtune=cortex-a35 -mfpu=neon-fp-armv8 -mfloat-abi=hard
++  endif
  # OS X
  else ifneq (,$(findstring osx,$(platform)))
+    TARGET := $(TARGET_NAME)_libretro.dylib

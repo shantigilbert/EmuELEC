@@ -3,8 +3,8 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="pvr.vdr.vnsi"
-PKG_VERSION="20.2.2-Nexus"
-PKG_SHA256="bf3f504fc2d8cd85820c8a399ceeaed865b25febe5b448b301bf20840ca8039a"
+PKG_VERSION="20.4.0-Nexus"
+PKG_SHA256="a781cfdf3a9d5d592eed5152200e69acf1214712f06c6b99573a1a01dadd62f5"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
@@ -17,3 +17,11 @@ PKG_LONGDESC="pvr.vdr.vnsi"
 
 PKG_IS_ADDON="yes"
 PKG_ADDON_TYPE="xbmc.pvrclient"
+
+if [ "${OPENGLES_SUPPORT}" = "yes" ]; then
+  PKG_DEPENDS_TARGET+=" ${OPENGLES}"
+fi
+
+if [ "${OPENGL_SUPPORT}" = "yes" ]; then
+  PKG_DEPENDS_TARGET+=" ${OPENGL}"
+fi

@@ -9,7 +9,6 @@
 #
 # Command Line Arguments
 # -v = Show verbose output
-# -s = set system root prefix
 # -m = migrate dtb.img settings to dtb.xml
 #
 #####################################################
@@ -17,7 +16,6 @@
 verbose=0
 changed=0
 migrate=0
-SYSTEM_ROOT=''
 BOOT_ROOT='/flash'
 amlogic_dt_id=''
 
@@ -26,11 +24,6 @@ while [ $# -ne 0 ]; do
   case "$arg" in
       -v)
         verbose=1
-        ;;
-      -s)
-        shift
-        PATH="$PATH:$1/usr/bin"
-        SYSTEM_ROOT="$1"
         ;;
       -m)
         migrate=1
@@ -44,9 +37,10 @@ while [ $# -ne 0 ]; do
 done
 
 xml_file="$BOOT_ROOT/dtb.xml"
-default_xml_file="$SYSTEM_ROOT/usr/share/bootloader/dtb.xml"
+default_xml_file="/usr/share/bootloader/dtb.xml"
 dtb_file="$BOOT_ROOT/dtb.img"
-[ -f /proc/device-tree/amlogic-dt-id ] && amlogic_dt_id=$(cat /proc/device-tree/amlogic-dt-id)
+[ -f /proc/device-tree/amlogic-dt-id ] && amlogic_dt_id=$(tr -d '\0' < /proc/device-tree/amlogic-dt-id)
+DT_ID=$(dtname)
 
 #########################################################
 # log
@@ -142,7 +136,6 @@ function migrate_dtb_to_xml() {
     # if not skip any further check and set to 'migrated'
     node_dt_id=$(xmlstarlet sel -t -v "//$node/@dt_id" $xml_file)
     if [ -n "$node_dt_id" ]; then
-      DT_ID=$(sh $SYSTEM_ROOT/usr/bin/dtname)
       log " dt_id: $node_dt_id,  coreelec-dt-id: $DT_ID"
 
       dt_id_match=0
@@ -195,7 +188,6 @@ function migrate_dtb_to_xml() {
       if [ "$node_status" != "$name_option" ]; then
         # special handling to migrate heartbeat setting from config.ini on Odroid devices
         if [ "$node" == "sys_led" ]; then
-          DT_ID=$(sh $SYSTEM_ROOT/usr/bin/dtname)
           case $DT_ID in
             *odroid*)
               log " detected Odroid device, migrate heartbeat led setting from config.ini"
@@ -259,8 +251,6 @@ function update_dtb_by_dtb_xml() {
     # if not skip node and set to 'migrated' to hide the option in CoreELEC settings
     if [ -n "$node_dt_id" ]; then
       log " dt_id: $node_dt_id"
-
-      DT_ID=$(sh $SYSTEM_ROOT/usr/bin/dtname)
       log " coreelec-dt-id: $DT_ID"
 
       dt_id_match=0

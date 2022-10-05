@@ -14,11 +14,10 @@ Signed-off-by: Ondrej Jirman <megous@megous.com>
 
 --- a/drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c
 +++ b/drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c
-@@ -57,20 +57,22 @@ struct emac_variant {
+@@ -57,18 +57,20 @@ struct emac_variant {
  };
  
  /* struct sunxi_priv_data - hold all sunxi private data
-- * @tx_clk:	reference to MAC TX clock
 - * @ephy_clk:	reference to the optional EPHY clock for the internal PHY
 - * @regulator:	reference to the optional regulator
 - * @rst_ephy:	reference to the optional EPHY reset for the internal PHY
@@ -27,7 +26,6 @@ Signed-off-by: Ondrej Jirman <megous@megous.com>
 - * @internal_phy_powered: Does the internal PHY is enabled
 - * @use_internal_phy: Is the internal PHY selected for use
 - * @mux_handle:	Internal pointer used by mdio-mux lib
-+ * @tx_clk:			reference to MAC TX clock
 + * @ephy_clk:			reference to the optional EPHY clock for
 + *				the internal PHY
 + * @regulator_phy:		reference to the optional regulator
@@ -40,7 +38,6 @@ Signed-off-by: Ondrej Jirman <megous@megous.com>
 + * @mux_handle:			Internal pointer used by mdio-mux lib
   */
  struct sunxi_priv_data {
- 	struct clk *tx_clk;
  	struct clk *ephy_clk;
 -	struct regulator *regulator;
 +	struct regulator *regulator_phy;

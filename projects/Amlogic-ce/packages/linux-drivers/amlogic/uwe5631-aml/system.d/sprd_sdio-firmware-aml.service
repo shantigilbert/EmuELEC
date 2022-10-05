@@ -1,0 +1,13 @@
+[Unit]
+Description=Attach /dev/ttyBT0 to BlueZ stack using sprd type
+ConditionPathExists=|!/sys/class/mmc_host/sdio/sdio:8800
+ConditionPathExists=|!/sys/class/mmc_host/mmc2/mmc2:8800
+Wants=bluetooth.service
+Before=bluetooth.service
+After=dev-ttyBT0.device
+
+[Service]
+Type=forking
+ExecStartPre=/usr/sbin/rfkill unblock bluetooth
+ExecStart=/usr/bin/hciattach -s 1500000 /dev/ttyBT0 sprd
+ExecStopPost=/usr/sbin/rfkill block bluetooth

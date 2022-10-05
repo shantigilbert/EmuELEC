@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="game.libretro.virtualjaguar"
-PKG_VERSION="2.1.0.27-Matrix"
-PKG_SHA256="05e87fa729d10a16fcd28208224ee8c7d1a59254873fce578b92dc9b2034c576"
+PKG_VERSION="2.1.0.28-Matrix"
+PKG_SHA256="3a98dd94bb316a686ca93174ae87072ca4ba168fb9046896f338e4025307fbca"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

@@ -1,0 +1,59 @@
+NAME
+       systemd-sleep.conf, sleep.conf.d - Suspend and hibernation configuration file
+
+SYNOPSIS
+       /etc/systemd/sleep.conf
+
+       /etc/systemd/sleep.conf.d/*.conf
+
+       /run/systemd/sleep.conf.d/*.conf
+
+       /usr/lib/systemd/sleep.conf.d/*.conf
+
+DESCRIPTION
+       systemd supports three general power-saving modes:
+
+       suspend
+           a low-power state where execution of the OS is paused, and complete power loss might result in lost data, and which is fast to enter and exit. This corresponds to suspend, standby, or freeze states as understood by the
+           kernel.
+
+       hibernate
+           a low-power state where execution of the OS is paused, and complete power loss does not result in lost data, and which might be slow to enter and exit. This corresponds to the hibernation as understood by the kernel.
+
+       hybrid-sleep
+           a low-power state where execution of the OS is paused, which might be slow to enter, and on complete power loss does not result in lost data but might be slower to exit in that case. This mode is called suspend-to-both
+           by the kernel.
+
+       Settings in these files determine what strings will be written to /sys/power/disk and /sys/power/state by systemd-sleep(8) when systemd(1) attempts to suspend or hibernate the machine.
+
+CONFIGURATION DIRECTORIES AND PRECEDENCE
+       The default configuration is defined during compilation, so a configuration file is only needed when it is necessary to deviate from those defaults. By default, the configuration file in /etc/systemd/ contains commented out
+       entries showing the defaults as a guide to the administrator. This file can be edited to create local overrides.
+
+       When packages need to customize the configuration, they can install configuration snippets in /usr/lib/systemd/*.conf.d/. Files in /etc/ are reserved for the local administrator, who may use this logic to override the
+       configuration files installed by vendor packages. The main configuration file is read before any of the configuration directories, and has the lowest precedence; entries in a file in any configuration directory override
+       entries in the single configuration file. Files in the *.conf.d/ configuration subdirectories are sorted by their filename in lexicographic order, regardless of which of the subdirectories they reside in. If multiple files
+       specify the same option, the entry in the file with the lexicographically latest name takes precedence. It is recommended to prefix all filenames in those subdirectories with a two-digit number and a dash, to simplify the
+       ordering of the files.
+
+       To disable a configuration file supplied by the vendor, the recommended way is to place a symlink to /dev/null in the configuration directory in /etc/, with the same filename as the vendor configuration file.
+
+OPTIONS
+       The following options can be configured in the "[Sleep]" section of /etc/systemd/sleep.conf or a sleep.conf.d file:
+
+       SuspendMode=, HibernateMode=, HybridSleepMode=
+           The string to be written to /sys/power/disk by, respectively, systemd-suspend.service(8), systemd-hibernate.service(8), or systemd-hybrid-sleep.service(8). More than one value can be specified by separating multiple
+           values with whitespace. They will be tried in turn, until one is written without error. If neither succeeds, the operation will be aborted.
+
+       SuspendState=, HibernateState=, HybridSleepState=
+           The string to be written to /sys/power/state by, respectively, systemd-suspend.service(8), systemd-hibernate.service(8), or systemd-hybrid-sleep.service(8). More than one value can be specified by separating multiple
+           values with whitespace. They will be tried in turn, until one is written without error. If neither succeeds, the operation will be aborted.
+
+EXAMPLE: FREEZE
+       Example: to exploit the “freeze” mode added in Linux 3.9, one can use systemctl suspend with
+
+           [Sleep]
+           SuspendState=freeze
+
+SEE ALSO
+       systemd-sleep(8), systemd-suspend.service(8), systemd-hibernate.service(8), systemd-hybrid-sleep.service(8), systemd(1), systemd.directives(7)

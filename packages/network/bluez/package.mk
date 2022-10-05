@@ -23,13 +23,14 @@ BLUEZ_CONFIG+=" --enable-monitor --enable-test"
 
 PKG_CONFIGURE_OPTS_TARGET="--disable-dependency-tracking \
                            --disable-silent-rules \
-                           --disable-library \
+                           --enable-library \
                            --enable-udev \
                            --disable-cups \
                            --disable-obex \
                            --enable-client \
                            --enable-systemd \
-                           --enable-tools --enable-deprecated \
+                           --enable-tools \
+                           --enable-deprecated \
                            --enable-datafiles \
                            --disable-manpages \
                            --disable-experimental \

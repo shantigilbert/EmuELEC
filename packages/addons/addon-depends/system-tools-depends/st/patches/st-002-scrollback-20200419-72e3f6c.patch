@@ -51,8 +51,8 @@ index 0ce6ac2..641edc0 100644
 -static void tscrolldown(int, int);
 +static void tscrollup(int, int, int);
 +static void tscrolldown(int, int, int);
- static void tsetattr(int *, int);
- static void tsetchar(Rune, Glyph *, int, int);
+ static void tsetattr(const int *, int);
+ static void tsetchar(Rune, const Glyph *, int, int);
  static void tsetdirt(int, int);
 @@ -415,10 +422,10 @@ tlinelen(int y)
  {

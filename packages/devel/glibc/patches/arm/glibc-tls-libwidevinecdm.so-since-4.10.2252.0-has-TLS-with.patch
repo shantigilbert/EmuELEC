@@ -10,14 +10,12 @@ Subject: [PATCH] tls: libwidevinecdm.so: since 4.10.2252.0 has TLS with
  elf/dl-tls.c | 5 +++++
  1 file changed, 5 insertions(+)
 
-diff --git a/elf/dl-tls.c b/elf/dl-tls.c
-index 9fa62f5d..d8f2f740 100644
 --- a/elf/dl-tls.c
 +++ b/elf/dl-tls.c
-@@ -213,6 +213,11 @@ void
+@@ -220,6 +220,11 @@ void
  _dl_determine_tlsoffset (void)
  {
-   size_t max_align = TLS_TCB_ALIGN;
+   size_t max_align = TCB_ALIGNMENT;
 +  /* libwidevinecdm.so: since 4.10.2252.0 has TLS with 64-byte alignment.
 +     Since TLS is initialized before audit modules are loaded and slotinfo
 +     information is available, this is not taken into account below in
@@ -26,6 +24,3 @@ index 9fa62f5d..d8f2f740 100644
    size_t freetop = 0;
    size_t freebottom = 0;
  
--- 
-2.31.1
-

@@ -1,0 +1,34 @@
+From 630a2f2a3eaa372c0dbd9a21fb9c00f0576ec442 Mon Sep 17 00:00:00 2001
+From: 7Ji <pugokushin@gmail.com>
+Date: Wed, 22 Jun 2022 09:39:07 +0800
+Subject: [PATCH 2/2] profiles/audio/media.c: fix conflict with unistd.c
+
+---
+ profiles/audio/media.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/profiles/audio/media.c b/profiles/audio/media.c
+index 23d15611b..72ed57cb1 100644
+--- a/profiles/audio/media.c
++++ b/profiles/audio/media.c
+@@ -1238,7 +1238,7 @@ static bool stop(void *user_data)
+ 	return media_player_send(mp, "Stop");
+ }
+ 
+-static bool pause(void *user_data)
++static bool bool_pause(void *user_data)
+ {
+ 	struct media_player *mp = user_data;
+ 
+@@ -1288,7 +1288,7 @@ static struct avrcp_player_cb player_cb = {
+ 	.set_volume = set_volume,
+ 	.play = play,
+ 	.stop = stop,
+-	.pause = pause,
++	.pause = bool_pause,
+ 	.next = next,
+ 	.previous = previous,
+ };
+-- 
+2.36.1
+

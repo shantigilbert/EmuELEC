@@ -1,0 +1,25 @@
+From b773c01fc13d2ae67abc0839888e383be23562fd Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tommi=20M=C3=A4kitalo?= <tommi@tntnet.org>
+Date: Sun, 24 Jan 2021 17:20:24 +0100
+Subject: [PATCH] make cxxtools::Char a trivial class by definining the default
+ constructor as default
+
+---
+ include/cxxtools/char.h | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/include/cxxtools/char.h b/include/cxxtools/char.h
+index 1e637317..3a4ed62a 100644
+--- a/include/cxxtools/char.h
++++ b/include/cxxtools/char.h
+@@ -68,9 +68,7 @@ namespace cxxtools
+             typedef int32_t value_type;
+ 
+             //! Constructs a character with a value of 0.
+-            Char()
+-            : _value(0)
+-            {}
++            Char() = default;
+ 
+             //! Constructs a character using the given value as base for the character value.
+             Char(value_type ch)

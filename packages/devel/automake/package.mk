@@ -9,6 +9,7 @@ PKG_SITE="http://sources.redhat.com/automake/"
 PKG_URL="http://ftpmirror.gnu.org/automake/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_HOST="ccache:host autoconf:host"
 PKG_LONGDESC="A GNU tool for automatically creating Makefiles."
+PKG_BUILD_FLAGS="-parallel"
 
 PKG_CONFIGURE_OPTS_HOST="--target=${TARGET_NAME} --disable-silent-rules"
 

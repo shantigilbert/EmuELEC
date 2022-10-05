@@ -1,0 +1,24 @@
+From 382709612ae03d6f81049ac72ac2dabd7613763d Mon Sep 17 00:00:00 2001
+From: Stefan Saraev <stefan@saraev.ca>
+Date: Wed, 18 Feb 2015 18:23:47 +0200
+Subject: [PATCH 7/8] remove nonexistant dependency
+
+---
+ units/graphical.target |    1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/units/graphical.target b/units/graphical.target
+index 87be97e..b01b46d 100644
+--- a/units/graphical.target
++++ b/units/graphical.target
+@@ -9,7 +9,6 @@
+ Description=Graphical Interface
+ Documentation=man:systemd.special(7)
+ Requires=multi-user.target
+-Wants=display-manager.service
+ Conflicts=rescue.service rescue.target
+ After=multi-user.target rescue.service rescue.target display-manager.service
+ AllowIsolate=yes
+-- 
+1.7.10.4
+

@@ -1,0 +1,14 @@
+[Unit]
+Description=Setup debug config
+DefaultDependencies=no
+After=systemd-tmpfiles-setup.service
+ConditionKernelCommandLine=|debugging
+ConditionPathExists=|/storage/.cache/debug.libreelec
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'cp /usr/share/debugconf/*.conf /run/libreelec/debug'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target

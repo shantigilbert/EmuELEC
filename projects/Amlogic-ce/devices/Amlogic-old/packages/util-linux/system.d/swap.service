@@ -1,0 +1,21 @@
+[Unit]
+Description=Mounting swapfile
+DefaultDependencies=false
+
+Before=swap.target shutdown.target
+Conflicts=shutdown.target
+Wants=swap.target
+
+ConditionPathExists=/proc/swaps
+ConditionKernelCommandLine=!noswap
+ConditionKernelCommandLine=!installer
+
+[Service]
+Environment=HOME=/storage
+Type=oneshot
+ExecStartPre=/usr/lib/coreelec/mount-swap create
+ExecStart=/usr/lib/coreelec/mount-swap mount
+RemainAfterExit=yes
+
+[Install]
+WantedBy=basic.target

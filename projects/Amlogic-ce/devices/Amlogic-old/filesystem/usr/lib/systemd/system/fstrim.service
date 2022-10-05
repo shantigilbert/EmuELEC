@@ -1,0 +1,9 @@
+[Unit]
+Description=Apply TRIM on all trimmable mounts
+
+[Service]
+Type=simple
+ExecStart=-/usr/sbin/fstrim -a -v
+
+[Install]
+WantedBy=basic.target

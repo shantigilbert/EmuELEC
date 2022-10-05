@@ -1,0 +1,14 @@
+--- a/src/main.c
++++ b/src/main.c
+@@ -26,6 +26,11 @@
+ #include <asm/hwcap.h>
+ #endif
+ #endif
++
++#define HWCAP2_CRC32	(1 << 4)
++#define HWCAP2_AES	(1 << 0)
++
++
+ 
+ #include "build_info.h"
+ #include "debug.h"

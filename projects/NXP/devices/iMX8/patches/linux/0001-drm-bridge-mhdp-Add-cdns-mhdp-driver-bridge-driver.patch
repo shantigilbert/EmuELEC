@@ -44,7 +44,7 @@ diff --git a/drivers/gpu/drm/bridge/cadence/Kconfig b/drivers/gpu/drm/bridge/cad
 index ef8c230e0f62..bb1865b15aca 100644
 --- a/drivers/gpu/drm/bridge/cadence/Kconfig
 +++ b/drivers/gpu/drm/bridge/cadence/Kconfig
-@@ -22,3 +22,29 @@ config DRM_CDNS_MHDP8546_J721E
+@@ -22,3 +22,31 @@ config DRM_CDNS_MHDP8546_J721E
  	  initializes the J721E Display Port and sets up the
  	  clock and data muxes.
  endif
@@ -60,6 +60,8 @@ index ef8c230e0f62..bb1865b15aca 100644
 +config DRM_CDNS_HDMI
 +	tristate "Cadence HDMI DRM driver"
 +	depends on DRM_CDNS_MHDP
++	select DRM_DISPLAY_HDCP_HELPER
++	select DRM_DISPLAY_HDMI_HELPER
 +
 +config DRM_CDNS_DP
 +	tristate "Cadence DP DRM driver"
@@ -696,7 +698,7 @@ index 000000000000..da40f62617ef
 +#include <drm/drm_of.h>
 +#include <drm/drm_probe_helper.h>
 +#include <drm/drm_print.h>
-+#include <drm/drm_scdc_helper.h>
++#include <drm/display/drm_scdc_helper.h>
 +#include <drm/drm_vblank.h>
 +#include <linux/delay.h>
 +#include <linux/err.h>
@@ -777,7 +779,7 @@ index 000000000000..da40f62617ef
 +		break;
 +	}
 +
-+	drm_hdmi_avi_infoframe_colorspace(&frame, conn_state);
++	drm_hdmi_avi_infoframe_colorimetry(&frame, conn_state);
 +
 +	adj_mode = &mhdp->bridge.base.encoder->crtc->state->adjusted_mode;
 +
@@ -1124,10 +1126,10 @@ index 000000000000..da40f62617ef
 +	}
 +
 +	/* Any defined maximum tmds clock limit we must not exceed*/
-+	if ((di->edid_hdmi_dc_modes & DRM_EDID_HDMI_DC_36) &&
++	if ((di->edid_hdmi_rgb444_dc_modes & DRM_EDID_HDMI_DC_36) &&
 +	    (mode->clock * 3 / 2 <= di->max_tmds_clock))
 +		video->color_depth = 12;
-+	else if ((di->edid_hdmi_dc_modes & DRM_EDID_HDMI_DC_30) &&
++	else if ((di->edid_hdmi_rgb444_dc_modes & DRM_EDID_HDMI_DC_30) &&
 +		 (mode->clock * 5 / 4 <= di->max_tmds_clock))
 +		video->color_depth = 10;
 +
@@ -3452,7 +3454,7 @@ index 000000000000..399c3f6f86ad
 +#ifndef CDNS_MHDP_H
 +#define CDNS_MHDP_H
 +
-+#include <drm/drm_dp_mst_helper.h>
++#include <drm/display/drm_dp_mst_helper.h>
 +
 +#define CDNS_APB_CFG				0x00000
 +#define CDNS_APB_CTRL				(CDNS_APB_CFG + 0x00)
@@ -3653,8 +3655,8 @@ index 17a9e7eb2130..bd013659404f 100644
 --- a/drivers/gpu/drm/rockchip/Makefile
 +++ b/drivers/gpu/drm/rockchip/Makefile
 @@ -8,7 +8,7 @@ rockchipdrm-y := rockchip_drm_drv.o rockchip_drm_fb.o \
- 		rockchip_drm_gem.o rockchip_drm_vop.o rockchip_vop_reg.o
- 
+ rockchipdrm-$(CONFIG_ROCKCHIP_VOP2) += rockchip_drm_vop2.o rockchip_vop2_reg.o
+ rockchipdrm-$(CONFIG_ROCKCHIP_VOP) += rockchip_drm_vop.o rockchip_vop_reg.o
  rockchipdrm-$(CONFIG_ROCKCHIP_ANALOGIX_DP) += analogix_dp-rockchip.o
 -rockchipdrm-$(CONFIG_ROCKCHIP_CDN_DP) += cdn-dp-core.o cdn-dp-reg.o
 +rockchipdrm-$(CONFIG_ROCKCHIP_CDN_DP) += cdn-dp-core.o
@@ -3672,12 +3674,12 @@ index a4a45daf93f2..058bc372f02b 100644
 -#include "cdn-dp-reg.h"
  #include "rockchip_drm_vop.h"
  
- #define connector_to_dp(c) \
--		container_of(c, struct cdn_dp_device, connector)
-+		container_of(c, struct cdn_dp_device, mhdp.connector.base)
+ static inline struct cdn_dp_device *connector_to_dp(struct drm_connector *connector)
+ {
+-	return container_of(connector, struct cdn_dp_device, connector);
++	return container_of(connector, struct cdn_dp_device, mhdp.connector.base);
+ }
  
- #define encoder_to_dp(c) \
- 		container_of(c, struct cdn_dp_device, encoder)
 @@ -62,17 +61,18 @@ MODULE_DEVICE_TABLE(of, cdn_dp_dt_ids);
  static int cdn_dp_grf_write(struct cdn_dp_device *dp,
  			    unsigned int reg, unsigned int val)
@@ -4110,7 +4112,7 @@ index a4a45daf93f2..058bc372f02b 100644
 +		DRM_DEV_ERROR(dev, "Failed to valid video %d\n", ret);
  		goto out;
  	}
- out:
+ 
 @@ -652,7 +662,8 @@ static void cdn_dp_encoder_disable(struct drm_encoder *encoder)
  	if (dp->active) {
  		ret = cdn_dp_disable(dp);
@@ -4364,7 +4366,7 @@ index a4a45daf93f2..058bc372f02b 100644
 @@ -1088,7 +1103,7 @@ static void cdn_dp_unbind(struct device *dev, struct device *master, void *data)
  {
  	struct cdn_dp_device *dp = dev_get_drvdata(dev);
- 	struct drm_encoder *encoder = &dp->encoder;
+ 	struct drm_encoder *encoder = &dp->encoder.encoder;
 -	struct drm_connector *connector = &dp->connector;
 +	struct drm_connector *connector = &dp->mhdp.connector.base;
  
@@ -4408,7 +4410,7 @@ index 81ac9b658a70..8b1b15b92503 100644
  #define _CDN_DP_CORE_H
  
 +#include <drm/bridge/cdns-mhdp.h>
- #include <drm/drm_dp_helper.h>
+ #include <drm/display/drm_dp_helper.h>
  #include <drm/drm_panel.h>
  #include <drm/drm_probe_helper.h>
 @@ -15,35 +16,6 @@
@@ -4455,7 +4457,7 @@ index 81ac9b658a70..8b1b15b92503 100644
 +	struct cdns_mhdp_device mhdp;
  	struct drm_device *drm_dev;
 -	struct drm_connector connector;
- 	struct drm_encoder encoder;
+ 	struct rockchip_encoder encoder;
 -	struct drm_display_mode mode;
 -	struct platform_device *audio_pdev;
  	struct work_struct event_work;
@@ -4489,8 +4491,8 @@ index 81ac9b658a70..8b1b15b92503 100644
  
 -	u8 dpcd[DP_RECEIVER_CAP_SIZE];
  	bool sink_has_audio;
- };
- #endif  /* _CDN_DP_CORE_H */
+ 
+ 	hdmi_codec_plugged_cb plugged_cb;
 diff --git a/drivers/gpu/drm/rockchip/cdn-dp-reg.c b/drivers/gpu/drm/rockchip/cdn-dp-reg.c
 deleted file mode 100644
 index 9d2163ef4d6e..000000000000
@@ -5488,8 +5490,8 @@ index 441248b7a79e..d76716d4edc6 100644
  
 +#include <drm/drm_bridge.h>
 +#include <drm/drm_connector.h>
-+#include <drm/drm_dp_helper.h>
-+#include <drm/drm_dp_mst_helper.h>
++#include <drm/display/drm_dp_helper.h>
++#include <drm/display/drm_dp_mst_helper.h>
 +#include <media/cec.h>
  #include <linux/bitops.h>
  

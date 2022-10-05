@@ -2,7 +2,7 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="duckstation"
-PKG_VERSION="a991bb20c8e71d6e905b3ef84aaf4077e2dc15d0"
+PKG_VERSION="fd3507c16d098fb32806c281caaefb205946da8a"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/stenzek/duckstation"
@@ -32,6 +32,17 @@ pre_configure_target() {
 	                         -DENABLE_CHEEVOS=ON \
 	                         -DHAVE_EGL=ON \
 	                         ${EXTRA_OPTS}"
+
+if [ "${DEVICE}" == "Amlogic-old" ]; then
+	cp -rf $(get_build_dir libevdev)/include/linux/linux/input-event-codes.h ${SYSROOT_PREFIX}/usr/include/linux/
+fi
+
+}
+
+post_make_target() {
+if [ "${DEVICE}" == "Amlogic-old" ]; then
+  rm ${SYSROOT_PREFIX}/usr/include/linux/input-event-codes.h
+fi
 }
 
 makeinstall_target() {

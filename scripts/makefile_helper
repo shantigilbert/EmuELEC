@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2022-present Team LibreELEC (https://libreelec.tv)
+
+set -e
+
+# If config/options can't be sourced, abort. PWD isn't the expected ROOT.
+# Only source from config/options what will be used
+BUILD_ROOT=$(PROJECT= DEVICE= ARCH= . config/options "" && echo "${BUILD_ROOT}")
+BUILD_BASE=$(PROJECT= DEVICE= ARCH= . config/options "" && echo "${BUILD_BASE}")
+
+if [ -z "${BUILD_BASE}" -o -z "${BUILD_ROOT}" ]; then
+  # make sure variables are set before running an rm
+  echo "error: ${0}: both BUILD_BASE and BUILD_ROOT must be set when running \"[clean|distclean]\"; aborting"
+  exit 1
+fi
+
+# task handling
+case $1 in
+  --clean)
+    rm -rf "${BUILD_ROOT}/${BUILD_BASE}."*/* "${BUILD_ROOT}/${BUILD_BASE}."*/.stamps
+  ;;
+  --distclean)
+    rm -rf "${BUILD_ROOT}/.ccache" "${BUILD_ROOT}/${BUILD_BASE}."*
+  ;;
+  *)
+    echo "error: ${0}: unsupported option on CLI; aborting"
+    exit 1
+  ;;
+esac

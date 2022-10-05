@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="qemu"
-PKG_VERSION="6.2.0"
-PKG_SHA256="68e15d8e45ac56326e0b9a4afa8b49a3dfe8aba3488221d098c84698bca65b45"
+PKG_VERSION="7.1.0"
+PKG_SHA256="a0634e536bded57cf38ec8a751adb124b89c776fe0846f21ab6c6728f1cbbbe6"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.qemu.org"
 PKG_URL="https://download.qemu.org/qemu-${PKG_VERSION}.tar.xz"
@@ -34,7 +34,6 @@ pre_configure_host() {
     --disable-docs \
     --disable-gcrypt \
     --disable-gnutls \
-    --disable-libxml2 \
     --disable-system \
     --disable-vnc \
     --disable-werror \

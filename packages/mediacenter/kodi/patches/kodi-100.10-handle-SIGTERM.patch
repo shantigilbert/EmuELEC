@@ -1,6 +1,6 @@
-From e658546b32da44813c3a9913fc55c71e1e946b13 Mon Sep 17 00:00:00 2001
+From f0bca779d21f12be077d97891aa321f02064a089 Mon Sep 17 00:00:00 2001
 From: MilhouseVH <milhouseVH.github@nmacleod.com>
-Date: Thu, 10 Mar 2022 23:20:09 +0100
+Date: Sun, 3 Apr 2022 11:31:07 +0200
 Subject: [PATCH] handle SIGTERM
 
 0. CApplication::Stop cant be trusted. (deadlocks crashes and boo)
@@ -16,15 +16,15 @@ so, when shutdown/reboot is requested:
 7. KILL
 ---
  xbmc/Application.cpp                          | 24 ++++++++++++++-----
- xbmc/Application.h                            |  1 +
- xbmc/XBApplicationEx.cpp                      |  1 +
- xbmc/XBApplicationEx.h                        |  1 +
+ xbmc/Application.h                            |  2 ++
  .../powermanagement/LogindUPowerSyscall.cpp   |  2 --
- 5 files changed, 21 insertions(+), 8 deletions(-)
+ 3 files changed, 20 insertions(+), 8 deletions(-)
 
+diff --git a/xbmc/Application.cpp b/xbmc/Application.cpp
+index bc5b15523d..3049d6ca61 100644
 --- a/xbmc/Application.cpp
 +++ b/xbmc/Application.cpp
-@@ -1968,12 +1968,12 @@ void CApplication::OnApplicationMessage(
+@@ -1432,12 +1432,12 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
    switch (msg)
    {
    case TMSG_POWERDOWN:
@@ -39,7 +39,7 @@ so, when shutdown/reboot is requested:
      break;
  
    case TMSG_SHUTDOWN:
-@@ -1994,12 +1994,13 @@ void CApplication::OnApplicationMessage(
+@@ -1458,12 +1458,13 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
  
    case TMSG_RESTART:
    case TMSG_RESET:
@@ -54,7 +54,7 @@ so, when shutdown/reboot is requested:
      Stop(EXITCODE_RESTARTAPP);
  #endif
      break;
-@@ -2530,7 +2531,7 @@ bool CApplication::Stop(int exitCode)
+@@ -2024,7 +2025,7 @@ bool CApplication::Stop(int exitCode)
      m_frameMoveGuard.unlock();
  
      CVariant vExitCode(CVariant::VariantTypeObject);
@@ -63,16 +63,16 @@ so, when shutdown/reboot is requested:
      CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::System, "OnQuit", vExitCode);
  
      // Abort any active screensaver
-@@ -2562,7 +2563,6 @@ bool CApplication::Stop(int exitCode)
+@@ -2056,7 +2057,6 @@ bool CApplication::Stop(int exitCode)
      // Needs cleaning up
-     CApplicationMessenger::GetInstance().Stop();
+     CServiceBroker::GetAppMessenger()->Stop();
      m_AppFocused = false;
 -    m_ExitCode = exitCode;
      CLog::Log(LOGINFO, "Stopping all");
  
      // cancel any jobs from the jobmanager
-@@ -3149,6 +3149,18 @@ void CApplication::OnQueueNextItem()
-   CServiceBroker::GetGUI()->GetWindowManager().SendThreadMessage(msg);
+@@ -2580,6 +2580,18 @@ void CApplication::StopPlaying()
+   }
  }
  
 +bool CApplication::SetExitCode(int exitCode)
@@ -87,51 +87,43 @@ so, when shutdown/reboot is requested:
 +  return true;
 +}
 +
- void CApplication::OnPlayBackStopped()
+ bool CApplication::OnMessage(CGUIMessage& message)
  {
-   CLog::LogF(LOGDEBUG, "CApplication::OnPlayBackStopped");
-@@ -4215,7 +4227,7 @@ void CApplication::ProcessSlow()
+   switch ( message.GetMessage() )
+@@ -3056,7 +3068,7 @@ void CApplication::ProcessSlow()
    if (CPlatformPosix::TestQuitFlag())
    {
      CLog::Log(LOGINFO, "Quitting due to POSIX signal");
--    CApplicationMessenger::GetInstance().PostMsg(TMSG_QUIT);
-+    CApplicationMessenger::GetInstance().PostMsg(TMSG_RESTARTAPP);
+-    CServiceBroker::GetAppMessenger()->PostMsg(TMSG_QUIT);
++    CServiceBroker::GetAppMessenger()->PostMsg(TMSG_RESTARTAPP);
    }
  #endif
  
+diff --git a/xbmc/Application.h b/xbmc/Application.h
+index c938d0a9b3..2fe138b437 100644
 --- a/xbmc/Application.h
 +++ b/xbmc/Application.h
-@@ -138,6 +138,7 @@ public:
+@@ -135,6 +135,7 @@ public:
+   bool CreateGUI();
    bool InitWindow(RESOLUTION res = RES_INVALID);
  
-   bool IsCurrentThread() const;
 +  bool SetExitCode(int exitCode);
    bool Stop(int exitCode);
-   void UnloadSkin();
-   bool LoadCustomWindows();
---- a/xbmc/XBApplicationEx.cpp
-+++ b/xbmc/XBApplicationEx.cpp
-@@ -22,6 +22,7 @@ CXBApplicationEx::CXBApplicationEx()
-   m_bStop = false;
-   m_AppFocused = true;
-   m_ExitCode = EXITCODE_QUIT;
-+  m_ExitCodeSet = false;
-   m_renderGUI = false;
- }
+   void ReloadSkin(bool confirm = false);
+   const std::string& CurrentFile();
+@@ -286,6 +287,7 @@ private:
+   CApplicationPlayer m_appPlayer;
+   CApplicationStackHelper m_stackHelper;
+   int m_ExitCode{EXITCODE_QUIT};
++  bool m_ExitCodeSet = false;
+ };
  
---- a/xbmc/XBApplicationEx.h
-+++ b/xbmc/XBApplicationEx.h
-@@ -29,6 +29,7 @@ public:
-   // Variables for timing
-   bool m_bStop;
-   int  m_ExitCode;
-+  bool m_ExitCodeSet;
-   bool m_AppFocused;
-   bool m_renderGUI;
- 
+ XBMC_GLOBAL_REF(CApplication,g_application);
+diff --git a/xbmc/platform/linux/powermanagement/LogindUPowerSyscall.cpp b/xbmc/platform/linux/powermanagement/LogindUPowerSyscall.cpp
+index 34eed6e41b..c374dbdbd3 100644
 --- a/xbmc/platform/linux/powermanagement/LogindUPowerSyscall.cpp
 +++ b/xbmc/platform/linux/powermanagement/LogindUPowerSyscall.cpp
-@@ -78,8 +78,6 @@ CLogindUPowerSyscall::~CLogindUPowerSysc
+@@ -78,8 +78,6 @@ CLogindUPowerSyscall::~CLogindUPowerSyscall()
  
  bool CLogindUPowerSyscall::Powerdown()
  {
@@ -140,3 +132,6 @@ so, when shutdown/reboot is requested:
    return LogindSetPowerState("PowerOff");
  }
  
+-- 
+2.30.2
+

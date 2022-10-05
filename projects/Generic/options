@@ -6,10 +6,15 @@
   # generated code.
     case $TARGET_ARCH in
       x86_64)
-        # (AMD CPUs)    k8 k8-sse3 opteron opteron-sse3 athlon64 athlon64-sse3
-        #               athlon-fx amdfam10 barcelona
-        # (Intel CPUs)  atom core2 nocona
+        # Valid TARGET_CPU values as defined at:
+        # https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
+        # x86-64       A generic CPU with 64-bit extensions.
         #
+        # x86-64-v2    e.g. AMD CPU - Bulldozer - (bdver1)
+        #                   Intel CPU - Nehalem - (nehalem)
+        #
+        # x86-64-v3    e.g. AMD CPU - Bulldozer GEN4 - (bdver4)
+        #                   Intel CPU - Haswell - (haswell)
         TARGET_CPU="x86-64"
         ;;
     esac
@@ -45,9 +50,6 @@
 ################################################################################
 # setup project defaults
 ################################################################################
-
-  # build and install ALSA Audio support (yes / no)
-    ALSA_SUPPORT="yes"
 
   # additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware)
   # Space separated list is supported,

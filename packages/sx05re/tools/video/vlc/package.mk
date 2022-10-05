@@ -129,7 +129,7 @@ DISABLED_FEATURES="--disable-dependency-tracking \
             --disable-chromecast \
             --disable-lavf"
 
-	if [ "${DEVICE}" == "Amlogic" ]; then 
+	if [ "${DEVICE}" == "Amlogic-old" ]; then 
 		ENABLED_FEATURES+=" --enable-pulse"
 	else
 		DISABLED_FEATURES+=" --disable-pulse"

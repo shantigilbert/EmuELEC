@@ -1,0 +1,5 @@
+### UniSOC UWE5631 and UWE5621 kernel modules
+ACTION=="add", ENV{SUBSYSTEM}=="sdio", ENV{OF_NAME}=="wifi", ENV{OF_COMPATIBLE_0}=="sprd,unisoc-wifi", \
+  ATTRS{vendor}=="0x0000", ATTRS{device}=="0x0000", \
+  RUN{builtin}+="kmod load sprdwl_ng sprdbt_tty hci_uart", \
+  TAG+="systemd", ENV{SYSTEMD_WANTS}+="sprd_sdio-firmware-aml.service"

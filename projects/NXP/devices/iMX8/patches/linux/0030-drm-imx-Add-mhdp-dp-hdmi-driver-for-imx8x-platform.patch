@@ -96,7 +96,7 @@ index 000000000000..a6d03c94d196
 + */
 +#include <linux/clk.h>
 +#include <linux/kernel.h>
-+#include <drm/drm_dp_helper.h>
++#include <drm/display/drm_dp_helper.h>
 +#include <drm/bridge/cdns-mhdp.h>
 +#include "cdns-mhdp-phy.h"
 +

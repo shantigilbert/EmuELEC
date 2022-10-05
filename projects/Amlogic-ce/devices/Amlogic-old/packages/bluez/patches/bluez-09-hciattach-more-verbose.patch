@@ -1,0 +1,11 @@
+--- a/tools/hciattach_bcm43xx.c
++++ b/tools/hciattach_bcm43xx.c
+@@ -366,7 +366,7 @@
+ 		return -1;
+ 
+ 	if (bcm43xx_locate_patch(FIRMWARE_DIR, chip_name, fw_path)) {
+-		fprintf(stderr, "Patch not found, continue anyway\n");
++		fprintf(stderr, "Patch not found for chip %s, continue anyway\n", chip_name);
+ 	} else {
+ 		if (bcm43xx_load_firmware(fd, fw_path))
+ 			return -1;

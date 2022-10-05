@@ -5,6 +5,8 @@
     <setting label="30002" type="number" id="ss_cp" default="1705"/>
     <setting label="30003" type="slider" id="ss_ni" default="0" range="-20,1,19" option="int"/>
     <setting label="30004" type="select" id="ss_st" values="AirPlay|Default|Kodi|Spotify"/>
+    <setting label="30008" type="text" id="ss_ln" subsetting="true" visible="eq(-1,Spotify)" default="Snapcast"/>
+    <setting label="30009" type="number" id="ss_lp" subsetting="true" visible="eq(-2,Spotify)" default="0"/>
     <setting type="sep"/>
     <setting label="30005" type="bool" id="ss_eh" default="false"/>
     <setting label="30006" type="number" id="ss_hp" default="1780" visible="eq(-1,true)"/>

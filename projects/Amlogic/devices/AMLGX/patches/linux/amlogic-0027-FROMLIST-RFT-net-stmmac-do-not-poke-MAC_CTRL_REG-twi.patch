@@ -1,0 +1,92 @@
+From a4b987f6676cff06a193834f18f8c2cfe1a8e96d Mon Sep 17 00:00:00 2001
+From: Jerome Brunet <jbrunet@baylibre.com>
+Date: Thu, 30 Jun 2022 15:56:35 +0200
+Subject: [PATCH 27/75] FROMLIST(RFT): net: stmmac: do not poke MAC_CTRL_REG
+ twice on link up
+
+For some reason, poking MAC_CTRL_REG a second time, even with the same
+value, causes problem on the dwmac 3.70a.
+
+This problem happens on all the Amlogic SoCs, on link up, when the RMII
+10/100 internal interface is used. The problem does not happen on boards
+using the external RGMII 10/100/1000 interface. Initially we suspected the
+PHY to be the problem but after a lot of testing, the problem seems to be
+coming from the MAC controller.
+
+> meson8b-dwmac c9410000.ethernet: IRQ eth_wake_irq not found
+> meson8b-dwmac c9410000.ethernet: IRQ eth_lpi not found
+> meson8b-dwmac c9410000.ethernet: PTP uses main clock
+> meson8b-dwmac c9410000.ethernet: User ID: 0x11, Synopsys ID: 0x37
+> meson8b-dwmac c9410000.ethernet: DWMAC1000
+> meson8b-dwmac c9410000.ethernet: DMA HW capability register supported
+> meson8b-dwmac c9410000.ethernet: RX Checksum Offload Engine supported
+> meson8b-dwmac c9410000.ethernet: COE Type 2
+> meson8b-dwmac c9410000.ethernet: TX Checksum insertion supported
+> meson8b-dwmac c9410000.ethernet: Wake-Up On Lan supported
+> meson8b-dwmac c9410000.ethernet: Normal descriptors
+> meson8b-dwmac c9410000.ethernet: Ring mode enabled
+> meson8b-dwmac c9410000.ethernet: Enable RX Mitigation via HW Watchdog Timer
+
+The problem is not systematic. Its occurence is very random from 1/50 to
+1/2. It is fairly easy to detect by setting the kernel to boot over NFS and
+possibly setting it to reboot automatically when reaching the prompt.
+
+When problem happens, the link is reported up by the PHY but no packet are
+actually going out. DHCP requests eventually times out and the kernel reset
+the interface. It may take several attempts but it will eventually work.
+
+> meson8b-dwmac ff3f0000.ethernet eth0: Link is Up - 100Mbps/Full - flow control rx/tx
+> Sending DHCP requests ...... timed out!
+> meson8b-dwmac ff3f0000.ethernet eth0: Link is Down
+> IP-Config: Retrying forever (NFS root)...
+> meson8b-dwmac ff3f0000.ethernet eth0: PHY [0.1:08] driver [Meson G12A Internal PHY] (irq=POLL)
+> meson8b-dwmac ff3f0000.ethernet eth0: Register MEM_TYPE_PAGE_POOL RxQ-0
+> meson8b-dwmac ff3f0000.ethernet eth0: No Safety Features support found
+> meson8b-dwmac ff3f0000.ethernet eth0: PTP not supported by HW
+> meson8b-dwmac ff3f0000.ethernet eth0: configuring for phy/rmii link mode
+> meson8b-dwmac ff3f0000.ethernet eth0: Link is Up - 100Mbps/Full - flow control rx/tx
+> Sending DHCP requests ...... timed out!
+> meson8b-dwmac ff3f0000.ethernet eth0: Link is Down
+> IP-Config: Retrying forever (NFS root)...
+> [...] 5 retries ...
+> IP-Config: Retrying forever (NFS root)...
+> meson8b-dwmac ff3f0000.ethernet eth0: PHY [0.1:08] driver [Meson G12A Internal PHY] (irq=POLL)
+> meson8b-dwmac ff3f0000.ethernet eth0: Register MEM_TYPE_PAGE_POOL RxQ-0
+> meson8b-dwmac ff3f0000.ethernet eth0: No Safety Features support found
+> meson8b-dwmac ff3f0000.ethernet eth0: PTP not supported by HW
+> meson8b-dwmac ff3f0000.ethernet eth0: configuring for phy/rmii link mode
+> meson8b-dwmac ff3f0000.ethernet eth0: Link is Up - 100Mbps/Full - flow control rx/tx
+> Sending DHCP requests ., OK
+> IP-Config: Got DHCP answer from 10.1.1.1, my address is 10.1.3.229
+
+Of course the same problem happens when not using NFS and it fairly
+difficult for IoT products to detect this situation and recover.
+
+The call to stmmac_mac_set() should be no-op in our case, the bits it sets
+have already been set by an earlier call to stmmac_mac_set(). However
+removing this call solves the problem.
+
+Even weirder, keeping the call to stmmac_mac_set() but inserting a
+udelay(1) between writel() and stmmac_mac_set() solves the problem too.
+
+Suggested-by: Qi Duan <qi.duan@amlogic.com>
+Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+---
+ drivers/net/ethernet/stmicro/stmmac/stmmac_main.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
+index c5f33630e771..863f7d114807 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
++++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
+@@ -1063,7 +1063,6 @@ static void stmmac_mac_link_up(struct phylink_config *config,
+ 
+ 	writel(ctrl, priv->ioaddr + MAC_CTRL_REG);
+ 
+-	stmmac_mac_set(priv, priv->ioaddr, true);
+ 	if (phy && priv->dma_cap.eee) {
+ 		priv->eee_active = phy_init_eee(phy, 1) >= 0;
+ 		priv->eee_enabled = stmmac_eee_init(priv);
+-- 
+2.17.1
+

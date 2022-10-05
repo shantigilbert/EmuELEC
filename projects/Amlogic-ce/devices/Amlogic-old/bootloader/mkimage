@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2017-2018 Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
+
+# copy amlogic autoscript files to part1 for Generic img only
+if [ "${SUBDEVICE}" == "Generic" ]; then
+  for f in $RELEASE_DIR/3rdparty/bootloader/*autoscript; do
+    [ -e "$f" ] && mcopy "$f" ::
+  done
+fi
+
+# copy device trees to part1
+for dtb in $RELEASE_DIR/3rdparty/bootloader/device_trees $RELEASE_DIR/3rdparty/bootloader/*.dtb $RELEASE_DIR/3rdparty/bootloader/dtb.img ; do
+  [ -e "$dtb" ] && mcopy -s "$dtb" ::
+done
+
+if [ -n ${SUBDEVICE} ]; then
+  if [ -f "$RELEASE_DIR/3rdparty/bootloader/${SUBDEVICE}_dtb.img" ]; then
+    mcopy $RELEASE_DIR/3rdparty/bootloader/${SUBDEVICE}_dtb.img "::/dtb.img"
+  fi
+  if [ -f "$RELEASE_DIR/3rdparty/bootloader/${SUBDEVICE}_u-boot" ]; then
+    echo "Writing u-boot to $(basename $DISK)"
+    dd if="$RELEASE_DIR/3rdparty/bootloader/${SUBDEVICE}_u-boot" of="$DISK" conv=fsync,notrunc bs=1 count=112 >"$SAVE_ERROR" 2>&1 || show_error
+    dd if="$RELEASE_DIR/3rdparty/bootloader/${SUBDEVICE}_u-boot" of="$DISK" conv=fsync,notrunc bs=512 skip=1 seek=1 >"$SAVE_ERROR" 2>&1 || show_error
+  fi
+
+  if [ -f "$RELEASE_DIR/3rdparty/bootloader/${SUBDEVICE}_boot.ini" ]; then
+    cp -p "$RELEASE_DIR/3rdparty/bootloader/${SUBDEVICE}_boot.ini" "$LE_TMP/boot.ini"
+    sed -e "s/@BOOT_UUID@/$UUID_SYSTEM/" \
+        -e "s/@DISK_UUID@/$UUID_STORAGE/" \
+        -i "$LE_TMP/boot.ini"
+    mcopy "$LE_TMP/boot.ini" ::
+    if [ -f "$RELEASE_DIR/3rdparty/bootloader/config.ini" ]; then
+      mcopy $RELEASE_DIR/3rdparty/bootloader/config.ini ::
+    fi
+  fi
+
+  if [ "${SUBDEVICE}" == "Odroid_C2" ]; then
+    if [ -f "$RELEASE_DIR/3rdparty/bootloader/boot-logo.bmp.gz" ]; then
+      mcopy $RELEASE_DIR/3rdparty/bootloader/boot-logo.bmp.gz ::
+    fi
+  fi
+
+  if [ "${SUBDEVICE}" == "LePotato" ]; then
+    if [ -f "$RELEASE_DIR/3rdparty/bootloader/boot-logo-1080.bmp.gz" ]; then
+      mcopy $RELEASE_DIR/3rdparty/bootloader/boot-logo-1080.bmp.gz ::
+    fi
+    if [ -f "$RELEASE_DIR/3rdparty/bootloader/timeout-logo-1080.bmp.gz" ]; then
+      mcopy $RELEASE_DIR/3rdparty/bootloader/timeout-logo-1080.bmp.gz ::
+    fi
+  fi
+fi
+
+# Include older alternative kernel for Amlogic-old
+  mcopy $RELEASE_DIR/3rdparty/bootloader/old_ee_3.14_kernel.7z ::

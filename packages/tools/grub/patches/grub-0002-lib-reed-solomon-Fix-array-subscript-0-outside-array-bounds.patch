@@ -1,0 +1,51 @@
+From 3ce13d974b887338ae972c79b41ff6fc0eee6388 Mon Sep 17 00:00:00 2001
+From: Michael Chang <mchang@suse.com>
+Date: Mon, 28 Mar 2022 15:00:54 +0800
+Subject: lib/reed_solomon: Fix array subscript 0 is outside array bounds
+
+The grub_absolute_pointer() is a compound expression that can only work
+within a function. We are out of luck here when the pointer variables
+require global definition due to ATTRIBUTE_TEXT that have to use fully
+initialized global definition because of the way linkers work.
+
+  static gf_single_t * const gf_powx ATTRIBUTE_TEXT = (void *) 0x100000;
+
+For the reason given above, use GCC diagnostic pragmas to suppress the
+array-bounds warning.
+
+Signed-off-by: Michael Chang <mchang@suse.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ grub-core/lib/reed_solomon.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/grub-core/lib/reed_solomon.c b/grub-core/lib/reed_solomon.c
+index 82779a2..562bd2e 100644
+--- a/grub-core/lib/reed_solomon.c
++++ b/grub-core/lib/reed_solomon.c
+@@ -102,6 +102,11 @@ static gf_single_t errvals[256];
+ static gf_single_t eqstat[65536 + 256];
+ #endif
+ 
++#if __GNUC__ == 12
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Warray-bounds"
++#endif
++
+ static gf_single_t
+ gf_mul (gf_single_t a, gf_single_t b)
+ {
+@@ -319,6 +324,10 @@ decode_block (gf_single_t *ptr, grub_size_t s,
+     }
+ }
+ 
++#if __GNUC__ == 12
++#pragma GCC diagnostic pop
++#endif
++
+ #if !defined (STANDALONE)
+ static void
+ encode_block (gf_single_t *ptr, grub_size_t s,
+-- 
+cgit v1.1
+

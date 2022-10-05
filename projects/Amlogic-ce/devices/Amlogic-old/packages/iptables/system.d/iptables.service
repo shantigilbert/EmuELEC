@@ -1,0 +1,17 @@
+[Unit]
+Description=IPTABLES Packet Filtering
+ConditionPathExists=/usr/lib/libreelec/iptables_helper
+ConditionPathExists=|/storage/.cache/services/iptables.conf
+Before=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/storage/.cache/services/iptables.conf
+ExecStart=/usr/lib/libreelec/iptables_helper enable
+ExecReload=/usr/lib/libreelec/iptables_helper enable
+ExecStop=/usr/lib/libreelec/iptables_helper disable
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

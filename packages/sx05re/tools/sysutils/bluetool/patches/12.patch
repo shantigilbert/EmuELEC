@@ -1,0 +1,9 @@
+--- a/bluetool/__init__.py
++++ b/bluetool/__init__.py
+@@ -2,3 +2,6 @@
+ from .blueserver import BluetoothServer
+ 
+ __all__ = ['Bluetooth', 'BluetoothServer']
++from .tcp_bridge import TCPBridge, TCPBridgeError
++from .tcp_server import TCPServer
++from .sink import SocketSink, FileSink

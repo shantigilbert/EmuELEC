@@ -1,0 +1,11 @@
+--- a/bfd/Makefile.in	2022-08-05 09:53:59.000000000 +0000
++++ b/bfd/Makefile.in	2022-08-07 11:22:25.397501975 +0000
+@@ -264,7 +264,7 @@
+ am__v_texidevnull_0 = > /dev/null
+ am__v_texidevnull_1 = 
+ am__dirstamp = $(am__leading_dot)dirstamp
+-INFO_DEPS = doc/bfd.info
++INFO_DEPS = 
+ am__TEXINFO_TEX_DIR = $(srcdir)
+ DVIS = doc/bfd.dvi
+ PDFS = doc/bfd.pdf

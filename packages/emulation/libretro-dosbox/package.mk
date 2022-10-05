@@ -15,6 +15,10 @@ PKG_LIBNAME="dosbox_libretro.so"
 PKG_LIBPATH="${PKG_LIBNAME}"
 PKG_LIBVAR="DOSBOX_LIB"
 
+pre_make_target() {
+  export CXXFLAGS="${CXXFLAGS} -std=gnu++11"
+}
+
 make_target() {
   make -f Makefile.libretro
 }

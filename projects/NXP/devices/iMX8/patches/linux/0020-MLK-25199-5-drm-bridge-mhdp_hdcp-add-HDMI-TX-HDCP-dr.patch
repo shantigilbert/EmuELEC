@@ -31,13 +31,14 @@ diff --git a/drivers/gpu/drm/bridge/cadence/Kconfig b/drivers/gpu/drm/bridge/cad
 index c271ab24a99a..4c27836eb367 100644
 --- a/drivers/gpu/drm/bridge/cadence/Kconfig
 +++ b/drivers/gpu/drm/bridge/cadence/Kconfig
-@@ -43,6 +43,10 @@ config DRM_CDNS_AUDIO
+@@ -43,6 +43,11 @@ config DRM_CDNS_AUDIO
  	tristate "Cadence MHDP Audio driver"
  	depends on DRM_CDNS_MHDP
  
 +config DRM_CDNS_HDMI_HDCP
 +	tristate "Cadence MHDP HDMI HDCP driver"
 +	depends on DRM_CDNS_HDMI
++	select DRM_DISPLAY_HDCP_HELPER
 +
  config DRM_CDNS_HDMI_CEC
  	tristate "Cadence MHDP HDMI CEC driver"
@@ -71,7 +72,7 @@ index 84c175997740..dc393f6b75e7 100644
  #include <drm/drm_atomic_helper.h>
  #include <drm/drm_edid.h>
  #include <drm/drm_encoder_slave.h>
-+#include <drm/drm_hdcp.h>
++#include <drm/display/drm_hdcp.h>
  #include <drm/drm_of.h>
  #include <drm/drm_probe_helper.h>
  #include <drm/drm_print.h>
@@ -346,7 +347,7 @@ index 000000000000..e2a3bc7fb42b
 + *
 + */
 +#include <drm/bridge/cdns-mhdp.h>
-+#include <drm/drm_hdcp.h>
++#include <drm/display/drm_hdcp.h>
 +#include <drm/drm_print.h>
 +#include <linux/firmware.h>
 +

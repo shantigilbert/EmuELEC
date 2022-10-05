@@ -26,6 +26,12 @@ if [ -f "${DISTRO_DIR}/${DISTRO}/kernel_options" ]; then
       $PKG_BUILD/scripts/config --file $PKG_KERNEL_CFG_FILE --disable ${OPTION%%=*}
     fi
 
+    # must be a string if it contains double quotes
+    if [ -n "$(echo ${OPTION##*=} | grep '"')" ]; then
+      echo "[${OPTION##*=}] ${OPTION%%=*}"
+      $PKG_BUILD/scripts/config --file $PKG_KERNEL_CFG_FILE --set-str ${OPTION%%=*} $(echo ${OPTION##*=} | tr -d '"')
+    fi
+
   done < ${DISTRO_DIR}/${DISTRO}/kernel_options
 else
   echo "kernel options file doesn't exist: ${DISTRO_DIR}/${DISTRO}/kernel_options"

@@ -11,7 +11,7 @@ CONFIG_DIR="/storage/.config/emuelec/configs/mupen64plussa"
 CONFIG="${CONFIG_DIR}/mupen64plus.cfg"
 CONFIG_TMP="/tmp/jc/mupen64.tmp"
 
-source /usr/bin/joy_common.sh "mupen64plus"
+source joy_common.sh "mupen64plus"
 
 BTN_H0=$(get_ee_setting mupen_btn_h0)
 [[ -z "$BTN_H0" ]] && BTN_H0=0
@@ -115,6 +115,7 @@ clean_pad() {
 # $4 = Device Name
 
 set_pad() {
+  local JSI=$2
   local DEVICE_GUID=$3
   local JOY_NAME="$4"
 
@@ -174,7 +175,7 @@ set_pad() {
   echo "version = 2.000000" >> ${CONFIG}
   echo "mode = 0" >> ${CONFIG}
   local index=$(( $1 - 1 ))
-  echo "device = $index" >> ${CONFIG}
+  echo "device = ${JSI:2:1}" >> ${CONFIG}
   echo "name = \"$JOY_NAME\"" >> ${CONFIG}
   echo "plugged = True" >> ${CONFIG}
   echo "plugin = 2" >> ${CONFIG}

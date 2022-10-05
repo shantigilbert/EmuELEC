@@ -41,7 +41,7 @@ post_makeinstall_target() {
 	cp -rf $PKG_DIR/config/*.cfg $INSTALL/usr/config/emulationstation
 	
 	# Remove systems that are not compatible with S905
-	if [ ${DEVICE} = "Amlogic" ]; then 	
+	if [ ${DEVICE} = "Amlogic-old" ]; then 	
 	xmlstarlet ed -L -P -d "/systemList/system[name='3do']" $INSTALL/usr/config/emulationstation/es_systems.cfg
 	xmlstarlet ed -L -P -d "/systemList/system[name='segasaturn']" $INSTALL/usr/config/emulationstation/es_systems.cfg
 	fi

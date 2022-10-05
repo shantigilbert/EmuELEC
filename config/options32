@@ -1,0 +1,40 @@
+# This command requires BASH >= v4.0, since we're using Ubuntu 20 as a baseline, this should not be a problem
+# This reads those options into an array, one element per line, and keep empty line as is, also removing trailing \n
+readarray -t OPTIONS32 < <(
+  ARCH=arm
+  TARGET_ARCH=arm
+  # read DEVICE options
+  if [ -f "${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/options" ]; then
+    . "${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/options"
+  fi
+  # read architecture defaults
+  if [ -f "config/arch.${TARGET_ARCH}" ]; then
+    . "config/arch.${TARGET_ARCH}"
+  fi
+  echo $TARGET_ABI
+  echo $TARGET_GCC_ARCH
+  echo $TARGET_CFLAGS
+  echo $TARGET_LDFLAGS
+  echo $TARGET_ARCH_GCC_OPTS
+  echo $TARGET_CPU
+  echo $TARGET_FPU
+  echo $TARGET_SUBARCH
+)
+
+LIB32_TARGET_ABI="${OPTIONS32[0]}"
+LIB32_TARGET_GCC_ARCH="${OPTIONS32[1]}"
+LIB32_TARGET_CFLAGS="${OPTIONS32[2]}"
+LIB32_TARGET_LDFLAGS="${OPTIONS32[3]}"
+LIB32_TARGET_ARCH_GCC_OPTS="${OPTIONS32[4]}"
+LIB32_TARGET_CPU="${OPTIONS32[5]}"
+LIB32_TARGET_FPU="${OPTIONS32[6]}"
+LIB32_TARGET_SUBARCH="${OPTIONS32[7]}"
+LIB32_TARGET_NAME="${LIB32_TARGET_GCC_ARCH}-emuelec-linux-gnu${LIB32_TARGET_ABI}"
+LIB32_SYSROOT_PREFIX="${TOOLCHAIN}/${LIB32_TARGET_NAME}/sysroot"
+LIB32_TARGET_PREFIX="$TOOLCHAIN/bin/$LIB32_TARGET_NAME-"
+
+LIB32_TARGET_CFLAGS="$LIB32_TARGET_CFLAGS -Wall -pipe $PROJECT_CFLAGS"
+LIB32_TARGET_CXXFLAGS="$LIB32_TARGET_CFLAGS"
+LIB32_TARGET_LDFLAGS="$LIB32_TARGET_LDFLAGS $LD_OPTIM"
+
+unset OPTIONS32

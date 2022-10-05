@@ -1,3 +1,6 @@
+105
+- fix ttyd to include missing evlib_uv library
+
 104
 - libuv: update to 1.42.0
 

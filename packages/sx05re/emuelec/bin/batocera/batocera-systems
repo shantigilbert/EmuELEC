@@ -764,6 +764,7 @@ systems = {
     "sonic1": { "name": "Sonic 1", "biosFiles": [ { "md5": "", "file": "ports/sonic1/Data.rsdk" } ] },
     "sonic2": { "name": "Sonic 2", "biosFiles": [ { "md5": "", "file": "ports/sonic2/Data.rsdk" } ] },
     "soniccd": { "name": "Sonic CD", "biosFiles": [ { "md5": "", "file": "ports/soniccd/Data.rsdk" } ] },
+    "sonicmania": { "name": "Sonic Mania", "biosFiles": [ { "md5": "", "file": "ports/sonicmania/Data.rsdk" } ] },
 	
     "RigelEngine": { "name": "Duke Nukem 2", "biosFiles": [ { "md5": "", "file": "ports/rigelengine/NUKEM2.CMP" },
 														 { "md5": "", "file": "ports/rigelengine/NUKEM2.F1" },
@@ -771,6 +772,12 @@ systems = {
 														 { "md5": "", "file": "ports/rigelengine/NUKEM2.F3" },
 														 { "md5": "", "file": "ports/rigelengine/NUKEM2.F4" },
 														 { "md5": "", "file": "ports/rigelengine/NUKEM2.F5" } ] },
+    
+    # Phillips CDI
+    "cdi": { "name": "Phillips CDI", "biosFiles": [ { "md5": "", "file": "bios/same_cdi/bios/cdimono1.zip" },
+														 { "md5": "", "file": "bios/same_cdi/bios/cdimono2.zip"						  },
+														 { "md5": "", "file": "bios/same_cdi/bios/cdibios.zip"						  } ] },
+                                                         
     }
 
 class BiosStatus:

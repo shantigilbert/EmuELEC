@@ -1,0 +1,22 @@
+--- a/daemon/config/config.go	2022-06-03 10:30:24.000000000 -0700
++++ b/daemon/config/config.go	2022-06-07 14:29:36.755713207 -0700
+@@ -59,7 +59,7 @@
+ 	LinuxV2RuntimeName = "io.containerd.runc.v2"
+ 
+ 	// SeccompProfileDefault is the built-in default seccomp profile.
+-	SeccompProfileDefault = "builtin"
++	SeccompProfileDefault = "unconfined"
+ 	// SeccompProfileUnconfined is a special profile name for seccomp to use an
+ 	// "unconfined" seccomp profile.
+ 	SeccompProfileUnconfined = "unconfined"
+--- a/daemon/daemon_unix.go	2022-06-03 10:30:24.000000000 -0700
++++ b/daemon/daemon_unix.go	2022-06-07 14:34:55.315558083 -0700
+@@ -1711,8 +1711,6 @@
+ 
+ func (daemon *Daemon) setupSeccompProfile() error {
+ 	switch profile := daemon.configStore.SeccompProfile; profile {
+-	case "", config.SeccompProfileDefault:
+-		daemon.seccompProfilePath = config.SeccompProfileDefault
+ 	case config.SeccompProfileUnconfined:
+ 		daemon.seccompProfilePath = config.SeccompProfileUnconfined
+ 	default:

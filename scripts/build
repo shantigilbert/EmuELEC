@@ -117,6 +117,13 @@ build_msg "CLR_TOOLCHAIN" "TOOLCHAIN" "${PKG_TOOLCHAIN}${_auto_toolchain}"
 # check wrong toolchain configuration
 check_toolchain_config ${TARGET} ${PKG_TOOLCHAIN}
 
+# multilib support
+if flag_enabled "lib32" "no"; then
+  use_32_options
+elif flag_enabled "lib32:${TARGET}" "no"; then
+  use_32_options
+fi
+
 # setup toolchain
 setup_toolchain ${TARGET} ${PKG_TOOLCHAIN}
 

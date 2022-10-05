@@ -1,0 +1,33 @@
+Name
+
+modules-load.d — Configure kernel modules to load at boot
+
+Synopsis
+
+/etc/modules-load.d/*.conf
+
+/run/modules-load.d/*.conf
+
+/usr/lib/modules-load.d/*.conf
+
+Description
+
+systemd-modules-load.service(8) reads files from the above directories which contain kernel modules to load during boot in a static list. Each configuration file is named in the style of /etc/modules-load.d/program.conf. Note that it is usually a better idea to rely on the automatic module loading by PCI IDs, USB IDs, DMI IDs or similar triggers encoded in the kernel modules themselves instead of static configuration like this. In fact, most modern kernel modules are prepared for automatic loading already.
+Configuration Format
+
+The configuration files should simply contain a list of kernel module names to load, separated by newlines. Empty lines and lines whose first non-whitespace character is # or ; are ignored.
+
+Each configuration file shall be named in the style of program.conf. Files in /etc/ override files with the same name in /usr/lib/ and /run/. Files in /run/ override files with the same name in /usr/lib/. Packages should install their configuration files in /usr/lib/, files in /etc/ are reserved for the local administrator, who may use this logic to override the configuration files installed from vendor packages.
+
+If the administrator wants to disable a configuration file supplied by the vendor the recommended way is to place a symlink to /dev/null in /etc/modules-load.d/ bearing the same filename.
+Example
+
+Example 1. /etc/modules-load.d/virtio-net.conf example:
+
+# Load virtio-net.ko at boot
+virtio-net
+
+
+See Also
+
+systemd(1), systemd-modules-load.service(8), systemd-delta(1), modprobe(8) 

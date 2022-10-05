@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="mesen"
-PKG_VERSION="bb9ea02eba28682986044a6f49329ec533aa26ba"
-PKG_SHA256="ff1b5b567d5e11c1ea63c2d58b1e7c8d7b673bb425908f115f516b1faa446e5f"
+PKG_VERSION="9b412c1533a6d7eec7b2904775cbd26c21f02119"
+PKG_SHA256="9a321c90c82c15158511b3df7a1b6ee8269b42083afa3de33f9947cceb925e7c"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"

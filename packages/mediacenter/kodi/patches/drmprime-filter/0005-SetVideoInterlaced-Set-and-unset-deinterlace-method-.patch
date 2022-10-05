@@ -1,0 +1,41 @@
+From 622f31900b9c11dca44e40b36d12bff5997da953 Mon Sep 17 00:00:00 2001
+From: Dom Cobley <popcornmix@gmail.com>
+Date: Tue, 30 Nov 2021 16:05:06 +0000
+Subject: [PATCH 5/6] SetVideoInterlaced: Set and unset deinterlace method name
+ reported
+
+---
+ .../DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp          | 10 ++--------
+ 1 file changed, 2 insertions(+), 8 deletions(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
+index 26efaabe02..2ceb7ce02f 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
+@@ -769,14 +769,7 @@ bool CDVDVideoCodecDRMPRIME::FilterOpen(const std::string& filters, bool test)
+     return true;
+   }
+ 
+-  if (filters.find("deinterlace") != std::string::npos)
+-  {
+-    m_processInfo.SetVideoDeintMethod(filters);
+-  }
+-  else
+-  {
+-    m_processInfo.SetVideoDeintMethod("none");
+-  }
++  m_processInfo.SetVideoDeintMethod(filters);
+ 
+   if (CServiceBroker::GetLogging().CanLogComponent(LOGVIDEO))
+   {
+@@ -794,6 +787,7 @@ bool CDVDVideoCodecDRMPRIME::FilterOpen(const std::string& filters, bool test)
+ 
+ void CDVDVideoCodecDRMPRIME::FilterClose()
+ {
++  m_processInfo.SetVideoDeintMethod("none");
+   if (m_pFilterGraph)
+   {
+     CLog::Log(LOGDEBUG, LOGVIDEO, "CDVDVideoCodecDRMPRIME::FilterClose - Freeing filter graph");
+-- 
+2.34.1
+

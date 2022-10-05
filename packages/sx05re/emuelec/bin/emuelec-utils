@@ -38,7 +38,7 @@ function clearconfig() {
         unmount_all
 		systemctl stop emustation
 		ee_backup backup no
-		find /storage -mindepth 1 \( ! -regex '^/storage/.config/emulationstation/themes.*' -a ! -regex '^/storage/.update.*' -a ! -regex '^/storage/download.*' -a ! -regex '^/storage/roms.*' -a ! -regex '^/storage/.cache/bluetooth.*' \) -delete
+		find /storage -mindepth 1 \( ! -regex '^/storage/.config/emuelec/themes.*' -a ! -regex '^/storage/.config/emulationstation/themes.*' -a ! -regex '^/storage/.update.*' -a ! -regex '^/storage/download.*' -a ! -regex '^/storage/roms.*' -a ! -regex '^/storage/.cache/bluetooth.*' \) -delete
 		mkdir /storage/.config/
 		sync
         small-cores enable
@@ -51,7 +51,7 @@ function clearconfig() {
 	"ALL")
         unmount_all
 		systemctl stop emustation
-		find /storage -mindepth 1 \( ! -regex '^/storage/.update.*' -a ! -regex '^/storage/roms.*' -a ! -regex '^/storage/.cache/bluetooth.*' \) -delete
+		find /storage -mindepth 1 \( ! -regex '^/storage/.config/emuelec/themes.*' -a ! -regex '^/storage/.update.*' -a ! -regex '^/storage/roms.*' -a ! -regex '^/storage/.cache/bluetooth.*' \) -delete
 		mkdir /storage/.config/
 		sync
         small-cores enable
@@ -190,7 +190,7 @@ function resolutions() {
 
 	RESOLUTIONS=()
 
-	# N2 supported resolutions source : https://wiki.odroid.com/odroid-n2/application_note/software/set_display_mode
+  # N2 supported resolutions source : https://wiki.odroid.com/odroid-n2/application_note/software/set_display_mode
 	N2_SUPPORTED_RESOLUTIONS="480x320p60hz 640x480p60hz 720x480p60hz 720x576p50hz 800x480p60hz 1024x600p60hz 1024x768p60hz 1280x1024p60hz 1280x720p50hz 1280x720p60hz 1280x800p60hz 1360x768p60hz 1440x900p60hz 1600x1200p60hz 1600x900p60hz 1680x1050p60hz 1920x1080p24hz 1920x1080p30hz 1920x1080p50hz 1920x1080p60hz 1920x1200p60hz 2560x1080p60hz 2560x1440p60hz 2560x1600p60hz 3440x1440p60hz 3840x2160p24hz 3840x2160p25hz 3840x2160p30hz 3840x2160p50hz 3840x2160p60hz"
 
 	# Screen supported resolutions
@@ -242,6 +242,44 @@ function unmount_all () {
     if /usr/bin/busybox mountpoint -q /storage/roms ; then
         umount /storage/roms > /dev/null 2>&1
     fi
+}
+
+function createMultidisc() {
+  local ROMNAME="$1"
+
+  local BASEROMNAME="${ROMNAME##*/}"
+  local BASEFOLDER="$(dirname "${ROMNAME}")"
+  local ROMEXT="${BASEROMNAME##*.}"
+  local ROMNAME_NOEXT="${BASEROMNAME%.*}"
+
+  [[ "$ROMEXT" == "m3u" ]] && echo -e "\n" && return
+
+  if [[ "${ROMNAME_NOEXT,,}" =~ ^.*disc[[:space:]]*1.*$ ]]; then
+      local M3U_FILE=$(echo "${ROMNAME_NOEXT}" | sed -nE "s/(.*)(disc *)1(.*)/\1 DISCS \3/pi")
+      M3U_FILE=$(echo "${BASEFOLDER}/${M3U_FILE}.m3u")
+      [[ -f "${M3U_FILE}" ]] && echo -e "\n" && return
+
+      touch "${M3U_FILE}"
+      local HAS_SEQ=0
+      local REGEX=$( echo "${ROMNAME_NOEXT}" | sed -nE "s/(.*)(disc*)\s*[0-9](.*)/\1\2\3/pi" \
+        | sed -e 's/\[[^][]*\]//g' | sed -e 's/([^()]*)//g' | sed -e 's/\s+/ /' \
+        | awk '{$1=$1};1' )
+      REGEX=$( echo ".*${REGEX}.*" )
+      local FILES=$( ls "${BASEFOLDER}/"* | grep ".${ROMEXT}" | grep -E "${REGEX}" | sort )
+      IFS=$'\n'
+      local ITER=0
+      for item in $FILES
+      do
+        echo "${item}" >> "$M3U_FILE"
+        ((ITER++))
+      done
+      if [[ "$ITER" -gt "1" ]]; then
+        echo -e "${M3U_FILE}"
+      else
+        rm "${M3U_FILE}"
+      fi
+  fi
+  echo -e "\n"
 }
 
 cmd=${1}

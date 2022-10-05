@@ -1,0 +1,17 @@
+#!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
+# Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
+
+# remove old machine-id file
+[[ -f "/storage/.cache/machine-id" ]] && rm /storage/.cache/machine-id
+
+# test systemd-machine-id exists and is 32 hex chars or generate a new uuid
+MACHINEID="$(cat /storage/.cache/systemd-machine-id 2>/dev/null)"
+[ "${#MACHINEID}" != "32" ] && MACHINEID=
+[[ "${MACHINEID//[a-f0-9]/}" != "" ]] && MACHINEID=
+[ -z "${MACHINEID}" ] && MACHINEID=$(/usr/bin/dbus-uuidgen)
+
+# persist uuid
+mkdir -p /storage/.cache
+  echo "$MACHINEID" > /storage/.cache/systemd-machine-id

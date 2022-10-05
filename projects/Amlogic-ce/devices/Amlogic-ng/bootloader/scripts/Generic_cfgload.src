@@ -24,7 +24,7 @@ if test "${modeline}" != ""; then setenv cmode "modeline=${modeline}"; fi
 if test "${wol}" != ""; then setenv wol "enable_wol=${wol}"; fi
 if test "${keymap}" != ""; then setenv consoleopt "${consoleopt} keymap=${keymap}"; fi
 if test "${loadaddr_kernel}" != ""; then setenv loadaddr "${loadaddr_kernel}"; fi
-setenv displayopt "vout=${vout},en logo=osd0,loaded,${fb_addr} frac_rate_policy=${frac_rate_policy} native_4k_gui=${native_4k_gui} hdr_policy=1"
+setenv displayopt "vout=${vout},en logo=osd0,loaded,${fb_addr} frac_rate_policy=${frac_rate_policy} native_4k_gui=${native_4k_gui} hdmitx=${hdmitx} hdr_policy=1"
 setenv initargs "${rootopt} ${consoleopt} ${max_freq_a53} ${max_freq_a73} ${wol} ${cec} ${gpiopower} ${usbopts} ${cmode}"
 setenv bootargs "${bootargs} ${initargs} ${displayopt} ${coreelec}"
 

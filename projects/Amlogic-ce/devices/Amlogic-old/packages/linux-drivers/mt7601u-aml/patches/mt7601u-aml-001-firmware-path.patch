@@ -1,0 +1,13 @@
+diff --git a/include/os/rt_linux.h b/include/os/rt_linux.h
+index 0303698..36dd603 100755
+--- a/include/os/rt_linux.h
++++ b/include/os/rt_linux.h
+@@ -159,7 +159,7 @@ typedef struct usb_ctrlrequest devctrlrequest;
+ #ifdef ALLWINNER
+ #define STA_PROFILE_PATH                        "/system/vendor/modules/RT2870STA_7601.dat"
+ #else
+-#define STA_PROFILE_PATH			"/system/etc/wifi/RT2870STA_7601.dat"
++#define STA_PROFILE_PATH			"/lib/firmware/RT2870STA_7601.dat"
+ #endif
+ #define STA_DRIVER_VERSION			"JEDI.L0.MP1.mt7601u.v1.2"
+ #define DRIVER_ROLE			"STA"

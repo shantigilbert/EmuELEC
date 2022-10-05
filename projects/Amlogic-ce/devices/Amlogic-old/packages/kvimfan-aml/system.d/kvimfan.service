@@ -1,0 +1,12 @@
+[Unit]
+Description=Khadas VIM fan control module loader
+ConditionPathExists=/proc/device-tree/fan/compatible
+After=kernel-overlays.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c '[ `cat /proc/device-tree/fan/compatible` = "fanctl" ] && /sbin/modprobe khadas_fan'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=basic.target

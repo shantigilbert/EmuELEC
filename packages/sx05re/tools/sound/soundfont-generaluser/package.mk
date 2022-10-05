@@ -8,7 +8,7 @@ PKG_LICENSE="OSS"
 PKG_SITE="http://www.schristiancollins.com/generaluser.php"
 PKG_URL="https://www.dropbox.com/s/4x27l49kxcwamp5/GeneralUser_GS_$PKG_VERSION.zip"
 PKG_SOURCE_DIR="GeneralUser*"
-PKG_DEPENDS_TARGET=""
+PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="GeneralUser GS is a GM and GS compatible SoundFont bank for composing, playing MIDI files, and retro gaming."
 PKG_TOOLCHAIN="manual"
 

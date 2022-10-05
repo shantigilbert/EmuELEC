@@ -1,0 +1,557 @@
+From acffb81485e35e1f28152949a1c6e1d4dbf5172e Mon Sep 17 00:00:00 2001
+From: Michael Chang <mchang@suse.com>
+Date: Mon, 28 Mar 2022 15:00:53 +0800
+Subject: build: Fix -Werror=array-bounds array subscript 0 is outside array
+ bounds
+
+The GRUB is failing to build with GCC-12 in many places like this:
+
+  In function 'init_cbfsdisk',
+      inlined from 'grub_mod_init' at ../../grub-core/fs/cbfs.c:391:3:
+  ../../grub-core/fs/cbfs.c:345:7: error: array subscript 0 is outside array bounds of 'grub_uint32_t[0]' {aka 'unsigned int[]'} [-Werror=array-bounds]
+    345 |   ptr = *(grub_uint32_t *) 0xfffffffc;
+        |   ~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is caused by GCC regression in 11/12 [1]. In a nut shell, the
+warning is about detected invalid accesses at non-zero offsets to NULL
+pointers. Since hardwired constant address is treated as NULL plus an
+offset in the same underlying code, the warning is therefore triggered.
+
+Instead of inserting #pragma all over the places where literal pointers
+are accessed to avoid diagnosing array-bounds, we can try to borrow the
+idea from Linux kernel that the absolute_pointer() macro [2][3] is used
+to disconnect a pointer using literal address from it's original object,
+hence GCC won't be able to make assumptions on the boundary while doing
+pointer arithmetic. With that we can greatly reduce the code we have to
+cover up by making initial literal pointer assignment to use the new
+wrapper but not having to track everywhere literal pointers are
+accessed. This also makes code looks cleaner.
+
+Please note the grub_absolute_pointer() macro requires to be invoked in
+a function as long as it is compound expression. Some global variables
+with literal pointers has been changed to local ones in order to use
+grub_absolute_pointer() to initialize it. The shuffling is basically done
+in a selective and careful way that the variable's scope doesn't matter
+being local or global, for example, the global variable must not get
+modified at run time throughout. For the record, here's the list of
+global variables got shuffled in this patch:
+
+  grub-core/commands/i386/pc/drivemap.c:int13slot
+  grub-core/term/i386/pc/console.c:bios_data_area
+  grub-core/term/ns8250.c:serial_hw_io_addr
+
+[1] https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99578
+[2] https://elixir.bootlin.com/linux/v5.16.14/source/include/linux/compiler.h#L180
+[3] https://elixir.bootlin.com/linux/v5.16.14/source/include/linux/compiler-gcc.h#L31
+
+Signed-off-by: Michael Chang <mchang@suse.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ grub-core/bus/cs5536.c                |  5 +++--
+ grub-core/commands/acpi.c             |  4 ++--
+ grub-core/commands/efi/loadbios.c     |  9 +++++----
+ grub-core/commands/i386/pc/drivemap.c |  8 +++++---
+ grub-core/commands/i386/pc/sendkey.c  | 12 ++++++------
+ grub-core/disk/i386/pc/biosdisk.c     |  4 ++--
+ grub-core/fs/cbfs.c                   |  2 +-
+ grub-core/kern/i386/pc/acpi.c         |  4 ++--
+ grub-core/kern/i386/pc/mmap.c         |  2 +-
+ grub-core/loader/i386/multiboot_mbi.c |  2 +-
+ grub-core/loader/multiboot_mbi2.c     |  4 ++--
+ grub-core/mmap/i386/pc/mmap.c         | 26 +++++++++++++-------------
+ grub-core/net/drivers/i386/pc/pxe.c   | 12 ++++++------
+ grub-core/term/i386/pc/console.c      |  5 ++---
+ grub-core/term/i386/pc/vga_text.c     |  6 +++---
+ grub-core/term/ns8250.c               |  7 ++++++-
+ grub-core/video/i386/pc/vbe.c         |  6 +++---
+ include/grub/types.h                  | 24 ++++++++++++++++++++++++
+ 18 files changed, 87 insertions(+), 55 deletions(-)
+
+diff --git a/grub-core/bus/cs5536.c b/grub-core/bus/cs5536.c
+index 8c90ed5..cd0a45e 100644
+--- a/grub-core/bus/cs5536.c
++++ b/grub-core/bus/cs5536.c
+@@ -331,8 +331,9 @@ grub_cs5536_init_geode (grub_pci_device_t dev)
+ 
+   {
+     volatile grub_uint32_t *oc;
+-    oc = grub_pci_device_map_range (dev, 0x05022000,
+-				    GRUB_CS5536_USB_OPTION_REGS_SIZE);
++
++    oc = grub_absolute_pointer (grub_pci_device_map_range (dev, 0x05022000,
++				GRUB_CS5536_USB_OPTION_REGS_SIZE));
+ 
+     oc[GRUB_CS5536_USB_OPTION_REG_UOCMUX] =
+       (oc[GRUB_CS5536_USB_OPTION_REG_UOCMUX]
+diff --git a/grub-core/commands/acpi.c b/grub-core/commands/acpi.c
+index 1215f2a..fda62f4 100644
+--- a/grub-core/commands/acpi.c
++++ b/grub-core/commands/acpi.c
+@@ -168,7 +168,7 @@ grub_acpi_create_ebda (void)
+   struct grub_acpi_rsdp_v10 *v1;
+   struct grub_acpi_rsdp_v20 *v2;
+ 
+-  ebda = (grub_uint8_t *) (grub_addr_t) ((*((grub_uint16_t *)0x40e)) << 4);
++  ebda = (grub_uint8_t *) (grub_addr_t) ((*((grub_uint16_t *) grub_absolute_pointer (0x40e))) << 4);
+   grub_dprintf ("acpi", "EBDA @%p\n", ebda);
+   if (ebda)
+     ebda_kb_len = *(grub_uint16_t *) ebda;
+@@ -298,7 +298,7 @@ grub_acpi_create_ebda (void)
+       *target = 0;
+ 
+   grub_dprintf ("acpi", "Switching EBDA\n");
+-  (*((grub_uint16_t *) 0x40e)) = ((grub_addr_t) targetebda) >> 4;
++  (*((grub_uint16_t *) grub_absolute_pointer (0x40e))) = ((grub_addr_t) targetebda) >> 4;
+   grub_dprintf ("acpi", "EBDA switched\n");
+ 
+   return GRUB_ERR_NONE;
+diff --git a/grub-core/commands/efi/loadbios.c b/grub-core/commands/efi/loadbios.c
+index 5c7725f..574e410 100644
+--- a/grub-core/commands/efi/loadbios.c
++++ b/grub-core/commands/efi/loadbios.c
+@@ -46,7 +46,7 @@ enable_rom_area (void)
+   grub_uint32_t *rom_ptr;
+   grub_pci_device_t dev = { .bus = 0, .device = 0, .function = 0};
+ 
+-  rom_ptr = (grub_uint32_t *) VBIOS_ADDR;
++  rom_ptr = grub_absolute_pointer (VBIOS_ADDR);
+   if (*rom_ptr != BLANK_MEM)
+     {
+       grub_puts_ (N_("ROM image is present."));
+@@ -96,8 +96,8 @@ fake_bios_data (int use_rom)
+   void *acpi, *smbios;
+   grub_uint16_t *ebda_seg_ptr, *low_mem_ptr;
+ 
+-  ebda_seg_ptr = (grub_uint16_t *) EBDA_SEG_ADDR;
+-  low_mem_ptr = (grub_uint16_t *) LOW_MEM_ADDR;
++  ebda_seg_ptr = grub_absolute_pointer (EBDA_SEG_ADDR);
++  low_mem_ptr = grub_absolute_pointer (LOW_MEM_ADDR);
+   if ((*ebda_seg_ptr) || (*low_mem_ptr))
+     return;
+ 
+@@ -132,7 +132,8 @@ fake_bios_data (int use_rom)
+   *ebda_seg_ptr = FAKE_EBDA_SEG;
+   *low_mem_ptr = (FAKE_EBDA_SEG >> 6);
+ 
+-  *((grub_uint16_t *) (FAKE_EBDA_SEG << 4)) = 640 - *low_mem_ptr;
++  /* *((grub_uint16_t *) (FAKE_EBDA_SEG << 4)) = 640 - *low_mem_ptr; */
++  *((grub_uint16_t *) (grub_absolute_pointer (FAKE_EBDA_SEG << 4))) = 640 - *low_mem_ptr;
+ 
+   if (acpi)
+     grub_memcpy ((char *) ((FAKE_EBDA_SEG << 4) + 16), acpi, 1024 - 16);
+diff --git a/grub-core/commands/i386/pc/drivemap.c b/grub-core/commands/i386/pc/drivemap.c
+index 3fb22dc..a7ee4c9 100644
+--- a/grub-core/commands/i386/pc/drivemap.c
++++ b/grub-core/commands/i386/pc/drivemap.c
+@@ -31,9 +31,6 @@
+ 
+ GRUB_MOD_LICENSE ("GPLv3+");
+ 
+-/* Real mode IVT slot (seg:off far pointer) for interrupt 0x13.  */
+-static grub_uint32_t *const int13slot = (grub_uint32_t *) (4 * 0x13);
+-
+ /* Remember to update enum opt_idxs accordingly.  */
+ static const struct grub_arg_option options[] = {
+   /* TRANSLATORS: In this file "mapping" refers to a change GRUB makes so if
+@@ -280,6 +277,8 @@ install_int13_handler (int noret __attribute__ ((unused)))
+   grub_uint8_t *handler_base = 0;
+   /* Address of the map within the deployed bundle.  */
+   int13map_node_t *handler_map;
++  /* Real mode IVT slot (seg:off far pointer) for interrupt 0x13. */
++  grub_uint32_t *int13slot = (grub_uint32_t *) grub_absolute_pointer (4 * 0x13);
+ 
+   int i;
+   int entries = 0;
+@@ -354,6 +353,9 @@ install_int13_handler (int noret __attribute__ ((unused)))
+ static grub_err_t
+ uninstall_int13_handler (void)
+ {
++  /* Real mode IVT slot (seg:off far pointer) for interrupt 0x13. */
++  grub_uint32_t *int13slot = (grub_uint32_t *) grub_absolute_pointer (4 * 0x13);
++
+   if (! grub_drivemap_oldhandler)
+     return GRUB_ERR_NONE;
+ 
+diff --git a/grub-core/commands/i386/pc/sendkey.c b/grub-core/commands/i386/pc/sendkey.c
+index 184befa..282bb5d 100644
+--- a/grub-core/commands/i386/pc/sendkey.c
++++ b/grub-core/commands/i386/pc/sendkey.c
+@@ -216,12 +216,12 @@ static grub_err_t
+ grub_sendkey_postboot (void)
+ {
+   /* For convention: pointer to flags.  */
+-  grub_uint32_t *flags = (grub_uint32_t *) 0x417;
++  grub_uint32_t *flags = grub_absolute_pointer (0x417);
+ 
+   *flags = oldflags;
+ 
+-  *((char *) 0x41a) = 0x1e;
+-  *((char *) 0x41c) = 0x1e;
++  *((char *) grub_absolute_pointer (0x41a)) = 0x1e;
++  *((char *) grub_absolute_pointer (0x41c)) = 0x1e;
+ 
+   return GRUB_ERR_NONE;
+ }
+@@ -231,13 +231,13 @@ static grub_err_t
+ grub_sendkey_preboot (int noret __attribute__ ((unused)))
+ {
+   /* For convention: pointer to flags.  */
+-  grub_uint32_t *flags = (grub_uint32_t *) 0x417;
++  grub_uint32_t *flags = grub_absolute_pointer (0x417);
+ 
+   oldflags = *flags;
+   
+   /* Set the sendkey.  */
+-  *((char *) 0x41a) = 0x1e;
+-  *((char *) 0x41c) = keylen + 0x1e;
++  *((char *) grub_absolute_pointer (0x41a)) = 0x1e;
++  *((char *) grub_absolute_pointer (0x41c)) = keylen + 0x1e;
+   grub_memcpy ((char *) 0x41e, sendkey, 0x20);
+ 
+   /* Transform "any ctrl" to "right ctrl" flag.  */
+diff --git a/grub-core/disk/i386/pc/biosdisk.c b/grub-core/disk/i386/pc/biosdisk.c
+index 81fd4e8..49e4e8a 100644
+--- a/grub-core/disk/i386/pc/biosdisk.c
++++ b/grub-core/disk/i386/pc/biosdisk.c
+@@ -367,7 +367,7 @@ grub_biosdisk_open (const char *name, grub_disk_t disk)
+       if (version)
+ 	{
+ 	  struct grub_biosdisk_drp *drp
+-	    = (struct grub_biosdisk_drp *) GRUB_MEMORY_MACHINE_SCRATCH_ADDR;
++	    = (struct grub_biosdisk_drp *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR);
+ 
+ 	  /* Clear out the DRP.  */
+ 	  grub_memset (drp, 0, sizeof (*drp));
+@@ -654,7 +654,7 @@ grub_disk_biosdisk_fini (void)
+ GRUB_MOD_INIT(biosdisk)
+ {
+   struct grub_biosdisk_cdrp *cdrp
+-    = (struct grub_biosdisk_cdrp *) GRUB_MEMORY_MACHINE_SCRATCH_ADDR;
++    = (struct grub_biosdisk_cdrp *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR);
+   grub_uint8_t boot_drive;
+ 
+   if (grub_disk_firmware_is_tainted)
+diff --git a/grub-core/fs/cbfs.c b/grub-core/fs/cbfs.c
+index 581215e..8ab7106 100644
+--- a/grub-core/fs/cbfs.c
++++ b/grub-core/fs/cbfs.c
+@@ -342,7 +342,7 @@ init_cbfsdisk (void)
+   grub_uint32_t ptr;
+   struct cbfs_header *head;
+ 
+-  ptr = *(grub_uint32_t *) 0xfffffffc;
++  ptr = *((grub_uint32_t *) grub_absolute_pointer (0xfffffffc));
+   head = (struct cbfs_header *) (grub_addr_t) ptr;
+   grub_dprintf ("cbfs", "head=%p\n", head);
+ 
+diff --git a/grub-core/kern/i386/pc/acpi.c b/grub-core/kern/i386/pc/acpi.c
+index 297f5d0..0a69eba 100644
+--- a/grub-core/kern/i386/pc/acpi.c
++++ b/grub-core/kern/i386/pc/acpi.c
+@@ -27,7 +27,7 @@ grub_machine_acpi_get_rsdpv1 (void)
+   grub_uint8_t *ebda, *ptr;
+ 
+   grub_dprintf ("acpi", "Looking for RSDP. Scanning EBDA\n");
+-  ebda = (grub_uint8_t *) ((* ((grub_uint16_t *) 0x40e)) << 4);
++  ebda = (grub_uint8_t *) ((* ((grub_uint16_t *) grub_absolute_pointer (0x40e))) << 4);
+   ebda_len = * (grub_uint16_t *) ebda;
+   if (! ebda_len) /* FIXME do we really need this check? */
+     goto scan_bios;
+@@ -55,7 +55,7 @@ grub_machine_acpi_get_rsdpv2 (void)
+   grub_uint8_t *ebda, *ptr;
+ 
+   grub_dprintf ("acpi", "Looking for RSDP. Scanning EBDA\n");
+-  ebda = (grub_uint8_t *) ((* ((grub_uint16_t *) 0x40e)) << 4);
++  ebda = (grub_uint8_t *) ((* ((grub_uint16_t *) grub_absolute_pointer (0x40e))) << 4);
+   ebda_len = * (grub_uint16_t *) ebda;
+   if (! ebda_len) /* FIXME do we really need this check? */
+     goto scan_bios;
+diff --git a/grub-core/kern/i386/pc/mmap.c b/grub-core/kern/i386/pc/mmap.c
+index ef2faa2..53fcf45 100644
+--- a/grub-core/kern/i386/pc/mmap.c
++++ b/grub-core/kern/i386/pc/mmap.c
+@@ -143,7 +143,7 @@ grub_machine_mmap_iterate (grub_memory_hook_t hook, void *hook_data)
+ {
+   grub_uint32_t cont = 0;
+   struct grub_machine_mmap_entry *entry
+-    = (struct grub_machine_mmap_entry *) GRUB_MEMORY_MACHINE_SCRATCH_ADDR;
++    = (struct grub_machine_mmap_entry *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR);
+   int e820_works = 0;
+ 
+   while (1)
+diff --git a/grub-core/loader/i386/multiboot_mbi.c b/grub-core/loader/i386/multiboot_mbi.c
+index ff1a846..11a6e22 100644
+--- a/grub-core/loader/i386/multiboot_mbi.c
++++ b/grub-core/loader/i386/multiboot_mbi.c
+@@ -293,7 +293,7 @@ fill_vbe_info (struct multiboot_info *mbi, grub_uint8_t *ptrorig,
+   struct grub_vbe_mode_info_block *mode_info;
+ #if GRUB_MACHINE_HAS_VBE
+   grub_vbe_status_t status;
+-  void *scratch = (void *) GRUB_MEMORY_MACHINE_SCRATCH_ADDR;
++  void *scratch = grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR);
+     
+   status = grub_vbe_bios_get_controller_info (scratch);
+   if (status != GRUB_VBE_STATUS_OK)
+diff --git a/grub-core/loader/multiboot_mbi2.c b/grub-core/loader/multiboot_mbi2.c
+index 6d680d6..00a4841 100644
+--- a/grub-core/loader/multiboot_mbi2.c
++++ b/grub-core/loader/multiboot_mbi2.c
+@@ -504,7 +504,7 @@ static void
+ fill_vbe_tag (struct multiboot_tag_vbe *tag)
+ {
+   grub_vbe_status_t status;
+-  void *scratch = (void *) GRUB_MEMORY_MACHINE_SCRATCH_ADDR;
++  void *scratch = grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR);
+ 
+   tag->type = MULTIBOOT_TAG_TYPE_VBE;
+   tag->size = 0;
+@@ -577,7 +577,7 @@ retrieve_video_parameters (grub_properly_aligned_t **ptrorig)
+ #if defined (GRUB_MACHINE_PCBIOS)
+       {
+ 	grub_vbe_status_t status;
+-	void *scratch = (void *) GRUB_MEMORY_MACHINE_SCRATCH_ADDR;
++	void *scratch = grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR);
+ 	status = grub_vbe_bios_get_mode (scratch);
+ 	vbe_mode = *(grub_uint32_t *) scratch;
+ 	if (status != GRUB_VBE_STATUS_OK)
+diff --git a/grub-core/mmap/i386/pc/mmap.c b/grub-core/mmap/i386/pc/mmap.c
+index 6ab4f67..b9c5b0a 100644
+--- a/grub-core/mmap/i386/pc/mmap.c
++++ b/grub-core/mmap/i386/pc/mmap.c
+@@ -80,13 +80,13 @@ preboot (int noreturn __attribute__ ((unused)))
+     = min (grub_mmap_get_post64 (), 0xfc000000ULL) >> 16;
+ 
+   /* Correct BDA. */
+-  *((grub_uint16_t *) 0x413) = grub_mmap_get_lower () >> 10;
++  *((grub_uint16_t *) grub_absolute_pointer (0x413)) = grub_mmap_get_lower () >> 10;
+ 
+   /* Save old interrupt handlers. */
+-  grub_machine_mmaphook_int12offset = *((grub_uint16_t *) 0x48);
+-  grub_machine_mmaphook_int12segment = *((grub_uint16_t *) 0x4a);
+-  grub_machine_mmaphook_int15offset = *((grub_uint16_t *) 0x54);
+-  grub_machine_mmaphook_int15segment = *((grub_uint16_t *) 0x56);
++  grub_machine_mmaphook_int12offset = *((grub_uint16_t *) grub_absolute_pointer (0x48));
++  grub_machine_mmaphook_int12segment = *((grub_uint16_t *) grub_absolute_pointer (0x4a));
++  grub_machine_mmaphook_int15offset = *((grub_uint16_t *) grub_absolute_pointer (0x54));
++  grub_machine_mmaphook_int15segment = *((grub_uint16_t *) grub_absolute_pointer (0x56));
+ 
+   grub_dprintf ("mmap", "hooktarget = %p\n", hooktarget);
+ 
+@@ -94,11 +94,11 @@ preboot (int noreturn __attribute__ ((unused)))
+   grub_memcpy (hooktarget, &grub_machine_mmaphook_start,
+ 	       &grub_machine_mmaphook_end - &grub_machine_mmaphook_start);
+ 
+-  *((grub_uint16_t *) 0x4a) = ((grub_addr_t) hooktarget) >> 4;
+-  *((grub_uint16_t *) 0x56) = ((grub_addr_t) hooktarget) >> 4;
+-  *((grub_uint16_t *) 0x48) = &grub_machine_mmaphook_int12
++  *((grub_uint16_t *) grub_absolute_pointer (0x4a)) = ((grub_addr_t) hooktarget) >> 4;
++  *((grub_uint16_t *) grub_absolute_pointer (0x56)) = ((grub_addr_t) hooktarget) >> 4;
++  *((grub_uint16_t *) grub_absolute_pointer (0x48)) = &grub_machine_mmaphook_int12
+     - &grub_machine_mmaphook_start;
+-  *((grub_uint16_t *) 0x54) = &grub_machine_mmaphook_int15
++  *((grub_uint16_t *) grub_absolute_pointer (0x54)) = &grub_machine_mmaphook_int15
+     - &grub_machine_mmaphook_start;
+ 
+   return GRUB_ERR_NONE;
+@@ -108,10 +108,10 @@ static grub_err_t
+ preboot_rest (void)
+ {
+   /* Restore old interrupt handlers. */
+-  *((grub_uint16_t *) 0x48) = grub_machine_mmaphook_int12offset;
+-  *((grub_uint16_t *) 0x4a) = grub_machine_mmaphook_int12segment;
+-  *((grub_uint16_t *) 0x54) = grub_machine_mmaphook_int15offset;
+-  *((grub_uint16_t *) 0x56) = grub_machine_mmaphook_int15segment;
++  *((grub_uint16_t *) grub_absolute_pointer (0x48)) = grub_machine_mmaphook_int12offset;
++  *((grub_uint16_t *) grub_absolute_pointer (0x4a)) = grub_machine_mmaphook_int12segment;
++  *((grub_uint16_t *) grub_absolute_pointer (0x54)) = grub_machine_mmaphook_int15offset;
++  *((grub_uint16_t *) grub_absolute_pointer (0x56)) = grub_machine_mmaphook_int15segment;
+ 
+   return GRUB_ERR_NONE;
+ }
+diff --git a/grub-core/net/drivers/i386/pc/pxe.c b/grub-core/net/drivers/i386/pc/pxe.c
+index 997010c..db17186 100644
+--- a/grub-core/net/drivers/i386/pc/pxe.c
++++ b/grub-core/net/drivers/i386/pc/pxe.c
+@@ -174,7 +174,7 @@ grub_pxe_recv (struct grub_net_card *dev __attribute__ ((unused)))
+   grub_uint8_t *ptr, *end;
+   struct grub_net_buff *buf;
+ 
+-  isr = (void *) GRUB_MEMORY_MACHINE_SCRATCH_ADDR;
++  isr = (void *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR);
+ 
+   if (!in_progress)
+     {
+@@ -256,11 +256,11 @@ grub_pxe_send (struct grub_net_card *dev __attribute__ ((unused)),
+   struct grub_pxe_undi_tbd *tbd;
+   char *buf;
+ 
+-  trans = (void *) GRUB_MEMORY_MACHINE_SCRATCH_ADDR;
++  trans = (void *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR);
+   grub_memset (trans, 0, sizeof (*trans));
+-  tbd = (void *) (GRUB_MEMORY_MACHINE_SCRATCH_ADDR + 128);
++  tbd = (void *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR + 128);
+   grub_memset (tbd, 0, sizeof (*tbd));
+-  buf = (void *) (GRUB_MEMORY_MACHINE_SCRATCH_ADDR + 256);
++  buf = (void *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR + 256);
+   grub_memcpy (buf, pack->data, pack->tail - pack->data);
+ 
+   trans->tbd = SEGOFS ((grub_addr_t) tbd);
+@@ -287,7 +287,7 @@ static grub_err_t
+ grub_pxe_open (struct grub_net_card *dev __attribute__ ((unused)))
+ {
+   struct grub_pxe_undi_open *ou;
+-  ou = (void *) GRUB_MEMORY_MACHINE_SCRATCH_ADDR;
++  ou = (void *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR);
+   grub_memset (ou, 0, sizeof (*ou));
+   ou->pkt_filter = 4;
+   grub_pxe_call (GRUB_PXENV_UNDI_OPEN, ou, pxe_rm_entry);
+@@ -382,7 +382,7 @@ GRUB_MOD_INIT(pxe)
+   if (! pxenv)
+     return;
+ 
+-  ui = (void *) GRUB_MEMORY_MACHINE_SCRATCH_ADDR;
++  ui = (void *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR);
+   grub_memset (ui, 0, sizeof (*ui));
+   grub_pxe_call (GRUB_PXENV_UNDI_GET_INFORMATION, ui, pxe_rm_entry);
+ 
+diff --git a/grub-core/term/i386/pc/console.c b/grub-core/term/i386/pc/console.c
+index d44937c..9403390 100644
+--- a/grub-core/term/i386/pc/console.c
++++ b/grub-core/term/i386/pc/console.c
+@@ -238,12 +238,11 @@ grub_console_getkey (struct grub_term_input *term __attribute__ ((unused)))
+   return (regs.eax & 0xff) + (('a' - 1) | GRUB_TERM_CTRL);
+ }
+ 
+-static const struct grub_machine_bios_data_area *bios_data_area =
+-  (struct grub_machine_bios_data_area *) GRUB_MEMORY_MACHINE_BIOS_DATA_AREA_ADDR;
+-
+ static int
+ grub_console_getkeystatus (struct grub_term_input *term __attribute__ ((unused)))
+ {
++  const struct grub_machine_bios_data_area *bios_data_area =
++  (struct grub_machine_bios_data_area *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_BIOS_DATA_AREA_ADDR);
+   /* conveniently GRUB keystatus is modelled after BIOS one.  */
+   return bios_data_area->keyboard_flag_lower & ~0x80;
+ }
+diff --git a/grub-core/term/i386/pc/vga_text.c b/grub-core/term/i386/pc/vga_text.c
+index 88fecc5..669d06f 100644
+--- a/grub-core/term/i386/pc/vga_text.c
++++ b/grub-core/term/i386/pc/vga_text.c
+@@ -45,15 +45,15 @@ GRUB_MOD_LICENSE ("GPLv3+");
+ static struct grub_term_coordinate grub_curr_pos;
+ 
+ #ifdef __mips__
+-#define VGA_TEXT_SCREEN		((grub_uint16_t *) 0xb00b8000)
++#define VGA_TEXT_SCREEN		((grub_uint16_t *) grub_absolute_pointer (0xb00b8000))
+ #define cr_read grub_vga_cr_read
+ #define cr_write grub_vga_cr_write
+ #elif defined (MODE_MDA)
+-#define VGA_TEXT_SCREEN		((grub_uint16_t *) 0xb0000)
++#define VGA_TEXT_SCREEN		((grub_uint16_t *) grub_absolute_pointer (0xb0000))
+ #define cr_read grub_vga_cr_bw_read
+ #define cr_write grub_vga_cr_bw_write
+ #else
+-#define VGA_TEXT_SCREEN		((grub_uint16_t *) 0xb8000)
++#define VGA_TEXT_SCREEN		((grub_uint16_t *) grub_absolute_pointer (0xb8000))
+ #define cr_read grub_vga_cr_read
+ #define cr_write grub_vga_cr_write
+ #endif
+diff --git a/grub-core/term/ns8250.c b/grub-core/term/ns8250.c
+index 5980183..83b2599 100644
+--- a/grub-core/term/ns8250.c
++++ b/grub-core/term/ns8250.c
+@@ -28,7 +28,6 @@
+ 
+ #ifdef GRUB_MACHINE_PCBIOS
+ #include <grub/machine/memory.h>
+-static const unsigned short *serial_hw_io_addr = (const unsigned short *) GRUB_MEMORY_MACHINE_BIOS_DATA_AREA_ADDR;
+ #define GRUB_SERIAL_PORT_NUM 4
+ #else
+ #include <grub/machine/serial.h>
+@@ -237,6 +236,9 @@ static struct grub_serial_port com_ports[GRUB_SERIAL_PORT_NUM];
+ void
+ grub_ns8250_init (void)
+ {
++#ifdef GRUB_MACHINE_PCBIOS
++  const unsigned short *serial_hw_io_addr = (const unsigned short *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_BIOS_DATA_AREA_ADDR);
++#endif
+   unsigned i;
+   for (i = 0; i < GRUB_SERIAL_PORT_NUM; i++)
+     if (serial_hw_io_addr[i])
+@@ -272,6 +274,9 @@ grub_ns8250_init (void)
+ grub_port_t
+ grub_ns8250_hw_get_port (const unsigned int unit)
+ {
++#ifdef GRUB_MACHINE_PCBIOS
++  const unsigned short *serial_hw_io_addr = (const unsigned short *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_BIOS_DATA_AREA_ADDR);
++#endif
+   if (unit < GRUB_SERIAL_PORT_NUM
+       && !(dead_ports & (1 << unit)))
+     return serial_hw_io_addr[unit];
+diff --git a/grub-core/video/i386/pc/vbe.c b/grub-core/video/i386/pc/vbe.c
+index 0e65b52..a0bb9af 100644
+--- a/grub-core/video/i386/pc/vbe.c
++++ b/grub-core/video/i386/pc/vbe.c
+@@ -514,7 +514,7 @@ grub_vbe_probe (struct grub_vbe_info_block *info_block)
+ 
+       /* Use low memory scratch area as temporary storage
+          for VESA BIOS call.  */
+-      vbe_ib = (struct grub_vbe_info_block *) GRUB_MEMORY_MACHINE_SCRATCH_ADDR;
++      vbe_ib = (struct grub_vbe_info_block *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR);
+ 
+       /* Prepare info block.  */
+       grub_memset (vbe_ib, 0, sizeof (*vbe_ib));
+@@ -574,7 +574,7 @@ grub_vbe_get_preferred_mode (unsigned int *width, unsigned int *height)
+ 
+   /* Use low memory scratch area as temporary storage for VESA BIOS calls.  */
+   flat_panel_info = (struct grub_vbe_flat_panel_info *)
+-    (GRUB_MEMORY_MACHINE_SCRATCH_ADDR + sizeof (struct grub_video_edid_info));
++    grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR + sizeof (struct grub_video_edid_info));
+ 
+   if (controller_info.version >= 0x200
+       && (grub_vbe_bios_get_ddc_capabilities (&ddc_level) & 0xff)
+@@ -676,7 +676,7 @@ grub_vbe_set_video_mode (grub_uint32_t vbe_mode,
+ 	  == GRUB_VBE_MEMORY_MODEL_PACKED_PIXEL)
+ 	{
+ 	  struct grub_vbe_palette_data *palette
+-	    = (struct grub_vbe_palette_data *) GRUB_MEMORY_MACHINE_SCRATCH_ADDR;
++	    = (struct grub_vbe_palette_data *) grub_absolute_pointer (GRUB_MEMORY_MACHINE_SCRATCH_ADDR);
+ 	  unsigned i;
+ 
+ 	  /* Make sure that the BIOS can reach the palette.  */
+diff --git a/include/grub/types.h b/include/grub/types.h
+index 0a3ff15..5ae0ced 100644
+--- a/include/grub/types.h
++++ b/include/grub/types.h
+@@ -340,4 +340,28 @@ static inline void grub_set_unaligned64 (void *ptr, grub_uint64_t val)
+   dd->d = val;
+ }
+ 
++/*
++ * The grub_absolute_pointer() macro borrows the idea from Linux kernel of using
++ * RELOC_HIDE() macro to stop GCC from checking the result of pointer arithmetic
++ * and also it's conversion to be inside the symbol's boundary [1]. The check
++ * is sometimes false positive, especially it is controversial to emit the array
++ * bounds [-Warray-bounds] warning on all hardwired literal pointers since GCC
++ * 11/12 [2]. Unless a good solution can be settled, for the time being we
++ * would be in favor of the macro instead of GCC pragmas which cannot match the
++ * places the warning needs to be ignored in an exact way.
++ *
++ * [1] https://lists.linuxcoding.com/kernel/2006-q3/msg17979.html
++ * [2] https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99578
++ */
++#if defined(__GNUC__)
++# define grub_absolute_pointer(val)					\
++({									\
++	grub_addr_t __ptr;						\
++	asm ("" : "=r" (__ptr) : "0" ((void *) (val)));			\
++	(void *) (__ptr);						\
++})
++#else
++# define grub_absolute_pointer(val) ((void *) (val))
++#endif
++
+ #endif /* ! GRUB_TYPES_HEADER */
+-- 
+cgit v1.1
+

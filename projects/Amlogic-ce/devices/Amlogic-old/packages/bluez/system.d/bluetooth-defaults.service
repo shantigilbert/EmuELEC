@@ -1,0 +1,11 @@
+[Unit]
+Description=Bluetooth defaults
+After=local-fs.target
+
+ConditionPathExists=!/storage/.cache/services/bluez.conf
+ConditionPathExists=!/storage/.cache/services/bluez.disabled
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'cp /usr/share/services/bluez.conf /storage/.cache/services/'
+RemainAfterExit=yes

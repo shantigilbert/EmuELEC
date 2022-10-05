@@ -20,3 +20,4 @@ ath9k_htc/*
 brcm/*
 rtl_bt/*
 rtlwifi/*
+rtw88/*

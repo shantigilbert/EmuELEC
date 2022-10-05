@@ -1,0 +1,53 @@
+From bf2776b7f9403057cb82c2697e4fca8b554db4bd Mon Sep 17 00:00:00 2001
+From: MilhouseVH <milhouseVH.github@nmacleod.com>
+Date: Thu, 11 Apr 2019 20:00:05 +0100
+Subject: [PATCH] move hwdb.bin to /run
+
+---
+ src/libsystemd/sd-hwdb/hwdb-util.c   | 2 +-
+ src/libsystemd/sd-hwdb/sd-hwdb.c     | 2 +-
+ units/systemd-hwdb-update.service.in | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/libsystemd/sd-hwdb/hwdb-util.c b/src/libsystemd/sd-hwdb/hwdb-util.c
+index c83575c..6285f3d 100644
+--- a/src/libsystemd/sd-hwdb/hwdb-util.c
++++ b/src/libsystemd/sd-hwdb/hwdb-util.c
+@@ -20,7 +20,7 @@
+ #include "strv.h"
+ #include "tmpfile-util.h"
+ 
+-static const char *default_hwdb_bin_dir = "/etc/udev";
++static const char *default_hwdb_bin_dir = "/run";
+ static const char * const conf_file_dirs[] = {
+         "/etc/udev/hwdb.d",
+         UDEVLIBEXECDIR "/hwdb.d",
+diff --git a/src/libsystemd/sd-hwdb/sd-hwdb.c b/src/libsystemd/sd-hwdb/sd-hwdb.c
+index 79fe1a8..0acbf71 100644
+--- a/src/libsystemd/sd-hwdb/sd-hwdb.c
++++ b/src/libsystemd/sd-hwdb/sd-hwdb.c
+@@ -299,7 +299,7 @@ static int trie_search_f(sd_hwdb *hwdb, const char *search) {
+ 
+ static const char hwdb_bin_paths[] =
+         "/etc/systemd/hwdb/hwdb.bin\0"
+-        "/etc/udev/hwdb.bin\0"
++        "/run/hwdb.bin\0"
+         "/usr/lib/systemd/hwdb/hwdb.bin\0"
+ #if HAVE_SPLIT_USR
+         "/lib/systemd/hwdb/hwdb.bin\0"
+diff --git a/units/systemd-hwdb-update.service.in b/units/systemd-hwdb-update.service.in
+index 259fe0d..18d617f 100644
+--- a/units/systemd-hwdb-update.service.in
++++ b/units/systemd-hwdb-update.service.in
+@@ -16,7 +16,7 @@ After=systemd-remount-fs.service
+ Before=sysinit.target shutdown.target systemd-update-done.service
+ ConditionNeedsUpdate=/etc
+ ConditionPathExists=|!@udevlibexecdir@/hwdb.bin
+-ConditionPathExists=|/etc/udev/hwdb.bin
++ConditionPathExists=|/run/hwdb.bin
+ ConditionDirectoryNotEmpty=|/etc/udev/hwdb.d/
+ 
+ [Service]
+-- 
+2.14.1
+

@@ -2,8 +2,8 @@
 # Copyright (C) 2022-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="gst-plugins-bad"
-PKG_VERSION="1.18.5"
-PKG_SHA256="a164923b94f0d08578a6fcaeaac6e0c05da788a46903a1086870e9ca45ad678e"
+PKG_VERSION="1.20.3"
+PKG_SHA256="7a11c13b55dd1d2386dd902219e41cbfcdda8e1e0aa3e738186c95074b35da4f"
 PKG_LICENSE="LGPL-2.1-or-later"
 PKG_SITE="https://gstreamer.freedesktop.org/modules/gst-plugins-bad.html"
 PKG_URL="https://gstreamer.freedesktop.org/src/gst-plugins-bad/${PKG_NAME}-${PKG_VERSION}.tar.xz"
@@ -11,7 +11,7 @@ PKG_DEPENDS_TARGET="toolchain gst-plugins-base"
 PKG_LONGDESC="GStreamer Bad Plug-ins is a set of plug-ins that aren't up to par compared to the rest."
 
 pre_configure_target() {
-  PKG_MESON_OPTS_TARGET="-Dgst_player_tests=false \
+  PKG_MESON_OPTS_TARGET="-Dgst_play_tests=false \
                          -Daccurip=disabled \
                          -Dadpcmdec=disabled \
                          -Dadpcmenc=disabled \
@@ -117,7 +117,6 @@ pre_configure_target() {
                          -Dkms=disabled \
                          -Dladspa=disabled \
                          -Dlibde265=disabled \
-                         -Dlibmms=disabled \
                          -Dlv2=disabled \
                          -Dmediafoundation=disabled \
                          -Dmicrodns=disabled \
@@ -128,7 +127,6 @@ pre_configure_target() {
                          -Dmusepack=disabled \
                          -Dneon=disabled \
                          -Dnvcodec=disabled \
-                         -Dofa=disabled \
                          -Dopenal=disabled \
                          -Dopenexr=disabled \
                          -Dopenh264=disabled \
@@ -183,16 +181,17 @@ pre_configure_target() {
                          -Dgobject-cast-checks=disabled \
                          -Dglib-asserts=disabled \
                          -Dglib-checks=disabled \
-                         -Dpackage-name="gst-plugins-bad"
-                         -Dpackage-origin="LibreELEC.tv"
+                         -Dpackage-name=gst-plugins-bad \
+                         -Dpackage-origin=LibreELEC.tv \
                          -Ddoc=disabled"
 }
 
-post_makeinstall_target(){
+post_makeinstall_target() {
   # clean up
   safe_remove ${INSTALL}/usr/bin
   for PKG_GST_PLUGINS_BAD in \
-    libgstadaptivedemux libgstbadaudio libgstbasecamerabinsrc libgstcodecs libgstinsertbin libgstisoff libgstmpegts libgstphotography libgstplayer \
+    libgstadaptivedemux libgstbadaudio libgstbasecamerabinsrc libgstcodecs \
+    libgstinsertbin libgstisoff libgstmpegts libgstphotography libgstplayer \
     libgstsctp libgsttranscoder libgsturidownloader libgstwebrtc
   do
     safe_remove ${INSTALL}/usr/lib/${PKG_GST_PLUGINS_BAD}-1.0*

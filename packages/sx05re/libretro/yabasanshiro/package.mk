@@ -47,7 +47,7 @@ else
 		sed -i "s|-mtune=cortex-a73.cortex-a53|-mtune=cortex-a35|g" $PKG_BUILD/yabause/src/libretro/Makefile
 	fi
 	
-	if [[ "${DEVICE}" == "Amlogic" ]]; then
+	if [[ "${DEVICE}" == "Amlogic-old" ]]; then
 		sed -i "s|-mtune=cortex-a73.cortex-a53|-mtune=cortex-a53|g" $PKG_BUILD/yabause/src/libretro/Makefile
 	fi
 		PKG_MAKE_OPTS_TARGET+=" -C yabause/src/libretro platform=odroid-n2"

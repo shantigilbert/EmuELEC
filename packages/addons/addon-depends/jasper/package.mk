@@ -3,8 +3,8 @@
 # Copyright (C) 2021-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="jasper"
-PKG_VERSION="2.0.33"
-PKG_SHA256="38b8f74565ee9e7fec44657e69adb5c9b2a966ca5947ced5717cde18a7d2eca6"
+PKG_VERSION="3.0.6"
+PKG_SHA256="c79961bc00158f5b5dc5f5fcfa792fde9bebb024432689d0f9e3f95a097d0ec3"
 PKG_LICENSE="OpenSource"
 PKG_SITE="http://www.ece.uvic.ca/~mdadams/jasper/"
 PKG_URL="https://github.com/jasper-software/jasper/archive/refs/tags/version-${PKG_VERSION}.tar.gz"
@@ -14,4 +14,9 @@ PKG_BUILD_FLAGS="+pic"
 
 PKG_CMAKE_OPTS_TARGET="-DJAS_ENABLE_DOC=false \
                        -DJAS_ENABLE_PROGRAMS=false \
-                       -DJAS_ENABLE_SHARED=false"
+                       -DJAS_ENABLE_SHARED=false \
+                       -DJAS_STDC_VERSION=201710L"
+
+pre_configure_target() {
+  export CFLAGS="${CFLAGS} -std=gnu17"
+}

@@ -18,5 +18,8 @@ PKG_CONFIGURE_OPTS_TARGET="bash_cv_wcwidth_broken=no \
                            --with-curses"
 
 post_makeinstall_target() {
+  # fix static library
+  sed -i 's/-lreadline/-lreadline -lncursesw/' ${SYSROOT_PREFIX}/usr/lib/pkgconfig/readline.pc
+
   rm -rf ${INSTALL}/usr/share/readline
 }

@@ -1,0 +1,76 @@
+From 849858f47f1038c85ba5a5a61a787f8d872dbfad Mon Sep 17 00:00:00 2001
+From: Matthias Reichl <hias@horus.com>
+Date: Mon, 18 Apr 2022 23:20:20 +0200
+Subject: [PATCH] remove dead feature code
+
+LIRC_CAN_SET_REC_FILTER and LIRC_CAN_NOTIFY_DECODE flags were removed
+in linux 5.18 as no driver implemented those features.
+
+Drop the dead code dealing with that to fix build.
+
+Signed-off-by: Matthias Reichl <hias@horus.com>
+---
+ daemons/lircd.cpp        | 6 +-----
+ tools/lirc-lsplugins.cpp | 8 +++-----
+ 2 files changed, 4 insertions(+), 10 deletions(-)
+
+diff --git a/daemons/lircd.cpp b/daemons/lircd.cpp
+index d5be7088..eb48da23 100644
+--- a/daemons/lircd.cpp
++++ b/daemons/lircd.cpp
+@@ -485,8 +485,7 @@ static int setup_hardware(void)
+ 
+ 	if (curr_driver->fd != -1 && curr_driver->drvctl_func) {
+ 		if ((curr_driver->features & LIRC_CAN_SET_REC_CARRIER)
+-		    || (curr_driver->features & LIRC_CAN_SET_REC_TIMEOUT)
+-		    || (curr_driver->features & LIRC_CAN_SET_REC_FILTER)) {
++		    || (curr_driver->features & LIRC_CAN_SET_REC_TIMEOUT)) {
+ 				ret = setup_frequency() && setup_timeout();
+ 		}
+ 	}
+@@ -2066,9 +2065,6 @@ void loop(void)
+ 			const char* button_name;
+ 			int reps;
+ 
+-			if (curr_driver->drvctl_func && (curr_driver->features & LIRC_CAN_NOTIFY_DECODE))
+-				curr_driver->drvctl_func(DRVCTL_NOTIFY_DECODE, NULL);
+-
+ 			get_release_data(&remote_name, &button_name, &reps);
+ 
+ 			input_message(message, remote_name, button_name, reps, 0);
+diff --git a/tools/lirc-lsplugins.cpp b/tools/lirc-lsplugins.cpp
+index ba67a3cb..79c61792 100644
+--- a/tools/lirc-lsplugins.cpp
++++ b/tools/lirc-lsplugins.cpp
+@@ -57,8 +57,7 @@
+ 	"#    c: LIRC_CAN_SET_SEND_CARRIER\n" \
+ 	"#    d: LIRC_CAN_SET_SEND_DUTY_CYCLE\n" \
+ 	"#    t: LIRC_CAN_SET_TRANSMITTER_MASK\n" \
+-	"#    C: LIRC_CAN_MEASURE_CARRIER\n" \
+-	"#    D: LIRC_CAN_NOTIFY_DECODE\n"
++	"#    C: LIRC_CAN_MEASURE_CARRIER\n"
+ 
+ const struct option options[] = {
+ 	{ "plugindir",	  required_argument, NULL, 'U' },
+@@ -291,7 +290,7 @@ static void format_features(struct driver* hw, line_t* line)
+ 	char buff[256];
+ 
+ 	snprintf(buff, sizeof(buff),
+-		 "%c%c%c%c%c%c%c%c%c%c%c%c%c ",
++		 "%c%c%c%c%c%c%c%c%c%c%c%c ",
+ 		 get(LIRC_CAN_SEND_RAW, 'R', hw),
+ 		 get(LIRC_CAN_SEND_PULSE, 'P', hw),
+ 		 get(LIRC_CAN_SEND_MODE2, 'M', hw),
+@@ -303,8 +302,7 @@ static void format_features(struct driver* hw, line_t* line)
+ 		 get(LIRC_CAN_SET_SEND_CARRIER, 'c', hw),
+ 		 get(LIRC_CAN_SET_SEND_DUTY_CYCLE, 'd', hw),
+ 		 get(LIRC_CAN_SET_TRANSMITTER_MASK, 't', hw),
+-		 get(LIRC_CAN_MEASURE_CARRIER, 'C', hw),
+-		 get(LIRC_CAN_NOTIFY_DECODE, 'D', hw)
++		 get(LIRC_CAN_MEASURE_CARRIER, 'C', hw)
+ 		 );
+ 	line->features = strdup(buff);
+ }
+-- 
+2.30.2
+

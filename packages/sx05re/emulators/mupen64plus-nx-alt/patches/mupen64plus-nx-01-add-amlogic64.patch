@@ -1,22 +1,43 @@
 --- a/Makefile
 +++ b/Makefile
-@@ -248,9 +248,16 @@
+@@ -308,16 +308,35 @@
+    ASFLAGS = -f elf -d ELF_TYPE
+ 
+ # Amlogic S905/S912
+-else ifneq (,$(findstring amlogic,$(platform)))
++else ifneq (,$(findstring emuelec,$(platform)))
+    TARGET := $(TARGET_NAME)_libretro.so
     LDFLAGS += -shared -Wl,--version-script=$(LIBRETRO_DIR)/link.T -Wl,--no-undefined -ldl
     GLES = 1
++   GLES3= 0
     GL_LIB := -lGLESv2
 -   CPUFLAGS += -marm -mfloat-abi=hard -mfpu=neon
 -   HAVE_NEON = 1
 -   WITH_DYNAREC=arm
-+  ifneq (,$(findstring amlogic64,$(platform)))
++  ifneq (,$(findstring NG,$(BOARD)))
 +    WITH_DYNAREC=aarch64
 +    GL_LIB := -lGLESv3
 +    GLES = 0
 +    GLES3= 1
-+   else
++  endif
++  ifneq (,$(findstring OLD,$(BOARD)))
++    WITH_DYNAREC=aarch64
++    CPUFLAGS += -mcpu=cortex-a53
++   endif
++  ifneq (,$(findstring HH,$(BOARD)))
++    CPUFLAGS += -mcpu=cortex-a35
++   endif
++  ifneq (,$(findstring RK,$(BOARD)))
++    CPUFLAGS += -mcpu=cortex-a53
++   endif
++  ifneq (,$(findstring 32BIT,$(BOARD)))
 +	CPUFLAGS += -marm -mfloat-abi=hard -mfpu=neon
 +	HAVE_NEON = 1
 +	WITH_DYNAREC=arm
-+   endif
++ endif
     COREFLAGS += -DUSE_GENERIC_GLESV2 -DOS_LINUX
-    CPUFLAGS += -march=armv8-a -mcpu=cortex-a53 -mtune=cortex-a53
+-   CPUFLAGS += -march=armv8-a -mcpu=cortex-a53 -mtune=cortex-a53
++   
  
+ # Rockchip RK3288 e.g. Asus Tinker Board / RK3328 e.g. PINE64 Rock64 / RK3399 e.g. PINE64 RockPro64 - 32-bit userspace
+ else ifneq (,$(findstring RK,$(platform)))

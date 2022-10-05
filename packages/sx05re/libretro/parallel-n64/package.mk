@@ -2,8 +2,8 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="parallel-n64"
-PKG_VERSION="b804ab1a199d6ff1f8fef4aa7dfcf663990e430b"
-PKG_SHA256="918a949deabd9e5025ca5667cbce40a47bd48eb17909dd6af42fb79baf9b05d4"
+PKG_VERSION="a03fdcba6b2e9993f050b50112f597ce2f44fa2c"
+PKG_SHA256="8ac94a0515bac7aeda51ef5cbb5c042d69d4f73960ca0ae8961e7ecbe3d182fa"
 PKG_REV="2"
 PKG_LICENSE="GPLv2"
 PKG_ARCH="arm"
@@ -28,6 +28,10 @@ if [[ "$ARCH" == "arm" ]]; then
 	
 	if [ "${DEVICE}" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 		PKG_MAKE_OPTS_TARGET=" platform=Odroidgoa"
+	fi
+	
+	if [ "$DEVICE" == "RK356x" ] || [ "$DEVICE" == "OdroidM1" ]; then
+		PKG_MAKE_OPTS_TARGET=" platform=Odroidgoa-RK356x"
 	fi
 else
 	PKG_PATCH_DIRS="emuelec-aarch64"

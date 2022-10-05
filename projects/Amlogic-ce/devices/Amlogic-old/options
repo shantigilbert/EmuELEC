@@ -1,0 +1,171 @@
+################################################################################
+# setup system defaults
+################################################################################
+
+  # The TARGET_CPU variable controls which processor should be targeted for
+  # generated code.
+    case $TARGET_ARCH in
+      aarch64)
+        # TARGET_CPU:
+        # arm2 arm250 arm3 arm6 arm60 arm600 arm610 arm620 arm7 arm7m arm7d
+        # arm7dm arm7di arm7dmi arm70 arm700 arm700i arm710 arm710c
+        # arm7100 arm720 arm7500 arm7500fe arm7tdmi arm7tdmi-s arm710t
+        # arm720t arm740t strongarm strongarm110 strongarm1100
+        # strongarm1110 arm8 arm810 arm9 arm9e arm920 arm920t arm922t
+        # arm946e-s arm966e-s arm968e-s arm926ej-s arm940t arm9tdmi
+        # arm10tdmi arm1020t arm1026ej-s arm10e arm1020e arm1022e
+        # arm1136j-s arm1136jf-s mpcore mpcorenovfp arm1156t2-s
+        # arm1176jz-s arm1176jzf-s cortex-a8 cortex-a9 cortex-r4
+        # cortex-r4f cortex-m3 cortex-m1 xscale iwmmxt iwmmxt2 ep9312.
+        #
+        TARGET_KERNEL_ARCH="arm64"
+        TARGET_FLOAT="hard"
+        TARGET_CPU="cortex-a53"
+        TARGET_CPU_FLAGS="+crc+fp+simd"
+        ;;
+      arm)
+        TARGET_KERNEL_ARCH="arm64"
+        TARGET_FLOAT="hard"
+        TARGET_CPU="cortex-a53"
+        TARGET_CPU_FLAGS="+crc"
+        TARGET_FPU="neon-fp-armv8"
+        ;;
+    esac
+
+  # Bootloader to use (syslinux / u-boot / atv-bootloader / bcm2835-bootloader)
+    BOOTLOADER="u-boot"
+
+  # u-boot version to use (default)
+    UBOOT_VERSION="vendor"
+
+  # Target Configfile for u-boot
+    UBOOT_CONFIGFILE="boot.ini"
+
+  # Kernel target
+    KERNEL_TARGET="Image.lzo"
+
+  # Kernel extra targets to build
+    KERNEL_UBOOT_EXTRA_TARGET="gxbb_p200.dtb gxbb_p200_2G.dtb gxl_p212_1g.dtb gxl_p212_2g.dtb gxl_p230_2g.dtb"
+
+  # Build Android kernel image using mkbootimg
+    BUILD_ANDROID_BOOTIMG="yes"
+
+  # Additional options to be passed to Android mkbootimg
+    ANDROID_BOOTIMG_OPTIONS="--base 0x0 --kernel_offset 0x1080000"
+
+  # Additional kernel make parameters (for example to specify the u-boot loadaddress)
+    KERNEL_MAKE_EXTRACMD=""
+
+  # Additional kernel dependencies
+   KERNEL_EXTRA_DEPENDS_TARGET="device-trees-amlogic"
+
+  # Kernel to use. values can be:
+  # default:  default mainline kernel
+    LINUX="amlogic-3.14"
+
+  # kernel image name
+    KERNEL_NAME="kernel.img"
+
+  # legacy kernel image name
+    LEGACY_KERNEL_NAME="KERNEL"
+
+  # legacy dtb image name
+    LEGACY_DTB_NAME="meson64_odroidc2.dtb"
+
+################################################################################
+# setup build defaults
+################################################################################
+
+  # Project CFLAGS
+    PROJECT_CFLAGS=""
+
+  # SquashFS compression method (gzip / lzo / xz)
+    SQUASHFS_COMPRESSION="lzo"
+
+################################################################################
+# setup project defaults
+################################################################################
+
+  # build and install ALSA Audio support (yes / no)
+    ALSA_SUPPORT="yes"
+
+  # OpenGL(X) implementation to use (no / Mesa)
+    OPENGL="no"
+
+  # OpenGL-ES implementation to use (no / bcm2835-driver / gpu-viv-bin-mx6q / opengl-meson)
+    OPENGLES="opengl-meson"
+
+  # include uvesafb support (yes / no)
+    UVESAFB_SUPPORT="no"
+
+  # Displayserver to use (x11 / no)
+    DISPLAYSERVER="no"
+
+  # Windowmanager to use (fluxbox / none)
+    WINDOWMANAGER="none"
+
+  # Xorg Graphic drivers to use (all / i915,i965,r200,r300,r600,nvidia,nouveau)
+  # Space separated list is supported,
+  # e.g. GRAPHIC_DRIVERS="i915 i965 r300 r600 radeonsi nvidia nouveau"
+    GRAPHIC_DRIVERS=""
+
+  # Use a vendor specific KODI repo
+    KODI_VENDOR="amlogic-3.14"
+
+  # KODI Player implementation to use (default / bcm2835-driver / libfslvpuwrap / libamcodec)
+    KODIPLAYER_DRIVER="libamcodec"
+
+  # Modules to install in initramfs for early boot
+    INITRAMFS_MODULES="font softcursor bitblit fbcon dwc_otg"
+
+  # additional drivers to install:
+  # for a list of additinoal drivers see packages/linux-drivers
+  # Space separated list is supported,
+  # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
+    ADDITIONAL_DRIVERS="gpu-aml kvimfan-aml openvfd-driver wifi_dummy-aml
+                        ap6xxx-aml mt7601u-aml mt7603u-aml mt7610u-aml qca9377-aml ssv6xxx-aml-3.14
+                        RTL8188EU-aml RTL8189ES-aml RTL8189FS-aml RTL8192CU RTL8192DU RTL8192EU RTL8152-aml
+                        RTL8723BS-aml RTL8723DS-aml RTL8812AU RTL8814AU RTL8821CU RTL8822BU-aml RTL8822BS-aml"
+
+  # additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware)
+  # Space separated list is supported,
+  # e.g. FIRMWARE="dvb-firmware misc-firmware wlan-firmware"
+    FIRMWARE="misc-firmware wlan-firmware dvb-firmware brcmfmac_sdio-firmware-aml qca9377-firmware-aml rtl8723bs_bt rtl8822b_bt"
+
+  # build and install ATV IR remote support (yes / no)
+    ATVCLIENT_SUPPORT="no"
+
+  # Amlogic IR remote support (yes / no)
+    AMREMOTE_SUPPORT="yes"
+
+  # build and install iSCSI support - iscsistart (yes / no)
+    ISCSI_SUPPORT="no"
+
+  # build with installer (yes / no)
+    INSTALLER_SUPPORT="no"
+
+  # build and install driver addons (yes / no)
+    DRIVER_ADDONS_SUPPORT="yes"
+
+  # driver addons to install:
+  # for a list of additinoal drivers see packages/linux-driver-addons
+  # Space separated list is supported,
+    DRIVER_ADDONS=""
+
+  # debug tty path
+    DEBUG_TTY="/dev/ttyS0"
+
+  # additional packages to install:
+  # Space separated list is supported,
+  # e.g. ADDITIONAL_PACKAGES="PACKAGE1 PACKAGE2"
+    ADDITIONAL_PACKAGES="u-boot-script dtc u-boot-tools-aml CoreELEC-Debug-Scripts old_ee_3.14_kernel"
+
+  # add OOTB support for IR remote
+    IR_REMOTE_KEYMAPS="$IR_REMOTE_KEYMAPS odroid wetek_hub wetek_play_2 tanix"
+
+  # build with entware installer
+    ENTWARE_SUPPORT="yes"
+    ENTWARE_ARCH="aarch64-k3.10"
+
+  # CoreELEC Subdevices
+    SUBDEVICES="LePotato Odroid_C2"

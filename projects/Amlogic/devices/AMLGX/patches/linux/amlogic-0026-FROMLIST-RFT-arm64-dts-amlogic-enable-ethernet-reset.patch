@@ -1,0 +1,45 @@
+From e936402c4c053ada91a170a484865c8f8d9f397c Mon Sep 17 00:00:00 2001
+From: Jerome Brunet <jbrunet@baylibre.com>
+Date: Thu, 16 Jun 2022 11:03:49 +0200
+Subject: [PATCH 26/75] FROMLIST(RFT): arm64: dts: amlogic: enable ethernet
+ reset
+
+Enable the ethernet reset to help solve the intilization issue
+seen on the Amlogic SoCs with the internal phy path.
+
+Suggested-by: Qi Duan <qi.duan@amlogic.com>
+Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
+---
+ arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi | 2 ++
+ arch/arm64/boot/dts/amlogic/meson-gxl.dtsi        | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi b/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
+index 2c56b216d6f9..6af4894856da 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
+@@ -181,6 +181,8 @@
+ 				      "timing-adjustment";
+ 			rx-fifo-depth = <4096>;
+ 			tx-fifo-depth = <2048>;
++			resets = <&reset RESET_ETHERNET>;
++			reset-names = "stmmaceth";
+ 			status = "disabled";
+ 
+ 			mdio0: mdio {
+diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxl.dtsi
+index c3ac531c4f84..57f2087c65b2 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-gxl.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-gxl.dtsi
+@@ -134,6 +134,8 @@
+ 		 <&clkc CLKID_MPLL2>,
+ 		 <&clkc CLKID_FCLK_DIV2>;
+ 	clock-names = "stmmaceth", "clkin0", "clkin1", "timing-adjustment";
++	resets = <&reset RESET_ETHERNET>;
++	reset-names = "stmmaceth";
+ 
+ 	mdio0: mdio {
+ 		#address-cells = <1>;
+-- 
+2.17.1
+

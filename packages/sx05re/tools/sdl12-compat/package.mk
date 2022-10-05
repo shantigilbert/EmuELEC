@@ -2,8 +2,8 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="sdl12-compat"
-PKG_VERSION="c5bd71de527b981ec736dbd94e973cc11de0cbc0"
-PKG_SHA256="7f875f1a5a742dc5656ef8a500d123c938bb27f014ec51591c8e96db2e9641ae"
+PKG_VERSION="b03ee58d6eddbd6f75d774e235b4b10ac6b6e355"
+PKG_SHA256="b44addcc0c6cbae95169fee960623262d37b4e191bc9fd0aa33e49dfeb7b067f"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/libsdl-org/sdl12-compat"

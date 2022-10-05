@@ -1,0 +1,10 @@
+# This is a sample service script to switch to BBR TCP congestion control.
+# Please read carefully the comments in this file. For production usage
+# you can remove all comments (lines beginning with "#") from this file.
+
+# Switch to Fair Queue packet scheduler and BBR TCP congestion control
+net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
+
+# Important:
+# This file must be renamed to qdisc.conf to overlap existing /usr/lib/sysctl.d/qdisc.conf

@@ -8,6 +8,7 @@ PKG_SHA256="dee22e893cb5fc2b2b6ebd60b88478ab8556cb3b93f9a0d7ce8f3b61851871d4"
 PKG_LICENSE="GPLv2"
 PKG_SITE="http://libmpeg2.sourceforge.net/"
 PKG_URL="http://libmpeg2.sourceforge.net/files/${PKG_NAME}-${PKG_VERSION}.tar.gz"
+PKG_DEPENDS_HOST="toolchain:host"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="The MPEG Library is a collection of C routines to decode MPEG-1 and MPEG-2 movies."
 

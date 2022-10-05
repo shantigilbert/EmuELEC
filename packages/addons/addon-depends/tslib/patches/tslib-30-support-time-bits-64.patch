@@ -1,0 +1,56 @@
+--- a/plugins/galax-raw.c	2022-07-21 15:46:14.666220340 +0000
++++ b/plugins/galax-raw.c	2022-07-22 01:11:26.708402821 +0000
+@@ -198,7 +198,8 @@
+ 				samp->x = i->current_x;
+ 				samp->y = i->current_y;
+ 				samp->pressure = i->current_p;
+-				samp->tv = ev.time;
++				samp->tv.tv_sec = ev.input_event_sec;
++				samp->tv.tv_usec = ev.input_event_usec;
+ 				samp++;
+ 				total++;
+ 				break;
+--- a/plugins/input-raw.c	2013-08-08 00:23:04.000000000 +0000
++++ b/plugins/input-raw.c	2022-07-22 01:30:41.417546206 +0000
+@@ -179,7 +179,8 @@
+ 						samp->y = i->current_y;
+ 						samp->pressure = i->current_p;
+ 				}
+-				samp->tv = ev.time;
++				samp->tv.tv_sec = ev.input_event_sec;
++				samp->tv.tv_usec = ev.input_event_usec;
+ 	#ifdef DEBUG
+ 				fprintf(stderr, "RAW---------------------> %d %d %d %d.%d\n",
+ 						samp->x, samp->y, samp->pressure, samp->tv.tv_sec,
+@@ -262,7 +263,8 @@
+ 					samp->pressure = i->current_p = ev.value;
+ 					break;
+ 				}
+-				samp->tv = ev.time;
++				samp->tv.tv_sec = ev.input_event_sec;
++				samp->tv.tv_usec = ev.input_event_usec;
+ 	#ifdef DEBUG
+ 				fprintf(stderr, "RAW---------------------------> %d %d %d\n",
+ 					samp->x, samp->y, samp->pressure);
+@@ -278,7 +280,8 @@
+ 						samp->x = 0;
+ 						samp->y = 0;
+ 						samp->pressure = 0;
+-						samp->tv = ev.time;
++						samp->tv.tv_sec = ev.input_event_sec;
++						samp->tv.tv_usec = ev.input_event_usec;
+ 						samp++;
+ 						total++;
+ 					}
+--- a/plugins/st1232-raw.c	2022-07-22 01:31:02.757483058 +0000
++++ b/plugins/st1232-raw.c	2022-07-22 01:27:40.174757983 +0000
+@@ -162,7 +162,8 @@
+ 						samp->x = i->current_x;
+ 						samp->y = i->current_y;
+ 						samp->pressure = i->current_p;	/* is 0 on finger released */
+-						samp->tv = ev.time;
++						samp->tv.tv_sec = ev.input_event_sec;
++						samp->tv.tv_usec = ev.input_event_usec;
+       	
+ 						i->current_p = 0;		/* will be set again when getting xy cordinate */					
+ 						samp++;

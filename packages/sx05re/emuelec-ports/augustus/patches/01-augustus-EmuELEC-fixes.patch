@@ -1,0 +1,25 @@
+--- a/src/platform/joystick.c
++++ b/src/platform/joystick.c
+@@ -103,7 +103,7 @@
+ #if defined(__vita__) || defined(__SWITCH__)
+     return 1;
+ #else
+-    return 0;
++    return 1;
+ #endif
+ }
+ 
+--- a/src/platform/vita/vita.h
++++ b/src/platform/vita/vita.h
+@@ -25,3 +25,10 @@
+ 
+ #endif // __vita__
+ #endif // PLATFORM_VITA_H
++
++// We are not compiling for vita, but vita.h header is used widely we can set our options for EmuELEC here
++// We force the software use of cursor so that it is shown.
++#define PLATFORM_USE_SOFTWARE_CURSOR
++
++// Fix for misaligned textures: https://github.com/Keriew/augustus/issues/645
++// echo "#define MAX_TEXTURE_SIZE 1024" >> ${PKG_BUILD}/src/platform/vita/vita.h
+

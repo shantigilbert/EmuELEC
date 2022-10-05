@@ -1,0 +1,84 @@
+From 9074b57fd5a5c8ae20b15b59ed9abe9a7f0147b0 Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Fri, 15 Nov 2019 14:00:54 +0100
+Subject: [PATCH] mount: do not update exec deps on mountinfo changes
+
+Fixes: #13978
+---
+ src/core/mount.c | 42 ++++++++++++++++++++++++++++--------------
+ 1 file changed, 28 insertions(+), 14 deletions(-)
+
+diff --git a/src/core/mount.c b/src/core/mount.c
+index 1d1d2683da4..dfed691c43f 100644
+--- a/src/core/mount.c
++++ b/src/core/mount.c
+@@ -550,6 +550,32 @@ static int mount_verify(Mount *m) {
+         return 0;
+ }
+ 
++static int mount_add_non_exec_dependencies(Mount *m) {
++        int r;
++        assert(m);
++
++        /* Adds in all dependencies directly responsible for ordering the mount, as opposed to dependencies
++         * resulting from the ExecContext and such. */
++
++        r = mount_add_device_dependencies(m);
++        if (r < 0)
++                return r;
++
++        r = mount_add_mount_dependencies(m);
++        if (r < 0)
++                return r;
++
++        r = mount_add_quota_dependencies(m);
++        if (r < 0)
++                return r;
++
++        r = mount_add_default_dependencies(m);
++        if (r < 0)
++                return r;
++
++        return 0;
++}
++
+ static int mount_add_extras(Mount *m) {
+         Unit *u = UNIT(m);
+         int r;
+@@ -577,18 +603,6 @@ static int mount_add_extras(Mount *m) {
+                         return r;
+         }
+ 
+-        r = mount_add_device_dependencies(m);
+-        if (r < 0)
+-                return r;
+-
+-        r = mount_add_mount_dependencies(m);
+-        if (r < 0)
+-                return r;
+-
+-        r = mount_add_quota_dependencies(m);
+-        if (r < 0)
+-                return r;
+-
+         r = unit_patch_contexts(u);
+         if (r < 0)
+                 return r;
+@@ -601,7 +615,7 @@ static int mount_add_extras(Mount *m) {
+         if (r < 0)
+                 return r;
+ 
+-        r = mount_add_default_dependencies(m);
++        r = mount_add_non_exec_dependencies(m);
+         if (r < 0)
+                 return r;
+ 
+@@ -1574,7 +1588,7 @@ static int mount_setup_existing_unit(
+ 
+                 unit_remove_dependencies(u, UNIT_DEPENDENCY_MOUNTINFO_IMPLICIT);
+ 
+-                r = mount_add_extras(MOUNT(u));
++                r = mount_add_non_exec_dependencies(MOUNT(u));
+                 if (r < 0)
+                         return r;
+         }

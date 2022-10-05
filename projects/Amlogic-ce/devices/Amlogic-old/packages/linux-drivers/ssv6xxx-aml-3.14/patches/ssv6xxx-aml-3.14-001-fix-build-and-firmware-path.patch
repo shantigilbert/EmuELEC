@@ -1,0 +1,86 @@
+diff --git a/Makefile.android b/Makefile.android
+index 82211e1..0deeee5 100755
+--- a/Makefile.android
++++ b/Makefile.android
+@@ -2,10 +2,8 @@ PLATFORMS =
+
+ KBUILD_TOP := $(PWD)
+
+-SSV_PATH=$(ANDROID_BUILD_TOP)/hardware/wifi/icomm/ssv6xxx/ssv6051/
+-
+-include $(SSV_PATH)/ssv6051.cfg
+-include $(SSV_PATH)/platform-config.mak
++include ${KBUILD_TOP}/ssv6051.cfg
++include ${KBUILD_TOP}/platform-config.mak
+
+ PWD := $(shell pwd)
+
+@@ -69,7 +67,7 @@ obj-$(CONFIG_SSV6200_CORE) += $(KMODULE_NAME).o
+ all:module strip
+ 
+ module:
+-	make  -C $(SSV_KERNEL_PATH) ARCH=$(SSV_ARCH) CROSS_COMPILE=$(SSV_CROSS) \
++	$(MAKE) -C $(SSV_KERNEL_PATH) ARCH=$(SSV_ARCH) CROSS_COMPILE=$(SSV_CROSS) \
+ 	EXTRA_CFLAGS="$(EXTRA_CFLAGS)" M=$(PWD) modules
+ 
+ install:
+@@ -92,6 +90,6 @@ ifneq ($(SSV_STRIP),)
+ endif
+ 
+ clean:
+-	make -C $(SSV_KERNEL_PATH) ARCH=$(SSV_ARCH) CROSS_COMPILE=$(SSV_CROSS) \
++	$(MAKE) -C $(SSV_KERNEL_PATH) ARCH=$(SSV_ARCH) CROSS_COMPILE=$(SSV_CROSS) \
+ 	M=$(PWD) clean
+ 	rm $(DEF_PARSER_H)
+diff --git a/firmware/ssv6051-wifi.cfg b/firmware/ssv6051-wifi.cfg
+index 6c3a823..9c623a0 100755
+--- a/firmware/ssv6051-wifi.cfg
++++ b/firmware/ssv6051-wifi.cfg
+@@ -11,7 +11,7 @@
+ # Priority.3 default firmware
+ ##################################################
+
+-firmware_path = /system/etc/wifi/ssv6051/
++firmware_path = /usr/lib/firmware/ssv6051/
+
+ ############################################################
+ # MAC address
+
+diff --git a/platform-config.mak b/platform-config.mak
+index bf35b70..f02e2b5 100755
+--- a/platform-config.mak
++++ b/platform-config.mak
+@@ -5,7 +5,7 @@ CONFIG_SSV6200_CORE=m
+ ###########################################################################
+ # Compiler options                                                        #
+ ###########################################################################
+-ccflags-y += -Werror
++# ccflags-y += -Werror
+ 
+ # Enable -g to help debug. Deassembly from .o to .S would help to track to 
+ # the problomatic line from call stack dump.
+diff --git a/ssv6051.cfg b/ssv6051.cfg
+index 7cf12c2..a6960fa 100755
+--- a/ssv6051.cfg
++++ b/ssv6051.cfg
+@@ -16,6 +16,6 @@ ccflags-y += -DCONFIG_SSV_RSSI
+ #SSV_CROSS = $(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+ #SSV_KERNEL_PATH = $(ANDROID_BUILD_TOP)/out/target/product/p201/obj/KERNEL_OBJ/
+ 
+-SSV_ARCH = arm64
++#SSV_ARCH = arm64
+ #KMODDESTDIR = $(MODDESTDIR)
+ 
+diff --git a/ssvdevice/ssvdevice.c b/ssvdevice/ssvdevice.c
+index ff4305e..375827f 100755
+--- a/ssvdevice/ssvdevice.c
++++ b/ssvdevice/ssvdevice.c
+@@ -35,7 +35,7 @@
+ MODULE_AUTHOR("iComm Semiconductor Co., Ltd");
+ MODULE_DESCRIPTION("Shared library for SSV wireless LAN cards.");
+ MODULE_LICENSE("Dual BSD/GPL");
+-static char *stacfgpath = NULL;
++static char *stacfgpath = "/usr/lib/firmware/ssv6051/ssv6051-wifi.cfg";
+ EXPORT_SYMBOL(stacfgpath);
+ module_param(stacfgpath, charp, 0000);
+ MODULE_PARM_DESC(stacfgpath, "Get path of sta cfg");

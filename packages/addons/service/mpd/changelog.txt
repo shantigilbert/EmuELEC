@@ -1,3 +1,7 @@
+114
+- Update to version 0.23.8
+- mpd-mpc: update to 0.34
+
 113
 - Update to version 0.23.5
 - libmpdclient: update to 2.20

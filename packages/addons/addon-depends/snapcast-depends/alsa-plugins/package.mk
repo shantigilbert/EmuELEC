@@ -3,8 +3,8 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="alsa-plugins"
-PKG_VERSION="1.2.6"
-PKG_SHA256="068818a4b55d8c029daa00015d853d45113f56b224b7c64e1e117988c825b2a0"
+PKG_VERSION="1.2.7.1"
+PKG_SHA256="8c337814954bb7c167456733a6046142a2931f12eccba3ec2a4ae618a3432511"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.alsa-project.org/"
 PKG_URL="ftp://ftp.alsa-project.org/pub/plugins/${PKG_NAME}-${PKG_VERSION}.tar.bz2"

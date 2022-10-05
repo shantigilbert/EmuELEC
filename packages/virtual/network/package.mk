@@ -30,6 +30,10 @@ if [ "${WIREGUARD_SUPPORT}" = "yes" ]; then
   fi
 fi
 
+if [ "${ISCSI_SUPPORT}" = "yes" ]; then
+  PKG_DEPENDS_TARGET+=" open-iscsi"
+fi
+
 # nss needed by inputstream.adaptive, chromium etc.
 if [ "${TARGET_ARCH}" = "x86_64" ] || [ "${TARGET_ARCH}" = "arm" ]; then
   PKG_DEPENDS_TARGET+=" nss"

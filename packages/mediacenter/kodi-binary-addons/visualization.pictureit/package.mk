@@ -5,7 +5,7 @@
 PKG_NAME="visualization.pictureit"
 PKG_VERSION="20.0.0-Nexus"
 PKG_SHA256="3ef73a13a4a6ed1484482c90557652ce5a1e3b04b144e2e9e893f2c1e5a1a7bf"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="x86_64"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"

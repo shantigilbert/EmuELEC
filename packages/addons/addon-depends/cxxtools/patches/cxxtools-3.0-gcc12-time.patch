@@ -1,0 +1,11 @@
+https://bugs.gentoo.org/851837
+--- a/src/timer.cpp
++++ b/src/timer.cpp
+@@ -27,6 +27,7 @@
+ #include "cxxtools/clock.h"
+ #include "cxxtools/selector.h"
+ #include "cxxtools/datetime.h"
++#include <ctime>
+ #include <stdexcept>
+ 
+ namespace cxxtools

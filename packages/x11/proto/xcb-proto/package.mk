@@ -3,8 +3,8 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="xcb-proto"
-PKG_VERSION="1.14.1"
-PKG_SHA256="f04add9a972ac334ea11d9d7eb4fc7f8883835da3e4859c9afa971efdf57fcc3"
+PKG_VERSION="1.15.2"
+PKG_SHA256="7072beb1f680a2fe3f9e535b797c146d22528990c72f63ddb49d2f350a3653ed"
 PKG_LICENSE="OSS"
 PKG_SITE="https://www.X.org"
 PKG_URL="https://xorg.freedesktop.org/archive/individual/proto/${PKG_NAME}-${PKG_VERSION}.tar.xz"

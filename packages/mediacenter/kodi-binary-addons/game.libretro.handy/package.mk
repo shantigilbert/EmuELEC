@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="game.libretro.handy"
-PKG_VERSION="0.97.0.25-Matrix"
-PKG_SHA256="60ec795795c5ca96981c20f2b800a62579e068b7aa2f5aa45dd410f00d29303a"
+PKG_VERSION="0.97.0.27-Matrix"
+PKG_SHA256="48f16806fcda3943cb505faddf7d065494a0769f45536c8b3a03c864f7605d0e"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

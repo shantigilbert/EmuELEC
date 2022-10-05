@@ -12,19 +12,21 @@ diff --git a/gfx/video_thread_wrapper.c b/gfx/video_thread_wrapper.c
 index 9052130198..36028a6ec4 100644
 --- a/gfx/video_thread_wrapper.c
 +++ b/gfx/video_thread_wrapper.c
-@@ -568,7 +568,7 @@ static bool video_thread_frame(void *data, const void *frame_,
-     * still working on last frame. */
-    if (!thr->frame.updated)
-    {
+@@ -612,7 +612,7 @@
+       unsigned copy_stride = width *
+          (thr->info.rgb32 ? sizeof(uint32_t) : sizeof(uint16_t));
+ 
 -      if (src)
 +      if (src && src != dst)
        {
           unsigned h;
           for (h = 0; h < height; h++, src += pitch, dst += copy_stride)
-@@ -1109,6 +1109,20 @@ static uint32_t thread_get_flags(void *data)
-    return thr->poke->get_flags(thr->driver_data);
- }
+@@ -1248,6 +1248,20 @@
+       return thr->poke->get_flags(thr->driver_data);
  
+    return 0;
++}
++
 +static bool thread_get_current_software_framebuffer(void *data,
 +      struct retro_framebuffer *framebuffer)
 +{
@@ -37,18 +39,16 @@ index 9052130198..36028a6ec4 100644
 +   framebuffer->format = thr->info.rgb32 ? RETRO_PIXEL_FORMAT_XRGB8888 : RETRO_PIXEL_FORMAT_RGB565;
 +
 +   return true;
-+}
-+
+ }
+ 
  static const video_poke_interface_t thread_poke = {
-    thread_get_flags,
-    thread_load_texture,
-@@ -1225,7 +1225,7 @@ static const video_poke_interface_t thread_poke = {
+@@ -1270,7 +1284,7 @@
+    thread_show_mouse,
     thread_grab_mouse_toggle,
-
     thread_get_current_shader,
--   NULL,                      /* get_current_software_framebuffer */
+-   NULL, /* get_current_software_framebuffer */
 +   thread_get_current_software_framebuffer,
-    NULL,                      /* get_hw_render_interface */
+    NULL, /* get_hw_render_interface */
     thread_set_hdr_max_nits,
     thread_set_hdr_paper_white_nits,
 -- 

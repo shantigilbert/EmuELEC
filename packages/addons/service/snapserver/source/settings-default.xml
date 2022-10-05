@@ -3,6 +3,8 @@
     <setting id="ss_ni" default="true">0</setting>
     <setting id="ss_sp" default="true">1704</setting>
     <setting id="ss_st" default="true">AirPlay</setting>
+    <setting id="ss_ln" default="true">Snapcast</setting>
+    <setting id="ss_lp" default="true">0</setting>
     <setting id="ss_eh" default="true">false</setting>
     <setting id="ss_hp" default="true">1780</setting>
     <setting id="ss_ha" default="true">0.0.0.0</setting>

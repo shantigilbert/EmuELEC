@@ -1,0 +1,21 @@
+diff -Naur bluez-5.7/configure.ac bluez-5.7.patch/configure.ac
+--- bluez-5.7/configure.ac	2013-06-26 18:17:07.000000000 +0200
++++ bluez-5.7.patch/configure.ac	2013-07-12 20:21:17.000000000 +0200
+@@ -238,10 +238,13 @@
+ 	prefix="${ac_default_prefix}"
+ fi
+ 
+-if (test "$localstatedir" = '${prefix}/var'); then
+-	storagedir="${prefix}/var/lib/bluetooth"
+-else
+-	storagedir="${localstatedir}/lib/bluetooth"
++
++if (test "x$storagedir" = 'x'); then
++	if (test "$localstatedir" = '${prefix}/var'); then
++		storagedir="${prefix}/var/lib/bluetooth"
++	else
++		storagedir="${localstatedir}/lib/bluetooth"
++	fi
+ fi
+ AC_DEFINE_UNQUOTED(STORAGEDIR, "${storagedir}",
+ 			[Directory for the storage files])

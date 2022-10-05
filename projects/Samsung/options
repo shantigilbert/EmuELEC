@@ -42,9 +42,6 @@
 # setup project defaults
 ################################################################################
 
-  # build and install ALSA Audio support (yes / no)
-    ALSA_SUPPORT="yes"
-
   # OpenGL(X) implementation to use (no / mesa)
     OPENGL="no"
 
@@ -68,7 +65,7 @@
   # additional packages to install:
   # Space separated list is supported,
   # e.g. ADDITIONAL_PACKAGES="PACKAGE1 PACKAGE2"
-    ADDITIONAL_PACKAGES="dtc"
+    ADDITIONAL_PACKAGES="dtc emmctool"
 
   # additional drivers to install:
   # for a list of additional drivers see packages/linux-drivers

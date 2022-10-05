@@ -1,0 +1,17 @@
+--- a/libinstaller/linuxioctl.h	2022-07-17 12:45:43.459729359 +0000
++++ b/libinstaller/linuxioctl.h	2022-07-17 12:58:50.204815753 +0000
+@@ -16,7 +16,13 @@
+ #include <linux/fd.h>		/* Floppy geometry */
+ #include <linux/hdreg.h>	/* Hard disk geometry */
+ 
+-#include <linux/fs.h>		/* FIGETBSZ, FIBMAP, FS_IOC_* */
++#define FIBMAP	   _IO(0x00,1)	/* bmap access */
++#define FIGETBSZ   _IO(0x00,2)	/* get the block size used for bmap */
++
++#define	FS_IOC_GETFLAGS			_IOR('f', 1, long)
++#define	FS_IOC_SETFLAGS			_IOW('f', 2, long)
++
++#define FS_IMMUTABLE_FL			0x00000010 /* Immutable file */
+ 
+ #undef SECTOR_SIZE		/* Defined in msdos_fs.h for no good reason */
+ #undef SECTOR_BITS

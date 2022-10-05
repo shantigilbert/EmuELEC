@@ -1,0 +1,170 @@
+From e249c43741779ae7dd6834f6840384257d4c3dd8 Mon Sep 17 00:00:00 2001
+From: Mike Crowe <mac@mcrowe.com>
+Date: Fri, 6 Nov 2020 15:22:37 +0000
+Subject: [PATCH] [SV 45763] Fix large command line on POSIX systems
+
+When presented with a very long command line (as is common when linking
+a large number of files with absolute paths in a deep subdirectory),
+make fails to execute the command as it doesn't split the command line
+to fit within the limits.
+
+This is based on a fix for Debian bug 688601[1] by Adam Conrad applied
+by Manoj Srivastava originally applied for Debian make-dfsg 4.0-5 in
+2014 but dropped in 2018 (it seems under the incorrect assumption that
+it had been accepted upstream.)
+
+I've tweaked Adam's original patch so that it compiles successfully with
+-Werror on top of current master. This required:
+
+* moving the eval_line declaration to the top of the block, so I moved
+  the macros too
+* using a const variable when iterating over the shell
+* adding a cast to avoid a signed/unsigned mismatch.
+
+As suggested in the Savannah bug report[2], I've added a test case that
+fails without the rest of the patch. I'm not sure what the consequences
+of running the test on non-POSIX targets would be and whether it needs
+marking as an expected failure.
+
+* src/job.c (construct_command_argv_internal): support running commands
+longer than MAX_ARG_STRLEN
+* tests/scripts/features/long_command_line: add test for such a command
+* configure.ac: check for now-required sys/user.h and linux/binfmts.h
+headers
+
+[1] https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=688601
+[2] https://savannah.gnu.org/bugs/?45763#comment2
+---
+ src/job.c                                | 52 +++++++++++++++++++++++-
+ tests/scripts/features/long_command_line | 30 ++++++++++++++
+ 2 files changed, 81 insertions(+), 1 deletions(-)
+ create mode 100644 tests/scripts/features/long_command_line
+
+diff --git a/src/job.c b/src/job.c
+index 3bcec38..734c591 100644
+--- a/src/job.c
++++ b/src/job.c
+@@ -26,6 +26,12 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
+ #include "variable.h"
+ #include "os.h"
+ 
++#include <sys/user.h>
++#include <linux/binfmts.h>
++#ifndef PAGE_SIZE
++# define PAGE_SIZE (sysconf(_SC_PAGESIZE))
++#endif
++
+ /* Default shell to use.  */
+ #ifdef WINDOWS32
+ # ifdef HAVE_STRINGS_H
+@@ -3228,6 +3236,15 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
+     size_t sflags_len = shellflags ? strlen (shellflags) : 0;
+ #ifdef WINDOWS32
+     char *command_ptr = NULL; /* used for batch_mode_shell mode */
++#endif
++    char *args_ptr;
++#ifdef MAX_ARG_STRLEN
++    static char eval_line[] = "eval\\ \\\"set\\ x\\;\\ shift\\;\\ ";
++#define ARG_NUMBER_DIGITS 5
++#define EVAL_LEN (sizeof(eval_line)-1 + shell_len + 4                   \
++                  + (7 + ARG_NUMBER_DIGITS) * 2 * line_len / (MAX_ARG_STRLEN - 2))
++#else
++#define EVAL_LEN 0
+ #endif
+ 
+ # ifdef __EMX__ /* is this necessary? */
+@@ -3395,7 +3412,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
+       }
+ 
+     new_line = xmalloc ((shell_len*2) + 1 + sflags_len + 1
+-                        + (line_len*2) + 1);
++                        + (line_len*2) + 1 + EVAL_LEN);
+     ap = new_line;
+     /* Copy SHELL, escaping any characters special to the shell.  If
+        we don't escape them, construct_command_argv_internal will
+@@ -3415,6 +3432,31 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
+ #ifdef WINDOWS32
+     command_ptr = ap;
+ #endif
++
++#if !defined (WINDOWS32) && defined (MAX_ARG_STRLEN)
++    if (unixy_shell && line_len > MAX_ARG_STRLEN)
++      {
++       const char *q;
++       unsigned j;
++       memcpy (ap, eval_line, sizeof (eval_line) - 1);
++       ap += sizeof (eval_line) - 1;
++       for (j = 1; j <= 2 * line_len / (MAX_ARG_STRLEN - 2); j++)
++         ap += sprintf (ap, "\\$\\{%u\\}", j);
++       *ap++ = '\\';
++       *ap++ = '"';
++       *ap++ = ' ';
++       /* Copy only the first word of SHELL to $0.  */
++       for (q = shell; *q != '\0'; ++q)
++         {
++           if (isspace ((unsigned char)*q))
++             break;
++           *ap++ = *q;
++         }
++       *ap++ = ' ';
++      }
++#endif
++    args_ptr = ap;
++
+     for (p = line; *p != '\0'; ++p)
+       {
+         if (restp != NULL && *p == '\n')
+@@ -3462,6 +3504,14 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
+           }
+ #endif
+         *ap++ = *p;
++#if !defined (WINDOWS32) && defined (MAX_ARG_STRLEN)
++        if (unixy_shell && line_len > MAX_ARG_STRLEN
++            && (ap - args_ptr > (long)(MAX_ARG_STRLEN - 2)))
++         {
++           *ap++ = ' ';
++           args_ptr = ap;
++         }
++#endif
+       }
+     if (ap == new_line + shell_len + sflags_len + 2)
+       {
+diff --git a/tests/scripts/features/long_command_line b/tests/scripts/features/long_command_line
+new file mode 100644
+index 0000000..3899ac8
+--- /dev/null
++++ b/tests/scripts/features/long_command_line
+@@ -0,0 +1,30 @@
++#                                                                    -*-perl-*-
++$description = "Test long command line.";
++
++$details = "";
++
++# Variable names containing UTF8 characters
++run_make_test(q!
++# 49 characters
++ARGS:=one two three four five six seven eight niner ten
++# 49*4+3 = 199 characters
++ARGS:=$(ARGS) $(ARGS) $(ARGS) $(ARGS)
++# 199*4+3 = 799 characters
++ARGS:=$(ARGS) $(ARGS) $(ARGS) $(ARGS)
++# 799*4+3 = 3199 characters
++ARGS:=$(ARGS) $(ARGS) $(ARGS) $(ARGS)
++# 3199*4+3 = 12799 characters
++ARGS:=$(ARGS) $(ARGS) $(ARGS) $(ARGS)
++# 12799*4+3 = 51199 characters
++ARGS:=$(ARGS) $(ARGS) $(ARGS) $(ARGS)
++# 51199*4+3 = 204799 characters
++ARGS:=$(ARGS) $(ARGS) $(ARGS) $(ARGS)
++# 24799*2+1 = 409599 characters
++#ARGS:=$(ARGS) $(ARGS)
++
++test:
++	@: $(ARGS)
++!,
++              '', "");
++
++1;
+-- 
+2.20.1
+

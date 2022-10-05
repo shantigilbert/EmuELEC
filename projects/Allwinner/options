@@ -31,9 +31,6 @@
 # setup project defaults
 ################################################################################
 
-  # build and install ALSA Audio support (yes / no)
-    ALSA_SUPPORT="yes"
-
   # OpenGL(X) implementation to use (no / mesa)
     OPENGL="no"
 

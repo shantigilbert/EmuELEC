@@ -1,0 +1,14 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2022-present Team CoreELEC (https://coreelec.org)
+
+if grep -q "sc2" /proc/device-tree/compatible; then
+  SOC="S905X4"
+elif grep -q "t7" /proc/device-tree/compatible; then
+  SOC="A311D2"
+fi
+
+if [ -n "$SOC" ]; then
+  mkdir -p /var/lib
+  ln -sfn /usr/lib/ta/${SOC} /var/lib/teetz
+fi

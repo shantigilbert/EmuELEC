@@ -1,0 +1,26 @@
+From 50f34d1b65c2fb6c557e2b802e908986e8ec0b74 Mon Sep 17 00:00:00 2001
+From: Stefan Saraev <stefan@saraev.ca>
+Date: Fri, 7 Feb 2014 12:50:29 +0200
+Subject: [PATCH] 046d:c52b Logitech, Inc. Unifying Receiver
+
+---
+ tools/hid2hci.rules |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/tools/hid2hci.rules b/tools/hid2hci.rules
+index 7db4572..1feca6e 100644
+--- a/tools/hid2hci.rules
++++ b/tools/hid2hci.rules
+@@ -16,6 +16,9 @@ KERNEL=="hiddev*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c70[345abce]|c71[
+ # Logitech, Inc. diNovo Edge Keyboard
+ KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c714", \
+   RUN+="hid2hci --method=logitech-hid --devpath=%p"
++# Logitech, Inc. Unifying Receiver
++KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", \
++  RUN+="hid2hci --method=logitech-hid --devpath=%p"
+ 
+ ENV{DEVTYPE}!="usb_device", GOTO="hid2hci_end"
+ 
+-- 
+1.7.2.5
+

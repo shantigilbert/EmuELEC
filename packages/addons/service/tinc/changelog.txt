@@ -1,3 +1,6 @@
+106
+- Update to 1.1pre18
+
 105
 - Update to 1.1pre17
 

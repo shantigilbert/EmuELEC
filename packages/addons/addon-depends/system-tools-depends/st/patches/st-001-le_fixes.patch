@@ -4,7 +4,7 @@
 
 --- a/x.c	2020-06-19 11:29:45.000000000 +0200
 +++ b/x.c	2020-06-26 01:07:13.000000000 +0200
-@@ -752,6 +752,7 @@
+@@ -754,6 +754,7 @@
  xloadcolor(int i, const char *name, Color *ncolor)
  {
  	XRenderColor color = { .alpha = 0xffff };
@@ -12,7 +12,7 @@
  
  	if (!name) {
  		if (BETWEEN(i, 16, 255)) { /* 256 color */
-@@ -769,6 +770,14 @@
+@@ -771,6 +772,14 @@
  			name = colorname[i];
  	}
  
@@ -27,16 +27,3 @@
  	return XftColorAllocName(xw.dpy, xw.vis, xw.cmap, name, ncolor);
  }
  
-@@ -1585,8 +1594,10 @@
- 	XTextProperty prop;
- 	DEFAULT(p, opt_title);
- 
--	Xutf8TextListToTextProperty(xw.dpy, &p, 1, XUTF8StringStyle,
--			&prop);
-+	if (Xutf8TextListToTextProperty(xw.dpy, &p, 1, XUTF8StringStyle,
-+						&prop) < 0)
-+		return;
-+
- 	XSetWMName(xw.dpy, xw.win, &prop);
- 	XSetTextProperty(xw.dpy, xw.win, &prop, xw.netwmname);
- 	XFree(prop.value);

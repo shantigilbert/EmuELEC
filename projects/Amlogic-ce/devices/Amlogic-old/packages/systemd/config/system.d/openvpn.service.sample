@@ -1,0 +1,44 @@
+[Unit]
+Description=OpenVPN Autorun Service
+
+[Service]
+Type=forking
+Requires=network-online.service
+After=network-online.service
+ExecStart=/usr/sbin/openvpn --daemon --config /storage/.config/openvpn.config
+Restart=always
+RestartSec=15
+
+[Install]
+WantedBy=kodi.target
+
+# NOTES:
+#
+# 1) Edit /storage/.config/openvpn.config to the .config/.conf/.ovpn file
+# from your VPN service provider and test it works first by connecting at
+# the console:
+# 
+#   /usr/sbin/openvpn --daemon --config /storage/.config/openvpn.config
+#
+# 2) The openvpn.service file must be addeded to the active systemd config 
+# before it will work. This is done by running:
+#  
+#   systemctl enable openvpn.service
+# 
+# 3) If you suspend/resume your LibreELEC system you will need to stop and
+# restart the connection with a systemd *.power script, e.g.
+#
+#   mkdir -p /storage/.config/sleep.d
+#   nano /storage/.config/sleep.d/01-openvpn.power
+# 
+# Copy the sample script below. Remove # marks except for #!/bin/bash
+#
+#   #!/bin/sh
+#   case "$1" in
+#     pre)
+#     systemctl stop openvpn.service
+#     ;;
+#     post)
+#     systemctl start openvpn.service
+#     ;;
+#   esac

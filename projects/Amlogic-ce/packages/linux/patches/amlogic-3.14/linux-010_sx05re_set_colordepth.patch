@@ -1,0 +1,19 @@
+--- a/drivers/amlogic/display/osd/osd_fb.c
++++ b/drivers/amlogic/display/osd/osd_fb.c
+@@ -215,11 +215,11 @@
+ 		.yoffset         = 0,
+ 		.bits_per_pixel = 32,
+ 		.grayscale       = 0,
+-		.red             = {0, 0, 0},
+-		.green           = {0, 0, 0},
+-		.blue            = {0, 0, 0},
+-		.transp          = {0, 0, 0},
+-		.nonstd          = 0,
++		.red             = {16, 8, 0},
++		.green           = {8, 8, 0},
++		.blue            = {0, 8, 0},
++		.transp          = {24, 0, 0},
++		.nonstd          = 1,
+ 		.activate        = FB_ACTIVATE_NOW,
+ 		.height          = -1,
+ 		.width           = -1,

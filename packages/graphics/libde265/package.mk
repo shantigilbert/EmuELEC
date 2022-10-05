@@ -10,18 +10,8 @@ PKG_URL="https://github.com/strukturag/libde265/releases/download/v${PKG_VERSION
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="Open h.265 video codec implementation."
 PKG_BUILD_FLAGS="+pic"
-PKG_TOOLCHAIN="configure"
 
-PKG_CONFIGURE_OPTS_TARGET="--enable-static \
-                           --disable-shared \
-                           --disable-encoder \
-                           --disable-sherlock265"
-
-pre_configure_target() {
-  cd ..
-  ./autogen.sh
-}
-
-post_configure_target() {
-  libtool_remove_rpath libtool
-}
+PKG_CMAKE_OPTS_TARGET="-DBUILD_SHARED_LIBS=OFF \
+                       -DENABLE_SDL=OFF \
+                       -DENABLE_DECODER=OFF \
+                       -DENABLE_ENCODER=OFF"

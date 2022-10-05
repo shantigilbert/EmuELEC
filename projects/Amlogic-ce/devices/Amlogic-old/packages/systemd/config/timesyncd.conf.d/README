@@ -1,0 +1,86 @@
+TIMESYNCD.CONF(5)               timesyncd.conf               TIMESYNCD.CONF(5)
+
+NAME
+       timesyncd.conf, timesyncd.conf.d - Network Time Synchronization
+       configuration files
+
+SYNOPSIS
+       /etc/systemd/timesyncd.conf
+
+       /etc/systemd/timesyncd.conf.d/*.conf
+
+       /run/systemd/timesyncd.conf.d/*.conf
+
+       /usr/lib/systemd/timesyncd.conf.d/*.conf
+
+DESCRIPTION
+       These configuration files control NTP network time synchronization. See
+       systemd.syntax(5) for a general description of the syntax.
+
+CONFIGURATION DIRECTORIES AND PRECEDENCE
+       The default configuration is defined during compilation, so a
+       configuration file is only needed when it is necessary to deviate from
+       those defaults. By default, the configuration file in /etc/systemd/
+       contains commented out entries showing the defaults as a guide to the
+       administrator. This file can be edited to create local overrides.
+
+       When packages need to customize the configuration, they can install
+       configuration snippets in /usr/lib/systemd/*.conf.d/. Files in /etc/
+       are reserved for the local administrator, who may use this logic to
+       override the configuration files installed by vendor packages. The main
+       configuration file is read before any of the configuration directories,
+       and has the lowest precedence; entries in a file in any configuration
+       directory override entries in the single configuration file. Files in
+       the *.conf.d/ configuration subdirectories are sorted by their filename
+       in lexicographic order, regardless of which of the subdirectories they
+       reside in. When multiple files specify the same option, for options
+       which accept just a single value, the entry in the file with the
+       lexicographically latest name takes precedence. For options which
+       accept a list of values, entries are collected as they occur in files
+       sorted lexicographically. It is recommended to prefix all filenames in
+       those subdirectories with a two-digit number and a dash, to simplify
+       the ordering of the files.
+
+       To disable a configuration file supplied by the vendor, the recommended
+       way is to place a symlink to /dev/null in the configuration directory
+       in /etc/, with the same filename as the vendor configuration file.
+
+OPTIONS
+       The following settings are configured in the "[Time]" section:
+
+       NTP=
+           A space-separated list of NTP server host names or IP addresses.
+           During runtime this list is combined with any per-interface NTP
+           servers acquired from systemd-networkd.service(8).
+           systemd-timesyncd will contact all configured system or
+           per-interface servers in turn until one is found that responds.
+           When the empty string is assigned, the list of NTP servers is
+           reset, and all assignments prior to this one will have no effect.
+           This setting defaults to an empty list.
+
+       FallbackNTP=
+           A space-separated list of NTP server host names or IP addresses to
+           be used as the fallback NTP servers. Any per-interface NTP servers
+           obtained from systemd-networkd.service(8) take precedence over this
+           setting, as do any servers set via NTP= above. This setting is
+           hence only used if no other NTP server information is known. When
+           the empty string is assigned, the list of NTP servers is reset, and
+           all assignments prior to this one will have no effect. If this
+           option is not given, a compiled-in list of NTP servers is used
+           instead.
+
+       RootDistanceMaxSec=
+           Maximum acceptable root distance. Takes a time value (in seconds).
+           Defaults to 5 seconds.
+
+       PollIntervalMinSec=, PollIntervalMaxSec=
+           The minimum and maximum poll intervals for NTP messages. Each
+           setting takes a time value (in seconds).  PollIntervalMinSec= must
+           not be smaller than 16 seconds.  PollIntervalMaxSec= must be larger
+           than PollIntervalMinSec=.  PollIntervalMinSec= defaults to 32
+           seconds, and PollIntervalMaxSec= defaults to 2048 seconds.
+
+SEE ALSO
+       systemd(1), systemd-timesyncd.service(8), systemd-networkd.service(8)
+
+systemd 241                                                  TIMESYNCD.CONF(5)

@@ -3,11 +3,11 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="binutils"
-PKG_VERSION="2.35.1"
-PKG_SHA256="3ced91db9bf01182b7e420eab68039f2083aed0a214c0424e257eae3ddee8607"
+PKG_VERSION="2.39"
+PKG_SHA256="645c25f563b8adc0a81dbd6a41cffbf4d37083a382e02d5d3df4f65c09516d00"
 PKG_LICENSE="GPL"
-PKG_SITE="http://www.gnu.org/software/binutils/"
-PKG_URL="http://ftp.gnu.org/gnu/binutils/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+PKG_SITE="https://www.gnu.org/software/binutils/"
+PKG_URL="https://ftp.gnu.org/gnu/binutils/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_HOST="ccache:host bison:host flex:host linux:host"
 PKG_DEPENDS_TARGET="toolchain zlib binutils:host"
 PKG_LONGDESC="A GNU collection of binary utilities."
@@ -56,13 +56,15 @@ pre_configure_host() {
 
 make_host() {
   make configure-host
-  make
+  # override the makeinfo binary with true - this does not build the documentation
+  make MAKEINFO=true
 }
 
 makeinstall_host() {
   cp -v ../include/libiberty.h ${SYSROOT_PREFIX}/usr/include
   make -C bfd install # fix parallel build with libctf requiring bfd
-  make install
+  # override the makeinfo binary with true - this does not build the documentation
+  make HELP2MAN=true MAKEINFO=true install
 }
 
 make_target() {

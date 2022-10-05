@@ -1,0 +1,3 @@
+# o2.cz bluetooth remote
+evdev:input:b0005v0217p0000e0110*
+ KEYBOARD_KEY_c0041=enter		# OK button

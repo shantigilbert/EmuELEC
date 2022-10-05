@@ -10,7 +10,7 @@ PKG_ARCH="any"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/librespot-org/librespot/"
 PKG_URL="https://github.com/librespot-org/librespot/archive/v${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain alsa-lib avahi pulseaudio rust"
+PKG_DEPENDS_TARGET="toolchain alsa-lib avahi pulseaudio cargo:host"
 PKG_SECTION="service"
 PKG_SHORTDESC="Librespot: play Spotify through Kodi using a Spotify app as a remote"
 PKG_LONGDESC="Librespot (${PKG_VERSION_DATE}) lets you play Spotify through Kodi using a Spotify app as a remote."
@@ -23,17 +23,18 @@ PKG_ADDON_REQUIRES="script.module.requests:0.0.0"
 PKG_MAINTAINER="Anton Voyl (awiouy)"
 
 make_target() {
-  . $(get_build_dir rust)/cargo/env
   cargo build \
+    --target ${TARGET_NAME} \
     --release \
     --no-default-features \
     --features "alsa-backend pulseaudio-backend with-dns-sd"
-  ${STRIP} ${PKG_BUILD}/.${TARGET_NAME}/*/release/librespot
+
+  ${STRIP} ${PKG_BUILD}/.${TARGET_NAME}/target/${TARGET_NAME}/release/librespot
 }
 
 addon() {
   mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
-    cp ${PKG_BUILD}/.${TARGET_NAME}/*/release/librespot \
+    cp ${PKG_BUILD}/.${TARGET_NAME}/target/${TARGET_NAME}/release/librespot \
        ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
 
   mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/lib

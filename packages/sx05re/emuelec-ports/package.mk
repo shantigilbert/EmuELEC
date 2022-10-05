@@ -35,7 +35,12 @@ PKG_DEPENDS_TARGET+=" commander-genius \
                 hurrican \
                 cdogs-sdl \
                 abuse \
-                fheroes2"
+                fheroes2 \
+                augustus \
+                xash3d \
+                sonicmania \
+                shovelknight \
+                tmntsr"
 
 amlogicports=""
 hhports=" openjazz"

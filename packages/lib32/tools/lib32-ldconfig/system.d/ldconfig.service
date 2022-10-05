@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2022-present 7Ji (https://github.com/7Ji)
+
+[Unit]
+Description=Rebuild Dynamic Linker Cache On Bootup
+After=local-fs.target libmali.service
+Before=ldconfig.path
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ldconfig -X
+
+[Install]
+WantedBy=multi-user.target

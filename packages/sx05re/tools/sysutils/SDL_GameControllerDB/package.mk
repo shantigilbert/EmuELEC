@@ -7,7 +7,7 @@ PKG_SHA256="af45411e7b4a24b91f267cf2281c63df209e7552f41f29d9a4261a50363811e5"
 PKG_LICENSE="OSS"
 PKG_SITE="https://github.com/gabomdq/SDL_GameControllerDB"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET=""
+PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="A community sourced database of game controller mappings to be used with SDL2 Game Controller functionality"
 PKG_TOOLCHAIN="manual"
 

@@ -3,15 +3,18 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="samba"
-PKG_VERSION="4.13.17"
-PKG_SHA256="17bdb9ea60d30af22851c8e134d67b43a22fb1e20f159152a647c69dc2a58a68"
+PKG_VERSION="4.17.0"
+PKG_SHA256="04868ecda82fcbeda7b8bf519a2461a64d55c6e70efc6f6053b2fbba55f1823a"
 PKG_LICENSE="GPLv3+"
 PKG_SITE="https://www.samba.org"
 PKG_URL="https://download.samba.org/pub/samba/stable/${PKG_NAME}-${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain attr heimdal:host e2fsprogs Python3 libunwind zlib readline popt libaio connman gnutls wsdd2"
+PKG_DEPENDS_TARGET="toolchain attr heimdal:host e2fsprogs Python3 libunwind zlib readline popt libaio connman gnutls"
 PKG_NEED_UNPACK="$(get_pkg_directory heimdal) $(get_pkg_directory e2fsprogs)"
 PKG_LONGDESC="A free SMB / CIFS fileserver and client."
 PKG_BUILD_FLAGS="-gold"
+
+
+[[ "${DEVICE}" != "Amlogic-old" ]] && PKG_DEPENDS_TARGET+=" wsdd2"
 
 configure_package() {
   #PKG_WAF_VERBOSE="-v"
@@ -61,7 +64,6 @@ configure_package() {
                       --without-ad-dc \
                       --without-automount \
                       --without-cluster-support \
-                      --without-dnsupdate \
                       --without-fam \
                       --without-gettext \
                       --without-gpgme \
@@ -85,7 +87,7 @@ configure_package() {
   PKG_SAMBA_TARGET="smbclient,client/smbclient,smbtree,nmblookup,testparm"
 
   if [ "${SAMBA_SERVER}" = "yes" ]; then
-    PKG_SAMBA_TARGET+=",smbd/smbd,nmbd,smbpasswd"
+    PKG_SAMBA_TARGET+=",nmbd,rpcd_classic,rpcd_epmapper,rpcd_winreg,samba-dcerpcd,smbpasswd,smbd/smbd"
   fi
 }
 
@@ -123,12 +125,12 @@ pre_make_target() {
 }
 
 make_target() {
-  ./buildtools/bin/waf build ${PKG_WAF_VERBOSE} --targets=${PKG_SAMBA_TARGET} -j${CONCURRENCY_MAKE_LEVEL}
+  make ${PKG_SAMBA_TARGET} -j${CONCURRENCY_MAKE_LEVEL}
 }
 
 makeinstall_target() {
-  ./buildtools/bin/waf install ${PKG_WAF_VERBOSE} --destdir=${SYSROOT_PREFIX} --targets=smbclient -j${CONCURRENCY_MAKE_LEVEL}
-  ./buildtools/bin/waf install ${PKG_WAF_VERBOSE} --destdir=${INSTALL} --targets=${PKG_SAMBA_TARGET} -j${CONCURRENCY_MAKE_LEVEL}
+  PYTHONHASHSEED=1 WAF_MAKE=1 ./buildtools/bin/waf install ${PKG_WAF_VERBOSE} --destdir=${SYSROOT_PREFIX} --targets=smbclient -j${CONCURRENCY_MAKE_LEVEL}
+  PYTHONHASHSEED=1 WAF_MAKE=1 ./buildtools/bin/waf install ${PKG_WAF_VERBOSE} --destdir=${INSTALL} --targets=${PKG_SAMBA_TARGET} -j${CONCURRENCY_MAKE_LEVEL}
 }
 
 copy_directory_of_links() {
@@ -156,6 +158,12 @@ perform_manual_install() {
     mkdir -p ${INSTALL}/usr/sbin
       cp -L ${PKG_BUILD}/bin/smbd ${INSTALL}/usr/sbin
       cp -L ${PKG_BUILD}/bin/nmbd ${INSTALL}/usr/sbin
+
+    mkdir -p ${INSTALL}/usr/libexec/samba
+      cp -PR bin/default/source3/rpc_server/samba-dcerpcd ${INSTALL}/usr/libexec/samba
+      cp -PR bin/default/source3/rpc_server/rpcd_classic ${INSTALL}/usr/libexec/samba
+      cp -PR bin/default/source3/rpc_server/rpcd_epmapper ${INSTALL}/usr/libexec/samba
+      cp -PR bin/default/source3/rpc_server/rpcd_winreg ${INSTALL}/usr/libexec/samba
   fi
 }
 

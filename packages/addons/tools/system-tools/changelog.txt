@@ -1,3 +1,26 @@
+131
+- Add kmsxx (kmsprint, kmstest)
+
+130
+- bottom: update to 0.6.8
+- efivar: update to 38
+- evtest: update to 1.35
+- htop: update to 3.2.1
+- inotify-tools: update to 3.22.1.0
+- mc: update to 4.8.28
+- oniguruma: update to 6.9.8
+- screen: update to 4.9.0
+- sdparm: initial package
+- smartmontools: update to 7.3
+- st: update to 0.8.5
+- system-tools: 7z permissions
+- system-tools: add sdparm
+- unrar: update to 6.1.7
+- vim: update to 8.2.5052
+
+129
+- Fix (set) 7z/7za executable flag
+
 128
 - Add mmc-utils
 

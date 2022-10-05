@@ -48,6 +48,7 @@ makeinstall_target() {
 	mkdir -p ${INSTALL}/usr/bin/
 	mkdir -p ${INSTALL}/usr/config/emuelec/configs/rclone
 	cp ${PKG_BUILD}/rclone $INSTALL/usr/bin/
+	cp ${PKG_DIR}/bin/ra_rclone.sh $INSTALL/usr/bin
 	cp ${PKG_DIR}/config/emuelec-cloud-filter.cfg ${INSTALL}/usr/config/emuelec/configs/rclone/
 	ln -sf /emuelec/configs/rclone ${INSTALL}/usr/config/rclone
 }

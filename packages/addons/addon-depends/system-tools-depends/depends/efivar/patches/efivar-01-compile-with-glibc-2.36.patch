@@ -1,0 +1,13 @@
+--- a/src/util.h	2022-01-14 19:29:35.000000000 +0000
++++ b/src/util.h	2022-07-19 09:43:36.718759307 +0000
+@@ -23,7 +23,9 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <sys/ioctl.h>
+-#include <sys/mount.h>
++#define BLKGETSIZE _IO(0x12, 96) /* Return device size.  */
++#define BLKSSZGET  _IO(0x12,104) /* Get block device sector size.  */
++#define BLKGETSIZE64 _IOR(0x12,114,size_t) /* return device size.  */
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <tgmath.h>

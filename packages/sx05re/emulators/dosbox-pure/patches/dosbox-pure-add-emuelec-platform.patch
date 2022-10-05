@@ -10,7 +10,7 @@
 +BUILDDIR := release
 +CFLAGS   := -DNDEBUG -O3 -fno-ident
 +LDFLAGS  += -O3 -fno-ident
-+
++STRIPCMD = $(STRIP) --strip-all
 +CPUFLAGS := -mtune=cortex-a53 -mcpu=cortex-a53 -march=armv8-a+crc+fp+simd
 +   
 + ifneq (,$(findstring emuelec-hh,$(platform)))
@@ -20,7 +20,7 @@
 +   CPUFLAGS := -mtune=cortex-a72.cortex-a53 -mcpu=cortex-a72.cortex-a53 -march=armv8-a+crc+fp+simd
 + endif
 +
-+CFLAGS  += $(CPUFLAGS) -fpic -fomit-frame-pointer -fno-exceptions -fno-non-call-exceptions -Wno-psabi -Wno-format
++CFLAGS  += $(CPUFLAGS) -fpic -fomit-frame-pointer -Wno-psabi -Wno-format
 +LDFLAGS += $(CPUFLAGS) -lpthread -Wl,--gc-sections -shared
 +CXX = $(CC)
 +endif

@@ -1,0 +1,64 @@
+diff -Nur a/kernel/nv-vm.c b/kernel/nv-vm.c
+--- a/kernel/nv-vm.c	2019-12-11 22:04:24.000000000 +0000
++++ b/kernel/nv-vm.c	2022-04-25 01:28:55.889120175 +0000
+@@ -169,12 +169,12 @@
+ 
+ static inline int nv_map_sg(struct pci_dev *dev, struct scatterlist *sg)
+ {
+-    return pci_map_sg(dev, sg, 1, PCI_DMA_BIDIRECTIONAL);
++    return dma_map_sg(&dev->dev, sg, 1, DMA_BIDIRECTIONAL);
+ }
+ 
+ static inline void nv_unmap_sg(struct pci_dev *dev, struct scatterlist *sg)
+ {
+-    pci_unmap_sg(dev, sg, 1, PCI_DMA_BIDIRECTIONAL);
++    dma_unmap_sg(&dev->dev, sg, 1, DMA_BIDIRECTIONAL);
+ }
+ 
+ #define NV_MAP_SG_MAX_RETRIES 16
+--- a/kernel/nv-dma.c	2019-12-11 22:04:24.000000000 +0000
++++ b/kernel/nv-dma.c	2022-04-25 01:52:11.243235749 +0000
+@@ -136,10 +136,10 @@
+         return status;
+     }
+ 
+-    dma_map->sg_map_count = pci_map_sg(dma_map->dev,
++    dma_map->sg_map_count = dma_map_sg(&dma_map->dev->dev,
+             NV_DMA_MAP_SCATTERLIST(dma_map),
+             NV_DMA_MAP_SCATTERLIST_LENGTH(dma_map),
+-            PCI_DMA_BIDIRECTIONAL);
++            DMA_BIDIRECTIONAL);
+     if (dma_map->sg_map_count == 0)
+     {
+         nv_printf(NV_DBG_ERRORS,
+@@ -211,8 +211,8 @@
+ 
+     if (dma_map->sg_map_count != 0)
+     {
+-        pci_unmap_sg(dma_map->dev, NV_DMA_MAP_SCATTERLIST(dma_map),
+-                NV_DMA_MAP_SCATTERLIST_LENGTH(dma_map), PCI_DMA_BIDIRECTIONAL);
++        dma_unmap_sg(&dma_map->dev->dev, NV_DMA_MAP_SCATTERLIST(dma_map),
++                NV_DMA_MAP_SCATTERLIST_LENGTH(dma_map), DMA_BIDIRECTIONAL);
+     }
+ 
+     *priv = dma_map->user_pages;
+--- a/kernel/nv-drm.c	2022-04-25 01:59:40.255544206 +0000
++++ b/kernel/nv-drm.c	2022-04-25 02:08:28.231217905 +0000
+@@ -459,7 +459,7 @@
+ }
+ 
+ static int nv_drm_gem_vmap(struct drm_gem_object *gem,
+-                           struct dma_buf_map *map)
++                           struct iosys_map *map)
+ {
+     map->vaddr = nv_gem_prime_vmap(gem);
+     if (map->vaddr == NULL) {
+@@ -470,7 +470,7 @@
+ }
+ 
+ static void nv_drm_gem_vunmap(struct drm_gem_object *gem,
+-                              struct dma_buf_map *map)
++                              struct iosys_map *map)
+ {
+     nv_gem_prime_vunmap(gem, map->vaddr);
+     map->vaddr = NULL;

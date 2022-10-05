@@ -4,12 +4,13 @@
 # Copyright (C) 2020-present Team CoreELEC (https://coreelec.tv)
 
 PKG_NAME="kodi"
-PKG_VERSION="0ad3ca7d48483f2deb789dfbccb3c72735520a98"
-PKG_SHA256="bab8ef30a23959a752b17d6815f16382b9dd5e29cfc1c6e43e38d4c36640b93f"
+PKG_VERSION="1791c0e32448781207614cc83529f36ed3a66f00"
+PKG_SHA256="d5270c3960387b97467921f3da122c900d870770de15579f7962ad232d94d4ed"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"
 PKG_URL="https://github.com/CoreELEC/xbmc/archive/$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain JsonSchemaBuilder:host TexturePacker:host Python3 zlib systemd lzo pcre swig:host libass curl fontconfig fribidi tinyxml libjpeg-turbo freetype libcdio taglib libxml2 libxslt rapidjson sqlite ffmpeg crossguid libhdhomerun libfmt lirc libfstrcmp flatbuffers:host flatbuffers libudfread spdlog"
+PKG_DEPENDS_TARGET="toolchain JsonSchemaBuilder:host TexturePacker:host Python3 zlib systemd lzo pcre swig:host libass curl fontconfig fribidi tinyxml libjpeg-turbo freetype libcdio taglib libxml2 libxslt rapidjson sqlite ffmpeg crossguid libhdhomerun libfmt lirc libfstrcmp flatbuffers:host flatbuffers libudfread spdlog obu_util"
+PKG_DEPENDS_HOST="toolchain"
 PKG_LONGDESC="A free and open source cross-platform media player."
 PKG_BUILD_FLAGS="+speed"
 
@@ -24,7 +25,7 @@ post_unpack() {
 
   # don't build internal TexturePacker
   sed -i 's|set(INTERNAL_TEXTUREPACKER_INSTALLABLE TRUE)|set(INTERNAL_TEXTUREPACKER_INSTALLABLE FALSE)|' \
-    $(get_build_dir ${PKG_NAME})/cmake/modules/FindTexturePacker.cmake
+    $(get_build_dir ${PKG_NAME})/cmake/modules/buildtools/FindTexturePacker.cmake
 }
 
 configure_package() {
@@ -61,14 +62,14 @@ configure_package() {
     PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET $OPENGLES"
   fi
 
-  if [ "$ALSA_SUPPORT" = yes ]; then
+  if [ "$KODI_ALSA_SUPPORT" = yes ]; then
     PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET alsa-lib"
     KODI_ALSA="-DENABLE_ALSA=ON"
   else
     KODI_ALSA="-DENABLE_ALSA=OFF"
  fi
 
-  if [ "$PULSEAUDIO_SUPPORT" = yes ]; then
+  if [ "$KODI_PULSEAUDIO_SUPPORT" = yes ]; then
     PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET pulseaudio"
     KODI_PULSEAUDIO="-DENABLE_PULSEAUDIO=ON"
   else
@@ -180,12 +181,12 @@ configure_package() {
   if [ ! "$KODIPLAYER_DRIVER" = default ]; then
     PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET $KODIPLAYER_DRIVER libinput libxkbcommon"
     if [ "$OPENGLES_SUPPORT" = yes -a "$KODIPLAYER_DRIVER" = "$OPENGLES" ]; then
-      KODI_PLAYER="-DCORE_PLATFORM_NAME=gbm -DAPP_RENDER_SYSTEM=gles"
+      KODI_PLATFORM="-DCORE_PLATFORM_NAME=gbm -DAPP_RENDER_SYSTEM=gles"
       CFLAGS="$CFLAGS -DEGL_NO_X11"
       CXXFLAGS="$CXXFLAGS -DEGL_NO_X11"
       PKG_APPLIANCE_XML="$PKG_DIR/config/appliance-gbm.xml"
     elif [ "$KODIPLAYER_DRIVER" = libamcodec ]; then
-      KODI_PLAYER="-DCORE_PLATFORM_NAME=aml -DAPP_RENDER_SYSTEM=gles"
+      KODI_PLATFORM="-DCORE_PLATFORM_NAME=aml -DAPP_RENDER_SYSTEM=gles"
       PKG_APPLIANCE_XML_G12X="$PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/g12x/appliance.xml"
       PKG_APPLIANCE_XML_GXX="$PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/gxx/appliance.xml"
     fi
@@ -216,6 +217,7 @@ configure_package() {
                          -DENABLE_TESTING=OFF \
                          -DENABLE_INTERNAL_FLATBUFFERS=OFF \
                          -DENABLE_LCMS2=OFF \
+                         -DENABLE_INTERNAL_RapidJSON=OFF \
                          $PKG_KODI_USE_LTO \
                          $KODI_ARCH \
                          $KODI_NEON \
@@ -224,6 +226,7 @@ configure_package() {
                          $KODI_CEC \
                          $KODI_XORG \
                          $KODI_SAMBA \
+                         $KODI_PLATFORM \
                          $KODI_NFS \
                          $KODI_AVAHI \
                          $KODI_UPNP \
@@ -232,29 +235,61 @@ configure_package() {
                          $KODI_AIRTUNES \
                          $KODI_OPTICAL \
                          $KODI_BLURAY \
-                         $KODI_PLAYER"
+                         $KODI_ALSA \
+                         $KODI_PULSEAUDIO"
+}
+
+prepare_libdvd_library() {
+  # arg1 is library name libdvdcss/libdvdnav/libdvdread
+  local LIBRARY_VERSION="$(awk -F= '/VERSION=/ {print $2}' ${PKG_BUILD}/tools/depends/target/${1}/${1^^}-VERSION)"
+  local LIBRARY_SHA512="$(awk  -F= '/SHA512=/  {print $2}' ${PKG_BUILD}/tools/depends/target/${1}/${1^^}-VERSION)"
+  local LIBRARY_ARCHIVE="${SOURCES}/${1}/${1}-${LIBRARY_VERSION}.tar.gz"
+
+  if [ -f "${LIBRARY_ARCHIVE}" ]; then
+    local LIBRARY_ARCHIVE_SHA512="$(sha512sum "${LIBRARY_ARCHIVE}" | cut -d ' ' -f 1)"
+    if [ "${LIBRARY_ARCHIVE_SHA512}" = "${LIBRARY_SHA512}" ]; then
+      KODI_LIBDVD+=" -D${1^^}_URL=${LIBRARY_ARCHIVE}"
+    fi
+  fi
+}
+
+configure_host() {
+  setup_toolchain target:cmake
+  cmake ${CMAKE_GENERATOR_NINJA} \
+        -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CONF} \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+        -DHEADERS_ONLY=ON \
+        ${KODI_ARCH} \
+        ${KODI_NEON} \
+        ${KODI_PLATFORM} ..
+}
+
+make_host() {
+  :
+}
+
+makeinstall_host() {
+  DESTDIR=${SYSROOT_PREFIX} cmake -DCMAKE_INSTALL_COMPONENT="kodi-addon-dev" -P cmake_install.cmake
+
+  # more binaddons cross compile badness meh
+  sed -e "s:INCLUDE_DIR /usr/include/kodi:INCLUDE_DIR ${SYSROOT_PREFIX}/usr/include/kodi:g" \
+      -e "s:CMAKE_MODULE_PATH /usr/lib/kodi /usr/share/kodi/cmake:CMAKE_MODULE_PATH ${SYSROOT_PREFIX}/usr/share/kodi/cmake:g" \
+      -i ${SYSROOT_PREFIX}/usr/lib/kodi/cmake/KodiConfig.cmake
 }
 
 pre_configure_target() {
   export LIBS="$LIBS -lncurses"
 
   if [ "${KODI_DVDCSS_SUPPORT}" = yes ]; then
-    LIBDVDCSS_VERSION="$(grep VERSION= ${PKG_BUILD}/tools/depends/target/libdvdcss/LIBDVDCSS-VERSION)"
-    LIBDVDCSS_ARCHIVE="${SOURCES}/libdvdcss/libdvdcss-${LIBDVDCSS_VERSION#*=}.tar.gz"
     KODI_LIBDVD="-DENABLE_DVDCSS=ON"
-    [ -f "${LIBDVDCSS_ARCHIVE}" ] && KODI_LIBDVD+=" -DLIBDVDCSS_URL=${LIBDVDCSS_ARCHIVE}"
+    prepare_libdvd_library libdvdcss
   else
     KODI_LIBDVD="-DENABLE_DVDCSS=OFF"
   fi
 
-  LIBDVDNAV_VERSION="$(grep VERSION= ${PKG_BUILD}/tools/depends/target/libdvdnav/LIBDVDNAV-VERSION)"
-  LIBDVDNAV_ARCHIVE="${SOURCES}/libdvdnav/libdvdnav-${LIBDVDNAV_VERSION#*=}.tar.gz"
-  [ -f "${LIBDVDNAV_ARCHIVE}" ] && KODI_LIBDVD+=" -DLIBDVDNAV_URL=${LIBDVDNAV_ARCHIVE}"
-
-  LIBDVDREAD_VERSION="$(grep VERSION= ${PKG_BUILD}/tools/depends/target/libdvdread/LIBDVDREAD-VERSION)"
-  LIBDVDREAD_ARCHIVE="${SOURCES}/libdvdread/libdvdread-${LIBDVDREAD_VERSION#*=}.tar.gz"
-  [ -f "${LIBDVDREAD_ARCHIVE}" ] && KODI_LIBDVD+=" -DLIBDVDREAD_URL=${LIBDVDREAD_ARCHIVE}"
-
+  prepare_libdvd_library libdvdnav
+  prepare_libdvd_library libdvdread
   PKG_CMAKE_OPTS_TARGET+=" ${KODI_LIBDVD}"
 }
 
@@ -297,7 +332,16 @@ post_makeinstall_target() {
         -e "s|@KODI_MAX_SECONDS@|${KODI_MAX_SECONDS:-900}|g" \
         -i $INSTALL/usr/lib/kodi/kodi.sh
 
-    cp $PKG_DIR/config/kodi.conf $INSTALL/usr/lib/kodi/kodi.conf
+    if [ "${KODI_PULSEAUDIO_SUPPORT}" = "yes" -a "${KODI_ALSA_SUPPORT}" = "yes" ]; then
+      KODI_AE_SINK="ALSA+PULSE"
+    elif [ "${KODI_PULSEAUDIO_SUPPORT}" = "yes" -a "${KODI_ALSA_SUPPORT}" != "yes" ]; then
+      KODI_AE_SINK="PULSE"
+    elif [ "${KODI_PULSEAUDIO_SUPPORT}" != "yes" -a "${KODI_ALSA_SUPPORT}" = "yes" ]; then
+      KODI_AE_SINK="ALSA"
+    fi
+
+    # adjust audio output device to what was built
+    sed "s/@KODI_AE_SINK@/${KODI_AE_SINK}/" ${PKG_DIR}/config/kodi.conf.in > ${INSTALL}/usr/lib/kodi/kodi.conf
 
     # set default display environment
     if [ "$DISPLAYSERVER" = "x11" ]; then
@@ -377,7 +421,7 @@ post_makeinstall_target() {
   # more binaddons cross compile badness meh
   sed -e "s:INCLUDE_DIR /usr/include/kodi:INCLUDE_DIR $SYSROOT_PREFIX/usr/include/kodi:g" \
       -e "s:CMAKE_MODULE_PATH /usr/lib/kodi /usr/share/kodi/cmake:CMAKE_MODULE_PATH $SYSROOT_PREFIX/usr/share/kodi/cmake:g" \
-      -i $SYSROOT_PREFIX/usr/share/kodi/cmake/KodiConfig.cmake
+      -i $SYSROOT_PREFIX/usr/lib/kodi/cmake/KodiConfig.cmake
 
   if [ "$KODI_EXTRA_FONTS" = yes ]; then
     mkdir -p $INSTALL/usr/share/kodi/media/Fonts
