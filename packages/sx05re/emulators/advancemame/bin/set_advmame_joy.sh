@@ -12,8 +12,7 @@ CONFIG_DIR="/storage/.advance"
 CONFIG="${CONFIG_DIR}/advmame.rc"
 ES_FEATURES="/storage/.config/emulationstation/es_features.cfg"
 
-#source /storage/common.sh "advmame"
-source /usr/bin/joy_common.sh "advmame"
+source joy_common.sh "advmame"
 
 ROMNAME=$1
 
