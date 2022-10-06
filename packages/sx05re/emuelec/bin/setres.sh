@@ -178,7 +178,7 @@ BORDER_VALS=$(get_ee_setting ee_videowindow)
 # Legacy code, we use to set the buffer that is used for small parts of graphics
 # like Cursors and Fonts but setting default 32 made ES Fonts dissappear.
 BUFF=$(get_ee_setting ee_video_fb1_size)
-[[ -z "$BUFF" ]] && BUFF=0
+[[ -z "$BUFF" ]] && BUFF=32
 
 if [[ -n "$BUFF" ]] && [[ $BUFF > 0 ]]; then
   fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP
