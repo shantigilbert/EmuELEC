@@ -35,6 +35,11 @@ if [ ! -L "${LOCAL_CONFIG}/duckstation" ]; then
     ln -sf "${CONFIG_DIR}" "${LOCAL_CONFIG}/duckstation"
 fi
 
+AUTOGP=$(get_ee_setting duckstation_auto_gamepad)
+if [[ "${AUTOGP}" == "1" ]]; then
+	set_duckstation_joy.sh
+fi
+
 if [[ "${1}" == *"duckstation_gui.pbp"* ]]; then
     duckstation-nogui -fullscreen
 else

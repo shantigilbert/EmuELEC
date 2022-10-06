@@ -13,7 +13,7 @@ MAIN_CONFIG=${CONFIG_DIR}/Dolphin.ini
 CONFIG_TMP=/tmp/jc/GCPadNew.tmp
 
 
-source /usr/bin/joy_common.sh "dolphin"
+source joy_common.sh "dolphin"
 
 BTN_H0=$(get_ee_setting dolphin_btn_h0)
 [[ -z "$BTN_H0" ]] && BTN_H0=6

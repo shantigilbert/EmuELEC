@@ -128,6 +128,14 @@ if [[ $arguments != *"--NOLOG"* ]]; then
     VERBOSE="-v"
 fi
 
+# Set the display video to that of the emulator setting.
+[ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
+
+# Get the latest save files if there is any
+CLOUD_SYNC=$(get_ee_setting "${PLATFORM}.cloudsave")
+[[ "$CLOUD_SYNC" == "1" ]] && ra_rclone.sh get "${PLATFORM}" "${ROMNAME}" &
+CLOUD_PID=$!
+
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
 [ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh gameloading "$PLATFORM" "${ROMNAME}" || sleep 3
@@ -135,6 +143,9 @@ SPL=$(get_ee_setting ee_splash.enabled)
 # Set the display video to that of the emulator setting.
 [ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
 
+
+CONTROLLERCONFIG="${arguments#*--controllers=*}"
+echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
@@ -437,7 +448,7 @@ else
     gptokeyb 1 ${KILLTHIS} &
 fi
 
-blank_buffer
+[[ "$CLOUD_SYNC" == "1" ]] && wait $CLOUD_PID
 
 # Execute the command and try to output the results to the log file if it was not disabled.
 if [[ $LOGEMU == "Yes" ]]; then
@@ -451,6 +462,8 @@ else
 fi
 
 blank_buffer
+
+[[ "$CLOUD_SYNC" == "1" ]] && ra_rclone.sh set "${PLATFORM}" "${ROMNAME}" &
 
 # clear terminal window
 	reset > /dev/tty < /dev/null 2>&1
@@ -525,6 +538,8 @@ fi
 
 # Temp fix for libretro scummvm always erroing out on exit
 [[ "${EMU}" == *"scummvm_libretro"* ]] && ret_error=0
+
+[[ "$CLOUD_SYNC" == "1" ]] && wait $CLOUD_PID
 
 if [[ "$ret_error" != "0" ]]; then
     echo "exit $ret_error" >> $EMUELECLOG
