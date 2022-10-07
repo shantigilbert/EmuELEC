@@ -3,7 +3,6 @@
 
 PKG_NAME="gptokeyb"
 PKG_VERSION="30b65b0e54e520adfc0b3ce8d13a1ccfaf944595"
-PKG_GIT_CLONE_BRANCH="kill_signal"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/EmuELEC/gptokeyb"
