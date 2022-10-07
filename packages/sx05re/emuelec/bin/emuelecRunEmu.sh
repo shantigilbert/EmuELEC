@@ -138,7 +138,7 @@ CLOUD_PID=$!
 
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
-[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh gameloading "$PLATFORM" "${ROMNAME}" || sleep 3
+[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh gameloading "$PLATFORM" "${ROMNAME}" && sleep 3
 
 # Set the display video to that of the emulator setting.
 [ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
