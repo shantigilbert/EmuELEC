@@ -9,7 +9,6 @@
 # DO NOT modify this file, if you need to use autostart please use /storage/.config/custom_start.sh 
 
 # It seems some slow SDcards have a problem creating the symlink on time :/
-CONFIG_FLASH="/flash/config.ini"
 CONFIG_DIR="/storage/.emulationstation"
 CONFIG_DIR2="/storage/.config/emulationstation"
 
@@ -117,8 +116,13 @@ case "$DEFE" in
 	;;
 esac
 
+<<<<<<< HEAD
 FILE_MODE="/sys/class/display/mode"
 [[ -f "$FILE_MODE" ]] && setres.sh
+=======
+# Checks and sets the resolution for starting ES.
+check_res.sh
+>>>>>>> 26a4f3d2f49f8f5542133a5bec74d2b667aadff7
 
 # Show splash creen 
 show_splash.sh intro

@@ -1,0 +1,28 @@
+From b89fb39cb0e28456016828f37ae4756bf66101b6 Mon Sep 17 00:00:00 2001
+From: Christian Hewitt <christianshewitt@gmail.com>
+Date: Sun, 23 Jan 2022 07:38:32 +0000
+Subject: [PATCH 1/2] LOCAL: WinSystemGbmGLESContext: wait longer for vsync
+
+Waiting longer for vsync improves idle CPU consumption on ARM devices
+
+Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
+---
+ xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
+index 0d071c31f1..52ae4c1ef2 100644
+--- a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
++++ b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
+@@ -149,7 +149,7 @@ void CWinSystemGbmGLESContext::PresentRender(bool rendered, bool videoLayer)
+   }
+   else
+   {
+-    KODI::TIME::Sleep(10ms);
++    KODI::TIME::Sleep(40ms);
+   }
+ }
+ 
+-- 
+2.17.1
+

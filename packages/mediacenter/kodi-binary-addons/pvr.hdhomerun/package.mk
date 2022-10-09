@@ -3,9 +3,9 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="pvr.hdhomerun"
-PKG_VERSION="20.3.0-Nexus"
-PKG_SHA256="8e1e9d29873a7319a99a221fea77f7c9aa3383a4f317e407e08c53b53054addd"
-PKG_REV="2"
+PKG_VERSION="20.4.0-Nexus"
+PKG_SHA256="3872265e00fc748ba327aaa91beece747936f55d16356051cdd04b0b70a353c0"
+PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.hdhomerun"

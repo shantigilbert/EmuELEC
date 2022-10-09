@@ -4,12 +4,13 @@
 # Copyright (C) 2020-present Team CoreELEC (https://coreelec.tv)
 
 PKG_NAME="kodi"
-PKG_VERSION="88d56ddb992e3bb7a0c5ceabc0f07adef391bcf1"
-PKG_SHA256="86eb13dc6151cc13beb8b8ab9c22548d1a868b38d96a3a74835774fa191d5259"
+PKG_VERSION="1791c0e32448781207614cc83529f36ed3a66f00"
+PKG_SHA256="d5270c3960387b97467921f3da122c900d870770de15579f7962ad232d94d4ed"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"
 PKG_URL="https://github.com/CoreELEC/xbmc/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain JsonSchemaBuilder:host TexturePacker:host Python3 zlib systemd lzo pcre swig:host libass curl fontconfig fribidi tinyxml libjpeg-turbo freetype libcdio taglib libxml2 libxslt rapidjson sqlite ffmpeg crossguid libhdhomerun libfmt lirc libfstrcmp flatbuffers:host flatbuffers libudfread spdlog obu_util"
+PKG_DEPENDS_HOST="toolchain"
 PKG_LONGDESC="A free and open source cross-platform media player."
 PKG_BUILD_FLAGS="+speed"
 
@@ -180,12 +181,12 @@ configure_package() {
   if [ ! "$KODIPLAYER_DRIVER" = default ]; then
     PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET $KODIPLAYER_DRIVER libinput libxkbcommon"
     if [ "$OPENGLES_SUPPORT" = yes -a "$KODIPLAYER_DRIVER" = "$OPENGLES" ]; then
-      KODI_PLAYER="-DCORE_PLATFORM_NAME=gbm -DAPP_RENDER_SYSTEM=gles"
+      KODI_PLATFORM="-DCORE_PLATFORM_NAME=gbm -DAPP_RENDER_SYSTEM=gles"
       CFLAGS="$CFLAGS -DEGL_NO_X11"
       CXXFLAGS="$CXXFLAGS -DEGL_NO_X11"
       PKG_APPLIANCE_XML="$PKG_DIR/config/appliance-gbm.xml"
     elif [ "$KODIPLAYER_DRIVER" = libamcodec ]; then
-      KODI_PLAYER="-DCORE_PLATFORM_NAME=aml -DAPP_RENDER_SYSTEM=gles"
+      KODI_PLATFORM="-DCORE_PLATFORM_NAME=aml -DAPP_RENDER_SYSTEM=gles"
       PKG_APPLIANCE_XML_G12X="$PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/g12x/appliance.xml"
       PKG_APPLIANCE_XML_GXX="$PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/gxx/appliance.xml"
     fi
@@ -225,6 +226,7 @@ configure_package() {
                          $KODI_CEC \
                          $KODI_XORG \
                          $KODI_SAMBA \
+                         $KODI_PLATFORM \
                          $KODI_NFS \
                          $KODI_AVAHI \
                          $KODI_UPNP \
@@ -233,7 +235,6 @@ configure_package() {
                          $KODI_AIRTUNES \
                          $KODI_OPTICAL \
                          $KODI_BLURAY \
-                         $KODI_PLAYER \
                          $KODI_ALSA \
                          $KODI_PULSEAUDIO"
 }
@@ -250,6 +251,31 @@ prepare_libdvd_library() {
       KODI_LIBDVD+=" -D${1^^}_URL=${LIBRARY_ARCHIVE}"
     fi
   fi
+}
+
+configure_host() {
+  setup_toolchain target:cmake
+  cmake ${CMAKE_GENERATOR_NINJA} \
+        -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CONF} \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+        -DHEADERS_ONLY=ON \
+        ${KODI_ARCH} \
+        ${KODI_NEON} \
+        ${KODI_PLATFORM} ..
+}
+
+make_host() {
+  :
+}
+
+makeinstall_host() {
+  DESTDIR=${SYSROOT_PREFIX} cmake -DCMAKE_INSTALL_COMPONENT="kodi-addon-dev" -P cmake_install.cmake
+
+  # more binaddons cross compile badness meh
+  sed -e "s:INCLUDE_DIR /usr/include/kodi:INCLUDE_DIR ${SYSROOT_PREFIX}/usr/include/kodi:g" \
+      -e "s:CMAKE_MODULE_PATH /usr/lib/kodi /usr/share/kodi/cmake:CMAKE_MODULE_PATH ${SYSROOT_PREFIX}/usr/share/kodi/cmake:g" \
+      -i ${SYSROOT_PREFIX}/usr/lib/kodi/cmake/KodiConfig.cmake
 }
 
 pre_configure_target() {

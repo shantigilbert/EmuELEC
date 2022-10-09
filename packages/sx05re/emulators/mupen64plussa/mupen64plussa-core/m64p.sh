@@ -67,7 +67,7 @@ fi
 
 AUTOGP=$(get_ee_setting mupen64plus_auto_gamepad)
 if [[ "${AUTOGP}" != "0" ]]; then
-  /usr/bin/set_mupen64_joy.sh
+  set_mupen64_joy.sh
 fi
 
 

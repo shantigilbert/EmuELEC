@@ -1,3 +1,9 @@
+119
+- Switch FFmpeg to openssl3
+
+118
+- Add missing libraries
+
 117
 - Update aom (AV1) to 3.2.0
 - Update VPX to 1.11.0

@@ -1,7 +1,7 @@
 [Unit]
 Description=OpenVFD Service
 ConditionPathExists=/proc/device-tree/openvfd/
-After=kodi-autostart.service
+After=local-fs.target
 
 [Service]
 ExecStart=/usr/lib/coreelec/openvfd-start
