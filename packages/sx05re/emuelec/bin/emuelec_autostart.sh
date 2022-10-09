@@ -116,13 +116,8 @@ case "$DEFE" in
 	;;
 esac
 
-<<<<<<< HEAD
-FILE_MODE="/sys/class/display/mode"
-[[ -f "$FILE_MODE" ]] && setres.sh
-=======
 # Checks and sets the resolution for starting ES.
 check_res.sh
->>>>>>> 26a4f3d2f49f8f5542133a5bec74d2b667aadff7
 
 # Show splash creen 
 show_splash.sh intro
