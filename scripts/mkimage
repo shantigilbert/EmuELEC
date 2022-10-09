@@ -18,10 +18,16 @@ if [ -z "${SYSTEM_SIZE}" -o -z "${SYSTEM_PART_START}" ]; then
   exit 1
 fi
 
-STORAGE_SIZE=32 # STORAGE_SIZE must be >= 32 !
+if [ "${BOOTLOADER}" = "syslinux" ]; then
+  DISK_GPT_PADDING=1
+  DISK_LABEL=gpt
+else
+  DISK_GPT_PADDING=0
+  DISK_LABEL=msdos
+fi
 
+STORAGE_SIZE=32 # STORAGE_SIZE must be >= 32 !
 DISK_START_PADDING=$(( (${SYSTEM_PART_START} + 2048 - 1) / 2048 ))
-DISK_GPT_PADDING=1
 DISK_SIZE=$(( ${DISK_START_PADDING} + ${SYSTEM_SIZE} + ${STORAGE_SIZE} + ${DISK_GPT_PADDING} ))
 DISK_BASENAME="${TARGET_IMG}/${IMAGE_NAME}"
 if [ -n "${SUBDEVICE}" ]; then
@@ -53,12 +59,6 @@ trap cleanup SIGINT
 # create an image
 echo -e "\nimage: creating sparse file for disk image ${DISK##*/}..."
 dd if=/dev/zero of="${DISK}" bs=1M count=0 seek="${DISK_SIZE}" conv=fsync >"${SAVE_ERROR}" 2>&1 || show_error
-
-if [ "${BOOTLOADER}" = "syslinux" ]; then
-  DISK_LABEL=gpt
-else
-  DISK_LABEL=msdos
-fi
 
 # write a disklabel
 echo "image: creating ${DISK_LABEL} partition table..."

@@ -10,5 +10,5 @@ fi
 
 if [ -n "$SOC" ]; then
   mkdir -p /var/lib
-  ln -sf /usr/lib/ta/${SOC} /var/lib/teetz
+  ln -sfn /usr/lib/ta/${SOC} /var/lib/teetz
 fi

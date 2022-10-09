@@ -3,10 +3,10 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="boost"
-PKG_VERSION="1.79.0"
-PKG_SHA256="475d589d51a7f8b3ba2ba4eda022b170e562ca3b760ee922c146b6c65856ef39"
+PKG_VERSION="1.80.0"
+PKG_SHA256="1e19565d82e43bc59209a168f5ac899d3ba471d55c7610c677d4ccf2c9c500c0"
 PKG_LICENSE="OSS"
-PKG_SITE="http://www.boost.org/"
+PKG_SITE="https://www.boost.org/"
 PKG_URL="https://boostorg.jfrog.io/artifactory/main/release/${PKG_VERSION}/source/${PKG_NAME}_${PKG_VERSION//./_}.tar.bz2"
 PKG_DEPENDS_HOST="toolchain:host"
 PKG_DEPENDS_TARGET="toolchain boost:host Python3 zlib bzip2"
@@ -21,7 +21,7 @@ make_host() {
 
 makeinstall_host() {
   mkdir -p ${TOOLCHAIN}/bin
-    cp bjam ${TOOLCHAIN}/bin
+    cp b2 ${TOOLCHAIN}/bin
 }
 
 pre_configure_target() {
@@ -31,7 +31,7 @@ pre_configure_target() {
 
 configure_target() {
   sh bootstrap.sh --prefix=/usr \
-                  --with-bjam=${TOOLCHAIN}/bin/bjam \
+                  --with-bjam=${TOOLCHAIN}/bin/b2 \
                   --with-python=${TOOLCHAIN}/bin/python \
                   --with-python-root=${SYSROOT_PREFIX}/usr
 
@@ -42,21 +42,21 @@ configure_target() {
 }
 
 makeinstall_target() {
-  ${TOOLCHAIN}/bin/bjam -d2 --ignore-site-config \
-                          --layout=system \
-                          --prefix=${SYSROOT_PREFIX}/usr \
-                          --toolset=gcc link=static \
-                          --with-chrono \
-                          --with-date_time \
-                          --with-filesystem \
-                          --with-iostreams \
-                          --with-program_options \
-                          --with-python \
-                          --with-locale \
-                          --with-random \
-                          --with-regex -sICU_PATH="${SYSROOT_PREFIX}/usr" \
-                          --with-serialization \
-                          --with-system \
-                          --with-thread \
-                          install
+  ${TOOLCHAIN}/bin/b2 -d2 --ignore-site-config \
+                      --layout=system \
+                      --prefix=${SYSROOT_PREFIX}/usr \
+                      --toolset=gcc link=static \
+                      --with-chrono \
+                      --with-date_time \
+                      --with-filesystem \
+                      --with-iostreams \
+                      --with-program_options \
+                      --with-python \
+                      --with-locale \
+                      --with-random \
+                      --with-regex -sICU_PATH="${SYSROOT_PREFIX}/usr" \
+                      --with-serialization \
+                      --with-system \
+                      --with-thread \
+                      install
 }

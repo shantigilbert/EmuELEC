@@ -75,6 +75,28 @@ unpack() {
   tar --strip-components=1 -xf ${SOURCES}/gcc/gcc-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }
 
+post_makeinstall_bootstrap() {
+  GCC_VERSION=$(${TOOLCHAIN}/bin/${LIB32_TARGET_NAME}-gcc -dumpversion)
+  DATE="0401$(echo ${GCC_VERSION} | sed 's/\./0/g')"
+  CROSS_CC=${LIB32_TARGET_PREFIX}gcc-${GCC_VERSION}
+
+  rm -f ${LIB32_TARGET_PREFIX}gcc
+
+cat > ${LIB32_TARGET_PREFIX}gcc <<EOF
+#!/bin/sh
+${TOOLCHAIN}/bin/ccache ${CROSS_CC} "\$@"
+EOF
+
+  chmod +x ${LIB32_TARGET_PREFIX}gcc
+
+  # To avoid cache trashing
+  touch -c -t ${DATE} ${CROSS_CC}
+
+  # install lto plugin for binutils
+  mkdir -p ${TOOLCHAIN}/lib/bfd-plugins
+    ln -sf ../gcc/${LIB32_TARGET_NAME}/${GCC_VERSION}/liblto_plugin.so ${TOOLCHAIN}/lib/bfd-plugins
+}
+
 pre_configure_host() {
   unset CPP
 }

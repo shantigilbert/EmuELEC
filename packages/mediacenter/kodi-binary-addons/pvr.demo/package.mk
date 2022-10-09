@@ -3,9 +3,9 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="pvr.demo"
-PKG_VERSION="20.4.2-Nexus"
-PKG_SHA256="669765b108fd5caa4132657b1469ca8a42a8f8d0ad1e8a65b4966bde3cfaa99d"
-PKG_REV="2"
+PKG_VERSION="20.5.0-Nexus"
+PKG_SHA256="8f4d8f06e7dbeefdf6148abb06347c4d92b9edd4a818c7efd1e204a65a9556d2"
+PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.demo"

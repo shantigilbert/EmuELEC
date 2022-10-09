@@ -177,9 +177,9 @@ index 135a62366ab8..cafb09df6c75 100644
  {
  	struct dcss_kms_dev *kms;
  	struct drm_device *drm;
-@@ -148,19 +149,23 @@ struct dcss_kms_dev *dcss_kms_attach(struct dcss_dev *dcss)
+@@ -148,13 +149,16 @@ struct dcss_kms_dev *dcss_kms_attach(struct dcss_dev *dcss)
  
- 	drm->irq_enabled = true;
+ 		goto cleanup_mode_config;
  
 -	ret = dcss_kms_bridge_connector_init(kms);
 +	ret = dcss_crtc_init(crtc, drm);
@@ -197,14 +197,6 @@ index 135a62366ab8..cafb09df6c75 100644
  
  	drm_mode_config_reset(drm);
  
- 	drm_kms_helper_poll_init(drm);
- 
--	drm_bridge_connector_enable_hpd(kms->connector);
-+	if (!componentized)
-+		drm_bridge_connector_enable_hpd(kms->connector);
- 
- 	ret = drm_dev_register(drm, 0);
- 	if (ret)
 @@ -171,7 +176,8 @@ struct dcss_kms_dev *dcss_kms_attach(struct dcss_dev *dcss)
  	return kms;
  

@@ -8,11 +8,13 @@
 
 # odroidgoa
 
-
 function check_pwd() {
 
+<<<<<<< HEAD
 CONFIG_FLASH="/flash/config.ini"
 EE_CONF="${EE_DIR}/configs/emuelec.conf"
+=======
+>>>>>>> 26a4f3d2f49f8f5542133a5bec74d2b667aadff7
 ESSETTINGS="/storage/.config/emulationstation/es_settings.cfg"
 
 PWDFILE="${1}"
@@ -286,6 +288,7 @@ fi
 
 emuelec-utils setauddev
 
+<<<<<<< HEAD
 DEFE=""
 
 # If the video-mode is contained in flash config.
@@ -311,5 +314,9 @@ fi
 # finally we correct the FB according to video mode
 [[ ! -z "$DEFE" ]] && setres.sh ${DEFE}
 
+=======
+# Checks and sets the resolution for starting ES.
+check_res.sh
+>>>>>>> 26a4f3d2f49f8f5542133a5bec74d2b667aadff7
 
 exit 0
