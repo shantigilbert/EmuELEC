@@ -2,7 +2,7 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="PPSSPPSDL"
-PKG_VERSION="5318452e763e010141b84da35d2900c151340b34"
+PKG_VERSION="1e343370aed32c1ffe0ba5866228246525a0662f"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MAME"
