@@ -2,7 +2,7 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="dolphinSA"
-PKG_VERSION="333ede5416217cf88ea210e284cfb4f76d49e0f6"
+PKG_VERSION="9aece1810c47916e9e56b8a2ef0a7e7f99fb0c54"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/dolphin-emu/dolphin"
