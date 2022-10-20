@@ -3,7 +3,7 @@
 # Copyright (C) 2022-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="hlsdk-xash3d"
-PKG_VERSION="8f5c36dc62b463044cffa3ddf40347905ea39f08"
+PKG_VERSION="901d1947fba561dba7555b02997c843c59914e2b"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/FWGS/hlsdk-xash3d"
 PKG_URL="https://github.com/FWGS/hlsdk-xash3d.git"
