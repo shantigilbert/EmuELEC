@@ -2,7 +2,7 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="pygame"
-PKG_VERSION="d057b5d9e289d5b81d6fdea08d94ebfe2a70bd3a"
+PKG_VERSION="ee0fc698531a0c14f3e6a06734d35f8460ab71f4"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/pygame/pygame"
 PKG_URL="$PKG_SITE.git"
