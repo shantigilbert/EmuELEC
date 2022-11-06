@@ -43,6 +43,9 @@ pre_configure_host() {
     --disable-tirpc \
     --without-systemd \
     --without-tcp-wrappers"
+
+  # Tempfix for building on Ubuntu 22.04
+  [ -f /etc/lsb-release ] && ( grep -q "22.04" /etc/lsb-release ) && CFLAGS+=" -I/usr/include/tirpc"
 }
 
 pre_configure_target() {
