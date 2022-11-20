@@ -32,9 +32,6 @@ switch_resolution()
   local OLD_MODE=$1
   local MODE=$2
 
-  # This first checks that if you need to change the resolution and if so update
-  # the file that switches the mode automatically if the value is valid if not exit.
-  if [[ "$OLD_MODE" != "$MODE" ]]; then
     # Here we first clear the primary display buffer of leftover artifacts then set
     # the secondary small buffers flag to stop copying across.
     blank_buffer >> /dev/null
@@ -58,7 +55,7 @@ switch_resolution()
       echo "1"
       return
     fi
-  fi
+
   echo "0"
 }
 
