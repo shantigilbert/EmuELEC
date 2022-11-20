@@ -13,20 +13,14 @@ depending on sink's implementation.
 
 Signed-off-by: Alex Bee <knaerzche@gmail.com>
 ---
- drivers/gpu/drm/bridge/synopsys/dw-hdmi.c | 16 ++++++++--------
- 1 file changed, 9 insertions(+), 8 deletions(-)
+ drivers/gpu/drm/bridge/synopsys/dw-hdmi.c | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c b/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
-index 84cc52858ffb..3c20ef3bd3c1 100644
+index 92e621f2714f..7551e3ab77d6 100644
 --- a/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
 +++ b/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
-@@ -3036,18 +3036,11 @@ static irqreturn_t dw_hdmi_irq(int irq, void *dev_id)
- 	 * ask the source to re-read the EDID.
- 	 */
- 	if (intr_stat &
--	    (HDMI_IH_PHY_STAT0_RX_SENSE | HDMI_IH_PHY_STAT0_HPD)) {
-+	    (HDMI_IH_PHY_STAT0_RX_SENSE | HDMI_IH_PHY_STAT0_HPD))
- 		dw_hdmi_setup_rx_sense(hdmi,
+@@ -3179,12 +3179,6 @@ static irqreturn_t dw_hdmi_irq(int irq, void *dev_id)
  				       phy_stat & HDMI_PHY_HPD,
  				       phy_stat & HDMI_PHY_RX_SENSE);
  
@@ -35,12 +29,11 @@ index 84cc52858ffb..3c20ef3bd3c1 100644
 -			cec_notifier_phys_addr_invalidate(hdmi->cec_notifier);
 -			mutex_unlock(&hdmi->cec_notifier_mutex);
 -		}
--	}
 -
- 	if (intr_stat & HDMI_IH_PHY_STAT0_HPD) {
- 		enum drm_connector_status status = phy_int_pol & HDMI_PHY_HPD
- 						 ? connector_status_connected
-@@ -3061,6 +3054,14 @@ static irqreturn_t dw_hdmi_irq(int irq, void *dev_id)
+ 		if (phy_stat & HDMI_PHY_HPD)
+ 			status = connector_status_connected;
+ 
+@@ -3201,6 +3195,14 @@ static irqreturn_t dw_hdmi_irq(int irq, void *dev_id)
  			drm_helper_hpd_irq_event(hdmi->bridge.dev);
  			drm_bridge_hpd_notify(&hdmi->bridge, status);
  		}

@@ -5,7 +5,7 @@
 PKG_NAME="pvr.vuplus"
 PKG_VERSION="20.4.0-Nexus"
 PKG_SHA256="af51b32b85294ce19e92b59a9bab8d7710beeea99f8593816544f9188365ab83"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.vuplus"

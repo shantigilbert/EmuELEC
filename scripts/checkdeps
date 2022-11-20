@@ -115,12 +115,20 @@ case "${DISTRO}" in
         [g++]=gcc-c++
         [mkfontscale]=xorg-x11-font-utils
         [mkfontdir]=xorg-x11-font-utils
-        [bdftopcf]=xorg-x11-font-utils
         [xsltproc]=libxslt
         [java]=java-1.8.0-openjdk
         [python3]=python3
         [rpcgen]=rpcgen
       )
+      if [ "${DISTRO}" = "fedora" ]; then
+        dep_map+=(
+          [bdftopcf]=bdftopcf
+        )
+      else
+        dep_map+=(
+          [bdftopcf]=xorg-x11-font-utils
+        )
+      fi
       if [[ ! $(rpm -qa glibc-static) ]]; then
         dep_map+=(
           [glibc-static]=glibc-static

@@ -5,7 +5,7 @@
 PKG_NAME="pvr.nextpvr"
 PKG_VERSION="20.3.0-Nexus"
 PKG_SHA256="1e36d0eb8c974290b4869d9d65142599803a0eb5457be35c2b1f9b14c2956361"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.nextpvr"

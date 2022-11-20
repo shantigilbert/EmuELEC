@@ -52,33 +52,72 @@ diff --git a/UI/GameSettingsScreen.cpp b/UI/GameSettingsScreen.cpp
  
  	g_Config.iFpsLimit1 = iAlternateSpeedPercent1_ < 0 ? -1 : (iAlternateSpeedPercent1_ * 60) / 100;
  	g_Config.iFpsLimit2 = iAlternateSpeedPercent2_ < 0 ? -1 : (iAlternateSpeedPercent2_ * 60) / 100;
+--- b/libretro/libretro_core_options.h
++++ a/libretro/libretro_core_options.h
+@@ -337,6 +337,27 @@
+          { NULL, NULL },
+       },
+       "Number of frames"
++   },
++   {
++      "ppsspp_force_max_fps",
++      "Force Max FPS",
++      NULL,
++      NULL,
++      NULL,
++      "video",
++      {
++         { "Auto", NULL },
++         { "10",   NULL },
++         { "20",   NULL },
++         { "30",   NULL },
++         { "40",   NULL },
++         { "50",   NULL },
++         { "60",   NULL },
++         { "70",   NULL },
++         { "80",   NULL },
++         { NULL, NULL },
++      },
++      "Auto"
+    },
+    {
+       "ppsspp_auto_frameskip",
+
 diff --git a/libretro/libretro.cpp b/libretro/libretro.cpp
 --- b/libretro/libretro.cpp
 +++ a/libretro/libretro.cpp
-@@ -538,6 +538,7 @@
- static RetroOption<bool> ppsspp_auto_frameskip("ppsspp_auto_frameskip", "Auto Frameskip", false);
- static RetroOption<int> ppsspp_frameskip("ppsspp_frameskip", "Frameskip", { "Off", "1", "2", "3", "4", "5", "6", "7", "8" });
- static RetroOption<int> ppsspp_frameskiptype("ppsspp_frameskiptype", "Frameskip Type", { {"Number of frames", 0}, {"Percent of FPS", 1} });
-+static RetroOption<int> ppsspp_force_max_fps("ppsspp_force_max_fps", "Force Max FPS", { {"Auto", 0}, {"10", 10}, {"20", 20}, {"30", 30}, {"40", 40}, {"50", 50}, {"60", 60}, {"70", 70}, {"80", 80} });
- static RetroOption<int> ppsspp_internal_resolution("ppsspp_internal_resolution", "Internal Resolution (Restart)", 1, { "480x272", "960x544", "1440x816", "1920x1088", "2400x1360", "2880x1632", "3360x1904", "3840x2176", "4320x2448", "4800x2720" });
- static RetroOption<int> ppsspp_button_preference("ppsspp_button_preference", "Confirmation Button", { { "Cross", PSP_SYSTEMPARAM_BUTTON_CROSS }, { "Circle", PSP_SYSTEMPARAM_BUTTON_CIRCLE } });
- static RetroOption<bool> ppsspp_fast_memory("ppsspp_fast_memory", "Fast Memory (Speedhack)", true);
-@@ -688,6 +689,7 @@
-    vars.push_back(ppsspp_auto_frameskip.GetOptions());
-    vars.push_back(ppsspp_frameskip.GetOptions());
-    vars.push_back(ppsspp_frameskiptype.GetOptions());
-+   vars.push_back(ppsspp_force_max_fps.GetOptions());
-    vars.push_back(ppsspp_frame_duplication.GetOptions());
-    vars.push_back(ppsspp_detect_vsync_swap_interval.GetOptions());
-    vars.push_back(ppsspp_vertex_cache.GetOptions());
-@@ -819,6 +821,7 @@
-    ppsspp_cheats.Update(&g_Config.bEnableCheats);
-    ppsspp_locked_cpu_speed.Update(&g_Config.iLockedCPUSpeed);
-    ppsspp_rendering_mode.Update(&g_Config.iRenderingMode);
-+   ppsspp_force_max_fps.Update(&g_Config.iForceMaxEmulatedFPS);
-    ppsspp_cpu_core.Update((CPUCore *)&g_Config.iCpuCore);
-    ppsspp_io_timing_method.Update((IOTimingMethods *)&g_Config.iIOTimingMethod);
-    ppsspp_lower_resolution_for_effects.Update(&g_Config.iBloomHack);
+@@ -763,6 +763,31 @@
+          g_Config.bSkipGPUReadbacks = true;
+    }
+ 
++   var.key = "ppsspp_force_max_fps";
++   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
++   {
++      iInternalResolution_prev = g_Config.iInternalResolution;
++
++      if (!strcmp(var.value, "auto"))
++         g_Config.iInternalResolution = 0;
++      else if (!strcmp(var.value, "10"))
++         g_Config.iInternalResolution = 1;
++      else if (!strcmp(var.value, "20"))
++         g_Config.iInternalResolution = 2;
++      else if (!strcmp(var.value, "30"))
++         g_Config.iInternalResolution = 3;
++      else if (!strcmp(var.value, "40"))
++         g_Config.iInternalResolution = 4;
++      else if (!strcmp(var.value, "50"))
++         g_Config.iInternalResolution = 5;
++      else if (!strcmp(var.value, "60"))
++         g_Config.iInternalResolution = 6;
++      else if (!strcmp(var.value, "70"))
++         g_Config.iInternalResolution = 7;
++      else if (!strcmp(var.value, "80"))
++         g_Config.iInternalResolution = 8;
++   }
++
+    var.key = "ppsspp_frameskip";
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+       g_Config.iFrameSkip = atoi(var.value);
 
 --- a/UI/GameSettingsScreen.cpp	2018-11-18 02:06:08.250398000 +0000
 +++ b/UI/GameSettingsScreen.cpp	2018-11-18 02:20:02.941563758 +0000

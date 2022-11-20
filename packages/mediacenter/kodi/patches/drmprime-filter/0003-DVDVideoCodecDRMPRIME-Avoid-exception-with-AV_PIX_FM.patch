@@ -1,4 +1,4 @@
-From d4956bedd865a007585fbd59a4b938854b61b47f Mon Sep 17 00:00:00 2001
+From c2b50468de1a8a72a4e00e53492e4e26f2573490 Mon Sep 17 00:00:00 2001
 From: popcornmix <popcornmix@gmail.com>
 Date: Fri, 27 Aug 2021 20:29:50 +0100
 Subject: [PATCH 3/6] DVDVideoCodecDRMPRIME: Avoid exception with
@@ -9,10 +9,10 @@ Subject: [PATCH 3/6] DVDVideoCodecDRMPRIME: Avoid exception with
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
-index 6588abec6d..0084fcc441 100644
+index 1843e72e55..709311e75f 100644
 --- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
 +++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
-@@ -605,7 +605,7 @@ bool CDVDVideoCodecDRMPRIME::SetPictureParams(VideoPicture* pVideoPicture)
+@@ -606,7 +606,7 @@ bool CDVDVideoCodecDRMPRIME::SetPictureParams(VideoPicture* pVideoPicture)
    if (!pVideoPicture->videoBuffer)
    {
      CLog::Log(LOGERROR, "CDVDVideoCodecDRMPRIME::{} - videoBuffer:nullptr format:{}", __FUNCTION__,

@@ -3,4 +3,4 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
-kill $(cat /var/run/mysqld/mysqld.pid)
+kill $(cat /run/mysqld/mysqld.pid)

@@ -9,7 +9,7 @@ PKG_SITE="https://ffmpeg.org"
 PKG_URL="https://ffmpeg.org/releases/ffmpeg-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_TARGET="toolchain aom bzip2 openssl lame libvorbis opus x264 zlib"
 PKG_LONGDESC="FFmpegx is an complete FFmpeg build to support encoding and decoding."
-PKG_BUILD_FLAGS="-gold -sysroot"
+PKG_BUILD_FLAGS="-sysroot"
 
 # Dependencies
 get_graphicdrivers

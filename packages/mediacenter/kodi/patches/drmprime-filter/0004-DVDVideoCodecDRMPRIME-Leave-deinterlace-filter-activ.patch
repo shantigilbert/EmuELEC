@@ -1,4 +1,4 @@
-From b577b5358bc9e72550dbba9f12f27973639a8fca Mon Sep 17 00:00:00 2001
+From 66833bc8221a9d5a5fbc625c3f0293a261bbd412 Mon Sep 17 00:00:00 2001
 From: popcornmix <popcornmix@gmail.com>
 Date: Fri, 17 Sep 2021 15:23:16 +0100
 Subject: [PATCH 4/6] DVDVideoCodecDRMPRIME: Leave deinterlace filter active on
@@ -14,10 +14,10 @@ be just copied by deinterlace filter
  1 file changed, 4 insertions(+)
 
 diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
-index 0084fcc441..26efaabe02 100644
+index 709311e75f..6ba0804904 100644
 --- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
 +++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
-@@ -855,6 +855,10 @@ std::string CDVDVideoCodecDRMPRIME::GetFilterChain(bool interlaced)
+@@ -856,6 +856,10 @@ std::string CDVDVideoCodecDRMPRIME::GetFilterChain(bool interlaced)
    if (!m_processInfo.Supports(mInt))
      mInt = m_processInfo.GetFallbackDeintMethod();
  

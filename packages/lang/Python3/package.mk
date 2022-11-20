@@ -3,8 +3,8 @@
 
 PKG_NAME="Python3"
 # When changing PKG_VERSION remember to sync PKG_PYTHON_VERSION!
-PKG_VERSION="3.9.14"
-PKG_SHA256="651304d216c8203fe0adf1a80af472d8e92c3b0e0a7892222ae4d9f3ae4debcf"
+PKG_VERSION="3.9.15"
+PKG_SHA256="12daff6809528d9f6154216950423c9e30f0e47336cb57c6aa0b4387dd5eb4b2"
 PKG_LICENSE="OSS"
 PKG_SITE="https://www.python.org/"
 PKG_URL="https://www.python.org/ftp/python/${PKG_VERSION}/${PKG_NAME::-1}-${PKG_VERSION}.tar.xz"

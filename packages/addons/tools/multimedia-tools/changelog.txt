@@ -1,3 +1,9 @@
+117
+- mediainfo: update to 22.09
+- libmediainfo: update to 22.09
+- mpg123: update to 1.30.2 and https
+- squeezelite: update to 2022-04-10 (1.9.9.1403)
+
 116
 - libmediainfo: update to 21.09
 - mediainfo: update to 21.09

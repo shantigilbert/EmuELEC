@@ -3,63 +3,53 @@
 
 PKG_RKBIN="$(get_build_dir rkbin)"
 PKG_SOC="${DEVICE/RK/rk}"
+UBOOT_CONFIG=$("${ROOT}"/"${SCRIPTS}"/uboot_helper "${PROJECT}" "${DEVICE}" "${UBOOT_SYSTEM}" config)
 
-case "${PKG_SOC}" in
-  rk3036)
-    PKG_DATAFILE="spl/u-boot-spl-nodtb.bin"
-    PKG_LOADER="u-boot-dtb.bin"
-    ;;
-  rk3288)
-    PKG_DATAFILE="${PKG_RKBIN}/rk32/rk3288_ddr_400MHz_v1.08.bin"
-    PKG_LOADER="${PKG_RKBIN}/rk32/rk3288_miniloader_v2.58.bin"
-    PKG_LOAD_ADDR="0x0"
-    ;;
-  rk3328)
-    PKG_DATAFILE="${PKG_RKBIN}/rk33/rk3328_ddr_786MHz_v1.16.bin"
-    PKG_LOADER="${PKG_RKBIN}/rk33/rk3328_miniloader_v2.50.bin"
-    PKG_BL31="${PKG_RKBIN}/rk33/rk3328_bl31_v1.42.elf"
-    PKG_BL31_ADDR="0x10000"
-    PKG_LOAD_ADDR="0x200000"
-    ;;
-  rk3399)
-    PKG_DATAFILE="${PKG_RKBIN}/rk33/rk3399_ddr_800MHz_v1.24.bin"
-    PKG_LOADER="${PKG_RKBIN}/rk33/rk3399_miniloader_v1.24.bin"
-    PKG_BL31="${PKG_RKBIN}/rk33/rk3399_bl31_v1.31.elf"
-    PKG_BL31_ADDR="0x40000"
-    PKG_LOAD_ADDR="0x200000"
-    ;;
-  *)
-    PKG_DATAFILE="spl/u-boot-spl-dtb.bin"
-    PKG_LOADER="u-boot-dtb.bin"
-    ;;
-esac
+if [ "${ROCKCHIP_LEGACY_BOOT}" = "1" ]; then
+  echo "install: building Rockchip legacy boot chain ..."
 
-if [ -n "${PKG_DATAFILE}" -a -n "${PKG_LOADER}" ]; then
-  tools/mkimage -n ${PKG_SOC} -T rksd -d "${PKG_DATAFILE}" idbloader.img
-  cat "${PKG_LOADER}" >> idbloader.img
-  cp -av idbloader.img ${INSTALL}/usr/share/bootloader
+  if [ ! -f u-boot-dtb.bin ]; then
+    echo "install: u-boot-dtb.bin does not exist UBOOT_TARGET: ${UBOOT_TARGET}"
+    exit 1
+  fi
+
+  PKG_BOOT_INI="${PKG_RKBIN}"/RKBOOT/"${DEVICE}"MINIALL.ini
+  if [ ! -f "${PKG_BOOT_INI}" ]; then
+    echo "install: ${PKG_BOOT_INI} does not exist"
+    exit 1
+  fi
+
+  PKG_DDR_BIN="${PKG_RKBIN}"/$(sed -n "/FlashData/s/FlashData=//p" "${PKG_BOOT_INI}")
+  PKG_MINILOADER="${PKG_RKBIN}"/$(sed -n "/FlashBoot/s/FlashBoot=//p" "${PKG_BOOT_INI}")
+  PKG_LOAD_ADDR=$(sed -n "/SYS_TEXT_BASE/s/#define CONFIG_SYS_TEXT_BASE //p" u-boot.cfg)
+
+  # Override sdram frequency
+  if [ "${DEVICE}" = "RK3328" ]; then
+    sed -s 's/\x4d\x1\x4d\x1\x4d\x1\x4d\x1\x4d\x1\x4d\x1/\x20\x3\x20\x3\x20\x3\x20\x3\x20\x3\x20\x3/g' -i "${PKG_DDR_BIN}"
+    sed -s 's/\x90\x1\x90\x1\x90\x1\x90\x1\x90\x1\x90\x1/\x20\x3\x20\x3\x20\x3\x20\x3\x20\x3\x20\x3/g' -i "${PKG_DDR_BIN}"
+  fi
+
+  ${PKG_RKBIN}/tools/mkimage -n "${PKG_SOC}" -T rksd -d "${PKG_DDR_BIN}":"${PKG_MINILOADER}" idbloader.img.rk || exit 1
+  ${PKG_RKBIN}/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img.rk "${PKG_LOAD_ADDR}" || exit 1
+
+  dd if=idbloader.img.rk of="${UBOOT_FIT_IMAGE}" seek=0 conv=fsync,notrunc > /dev/null 2>&1 || exit 1
+  dd if=uboot.img.rk of="${UBOOT_FIT_IMAGE}" seek=16320 conv=fsync,notrunc > /dev/null 2>&1 || exit 1
+
+  if [ "${TARGET_ARCH}" = "aarch64" -o "${TARGET_KERNEL_ARCH}" = "arm64" ]; then
+    PKG_ATF_INI="${PKG_RKBIN}"/RKTRUST/"${DEVICE}"TRUST.ini
+    if [ ! -f "${PKG_ATF_INI}" ]; then
+      echo "install: ${PKG_ATF_INI} does not exist"
+      exit 1
+    fi
+
+    "${PKG_RKBIN}"/tools/trust_merger --ignore-bl32 --prepath "${PKG_RKBIN}"/ "${PKG_ATF_INI}" || exit 1
+    dd if=trust.img of="${UBOOT_FIT_IMAGE}" seek=24512 conv=fsync,notrunc > /dev/null 2>&1 || exit 1
+  fi
 fi
 
-if [ -n "${PKG_LOAD_ADDR}" ]; then
-  ${PKG_RKBIN}/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img ${PKG_LOAD_ADDR}
-  cp -av uboot.img ${INSTALL}/usr/share/bootloader
-fi
-
-if [ -n "${PKG_BL31}" ]; then
-  cat >trust.ini <<EOF
-[BL30_OPTION]
-SEC=0
-[BL31_OPTION]
-SEC=1
-PATH=${PKG_BL31}
-ADDR=${PKG_BL31_ADDR}
-[BL32_OPTION]
-SEC=0
-[BL33_OPTION]
-SEC=0
-[OUTPUT]
-PATH=trust.img
-EOF
-  ${PKG_RKBIN}/tools/trust_merger --verbose trust.ini
-  cp -av trust.img ${INSTALL}/usr/share/bootloader
+if [ -f "${UBOOT_FIT_IMAGE}" ]; then
+  cp -av "${UBOOT_FIT_IMAGE}" "${INSTALL}"/usr/share/bootloader
+else
+  echo "install: bootloader ${UBOOT_FIT_IMAGE} was not built."
+  exit 1
 fi

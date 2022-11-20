@@ -4,7 +4,7 @@
 PKG_NAME="pvr.freebox"
 PKG_VERSION="20.3.0-Nexus"
 PKG_SHA256="0483f4e9e12160bb2d014e2f74f858ec4038dbb6b9e22815c1e5a46361d0f022"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/aassif/pvr.freebox"

@@ -5,7 +5,7 @@ Before=kodi.service
 
 [Service]
 Type=forking
-PIDFile=/var/run/mysqld/mysqld.pid
+PIDFile=/run/mysqld/mysqld.pid
 ExecStart=/bin/sh -c "exec sh /storage/.kodi/addons/service.mariadb/bin/mariadb.start"
 ExecStop=/bin/sh -c "exec sh /storage/.kodi/addons/service.mariadb/bin/mariadb.stop"
 TimeoutStartSec=60

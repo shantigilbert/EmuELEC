@@ -299,75 +299,78 @@ devices = \
       },
       'tinker': {
         'dtb': 'rk3288-tinker-s.dtb',
-        'config': 'tinker-rk3288_defconfig'
+        'config': 'tinker-s-rk3288_defconfig'
       },
     },
     'RK3328': {
       'a1': {
         'dtb': 'rk3328-a1.dtb',
-        'config': 'evb-rk3328_defconfig'
+        'config': 'evb-rk3328_defconfig',
+        'rockchip_legacy_boot': '1'
       },
       'roc-cc': {
         'dtb': 'rk3328-roc-cc.dtb',
-        'config': 'evb-rk3328_defconfig'
+        'config': 'roc-cc-rk3328_defconfig'
       },
       'rock64': {
         'dtb': 'rk3328-rock64.dtb',
-        'config': 'evb-rk3328_defconfig'
+        'config': 'rock64-rk3328_defconfig'
       },
     },
     'RK3399': {
       'hugsun-x99': {
         'dtb': 'rk3399-hugsun-x99.dtb',
-        'config': 'evb-rk3399_defconfig'
+        'config': 'evb-rk3399_defconfig',
+        'rockchip_legacy_boot': '1'
       },
       'khadas-edge': {
         'dtb': 'rk3399-khadas-edge.dtb',
-        'config': 'evb-rk3399_defconfig'
+        'config': 'khadas-edge-rk3399_defconfig'
       },
       'nanopc-t4': {
         'dtb': 'rk3399-nanopc-t4.dtb',
-        'config': 'evb-rk3399_defconfig'
+        'config': 'nanopc-t4-rk3399_defconfig'
       },
       'nanopi-m4': {
         'dtb': 'rk3399-nanopi-m4.dtb',
-        'config': 'evb-rk3399_defconfig'
+        'config': 'nanopi-m4-rk3399_defconfig'
       },
       'orangepi': {
         'dtb': 'rk3399-orangepi.dtb',
-        'config': 'evb-rk3399_defconfig'
+        'config': 'orangepi-rk3399_defconfig'
       },
       'rock960': {
         'dtb': 'rk3399-rock960.dtb',
-        'config': 'evb-rk3399_defconfig'
+        'config': 'rock960-rk3399_defconfig'
       },
       'rock-pi-4': {
         'dtb': 'rk3399-rock-pi-4b.dtb',
-        'config': 'evb-rk3399_defconfig'
+        'config': 'rock-pi-4-rk3399_defconfig'
       },
       'rock-pi-4-plus': {
         'dtb': 'rk3399-rock-pi-4b-plus.dtb',
-        'config': 'evb-rk3399_defconfig'
+        'config': 'rock-pi-4-rk3399_defconfig'
       },
       'rock-pi-n10': {
         'dtb': 'rk3399pro-rock-pi-n10.dtb',
-        'config': 'evb-rk3399_defconfig'
+        'config': 'rock-pi-n10-rk3399pro_defconfig'
       },
       'rockpro64': {
         'dtb': 'rk3399-rockpro64.dtb',
-        'config': 'evb-rk3399_defconfig'
+        'config': 'rockpro64-rk3399_defconfig'
       },
       'roc-pc': {
         'dtb': 'rk3399-roc-pc-mezzanine.dtb',
-        'config': 'firefly-rk3399_defconfig'
+        'config': 'roc-pc-mezzanine-rk3399_defconfig'
       },
       'roc-pc-plus': {
         'dtb': 'rk3399-roc-pc-plus.dtb',
-        'config': 'firefly-rk3399_defconfig'
+        'config': 'roc-pc-rk3399_defconfig'
       },
       'sapphire': {
         'dtb': 'rk3399-sapphire.dtb',
-        'config': 'evb-rk3399_defconfig'
+        'config': 'evb-rk3399_defconfig',
+        'rockchip_legacy_boot': '1'
       },
     },
   },

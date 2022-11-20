@@ -53,10 +53,10 @@ index 2b7d655678d0..a25cd11f1124 100644
  	return 0;
  }
  
-diff --git a/include/configs/sun8i.h b/include/configs/sun8i.h
+diff --git a/include/configs/sunxi-common.h b/include/configs/sunxi-common.h
 index 2f0d69bdfce2..fda5b235a3e0 100644
---- a/include/configs/sun8i.h
-+++ b/include/configs/sun8i.h
+--- a/include/configs/sunxi-common.h
++++ b/include/configs/sunxi-common.h
 @@ -26,6 +26,9 @@
  #define SUNXI_RESUME_BASE		(CONFIG_ARMV7_SECURE_BASE + \
  					 CONFIG_ARMV7_SECURE_MAX_SIZE)

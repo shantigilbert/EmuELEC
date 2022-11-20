@@ -1,0 +1,261 @@
+From 43034e79bdd1385f7410361c0e986adfcf2cdae3 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Tue, 8 Dec 2020 09:35:08 -0500
+Subject: [PATCH] add-power-on-argument
+
+---
+ utils/keytable/keytable.c | 154 +++++++++++++++++++++++++-------------
+ 1 file changed, 102 insertions(+), 52 deletions(-)
+
+diff --git a/utils/keytable/keytable.c b/utils/keytable/keytable.c
+index 248493a..6f1831a 100644
+--- a/utils/keytable/keytable.c
++++ b/utils/keytable/keytable.c
+@@ -141,6 +141,7 @@ enum sysfs_protocols {
+ 	SYSFS_IMON		= (1 << 14),
+ 	SYSFS_RCMM		= (1 << 15),
+ 	SYSFS_XBOX_DVD		= (1 << 16),
++	SYSFS_IRMP		= (1 << 17),
+ 	SYSFS_INVALID		= 0,
+ };
+ 
+@@ -177,6 +178,7 @@ const struct protocol_map_entry protocol_map[] = {
+ 	{ "imon",	NULL,		SYSFS_IMON	},
+ 	{ "rc-mm",	NULL,		SYSFS_RCMM	},
+ 	{ "xbox-dvd",	NULL,		SYSFS_XBOX_DVD	},
++	{ "irmp",	"/irmp_decoder",		SYSFS_IRMP	},
+ 	{ NULL,		NULL,		SYSFS_INVALID	},
+ };
+ 
+@@ -266,6 +268,7 @@ static const struct argp_option options[] = {
+ 	{"clear",	'c',	0,		0,	N_("Clears the scancode to keycode mappings"), 0},
+ 	{"sysdev",	's',	N_("SYSDEV"),	0,	N_("rc device to control, defaults to rc0 if not specified"), 0},
+ 	{"test",	't',	0,		0,	N_("test if IR is generating events"), 0},
++	{"power-key",	'u',	0,		0,	N_("will scan for a compatible power on code"), 0},
+ 	{"read",	'r',	0,		0,	N_("reads the current scancode/keycode mapping"), 0},
+ 	{"write",	'w',	N_("KEYMAP"),	0,	N_("write (adds) the keymap from the specified file"), 0},
+ 	{"set-key",	'k',	N_("SCANKEY"),	0,	N_("Change scan/key pairs"), 0},
+@@ -289,6 +292,7 @@ static int readtable = 0;
+ static int clear = 0;
+ int debug = 0;
+ static int test = 0;
++static int poweron = 0;
+ static int delay = -1;
+ static int period = -1;
+ static int test_keymap = 0;
+@@ -538,6 +542,9 @@ static error_t parse_opt(int k, char *arg, struct argp_state *state)
+ 	case 't':
+ 		test++;
+ 		break;
++	case 'u':
++		poweron++;
++		break;
+ 	case 'c':
+ 		clear++;
+ 		break;
+@@ -1501,12 +1508,14 @@ static void print_scancodes(const struct lirc_scancode *scancodes, unsigned coun
+ 	}
+ }
+ 
+-static void test_event(struct rc_device *rc_dev, int fd)
++static void test_event(struct rc_device *rc_dev, int fd, int power_on)
+ {
+ 	struct input_event ev[64];
+ 	struct lirc_scancode sc[64];
+ 	int rd, i, lircfd = -1;
+ 	unsigned mode;
++	unsigned protocol;
++	unsigned undefined;
+ 
+ 	/* LIRC reports time in monotonic, set event to same */
+ 	mode = CLOCK_MONOTONIC;
+@@ -1526,7 +1535,11 @@ static void test_event(struct rc_device *rc_dev, int fd)
+ 		}
+ 	}
+ 
+-	printf (_("Testing events. Please, press CTRL-C to abort.\n"));
++	if (!power_on)
++		printf (_("Testing events. Please, press CTRL-C to abort.\n"));
++	else
++		printf (_("Waiting for IRMP decode event. Please, press CTRL-C to abort.\n"));
++
+ 	while (1) {
+ 		struct pollfd pollstruct[2] = {
+ 			{ .fd = fd, .events = POLLIN },
+@@ -1540,7 +1553,7 @@ static void test_event(struct rc_device *rc_dev, int fd)
+ 			perror(_("poll returned error"));
+ 		}
+ 
+-		if (lircfd != -1) {
++		if (lircfd != -1 && !power_on) {
+ 			rd = read(lircfd, sc, sizeof(sc));
+ 
+ 			if (rd != -1) {
+@@ -1561,54 +1574,88 @@ static void test_event(struct rc_device *rc_dev, int fd)
+ 			return;
+ 		}
+ 
+-		for (i = 0; i < rd / sizeof(struct input_event); i++) {
+-			printf(_("%ld.%06ld: event type %s(0x%02x)"),
+-				ev[i].input_event_sec, ev[i].input_event_usec,
+-				get_event_name(events_type, ev[i].type), ev[i].type);
++		if (!power_on) {
++			for (i = 0; i < rd / sizeof(struct input_event); i++) {
++				printf(_("%ld.%06ld: event type %s(0x%02x)"),
++					ev[i].input_event_sec, ev[i].input_event_usec,
++					get_event_name(events_type, ev[i].type), ev[i].type);
+ 
+-			switch (ev[i].type) {
+-			case EV_SYN:
+-				printf(".\n");
+-				break;
+-			case EV_KEY:
+-				printf(_(" key_%s: %s(0x%04x)\n"),
+-					(ev[i].value == 0) ? _("up") : _("down"),
+-					get_event_name(key_events, ev[i].code),
+-					ev[i].code);
+-				break;
+-			case EV_REL:
+-				printf(_(": %s (0x%04x) value=%d\n"),
+-					get_event_name(rel_events, ev[i].code),
+-					ev[i].code,
+-					ev[i].value);
+-				break;
+-			case EV_ABS:
+-				printf(_(": %s (0x%04x) value=%d\n"),
+-					get_event_name(abs_events, ev[i].code),
+-					ev[i].code,
+-					ev[i].value);
+-				break;
+-			case EV_MSC:
+-				if (ev[i].code == MSC_SCAN)
+-					printf(_(": scancode = 0x%02x\n"), ev[i].value);
+-				else
+-					printf(_(": code = %s(0x%02x), value = %d\n"),
+-						get_event_name(msc_events, ev[i].code),
++				switch (ev[i].type) {
++				case EV_SYN:
++					printf(".\n");
++					break;
++				case EV_KEY:
++					printf(_(" key_%s: %s(0x%04x)\n"),
++						(ev[i].value == 0) ? _("up") : _("down"),
++						get_event_name(key_events, ev[i].code),
++						ev[i].code);
++					break;
++				case EV_REL:
++					printf(_(": %s (0x%04x) value=%d\n"),
++						get_event_name(rel_events, ev[i].code),
++						ev[i].code,
++						ev[i].value);
++					break;
++				case EV_ABS:
++					printf(_(": %s (0x%04x) value=%d\n"),
++						get_event_name(abs_events, ev[i].code),
++						ev[i].code,
++						ev[i].value);
++					break;
++				case EV_MSC:
++					if (ev[i].code == MSC_SCAN)
++						printf(_(": scancode = 0x%02x\n"), ev[i].value);
++					else
++						printf(_(": code = %s(0x%02x), value = %d\n"),
++							get_event_name(msc_events, ev[i].code),
++							ev[i].code, ev[i].value);
++					break;
++				case EV_REP:
++					printf(_(": value = %d\n"), ev[i].value);
++					break;
++				case EV_SW:
++				case EV_LED:
++				case EV_SND:
++				case EV_FF:
++				case EV_PWR:
++				case EV_FF_STATUS:
++				default:
++					printf(_(": code = 0x%02x, value = %d\n"),
+ 						ev[i].code, ev[i].value);
+-				break;
+-			case EV_REP:
+-				printf(_(": value = %d\n"), ev[i].value);
+-				break;
+-			case EV_SW:
+-			case EV_LED:
+-			case EV_SND:
+-			case EV_FF:
+-			case EV_PWR:
+-			case EV_FF_STATUS:
+-			default:
+-				printf(_(": code = 0x%02x, value = %d\n"),
+-					ev[i].code, ev[i].value);
+-				break;
++					break;
++				}
++			}
++		} else {
++			for (i = 0; i < rd / sizeof(struct input_event); i++) {
++
++				switch (ev[i].type) {
++				case EV_MSC:
++					if (ev[i].code == MSC_SCAN) {
++						if ((ev[i].value & 0xFFFFFF00) == 0xA0A0A000) {
++							protocol = ev[i].value & 0xFF;
++							undefined = 0;
++							mode = 0;
++						}
++						else if ((ev[i].value & 0xFFFFFF00) == 0xB0B0B000) {
++							protocol = ev[i].value & 0xFF;
++							undefined = 1;
++							mode = 0;
++						}
++						else if (!mode) {
++							if (!undefined) {
++								printf(_("Received IRMP code: remotewakeup='0x%08x', decode_type='0x%x', "), ev[i].value, protocol);
++								mode = 1;
++							}
++							else
++								printf(_("Received IRMP code: scancode='0x%08x', IRMP protocol = %d, decode_type is undefined!\n"), ev[i].value, protocol);
++						}
++						else if (mode) {
++							printf(_("remotewakeupmask='0x%08x'\n"), ev[i].value);
++							mode = 0;
++						}
++					}
++					break;
++				}
+ 			}
+ 		}
+ 	}
+@@ -2047,7 +2094,7 @@ int main(int argc, char *argv[])
+ 		return 0;
+ 
+ 	/* Just list all devices */
+-	if (!clear && !readtable && !keytable && !ch_proto && !cfg.next && !test && delay < 0 && period < 0 && !bpf_protocol) {
++	if (!clear && !readtable && !keytable && !ch_proto && !cfg.next && !test && !poweron && delay < 0 && period < 0 && !bpf_protocol) {
+ 		if (show_sysfs_attribs(&rc_dev, devclass))
+ 			return -1;
+ 
+@@ -2153,6 +2200,9 @@ int main(int argc, char *argv[])
+ 	/*
+ 	 * Third step: change protocol
+ 	 */
++	if (poweron)
++		ch_proto = SYSFS_IRMP;
++
+ 	if (ch_proto || bpf_protocol) {
+ 		if (rc_dev.lirc_name)
+ 			clear_bpf(rc_dev.lirc_name);
+@@ -2203,8 +2253,8 @@ int main(int argc, char *argv[])
+ 		set_rate(fd, new_delay, new_period);
+ 	}
+ 
+-	if (test)
+-		test_event(&rc_dev, fd);
++	if (test || poweron)
++		test_event(&rc_dev, fd, poweron);
+ 
+ 	return 0;
+ }
+-- 
+2.38.1
+

@@ -4,7 +4,7 @@
 PKG_NAME="pvr.waipu"
 PKG_VERSION="20.6.0-Nexus"
 PKG_SHA256="64d348040dcf523d5ef7dad2cc6efa05b2186d99b116f353d97d2cbd5f4093b8"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/flubshi/pvr.waipu"

@@ -4,7 +4,7 @@
 PKG_NAME="pvr.plutotv"
 PKG_VERSION="20.3.0-Nexus"
 PKG_SHA256="d38a6bf4debc442849d01faedadcccb1b07debe850cd3c9a5789508233d22256"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.plutotv"

@@ -512,6 +512,20 @@ Shovel Knight:
     - /usr/bin/show_splash.sh gameloading "ports" "shovelknight"
     - shovelknight.sh >> $EE_LOG 2>&1
 
+Half-Life:
+  description: "Half-Life is a 1998 first-person shooter (FPS) game developed by Valve and published by Sierra Studios for Windows. It was Valve's debut product and the first game in the Half-Life series. Players assume the role of Gordon Freeman, a scientist who must escape the Black Mesa Research Facility after it is invaded by aliens. The gameplay consists of combat, exploration, and puzzle-solving. "
+  rating: 1.0
+  release_date: 1998
+  developer: Valve
+  publisher: Sierra Studios
+
+  init_port: true
+  port_exe: "xash3d"
+  audio: "alsa"
+  commands:
+    - /usr/bin/show_splash.sh gameloading "ports" "hl"
+    - xash3d.sh >> $EE_LOG 2>&1
+
 TMNTSR:
   description: "Teenage Mutant Ninja Turtles: Shredder's Revenge is a beat'em up game developed by Tribute Games and published by Dotemu."
   rating: 1.0

@@ -14,6 +14,7 @@ PKG_BUILD_FLAGS="+pic"
 
 PKG_CMAKE_OPTS_HOST="-DBUILD_SHARED_LIBS=OFF \
                      -DBUILD_STATIC_LIBS=ON \
+                     -DPCRE2_STATIC_PIC=ON \
                      -DPCRE2_BUILD_PCRE2_8=ON \
                      -DPCRE2_BUILD_PCRE2_16=ON \
                      -DPCRE2_BUILD_PCRE2_32=ON \

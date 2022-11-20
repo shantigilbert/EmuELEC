@@ -1,15 +1,17 @@
-From f5f78dda7b1161779ce7a0c495f54e30f971776a Mon Sep 17 00:00:00 2001
+From c32d80cbfd5eb6ae9b5a36b3e9a8ec6e9d825837 Mon Sep 17 00:00:00 2001
 From: Stefan Saraev <stefan@saraev.ca>
 Date: Sat, 18 Apr 2015 14:59:29 +0300
-Subject: [PATCH 07/13] disable minimize
+Subject: [PATCH] disable minimize
 
 ---
- xbmc/Application.cpp | 1 -
+ xbmc/application/Application.cpp | 1 -
  1 file changed, 1 deletion(-)
 
---- a/xbmc/Application.cpp
-+++ b/xbmc/Application.cpp
-@@ -2171,7 +2171,6 @@ void CApplication::OnApplicationMessage(
+diff --git a/xbmc/application/Application.cpp b/xbmc/application/Application.cpp
+index 27b7bc80cb..bafb5de064 100644
+--- a/xbmc/application/Application.cpp
++++ b/xbmc/application/Application.cpp
+@@ -1572,7 +1572,6 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
      break;
  
    case TMSG_MINIMIZE:
@@ -17,3 +19,6 @@ Subject: [PATCH 07/13] disable minimize
      break;
  
    case TMSG_EXECUTE_OS:
+-- 
+2.34.1
+

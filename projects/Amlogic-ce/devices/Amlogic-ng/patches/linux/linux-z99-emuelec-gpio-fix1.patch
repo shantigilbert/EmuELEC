@@ -44,3 +44,20 @@ index 353ad93776acf..9c46f148b11c6 100644
 +		};
 +	};
 +};
+diff --git a/arch/arm64/boot/dts/amlogic/g12b_s922x_odroid_n2l_joystick.dts b/arch/arm64/boot/dts/amlogic/g12b_s922x_odroid_n2l_joystick.dts
+index 353ad93776acf..9c46f148b11c6 100644
+--- a/arch/arm64/boot/dts/amlogic/g12b_s922x_odroid_n2l_joystick.dts
++++ b/arch/arm64/boot/dts/amlogic/g12b_s922x_odroid_n2l_joystick.dts
+@@ -39,3 +39,12 @@
+ 			<&gpio GPIOX_5 GPIO_ACTIVE_LOW>;
+ 	};
+ };
++
++&pinctrl_periphs {
++	spdifout: spdifout {
++		mux {/* GPIOA_11 */
++			groups = "spdif_out_a11";
++			function = "spdif_out";
++		};
++	};
++};

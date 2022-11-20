@@ -1,7 +1,7 @@
 From 2891f697cbfea4f0bf60bc476e78ab25947ac810 Mon Sep 17 00:00:00 2001
 From: chewitt <christianshewitt@gmail.com>
 Date: Fri, 15 May 2020 06:12:43 +0000
-Subject: [PATCH 2/3] WIP: add Amlogic cards to Makefile.am
+Subject: [PATCH 2/2] WIP: add Amlogic cards to Makefile.am
 
 ---
  src/conf/cards/Makefile.am | 2 ++

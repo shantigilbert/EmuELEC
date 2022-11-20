@@ -2,7 +2,7 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="abuse"
-PKG_VERSION="56e390846baa0c259c0e4705362ba57471164392"
+PKG_VERSION="9d1f66f57377859bae10e28eabebea0b9c750490"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"

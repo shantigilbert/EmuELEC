@@ -1,3 +1,6 @@
+122
+- update to 1.22.0
+
 121
 - update to 1.21.0
 

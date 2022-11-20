@@ -1,20 +1,23 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
-SRCDIR="${BUILD}/image/system/usr/share/bootloader"
-DSTDIR="${RELEASE_DIR}/3rdparty/bootloader"
+SRCDIR="${BUILD}"/image/system/usr/share/bootloader
+DSTDIR="${RELEASE_DIR}"/3rdparty/bootloader
 
 mkdir -p "${DSTDIR}"
-  if [ -n "${UBOOT_SYSTEM}" ]; then
-    if [ -f "${SRCDIR}/idbloader.img" ]; then
-      cp -a "${SRCDIR}/idbloader.img" "${DSTDIR}"
+if [ -n "${UBOOT_SYSTEM}" ]; then
+  if [ -f "${SRCDIR}"/"${UBOOT_FIT_IMAGE}" ]; then
+    cp -av "${SRCDIR}"/"${UBOOT_FIT_IMAGE}" "${DSTDIR}" && \
+    ln -sfv "${UBOOT_FIT_IMAGE}" "${DSTDIR}"/idbloader.img || exit 1
+    if [ "${ROCKCHIP_LEGACY_BOOT}" = "1" ]; then
+      touch "${DSTDIR}"/.rockchip_boot_chain_old
+    else
+      touch "${DSTDIR}"/.rockchip_boot_chain_new
     fi
-    if [ -f "${SRCDIR}/uboot.img" ]; then
-      cp -a "${SRCDIR}/uboot.img" "${DSTDIR}"
-    fi
-    if [ -f "${SRCDIR}/trust.img" ]; then
-      cp -a "${SRCDIR}/trust.img" "${DSTDIR}"
-    fi
+  else
+    echo "release: bootloader image ${SRCDIR}/${UBOOT_FIT_IMAGE} does not exist."
+    exit 1
   fi
+fi
 
-  cp -a "${SRCDIR}"/${DEVICE,,}*.dtb "${DSTDIR}"
+cp -av "${SRCDIR}"/"${DEVICE,,}"*.dtb "${DSTDIR}"

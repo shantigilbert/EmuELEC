@@ -3,14 +3,14 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="proftpd"
-PKG_VERSION="1.3.7d"
-PKG_SHA256="b231536e2978116801d06278e805b18e5240568d2bc921693ac7147652e267e4"
-PKG_REV="105"
+PKG_VERSION="1.3.7e"
+PKG_SHA256="6e716a3b53ee069290399fce6dccf4c229fafe6ec2cb14db3778b7aa3f9a8c92"
+PKG_REV="106"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.proftpd.org/"
 PKG_URL="https://github.com/proftpd/proftpd/archive/v${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain libcap openssl ncurses pcre whois"
+PKG_DEPENDS_TARGET="toolchain libcap openssl ncurses pcre"
 PKG_SECTION="service"
 PKG_SHORTDESC="ProFTPD: a FTP server for linux"
 PKG_LONGDESC="ProFTPD (${PKG_VERSION}): is a secure and configurable FTP server with SSL/TLS support"
@@ -50,10 +50,8 @@ addon() {
     cp ${PKG_INSTALL}/usr/bin/ftpwho ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
     cp ${PKG_INSTALL}/usr/bin/ftptop ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
 
-    cp $(get_install_dir whois)/usr/bin/mkpasswd ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
-
   mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/locale
     for i in ${PKG_INSTALL}/storage/.kodi/addons/${PKG_ADDON_ID}/locale/*; do
-      cp ${i}/LC_MESSAGES/proftpd.mo ${ADDON_BUILD}/${PKG_ADDON_ID}/locale/$(basename ${i}).mo
+      cp ${i}/LC_MESSAGES/proftpd.mo ${ADDON_BUILD}/${PKG_ADDON_ID}/locale/${i##*/}.mo
     done
 }

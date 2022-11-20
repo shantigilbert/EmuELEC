@@ -10,10 +10,10 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h6.dtsi
-@@ -160,6 +160,17 @@
+@@ -160,6 +160,18 @@
  			};
  		};
- 
+
 +		deinterlace: deinterlace@1420000 {
 +			compatible = "allwinner,sun50i-h6-deinterlace";
 +			reg = <0x01420000 0x2000>;
@@ -23,6 +23,7 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 +			clock-names = "bus", "mod", "ram";
 +			resets = <&ccu RST_BUS_DEINTERLACE>;
 +			interrupts = <GIC_SPI 79 IRQ_TYPE_LEVEL_HIGH>;
++			iommus = <&iommu 2>;
 +		};
 +
  		video-codec@1c0e000 {

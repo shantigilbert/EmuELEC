@@ -1,5 +1,5 @@
---- a/src/libretro/Makefile
-+++ b/src/libretro/Makefile
+--- a/src/os/libretro/Makefile
++++ b/src/os/libretro/Makefile
 @@ -137,6 +137,27 @@
        endif
     endif

@@ -1,9 +1,9 @@
 #!/bin/bash
 
+. /etc/profile
+
 ACTION=$1
 shift
-
-echo "EmuELEC Bluetooth Log" > /emuelec/logs/bluetooth-agent.log
 
 do_help() {
     echo "${1} list" >&2
@@ -26,60 +26,16 @@ do_list() {
 
 do_remove() {
     DEV="${1}"
-
     # output is never nice
-    if ! (echo "untrust ${DEV}" ; echo "remove ${DEV}") | bluetoothctl >/dev/null 2>/dev/null
+    if ! (echo "untrust ${DEV}" ; echo "remove ${DEV}") | /usr/bin/bluetoothctl >> /emuelec/logs/bluetooth.log 2>&1
     then
 	return 1
     fi
-  
     return 0
 }
 
 do_trust() {
-	NPID=$(pgrep -f batocera-bluetooth-agent)
-    test -z "${NPID}" && return 0
-
-    touch "/var/run/bt_status" || retrun 1
-    LAST_MSG=$(cat "/var/run/bt_status")
-    
-    # start discovering
-    kill -10 "${NPID}"
-
-    trap "kill -12 ${NPID}" 2 3
-
-    N=30
-    while test $N -gt 0
-    do
-	NEW_MSG=$(cat "/var/run/bt_status")
-	if test "${LAST_MSG}" != "${NEW_MSG}"
-	then
-	    LAST_MSG="${NEW_MSG}"
-	    echo "${NEW_MSG}"
-	fi
-	sleep 1
-	let N--
-    done
-
-    # stop discovering
-    kill -12 "${NPID}"
- 
-}
-
-do_starttrust() {
-	NPID=$(pgrep -f batocera-bluetooth-agent)
-    test -z "${NPID}" && exit 0
-
-    # start discovering
-    kill -10 "${NPID}"
-}
-
-do_stoptrust() {
-	NPID=$(pgrep -f batocera-bluetooth-agent)
-    test -z "${NPID}" && exit 0
-
-    # stop discovering
-    kill -12 "${NPID}"
+emuelec-bluetooth
 }
 
 case "${ACTION}" in
@@ -89,20 +45,8 @@ case "${ACTION}" in
     "trust")
 	do_trust
 	;;
-    "starttrust")
-	do_starttrust
-	;;
-    "stoptrust")
-	do_stoptrust
-	;;
     "remove")
-	if test $# = 1
-	then
-	    do_remove "${1}" || exit 1
-	else
-	    do_help "${0}"
-	    exit 1
-	fi
+    do_remove "${1}" || exit 1
 	;;
     *)
 	do_help "${0}"

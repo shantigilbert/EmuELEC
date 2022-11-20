@@ -1,0 +1,13 @@
+--- a/kernel/nv-acpi.c	2019-12-11 22:04:24.000000000 +0000
++++ b/kernel/nv-acpi.c	2022-08-29 08:50:01.383913160 +0000
+@@ -16,6 +16,9 @@
+ #include "nv-reg.h"
+ 
+-#if defined(NV_LINUX_ACPI_EVENTS_SUPPORTED)
++#include <linux/version.h>
++// Rel.commit "ACPI: bus: Drop unused list heads from struct acpi_device" (Rafael J. Wysocki, 4 Jun 2022)
++// Disable ACPI support due to more GPL stuff (acpi_dev_for_each_child is only GPL-exported)
++#if defined(NV_LINUX_ACPI_EVENTS_SUPPORTED) && (LINUX_VERSION_CODE < KERNEL_VERSION(6, 0, 0))
+ static RM_STATUS   nv_acpi_extract_integer (const union acpi_object *, void *, NvU32, NvU32 *);
+ static RM_STATUS   nv_acpi_extract_buffer  (const union acpi_object *, void *, NvU32, NvU32 *);
+ static RM_STATUS   nv_acpi_extract_package (const union acpi_object *, void *, NvU32, NvU32 *);

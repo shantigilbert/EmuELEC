@@ -255,8 +255,50 @@ check_toolchain_config() {
   done
 }
 
+# args: linker, default availability yes/no
+linker_allowed() {
+  if flag_enabled "$1" "$2"; then
+    # bfd is always available, others need to be enabled with <LINKER>_SUPPORT="yes"
+    local linker_support="${1^^}_SUPPORT"
+    if [ "$1" = "bfd" ] || [ "${!linker_support}" = "yes" ]; then
+      return 0
+    fi
+  fi
+  return 1
+}
+
+# return target linker to use for a package
+get_target_linker() {
+  # all known linkers, in descending order of priority
+  # those are candidates for explicit opt-in via PKG_BUILD_FLAGS
+  local all_linkers="mold gold bfd"
+
+  # linkers to choose from unless disabled via PKG_BUILD_FLAGS
+  local linker_candidates="${DEFAULT_LINKER:-bfd} ${all_linkers}"
+
+  local linker
+
+  # check if package prefers a specific linker
+  for linker in ${all_linkers}; do
+    if linker_allowed "${linker}" "no"; then
+      echo "${linker}"
+      return
+    fi
+  done
+
+  # select linker which isn't disabled by PKG_BUILD_FLAGS
+  for linker in ${linker_candidates}; do
+    if linker_allowed "${linker}" "yes"; then
+      echo "${linker}"
+      return
+    fi
+  done
+
+  # none of our linkers matched, use the compiler's default linker
+  echo "compiler_default"
+}
+
 setup_toolchain() {
-  local have_gold="no"
   if [ "$LTO_SUPPORT" = "yes" ]; then
     if flag_enabled "lto-parallel" "no"; then
       TARGET_CFLAGS+=" $FLAGS_OPTIM_LTO_PARALLEL $FLAGS_OPTIM_LTO_NO_FAT"
@@ -279,15 +321,14 @@ setup_toolchain() {
     TARGET_LDFLAGS+=" $FLAGS_OPTIM_LTO_OFF"
   fi
 
-  # gold flag
-  if flag_enabled "gold" "$GOLD_SUPPORT" "only-disable"; then
-    TARGET_LDFLAGS+=" $LDFLAGS_OPTIM_GOLD"
-    have_gold="yes"
-  fi
+  local linker="$(get_target_linker)"
+  local linker_opts="LDFLAGS_OPTIM_LINKER_${linker^^}"
+
+  TARGET_LDFLAGS+=" ${!linker_opts}"
 
   # compiler optimization, descending priority: speed, size, default
   if [ "${BUILD_WITH_DEBUG}" = "yes" ]; then
-    if [ "${SPLIT_DEBUG_INFO}" = "yes" -a "${have_gold}" = "yes" ]; then
+    if [ "${SPLIT_DEBUG_INFO}" = "yes" -a "${linker}" = "gold" ]; then
       TARGET_CFLAGS+=" $CFLAGS_OPTIM_DEBUG_SPLIT"
       TARGET_CXXFLAGS+=" $CXXFLAGS_OPTIM_DEBUG_SPLIT"
       TARGET_LDFLAGS+=" $LDFLAGS_OPTIM_DEBUG_SPLIT"
@@ -1842,6 +1883,24 @@ use_32_options() {
   TARGET_CXXFLAGS="${LIB32_TARGET_CXXFLAGS}"
   TARGET_LDFLAGS="${LIB32_TARGET_LDFLAGS}"
   SYSROOT_PREFIX="${LIB32_SYSROOT_PREFIX}"
+}
+
+# store current timestamp in TIMESTAMP_xxx variable (xxx set by arg)
+# timestamps are seconds.milliseconds since epoch
+record_timestamp() {
+  if [ -n "${TRACE_BUILD_TIMING}" ]; then
+    typeset -g "TIMESTAMP_$1=$(date +%s.%3N)"
+  fi
+}
+
+# args: text, start timestamp, end timestamp
+show_timestamp_diff() {
+  if [ -n "${TRACE_BUILD_TIMING}" ]; then
+    local start="TIMESTAMP_$2"
+    local end="TIMESTAMP_$3"
+    local timediff=$(echo "${!end}-${!start}" | bc)
+    printf '%20s: %10.3f\n' "$1" "${timediff}"
+  fi
 }
 
 # Use distribution functions if any

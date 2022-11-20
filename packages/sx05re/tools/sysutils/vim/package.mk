@@ -28,7 +28,7 @@ PKG_CONFIGURE_OPTS_TARGET="vim_cv_getcwd_broken=no \
                            --enable-gui=no \
                            --with-compiledby=EmuELEC \
                            --with-features=huge \
-                           --with-tlib=tinfo \
+                           --with-tlib=ncurses \
                            --without-x"
 
 PKG_MAKEINSTALL_OPTS_TARGET=VIMRTDIR=

@@ -15,7 +15,7 @@ pre_configure_target() {
   cd src
   PKG_MAKE_OPTS_TARGET=" -C ${PKG_BUILD}/src sundog"
   sed -i "s|sdl2-config|$SYSROOT_PREFIX/usr/bin/sdl2-config|g" Makefile
-  sed -i "s|-lreadline|-lreadline -lncurses -ltinfo|g" Makefile
+  sed -i "s|-lreadline|-lreadline -lncurses|g" Makefile
 }
 
 makeinstall_target() {

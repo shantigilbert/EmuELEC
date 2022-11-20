@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings  version="1">
+ <section id="service.nextpvr">
+    <category id="download" label="30001">
+    <group id="0">
+        <setting id="scantable" type="action" label="30038" help="30037">
+          <level>0</level>
+          <data>RunScript(service.nextpvr, getscantables)</data>
+          <control type="button" format="action">
+            <close>false</close>
+          </control>
+        </setting>
+        <setting id="update" type="action" label="30002" help="30003">
+          <level>2</level>
+          <data>RunScript(service.nextpvr, updategeneric)</data>
+          <control type="button" format="action">
+            <close>false</close>
+          </control>
+        </setting>
+      </group>
+    </category>
+    <category id="control" label="30004">
+      <group id="0">
+        <setting id="waitfor" type="integer" label="30049" help="30050">
+          <level>1</level>
+          <default>5</default>
+          <constraints>
+            <minimum>5</minimum>
+            <step>1</step>
+            <maximum>60</maximum>
+          </constraints>
+          <control type="slider" format="integer">
+            <popup>false</popup>
+          </control>
+        </setting>
+        <setting id="updateepg" type="action" label="30005" help="30006">
+          <level>1</level>
+          <data>RunScript(service.nextpvr, updateepg)</data>
+          <control type="button" format="action">
+            <close>false</close>
+          </control>
+        </setting>
+        <setting id="updatem3u" type="action" label="30007" help="30008">
+          <level>3</level>
+          <data>RunScript(service.nextpvr, updatem3u)</data>
+          <control type="button" format="action">
+            <close>false</close>
+          </control>
+        </setting>
+        <setting id="rescan" type="action" label="30013" help="30014">
+          <level>2</level>
+          <data>RunScript(service.nextpvr, rescan)</data>
+          <control type="button" format="action">
+            <close>false</close>
+          </control>
+        </setting>
+        <setting id="transcode" type="action" label="30009" help="30010">
+          <level>3</level>
+          <data>RunScript(service.nextpvr, transcode)</data>
+          <control type="button" format="action">
+            <close>false</close>
+          </control>
+        </setting>
+        <setting id="defaults" type="action" label="30044" help="30045">
+          <level>3</level>
+          <data>RunScript(service.nextpvr, defaults)</data>
+          <control type="button" format="action">
+            <close>false</close>
+          </control>
+        </setting>
+        <setting id="satiprtsp" type="integer" label="30047" help="30048">
+          <level>1</level>
+          <default>554</default>
+          <control type="edit" format="integer">
+            <heading>30047</heading>
+          </control>
+        </setting>
+      </group>
+    </category>
+  </section>
+</settings>

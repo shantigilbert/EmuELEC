@@ -1,0 +1,13 @@
+export ROCKCHIP_LEGACY_BOOT=$("${ROOT}"/"${SCRIPTS}"/uboot_helper "${PROJECT}" "${DEVICE}" "${UBOOT_SYSTEM}" rockchip_legacy_boot) || "${ROCKCHIP_LEGACY_BOOT:-}"
+
+if [ "${ROCKCHIP_LEGACY_BOOT}" = "1" ]; then
+  export UBOOT_TARGET="u-boot-dtb.bin"
+else
+  export UBOOT_TARGET=""
+fi
+
+if [ -n "${ATF_PLATFORM}" ]; then
+  if [ -f "$(get_install_dir atf)/usr/share/bootloader/bl31.elf" ]; then
+    export BL31="$(get_install_dir atf)/usr/share/bootloader/bl31.elf"
+  fi
+fi

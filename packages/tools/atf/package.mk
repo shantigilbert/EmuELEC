@@ -14,6 +14,11 @@ PKG_TOOLCHAIN="manual"
 
 [ -n "${KERNEL_TOOLCHAIN}" ] && PKG_DEPENDS_TARGET+=" gcc-${KERNEL_TOOLCHAIN}:host"
 
+if [ "${PROJECT}" = "Rockchip" -a "${DEVICE}" = "RK3399" ]; then
+  PKG_DEPENDS_TARGET+=" gcc-arm-none-eabi:host"
+  export M0_CROSS_COMPILE="${TOOLCHAIN}/bin/arm-none-eabi-"
+fi
+
 make_target() {
   if [ "${DEVICE}" = "iMX8" ]; then
     CROSS_COMPILE="${TARGET_KERNEL_PREFIX}" LDFLAGS="--no-warn-rwx-segments" CFLAGS="--param=min-pagesize=0" make PLAT=${ATF_PLATFORM} bl31
@@ -24,5 +29,5 @@ make_target() {
 
 makeinstall_target() {
   mkdir -p ${INSTALL}/usr/share/bootloader
-  cp -a build/${ATF_PLATFORM}/release/bl31.bin ${INSTALL}/usr/share/bootloader
+  cp -a build/${ATF_PLATFORM}/release/${ATF_BL31_BINARY:-bl31.bin} ${INSTALL}/usr/share/bootloader
 }

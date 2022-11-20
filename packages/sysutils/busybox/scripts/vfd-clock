@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2022-present Team LibreELEC (https://libreelec.tv)
+
+do_start(){
+  while sleep 1
+  do
+    printf "%4s" "$(date +'%l %M' | tr -d '[:space:]')" > "$LED_PATH_TEXT"
+    if [ "$LED_COLON" = "off" ]; then
+      echo "1" > "$LED_PATH_COLON"
+      LED_COLON="on"
+    else
+      echo "0" > "$LED_PATH_COLON"
+      LED_COLON="off"
+    fi
+  done
+}
+
+do_stop(){
+  echo "0" > "$LED_PATH_COLON"
+  echo " " > "$LED_PATH_TEXT"
+}
+
+case $(dtname) in
+  oranth,tx3-mini)
+    LED_PATH_COLON="/sys/devices/platform/spi/spi_master/spi0/spi0.0/leds/:colon/brightness"
+    LED_PATH_TEXT="/sys/devices/platform/spi/spi_master/spi0/spi0.0/display_text"
+    ;;
+  default|*)
+    # noop
+    ;;
+esac
+
+if [ -n "$LED_PATH_COLON" ] && [ -n "$LED_PATH_TEXT" ]; then
+  case $1 in
+    start)
+      do_start
+      ;;
+    stop)
+      do_stop
+      ;;
+  esac
+else
+  exit 0
+fi

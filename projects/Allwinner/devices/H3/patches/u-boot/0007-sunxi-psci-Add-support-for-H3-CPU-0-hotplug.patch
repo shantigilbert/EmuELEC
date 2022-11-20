@@ -174,13 +174,13 @@ index ad1f97632979..a2c74da81aa9 100644
  #ifdef SCP_ADDR
  						    "scp",
  #endif
-diff --git a/include/configs/sun8i.h b/include/configs/sun8i.h
+diff --git a/include/configs/sunxi-common.h b/include/configs/sunxi-common.h
 index 563635636624..2f0d69bdfce2 100644
---- a/include/configs/sun8i.h
-+++ b/include/configs/sun8i.h
-@@ -14,6 +14,12 @@
- 
+--- a/include/configs/sunxi-common.h
++++ b/include/configs/sunxi-common.h
+@@ -15,6 +15,12 @@
  #include <asm/arch/cpu.h>
+ #include <linux/stringify.h>
  
 +#ifdef SUNXI_SRAM_A2_SIZE
 +#define SUNXI_RESUME_BASE		(CONFIG_ARMV7_SECURE_BASE + \
@@ -188,9 +188,9 @@ index 563635636624..2f0d69bdfce2 100644
 +#define SUNXI_RESUME_SIZE		1024
 +#endif
 +
- /*
-  * Include common sunxi configuration where most the settings are
-  */
+ /* Serial & console */
+ #define CONFIG_SYS_NS16550_SERIAL
+ /* ns16550 reg in the low bits of cpu reg */
 -- 
 2.33.0
 

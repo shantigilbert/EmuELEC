@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2021-present Team LibreELEC (https://libreelec.tv)
+
+. /etc/profile
+oe_setup_addon service.nextpvr
+
+ICON="${ADDON_DIR}/resources/icon.png"
+CONTROL_FILE="/tmp/curl.nextpvr.done"
+DATA_FILE="/tmp/curl.nextpvr.data"
+NEXTPVR_FILE="NPVR-@NEXTPVR_VERSION@.zip"
+
+# check for enough free disk space
+if [ $(df . | awk 'END {print $4}') -lt 400000 ]; then
+  kodi-send --action="Notification(Not enough disk space, at least 400MB are required,30000,${ICON})" >/dev/null
+  exit 0
+fi
+
+# remove install status and folders
+if [ -f ${ADDON_DIR}/extract.ok ]; then
+  rm ${ADDON_DIR}/extract.ok
+fi
+
+if [ -d ${ADDON_DIR}/nextpvr-bin ]; then
+  rm -rf ${ADDON_DIR}/nextpvr-bin
+fi
+
+if [ -d ${ADDON_DIR}/tmp_download ]; then
+  rm -rf ${ADDON_DIR}/tmp_download
+fi
+
+# create tmp download dir
+mkdir -p ${ADDON_DIR}/tmp_download
+cd ${ADDON_DIR}/tmp_download
+
+echo "Downloading NextPVR"
+
+# download NextPVR
+rm -f ${CONTROL_FILE} ${DATA_FILE}
+(
+  curl -# -O -C - https://nextpvr.com/stable/linux/${NEXTPVR_FILE} 2>${DATA_FILE}
+  touch ${CONTROL_FILE}
+) |
+  while [ : ]; do
+    [ -f ${DATA_FILE} ] && prog="$(tr '\r' '\n' <${DATA_FILE} | tail -n 1 | sed -r 's/^[# ]+/#/;s/^[^0-9]*//g')" || prog=
+    kodi-send --action="Notification(Downloading NextPVR,\"${prog:-0.0%}\",3000,${ICON})" >/dev/null
+    [ -f ${CONTROL_FILE} ] && break
+    sleep 4
+  done
+
+rm -f ${CONTROL_FILE} ${DATA_FILE}
+
+# check for failed download
+if [ ! -f ${NEXTPVR_FILE} ]; then
+  kodi-send --action="Notification(Download NextPVR failed,${ICON})"
+  exit 1
+fi
+
+# extract NextPVR
+kodi-send --action="Notification(Extracting NextPVR,starting,1000,${ICON})" >/dev/null
+mkdir -p ${ADDON_DIR}/nextpvr-bin
+unzip ${NEXTPVR_FILE} -d ${ADDON_DIR}/nextpvr-bin >/dev/null
+
+if [ "$(uname -m)" != "x86_64" ]; then
+  sed -i 's/<TranscodeHLS>default<\/TranscodeHLS>/<TranscodeHLS>-y [ANALYZE_DURATION] [SEEK] -i [SOURCE] -map_metadata -1 -threads [THREADS] -ignore_unknown -map 0:v:0? [PREFERRED_LANGUAGE] -map 0:a:[AUDIO_STREAM] -map -0:s -vcodec copy -acodec aac -ac 2 -c:s copy -hls_time [SEGMENT_DURATION] -start_number 0 -hls_list_size [SEGMENT_COUNT] -y [TARGET]<\/TranscodeHLS>/' ${ADDON_DIR}/nextpvr-bin/data/Config-master-dont-edit.xml
+fi
+sed -i 's/<RecordingDirectory>C:\\Users\\Public\\Videos\\<\/RecordingDirectory>/<RecordingDirectory>\/storage\/tvshows\/<\/RecordingDirectory>/' ${ADDON_DIR}/nextpvr-bin/data/Config-master-dont-edit.xml
+sed -i 's/<LiveTVBufferDirectory>C:\\Users\\Public\\Videos\\<\/LiveTVBufferDirectory>/<LiveTVBufferDirectory>\/tmp\/<\/LiveTVBufferDirectory>/' ${ADDON_DIR}/nextpvr-bin/data/Config-master-dont-edit.xml
+find ${ADDON_DIR}/nextpvr-bin/DeviceHost -name DeviceHostLinux -exec chmod 755 {} \;
+
+# cleanup
+cd ${ADDON_DIR}
+rm -rf ${ADDON_DIR}/tmp_download
+touch ${ADDON_DIR}/extract.ok
+kodi-send --action="Notification(Extracting NextPVR,finished,1000,${ICON})" >/dev/null

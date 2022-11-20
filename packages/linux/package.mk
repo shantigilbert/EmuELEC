@@ -6,7 +6,7 @@ PKG_NAME="linux"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kernel.org"
 PKG_DEPENDS_HOST="ccache:host rsync:host"
-PKG_DEPENDS_TARGET="linux:host kmod:host xz:host keyutils ncurses openssl:host ${KERNEL_EXTRA_DEPENDS_TARGET}"
+PKG_DEPENDS_TARGET="linux:host kmod:host xz:host keyutils openssl:host ${KERNEL_EXTRA_DEPENDS_TARGET}"
 PKG_NEED_UNPACK="${LINUX_DEPENDS} $(get_pkg_directory initramfs) $(get_pkg_variable initramfs PKG_NEED_UNPACK)"
 PKG_LONGDESC="This package contains a precompiled kernel image and the modules."
 PKG_IS_KERNEL_PKG="yes"
@@ -16,21 +16,21 @@ PKG_PATCH_DIRS="${LINUX}"
 
 case "${LINUX}" in
   amlogic)
-    PKG_VERSION="3d7cb6b04c3f3115719235cc6866b10326de34cd" # 5.19
-    PKG_SHA256="3e35fa50a8a388ceee5cac5e6c2d08d558594891ec7fd83a193aba44b81e2388"
+    PKG_VERSION="30c780ac0f9fc09160790cf58f07ef3b92097ceb" # 5.19.14
+    PKG_SHA256="74631b2e072dd50e1f98af5b907cb416aab7b03e897e36477c6f1c078ec79de9"
     PKG_URL="https://github.com/torvalds/linux/archive/${PKG_VERSION}.tar.gz"
     PKG_SOURCE_NAME="linux-${LINUX}-${PKG_VERSION}.tar.gz"
     ;;
   raspberrypi)
-    PKG_VERSION="4710bf680f806a4ff50a1278015de2577e9a44e4" # 5.15.61
-    PKG_SHA256="2cde145b11025042b4078b137d88a2cf60ba2de39a89e4756b7e401e3c04505d"
+    PKG_VERSION="995137e7ea36f56af0072eb940845f918ad6e08e" # 6.0.6
+    PKG_SHA256="f4508994790914b15f3566c633d9e104cd54cdb33986c2ed3cddd87b7dcbd30d"
     PKG_URL="https://github.com/raspberrypi/linux/archive/${PKG_VERSION}.tar.gz"
     PKG_SOURCE_NAME="linux-${LINUX}-${PKG_VERSION}.tar.gz"
     ;;
   *)
-    PKG_VERSION="5.19.7"
-    PKG_SHA256="b8bb6019d4255f39196726f9d0f82f76179d1c3d7c6b603431ef04b38201199f"
-    PKG_URL="https://www.kernel.org/pub/linux/kernel/v5.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+    PKG_VERSION="6.0.6"
+    PKG_SHA256="864b05af2d869ba73d61a9c5959e4531a141ab2bd7b217483671f625f9747faa"
+    PKG_URL="https://www.kernel.org/pub/linux/kernel/v${PKG_VERSION/.*/}.x/${PKG_NAME}-${PKG_VERSION}.tar.xz"
     PKG_PATCH_DIRS="default"
     ;;
 esac

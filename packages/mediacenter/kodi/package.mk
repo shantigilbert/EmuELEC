@@ -3,8 +3,8 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="kodi"
-PKG_VERSION="9f7e9e02313cd935f93ee47b30758de051c09d91"
-PKG_SHA256="3f68f4871d3aa3ade7b2738d7dd904709ead6cd5b156539de74124457d350d81"
+PKG_VERSION="92a0283f169270dc205834b470c09c84e845dfc1"
+PKG_SHA256="51e2a51d98098662c138ffbcf8c08038e10f9b8b6b933b1a1180f3ec17950f96"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"
 PKG_URL="https://github.com/xbmc/xbmc/archive/${PKG_VERSION}.tar.gz"
@@ -18,6 +18,23 @@ configure_package() {
   if [ "${LTO_SUPPORT}" = "yes" ] && ! build_with_debug; then
     PKG_KODI_USE_LTO="-DUSE_LTO=${CONCURRENCY_MAKE_LEVEL}"
   fi
+
+  # Set linker options
+  case $(get_target_linker) in
+    gold)
+      PKG_KODI_LINKER="-DENABLE_GOLD=ON \
+                       -DENABLE_MOLD=OFF"
+      ;;
+    mold)
+      PKG_KODI_LINKER="-DENABLE_GOLD=OFF \
+                       -DENABLE_MOLD=ON \
+                       -DMOLD_EXECUTABLE=${TOOLCHAIN}/${TARGET_NAME}/bin/mold"
+      ;;
+    *)
+      PKG_KODI_LINKER="-DENABLE_GOLD=OFF \
+                       -DENABLE_MOLD=OFF"
+      ;;
+  esac
 
   get_graphicdrivers
 
@@ -33,6 +50,7 @@ configure_package() {
                    -DAPP_RENDER_SYSTEM=gl"
   elif [ "${DISPLAYSERVER}" = "wl" ]; then
     PKG_DEPENDS_TARGET+=" wayland waylandpp"
+    PKG_PATCH_DIRS+=" wayland"
     CFLAGS+=" -DEGL_NO_X11"
     CXXFLAGS+=" -DEGL_NO_X11"
     KODI_PLATFORM="-DCORE_PLATFORM_NAME=wayland \
@@ -164,10 +182,14 @@ configure_package() {
     KODI_UPNP="-DENABLE_UPNP=OFF"
   fi
 
-  if target_has_feature neon; then
-    KODI_NEON="-DENABLE_NEON=ON"
+  if [ "${TARGET_ARCH}" = "aarch64" -o "${TARGET_ARCH}" = "arm" ]; then
+    if target_has_feature neon; then
+      KODI_NEON="-DENABLE_NEON=ON"
+    else
+      KODI_NEON="-DENABLE_NEON=OFF"
+    fi
   else
-    KODI_NEON="-DENABLE_NEON=OFF"
+    KODI_NEON=""
   fi
 
   if [ "${VDPAU_SUPPORT}" = "yes" -a "${DISPLAYSERVER}" = "x11" ]; then
@@ -232,7 +254,6 @@ configure_package() {
                          -DENABLE_CCACHE=OFF \
                          -DENABLE_LIRCCLIENT=ON \
                          -DENABLE_EVENTCLIENTS=ON \
-                         -DENABLE_LDGOLD=ON \
                          -DENABLE_DEBUGFISSION=OFF \
                          -DENABLE_APP_AUTONAME=OFF \
                          -DENABLE_TESTING=OFF \
@@ -240,6 +261,7 @@ configure_package() {
                          -DENABLE_LCMS2=OFF \
                          -DADDONS_CONFIGURE_AT_STARTUP=OFF \
                          ${PKG_KODI_USE_LTO} \
+                         ${PKG_KODI_LINKER} \
                          ${KODI_ARCH} \
                          ${KODI_NEON} \
                          ${KODI_VDPAU} \
@@ -359,7 +381,6 @@ post_makeinstall_target() {
     cp -R ${PKG_DIR}/config/repository.libreelec.tv ${INSTALL}/usr/share/kodi/addons
     sed -e "s|@ADDON_URL@|${ADDON_URL}|g" -i ${INSTALL}/usr/share/kodi/addons/repository.libreelec.tv/addon.xml
     sed -e "s|@ADDON_VERSION@|${ADDON_VERSION}|g" -i ${INSTALL}/usr/share/kodi/addons/repository.libreelec.tv/addon.xml
-    cp -R ${PKG_DIR}/config/repository.kodi.game ${INSTALL}/usr/share/kodi/addons
 
   mkdir -p ${INSTALL}/usr/share/kodi/config
 
@@ -395,7 +416,6 @@ post_makeinstall_target() {
   ADDON_MANIFEST=${INSTALL}/usr/share/kodi/system/addon-manifest.xml
   xmlstarlet ed -L -d "/addons/addon[text()='service.xbmc.versioncheck']" ${ADDON_MANIFEST}
   xmlstarlet ed -L -d "/addons/addon[text()='skin.estouchy']" ${ADDON_MANIFEST}
-  xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "repository.kodi.game" ${ADDON_MANIFEST}
   xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "repository.libreelec.tv" ${ADDON_MANIFEST}
   if [ -n "${DISTRO_PKG_SETTINGS}" ]; then
     xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "${DISTRO_PKG_SETTINGS_ID}" ${ADDON_MANIFEST}

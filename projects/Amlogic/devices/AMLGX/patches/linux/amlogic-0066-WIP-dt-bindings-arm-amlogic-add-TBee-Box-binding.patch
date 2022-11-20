@@ -1,0 +1,27 @@
+From 89c72d8023a2b3fdd7873975963aa4ae841c98f4 Mon Sep 17 00:00:00 2001
+From: Christian Hewitt <christianshewitt@gmail.com>
+Date: Wed, 6 Jul 2022 05:05:11 +0000
+Subject: [PATCH 66/74] WIP: dt-bindings: arm: amlogic: add TBee Box binding
+
+Add the board binding for the TBee Box.
+
+Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
+---
+ Documentation/devicetree/bindings/arm/amlogic.yaml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/arm/amlogic.yaml b/Documentation/devicetree/bindings/arm/amlogic.yaml
+index 47a9ec09a81a..a17daa64ba31 100644
+--- a/Documentation/devicetree/bindings/arm/amlogic.yaml
++++ b/Documentation/devicetree/bindings/arm/amlogic.yaml
+@@ -110,6 +110,7 @@ properties:
+               - libretech,aml-s905x-cc-v2
+               - nexbox,a95x
+               - osmc,vero4k
++              - tbee,box
+           - const: amlogic,s905x
+           - const: amlogic,meson-gxl
+ 
+-- 
+2.17.1
+

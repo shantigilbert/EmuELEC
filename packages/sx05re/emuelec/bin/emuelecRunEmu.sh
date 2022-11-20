@@ -64,6 +64,7 @@ set_kill_keys() {
     # If gptokeyb is running we kill it first. 
     kill_video_controls
     KILLTHIS=${1}
+    KILLSIGNAL=${2}
 }
 
 # Extract the platform name from the arguments
@@ -121,6 +122,7 @@ fi
 [[ ${PLATFORM} = "ports" ]] && LIBRETRO="yes"
 
 KILLTHIS="none"
+KILLSIGNAL="15"
 
 # if there wasn't a --NOLOG included in the arguments, enable the emulator log output. TODO: this should be handled in ES menu
 if [[ $arguments != *"--NOLOG"* ]]; then
@@ -138,7 +140,7 @@ CLOUD_PID=$!
 
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
-[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh gameloading "$PLATFORM" "${ROMNAME}" && sleep 3
+[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh gameloading "$PLATFORM" "${ROMNAME}"
 
 # Set the display video to that of the emulator setting.
 [ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
@@ -190,7 +192,7 @@ case ${PLATFORM} in
 		;;
 	"mame"|"arcade"|"cps1"|"cps2"|"cps3")
 		if [ "$EMU" = "AdvanceMame" ]; then
-            set_kill_keys "advmame"
+            set_kill_keys "advmame" 3
             RUNTHIS='${TBASH} advmame.sh "${ROMNAME}"'
 		elif [ "$EMU" = "FbneoSA" ]; then
             set_kill_keys "fbneo"
@@ -442,11 +444,7 @@ if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do al
     eval echo ${RUNTHIS} >> $EMUELECLOG
 fi
 
-if [[ "${KILLTHIS}" == "advmame" ]]; then
-    gptokeyb 1 ${KILLTHIS} -killsignal 3 &
-else
-    gptokeyb 1 ${KILLTHIS} &
-fi
+gptokeyb 1 ${KILLTHIS} -killsignal ${KILLSIGNAL} &
 
 [[ "$CLOUD_SYNC" == "1" ]] && wait $CLOUD_PID
 
@@ -474,12 +472,10 @@ blank_buffer
 # Return to default mode
 $TBASH $SET_DISPLAY_SH $VIDEO
 
-sleep 3 && check_hard_kill "${KILL_THIS}" &
+check_hard_kill "${KILL_THIS}" &
 
 # Show exit splash
 ${TBASH} show_splash.sh exit
-sleep 4
-
 
 # Just in case
 kill_video_controls

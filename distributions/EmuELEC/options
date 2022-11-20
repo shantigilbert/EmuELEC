@@ -251,6 +251,12 @@
 # e.g. ADDITIONAL_PACKAGES="PACKAGE1 PACKAGE2"
   ADDITIONAL_PACKAGES=""
 
+# MOLD (Modern Linker) support
+  MOLD_SUPPORT="no"
+
+# default linker (bfd / gold)
+  DEFAULT_LINKER="gold"
+
 # start SX05RE added options
 
 LAKKA_MIRROR="http://sources.lakka.tv"
@@ -273,6 +279,7 @@ daphne \
 dinothawr \
 dosbox-svn \
 easyrpg \
+fake_08 \
 fbalpha2012 \
 fbneo \
 fceumm \
@@ -344,7 +351,6 @@ virtualjaguar"
 
 LIBRETRO_S922X_CORES="mesen \
 mesen-s \
-yabasanshiro \
 quicknes"
 
   RA_PLAYLIST_NAMES=""\

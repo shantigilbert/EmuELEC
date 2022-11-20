@@ -13,6 +13,8 @@ PKG_DEPENDS_TARGET="lib32-toolchain lib32-util-macros lib32-zlib"
 PKG_LONGDESC="X.org libpciaccess library."
 PKG_PATCH_DIRS+=" $(get_pkg_directory libpciaccess)/patches"
 PKG_BUILD_FLAGS="lib32"
+PKG_TOOLCHAIN="autotools"
+
 
 PKG_CONFIGURE_OPTS_TARGET="ac_cv_header_asm_mtrr_h=set \
                            --with-pciids-path=/usr/share \
@@ -21,7 +23,7 @@ PKG_CONFIGURE_OPTS_TARGET="ac_cv_header_asm_mtrr_h=set \
 unpack() {
   ${SCRIPTS}/get libpciaccess
   mkdir -p ${PKG_BUILD}
-  tar --strip-components=1 -xf ${SOURCES}/libpciaccess/libpciaccess-${PKG_VERSION}.tar.bz2 -C ${PKG_BUILD}
+  tar --strip-components=1 -xf ${SOURCES}/libpciaccess/libpciaccess-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }
 
 pre_configure_target() {

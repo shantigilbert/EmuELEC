@@ -1,15 +1,13 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
-if [ -f "${RELEASE_DIR}/3rdparty/bootloader/idbloader.img" ]; then
-  echo "image: burn idbloader.img to image..."
-  dd if="${RELEASE_DIR}/3rdparty/bootloader/idbloader.img" of="${DISK}" bs=32k seek=1 conv=fsync,notrunc >"${SAVE_ERROR}" 2>&1 || show_error
-fi
-if [ -f "${RELEASE_DIR}/3rdparty/bootloader/uboot.img" ]; then
-  echo "image: burn uboot.img to image..."
-  dd if="${RELEASE_DIR}/3rdparty/bootloader/uboot.img" of="${DISK}" bs=64k seek=128 conv=fsync,notrunc >"${SAVE_ERROR}" 2>&1 || show_error
-fi
-if [ -f "${RELEASE_DIR}/3rdparty/bootloader/trust.img" ]; then
-  echo "image: burn trust.img to image..."
-  dd if="${RELEASE_DIR}/3rdparty/bootloader/trust.img" of="${DISK}" bs=64k seek=192 conv=fsync,notrunc >"${SAVE_ERROR}" 2>&1 || show_error
+if [ -n "${UBOOT_SYSTEM}" ]; then
+  BOOTLOADER_PATH="${RELEASE_DIR}/3rdparty/bootloader/u-boot-rockchip.bin"
+  if [ -f "${BOOTLOADER_PATH}" ]; then
+    echo "image: burn bootloader to image..."
+    dd if="${BOOTLOADER_PATH}" of="${DISK}" seek=64 conv=fsync,notrunc >"${SAVE_ERROR}" 2>&1 || show_error
+  else
+    echo "image: bootloader ${BOOTLOADER_PATH} does not exist.";
+    exit 1
+  fi
 fi

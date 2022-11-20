@@ -67,9 +67,9 @@ index 9f3dd143..9619a6eb 100644
  	cp -ar $(top_srcdir)/python-pkg  $(abs_builddir)
  	chmod -R u+w  python-pkg
 @@ -193,6 +205,7 @@ python-pkg/lirc/config.py: Makefile  $(abs_builddir)/python-pkg/setup.py
- 	@echo 'DOCDIR = "$(docdir)"' >>$@
- 	@echo 'MODINFO = "$(MODINFO)"' >>$@
- 	@echo 'VERSION = "$(VERSION)"' >>$@
+ 	@echo 'DOCDIR="$(docdir)"' >>$@
+ 	@echo 'MODINFO="$(MODINFO)"' >>$@
+ 	@echo 'VERSION="$(VERSION)"' >>$@
 +endif
  
  paths.h: Makefile
@@ -115,7 +115,7 @@ index abfb9911..8aff1cff 100644
  endif
  
 +if HAVE_PYTHON
- dist_bin_SCRIPTS        += pronto2lirc irdb-get irtext2udp
+ dist_bin_SCRIPTS        += pronto2lirc irdb-get irtext2udp lirc-postinstall
  dist_sbin_SCRIPTS       = lircd-setup
  dist_noinst_SCRIPTS     = make_rel_symlink.py check_configs.py
 @@ -121,6 +126,7 @@ install-data-hook:

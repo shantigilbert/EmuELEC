@@ -3,11 +3,11 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libXmu"
-PKG_VERSION="1.1.3"
-PKG_SHA256="9c343225e7c3dc0904f2122b562278da5fed639b1b5e880d25111561bac5b731"
+PKG_VERSION="1.1.4"
+PKG_SHA256="210de3ab9c3e9382572c25d17c2518a854ce6e2c62c5f8315deac7579e758244"
 PKG_LICENSE="OSS"
-PKG_SITE="http://www.X.org"
-PKG_URL="http://xorg.freedesktop.org/archive/individual/lib/${PKG_NAME}-${PKG_VERSION}.tar.bz2"
+PKG_SITE="https://www.X.org"
+PKG_URL="https://xorg.freedesktop.org/archive/individual/lib/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_TARGET="toolchain util-macros libXext libX11 libXt"
 PKG_LONGDESC="LibXmu provides a set of miscellaneous utility convenience functions for X libraries to use."
 PKG_BUILD_FLAGS="+pic"

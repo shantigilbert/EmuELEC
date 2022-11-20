@@ -1,4 +1,4 @@
-From 3e1f7d098726e4af7eac9c83c70cf8196e4e9e3e Mon Sep 17 00:00:00 2001
+From 7336d7da9e863be6fac9b5cab5ffe441e658f15f Mon Sep 17 00:00:00 2001
 From: MilhouseVH <milhouseVH.github@nmacleod.com>
 Date: Wed, 5 Jul 2017 15:46:51 +0100
 Subject: [PATCH] make binary addons executable
@@ -10,9 +10,11 @@ credits to vpeter4 for the patch
  xbmc/addons/Addon.cpp | 26 ++++++++++++++++++++++++++
  1 file changed, 26 insertions(+)
 
+diff --git a/xbmc/addons/Addon.cpp b/xbmc/addons/Addon.cpp
+index 90669bb10e..f6aabfc615 100644
 --- a/xbmc/addons/Addon.cpp
 +++ b/xbmc/addons/Addon.cpp
-@@ -14,6 +14,10 @@
+@@ -29,6 +29,10 @@
  #include <utility>
  #include <vector>
  
@@ -20,10 +22,10 @@ credits to vpeter4 for the patch
 +#include <dirent.h>
 +#include <sys/stat.h>
 +
- #include "AddonManager.h"
- #include "addons/settings/AddonSettings.h"
- #include "filesystem/Directory.h"
-@@ -390,6 +394,28 @@ void OnPreInstall(const AddonPtr& addon)
+ #ifdef HAS_PYTHON
+ #include "interfaces/python/XBPython.h"
+ #endif
+@@ -663,6 +667,28 @@ void OnPreInstall(const AddonPtr& addon)
  
  void OnPostInstall(const AddonPtr& addon, bool update, bool modal)
  {
@@ -52,3 +54,6 @@ credits to vpeter4 for the patch
    addon->OnPostInstall(update, modal);
  }
  
+-- 
+2.34.1
+

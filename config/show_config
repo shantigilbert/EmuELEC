@@ -31,6 +31,8 @@ show_config() {
   config_message+="\n - CPU features:\t\t\t ${TARGET_FEATURES}"
   config_message+="\n - LTO (Link Time Optimization) support: ${LTO_SUPPORT}"
   config_message+="\n - GOLD (Google Linker) Support:\t ${GOLD_SUPPORT}"
+  config_message+="\n - MOLD (Modern Linker) Support:\t ${MOLD_SUPPORT}"
+  config_message+="\n - Default Linker:\t\t\t ${DEFAULT_LINKER}"
   config_message+="\n - LLVM support:\t\t\t ${LLVM_SUPPORT}"
   config_message+="\n - DEBUG:\t\t\t\t ${DEBUG:-no}"
   config_message+="\n - CFLAGS:\t\t\t\t ${TARGET_CFLAGS}"

@@ -133,7 +133,7 @@ index 4b01d3881214..4d425196d415 100644
  	}
  }
  
-@@ -388,37 +428,6 @@ static void cedrus_h265_setup(struct cedrus_ctx *ctx,
+@@ -388,36 +428,6 @@ static void cedrus_h265_setup(struct cedrus_ctx *ctx,
  	width_in_ctb_luma =
  		DIV_ROUND_UP(sps->pic_width_in_luma_samples, ctb_size_luma);
  
@@ -163,8 +163,7 @@ index 4b01d3881214..4d425196d415 100644
 -					GFP_KERNEL, DMA_ATTR_NO_KERNEL_MAPPING);
 -		if (!ctx->codec.h265.mv_col_buf) {
 -			ctx->codec.h265.mv_col_buf_size = 0;
--			// TODO: Abort the process here.
--			return;
+-			return -ENOMEM;
 -		}
 -	}
 -

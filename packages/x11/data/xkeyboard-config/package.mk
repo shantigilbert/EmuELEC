@@ -3,8 +3,8 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="xkeyboard-config"
-PKG_VERSION="2.36"
-PKG_SHA256="1f1bb1292a161d520a3485d378609277d108cd07cde0327c16811ff54c3e1595"
+PKG_VERSION="2.37"
+PKG_SHA256="eb1383a5ac4b6210d7c7302b9d6fab052abdf51c5d2c9b55f1f779997ba68c6c"
 PKG_LICENSE="MIT"
 PKG_SITE="https://www.X.org"
 PKG_URL="https://www.x.org/releases/individual/data/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.tar.xz"
@@ -18,12 +18,10 @@ configure_package() {
 }
 
 pre_configure_target() {
-  PKG_MESON_OPTS_TARGET="-Dcompat-rules=true \
-                         -Ddatadir=lib"
+  PKG_MESON_OPTS_TARGET="-Dcompat-rules=true"
 
   if [ "${DISPLAYSERVER}" = "x11" ]; then
-    PKG_MESON_OPTS_TARGET+=" -Dxkb-base=${XORG_PATH_XKB} \
-                            -Dxorg-rules-symlinks=true"
+    PKG_MESON_OPTS_TARGET+=" -Dxorg-rules-symlinks=true"
   else
     PKG_MESON_OPTS_TARGET+=" -Dxorg-rules-symlinks=false"
   fi

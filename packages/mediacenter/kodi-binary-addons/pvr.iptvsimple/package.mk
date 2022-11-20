@@ -5,7 +5,7 @@
 PKG_NAME="pvr.iptvsimple"
 PKG_VERSION="20.6.0-Nexus"
 PKG_SHA256="e760543065fb9fc29d35f20bc6ff617b4a24e337a5d276ab05476a6bb6a95f0d"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.iptvsimple"

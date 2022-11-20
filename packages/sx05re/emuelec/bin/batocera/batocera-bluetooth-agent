@@ -6,11 +6,13 @@ from optparse import OptionParser, make_option
 import dbus
 import dbus.service
 import dbus.mainloop.glib
-import bluezutils
+from bluetool import bluezutils
 import time
 import os
 import logging
 import signal
+import pgi
+pgi.install_as_gi()
 from gi.repository import GLib
 
 AGENT_INTERFACE = 'org.bluez.Agent1'

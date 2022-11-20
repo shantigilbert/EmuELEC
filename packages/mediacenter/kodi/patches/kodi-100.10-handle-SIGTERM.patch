@@ -1,4 +1,4 @@
-From f0bca779d21f12be077d97891aa321f02064a089 Mon Sep 17 00:00:00 2001
+From de3a1d59836496b786ce31e9f2ce77c0c9db545b Mon Sep 17 00:00:00 2001
 From: MilhouseVH <milhouseVH.github@nmacleod.com>
 Date: Sun, 3 Apr 2022 11:31:07 +0200
 Subject: [PATCH] handle SIGTERM
@@ -15,16 +15,16 @@ so, when shutdown/reboot is requested:
 6. addons / pvrmanager / cec / everything else.. are free to deadlock / crash now, we dont care
 7. KILL
 ---
- xbmc/Application.cpp                          | 24 ++++++++++++++-----
- xbmc/Application.h                            |  2 ++
+ xbmc/application/Application.cpp              | 24 ++++++++++++++-----
+ xbmc/application/Application.h                |  2 ++
  .../powermanagement/LogindUPowerSyscall.cpp   |  2 --
  3 files changed, 20 insertions(+), 8 deletions(-)
 
-diff --git a/xbmc/Application.cpp b/xbmc/Application.cpp
-index bc5b15523d..3049d6ca61 100644
---- a/xbmc/Application.cpp
-+++ b/xbmc/Application.cpp
-@@ -1432,12 +1432,12 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
+diff --git a/xbmc/application/Application.cpp b/xbmc/application/Application.cpp
+index bafb5de064..c5f39217cc 100644
+--- a/xbmc/application/Application.cpp
++++ b/xbmc/application/Application.cpp
+@@ -1444,12 +1444,12 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
    switch (msg)
    {
    case TMSG_POWERDOWN:
@@ -39,7 +39,7 @@ index bc5b15523d..3049d6ca61 100644
      break;
  
    case TMSG_SHUTDOWN:
-@@ -1458,12 +1458,13 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
+@@ -1470,12 +1470,13 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
  
    case TMSG_RESTART:
    case TMSG_RESET:
@@ -54,7 +54,7 @@ index bc5b15523d..3049d6ca61 100644
      Stop(EXITCODE_RESTARTAPP);
  #endif
      break;
-@@ -2024,7 +2025,7 @@ bool CApplication::Stop(int exitCode)
+@@ -2039,7 +2040,7 @@ bool CApplication::Stop(int exitCode)
      m_frameMoveGuard.unlock();
  
      CVariant vExitCode(CVariant::VariantTypeObject);
@@ -63,7 +63,7 @@ index bc5b15523d..3049d6ca61 100644
      CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::System, "OnQuit", vExitCode);
  
      // Abort any active screensaver
-@@ -2056,7 +2057,6 @@ bool CApplication::Stop(int exitCode)
+@@ -2071,7 +2072,6 @@ bool CApplication::Stop(int exitCode)
      // Needs cleaning up
      CServiceBroker::GetAppMessenger()->Stop();
      m_AppFocused = false;
@@ -71,7 +71,7 @@ index bc5b15523d..3049d6ca61 100644
      CLog::Log(LOGINFO, "Stopping all");
  
      // cancel any jobs from the jobmanager
-@@ -2580,6 +2580,18 @@ void CApplication::StopPlaying()
+@@ -2602,6 +2602,18 @@ void CApplication::StopPlaying()
    }
  }
  
@@ -90,7 +90,7 @@ index bc5b15523d..3049d6ca61 100644
  bool CApplication::OnMessage(CGUIMessage& message)
  {
    switch ( message.GetMessage() )
-@@ -3056,7 +3068,7 @@ void CApplication::ProcessSlow()
+@@ -3114,7 +3126,7 @@ void CApplication::ProcessSlow()
    if (CPlatformPosix::TestQuitFlag())
    {
      CLog::Log(LOGINFO, "Quitting due to POSIX signal");
@@ -99,11 +99,11 @@ index bc5b15523d..3049d6ca61 100644
    }
  #endif
  
-diff --git a/xbmc/Application.h b/xbmc/Application.h
-index c938d0a9b3..2fe138b437 100644
---- a/xbmc/Application.h
-+++ b/xbmc/Application.h
-@@ -135,6 +135,7 @@ public:
+diff --git a/xbmc/application/Application.h b/xbmc/application/Application.h
+index 710ea9923b..59763464ab 100644
+--- a/xbmc/application/Application.h
++++ b/xbmc/application/Application.h
+@@ -120,6 +120,7 @@ public:
    bool CreateGUI();
    bool InitWindow(RESOLUTION res = RES_INVALID);
  
@@ -111,7 +111,7 @@ index c938d0a9b3..2fe138b437 100644
    bool Stop(int exitCode);
    void ReloadSkin(bool confirm = false);
    const std::string& CurrentFile();
-@@ -286,6 +287,7 @@ private:
+@@ -274,6 +275,7 @@ private:
    CApplicationPlayer m_appPlayer;
    CApplicationStackHelper m_stackHelper;
    int m_ExitCode{EXITCODE_QUIT};
@@ -133,5 +133,5 @@ index 34eed6e41b..c374dbdbd3 100644
  }
  
 -- 
-2.30.2
+2.34.1
 

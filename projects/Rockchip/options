@@ -5,11 +5,9 @@
   # Bootloader to use (syslinux / u-boot / bcm2835-bootloader)
     BOOTLOADER="u-boot"
 
-  # U-Boot make target
-    UBOOT_TARGET="u-boot-dtb.bin"
-
   # U-Boot firmware package(s) to use
     UBOOT_FIRMWARE="rkbin"
+    UBOOT_FIT_IMAGE="u-boot-rockchip.bin"
 
   # Additional kernel make parameters (for example to specify the u-boot loadaddress)
     KERNEL_MAKE_EXTRACMD="dtbs"

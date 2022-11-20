@@ -1,3 +1,12 @@
+110
+- Update to Jellyfin 10.8.7
+
+109
+- Update to Jellyfin 10.8.6
+
+108
+- Update to Jellyfin 10.8.5
+
 107
 - Update to Jellyfin 10.8.4
 

@@ -1,3 +1,7 @@
+117
+- iperf: update to 3.12
+- nmap: update to 7.93
+
 116
 - rsync: update to 3.2.5
 

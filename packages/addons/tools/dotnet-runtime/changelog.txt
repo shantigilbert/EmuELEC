@@ -1,3 +1,15 @@
+124
+- Drop ASP.NET Core Runtime 3.1
+  .NET Core 3.1 is End of Support - 2022-12-13
+  Current addons using .NET (Emby4, Jellyfin, NextPVR)
+    are now all using .NET 6.0
+
+123
+- Update ASP.NET Core Runtime 6.0.10
+
+122
+- Update ASP.NET Core Runtime 6.0.9
+
 121
 - Update ASP.NET Core Runtime 6.0.8
 

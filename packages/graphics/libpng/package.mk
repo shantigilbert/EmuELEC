@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
+# Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libpng"
-PKG_VERSION="1.6.37"
-PKG_SHA256="505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca"
+PKG_VERSION="1.6.38"
+PKG_SHA256="b3683e8b8111ebf6f1ac004ebb6b0c975cd310ec469d98364388e9cedbfa68be"
 PKG_LICENSE="LibPNG2"
 PKG_SITE="http://www.libpng.org/"
 PKG_URL="${SOURCEFORGE_SRC}/libpng/${PKG_NAME}-${PKG_VERSION}.tar.xz"
@@ -31,6 +32,9 @@ post_makeinstall_target() {
   sed -e "s:\([\"'= ]\)/usr:\\1${SYSROOT_PREFIX}/usr:g" \
       -e "s:libs=\"-lpng16\":libs=\"-lpng16 -lz\":g" \
       -i ${SYSROOT_PREFIX}/usr/bin/libpng*-config
+
+  sed -e 's|^Libs: -L${libdir} -lpng16|Libs: -L${libdir} -lpng16 -lz|g' \
+      -i ${SYSROOT_PREFIX}/usr/lib/pkgconfig/libpng*.pc
 
   rm -rf ${INSTALL}/usr/bin
 }

@@ -2,8 +2,8 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="vlc"
-PKG_VERSION="3.0.16"
-PKG_SHA256="ffae35fc64f625c175571d2346bc5f6207be99762517f15423e74f18399410f6"
+PKG_VERSION="3.0.17.4"
+PKG_SHA256="8c5a62d88a4fb45c1b095cf10befef217dfa87aedcec5184b9e7d590b6dd4133"
 PKG_REV="20211025"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
@@ -106,7 +106,6 @@ DISABLED_FEATURES="--disable-dependency-tracking \
             --disable-skins2 \
             --disable-kai \
             --disable-macosx \
-            --disable-macosx-qtkit \
             --disable-ncurses \
             --disable-goom \
             --disable-projectm \
@@ -122,12 +121,53 @@ DISABLED_FEATURES="--disable-dependency-tracking \
             --disable-dxva2 \
             --disable-dav1d \
             --disable-qt \
-            --disable-shm \
-            --disable-bonjour \
             --disable-x26410b \
-            --disable-x264 \
             --disable-chromecast \
-            --disable-lavf"
+            --disable-static \
+            --disable-a52 \
+            --disable-addonmanagermodules \
+            --disable-aom \
+            --disable-aribb25 \
+            --disable-aribsub \
+            --disable-asdcp \
+            --disable-bpg \
+            --disable-caca \
+            --disable-chromaprint \
+            --disable-chromecast \
+            --disable-crystalhd \
+            --disable-dc1394 \
+            --disable-dca \
+            --disable-decklink \
+            --disable-dsm \
+            --disable-dv1394 \
+            --disable-fluidlite \
+            --disable-gme \
+            --disable-goom \
+            --disable-jack \
+            --disable-kai \
+            --disable-kate \
+            --disable-kva \
+            --disable-libplacebo \
+            --disable-linsys \
+            --disable-mfx \
+            --disable-microdns \
+            --disable-mmal \
+            --disable-mtp \
+            --disable-notify \
+            --disable-projectm \
+            --disable-shine \
+            --disable-shout \
+            --disable-sndio \
+            --disable-spatialaudio \
+            --disable-srt \
+            --disable-telx \
+            --disable-tiger \
+            --disable-twolame \
+            --disable-vdpau \
+            --disable-vsxu \
+            --disable-wasapi \
+            --disable-x262 \
+            --disable-zvbi"
 
 	if [ "${DEVICE}" == "Amlogic-old" ]; then 
 		ENABLED_FEATURES+=" --enable-pulse"

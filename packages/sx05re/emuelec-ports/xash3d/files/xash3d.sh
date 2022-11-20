@@ -19,10 +19,13 @@ if [ ! -x "${XASH3D_VALVEDIR}" ]; then
   exit 0
 fi
 
-[ ! -e ${XASH3D_VALVEDIR}/dlls/hl_arm64.so ] && cp -rf ${XHAS3D_LIBS}/* ${XASH3D_VALVEDIR}/
+if [ ! -e ${XASH3D_VALVEDIR}/emuelec.config.done ]; then
+ cp -rf ${XHAS3D_LIBS}/* ${XASH3D_VALVEDIR}/
+ cp -rf /usr/emuelec/configs/hl/config.cfg  ${XASH3D_VALVEDIR}/config.cfg
+ touch ${XASH3D_VALVEDIR}/emuelec.config.done
+fi
 
 # Change to binary folder and run HL
 cd /usr/bin/xash3d
-gptokeyb -c /emuelec/configs/gptokeyb/xash3d.gptk &
 ./xash3d -ref gles2 -console &> /emuelec/logs/xash3d.log
 killall gptokeyb

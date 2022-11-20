@@ -1,3 +1,9 @@
+113
+- rsyslog: update to 8.2210.0
+
+112
+- rsyslog: update to 8.2208.0
+
 111
 - rsyslog: update to 8.2206.0
 

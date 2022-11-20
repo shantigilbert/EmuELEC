@@ -3806,8 +3806,8 @@ index a4a45daf93f2..058bc372f02b 100644
  				  edid->width_cm, edid->height_cm);
  
  		dp->sink_has_audio = drm_detect_monitor_audio(edid);
-@@ -279,7 +282,8 @@ static int cdn_dp_connector_mode_valid(struct drm_connector *connector,
- 				       struct drm_display_mode *mode)
+@@ -279,7 +282,8 @@ cdn_dp_connector_mode_valid(struct drm_connector *connector,
+ 			    struct drm_display_mode *mode)
  {
  	struct cdn_dp_device *dp = connector_to_dp(connector);
 -	struct drm_display_info *display_info = &dp->connector.display_info;

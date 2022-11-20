@@ -1,4 +1,4 @@
-From 8605348fc36d4079795c05acf9047a9b44e20454 Mon Sep 17 00:00:00 2001
+From a9fc1d56916fbcf4e00a1dd7543c9f53d697477a Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Tue, 3 Aug 2021 18:42:55 +0000
 Subject: [PATCH 03/15] LOCAL: board: amlogic: odroid-n2: remove /amlogic/

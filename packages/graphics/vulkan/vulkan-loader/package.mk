@@ -3,42 +3,21 @@
 # Copyright (C) 2021-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="vulkan-loader"
-PKG_VERSION="1.3.228"
-PKG_SHA256="d553a17d058016ae959f71fb0964a3424bc5344a874026caabec0eecd74281b8"
+PKG_VERSION="1.3.233"
+PKG_SHA256="b095def299ed4fc63cf177412553a5825a9e6ce94aa18074a5bd8a4168d02660"
 PKG_LICENSE="Apache-2.0"
 PKG_SITE="https://github.com/KhronosGroup/Vulkan-Loader"
 PKG_URL="https://github.com/KhronosGroup/Vulkan-Loader/archive/v${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_HOST="toolchain:host vulkan-headers:host"
-PKG_DEPENDS_TARGET="toolchain vulkan-headers"
+PKG_DEPENDS_TARGET="toolchain Python3:host vulkan-headers"
 PKG_LONGDESC="Vulkan Installable Client Driver (ICD) Loader."
 
 configure_package() {
-  # Builds asm_offset binary for GAS / GNU Assembler
-  if [ "${ARCH}" != "arm" ]; then
-    PKG_DEPENDS_TARGET+=" vulkan-loader:host"
-  fi
-
   # Displayserver Support
   if [ "${DISPLAYSERVER}" = "x11" ]; then
     PKG_DEPENDS_TARGET+=" libxcb libX11"
   elif [ "${DISPLAYSERVER}" = "wl" ]; then
     PKG_DEPENDS_TARGET+=" wayland"
   fi
-}
-
-pre_configure_host() {
-  PKG_CMAKE_OPTS_HOST="-DBUILD_WSI_XCB_SUPPORT=OFF \
-                       -DBUILD_WSI_XLIB_SUPPORT=OFF \
-                       -DBUILD_WSI_WAYLAND_SUPPORT=OFF \
-                       -DBUILD_TESTS=OFF"
-
-  # Hack to workaround missing options to build a standalone asm_offset binary,
-  # if the glibc version of the host & target system differs build will fail otherwise.
-  sed -e 's|COMMAND asm_offset GAS|COMMAND ./asm_offset GAS|g' -i ${PKG_BUILD}/loader/CMakeLists.txt
-}
-
-makeinstall_host() {
-  cp ${PKG_BUILD}/.${HOST_NAME}/loader/asm_offset ${TOOLCHAIN}/bin/
 }
 
 pre_configure_target() {
@@ -62,7 +41,4 @@ pre_configure_target() {
                              -DBUILD_WSI_XLIB_SUPPORT=OFF \
                              -DBUILD_WSI_WAYLAND_SUPPORT=OFF"
   fi
-
-  # Hack to run asm_offset located at toolchain path
-  sed -e 's|COMMAND ./asm_offset GAS|COMMAND asm_offset GAS|g' -i ${PKG_BUILD}/loader/CMakeLists.txt
 }

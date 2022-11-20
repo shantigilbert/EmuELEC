@@ -3,8 +3,8 @@
 # Copyright (C) 2020-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="sed"
-PKG_VERSION="4.8"
-PKG_SHA256="f79b0cfea71b37a8eeec8490db6c5f7ae7719c35587f21edb0617f370eeff633"
+PKG_VERSION="4.9"
+PKG_SHA256="6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.gnu.org/software/sed/"
 PKG_URL="http://ftpmirror.gnu.org/sed/${PKG_NAME}-${PKG_VERSION}.tar.xz"
