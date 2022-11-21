@@ -32,33 +32,30 @@ switch_resolution()
   local OLD_MODE=$1
   local MODE=$2
 
-  # This first checks that if you need to change the resolution and if so update
-  # the file that switches the mode automatically if the value is valid if not exit.
-  if [[ "$OLD_MODE" != "$MODE" ]]; then
-    # Here we first clear the primary display buffer of leftover artifacts then set
-    # the secondary small buffers flag to stop copying across.
-    blank_buffer >> /dev/null
+  # Here we first clear the primary display buffer of leftover artifacts then set
+  # the secondary small buffers flag to stop copying across.
+  blank_buffer >> /dev/null
 
-    case $MODE in
-      480cvbs)
-        echo 480cvbs > "${FILE_MODE}"
-        ;;
-      576cvbs)
-        echo 576cvbs > "${FILE_MODE}"
-        ;;
-      480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
-        echo $MODE > "${FILE_MODE}"
-        ;;
-      *x*)
-        echo $MODE > "${FILE_MODE}"
-        ;;
-    esac
-    local NEW_MODE=$(cat $FILE_MODE)
-    if [[ "$NEW_MODE" == "$MODE" ]]; then
-      echo "1"
-      return
-    fi
+  case $MODE in
+    480cvbs)
+      echo 480cvbs > "${FILE_MODE}"
+      ;;
+    576cvbs)
+      echo 576cvbs > "${FILE_MODE}"
+      ;;
+    480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
+      echo $MODE > "${FILE_MODE}"
+      ;;
+    *x*)
+      echo $MODE > "${FILE_MODE}"
+      ;;
+  esac
+  local NEW_MODE=$(cat $FILE_MODE)
+  if [[ "$NEW_MODE" == "$MODE" ]]; then
+    echo "1"
+    return
   fi
+
   echo "0"
 }
 
@@ -153,8 +150,10 @@ set_display_borders() {
 # Here we initialize any arguments and variables to be used in the script.
 # The Mode we want the display to change too.
 MODE=$1
-FORCE_RUN=$2
+PLATFORM=$2
 
+# Safeguard to prevent blank mode being set.
+[[ -z "$MODE" ]] && exit 0
 
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
@@ -192,11 +191,11 @@ if [[ ! -f "$FILE_MODE" ]] || [[ $MODE == "auto" ]]; then
   exit 0
 fi
 
-if [[ "$FORCE_RUN" == "" ]] && [[ "$MODE" == "$OLD_MODE" ]]; then
-  if [[ -z "${BORDER_VALS}" ]]; then
-    exit 0
-  fi
-fi
+#if [[ "$FORCE_RUN" == "" ]] && [[ "$MODE" == "$OLD_MODE" ]]; then
+#  if [[ -z "${BORDER_VALS}" ]]; then
+#    exit 0
+#  fi
+#fi
 
 
 # For resolution with 2 width and height resolution numbers extract the Height.
@@ -250,6 +249,8 @@ fi
 # Gets the default X, and Y position offsets for cvbs so the display can fit 
 # inside the actual analog diplay resolution which is a bit smaller than the 
 # resolution it's usually transmitted as.
+declare -a BORDERS
+
 if [[ "${MODE}" == "480cvbs" ]]; then
   BORDERS=(4 0)
 fi
@@ -261,9 +262,9 @@ fi
 # to resize there screen display to make it smaller so it can fit into a screen
 # properly. If the user suppllies values its coded to restrict the user into not
 # letting the user set a width greater than the screen display size.
-BORDER_VALS=$(get_ee_setting ee_videowindow)
+BORDER_VALS=$(get_ee_setting ee_videowindow ${PLATFORM})
 if [[ ! -z "${BORDER_VALS}" ]]; then
-  declare -a BORDERS=(${BORDER_VALS})
+  BORDERS=(${BORDER_VALS})
   COUNT_ARGS=${#BORDERS[@]}
   if [[ ${COUNT_ARGS} != 4 && ${COUNT_ARGS} != 2 ]]; then
     exit 0
@@ -273,7 +274,7 @@ fi
 # If border values have been supplied then we can check the offsets and the
 # width and height and make sure they are all valid and will not cause issues for
 # when we set the borders, and allow the primary display buffer to resize the screen.
-if [[ ! -z "${BORDERS}" ]]; then
+if [[ ! -z "${BORDERS[@]}" ]]; then
   PW=${BORDERS[2]}
   [[ -z "$PW" ]] && PW=$RW
   PH=${BORDERS[3]}

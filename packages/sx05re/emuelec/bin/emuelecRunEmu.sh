@@ -140,7 +140,7 @@ CLOUD_PID=$!
 
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
-[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh gameloading "$PLATFORM" "${ROMNAME}"
+[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh gameloading "$PLATFORM" "${ROMNAME}" && sleep 3
 
 # Set the display video to that of the emulator setting.
 [ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
@@ -444,7 +444,11 @@ if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do al
     eval echo ${RUNTHIS} >> $EMUELECLOG
 fi
 
-gptokeyb 1 ${KILLTHIS} -killsignal ${KILLSIGNAL} &
+if [[ "${KILLTHIS}" == "advmame" ]]; then
+    gptokeyb 1 ${KILLTHIS} -killsignal 3 &
+else
+    gptokeyb 1 ${KILLTHIS} &
+fi
 
 [[ "$CLOUD_SYNC" == "1" ]] && wait $CLOUD_PID
 
@@ -472,10 +476,12 @@ blank_buffer
 # Return to default mode
 $TBASH $SET_DISPLAY_SH $VIDEO
 
-check_hard_kill "${KILL_THIS}" &
+sleep 2 && check_hard_kill "${KILL_THIS}" &
 
 # Show exit splash
 ${TBASH} show_splash.sh exit
+sleep 4
+
 
 # Just in case
 kill_video_controls
