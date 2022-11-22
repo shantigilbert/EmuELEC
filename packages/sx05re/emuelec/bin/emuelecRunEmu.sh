@@ -444,11 +444,8 @@ if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do al
     eval echo ${RUNTHIS} >> $EMUELECLOG
 fi
 
-if [[ "${KILLTHIS}" == "advmame" ]]; then
-    gptokeyb 1 ${KILLTHIS} -killsignal 3 &
-else
-    gptokeyb 1 ${KILLTHIS} &
-fi
+gptokeyb 1 ${KILLTHIS} -killsignal ${KILLSIGNAL} &
+
 
 [[ "$CLOUD_SYNC" == "1" ]] && wait $CLOUD_PID
 
