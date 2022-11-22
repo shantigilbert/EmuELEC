@@ -173,7 +173,6 @@ OLD_MODE=$( cat ${FILE_MODE} )
 
 BORDER_VALS=$(get_ee_setting ee_videowindow)
 
-
 # Legacy code, we use to set the buffer that is used for small parts of graphics
 # like Cursors and Fonts but setting default 32 made ES Fonts dissappear.
 BUFF=$(get_ee_setting ee_video_fb1_size)
@@ -183,20 +182,12 @@ if [[ -n "$BUFF" ]] && [[ $BUFF > 0 ]]; then
   fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP
 fi
 
-
 # If the current display is the same as the change just exit. First we hide the
 # primary display buffer by setting the fb1 blank flag so it stops copying chunks
 # of data on to the image, then we blank the buffer by setting all the bits to 0.
 if [[ ! -f "$FILE_MODE" ]] || [[ $MODE == "auto" ]]; then
   exit 0
 fi
-
-#if [[ "$FORCE_RUN" == "" ]] && [[ "$MODE" == "$OLD_MODE" ]]; then
-#  if [[ -z "${BORDER_VALS}" ]]; then
-#    exit 0
-#  fi
-#fi
-
 
 # For resolution with 2 width and height resolution numbers extract the Height.
 # *p* stand for progressive and *i* stand for interlaced.
