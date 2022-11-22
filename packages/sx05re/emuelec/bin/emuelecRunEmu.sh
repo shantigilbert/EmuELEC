@@ -446,7 +446,6 @@ fi
 
 gptokeyb 1 ${KILLTHIS} -killsignal ${KILLSIGNAL} &
 
-
 [[ "$CLOUD_SYNC" == "1" ]] && wait $CLOUD_PID
 
 # Execute the command and try to output the results to the log file if it was not disabled.
