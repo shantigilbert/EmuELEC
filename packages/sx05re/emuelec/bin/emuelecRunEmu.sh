@@ -476,7 +476,6 @@ check_hard_kill "${KILL_THIS}" &
 # Show exit splash
 ${TBASH} show_splash.sh exit
 
-
 # Just in case
 kill_video_controls
 
