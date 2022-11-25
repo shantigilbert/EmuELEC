@@ -469,7 +469,7 @@ blank_buffer
 # Return to default mode
 $TBASH $SET_DISPLAY_SH $VIDEO
 
-check_hard_kill "${KILL_THIS}" &
+check_hard_kill "${KILL_THIS}"
 
 # Show exit splash
 ${TBASH} show_splash.sh exit
