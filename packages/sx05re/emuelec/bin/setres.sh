@@ -14,19 +14,6 @@
 # Source predefined functions and variables
 . /etc/profile
 
-
-blank_buffer()
-{
-  # Blank the buffer.
-  echo 1 > /sys/class/graphics/fb1/blank
-  dd if=/dev/zero of=/dev/fb1 bs=8M > /dev/null 2>&1
-  echo 0 > /sys/class/graphics/fb1/blank
-  echo 1 > /sys/class/graphics/fb0/blank
-  dd if=/dev/zero of=/dev/fb0 bs=32M > /dev/null 2>&1
-  echo 0 > /sys/class/graphics/fb0/blank
-  [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
-}
-
 switch_resolution()
 {
   local OLD_MODE=$1
