@@ -37,7 +37,7 @@ jc_get_players() {
 
   for dev in $(echo $JOYS); do
     local JSI=$dev
-    local DETAILS=$(cat /tmp/input_devices | grep -P "H\: Handlers=(?=.*? ${JSI} )" -B 5)
+    local DETAILS=$(cat /tmp/input_devices | grep -P "H\: Handlers(?=.*?[= ]${JSI} )" -B 5)
 
     local PROC_GUID=$(echo "${DETAILS}" | grep I: | sed "s|I:\ Bus=||" | sed "s|\ Vendor=||" | sed "s|\ Product=||" | sed "s|\ Version=||")
     local DEVICE_GUID=$(jc_generate_guid ${PROC_GUID})
