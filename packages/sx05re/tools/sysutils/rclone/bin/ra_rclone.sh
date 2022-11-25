@@ -79,5 +79,5 @@ if [[ "${RUNSYNC}" == "1" ]]; then
     | grep -e "ERROR :" -e "Failed to create file system" \
     | grep -v "directory not found")
   [[ ! -z "$LOG_ERROR_TEXT" ]] || [[ ! -f "${RC_LOG}" ]] && exit 1
+  exit 0  
 fi
-exit 0
