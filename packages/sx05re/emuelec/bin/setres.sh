@@ -37,13 +37,6 @@ switch_resolution()
       echo $MODE > "${FILE_MODE}"
       ;;
   esac
-  local NEW_MODE=$(cat $FILE_MODE)
-  if [[ "$NEW_MODE" == "$MODE" ]]; then
-    echo "1"
-    return
-  fi
-
-  echo "0"
 }
 
 get_resolution_size()
@@ -201,7 +194,7 @@ fi
 # This is needed to reset scaling.
 echo 0 > /sys/class/ppmgr/ppscaler
 
-SWITCHED_MODES=$(switch_resolution $OLD_MODE $MODE)
+switch_resolution $OLD_MODE $MODE
 
 declare -a SIZE=($( get_resolution_size $MODE ))
 
@@ -210,12 +203,11 @@ SH=${SIZE[1]}
 RW=${SIZE[2]}
 RH=${SIZE[3]}
 
-echo "SWITCHED_MODES=$SWITCHED_MODES"
-
 # Once we know the Width and Height is valid numbers we set the primary display
 # buffer, and we multiply the 2nd height by a factor of 2 I assume for interlaced 
 # support.
-if [[ "$SWITCHED_MODES" == "1" ]]; then
+CURRENT_MODE=$( cat ${FILE_MODE} )
+if [[ "$CURRENT_MODE" == "$MODE" ]]; then
   echo "SET MAIN FRAME BUFFER"
   set_main_framebuffer $RW $RH
   blank_buffer
