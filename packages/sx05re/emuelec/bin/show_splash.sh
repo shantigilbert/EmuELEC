@@ -44,13 +44,13 @@ SPLASHDIR="/storage/roms/splash"
 if [ "$ACTION_TYPE" == "intro" ] || [ "$ACTION_TYPE" == "exit" ]; then
 	SPLASH=${DEFAULTSPLASH}
   if [[ "$MODE" == *"x"* ]]; then
-    SPLASH="${SPLASHDIR}/splash-std.png"
-  fi  
+    SPLASH="/storage/.config/splash/splash-std.png"
+  fi
 elif [ "$ACTION_TYPE" == "blank" ]; then
   SPLASH=${BLANKSPLASH}
 elif [ "$ACTION_TYPE" == "gameloading" ]; then
   if [[ "$MODE" == *"x"* ]]; then
-    GAMELOADINGSPLASH="${SPLASHDIR}/loading-game-std.png"
+    GAMELOADINGSPLASH="/storage/.config/splash/loading-game-std.png"
   fi
 
 	ROMNAME=$(basename "${3%.*}")

@@ -62,8 +62,6 @@ if [[ "$EE_DEVICE" == "GameForce" ]] || [[ "$EE_DEVICE" == "OdroidGoAdvance" ]];
     odroidgoa_utils.sh oga_oc "${OGAOC}"
 fi
 
-# Setting resolution
-setres.sh
 
 # Mounts /storage/roms
 MOUNT_HANDLER=$(get_ee_setting ee_mount.handler)

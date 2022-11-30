@@ -130,9 +130,6 @@ if [[ $arguments != *"--NOLOG"* ]]; then
     VERBOSE="-v"
 fi
 
-# Set the display video to that of the emulator setting.
-[ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
-
 # Get the latest save files if there is any
 CLOUD_SYNC=$(get_ee_setting "${PLATFORM}.cloudsave")
 [[ "$CLOUD_SYNC" == "1" ]] && ra_rclone.sh get "${PLATFORM}" "${ROMNAME}" &
@@ -143,7 +140,7 @@ SPL=$(get_ee_setting ee_splash.enabled)
 [ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh gameloading "$PLATFORM" "${ROMNAME}"
 
 # Set the display video to that of the emulator setting.
-[ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU # set display
+[ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU $PLATFORM # set display
 
 
 CONTROLLERCONFIG="${arguments#*--controllers=*}"
@@ -471,8 +468,6 @@ blank_buffer
 
 # Return to default mode
 $TBASH $SET_DISPLAY_SH $VIDEO
-
-check_hard_kill "${KILL_THIS}" &
 
 # Show exit splash
 ${TBASH} show_splash.sh exit
