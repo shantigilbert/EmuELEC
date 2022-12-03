@@ -1,0 +1,168 @@
+From 3a8bc6478654afcbd219f45e7ea01353c2d57eb6 Mon Sep 17 00:00:00 2001
+From: Rui Ueyama <ruiu@cs.stanford.edu>
+Date: Sat, 7 May 2022 19:55:24 +0800
+Subject: [PATCH] Retry if pthread_create fails with EAGAIN
+
+On many Unix-like systems, pthread_create can fail spuriously even if
+the running machine has enough resources to spawn a new thread.
+Therefore, if EAGAIN is returned from pthread_create, we actually have
+to try again.
+
+I observed this issue when running the mold linker
+(https://github.com/rui314/mold) under a heavy load. mold uses OneTBB
+for parallelization.
+
+As another data point, Go has the same logic to retry on EAGAIN:
+https://go-review.googlesource.com/c/go/+/33894/
+
+nanosleep is defined in POSIX 2001, so I believe that all Unix-like
+systems support it.
+
+Signed-off-by: Rui Ueyama <ruiu@cs.stanford.edu>
+---
+ src/tbb/rml_thread_monitor.h     | 30 +++++++++++++++-
+ test/CMakeLists.txt              |  3 ++
+ test/tbb/test_pthread_create.cpp | 59 ++++++++++++++++++++++++++++++++
+ 3 files changed, 91 insertions(+), 1 deletion(-)
+ create mode 100644 test/tbb/test_pthread_create.cpp
+
+diff --git a/src/tbb/rml_thread_monitor.h b/src/tbb/rml_thread_monitor.h
+index 13b556380..dc046ba00 100644
+ src/tbb/rml_thread_monitor.h | 19 ++++++++++++++++++-
+ 1 file changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/src/tbb/rml_thread_monitor.h b/src/tbb/rml_thread_monitor.h
+index 13b556380..5b844b232 100644
+--- a/src/tbb/rml_thread_monitor.h
++++ b/src/tbb/rml_thread_monitor.h
+@@ -31,6 +31,7 @@
+ #include <pthread.h>
+ #include <cstring>
+ #include <cstdlib>
++#include <time.h>
+ #else
+ #error Unsupported platform
+ #endif
+@@ -183,6 +184,32 @@ inline void thread_monitor::check( int error_code, const char* routine ) {
+     }
+ }
+
++// pthread_create(2) can spuriously fail on Linux. This is a function
++// to wrap pthread_create(2) to retry if it fails with EAGAIN.
++inline void do_pthread_create(pthread_t *handle, pthread_attr_t *s, void* (*thread_routine)(void*), void* arg) {
++#ifdef __linux__
++  int tries = 0;
++  const int max_num_tries = 20;
++
++  for (;;) {
++    int error_code = pthread_create(handle, s, thread_routine, arg);
++    if (!error_code)
++      break;
++    if (error_code != EAGAIN || tries++ > max_num_tries) {
++      handle_perror(error_code, "pthread_create has failed");
++      break;
++    }
++
++    // Retry after tries * 1 millisecond.
++    struct timespec ts = {0, tries * 1000 * 1000};
++    nanosleep(&ts, NULL);
++  }
++#else
++  if (int error_code = pthread_create(handle, s, thread_routine, arg))
++    handle_perror(error_code, "pthread_create has failed");
++#endif
++}
++
+ inline thread_monitor::handle_type thread_monitor::launch( void* (*thread_routine)(void*), void* arg, std::size_t stack_size ) {
+     // FIXME - consider more graceful recovery than just exiting if a thread cannot be launched.
+     // Note that there are some tricky situations to deal with, such that the thread is already
+@@ -191,8 +218,9 @@ inline thread_monitor::handle_type thread_monitor::launch( void* (*thread_routin
+     check(pthread_attr_init( &s ), "pthread_attr_init has failed");
+     if( stack_size>0 )
+         check(pthread_attr_setstacksize( &s, stack_size ), "pthread_attr_setstack_size has failed" );
++
+     pthread_t handle;
+-    check( pthread_create( &handle, &s, thread_routine, arg ), "pthread_create has failed" );
++    do_pthread_create(&handle, &s, thread_routine, arg);
+     check( pthread_attr_destroy( &s ), "pthread_attr_destroy has failed" );
+     return handle;
+ }
+diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
+index f15679e83..92802b015 100644
+--- a/test/CMakeLists.txt
++++ b/test/CMakeLists.txt
+@@ -373,6 +373,9 @@ if (TARGET TBB::tbb)
+     if (APPLE OR ANDROID_PLATFORM)
+         target_link_libraries(test_dynamic_link PRIVATE -rdynamic) # for the test_dynamic_link
+     endif()
++    if (UNIX AND NOT APPLE)
++      tbb_add_test(SUBDIR tbb NAME test_pthread_create DEPENDENCIES TBB::tbb)
++    endif()
+     tbb_add_test(SUBDIR tbb NAME test_collaborative_call_once DEPENDENCIES TBB::tbb)
+     tbb_add_test(SUBDIR tbb NAME test_concurrent_lru_cache DEPENDENCIES TBB::tbb)
+     tbb_add_test(SUBDIR tbb NAME test_concurrent_unordered_map DEPENDENCIES TBB::tbb)
+diff --git a/test/tbb/test_pthread_create.cpp b/test/tbb/test_pthread_create.cpp
+new file mode 100644
+index 000000000..4cb1f4ea5
+--- /dev/null
++++ b/test/tbb/test_pthread_create.cpp
+@@ -0,0 +1,59 @@
++/*
++    Copyright (c) 2005-2022 Intel Corporation
++
++    Licensed under the Apache License, Version 2.0 (the "License");
++    you may not use this file except in compliance with the License.
++    You may obtain a copy of the License at
++
++        http://www.apache.org/licenses/LICENSE-2.0
++
++    Unless required by applicable law or agreed to in writing, software
++    distributed under the License is distributed on an "AS IS" BASIS,
++    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++    See the License for the specific language governing permissions and
++    limitations under the License.
++*/
++
++#include "common/test.h"
++#include "common/utils.h"
++
++#include <atomic>
++#include <sys/types.h>
++#include <sys/wait.h>
++#include <tbb/global_control.h>
++#include <tbb/parallel_for.h>
++#include <thread>
++#include <unistd.h>
++
++//! Test that thread pool creation won't be affected with a spurious failure of pthread_create().
++//! \brief \ref error_guessing
++TEST_CASE("pthread_create is not affected by fork") {
++    std::atomic_bool done;
++
++    std::thread thr([&]() {
++        while (!done) {
++            pid_t pid = fork();
++            CHECK(pid != -1);
++
++            if (pid == 0) {
++                // child
++              _exit(0);
++            } else {
++                int wstatus;
++                do {
++                  pid_t pid2 = waitpid(pid, &wstatus, 0);
++                  CHECK(pid2 != -1);
++                } while (!WIFEXITED(wstatus) && !WIFSIGNALED(wstatus));
++            }
++        }
++    });
++
++    for (int i = 0; i < 50; i++) {
++        tbb::task_scheduler_handle handle{tbb::attach{}};
++        tbb::parallel_for(0, 10000, [](int) {});
++        tbb::finalize(handle);
++    }
++
++    done = true;
++    thr.join();
++}

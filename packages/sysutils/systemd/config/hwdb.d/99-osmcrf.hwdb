@@ -1,3 +1,15 @@
+evdev:input:b0003v2252p1069*
+ KEYBOARD_KEY_7002e=volumeup
+ KEYBOARD_KEY_7002d=volumedown
+ KEYBOARD_KEY_7000c=kpleftparen
+ KEYBOARD_KEY_70006=kprightparen
+
+evdev:input:b0003v2017p1690*
+ KEYBOARD_KEY_7002e=volumeup
+ KEYBOARD_KEY_7002d=volumedown
+ KEYBOARD_KEY_7000c=kpleftparen
+ KEYBOARD_KEY_70006=kprightparen
+
 evdev:input:b0003v2017p1689*
  KEYBOARD_KEY_7002e=volumeup
  KEYBOARD_KEY_7002d=volumedown

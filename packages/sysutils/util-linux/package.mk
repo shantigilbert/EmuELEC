@@ -55,7 +55,7 @@ PKG_CONFIGURE_OPTS_TARGET="${UTILLINUX_CONFIG_DEFAULT} \
                            --enable-fstrim \
                            --enable-blkid \
                            --enable-lsfd \
-                           --enable-setterm \
+                           --disable-setterm \
                            --with-ncursesw"
 
 if [ "${SWAP_SUPPORT}" = "yes" ]; then
@@ -78,11 +78,6 @@ PKG_CONFIGURE_OPTS_INIT="${UTILLINUX_CONFIG_DEFAULT} \
 if [ "${INITRAMFS_PARTED_SUPPORT}" = "yes" ]; then
   PKG_CONFIGURE_OPTS_INIT+=" --enable-mkfs --enable-libuuid"
 fi
-
-pre_makeinstall_target() {
-mkdir -p $INSTALL/usr/bin
-cp $PKG_BUILD/.$TARGET_NAME/setterm $INSTALL/usr/bin
-}
 
 post_makeinstall_target() {
   if [ "${SWAP_SUPPORT}" = "yes" ]; then

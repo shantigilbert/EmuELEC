@@ -1,0 +1,24 @@
+From f7f2ef6182d058f7c58401d9278aa3136cb996f5 Mon Sep 17 00:00:00 2001
+From: SupervisedThinking <supervisedthinking@gmail.com>
+Date: Thu, 29 Sep 2022 11:49:57 +0200
+Subject: [PATCH] CMakeLists: allow custom mold binary install path
+
+- https://cmake.org/cmake/help/latest/command/install.html
+- ${CMAKE_INSTALL_BINDIR} defaults to bin if not set
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7136cf2b..4542f915 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -287,7 +287,7 @@ if(BUILD_TESTING)
+ endif()
+ 
+ if(NOT CMAKE_SKIP_INSTALL_RULES)
+-  install(TARGETS mold RUNTIME DESTINATION bin)
++  install(TARGETS mold RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+   install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DOCDIR})
+   install(FILES docs/mold.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1/)
+   install(CODE "

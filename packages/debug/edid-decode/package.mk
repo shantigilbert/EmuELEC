@@ -2,15 +2,16 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="edid-decode"
-PKG_VERSION="770cfb947ea9d9eb5cda57a87dc66d13c60cfefc"
-PKG_SHA256="eb6a766b89ef5f7d06d6649fc442ee57377ee7add801cde0a5ba6b636da78075"
+PKG_VERSION="9ba4e90f3c0705351d32f526653e3e765fa2cf64" # 2022-09-23
+PKG_SHA256="8b55a1c09a32c4c39ea0092e1f468f545a535323eb36016e042e0bf156833a1b"
 PKG_LICENSE="None"
 PKG_SITE="https://git.linuxtv.org/edid-decode.git/"
 PKG_URL="https://repo.or.cz/edid-decode.git/snapshot/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="Decode EDID data in human-readable format"
 
-EDID_SOURCES="edid-decode.cpp parse-base-block.cpp parse-cta-block.cpp \
+EDID_SOURCES="calc-gtf-cvt.cpp calc-ovt.cpp \
+              edid-decode.cpp parse-base-block.cpp parse-cta-block.cpp \
               parse-displayid-block.cpp parse-ls-ext-block.cpp \
               parse-di-ext-block.cpp parse-vtb-ext-block.cpp"
 

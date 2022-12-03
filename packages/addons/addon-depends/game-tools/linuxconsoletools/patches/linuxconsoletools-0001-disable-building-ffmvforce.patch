@@ -1,12 +1,12 @@
 diff -Naur a/utils/Makefile b/utils/Makefile
---- a/utils/Makefile	2016-04-19 13:20:50.000000000 -0700
-+++ b/utils/Makefile	2016-10-20 00:31:34.238941511 -0700
-@@ -27,7 +27,7 @@
+--- a/utils/Makefile	2022-05-21 09:44:47.000000000 +0000
++++ b/utils/Makefile	2022-05-21 18:58:51.363206817 +0000
+@@ -37,7 +37,7 @@
+ endif
  
- CFLAGS		?= -g -O2 -Wall
- 
--PROGRAMS	= inputattach jstest jscal fftest ffmvforce ffset \
-+PROGRAMS	= inputattach jstest jscal fftest ffset \
- 		  ffcfstress jscal-restore jscal-store evdev-joystick
+ ifndef DISABLE_FORCEFEEDBACK
+-PROGRAMS	+= fftest ffmvforce ffset ffcfstress
++PROGRAMS	+= fftest ffset ffcfstress
+ endif
  
  PREFIX          ?= /usr/local

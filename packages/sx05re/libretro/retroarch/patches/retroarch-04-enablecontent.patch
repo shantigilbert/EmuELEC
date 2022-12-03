@@ -1,14 +1,19 @@
 --- a/menu/menu_displaylist.c	2017-08-18 06:30:31.000000000 -0500
 +++ b/menu/menu_displaylist.c	2017-08-20 01:54:59.625855817 -0500
-@@ -11390,7 +11390,7 @@
-       case DISPLAYLIST_OPTIONS:
+@@ -13245,13 +13245,6 @@
           menu_entries_ctl(MENU_ENTRIES_CTL_CLEAR, info->list);
           {
--#ifdef HAVE_LAKKA
-+#ifndef HAVE_LAKKA
-             if (menu_entries_append_enum(info->list,
-                      msg_hash_to_str(MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA),
-                      msg_hash_to_str(MENU_ENUM_LABEL_UPDATE_LAKKA),
+ #ifdef HAVE_LAKKA
+-            if (menu_entries_append(info->list,
+-                     msg_hash_to_str(MENU_ENUM_LABEL_VALUE_UPDATE_LAKKA),
+-                     msg_hash_to_str(MENU_ENUM_LABEL_UPDATE_LAKKA),
+-                     MENU_ENUM_LABEL_UPDATE_LAKKA,
+-                     MENU_SETTING_ACTION, 0, 0, NULL))
+-               count++;
+-
+             if (settings->bools.menu_show_legacy_thumbnail_updater)
+             {
+                if (menu_entries_append(info->list,
 --- a/menu/menu_setting.c
 +++ b/menu/menu_setting.c
 @@ -8504,7 +8504,7 @@

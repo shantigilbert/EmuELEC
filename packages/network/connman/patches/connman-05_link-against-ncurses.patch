@@ -16,7 +16,7 @@ index 41efc1f..d1d3ddc 100644
  
  client_connmanctl_LDADD = gdbus/libgdbus-internal.la @DBUS_LIBS@ @GLIB_LIBS@ \
 -				-lreadline -ldl
-+				-lreadline -lncurses -ldl -ltinfo
++				-lreadline -lncurses -ldl
  endif
  
  noinst_PROGRAMS += unit/test-ippool

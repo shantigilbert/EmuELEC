@@ -3,8 +3,8 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="lirc"
-PKG_VERSION="0.10.1"
-PKG_SHA256="8b753c60df2a7f5dcda2db72c38e448ca300c3b4f6000c1501fcb0bd5df414f2"
+PKG_VERSION="0.10.2"
+PKG_SHA256="3d44ec8274881cf262f160805641f0827ffcc20ade0d85e7e6f3b90e0d3d222a"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.lirc.org"
 PKG_URL="https://sourceforge.net/projects/lirc/files/LIRC/${PKG_VERSION}/${PKG_NAME}-${PKG_VERSION}.tar.bz2"

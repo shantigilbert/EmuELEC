@@ -23,33 +23,38 @@ jc_get_players() {
 
 # Dump gamepad information
   cat /proc/bus/input/devices \
-    | grep -E -B 5 -A 3 "H\: Handlers=(js[0-9] event[0-9])|(event[0-9] js[0-9])" \
+    | grep -E -B 5 -A 3 "H\: Handlers=(js[0-9] event[0-9]+)|(event[0-9]+ js[0-9])" \
     | grep -Ew -B 8 "B: KEY\=[0-9a-f ]+" > /tmp/input_devices
 
 # Determine how many gamepads/players are connected
-  JOYS=$(ls -A1 /dev/input/js*| sort )
-  
-  declare -a PLAYER_CFGS=()
-  
-  for dev in $(echo $JOYS); do
-   
-    JOY_INDEX=$(basename $dev)
-   
-    PROC_GUID=$(cat /tmp/input_devices | grep ${JOY_INDEX} -B 5 | grep I: | sed "s|I:\ Bus=||" | sed "s|\ Vendor=||" | sed "s|\ Product=||" | sed "s|\ Version=||")
-    local DEVICE_GUID=$(jc_generate_guid ${PROC_GUID})
+  JOYS=$(ls -ltr /dev/input/js* | awk '{print $8"\t"$9"\t"$10}' | sort \
+    | awk '{print $3}' | cut -d'/' -f4)
+  if [[ -f "/storage/.config/JOY_LEGACY_ORDER" ]]; then
+    JOYS=$(ls -A1 /dev/input/js*| sort | sed "s|/dev/input/||g")
+  fi
 
+  declare -a PLAYER_CFGS=()
+
+  for dev in $(echo $JOYS); do
+    local JSI=$dev
+    local DETAILS=$(cat /tmp/input_devices \
+        | grep -E "H\: Handlers=(${JSI} event[0-9]+)|(event[0-9]+ ${JSI})" -B 5)
+    
+    local PROC_GUID=$(echo "${DETAILS}" | grep I: | sed "s|I:\ Bus=||" | sed "s|\ Vendor=||" | sed "s|\ Product=||" | sed "s|\ Version=||")
+    local DEVICE_GUID=$(jc_generate_guid ${PROC_GUID})
     [[ -z "${DEVICE_GUID}" ]] && continue
 
-    local JOY_DETAIL=$(jc_get_device_detail "${DEVICE_GUID}")
-    [[ "$JOY_DETAIL" == 0 ]] && continue
-    local JSI=$(echo "$JOY_DETAIL" | cut -d' ' -f1)
-    local JOY_NAME=$(echo "$JOY_DETAIL" | cut -d' ' -f2-)
+    local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep "platform:Linux" | head -1)
+    echo "GC_CONFIG=$GC_CONFIG"
+    [[ -z $GC_CONFIG ]] && continue
+
+    local JOY_NAME=$(echo "${DETAILS}" | grep -E "^N\: Name.*[\= ]?.*$" | cut -d "=" -f 2 | tr -d '"')
+    [[ -z "$JOY_NAME" ]] && continue
 
     # Add the joy config to array if guid and joyname set.
     if [[ ! -z "${DEVICE_GUID}" && ! -z "$JOY_NAME" ]]; then
-      local PLAYER_CFG="${PLAYER} ${JSI} ${DEVICE_GUID} ${JOY_NAME}"
-
-      PLAYER_CFGS+=("${PLAYER_CFG}")
+      local PLAYER_CFG="${JSI} ${DEVICE_GUID} \"${JOY_NAME}\""
+      PLAYER_CFGS[$((PLAYER-1))]="${PLAYER_CFG}"
       ((PLAYER++))
     fi
   done
@@ -61,43 +66,50 @@ jc_get_players() {
     return
   fi
 
-  declare -i PLAYERS=${#PLAYER_CFGS[@]}
-  local PLAYER_CFG=0
-  for PLAYER in {1..4}; do
-    local PINDEX=$(( PLAYER - 1 ))
-    PLAYER_CFG=$PLAYER
-    if [[ "$PINDEX" -lt "$PLAYERS" ]]; then
-      PLAYER_CFG="${PLAYER_CFGS[$PINDEX]}"
-      jc_setup_gamecontroller "${PLAYER_CFG}"
-    else
-      clean_pad ${PLAYER_CFG}
-    fi
-  done
-}
+  local cfgCount=${#PLAYER_CFGS[@]}
+  MANUAL_CONFIG=$(cat "/tmp/controllerconfig.txt")
+  echo "MANUAL_CONFIG=${MANUAL_CONFIG}"
+  if [[ ! -z "${MANUAL_CONFIG}" && ! -f "/storage/.config/EE_CONTROLLER_OVERIDE_OFF" ]]; then
+    declare -a GUID_ORDER=($MANUAL_CONFIG)
+    declare -a GUIDS=()
 
-jc_setup_gamecontroller() {
-  local PLAYER_CFG="$1"
-  local JOY_INFO=$(echo "$1" | cut -d' ' -f1-3)
-  local JOY_NAME=$(echo "$1" | cut -d' ' -f4-)
-
-  [[ -z "${CACHE_FILE}" ]] && return
-
-  local USE_CACHE=$(get_ee_setting ${EMULATOR}_joy_cache)
-  if [[ "${USE_CACHE}" == "1" ]]; then
-    local CACHE=""
-    [[ -f "${CACHE_FILE}" ]] && CACHE=$(cat $CACHE_FILE | grep "$PLAYER_CFG")
-
-    if [[ ! -z "$CACHE" || "$CACHE" == "${PLAYER_CFG}" ]]; then
-      return
-    fi
+    local index=0
+    local row=0
+    local i=0
+    local pl=0
+    for i in ${GUID_ORDER[@]}; do
+      row=$(( index % 4 ))
+      [[ $row == 0 ]] && pl=${i:2:1}
+      [[ $row == 3 ]] && GUIDS[$pl]=${GUID_ORDER[$(( index+0 ))]}
+      (( index++ ))
+    done
+    echo "GUID_ORDER=${GUIDS[@]}"
+    local si=0
+    for (( i=1; i<=$cfgCount; i++ )); do
+      local tGUID=${GUIDS[i]}
+      [[ "$tGUID" == "" ]] && continue
+      for (( j=$si; j<$cfgCount; j++ )); do
+        local cfgGUID=$(echo "${PLAYER_CFGS[$j]}" | cut -d' ' -f2)
+        if [[ $tGUID == $cfgGUID ]]; then
+          local tmp="${PLAYER_CFGS[$j]}"
+          PLAYER_CFGS[$j]="${PLAYER_CFGS[$si]}"
+          PLAYER_CFGS[$si]="$tmp"
+          (( si++ ))
+          break
+        fi
+      done
+    done
   fi
 
-  echo "CONTROLLER: ${PLAYER_CFG}"
-  clean_pad ${JOY_INFO} "${JOY_NAME}"
-  set_pad ${JOY_INFO} "${JOY_NAME}"
-
-  [[ -f "${CACHE_FILE}" ]] && sed -i "/^${PLAYER_CFG:0:1} js.*$/d" ${CACHE_FILE}
-  echo "${PLAYER_CFG}" >> "${CACHE_FILE}"
+  local PLAYER_CFG=
+  for p in {1..4}; do
+    local CFG="${p} ${PLAYER_CFGS[$(( p-1 ))]}"
+    if [[ $p -le $cfgCount ]]; then
+      echo "PLAYER_CFG=${CFG}"
+    fi
+    eval clean_pad ${CFG}
+    [[ "${CFG}" != "${p} " ]] && eval set_pad ${CFG}
+  done
 }
 
 jc_generate_guid() {
@@ -114,38 +126,4 @@ jc_generate_guid() {
         v+=$(echo ${p4:6:2}${p4:4:2}${p4:2:2}${p4:0:2})0000
 
   echo "$v"
-}
-
-jc_get_device_detail() {
-  local GUID="${1}"
-
-  v=${DEVICE_GUID:0:8}
-  local p1=$(echo ${v:6:2}${v:4:2}${v:2:2}${v:0:2}) # Bus, generally not needed
-  local v=${GUID:8:8}
-  local p2=$(echo ${v:6:2}${v:4:2}${v:2:2}${v:0:2}) # Vendor
-  v=${GUID:16:8}
-  local p3=$(echo ${v:6:2}${v:4:2}${v:2:2}${v:0:2}) # Product
-  v=${GUID:24:8}
-  local p4=$(echo ${v:6:2}${v:4:2}${v:2:2}${v:0:2}) # Version
-
-  local vendor=$(echo ${p2:4})
-  local product=$(echo ${p3:4})
-  local version=$(echo ${p4:4})
-
-  local I_REGEX="^I\: .* Vendor\=${vendor} Product\=${product} Version\=${version}$"
-  local EE_DEV=$(cat /tmp/input_devices | grep -Ew -A 8 "$I_REGEX" | head -n8)
-
-  declare -i REC_INDEX=$(cat /tmp/input_devices | grep -n -E "$I_REGEX" | cut -d':' -f1 | head -n1 )
-  declare -i REC_LENGTH=$(( REC_INDEX + 9 ))
-  sed -i "${REC_INDEX},${REC_LENGTH}d" /tmp/input_devices
-
-  local JSI=$(echo -e "${EE_DEV}" | grep "H: Handlers" | sed -E 's/.*H: Handlers=.*(js[0-9]).*/\1/' | head -n1 )
-  
-  if [[ ! -z "${EE_DEV}" ]]; then
-    local JOY_NAME=$(echo "${EE_DEV}" | grep -E "^N\: Name.*[\= ]?.*$" \
-      | cut -d "=" -f 2 | tr -d '"')
-    echo "${JSI} ${JOY_NAME}"
-    return
-  fi
-  echo "0"
 }

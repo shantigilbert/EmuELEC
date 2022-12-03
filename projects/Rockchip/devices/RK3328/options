@@ -18,6 +18,11 @@
         ;;
     esac
 
+  # Firmware
+    UBOOT_FIRMWARE+=" atf"
+    ATF_PLATFORM="rk3328"
+    ATF_BL31_BINARY="bl31/bl31.elf"
+
   # Kernel target
     KERNEL_TARGET="Image"
 
@@ -26,10 +31,7 @@
     GRAPHIC_DRIVERS="lima"
 
   # kernel serial console
-    EXTRA_CMDLINE="console=tty0 coherent_pool=2M cec.debounce_ms=5000"
-    if [ "$UBOOT_SYSTEM" != "box-trn9" ]; then
-      EXTRA_CMDLINE="console=uart8250,mmio32,0xff130000 $EXTRA_CMDLINE"
-    fi
+    EXTRA_CMDLINE="console=uart8250,mmio32,0xff130000 console=tty0 coherent_pool=2M cec.debounce_ms=5000"
 
   # set the addon project
     ADDON_PROJECT="ARMv8"

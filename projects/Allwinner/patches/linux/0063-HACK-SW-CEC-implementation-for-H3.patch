@@ -66,7 +66,7 @@ index bffe1b9cd3dc..61c97619cba1 100644
 @@ -174,6 +185,8 @@ struct sun8i_hdmi_phy {
  	struct regmap			*regs;
  	struct reset_control		*rst_phy;
- 	struct sun8i_hdmi_phy_variant	*variant;
+ 	const struct sun8i_hdmi_phy_variant *variant;
 +	unsigned int 			disable_cec : 1;
 +	unsigned int 			bit_bang_cec : 1;
  };
@@ -76,7 +76,7 @@ diff --git a/drivers/gpu/drm/sun4i/sun8i_hdmi_phy.c b/drivers/gpu/drm/sun4i/sun8
 index b64d93da651d..e2936e7745b8 100644
 --- a/drivers/gpu/drm/sun4i/sun8i_hdmi_phy.c
 +++ b/drivers/gpu/drm/sun4i/sun8i_hdmi_phy.c
-@@ -498,8 +498,9 @@ static void sun8i_hdmi_phy_init_h3(struct sun8i_hdmi_phy *phy)
+@@ -506,8 +506,9 @@
  	regmap_update_bits(phy->regs, SUN8I_HDMI_PHY_PLL_CFG1_REG,
  			   SUN8I_HDMI_PHY_PLL_CFG1_CKIN_SEL_MSK, 0);
  
@@ -88,7 +88,7 @@ index b64d93da651d..e2936e7745b8 100644
  
  	/* read calibration data */
  	regmap_read(phy->regs, SUN8I_HDMI_PHY_ANA_STS_REG, &val);
-@@ -576,8 +577,47 @@ void sun8i_hdmi_phy_set_ops(struct sun8i_hdmi_phy *phy,
+@@ -584,8 +585,47 @@
  		plat_data->cur_ctr = variant->cur_ctr;
  		plat_data->phy_config = variant->phy_cfg;
  	}
@@ -136,7 +136,7 @@ index b64d93da651d..e2936e7745b8 100644
  static const struct regmap_config sun8i_hdmi_phy_regmap_config = {
  	.reg_bits	= 32,
  	.val_bits	= 32,
-@@ -653,6 +693,7 @@ int sun8i_hdmi_phy_get(struct sun8i_dw_hdmi *hdmi, struct device_node *node)
+@@ -653,6 +693,7 @@
  {
  	struct platform_device *pdev = of_find_device_by_node(node);
  	struct sun8i_hdmi_phy *phy;
@@ -144,7 +144,7 @@ index b64d93da651d..e2936e7745b8 100644
  
  	if (!pdev)
  		return -EPROBE_DEFER;
-@@ -664,8 +705,35 @@ int sun8i_hdmi_phy_get(struct sun8i_dw_hdmi *hdmi, struct device_node *node)
+@@ -666,8 +707,35 @@
  	hdmi->phy = phy;
  
  	put_device(&pdev->dev);
@@ -180,9 +180,9 @@ index b64d93da651d..e2936e7745b8 100644
  }
  
  static int sun8i_hdmi_phy_probe(struct platform_device *pdev)
-@@ -690,6 +758,14 @@ static int sun8i_hdmi_phy_probe(struct platform_device *pdev)
+@@ -682,6 +750,14 @@
  
- 	phy->variant = (struct sun8i_hdmi_phy_variant *)match->data;
+ 	phy->variant = of_device_get_match_data(dev);
  	phy->dev = dev;
 +	phy->disable_cec = of_machine_is_compatible("roofull,beelink-x2") ||
 +			   of_machine_is_compatible("friendlyarm,nanopi-m1") ||
@@ -193,15 +193,25 @@ index b64d93da651d..e2936e7745b8 100644
 +	phy->bit_bang_cec = phy->disable_cec &&
 +			    !of_machine_is_compatible("roofull,beelink-x2");
  
- 	ret = of_address_to_resource(node, 0, &res);
- 	if (ret) {
-@@ -768,6 +844,9 @@ static int sun8i_hdmi_phy_remove(struct platform_device *pdev)
- {
- 	struct sun8i_hdmi_phy *phy = platform_get_drvdata(pdev);
+ 	regs = devm_platform_ioremap_resource(pdev, 0);
+ 	if (IS_ERR(regs))
+@@ -728,8 +804,19 @@
+ 	return 0;
+ }
  
++static int sun8i_hdmi_phy_remove(struct platform_device *pdev)
++{
++	struct sun8i_hdmi_phy *phy = platform_get_drvdata(pdev);
++
 +	cec_notifier_cec_adap_unregister(phy->cec_notifier, phy->cec_adapter);
 +	cec_unregister_adapter(phy->cec_adapter);
 +
- 	reset_control_put(phy->rst_phy);
- 
- 	clk_put(phy->clk_pll0);
++	return 0;
++}
++
+ struct platform_driver sun8i_hdmi_phy_driver = {
+ 	.probe  = sun8i_hdmi_phy_probe,
++	.remove = sun8i_hdmi_phy_remove,
+ 	.driver = {
+ 		.name = "sun8i-hdmi-phy",
+ 		.of_match_table = sun8i_hdmi_phy_of_table,

@@ -3,11 +3,11 @@
 # Copyright (C) 2022-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="xash3d"
-PKG_VERSION="5b97c2135adfd6716ba84ff736682b44cc41c10f"
+PKG_VERSION="3da736a1eb7316d0650dcdf9f711b0e6c5d10881"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/FWGS/xash3d-fwgs"
 PKG_URL="https://github.com/FWGS/xash3d-fwgs.git"
-PKG_DEPENDS_TARGET="toolchain hlsdk-xash3d SDL2"
+PKG_DEPENDS_TARGET="toolchain hlsdk-portable SDL2"
 PKG_LONGDESC="Xash3D FWGS engine. Rebooted fork since big Xash3D 0.99"
 PKG_TOOLCHAIN="manual"
 PKG_BUILD_FLAGS="-lto"
@@ -27,8 +27,8 @@ cd ${PKG_BUILD}
   ./waf install --destdir=${INSTALL}/usr/bin/xash3d
 
   mkdir -p ${INSTALL}/usr/lib/xash3d/valve
-  mkdir -p ${INSTALL}/usr/emuelec/configs/gptokeyb
+  mkdir -p ${INSTALL}/usr/emuelec/configs/hl
   wget -q -O ${INSTALL}/usr/lib/xash3d/valve/extras.pak https://github.com/FWGS/xash-extras/releases/download/v0.19.2/extras.pak
   cp ${PKG_DIR}/files/xash3d.sh ${INSTALL}/usr/bin/
-  cp ${PKG_DIR}/files/xash3d.gptk ${INSTALL}/usr/emuelec/configs/gptokeyb
+  cp ${PKG_DIR}/files/config.cfg ${INSTALL}/usr/emuelec/configs/hl
 }

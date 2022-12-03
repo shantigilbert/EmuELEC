@@ -7,10 +7,10 @@
 oe_setup_addon service.mariadb
 
 # create dir for socket and pid
-mkdir -p /var/run/mysqld
+mkdir -p /run/mysqld
 
 # exit if already running
-PID=$(ps aux | awk '/\/bin\/mysqld/ {print $1; exit 0}')
+PID=$(ps aux | awk '/\/bin\/mariadbd/ {print $1; exit 0}')
 if [ -n "$PID" ]; then
   echo "MariaDB server is already running"
   exit 0
@@ -23,6 +23,7 @@ fi
 
 # install database
 if [ ! -d "$ADDON_HOME/data/mysql" ]; then
+  mkdir -p $ADDON_HOME/data
   echo "Installing database"
   $ADDON_DIR/bin/mysql_install_db --basedir=$ADDON_DIR --datadir=$ADDON_HOME/data
 fi
@@ -54,5 +55,5 @@ SQL_DATA
   init_file="--init-file=$ADDON_HOME/set_mysql_passwords.sql"
 fi
 
-echo "Starting mysqld"
-MYSQL_HOME="$ADDON_HOME" exec $ADDON_DIR/bin/mysqld $init_file &
+echo "Starting mariadbd"
+MYSQL_HOME="$ADDON_HOME" exec $ADDON_DIR/bin/mariadbd $init_file &

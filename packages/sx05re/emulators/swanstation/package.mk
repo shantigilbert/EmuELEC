@@ -2,8 +2,8 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="swanstation"
-PKG_VERSION="c1487ab4bd58cfb89d69765b19c9b02a1581b0a6"
-PKG_SHA256="fe438bc3d3fdeb49c38c3806e3771c68b6a6dea6c65a41edf56e5f1743127f8e"
+PKG_VERSION="27a224fc9e86e0f061504878d1c0cbf3fd6891af"
+PKG_SHA256="5fab45a94ad3f8e8f68ee93bc6c0f12d54560c31e60d1e053cde9ffff9bfd5f8"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/swanstation"

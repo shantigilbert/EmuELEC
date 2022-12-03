@@ -57,19 +57,9 @@ fi
   done
 
 # update bootloader
-  if [ -f ${SYSTEM_ROOT}/usr/share/bootloader/idbloader.img ]; then
-    echo -n "Updating idbloader.img... "
-    dd if=${SYSTEM_ROOT}/usr/share/bootloader/idbloader.img of=${BOOT_DISK} bs=32k seek=1 conv=fsync &>/dev/null
-    echo "done"
-  fi
-  if [ -f ${SYSTEM_ROOT}/usr/share/bootloader/uboot.img ]; then
-    echo -n "Updating uboot.img... "
-    dd if=${SYSTEM_ROOT}/usr/share/bootloader/uboot.img of=${BOOT_DISK} bs=64k seek=128 conv=fsync &>/dev/null
-    echo "done"
-  fi
-  if [ -f ${SYSTEM_ROOT}/usr/share/bootloader/trust.img ]; then
-    echo -n "Updating trust.img... "
-    dd if=${SYSTEM_ROOT}/usr/share/bootloader/trust.img of=${BOOT_DISK} bs=64k seek=192 conv=fsync &>/dev/null
+ if [ -f ${SYSTEM_ROOT}/usr/share/bootloader/u-boot-rockchip.bin ]; then
+    echo -n "Updating fit image u-boot-rockchip.bin ... "
+    dd if=${SYSTEM_ROOT}/usr/share/bootloader/u-boot-rockchip.bin of=${BOOT_DISK} seek=64 conv=fsync &>/dev/null
     echo "done"
   fi
 

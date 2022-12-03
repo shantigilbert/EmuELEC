@@ -11,7 +11,7 @@
 
 # setup ARCH specific *FLAGS
   TARGET_CFLAGS="-march=${TARGET_CPU}"
-  TARGET_LDFLAGS="-march=${TARGET_CPU}"
+  TARGET_LDFLAGS=""
 
 # build with microarchitecture feature support defined by the TARGET_CPU value
 # see https://gitlab.com/x86-psABIs/x86-64-ABI/-/wikis/home for further details

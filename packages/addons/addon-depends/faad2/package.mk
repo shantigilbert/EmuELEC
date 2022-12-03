@@ -3,11 +3,11 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="faad2"
-PKG_VERSION="2.10.0"
-PKG_SHA256="0c6d9636c96f95c7d736f097d418829ced8ec6dbd899cc6cc82b728480a84bfb"
+PKG_VERSION="2.10.1"
+PKG_SHA256="4c16c71295ca0cbf7c3dfe98eb11d8fa8d0ac3042e41604cfd6cc11a408cf264"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/knik0/faad2/"
-PKG_URL="https://github.com/knik0/faad2/archive/${PKG_VERSION//./_}.tar.gz"
+PKG_URL="https://github.com/knik0/faad2/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="An MPEG-4 AAC decoder."
 PKG_TOOLCHAIN="configure"

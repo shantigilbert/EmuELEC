@@ -1,3 +1,11 @@
+108
+- update MariaDB to 10.9.4
+
+107
+- update MariaDB to 10.9.3
+- supports openssl
+- migrated to pcre2
+
 106
 - update MariaDB to 10.4.22
 - drop support for TokuDB, it is deprecated in 10.5.y and is not

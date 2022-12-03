@@ -2,11 +2,11 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="wayland-protocols"
-PKG_VERSION="1.26"
-PKG_SHA256="c553384c1c68afd762fa537a2569cc9074fe7600da12d3472761e77a2ba56f13"
+PKG_VERSION="1.27"
+PKG_SHA256="9046f10a425d4e2a00965a03acfb6b3fb575a56503ac72c2b86821c69653375c"
 PKG_LICENSE="OSS"
 PKG_SITE="https://wayland.freedesktop.org/"
-PKG_URL="https://wayland.freedesktop.org/releases/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+PKG_URL="https://gitlab.freedesktop.org/wayland/${PKG_NAME}/-/releases/${PKG_VERSION}/downloads/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_TARGET="toolchain wayland:host"
 PKG_LONGDESC="Specifications of extended Wayland protocols"
 

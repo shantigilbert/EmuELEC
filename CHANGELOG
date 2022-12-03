@@ -1,6 +1,108 @@
 EmuELEC CHANGELOG
 ==================
 
+# v4.6
+
+## Please read the complete change-log before updating. A lot of the changes have been done to the base system. specially to the way the partitions are handled so you might need/want to do a clean install.
+
+There is now a new tool for mounting systemd and external sources for ROMS
+you can read more about it here: https://github.com/EmuELEC/EmuELEC/pull/980
+
+EEROMS partition will only be created on SD cards bigger than 8gb. For detail explanation: https://github.com/EmuELEC/EmuELEC/pull/979
+This also changes how the second partition is created, It is now 6GB (unless you use a 4GB sd card, then it will be 2GB) If you update from 4.5 or lower you will keep the 2GB STORAGE partition, but if you need your STORAGE partition to be bigger (6GB), then you will need to do a clean install on a SD card bigger than 8GB. 
+
+The System base is now from CoreELEC 20 and all emulators, cores and ports have been 
+updated to their most recent version at the time of this release.
+
+Please note that due to lack of time, some devices have not been properly tested, if you find a bug or an issue, please don't hesitate to let us know via [Discord](https://discord.gg/cbgtJTul), the [EmuELEC forum](https://emuelec.org) or opening an issue in github.
+
+
+# Thanks to the always supportive Patreons
+
+John Johnson
+victor manuel sanchez lopez
+Daniel Iruegas
+Victor Davis
+John Gamester
+Matthew S
+jmthill
+Russ Crandall
+tailbøx
+Peter Shaw
+Noah Heninger
+BSM_Mylock
+Tony Escobar
+Dennis W.
+Nina Seramour
+Michael Brown
+Tomas Radej
+Brian 
+Chad Barker
+AlienatedDiego
+Bryan Pizzuti
+
+And anyone else who has supported via other means, in the past, present and future, I really appreciate it!
+
+## What's Changed
+* fakeroot: bump to 1.28 (from no-longer-existing 1.27) by @JohnnyonFlame in https://github.com/EmuELEC/EmuELEC/pull/884
+* Update libretro core cap32 by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/886
+* Update hypseus-singe to fix some games by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/887
+* Bump RigelEngine to latest version by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/889
+* Fix audio stuttering in lzdoom again by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/888
+* Multiple controller mappings - iNNEXT USB and PlayGame USB by @nwildner in https://github.com/EmuELEC/EmuELEC/pull/840
+* dev joy advmame fix - 1 controller controlling 2 players and more bug. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/891
+* Fix for mpv not compiling on OGA/OGS/GF by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/919
+* fix fs-resize would break on 4GB drives, and EEROMS was not properly formatted on USB drives by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/921
+* RK356x: update uboot for firefly devices by @shantigilbert in https://github.com/EmuELEC/EmuELEC/pull/926
+* EE-ES Multidisc creation support. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/923
+* implements installtointernal via a new package ampart by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/928
+* introduce new emmc installation method aminstall by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/930
+* Remove duplicate PKG_VERSION in bstone package.mk by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/938
+* mount_romfs.sh: rewrite to properly support 2-partition layout by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/942
+* ampart: bump version f0c3cc44; aminstall: misc fixes and better migration of EEROMS by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/943
+* mount_romfs.sh: ensure /storage/.update is always mounted as long as EEROMS is valid; mount EEROMS when user-defined storage-roms.mount failed by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/944
+* Misc packages fixes by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/946
+* Revert RTL8812AU to previous version by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/947
+* poppler: bump version 32fa288 (22.06.0) and deps fix by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/948
+* jslisten: add systemd as dependency as it includes libudev.h by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/949
+* emuelec-32bit-libs: fix typo PKG_BUID -> PKG_BUILD by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/951
+* exfat-linux: seperate from linux to save build time by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/950
+* Misc depedency fixes (qt-everywhere, ampart) by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/953
+* Introduce actual multilib support by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/956
+* Flycast Textures folders by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/960
+* Fix typo description heart of darkness by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/959
+* DuckStation Textures - Modify emuelec-dirs add /roms/psx/textures by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/958
+* lib32: optimize, behaviour change and mali fix by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/957
+* Updating duckstation to the latest working version by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/967
+* Adding symlink logic in duckstation.sh to redirect to texture replacement by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/966
+* Add PKG_NEED_UNPACK to lib32 packages that need it. by @shantigilbert in https://github.com/EmuELEC/EmuELEC/pull/971
+* fheroes2: fix controller not working; SDL2 cleanup by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/974
+* Fix assets dir in devilutionX by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/976
+* fs-resize: raise storage size to 6g, allow omitting eeroms manually by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/979
+* eemount: introduce package & change mount logic by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/980
+* eemount: bump 4adf3138; init: fix disabled systemds units by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/983
+* eemount: bump 2321603 by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/984
+* force overwrite file on unziping files by @lihexali in https://github.com/EmuELEC/EmuELEC/pull/989
+* Update Emulators 4.6 by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1013
+* lib32-libdrm: keep up with generic-libdrm by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1016
+* ffmpeg: fix dep x264; lib32-ffmpeg: switch to openssl by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1019
+* options: raise default ccache limit to 20G by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1022
+* package emulator advmame - patch for vsync to work with the fps. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/992
+* Bump bstone to latest by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1023
+* Update emulators 46 part 2 by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1018
+* emulator - duckstation standalone - game controller autoconfiguration by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/994
+* [Feature] Cloud Loading and Saving for retroarch auto saves and state saves. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/997
+* EE - joy common - controller - order fix and revision by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/936
+* Check resolution fixes, Setres overhaul, cvbs fix other resolutions people could not see. Borders option added. AdvMame Exit Display Fix. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1021
+* Update es_systems.cfg by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1054
+* Update 99-emuelec.conf by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1055
+* Set Resolution - Fixes by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1058
+
+## New Contributors
+* @JohnnyonFlame made their first contribution in https://github.com/EmuELEC/EmuELEC/pull/884
+* @7Ji made their first contribution in https://github.com/EmuELEC/EmuELEC/pull/921
+* @lihexali made their first contribution in https://github.com/EmuELEC/EmuELEC/pull/989
+
 # 4.5
 
 ## EmuELEC v4.5 - Core/Emulator Update

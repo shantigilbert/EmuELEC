@@ -1,3 +1,8 @@
+106
+- update to 1.7.0
+- libuv: update to 1.44.2
+- libwebsockets: update to 4.3.2
+
 105
 - fix ttyd to include missing evlib_uv library
 

@@ -190,22 +190,49 @@ function resolutions() {
 
 	RESOLUTIONS=()
 
-  # N2 supported resolutions source : https://wiki.odroid.com/odroid-n2/application_note/software/set_display_mode
-	N2_SUPPORTED_RESOLUTIONS="480x320p60hz 640x480p60hz 720x480p60hz 720x576p50hz 800x480p60hz 1024x600p60hz 1024x768p60hz 1280x1024p60hz 1280x720p50hz 1280x720p60hz 1280x800p60hz 1360x768p60hz 1440x900p60hz 1600x1200p60hz 1600x900p60hz 1680x1050p60hz 1920x1080p24hz 1920x1080p30hz 1920x1080p50hz 1920x1080p60hz 1920x1200p60hz 2560x1080p60hz 2560x1440p60hz 2560x1600p60hz 3440x1440p60hz 3840x2160p24hz 3840x2160p25hz 3840x2160p30hz 3840x2160p50hz 3840x2160p60hz"
+  if [ -f "/storage/LEGACY_RESOLUTIONS" ]; then
+    # N2 supported resolutions source : https://wiki.odroid.com/odroid-n2/application_note/software/set_display_mode
+    N2_SUPPORTED_RESOLUTIONS="480x320p60hz 640x480p60hz 720x480p60hz 720x576p50hz 800x480p60hz 1024x600p60hz 1024x768p60hz 1280x1024p60hz 1280x720p50hz 1280x720p60hz 1280x800p60hz 1360x768p60hz 1440x900p60hz 1600x1200p60hz 1600x900p60hz 1680x1050p60hz 1920x1080p24hz 1920x1080p30hz 1920x1080p50hz 1920x1080p60hz 1920x1200p60hz 2560x1080p60hz 2560x1440p60hz 2560x1600p60hz 3440x1440p60hz 3840x2160p24hz 3840x2160p25hz 3840x2160p30hz 3840x2160p50hz 3840x2160p60hz"
 
-	# Screen supported resolutions
-	SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/amhdmitx/amhdmitx0/rawedid | /usr/bin/edid-decode |/usr/bin/grep "@" | sed -E "s| {0,9}VIC {0,9}[0-9]{1,2}||" | /usr/bin/awk '{print $1}' | /usr/bin/sed  's/@/p/g'|/usr/bin/tr '[:upper:]' '[:lower:]'`
+    # Screen supported resolutions
+    SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/amhdmitx/amhdmitx0/rawedid | /usr/bin/edid-decode |/usr/bin/grep "@" | sed -E "s| {0,9}VIC {0,9}[0-9]{1,2}||" | /usr/bin/awk '{print $1}' | /usr/bin/sed  's/@/p/g'|/usr/bin/tr '[:upper:]' '[:lower:]'`
 
-	for N2SP in $N2_SUPPORTED_RESOLUTIONS
-	do
-	for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
-	do
-		if [ "$N2SP" = "$SSR" ]
-		then
-		RESOLUTIONS+=($N2SP)
-		fi
-	done
-	done
+    for N2SP in $N2_SUPPORTED_RESOLUTIONS
+    do
+      for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
+      do
+        if [ "$N2SP" = "$SSR" ]
+        then
+          RESOLUTIONS+=($N2SP)
+        fi
+      done
+    done
+  fi
+
+  if [[ "$EE_PROJECT" == "Rockchip" ]]; then
+    SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/display/display0.HDMI/modes | sort -u`
+    for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
+    do
+      RESOLUTIONS+=($SSR)
+    done
+  else
+    # Screen supported resolutions
+    SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat /sys/class/display/cap | sed '/smpte/d' | sed '/pal/d' | sed '/ntsc/d' | sed 's/\*//' | grep -E '[0-9x]+[pi][56]0hz|cvbs'`
+    for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
+    do
+      RESOLUTIONS+=($SSR)
+    done
+  fi
+
+  if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
+    RESOLUTIONS+="480x320p60hz"
+  fi
+
+  if [ "$EE_DEVICE" == "GameForce" ]; then
+    RESOLUTIONS+="640x480p60hz"
+  fi
+
+  RESOLUTIONS=($(printf "%s\n" "${RESOLUTIONS[@]}" | sort -u))
 
 	IFS=","
 	echo "${RESOLUTIONS[*]}"

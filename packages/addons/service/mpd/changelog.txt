@@ -1,3 +1,7 @@
+115
+- Update to version 0.23.10
+- faad2: update to 2.10.1
+
 114
 - Update to version 0.23.8
 - mpd-mpc: update to 0.34

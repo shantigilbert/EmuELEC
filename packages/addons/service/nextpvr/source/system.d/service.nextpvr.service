@@ -1,0 +1,13 @@
+[Unit]
+Description=NextPVR Server
+Documentation=https://nextpvr.com
+Wants=multi-user.target
+After=multi-user.target
+
+[Service]
+SyslogIdentifier=%N
+ExecStart=/bin/sh /storage/.kodi/addons/%N/bin/nextpvr.start
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

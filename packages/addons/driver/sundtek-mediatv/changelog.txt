@@ -1,6 +1,9 @@
+8.0.107
+- rebuild to include new driver version
+
 8.0.106
 - updates for Python 3
-  
+
 8.0.105
 - use new output from mediaclient
   use xmlstartlet to parse settings.xml file

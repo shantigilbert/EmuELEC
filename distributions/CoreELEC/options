@@ -32,6 +32,12 @@
 # GOLD (Google Linker) support
   GOLD_SUPPORT="yes"
 
+# MOLD (Modern Linker) support
+  MOLD_SUPPORT="no"
+
+# default linker (bfd / gold / mold)
+  DEFAULT_LINKER="gold"
+
 # HARDENING (security relevant linker and compiler flags) support
   HARDENING_SUPPORT="no"
 
@@ -87,6 +93,12 @@
 # build and install PulseAudio support (yes / no)
   PULSEAUDIO_SUPPORT="yes"
 
+# build and install pipewire support (yes / no)
+  PIPEWIRE_SUPPORT="no"
+
+# build and install eSpeak-NG support (yes / no)
+  ESPEAK_SUPPORT="no"
+
 # build and install with BluRay support (yes / no)
   KODI_BLURAY_SUPPORT="yes"
 
@@ -138,6 +150,9 @@
 # build kodi with pulseaudio support (yes/no)
   KODI_PULSEAUDIO_SUPPORT="yes"
 
+# build kodi with pipewire support (yes/no)
+  KODI_PIPEWIRE_SUPPORT="no"
+
 ### KODI ADDONS ###
 
 # Distribution Specific source location
@@ -175,7 +190,7 @@
   WIRELESS_DAEMON="wpa_supplicant"
 
 # build and install iSCSI support - iscsistart (yes / no)
-  ISCSI_SUPPORT="yes"
+  ISCSI_SUPPORT="no"
 
 # build with NFS support (mounting nfs shares via the OS) (yes / no)
   NFS_SUPPORT="yes"
@@ -222,19 +237,8 @@
 # build with installer (yes / no)
   INSTALLER_SUPPORT="yes"
 
-# Windowmanager to use (fluxbox / none)
-  WINDOWMANAGER="fluxbox"
-
-# Xorg Graphic drivers to use (all / i915,i965,r200,r300,r600,nvidia)
-# Space separated list is supported,
-# e.g. GRAPHIC_DRIVERS="i915 i965 r300 r600 radeonsi nvidia"
-  GRAPHIC_DRIVERS="r300 r600 radeonsi iris i915 i965 nvidia nvidia-legacy vmware virtio"
-
 # build and install remote support (yes / no)
   REMOTE_SUPPORT="yes"
-
-# IR remote protocols supported in default config
-  IR_REMOTE_PROTOCOLS="RC6 NEC"
 
 # IR remote keymaps supported in default config
   IR_REMOTE_KEYMAPS="rc6_mce xbox_360 xbox_one"

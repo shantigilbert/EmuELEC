@@ -32,6 +32,12 @@
 # GOLD (Google Linker) support
   GOLD_SUPPORT="yes"
 
+# MOLD (Modern Linker) support
+  MOLD_SUPPORT="no"
+
+# default linker (bfd / gold / mold)
+  DEFAULT_LINKER="gold"
+
 # HARDENING (security relevant linker and compiler flags) support
   HARDENING_SUPPORT="no"
 

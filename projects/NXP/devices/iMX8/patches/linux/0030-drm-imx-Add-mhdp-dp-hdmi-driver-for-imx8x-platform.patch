@@ -2114,7 +2114,7 @@ new file mode 100644
 index 000000000000..3acbdf575ee2
 --- /dev/null
 +++ b/drivers/gpu/drm/imx/mhdp/cdns-mhdp-imxdrv.c
-@@ -0,0 +1,257 @@
+@@ -0,0 +1,259 @@
 +/*
 + * copyright (c) 2019 nxp semiconductor, inc.
 + *
@@ -2129,6 +2129,8 @@ index 000000000000..3acbdf575ee2
 +#include <drm/drm_vblank.h>
 +#include <drm/drm_crtc_helper.h>
 +#include <drm/drm_encoder_slave.h>
++
++#include <uapi/linux/media-bus-format.h>
 +
 +#include "cdns-mhdp-imx.h"
 +#include "cdns-mhdp-phy.h"

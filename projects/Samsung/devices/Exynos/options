@@ -13,10 +13,10 @@
     esac
 
   # OpenGL-ES implementation to use
-    OPENGLES="libmali"
+    OPENGLES="mesa"
 
   # Graphic drivers to use
-    GRAPHIC_DRIVERS="mali"
+    GRAPHIC_DRIVERS="panfrost"
 
   # KODI Player implementation to use
     KODIPLAYER_DRIVER="$OPENGLES"

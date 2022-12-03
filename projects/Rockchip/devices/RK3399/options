@@ -18,6 +18,11 @@
         ;;
     esac
 
+  # Firmware
+    UBOOT_FIRMWARE+=" atf"
+    ATF_PLATFORM="rk3399"
+    ATF_BL31_BINARY="bl31/bl31.elf"
+
   # Kernel target
     KERNEL_TARGET="Image"
 

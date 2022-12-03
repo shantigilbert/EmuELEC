@@ -1,10 +1,10 @@
 --- a/CMakeLists.txt	2021-09-12 13:53:14.192948082 +1000
 +++ b/CMakeLists.txt	2021-09-12 13:54:27.389413149 +1000
 @@ -535,6 +535,7 @@
-              LIBSNDFILE_STATIC_LDFLAGS MATCHES "vorbis" OR
-              LIBSNDFILE_STATIC_LDFLAGS_OTHER MATCHES "vorbis" )
-           set ( LIBSNDFILE_HASVORBIS 1 )
-+          set ( LIBSNDFILE_LIBRARIES ${LIBSNDFILE_STATIC_LIBRARIES} )
-         else ()
-           message ( NOTICE "Seems like libsndfile was compiled without OGG/Vorbis support." )
-         endif ()
+            LIBSNDFILE_STATIC_LDFLAGS MATCHES "vorbis" OR
+            LIBSNDFILE_STATIC_LDFLAGS_OTHER MATCHES "vorbis" )
+         set ( LIBSNDFILE_HASVORBIS 1 )
++        set ( LIBSNDFILE_LIBRARIES ${LIBSNDFILE_STATIC_LIBRARIES} )
+     else ()
+         message ( NOTICE "Seems like libsndfile was compiled without OGG/Vorbis support." )
+     endif ()

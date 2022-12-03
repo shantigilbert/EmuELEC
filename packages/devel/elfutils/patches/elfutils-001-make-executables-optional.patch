@@ -29,7 +29,7 @@ diff --git a/configure.ac b/configure.ac
 index 5a2dc37..a1e856a 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -87,6 +87,11 @@ AS_IF([test "$use_locks" = yes],
+@@ -88,6 +88,11 @@ AS_IF([test "$use_locks" = yes],
  
  AH_TEMPLATE([USE_LOCKS], [Defined if libraries should be thread-safe.])
  
@@ -38,9 +38,9 @@ index 5a2dc37..a1e856a 100644
 +               [build_programs=$enableval], [build_programs=no])
 +AM_CONDITIONAL(BUILD_PROGRAMS, test "$build_programs" = yes)
 +
- AC_PROG_CC_C99
+ m4_version_prereq([2.70], [AC_PROG_CC], [AC_PROG_CC_C99])
+ AC_PROG_CXX
  AC_PROG_RANLIB
- AC_PROG_YACC
 -- 
 2.7.4
 

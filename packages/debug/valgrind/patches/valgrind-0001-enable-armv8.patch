@@ -7,6 +7,6 @@ diff -Naur a/configure b/configure
  
 -     armv7*)
 +     armv7*|armv8*)
- 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ok (${host_cpu})" >&5
- $as_echo "ok (${host_cpu})" >&6; }
+ 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: ok (${host_cpu})" >&5
+ printf "%s\n" "ok (${host_cpu})" >&6; }
  	ARCH_MAX="arm"

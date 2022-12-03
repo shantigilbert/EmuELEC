@@ -1,0 +1,40 @@
+From ff65aa88a1ff3f02cc10e5a6e2af865b0c97f4fc Mon Sep 17 00:00:00 2001
+From: Matthias Reichl <hias@horus.com>
+Date: Sat, 8 Feb 2020 21:42:06 +0100
+Subject: [PATCH] disable bpf decoder build and drop bpf dependency on clang
+
+Signed-off-by: Matthias Reichl <hias@horus.com>
+---
+ configure.ac               | 2 +-
+ utils/keytable/Makefile.am | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 3bb1d2a5..7b633473 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -565,7 +565,7 @@
+ AM_CONDITIONAL([WITH_V4L2_COMPLIANCE_LIBV4L], [test x$ac_cv_func_fork = xyes -a x${enable_v4l2_compliance_libv4l} != xno])
+ AM_CONDITIONAL([WITH_V4L2_COMPLIANCE_32], [test x$ac_cv_func_fork = xyes -a x${enable_v4l2_compliance_32} = xyes])
+ PKG_CHECK_MODULES([LIBBPF], [libbpf >= 0.7], [bpf_pc=yes], [bpf_pc=no])
+-AM_CONDITIONAL([WITH_BPF],          [test x$enable_bpf != xno -a x$libelf_pkgconfig = xyes -a x$CLANG = xclang -a x$bpf_pc = xyes])
++AM_CONDITIONAL([WITH_BPF],          [test x$enable_bpf != xno -a x$libelf_pkgconfig = xyes -a x$bpf_pc = xyes])
+ 
+ # append -static to libtool compile and link command to enforce static libs
+ AS_IF([test x$enable_libdvbv5 = xno], [AC_SUBST([ENFORCE_LIBDVBV5_STATIC], ["-static"])])
+diff --git a/utils/keytable/Makefile.am b/utils/keytable/Makefile.am
+index 4724897e..1c209fe2 100644
+--- a/utils/keytable/Makefile.am
++++ b/utils/keytable/Makefile.am
+@@ -23,7 +23,7 @@
+ if WITH_BPF
+ ir_keytable_LDFLAGS += $(LIBELF_LIBS) $(LIBBPF_LIBS)
+ ir_keytable_CFLAGS = $(LIBBPF_CFLAGS)
+-SUBDIRS = bpf_protocols
++# SUBDIRS = bpf_protocols
+ endif
+ 
+ EXTRA_DIST = 70-infrared.rules 50-rc_keymap.conf rc_keymaps rc_keymaps_userspace gen_input_events.pl gen_keytables.pl ir-keytable.1 rc_maps.cfg rc_keymap.5
+-- 
+2.20.1
+

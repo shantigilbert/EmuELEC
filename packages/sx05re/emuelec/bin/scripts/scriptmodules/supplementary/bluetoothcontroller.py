@@ -91,11 +91,11 @@ class MyApp(object):
         ]
         menu = []
         for device in self.bt.get_available_devices():
-            mac_address = device['mac_address']
+            mac_address = device['mac_address'].decode('utf-8')
             for property in properties:
                 device[property] = self.bt.get_device_property(mac_address,property)
             if ((device['Icon'] == 'input-gaming') and (device['Trusted'] == 0)):
-                menu.append(('{}\t{}\tRSSI: {}'.format(device['mac_address'],device['name'],device['RSSI']),self.trust_controller))
+                menu.append(('{}\t{}\tRSSI: {}'.format(device['mac_address'].decode('utf-8'),device['name'].decode('utf-8'),device['RSSI']),self.trust_controller))
         self.make_menu(menu)
         self.menu.display()
 
@@ -116,11 +116,11 @@ class MyApp(object):
         ]
         menu = []
         for device in self.bt.get_devices_to_pair():
-            mac_address = device['mac_address']
+            mac_address = device['mac_address'].decode('utf-8')
             for property in properties:
                 device[property] = self.bt.get_device_property(mac_address,property)
             if ((device['Icon'] == 'input-gaming') and (device['Trusted'] == 1) and device['Paired'] == 0):
-                menu.append(('{}\t{}\tRSSI: {}'.format(device['mac_address'],device['name'],device['RSSI']),self.pair_controller))
+                menu.append(('{}\t{}\tRSSI: {}'.format(device['mac_address'].decode('utf-8'),device['name'].decode('utf-8'),device['RSSI']),self.pair_controller))
         self.make_menu(menu)
         self.menu.display()
 
@@ -142,11 +142,11 @@ class MyApp(object):
         ]
         menu = []
         for device in self.bt.get_available_devices():
-            mac_address = device['mac_address']
+            mac_address = device['mac_address'].decode('utf-8')
             for property in properties:
                 device[property] = self.bt.get_device_property(mac_address,property)
             if ((device['Icon'] == 'input-gaming') and (device['Paired'] == 1) and (device['Trusted'] == 1) and (device['Connected'] == 0)):
-                menu.append(('{}\t{}\tRSSI: {}'.format(device['mac_address'],device['name'],device['RSSI']),self.connect_device))
+                menu.append(('{}\t{}\tRSSI: {}'.format(device['mac_address'].decode('utf-8'),device['name'].decode('utf-8'),device['RSSI']),self.connect_device))
         self.make_menu(menu)
         self.menu.display()
 
@@ -167,11 +167,11 @@ class MyApp(object):
         ]
         menu = []
         for device in self.bt.get_connected_devices():
-            mac_address = device['mac_address']
+            mac_address = device['mac_address'].decode('utf-8')
             for property in properties:
                 device[property] = self.bt.get_device_property(mac_address,property)
             if ((device['Icon'] == 'input-gaming') and (device['Connected'] == 1)):
-                menu.append(('{}\t{}\tRSSI: {}'.format(device['mac_address'],device['name'],device['RSSI']),self.disconnect_device))
+                menu.append(('{}\t{}\tRSSI: {}'.format(device['mac_address'].decode('utf-8'),device['name'].decode('utf-8'),device['RSSI']),self.disconnect_device))
         self.make_menu(menu)
         self.menu.display()
 
@@ -194,11 +194,11 @@ class MyApp(object):
         ]
         menu = []
         for device in self.bt.get_available_devices():
-            mac_address = device['mac_address']
+            mac_address = device['mac_address'].decode('utf-8')
             for property in properties:
                 device[property] = self.bt.get_device_property(mac_address,property)
             if ((device['Icon'] == 'input-gaming') and ((device['Paired'] == 1) or (device['Trusted'] == 1) or (device['Blocked'] == 1))):
-                menu.append(('{}\t{}\tRSSI: {}\tTrusted: {}\tPaired: {}\tConnected: {}\tBlocked: {}'.format(device['mac_address'],device['name'],device['RSSI'],device['Trusted'],device['Paired'],device['Connected'],device['Blocked']),self.remove_device))
+                menu.append(('{}\t{}\tRSSI: {}\tTrusted: {}\tPaired: {}\tConnected: {}\tBlocked: {}'.format(device['mac_address'].decode('utf-8'),device['name'].decode('utf-8'),device['RSSI'],device['Trusted'],device['Paired'],device['Connected'],device['Blocked']),self.remove_device))
         self.make_menu(menu)
         self.menu.display()
 
@@ -227,8 +227,8 @@ if __name__ == "__main__":
         devices = bt.get_devices_to_pair()
         print(devices)
         for device in devices:
-            mac = device['mac_address']
-            name = device['name']
+            mac = device['mac_address'].decode('utf-8')
+            name = device['name'].decode('utf-8')
             print('Found MAC: {}\tName: {}'.format(mac,name))
             if bt.get_device_property(mac,'Icon') == 'input-gaming':
                 print('Found controller {} Name: {}, trusting...'.format(mac,name))

@@ -1,7 +1,7 @@
-From 1f745f70a5fa74abfe3bd8524bdaab566eb50db4 Mon Sep 17 00:00:00 2001
+From ba150fce5364043486a419a690d6f31e16b2a71c Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Wed, 14 Aug 2019 19:58:14 +0000
-Subject: [PATCH 02/75] LOCAL: set meson-g12 cma pool to 896MB
+Subject: [PATCH 02/74] LOCAL: set meson-g12 cma pool to 896MB
 
 This change sets the CMA pool to a larger 896MB! value for vdec use
 

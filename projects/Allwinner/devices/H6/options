@@ -35,3 +35,6 @@
 
   # set the addon project
     ADDON_PROJECT="ARMv8"
+
+  # additional kernel parameters
+    EXTRA_CMDLINE="$EXTRA_CMDLINE"

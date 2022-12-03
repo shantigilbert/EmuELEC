@@ -5,8 +5,6 @@
 
 # OpenBOR only works with Pak files, if you have an extracted game you will need to create a pak first.
 
-/usr/bin/setres.sh 16
-
 pakname=$(basename "$1")
 pakname="${pakname%.*}"
 
@@ -36,5 +34,4 @@ gptokeyb openbor &
 # Clear PAKS folder to avoid getting the launcher on nex run
 rm -rf ${PAKS}/*
 
-/usr/bin/setres.sh
 killall gptokeyb &

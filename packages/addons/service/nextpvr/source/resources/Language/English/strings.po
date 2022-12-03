@@ -1,0 +1,142 @@
+# Kodi Media Center language file
+# Addon Name: nextpvr
+# Addon id: service.nextpvr
+# Addon Provider: Team LibreELEC
+msgid ""
+msgstr ""
+
+msgctxt "#30001"
+msgid "Download"
+msgstr ""
+
+msgctxt "#30002"
+msgid "Download current Linux NPVR.zip"
+msgstr ""
+
+msgctxt "#30003"
+msgid "Check the NextPVR forum before updating"
+msgstr ""
+
+msgctxt "#30004"
+msgid "Manage Server"
+msgstr ""
+
+msgctxt "#30005"
+msgid "Update guide"
+msgstr ""
+
+msgctxt "#30006"
+msgid "Start an unscheduled EPG update"
+msgstr ""
+
+msgctxt "#30007"
+msgid "Update IPTV m3u source"
+msgstr ""
+
+msgctxt "#30008"
+msgid "Rescan m3u file(s) and update URLs"
+msgstr ""
+
+msgctxt "#30009"
+msgid "Toggle custom HLS transcoding with default"
+msgstr ""
+
+msgctxt "#30010"
+msgid "Change HLS transcoding mode, default will not work on all platforms"
+msgstr ""
+
+msgctxt "#30011"
+msgid "Download NPVR.zip"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Extract NPVR.zip"
+msgstr ""
+
+msgctxt "#30013"
+msgid "Rescan tuning devices"
+msgstr ""
+
+msgctxt "#30014"
+msgid "Rescan for tuner changes after start-up"
+msgstr ""
+
+msgctxt "#30015"
+msgid "Update EPG started"
+msgstr ""
+
+msgctxt "#30016"
+msgid "Update m3u started"
+msgstr ""
+
+msgctxt "#30017"
+msgid "Device refresh started"
+msgstr ""
+
+msgctxt "#30018"
+msgid "Transcode set to default"
+msgstr ""
+
+msgctxt "#30019"
+msgid "Transcode set to custom"
+msgstr ""
+
+msgctxt "#30020"
+msgid "Restart server now"
+msgstr ""
+
+msgctxt "#30037"
+msgid "Install the frequency scanning table for digital devices"
+msgstr ""
+
+msgctxt "#30038"
+msgid "Download and install Scan-Tables"
+msgstr ""
+
+msgctxt "#30039"
+msgid "Download completed and installed"
+msgstr ""
+
+msgctxt "#30040"
+msgid "Could not download zip file"
+msgstr ""
+
+msgctxt "#30041"
+msgid "Could not extract zip file"
+msgstr ""
+
+msgctxt "#30042"
+msgid "Download Scan-Tables"
+msgstr ""
+
+msgctxt "#30043"
+msgid "Extract Scan-Tables"
+msgstr ""
+
+msgctxt "#30044"
+msgid "Reset web server credentials"
+msgstr ""
+
+msgctxt "#30045"
+msgid "Reset to defaults Username: admin Password: password"
+msgstr ""
+
+msgctxt "#30046"
+msgid "Set Username: admin Password: password"
+msgstr ""
+
+msgctxt "#30047"
+msgid "SAT>IP RTSP port"
+msgstr ""
+
+msgctxt "#30048"
+msgid "Default is 554 - TVHeadend uses 9983"
+msgstr ""
+
+msgctxt "#30049"
+msgid "Startup uptime wait"
+msgstr ""
+
+msgctxt "#30050"
+msgid "Delay service launch on boot to specified uptime (seconds)"
+msgstr ""

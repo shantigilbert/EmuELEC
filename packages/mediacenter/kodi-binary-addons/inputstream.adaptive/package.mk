@@ -2,14 +2,14 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="inputstream.adaptive"
-PKG_VERSION="20.2.3-Nexus"
-PKG_SHA256="31a9dc1f403e362535e5b2751bf08f09239daa27860912ce79f2bd6b1c97dd1a"
-PKG_REV="2"
+PKG_VERSION="20.3.1-Nexus"
+PKG_SHA256="e05639a1b32cec9b9bdef364a05ee91bfa17fe5cf1c00e31a98c8b31ddfcb658"
+PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/inputstream.adaptive"
 PKG_URL="https://github.com/xbmc/inputstream.adaptive/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain kodi-platform bento4"
+PKG_DEPENDS_TARGET="toolchain kodi-platform bento4 expat"
 PKG_SECTION=""
 PKG_SHORTDESC="inputstream.adaptive"
 PKG_LONGDESC="inputstream.adaptive"

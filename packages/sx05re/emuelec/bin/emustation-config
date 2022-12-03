@@ -8,10 +8,8 @@
 
 # odroidgoa
 
-
 function check_pwd() {
 
-EE_CONF="${EE_DIR}/configs/emuelec.conf"
 ESSETTINGS="/storage/.config/emulationstation/es_settings.cfg"
 
 PWDFILE="${1}"
@@ -284,5 +282,8 @@ if [[ "$BTENABLED" == "1" ]]; then
 fi
 
 emuelec-utils setauddev
+
+# Checks and sets the resolution for starting ES.
+check_res.sh
 
 exit 0

@@ -7,10 +7,6 @@ PKG_ARCH="any"
 PKG_LICENSE="OSS"
 PKG_SITE="https://github.com/criptych/physfs"
 PKG_URL="$PKG_SITE.git"
-PKG_DEPENDS_TARGET="toolchain glm"
+PKG_DEPENDS_TARGET="toolchain glm ncurses"
 PKG_SHORTDESC="PhysicsFS; a portable, flexible file i/o abstraction."
 GET_HANDLER_SUPPORT="git"
-
-pre_configure_target() {
-	PKG_CMAKE_OPTS_TARGET="-DOTHER_LDFLAGS=-ltinfo"
-}

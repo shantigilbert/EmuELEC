@@ -47,7 +47,7 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 +obj-$(CONFIG_VIDEO_SUN50I_DEINTERLACE) += sun50i-di.o
 --- /dev/null
 +++ b/drivers/media/platform/sunxi/sun50i-di/sun50i-di.c
-@@ -0,0 +1,1134 @@
+@@ -0,0 +1,1137 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Allwinner sun50i deinterlacer driver
@@ -137,6 +137,9 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 +	deinterlace_write(dev, DEINTERLACE_OUT_FLAG_ADDR, ctx->flag2_buf_dma);
 +	deinterlace_write(dev, DEINTERLACE_FLAG_ADDRH, 0);
 +	deinterlace_write(dev, DEINTERLACE_FLAG_PITCH, 0x200);
++	if (device_iommu_mapped(dev->dev))
++		deinterlace_set_bits(dev, DEINTERLACE_CTRL,
++				     DEINTERLACE_CTRL_IOMMU_EN);
 +
 +	width = ctx->src_fmt.width;
 +	height = ctx->src_fmt.height;

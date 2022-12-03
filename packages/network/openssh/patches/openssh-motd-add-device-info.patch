@@ -1,0 +1,101 @@
+Using username "root".
+root@192.168.1.8's password:
+Send automatic password
+##############################################
+#                  CoreELEC                  #
+#            https://coreelec.org            #
+##############################################
+
+CoreELEC (community): 20.0-Nexus_devel_20220926082903 (Amlogic-ne.arm)
+       Machine model: Khadas VIM4
+      CoreELEC dt-id: t7_a311d2_khadas_vim4
+
+CoreELEC:~ #
+
+
+--- a/session.c	2022-09-24 17:07:26.675597500 +0200
++++ b/session.c	2022-09-26 11:06:59.549512600 +0200
+@@ -792,6 +792,9 @@ do_motd(void)
+ {
+ 	FILE *f;
+ 	char buf[256];
++	char *p;
++	ssize_t len_pretty = 0;
++	ssize_t len;
+ 
+ 	if (options.print_motd) {
+ #ifdef HAVE_LOGIN_CAP
+@@ -805,6 +808,73 @@ do_motd(void)
+ 				fputs(buf, stdout);
+ 			fclose(f);
+ 		}
++
++		/* get os pretty name length */
++		f = fopen("/etc/os-release", "r");
++		if (f) {
++			while (fgets(buf, sizeof(buf), f)) {
++				if (strncmp(buf, "PRETTY_NAME=", 12) == 0) {
++					p = strchr(&buf[12], ':');
++					if (p)
++						len_pretty = p - &buf[12];
++
++					break;
++				}
++			}
++
++			fclose(f);
++		}
++
++		/* display machine model */
++		f = fopen("/proc/device-tree/model", "r");
++		if (f) {
++			len = len_pretty - 14;
++			if (len < 0)
++				len = 0;
++
++			memset(buf, ' ', sizeof(buf));
++			snprintf(&buf[len], sizeof(buf) - len, "Machine model: ");
++			fputs(buf, stdout);
++			fgets(buf, sizeof(buf), f);
++			fputs(buf, stdout);
++			fputs("\n", stdout);
++			fclose(f);
++		}
++
++		/* display coreelec dt-id */
++		f = fopen("/proc/device-tree/coreelec-dt-id", "r");
++		if (f) {
++			len = len_pretty - 15;
++			if (len < 0)
++				len = 0;
++
++			memset(buf, ' ', sizeof(buf));
++			snprintf(&buf[len], sizeof(buf) - len, "CoreELEC dt-id: ");
++			fputs(buf, stdout);
++			fgets(buf, sizeof(buf), f);
++			fputs(buf, stdout);
++			fputs("\n", stdout);
++			fclose(f);
++		}
++
++		/* display amlogic dt-id */
++		f = fopen("/proc/device-tree/amlogic-dt-id", "r");
++		if (f) {
++			len = len_pretty - 14;
++			if (len < 0)
++				len = 0;
++
++			memset(buf, ' ', sizeof(buf));
++			snprintf(&buf[len], sizeof(buf) - len, "Amlogic dt-id: ");
++			fputs(buf, stdout);
++			fgets(buf, sizeof(buf), f);
++			fputs(buf, stdout);
++			fputs("\n", stdout);
++			fclose(f);
++		}
++
++		/* put empty line before prompt */
++		fputs("\n", stdout);
+ 	}
+ }
+ 

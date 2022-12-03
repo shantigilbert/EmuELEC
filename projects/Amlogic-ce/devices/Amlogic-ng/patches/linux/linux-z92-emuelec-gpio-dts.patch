@@ -27,7 +27,7 @@ index d006c453ac7ff..2a852a303c355 100644
 +dtb-$(CONFIG_ARM64) += g12b_s922x_odroid_n2_joystick.dtb
 +dtb-$(CONFIG_ARM64) += g12b_s922x_odroid_n2plus_joystick.dtb
 +dtb-$(CONFIG_ARM64) += sm1_s905x3_odroid_c4_joystick.dtb
-+
++dtb-$(CONFIG_ARM64) += g12b_s922x_odroid_n2l_joystick.dtb
  always		:= $(dtb-y)
  subdir-y	:= $(dts-dirs)
  clean-files	:= *.dtb
@@ -38,6 +38,50 @@ index 0000000000000..353ad93776acf
 +++ b/arch/arm64/boot/dts/amlogic/g12b_s922x_odroid_n2_joystick.dts
 @@ -0,0 +1,41 @@
 +#include "g12b_s922x_odroid_n2plus.dts"
++
++/{
++	parport0: parport@0 {
++		compatible = "parport,odroid";
++		status = "okay";
++
++		data-gpios = <&gpio GPIOX_2 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_1 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_8 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_9 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_13 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_16 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_12 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_0 GPIO_ACTIVE_LOW>;
++
++		status-gpios = <&gpio GPIOA_13 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_3 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_4 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_7 GPIO_ACTIVE_LOW>;
++	};
++
++	parport1: parport@1 {
++		compatible = "parport,odroid";
++		status = "okay";
++
++		data-gpios = <&gpio GPIOX_17 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOA_15 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_6 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOA_14 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOA_4 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOA_12 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_10 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_19 GPIO_ACTIVE_LOW>;
++
++		status-gpios = <&gpio GPIOX_11 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_14 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_15 GPIO_ACTIVE_LOW>,
++			<&gpio GPIOX_5 GPIO_ACTIVE_LOW>;
++	};
++};
+--- /dev/null
++++ b/arch/arm64/boot/dts/amlogic/g12b_s922x_odroid_n2l_joystick.dts
+@@ -0,0 +1,41 @@
++#include "g12b_s922x_odroid_n2l.dts"
 +
 +/{
 +	parport0: parport@0 {

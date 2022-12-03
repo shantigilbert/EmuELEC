@@ -190,9 +190,9 @@ fi
     ./scripts/get "$PKG_NAME"
     
     if [ "$p" != "linux" ]; then
-    CALCSHA=$(cat ./sources/$PKG_NAME/$PKG_NAME-$UPS_VERSION.*.sha256)
+    CALCSHA=$(cat ${SOURCES_DIR}/$PKG_NAME/$PKG_NAME-$UPS_VERSION.*.sha256)
     else
-    CALCSHA=$(cat ./sources/$PKG_NAME/linux-$LINUX-$UPS_VERSION.tar.gz.sha256)
+    CALCSHA=$(cat ${SOURCES_DIR}/$PKG_NAME/linux-$LINUX-$UPS_VERSION.tar.gz.sha256)
     fi
     
     echo "NEW SHA256 $CALCSHA"

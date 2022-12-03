@@ -10,7 +10,7 @@ PKG_ARCH="aarch64"
 PKG_LICENSE="LGPLv2.1+"
 PKG_SITE="https://ffmpeg.org"
 PKG_URL=""
-PKG_DEPENDS_TARGET="lib32-toolchain lib32-zlib lib32-bzip2 lib32-gnutls lib32-SDL2"
+PKG_DEPENDS_TARGET="lib32-toolchain lib32-zlib lib32-bzip2 lib32-openssl lib32-SDL2"
 PKG_LONGDESC="FFmpeg is a complete, cross-platform solution to record, convert and stream audio and video."
 PKG_BUILD_FLAGS="lib32 -gold"
 
@@ -58,6 +58,7 @@ pre_configure_target() {
   rm -rf .${TARGET_NAME}
   if [ ${DISTRO} == "EmuELEC" ]; then
     sed -i "s|int hide_banner = 0|int hide_banner = 1|" ${PKG_BUILD}/fftools/cmdutils.c
+    sed -i "s|SDL2_CONFIG=\"\${cross_prefix}sdl2-config\"|SDL2_CONFIG=\"${SYSROOT_PREFIX}/usr/bin/sdl2-config\"|" ${PKG_BUILD}/configure
   fi
 }
 
@@ -84,7 +85,7 @@ configure_target() {
               --disable-static \
               --enable-shared \
               --enable-gpl \
-              --disable-version3 \
+              --enable-version3 \
               --enable-logging \
               --disable-doc \
               --disable-debug \
@@ -101,8 +102,8 @@ configure_target() {
               --enable-avfilter \
               --enable-pthreads \
               --enable-network \
-              --enable-gnutls \
-              --disable-openssl \
+              --disable-gnutls \
+              --enable-openssl \
               --disable-gray \
               --enable-swscale-alpha \
               --disable-small \

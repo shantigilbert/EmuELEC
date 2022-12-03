@@ -24,7 +24,6 @@ PKG_CONFIGURE_OPTS_TARGET="--without-ada \
                            --with-normal \
                            --without-debug \
                            --without-profile \
-                           --with-termlib \
                            --without-ticlib \
                            --without-gpm \
                            --without-dbmalloc \
@@ -61,7 +60,6 @@ PKG_CONFIGURE_OPTS_TARGET="--without-ada \
                            --enable-leaks"
 
 PKG_CONFIGURE_OPTS_HOST="--enable-termcap \
-                         --with-termlib \
                          --with-shared \
                          --enable-pc-files \
                          --without-manpages \
@@ -77,7 +75,7 @@ post_makeinstall_target() {
   # create links to be compatible with any ncurses include path and lib names
   ln -sf . ${SYSROOT_PREFIX}/usr/include/ncursesw
   ln -sf . ${SYSROOT_PREFIX}/usr/include/ncurses
-  for f in form menu ncurses panel tinfo; do
+  for f in form menu ncurses panel; do
     ln -sf lib${f}w.a ${SYSROOT_PREFIX}/usr/lib/lib${f}.a
     ln -sf ${f}w.pc ${SYSROOT_PREFIX}/usr/lib/pkgconfig/${f}.pc
   done

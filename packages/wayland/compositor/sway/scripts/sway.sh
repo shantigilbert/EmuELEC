@@ -10,5 +10,8 @@ if [ ! -z "$(lsmod | grep 'nvidia')" ]; then
   SWAY_GPU_ARGS="--unsupported-gpu"
 fi
 
+# start sway, even if no input devices are connected
+export WLR_LIBINPUT_NO_DEVICES=1
+
 logger -t Sway "### Starting Sway with -V ${SWAY_GPU_ARGS} ${SWAY_DAEMON_ARGS}"
 /usr/bin/sway -V ${SWAY_GPU_ARGS} ${SWAY_DAEMON_ARGS} > ${SWAY_LOG_FILE} 2>&1

@@ -23,7 +23,7 @@ PKG_CMAKE_OPTS_TARGET="-DEXPAT_BUILD_DOCS=OFF \
 unpack() {
   ${SCRIPTS}/get expat
   mkdir -p ${PKG_BUILD}
-  tar --strip-components=1 -xf ${SOURCES}/expat/expat-${PKG_VERSION}.tar.bz2 -C ${PKG_BUILD}
+  tar --strip-components=1 -xf ${SOURCES}/expat/expat-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }
 
 post_makeinstall_target() {

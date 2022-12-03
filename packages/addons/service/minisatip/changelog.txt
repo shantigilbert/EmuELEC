@@ -1,3 +1,6 @@
+112
+- upgrade to minisatip 1.2.36
+
 111
 - upgrade to minisatip 1.2.7
 

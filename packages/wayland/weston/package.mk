@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="weston"
-PKG_VERSION="10.0.1"
-PKG_SHA256="8a9e52506a865a7410981b04f8341b89b84106db8531ab1f9fdd37b5dc034115"
+PKG_VERSION="11.0.0"
+PKG_SHA256="a6138d4dc9554560ac304312df456019f4be025ec79130f05fb5f2e41c091e1d"
 PKG_LICENSE="MIT"
 PKG_SITE="https://wayland.freedesktop.org/"
 PKG_URL="https://gitlab.freedesktop.org/wayland/weston/-/releases/${PKG_VERSION}/downloads/${PKG_NAME}-${PKG_VERSION}.tar.xz"
@@ -17,10 +17,8 @@ PKG_MESON_OPTS_TARGET="-Dbackend-drm=true \
                        -Dscreenshare=false \
                        -Dbackend-wayland=false \
                        -Dbackend-x11=false \
-                       -Ddeprecated-backend-fbdev=false \
                        -Dbackend-default=drm \
                        -Drenderer-gl=true \
-                       -Ddeprecated-weston-launch=false \
                        -Dxwayland=false \
                        -Dsystemd=true \
                        -Dremoting=false \
@@ -30,9 +28,7 @@ PKG_MESON_OPTS_TARGET="-Dbackend-drm=true \
                        -Dshell-ivi=false \
                        -Dshell-kiosk=false \
                        -Ddesktop-shell-client-default="weston-desktop-shell" \
-                       -Ddeprecated-wl-shell=false \
                        -Dcolor-management-lcms=false \
-                       -Dcolor-management-colord=false \
                        -Dlauncher-logind=false \
                        -Dlauncher-libseat=true \
                        -Dimage-jpeg=true \
@@ -44,7 +40,6 @@ PKG_MESON_OPTS_TARGET="-Dbackend-drm=true \
                        -Dwcap-decode=false \
                        -Dtest-junit-xml=false \
                        -Dtest-skip-is-failure=false \
-                       -Dtest-gl-renderer=false \
                        -Ddoc=false"
 
 pre_configure_target() {

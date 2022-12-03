@@ -13,5 +13,5 @@ PKG_CONFIGURE_OPTS_TARGET+=" --disable-static --enable-shared"
 
 unpack() {
   mkdir -p ${PKG_BUILD}
-  tar --strip-components=1 -xf ${SOURCES}/${PKG_NAME:4}/${PKG_NAME:4}-${PKG_VERSION}.tar.bz2 -C ${PKG_BUILD}
+  tar --strip-components=1 -xf ${SOURCES}/${PKG_NAME:4}/${PKG_NAME:4}-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }

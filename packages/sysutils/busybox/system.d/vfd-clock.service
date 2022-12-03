@@ -1,0 +1,15 @@
+[Unit]
+Description=VFD Clock Service
+After=network-online.target graphical.target
+Requires=graphical.target
+Wants=kodi.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh /usr/bin/vfd-clock start
+ExecStopPost=/bin/sh /usr/bin/vfd-clock stop
+RemainAfterExit=yes
+StartLimitInterval=0
+
+[Install]
+WantedBy=kodi.target

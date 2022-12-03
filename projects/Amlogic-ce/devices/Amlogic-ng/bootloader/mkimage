@@ -4,7 +4,7 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 # copy amlogic autoscript files to part1 if needed
-if [ "${SUBDEVICE}" != "Odroid_N2" ] && [ "${SUBDEVICE}" != "Odroid_C4" ] && [ "${SUBDEVICE}" != "Odroid_HC4" ] && [ "${SUBDEVICE}" != "LePotato" ] && [ "${SUBDEVICE}" != "LaFrite" ] && [ "${SUBDEVICE:0:10}" != "Radxa_Zero" ]; then
+if [ "${SUBDEVICE}" != "Odroid_N2" ] && [ "${SUBDEVICE}" != "Odroid_N2L" ] && [ "${SUBDEVICE}" != "Odroid_C4" ] && [ "${SUBDEVICE}" != "Odroid_HC4" ] && [ "${SUBDEVICE}" != "LePotato" ] && [ "${SUBDEVICE}" != "LaFrite" ] && [ "${SUBDEVICE:0:10}" != "Radxa_Zero" ]; then
   for f in $RELEASE_DIR/3rdparty/bootloader/*autoscript; do
     [ -e "$f" ] && mcopy "$f" ::
   done
@@ -41,7 +41,7 @@ if [ "${SUBDEVICE}" != "Generic" ]; then
     mcopy "$LE_TMP/boot.ini" ::
   fi
 
-  if [ "${SUBDEVICE}" == "Odroid_N2" -o "${SUBDEVICE}" == "Odroid_C4" -o "${SUBDEVICE}" == "Odroid_HC4" ]; then
+  if [ "${SUBDEVICE}" == "Odroid_N2" -o "${SUBDEVICE}" == "Odroid_N2L" -o "${SUBDEVICE}" == "Odroid_C4" -o "${SUBDEVICE}" == "Odroid_HC4" ]; then
     if [ -f "$RELEASE_DIR/3rdparty/bootloader/hk-boot-logo-1080.bmp.gz" ]; then
       mcopy $RELEASE_DIR/3rdparty/bootloader/hk-boot-logo-1080.bmp.gz "::/boot-logo-1080.bmp.gz"
     fi

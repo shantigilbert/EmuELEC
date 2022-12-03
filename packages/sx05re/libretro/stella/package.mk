@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="stella"
-PKG_VERSION="4fecd8fc97ab7786610a5ae4e665e4fe4d5d1374"
-PKG_SHA256="1107c815d1ff1779202d78ff3b89cf643185274a8acbbdbe2c4115e8db74bb29"
+PKG_VERSION="d1767d4d93adff907b370c4a26097fb873a00260"
+PKG_SHA256="fae13228c441c6beaba6265789ae57c607c193a8cc1d59225341bd2c649a9dd2"
 PKG_REV="1"
 PKG_LICENSE="GPL2"
 PKG_SITE="https://github.com/stella-emu/stella"
@@ -34,13 +34,13 @@ PKG_TOOLCHAIN="make"
 
 pre_configure_target() {
 if [ "$ARCH" == "arm" ]; then
-PKG_MAKE_OPTS_TARGET=" -C $PKG_BUILD/src/libretro -f Makefile platform=emuelec"
+PKG_MAKE_OPTS_TARGET=" -C $PKG_BUILD/src/os/libretro -f Makefile platform=emuelec"
 else
-PKG_MAKE_OPTS_TARGET=" -C $PKG_BUILD/src/libretro -f Makefile platform=emuelec-arm64"
+PKG_MAKE_OPTS_TARGET=" -C $PKG_BUILD/src/os/libretro -f Makefile platform=emuelec-arm64"
 fi
 }
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro
-  cp $PKG_BUILD/src/libretro/stella_libretro.so $INSTALL/usr/lib/libretro/
+  cp $PKG_BUILD/src/os/libretro/stella_libretro.so $INSTALL/usr/lib/libretro/
 }

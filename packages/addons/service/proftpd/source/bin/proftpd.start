@@ -4,6 +4,7 @@
 # Copyright (C) 2012 x23
 # Copyright (C) 2009-2013 Stephan Raue (stephan@openelec.tv)
 # Copyright (C) 2012-2015 ultraman
+# Copyright (C) 2021-present Team LibreELEC (https://libreelec.tv)
 
 . /etc/profile
 
@@ -25,7 +26,7 @@ fi
 if [ ! -f "$ADDON_HOME/proftpd.cert.pem" -o ! -f "$ADDON_HOME/proftpd.key.pem" ]; then
   openssl req -newkey rsa:1024 -config $ADDON_HOME/openssl.cnf -new -x509 -days "$CertTTL" -nodes -out "$ADDON_HOME/proftpd.cert.pem" -keyout "$ADDON_HOME/proftpd.key.pem"
 fi
-  
+
 # Edit proftpd.conf with user settings
 if [ "$TLSEngine" = "false" ]; then
   sed -i 's/TLSEngine.*/TLSEngine off/g' $ADDON_HOME/proftpd.conf
@@ -91,24 +92,25 @@ fi
 
 cd "$ADDON_DIR/bin"
 
-case "$CryptoHash" in
-  "0") CryptoHash="sha-512"; SALTLength="16";;
-  "1") CryptoHash="sha-256"; SALTLength="16";;
-  "2") CryptoHash="md5";     SALTLength="8";;
-esac
-
 mkdir -p /var/config/
 rm -f /var/config/proftpd.passwd
 touch /var/config/proftpd.passwd
 chmod 700 /var/config/proftpd.passwd
 
 for NUM in $(seq 1 100); do
+
+  case "$CryptoHash" in
+    "0") password_salt=$(python -c "import crypt; print(crypt.mksalt(crypt.METHOD_SHA512))");;
+    "1") password_salt=$(python -c "import crypt; print(crypt.mksalt(crypt.METHOD_SHA256))");;
+    "2") password_salt=$(python -c "import crypt; print(crypt.mksalt(crypt.METHOD_MD5))");;
+  esac
+
   USERNAME=$(eval echo \$Username${NUM})
   USERPASS=$(eval echo \$Userpass${NUM})
   USERPATH=$(eval echo \$Userpath${NUM})
 
   if [ -n "$USERNAME" ]; then
-    echo $USERNAME:$(./mkpasswd --hash=$CryptoHash --salt=$(cat /dev/urandom | tr -cd "[:alnum:]" | head -c $SALTLength) $USERPASS):10:10::$USERPATH:/bin/false >> /var/config/proftpd.passwd
+    echo $USERNAME:$(python -c "import crypt; print(crypt.crypt('${USERPASS}', '${password_salt}'))"):10:10::$USERPATH:/bin/false >> /var/config/proftpd.passwd
     # user writes with different user/group
     mkdir -p "$USERPATH"
     chmod 777 "$USERPATH"
