@@ -182,6 +182,23 @@ case ${PLATFORM} in
         fi
 		;;
 	"psx")
+    # get the custom bios name
+    CUSTOMBIOSNAME="${ROMNAME%.*}.bios"
+    if [[ -f "${CUSTOMBIOSNAME}" ]]; then
+        if [[ ! -f "/storage/roms/psx/scph7001.bios" ]]; then
+            # make backup
+            [[ -f "/storage/roms/bios/scph101.bin" ]] && cp "/storage/roms/bios/scph101.bin" "/storage/roms/bios/scph101.bin.bak"
+        fi
+        # use the custom bios
+        cp "${CUSTOMBIOSNAME}" "/storage/roms/bios/scph101.bin"
+    else
+        # recover the original bios
+        if [[ -f "/storage/roms/psx/scph7001.bios" ]]; then
+            cp "/storage/roms/psx/scph7001.bios" "/storage/roms/bios/scph101.bin"
+        else
+            [[ -f "/storage/roms/bios/scph101.bin.bak" ]] && cp "/storage/roms/bios/scph101.bin.bak" "/storage/roms/bios/scph101.bin"
+        fi
+    fi
 		if [ "$EMU" = "duckstation" ]; then
             set_kill_keys "duckstation-nogui"
             RUNTHIS='${TBASH} duckstation.sh "${ROMNAME}"'
