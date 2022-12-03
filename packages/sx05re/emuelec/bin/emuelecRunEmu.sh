@@ -81,6 +81,28 @@ ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
 GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
+# if has custom bios, use it.
+# please place the common bios(scph7001.bios) into /storage/roms/psx/scph7001.bios
+# for when there is no custom bios.
+CUSTOMBIOSNAME="${ROMNAME%.*}.bios"
+if [[ ${PLATFORM} == "psx" ]]; then
+    if [ -f "${CUSTOMBIOSNAME}" ]; then
+        if [[ ! -f "/storage/roms/psx/scph7001.bios" ]]; then
+            # make backup
+            [[ -f "/storage/roms/bios/scph101.bin" ]] && cp "/storage/roms/bios/scph101.bin" "/storage/roms/bios/scph101.bin.bak"
+        fi
+        # use custom bios
+        cp "${CUSTOMBIOSNAME}" "/storage/roms/bios/scph101.bin"
+    else
+        if [[ -f "/storage/roms/psx/scph7001.bios" ]]; then
+            cp "/storage/roms/psx/scph7001.bios" "/storage/roms/bios/scph101.bin"
+        else
+            [[ -f "/storage/roms/bios/scph101.bin.bak" ]] && cp "/storage/roms/bios/scph101.bin.bak" "/storage/roms/bios/scph101.bin"
+        fi
+    fi
+fi
+
+
 SET_DISPLAY_SH="setres.sh"
 VIDEO="$(cat /sys/class/display/mode)"
 VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
