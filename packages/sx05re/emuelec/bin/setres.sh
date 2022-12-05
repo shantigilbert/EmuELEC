@@ -137,6 +137,8 @@ PLATFORM=$2
 
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
+[[ "$EE_DEVICE" == "Amlogic" ]] && MODE=1080p60hz
+
 # File location of the file that when written to switches the display to match
 # that screen resolution. Note - You do not have to alter anything else, if it's
 # a valid screen value ti will auto-change, if not it will just keep it's
