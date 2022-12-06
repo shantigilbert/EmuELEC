@@ -337,8 +337,7 @@ uzem \
 vba-next \
 vbam \
 vecx \
-vice \
-virtualjaguar"
+vice"
 
 LIBRETRO_EXTRA_CORES="chailove \
 crocods \
@@ -351,7 +350,8 @@ yabause"
 
 LIBRETRO_S922X_CORES="mesen \
 mesen-s \
-quicknes"
+quicknes \
+virtualjaguar"
 
   RA_PLAYLIST_NAMES=""\
 "Atari - 2600.lpl;"\
