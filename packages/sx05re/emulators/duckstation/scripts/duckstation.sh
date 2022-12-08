@@ -46,7 +46,7 @@ ztoken=$(grep "Token =" /storage/.config/emuelec/configs/duckstation/settings.in
 if ([ -z "$ztoken" ]) 
 then
 
-duckstationcheevos.sh
+    duckstationcheevos.sh
 
 fi
 
