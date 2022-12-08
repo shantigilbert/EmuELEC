@@ -11,7 +11,7 @@ password=$(grep "global.retroachievements.password" /storage/.config/emuelec/con
 #Parse token from reply retroachievements
 token=$(curl -s "http://retroachievements.org/dorequest.php?r=login&u=$username&p=$password"|sed -E 's/.*"Token":"?([^,"]*)"?.*/\1/')
 
-#Test the token if empty exit 1
+#Test the token if empty exit 1.
 if [ -z "$token" ]
 then
       echo "Token is empty you must log in retroachievement first in retroarch achievements"
@@ -33,12 +33,12 @@ zdts=$(grep "LoginTimestamp =" /storage/.config/emuelec/configs/duckstation/sett
 if ([ -z "$zcheevos" ] && [ -z "$zenabledtrue" ] && [ -z "$zenabledfalse" ])
 then
 
-sed -i "$ a [Cheevos]\nEnabled = true\nUsername = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
+     sed -i "$ a [Cheevos]\nEnabled = true\nUsername = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
 
 elif ([ -z "$zenabledtrue" ] && [ -z "$zenabledfalse" ])
 then
 
-sed -i "/^\[Cheevos\].*/a Enabled = true\nUsername = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
+     sed -i "/^\[Cheevos\].*/a Enabled = true\nUsername = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
 
 elif [ -n "$zenabledtrue" ]
 then 
@@ -46,7 +46,7 @@ then
      if ([ -z "$zusername" ] && [ -z "$ztoken" ] && [ -z "$zdts" ])
      then
      
-     sed -i "/^Enabled = true.*/a Username = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
+          sed -i "/^Enabled = true.*/a Username = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
      
      fi
 
@@ -56,7 +56,7 @@ then
      if ([ -z "$zusername" ] && [ -z "$ztoken" ] && [ -z "$zdts" ])
      then
 
-     sed -i "/^Enabled = false.*/a Username = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
+          sed -i "/^Enabled = false.*/a Username = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
 
      fi
 fi
