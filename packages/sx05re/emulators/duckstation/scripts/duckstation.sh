@@ -40,6 +40,16 @@ if [[ "${AUTOGP}" == "1" ]]; then
 	set_duckstation_joy.sh
 fi
 
+#Setting Cheevos if enabled on emulationstation. First check if token entry is not present
+ztoken=$(grep "Token =" /storage/.config/emuelec/configs/duckstation/settings.ini)
+
+if ([ -z "$ztoken" ]) 
+then
+
+duckstationcheevos.sh
+
+fi
+
 if [[ "${1}" == *"duckstation_gui.pbp"* ]]; then
     duckstation-nogui -fullscreen
 else
