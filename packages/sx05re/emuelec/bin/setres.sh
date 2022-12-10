@@ -137,8 +137,6 @@ PLATFORM=$2
 
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
-[[ "$EE_DEVICE" == "Amlogic" ]] && MODE=1080p60hz
-
 # File location of the file that when written to switches the display to match
 # that screen resolution. Note - You do not have to alter anything else, if it's
 # a valid screen value ti will auto-change, if not it will just keep it's
@@ -205,6 +203,11 @@ SH=${SIZE[1]}
 RW=${SIZE[2]}
 RH=${SIZE[3]}
 
+if [[ "$EE_DEVICE" == "Amlogic" ]]; then
+  RW=1920
+  RH=1080
+fi
+
 # Once we know the Width and Height is valid numbers we set the primary display
 # buffer, and we multiply the 2nd height by a factor of 2 I assume for interlaced 
 # support.
@@ -228,6 +231,12 @@ if [[ "${MODE}" == "480cvbs" ]]; then
 fi
 if [[ "${MODE}" == "576cvbs" ]]; then
   BORDERS=(12 0)
+fi
+
+if [[ "$EE_DEVICE" == "Amlogic" ]]; then
+  BORDERS=(0 0)
+  RW=$SW
+  RH=$SH
 fi
 
 # This monolith slab of code basically gets the users preference of if they want 
