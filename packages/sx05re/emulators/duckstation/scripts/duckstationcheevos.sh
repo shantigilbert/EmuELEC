@@ -32,31 +32,21 @@ zdts=$(grep "LoginTimestamp =" /storage/.config/emuelec/configs/duckstation/sett
 
 if ([ -z "$zcheevos" ] && [ -z "$zenabledtrue" ] && [ -z "$zenabledfalse" ])
 then
-
      sed -i "$ a [Cheevos]\nEnabled = true\nUsername = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
 
 elif ([ -z "$zenabledtrue" ] && [ -z "$zenabledfalse" ])
 then
-
      sed -i "/^\[Cheevos\].*/a Enabled = true\nUsername = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
-
 elif [ -n "$zenabledtrue" ]
 then 
-
      if ([ -z "$zusername" ] && [ -z "$ztoken" ] && [ -z "$zdts" ])
      then
-     
           sed -i "/^Enabled = true.*/a Username = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
-     
      fi
-
 elif [ -n "$zenabledfalse" ]
 then
-
      if ([ -z "$zusername" ] && [ -z "$ztoken" ] && [ -z "$zdts" ])
      then
-
           sed -i "/^Enabled = false.*/a Username = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
-
      fi
 fi
