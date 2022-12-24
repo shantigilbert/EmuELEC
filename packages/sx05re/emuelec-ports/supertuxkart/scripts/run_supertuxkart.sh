@@ -7,10 +7,10 @@
 . /etc/profile
 
 # This variable has to match the version on package.mk
-VERSION="1.3"
+VERSION="1.4"
 
 ASSETS="https://github.com/supertuxkart/stk-assets-mobile/releases/download/${VERSION}/stk-assets.zip"
-DATA="https://github.com/supertuxkart/stk-code/archive/refs/heads/${VERSION}.zip"
+DATA="https://github.com/supertuxkart/stk-code/archive/refs/tags/${VERSION}.zip"
 DATAFOLDER="/storage/roms/ports/supertuxkart"
 
 mkdir -p "${DATAFOLDER}"
@@ -35,7 +35,8 @@ if [ ! -e "${DATAFOLDER}/data/stk_config.xml" ]; then
             rm "${VERSION}.zip"
             ee_console disable
             mkdir -p /storage/.config/supertuxkart/config-0.10
-
+            [[ ! -f "${DATAFOLDER}/supertuxkart.git" ]] && touch "${DATAFOLDER}/supertuxkart.git"
+            
 cat > /storage/.config/supertuxkart/config-0.10/players.xml << EOF
 <?xml version="1.0"?>
 <players version="1" >

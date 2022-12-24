@@ -485,9 +485,6 @@ fi
 # reset audio to default
 set_audio default
 
-# remove emu.cfg if platform was reicast
-[ -f /storage/.config/reicast/emu.cfg ] && rm /storage/.config/reicast/emu.cfg
-
 if [[ "$BTENABLED" == "1" ]]; then
 	# Restart the bluetooth agent
     systemctl start bluetooth-agent

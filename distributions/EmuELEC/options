@@ -346,12 +346,12 @@ desmume-2015 \
 lutro \
 melonds \
 snes9x2005 \
-yabause \
-virtualjaguar"
+yabause"
 
 LIBRETRO_S922X_CORES="mesen \
 mesen-s \
-quicknes"
+quicknes \
+virtualjaguar"
 
   RA_PLAYLIST_NAMES=""\
 "Atari - 2600.lpl;"\
