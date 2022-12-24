@@ -24,7 +24,6 @@ fi
 if [ ! -L "${CONFIG_DIR}/textures" ]; then
     rm -r "${CONFIG_DIR}/textures"
     ln -s /storage/roms/psx/textures "${CONFIG_DIR}"
-
 fi
 
 if [ -d "${LOCAL_CONFIG}/duckstation" ]; then
@@ -45,9 +44,7 @@ ztoken=$(grep "Token =" /storage/.config/emuelec/configs/duckstation/settings.in
 
 if ([ -z "$ztoken" ]) 
 then
-
     duckstationcheevos.sh
-
 fi
 
 if [[ "${1}" == *"duckstation_gui.pbp"* ]]; then
