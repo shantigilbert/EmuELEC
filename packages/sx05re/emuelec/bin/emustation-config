@@ -272,13 +272,12 @@ PWDFILE="/flash/ee_defaults.txt"
 # wait for all the subshells to finish
 wait
 
-# We do not care if BT scanning finishes before ES starts
-BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
-if [[ "$BTENABLED" == "1" ]]; then
-    # Search for bluetooth gamepads while ES loads. 
-    (
-        batocera-bluetooth trust
-    ) &
+if [[ "$BTENABLED" != "1" ]]; then
+systemctl stop bluetooth
+rm /storage/.cache/services/bluez.conf & 
+else
+systemctl restart bluetooth
+emuelec-bluetooth &
 fi
 
 emuelec-utils setauddev
