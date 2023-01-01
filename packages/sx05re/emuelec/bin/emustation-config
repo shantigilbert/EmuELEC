@@ -272,12 +272,15 @@ PWDFILE="/flash/ee_defaults.txt"
 # wait for all the subshells to finish
 wait
 
+# Start Scanning for Bluetooth Controllers
+BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
+
+chown -R root:root /storage/.cache/bluetooth
 if [[ "$BTENABLED" != "1" ]]; then
 systemctl stop bluetooth
 rm /storage/.cache/services/bluez.conf & 
 else
 systemctl restart bluetooth
-emuelec-bluetooth &
 fi
 
 emuelec-utils setauddev
