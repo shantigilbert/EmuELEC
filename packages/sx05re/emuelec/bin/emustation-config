@@ -277,11 +277,12 @@ BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 
 chown -R root:root /storage/.cache/bluetooth
 if [[ "$BTENABLED" != "1" ]]; then
-systemctl stop bluetooth
-rm /storage/.cache/services/bluez.conf & 
+  systemctl stop bluetooth
+  rm /storage/.cache/services/bluez.conf & 
 else
-systemctl restart bluetooth
-emuelec-bluetooth &
+  BT_RUN=$(ps ax | grep [b]luetoothd | wc -l)
+  [[ "$BT_RUN" == 0 ]] && systemctl start bluetooth
+  emuelec-bluetooth &
 fi
 
 emuelec-utils setauddev

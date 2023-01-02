@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
 import time
+import sys
 from bluetool import Bluetooth
 
 if __name__ == "__main__":
     bt = Bluetooth()
-    print('Scanning for available devices for 90 seconds, please wait...')
-    bt.start_scanning(60)
+    print('Scanning for available devices, please wait...')
+    bt.start_scanning(10)
     time.sleep(10)
+    if bt._scan_thread == None:
+        sys.exit("bluetooth not available.")
     print('Getting pairable devices, please wait...')
     devices = bt.get_devices_to_pair()
     for device in devices:
