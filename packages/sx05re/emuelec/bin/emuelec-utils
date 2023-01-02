@@ -6,6 +6,12 @@
 # Source predefined functions and variables
 . /etc/profile
 
+function run_bt ()
+{
+  emuelec-bluetooth-standby &
+  echo $!
+}
+
 function error() {
     text_viewer /emuelec/logs/emuelec.log -w -t "Error! ${2}" -f 24
 	show_splash.sh exit

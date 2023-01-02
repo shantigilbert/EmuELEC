@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+
+import time
+from subprocess import call
+
+if __name__ == "__main__":
+    while True:
+        call('systemctl restart bluetooth', shell=True)
+        time.sleep(30)
+
