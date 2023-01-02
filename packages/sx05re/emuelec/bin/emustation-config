@@ -281,6 +281,7 @@ systemctl stop bluetooth
 rm /storage/.cache/services/bluez.conf & 
 else
 systemctl restart bluetooth
+emuelec-bluetooth &
 fi
 
 emuelec-utils setauddev
