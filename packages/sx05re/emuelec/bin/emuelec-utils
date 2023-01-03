@@ -8,7 +8,9 @@
 
 function run_standby()
 {
-  emuelec-usb-reset &
+  local delay=$1
+  delay=$(( delay * 60 ))
+  sleep $delay && standby_reset &
   echo $! > /tmp/standby.pid
 }
 
