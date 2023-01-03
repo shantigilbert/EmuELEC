@@ -6,10 +6,22 @@
 # Source predefined functions and variables
 . /etc/profile
 
-function run_bt ()
+function run_standby()
 {
-  emuelec-bluetooth-standby &
-  echo $!
+  emuelec-usb-reset &
+  echo $! > /tmp/standby.pid
+}
+
+function standby_reset()
+{
+  if [[ -f "/sys/bus/usb/devices/usb1/authorized" ]]; then
+    echo 0 > /sys/bus/usb/devices/usb1/authorized
+    echo 1 > /sys/bus/usb/devices/usb1/authorized
+  fi
+  if [[ -f "/sys/bus/usb/devices/usb2/authorized" ]]; then
+    echo 0 > /sys/bus/usb/devices/usb2/authorized
+    echo 1 > /sys/bus/usb/devices/usb2/authorized
+  fi
 }
 
 function error() {
