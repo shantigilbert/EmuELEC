@@ -269,6 +269,11 @@ PWDFILE="/flash/ee_defaults.txt"
 
 # mount -t overlay ports -o lowerdir=/usr/bin/ports,upperdir=/emuelec/ports,workdir=/storage/.tmp/ports-workdir "${LINK}/ports_scripts"
 
+RESTART_USB_ENABLED=$(get_ee_setting ee_restart_usb.enabled)
+if [[ "$RESTART_USB_ENABLED" == "1" ]]; then
+  emuelec-utils usb_reset
+fi
+
 # wait for all the subshells to finish
 wait
 

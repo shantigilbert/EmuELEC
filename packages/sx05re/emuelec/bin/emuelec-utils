@@ -10,11 +10,11 @@ function run_standby()
 {
   local delay=$1
   delay=$(( delay * 60 ))
-  sleep $delay && standby_reset &
+  sleep $delay && usb_reset &
   echo $! > /tmp/standby.pid
 }
 
-function standby_reset()
+function usb_reset()
 {
   if [[ -f "/sys/bus/usb/devices/usb1/authorized" ]]; then
     echo 0 > /sys/bus/usb/devices/usb1/authorized
