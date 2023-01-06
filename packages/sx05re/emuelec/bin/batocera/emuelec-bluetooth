@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 
 import time
-import sys
 from bluetool import Bluetooth
 
 if __name__ == "__main__":
     bt = Bluetooth()
-    print('Scanning for available devices, please wait...')
-    bt.start_scanning(10)
+    print('Scanning for available devices for 60 seconds, please wait...')
+    bt.start_scanning(60)
     time.sleep(10)
-    if bt._scan_thread == None:
-        sys.exit("bluetooth not available.")
     print('Getting pairable devices, please wait...')
     devices = bt.get_devices_to_pair()
     for device in devices:
@@ -19,15 +16,24 @@ if __name__ == "__main__":
         icon = bt.get_device_property(mac,'Icon')
         if not icon or (icon and icon == 'input-gaming'):
             print('Found MAC: {}\tName: {}'.format(mac,name))
-            print('Found controller {} Name: {}, trusting...'.format(mac,name))
-            bt.trust(mac)
-            if bt.get_device_property(mac,'Trusted') == 1:
-                print('Trusted {}, quick pause, then pairing...'.format(name))
+            print('Found controller {} Name: {}'.format(mac,name))
+            if bt.get_device_property(mac,'Trusted') != 1:
+                print('Trusting {}, quick pause')
+                bt.trust(mac)
                 time.sleep(5)
-                bt.pair(mac)
-                if bt.get_device_property(mac,'Paired') == 1:
-                    print('Paired {}, quick pause, then connecting...'.format(name))
+            if bt.get_device_property(mac,'Trusted') == 1:
+                print('Trusted {}, then pairing...'.format(name))
+                if bt.get_device_property(mac,'Paired') != 1:
+                    print('Pairing {}, quick pause')
+                    bt.pair(mac)
                     time.sleep(5)
-                    bt.connect(mac)
+                if bt.get_device_property(mac,'Paired') == 1:
+                    print('Paired {}, then connecting...'.format(name))
+                    if bt.get_device_property(mac,'Connected') != 1:
+                        print('Connecting {}, quick pause')
+                        bt.connect(mac)
+                        time.sleep(2)
                     if bt.get_device_property(mac,'Connected') == 1:
                         print('Connected {}, exiting...'.format(name))
+                    else:
+                        print('Connect Error {}, exiting...'.format(name))
