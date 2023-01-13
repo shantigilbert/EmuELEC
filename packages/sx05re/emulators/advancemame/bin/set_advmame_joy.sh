@@ -106,9 +106,9 @@ set_pad(){
   [[ -z "$JOY_NAME" ]] && JOY_NAME=$(echo $GC_CONFIG | cut -d',' -f2)
   [[ -z "$JOY_NAME" ]] && return
 
-  local GAMEPAD=$(echo "$JOY_NAME" | sed "s|,||g" | sed "s|_||g" | cut -d'"' -f 2 \
+  local GAMEPAD="$(echo "$JOY_NAME" | sed "s|,||g" | sed "s|_||g" | cut -d'"' -f 2 \
     | sed "s|(||" | sed "s|)||" | sed -e 's/[^A-Za-z0-9._-]/ /g' | sed 's/[[:blank:]]*$//' \
-    | sed 's/-//' | sed -e 's/[^A-Za-z0-9._-]/_/g' |tr '[:upper:]' '[:lower:]' | tr -d '.')
+    | sed 's/-//' | sed -e 's/[^A-Za-z0-9._-]/_/g' |tr '[:upper:]' '[:lower:]' | tr -d '.')"
 
   if [[ "${P_INDEX}" -gt "0" ]]; then
     BTN_H0=$(advj | grep -B 1 -E "^joy 0 .*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
@@ -231,10 +231,10 @@ set_pad(){
   # Menu should only be set to player 1
   if [[ "${1}" == "1" ]]; then
   #echo "Setting menu buttons for player 1" #debug
-    echo "input_map[ui_up] ${DIRS[0]}" >> ${CONFIG}
-    echo "input_map[ui_down] ${DIRS[1]}" >> ${CONFIG}
-    echo "input_map[ui_left] ${DIRS[2]}" >> ${CONFIG}
-    echo "input_map[ui_right] ${DIRS[3]}" >> ${CONFIG}
+    echo "input_map[ui_up] keyboard[0,up] or keyboard[1,up] or ${DIRS[0]}" >> ${CONFIG}
+    echo "input_map[ui_down] keyboard[0,down] or keyboard[1,down] or ${DIRS[1]}" >> ${CONFIG}
+    echo "input_map[ui_left] keyboard[0,left] or keyboard[1,left] or ${DIRS[2]}" >> ${CONFIG}
+    echo "input_map[ui_right] keyboard[0,right] or keyboard[1,right] or ${DIRS[3]}" >> ${CONFIG}
 
     local button="${GC_ASSOC[a]}"
     local VAL="${ADVMAME_VALUES[$button]}"
@@ -259,7 +259,7 @@ set_pad(){
     echo -n "input_map[ui_configure] keyboard[1,tab] or keyboard[0,tab]" >> ${CONFIG}
     if [ ! -z "$VAL" ]; then
       echo " or joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
-    fi    
+    fi  
   fi
 }
 
