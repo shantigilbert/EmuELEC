@@ -19,7 +19,7 @@ ROMNAME=$1
 
 BTN_CFG="0 1 2 3 4 5 6 7"
 
-BTN_H0=$(advj | grep -B 1 -E "^joy 0 .*" | grep sticks: | sed "s|sticks:\ ||")
+BTN_H0=$(advj | grep -B 1 -E "^joy 0 .*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
 
 declare -A ADVMAME_VALUES=(
   ["b0"]="button1"
@@ -111,12 +111,12 @@ set_pad(){
     | sed 's/-//' | sed -e 's/[^A-Za-z0-9._-]/_/g' |tr '[:upper:]' '[:lower:]' | tr -d '.')
 
   if [[ "${P_INDEX}" -gt "0" ]]; then
-    BTN_H0=$(advj | grep -B 1 -E "^joy ${P_INDEX} .*" | grep sticks: | sed "s|sticks:\ ||")
+    BTN_H0=$(advj | grep -B 1 -E "^joy 0 .*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
     if [[ ! -z "$BTN_H0" ]]; then
-      ADVMAME_VALUES["h0.1"]="stick$BTN_H0,y,up"
-      ADVMAME_VALUES["h0.4"]="stick$BTN_H0,y,down"
-      ADVMAME_VALUES["h0.8"]="stick$BTN_H0,x,left"
-      ADVMAME_VALUES["h0.2"]="stick$BTN_H0,x,right"
+      ADVMAME_VALUES["h0.1"]="stick${BTN_H0},y,up"
+      ADVMAME_VALUES["h0.4"]="stick${BTN_H0},y,down"
+      ADVMAME_VALUES["h0.8"]="stick${BTN_H0},x,left"
+      ADVMAME_VALUES["h0.2"]="stick${BTN_H0},x,right"
     fi
   fi
 
@@ -164,9 +164,24 @@ set_pad(){
       case $GC_INDEX in
         dpup|dpdown|dpleft|dpright)
           [[ ! -z "$DIR" ]] && DIR+=" or "
-          [[ "$BTN_TYPE" == "b" ]] && DIR+="joystick_button[${GAMEPAD},${VAL}]"
-          [[ "$BTN_TYPE" == "h" ]] && DIR+="joystick_digital[${GAMEPAD},${VAL}]"
-          DIRS["$I"]="$DIR"
+    		  if [[ "$BTN_TYPE" == "a" ]]; then
+    			local direction
+    			case $GC_INDEX in
+    				dpleft|dpup)
+    					direction=1
+    					;;
+    				dpright|dpdown)
+    					direction=2
+    					;;
+    			esac
+    			VAL="${ADVMAME_VALUES[${TVAL},${direction}]}"
+    			DIR+="joystick_digital[${GAMEPAD},${VAL}]"
+    			DIRS["$I"]="$DIR"
+    		  else
+    			[[ "$BTN_TYPE" == "b" ]] && DIR+="joystick_button[${GAMEPAD},${VAL}]"
+    			[[ "$BTN_TYPE" == "h" ]] && DIR+="joystick_digital[${GAMEPAD},${VAL}]"
+    			DIRS["$I"]="$DIR"
+    		  fi
           ;;
         leftx|lefty)
           for i in {1..2}; do
@@ -226,16 +241,25 @@ set_pad(){
     if [ ! -z "$VAL" ]; then
       echo "input_map[ui_select] keyboard[0,enter] or keyboard[1,enter] or joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
     fi
-    button="${GC_ASSOC[leftstick]}"
+    button="${GC_ASSOC[b]}"
     VAL="${ADVMAME_VALUES[$button]}"
     if [ ! -z "$VAL" ]; then
       echo "input_map[ui_cancel] keyboard[0,backspace] or keyboard[1,backspace] or joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
     fi
+    
+    VAL=""
     button="${GC_ASSOC[rightstick]}"
-    VAL="${ADVMAME_VALUES[$button]}"
-    if [ ! -z "$VAL" ]; then
-      echo "input_map[ui_configure] keyboard[1,tab] or keyboard[0,tab] or joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
+    if [[ ! -z "$button" ]]; then
+      VAL="${ADVMAME_VALUES[$button]}"
+    elif [[ "${GC_ASSOC[guide]}" != "${GC_ASSOC[back]}" ]]; then
+      button="${GC_ASSOC[guide]}"
+      VAL="${ADVMAME_VALUES[$button]}"
     fi
+    
+    echo -n "input_map[ui_configure] keyboard[1,tab] or keyboard[0,tab]" >> ${CONFIG}
+    if [ ! -z "$VAL" ]; then
+      echo " or joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
+    fi    
   fi
 }
 
