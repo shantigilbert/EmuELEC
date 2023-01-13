@@ -24,7 +24,6 @@ fi
 if [ ! -L "${CONFIG_DIR}/textures" ]; then
     rm -r "${CONFIG_DIR}/textures"
     ln -s /storage/roms/psx/textures "${CONFIG_DIR}"
-
 fi
 
 if [ -d "${LOCAL_CONFIG}/duckstation" ]; then
@@ -38,6 +37,14 @@ fi
 AUTOGP=$(get_ee_setting duckstation_auto_gamepad)
 if [[ "${AUTOGP}" == "1" ]]; then
 	set_duckstation_joy.sh
+fi
+
+#Setting Cheevos if enabled on emulationstation. First check if token entry is not present
+ztoken=$(grep "Token =" /storage/.config/emuelec/configs/duckstation/settings.ini)
+
+if ([ -z "$ztoken" ]) 
+then
+    duckstationcheevos.sh
 fi
 
 if [[ "${1}" == *"duckstation_gui.pbp"* ]]; then
