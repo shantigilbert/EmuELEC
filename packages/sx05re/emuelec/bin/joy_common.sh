@@ -102,13 +102,19 @@ jc_get_players() {
   fi
 
   local PLAYER_CFG=
+  mkdir -p /tmp/JOYPAD_NAMES
+  rm /tmp/JOYPAD_NAMES/*.txt 2>/dev/null
   for p in {1..4}; do
     local CFG="${p} ${PLAYER_CFGS[$(( p-1 ))]}"
     if [[ $p -le $cfgCount ]]; then
       echo "PLAYER_CFG=${CFG}"
     fi
     eval clean_pad ${CFG}
-    [[ "${CFG}" != "${p} " ]] && eval set_pad ${CFG}
+    if [[ "${CFG}" != "${p} " ]]; then
+      local JOYNAME=$(echo "${CFG}" | cut -d' ' -f4-)
+      echo "$JOYNAME" > "/tmp/JOYPAD_NAMES/JOYPAD${p}.txt"
+      eval set_pad ${CFG}
+    fi
   done
 }
 

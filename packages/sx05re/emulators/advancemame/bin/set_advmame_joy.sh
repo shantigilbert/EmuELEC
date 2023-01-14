@@ -106,7 +106,7 @@ set_pad(){
   [[ -z "$JOY_NAME" ]] && JOY_NAME=$(echo $GC_CONFIG | cut -d',' -f2)
   [[ -z "$JOY_NAME" ]] && return
 
-  local GAMEPAD="$(echo "$JOY_NAME" | sed "s|,||g" | sed "s|_||g" | cut -d'"' -f 2 \
+  local GAMEPAD="$(cat "/tmp/JOYPAD_NAMES/JOYPAD${1}.txt" | sed "s|,||g" | sed "s|_||g" | cut -d'"' -f 2 \
     | sed "s|(||" | sed "s|)||" | sed -e 's/[^A-Za-z0-9._-]/ /g' | sed 's/[[:blank:]]*$//' \
     | sed 's/-//' | sed -e 's/[^A-Za-z0-9._-]/_/g' |tr '[:upper:]' '[:lower:]' | tr -d '.')"
 
@@ -118,6 +118,13 @@ set_pad(){
       ADVMAME_VALUES["h0.8"]="stick${BTN_H0},x,left"
       ADVMAME_VALUES["h0.2"]="stick${BTN_H0},x,right"
     fi
+  fi
+
+  if [[ -f "/storage/.config/JP_ADVMAME_INVERT_AXIS" ]]; then
+    ADVMAME_VALUES["a1,1"]="stick,y,up"
+    ADVMAME_VALUES["a1,2"]="stick,y,down"
+    ADVMAME_VALUES["a0,1"]="stick,x,left"
+    ADVMAME_VALUES["a0,2"]="stick,x,right"
   fi
 
   local NAME_NUM="${GC_NAMES[$GAMEPAD]}"
