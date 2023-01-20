@@ -20,11 +20,13 @@ if [ ! -z "${GAMEPADCONFIG}" ]; then
     echo -e "<?xml version=\"1.0\"?>\n<inputList>" > "/storage/roms/saturn/yabasanshiro/input.cfg"
     echo "${GAMEPADCONFIG}" >> "/storage/roms/saturn/yabasanshiro/input.cfg"
     echo "</inputList>" >> "/storage/roms/saturn/yabasanshiro/input.cfg"
+elif [ -f "/storage/.config/emulationstation/es_temporaryinput.cfg" ]; then
+  cp "/storage/.config/emulationstation/es_temporaryinput.cfg" "/storage/roms/saturn/yabasanshiro/input.cfg"
 fi
 
 # if the auto config was not succesful copy the default just in case.
 if [ ! -e "/storage/roms/saturn/yabasanshiro/input.cfg" ]; then
-    cp -rf "/emuelec/configs/yabasanshiro/input.cfg" "/storage/roms/saturn/yabasanshiro/input.cfg"
+  cp -rf "/emuelec/configs/yabasanshiro/input.cfg" "/storage/roms/saturn/yabasanshiro/input.cfg"
 fi
 
 HLEBIOS=$(get_ee_setting hlebios saturn "${ROMNAME}")
