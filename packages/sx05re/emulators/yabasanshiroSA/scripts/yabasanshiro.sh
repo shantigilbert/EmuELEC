@@ -26,7 +26,7 @@ fi
 
 # if the auto config was not succesful copy the default just in case.
 if [ ! -e "/storage/roms/saturn/yabasanshiro/input.cfg" ]; then
-  cp -rf "/emuelec/configs/yabasanshiro/input.cfg" "/storage/roms/saturn/yabasanshiro/input.cfg"
+    cp -rf "/emuelec/configs/yabasanshiro/input.cfg" "/storage/roms/saturn/yabasanshiro/input.cfg"
 fi
 
 HLEBIOS=$(get_ee_setting hlebios saturn "${ROMNAME}")
