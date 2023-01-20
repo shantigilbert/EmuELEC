@@ -127,4 +127,3 @@ jc_generate_guid() {
 
   echo "$v"
 }
-
