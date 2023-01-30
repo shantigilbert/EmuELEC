@@ -33,7 +33,8 @@ PKG_TOOLCHAIN="cmake"
 PKG_CMAKE_OPTS_TARGET="-DLIBRETRO=ON \
                         -DUSE_OPENMP=OFF \ 
                         -DCMAKE_BUILD_TYPE=Release \
-                        -DUSE_GLES2=ON"
+                        -DUSE_GLES2=OFF"
+                        -DUSE_GLES=ON"
 
 pre_make_target() {
   find $PKG_BUILD -name flags.make -exec sed -i "s:isystem :I:g" \{} \;
