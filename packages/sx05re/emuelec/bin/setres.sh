@@ -37,6 +37,7 @@ switch_resolution()
       echo $MODE > "${FILE_MODE}"
       ;;
   esac
+  sleep 1
 }
 
 get_resolution_size()
@@ -251,6 +252,15 @@ if [[ ! -z "${BORDERS[@]}" ]]; then
   [[ -z "$PH" ]] && PH=$RH
   set_display_borders ${BORDERS[0]} ${BORDERS[1]} $PW $PH $RW $RH
 fi
+
+case $MODE in
+  480cvbs)
+		echo 30 10 669 469 > /sys/class/graphics/fb0/window_axis
+		;;
+	576cvbs)
+		echo 35 20 680 565 > /sys/class/graphics/fb0/window_axis
+		;;
+esac
 
 # Lastly we call fbfix to reset its known memory offsets so when the primary 
 # buffer display is used, it's got the correct starting memory address. Note - 
