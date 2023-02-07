@@ -254,11 +254,23 @@ if [[ ! -z "${BORDERS[@]}" ]]; then
 fi
 
 case $MODE in
-  480cvbs)
+	480cvbs)
+		fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
+		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+		echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
 		echo 30 10 669 469 > /sys/class/graphics/fb0/window_axis
+		echo 640 > /sys/class/graphics/fb0/scale_width
+		echo 480 > /sys/class/graphics/fb0/scale_height
+		echo 0x10001 > /sys/class/graphics/fb0/free_scale
 		;;
 	576cvbs)
+		fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
+		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+		echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
 		echo 35 20 680 565 > /sys/class/graphics/fb0/window_axis
+		echo 720 > /sys/class/graphics/fb0/scale_width
+		echo 576 > /sys/class/graphics/fb0/scale_height
+		echo 0x10001 > /sys/class/graphics/fb0/free_scale
 		;;
 esac
 
