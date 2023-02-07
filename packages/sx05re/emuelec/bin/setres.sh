@@ -197,6 +197,29 @@ echo 0 > /sys/class/ppmgr/ppscaler
 
 switch_resolution $OLD_MODE $MODE
 
+case $MODE in
+	480cvbs)
+		fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
+		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+		echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
+		echo 30 10 669 469 > /sys/class/graphics/fb0/window_axis
+		echo 640 > /sys/class/graphics/fb0/scale_width
+		echo 480 > /sys/class/graphics/fb0/scale_height
+		echo 0x10001 > /sys/class/graphics/fb0/free_scale
+    exit 0
+		;;
+	576cvbs)
+		fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
+		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
+		echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
+		echo 35 20 680 565 > /sys/class/graphics/fb0/window_axis
+		echo 720 > /sys/class/graphics/fb0/scale_width
+		echo 576 > /sys/class/graphics/fb0/scale_height
+		echo 0x10001 > /sys/class/graphics/fb0/free_scale
+    exit 0
+		;;
+esac
+
 declare -a SIZE=($( get_resolution_size $MODE ))
 
 SW=${SIZE[0]}
@@ -252,27 +275,6 @@ if [[ ! -z "${BORDERS[@]}" ]]; then
   [[ -z "$PH" ]] && PH=$RH
   set_display_borders ${BORDERS[0]} ${BORDERS[1]} $PW $PH $RW $RH
 fi
-
-case $MODE in
-	480cvbs)
-		fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
-		echo 30 10 669 469 > /sys/class/graphics/fb0/window_axis
-		echo 640 > /sys/class/graphics/fb0/scale_width
-		echo 480 > /sys/class/graphics/fb0/scale_height
-		echo 0x10001 > /sys/class/graphics/fb0/free_scale
-		;;
-	576cvbs)
-		fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
-		echo 35 20 680 565 > /sys/class/graphics/fb0/window_axis
-		echo 720 > /sys/class/graphics/fb0/scale_width
-		echo 576 > /sys/class/graphics/fb0/scale_height
-		echo 0x10001 > /sys/class/graphics/fb0/free_scale
-		;;
-esac
 
 # Lastly we call fbfix to reset its known memory offsets so when the primary 
 # buffer display is used, it's got the correct starting memory address. Note - 
