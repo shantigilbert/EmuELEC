@@ -16,8 +16,8 @@
 
 switch_resolution()
 {
-  local OLD_MODE=$1
-  local MODE=$2
+  local MODE=$1
+  local OLD_MODE=$2
 
   # Here we first clear the primary display buffer of leftover artifacts then set
   # the secondary small buffers flag to stop copying across.
@@ -195,7 +195,7 @@ fi
 # This is needed to reset scaling.
 echo 0 > /sys/class/ppmgr/ppscaler
 
-switch_resolution $OLD_MODE $MODE
+switch_resolution $MODE $OLD_MODE
 
 case $MODE in
 	480cvbs)
