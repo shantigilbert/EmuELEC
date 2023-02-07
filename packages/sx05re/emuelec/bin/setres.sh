@@ -37,7 +37,6 @@ switch_resolution()
       echo $MODE > "${FILE_MODE}"
       ;;
   esac
-  sleep 1
 }
 
 get_resolution_size()
