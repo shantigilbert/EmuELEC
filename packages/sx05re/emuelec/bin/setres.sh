@@ -14,59 +14,69 @@
 # Source predefined functions and variables
 . /etc/profile
 
+# hides the screen from the buffer, 1 activates it, 0 otherwise.
+hide_screen()
+{
+  echo $1 > /sys/class/graphics/fb0/blank
+  echo $1 > /sys/class/graphics/fb1/blank
+}
+
+# switches the display mode.
 switch_resolution()
 {
   local MODE=$1
-  local OLD_MODE=$2
 
   # Here we first clear the primary display buffer of leftover artifacts then set
   # the secondary small buffers flag to stop copying across.
   blank_buffer >> /dev/null
 
+  # Makes sure it's a valid mode before trying to set the display mode.
   case $MODE in
-    480cvbs)
-      echo 480cvbs > "${FILE_MODE}"
-      ;;
-    576cvbs)
-      echo 576cvbs > "${FILE_MODE}"
-      ;;
-    480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
-      echo $MODE > "${FILE_MODE}"
-      ;;
-    *x*)
+    480cvbs|576cvbs|480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*|*x*)
       echo $MODE > "${FILE_MODE}"
       ;;
   esac
 }
 
+# gets the resolution sizes, its real size, and its scaled size.
 get_resolution_size()
 {
   local MODE=$1
 
   # Here we set the Height and Width of the particular resolution, RH and RW stands
   # for Real Width and Real Height respectively.
+  # SW and SH stand for scaled width and height and only differ in cvbs cases.
   local RW=0
   local RH=0
   case $MODE in
     480cvbs)
       RW=640
       RH=480
-      [[ -z "$SW" ]] && SW=1024
-      [[ -z "$SH" ]] && SH=768
+      # Sets the default scaled size for cvbs, Note - it's ratio is same as res.
+      [[ -z "$SW" ]] && SW=1280
+      [[ -z "$SH" ]] && SH=960
       ;;
     576cvbs)
       RW=720
       RH=576
-      [[ -z "$SW" ]] && SW=1024
-      [[ -z "$SH" ]] && SH=768
+      [[ -z "$SW" ]] && SW=1280
+      [[ -z "$SH" ]] && SH=960
       ;;
     480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
+      # Extracts height from the mode for progressive and interlaced scanning.
+      case $MODE in
+        *p*) SH=$(echo $MODE | cut -d'p' -f 1) ;;
+        *i*) SH=$(echo $MODE | cut -d'i' -f 1) ;;
+      esac    
       SW=$(( $SH*16/9 ))
+      # Sets 480p's width to 640, not sure if we keep this value as it really 
+      # should be 853.
       [[ "$MODE" == "480"* ]] && SW=640
       RW=$SW
       RH=$SH
       ;;
     *x*)
+      # Extracts width and height for modes that have both dimensions contained.
       SW=$(echo $MODE | cut -d'x' -f 1)
       SH=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
       [ ! -n "$SH" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
@@ -77,12 +87,16 @@ get_resolution_size()
   echo "$SW $SH $RW $RH"
 }
 
+# Sets the main framebuffer fb0 to match the display mode. For cvbs the scaled,
+# dimensions are larger than the real sizes.
 set_main_framebuffer() {
   local SW=$1
   local SH=$2
   local BPP=32
 
   if [[ -n "$SW" && "$SW" > 0 && -n "$SH" && "$SH" > 0 ]]; then
+    # We multiply the 2nd height by a factor of 2 I assume for interlaced 
+    # support.
     MSH=$(( SH*2 ))
     fbset -fb /dev/fb0 -g $SW $SH $SW $MSH $BPP
     echo 0 0 $(( SW-1 )) $(( SH-1 )) > /sys/class/graphics/fb0/free_scale_axis
@@ -91,6 +105,9 @@ set_main_framebuffer() {
   fi
 }
 
+# Sets display borders around the screen. Expects 6 arguments, X position,
+# Y position, the width and height of the display area. Also the real width and 
+# height of the display size.
 set_display_borders() {
   local PX=$1
   local PY=$2
@@ -99,6 +116,7 @@ set_display_borders() {
   local RW=$5
   local RH=$6
   
+  # Make sure recieved arguments are valid and good.
   if [[ -z "$PX" || -z "$PY" || -z "$PW" || -z "$PH" ]]; then
     return 1
   elif [[ ! -n "$PX" || ! -n "$PY" || ! -n "$PW" || ! -n "$PH" ]]; then
@@ -130,31 +148,35 @@ set_display_borders() {
 # Here we initialize any arguments and variables to be used in the script.
 # The Mode we want the display to change too.
 MODE=$1
+# Platform is optional and used so the user can supply ee_videowindow sizes 
+# specific for the Core Emulator.
 PLATFORM=$2
 
-# Safeguard to prevent blank mode being set.
-[[ -z "$MODE" ]] && exit 0
-
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
-
-# File location of the file that when written to switches the display to match
-# that screen resolution. Note - You do not have to alter anything else, if it's
-# a valid screen value ti will auto-change, if not it will just keep it's
-# original value.
 FILE_MODE="/sys/class/display/mode"
 
-# SH=Height in pixels, SW=Width in pixels, BPP=Bits Per Pixel.
+# Safeguard to prevent a blank mode being set.
+[[ -z "$MODE" ]] && exit 0
+
+# If the display file mode is NOT present, or the video mode supplied is set to
+# auto then just exit.
+if [[ ! -f "$FILE_MODE" ]] || [[ $MODE == "auto" ]]; then
+  exit 0
+fi
+
+# Here we hide the screen after we are sure that the mode change is good to go.
+hide_screen 1
+
+# Resets the pointer of the current index of the frame buffer to the start.
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
+
+# BPP=Bits Per Pixel.
 BPP=32
-SH=0
-SW=0
 
 # The current display mode before it may get changed below.
 OLD_MODE=$( cat ${FILE_MODE} )
 
-BORDER_VALS=$(get_ee_setting ee_videowindow)
-
-# Legacy code, we use to set the buffer that is used for small parts of graphics
-# like Cursors and Fonts but setting default 32 made ES Fonts dissappear.
+# Legacy code, we use to set the sub-buffer that is used for small parts of
+# graphics. It has always been set to 32x32 so seems no need to change it.
 BUFF=$(get_ee_setting ee_video_fb1_size)
 [[ -z "$BUFF" ]] && BUFF=32
 
@@ -162,23 +184,18 @@ if [[ -n "$BUFF" ]] && [[ $BUFF > 0 ]]; then
   fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP
 fi
 
-# If the current display is the same as the change just exit. First we hide the
-# primary display buffer by setting the fb1 blank flag so it stops copying chunks
-# of data on to the image, then we blank the buffer by setting all the bits to 0.
-if [[ ! -f "$FILE_MODE" ]] || [[ $MODE == "auto" ]]; then
-  exit 0
-fi
+# This is needed to reset scaling.
+echo 0 > /sys/class/ppmgr/ppscaler
 
-# For resolution with 2 width and height resolution numbers extract the Height.
-# *p* stand for progressive and *i* stand for interlaced.
-if [[ ! "$MODE" == *"x"* ]]; then
-  case $MODE in
-    *p*) SH=$(echo $MODE | cut -d'p' -f 1) ;;
-    *i*) SH=$(echo $MODE | cut -d'i' -f 1) ;;
-  esac
-fi
+# Switch the resolution of the display mode. 
+switch_resolution $MODE
 
-# Option too Custom set the CVBS Resolution by creating a cvbs_resolution.txt file.
+# Check that the display mode did change or just show the screen and exit. This
+# is a safeguard to prevent continueing with display settings.
+NEW_MODE=$( cat ${FILE_MODE} )
+[[ "$NEW_MODE" != "$MODE" ]] && hide_screen 0 && exit 1
+
+# Option to Custom set the CVBS Resolution by creating a cvbs_resolution.txt file.
 # File contents must just 2 different integers seperated by a space. e.g. 800 600.
 CVBS_RES_FILE="/storage/.config/cvbs_resolution.txt"
 if [[ "$MODE" == *"cvbs" ]]; then
@@ -191,34 +208,7 @@ if [[ "$MODE" == *"cvbs" ]]; then
   fi
 fi
 
-# This is needed to reset scaling.
-echo 0 > /sys/class/ppmgr/ppscaler
-
-switch_resolution $MODE $OLD_MODE
-
-case $MODE in
-	480cvbs)
-		fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
-		echo 30 10 669 469 > /sys/class/graphics/fb0/window_axis
-		echo 640 > /sys/class/graphics/fb0/scale_width
-		echo 480 > /sys/class/graphics/fb0/scale_height
-		echo 0x10001 > /sys/class/graphics/fb0/free_scale
-    exit 0
-		;;
-	576cvbs)
-		fbset -fb /dev/fb0 -g 1280 960 1280 1920 $BPP
-		fbset -fb /dev/fb1 -g $BPP $BPP $BPP $BPP $BPP
-		echo 0 0 1279 959 > /sys/class/graphics/fb0/free_scale_axis
-		echo 35 20 680 565 > /sys/class/graphics/fb0/window_axis
-		echo 720 > /sys/class/graphics/fb0/scale_width
-		echo 576 > /sys/class/graphics/fb0/scale_height
-		echo 0x10001 > /sys/class/graphics/fb0/free_scale
-    exit 0
-		;;
-esac
-
+# Get the real and scaled sizes of the display.
 declare -a SIZE=($( get_resolution_size $MODE ))
 
 SW=${SIZE[0]}
@@ -227,29 +217,42 @@ RW=${SIZE[2]}
 RH=${SIZE[3]}
 
 # Once we know the Width and Height is valid numbers we set the primary display
-# buffer, and we multiply the 2nd height by a factor of 2 I assume for interlaced 
-# support.
-CURRENT_MODE=$( cat ${FILE_MODE} )
-if [[ "$CURRENT_MODE" == "$MODE" ]]; then
-  echo "SET MAIN FRAME BUFFER"
-  set_main_framebuffer $RW $RH
-  blank_buffer
-fi
+# buffer.
+echo "SET MAIN FRAME BUFFER"
+set_main_framebuffer $RW $RH
 
-# Now that the primary buffer has been acquired we blank it again because the new
-# memory allocated, may contain garbage artifact data.
+# Clears the screen of any pixel corruption so it becomes fresh and blank.
+blank_buffer
+
+# We can show the screen now that we have properly set the dimensions.
+hide_screen 0
+
+# Legacy code - I have no idea about these values but apparently they should
+# make cvbs display properly. The values go over the real values which leads me
+# to believe that cvbs uses longer pixel ranges because of overscanning.
+case $MODE in
+	480cvbs)
+		echo 30 10 669 469 > /sys/class/graphics/fb0/window_axis
+#		echo 640 > /sys/class/graphics/fb0/scale_width
+#		echo 480 > /sys/class/graphics/fb0/scale_height
+    echo 1 > /sys/class/graphics/fb0/freescale_mode
+		echo 0x10001 > /sys/class/graphics/fb0/free_scale
+    exit 0
+		;;
+	576cvbs)
+		echo 35 20 680 565 > /sys/class/graphics/fb0/window_axis
+#		echo 720 > /sys/class/graphics/fb0/scale_width
+#		echo 576 > /sys/class/graphics/fb0/scale_height
+    echo 1 > /sys/class/graphics/fb0/freescale_mode
+		echo 0x10001 > /sys/class/graphics/fb0/free_scale
+    exit 0
+		;;
+esac
 
 # Gets the default X, and Y position offsets for cvbs so the display can fit 
 # inside the actual analog diplay resolution which is a bit smaller than the 
 # resolution it's usually transmitted as.
 declare -a BORDERS
-
-if [[ "${MODE}" == "480cvbs" ]]; then
-  BORDERS=(4 0)
-fi
-if [[ "${MODE}" == "576cvbs" ]]; then
-  BORDERS=(12 0)
-fi
 
 # This monolith slab of code basically gets the users preference of if they want 
 # to resize there screen display to make it smaller so it can fit into a screen
