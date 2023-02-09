@@ -231,7 +231,7 @@ hide_screen 0
 # make cvbs display properly. The values go over the real values which leads me
 # to believe that cvbs uses longer pixel ranges because of overscanning.
 if [[ "$MODE" == *"cvbs" ]]; then
-  CVBS_OFFSETS=$( cat "/storage/.config/${MODE}cvbs_offsets" )
+  CVBS_OFFSETS=$( cat "/storage/.config/${MODE}_offsets" )
   if [[ -z "$CVBS_OFFSETS" ]]; then
     [[ "$MODE" == "480cvbs" ]] && CVBS_OFFSETS="30 10 669 469"
     [[ "$MODE" == "576cvbs" ]] && CVBS_OFFSETS="35 20 680 565"
