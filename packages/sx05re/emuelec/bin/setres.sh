@@ -50,7 +50,7 @@ get_resolution_size()
   local RH=0
   case $MODE in
     480cvbs)
-      RW=640
+      RW=720
       RH=480
       # Sets the default scaled size for cvbs, Note - it's ratio is same as res.
       [[ -z "$SW" ]] && SW=1280
@@ -231,22 +231,26 @@ hide_screen 0
 # make cvbs display properly. The values go over the real values which leads me
 # to believe that cvbs uses longer pixel ranges because of overscanning.
 if [[ "$MODE" == *"cvbs" ]]; then
-  CVBS_OFFSETS=$( cat "/storage/.config/${MODE}_offsets" )
-  if [[ -z "$CVBS_OFFSETS" ]]; then
+  declare -a CVBS_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
+  COUNT_ARGS=${#CVBS_OFFSETS[@]}
+  if [[ "$COUNT_ARGS" == "0" ]]; then
     [[ "$MODE" == "480cvbs" ]] && CVBS_OFFSETS="30 10 669 469"
     [[ "$MODE" == "576cvbs" ]] && CVBS_OFFSETS="35 20 680 565"
+  elif [[ "$COUNT_ARGS" == "2" ]]; then
+      CVBS_OFFSETS[2]=$(( $RW - $CVBS_OFFSETS[0] - 1 ))
+      CVBS_OFFSETS[3]=$(( $RH - $CVBS_OFFSETS[1] - 1 ))
   fi
 fi
 
 case $MODE in
 	480cvbs)
-		echo $CVBS_OFFSETS > /sys/class/graphics/fb0/window_axis
+		echo $CVBS_OFFSETS[@] > /sys/class/graphics/fb0/window_axis
     echo 1 > /sys/class/graphics/fb0/freescale_mode
 		echo 0x10001 > /sys/class/graphics/fb0/free_scale
     exit 0
 		;;
 	576cvbs)
-		echo $CVBS_OFFSETS > /sys/class/graphics/fb0/window_axis
+		echo $CVBS_OFFSETS[@] > /sys/class/graphics/fb0/window_axis
     echo 1 > /sys/class/graphics/fb0/freescale_mode
 		echo 0x10001 > /sys/class/graphics/fb0/free_scale
     exit 0
