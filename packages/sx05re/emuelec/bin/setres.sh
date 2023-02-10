@@ -230,27 +230,30 @@ hide_screen 0
 # Legacy code - I have no idea about these values but apparently they should
 # make cvbs display properly. The values go over the real values which leads me
 # to believe that cvbs uses longer pixel ranges because of overscanning.
+declare -a CVBS_OFFSETS
 if [[ "$MODE" == *"cvbs" ]]; then
-  declare -a CVBS_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
+  CVBS_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
   COUNT_ARGS=${#CVBS_OFFSETS[@]}
   if [[ "$COUNT_ARGS" == "0" ]]; then
     [[ "$MODE" == "480cvbs" ]] && CVBS_OFFSETS="30 10 669 469"
     [[ "$MODE" == "576cvbs" ]] && CVBS_OFFSETS="35 20 680 565"
   elif [[ "$COUNT_ARGS" == "2" ]]; then
-      CVBS_OFFSETS[2]=$(( $RW - $CVBS_OFFSETS[0] - 1 ))
-      CVBS_OFFSETS[3]=$(( $RH - $CVBS_OFFSETS[1] - 1 ))
+      TMP="${CVBS_OFFSETS[0]}"
+      CVBS_OFFSETS[2]=$(( $RW - $TMP - 1 ))
+      TMP="${CVBS_OFFSETS[1]}"
+      CVBS_OFFSETS[3]=$(( $RH - $TMP - 1 ))
   fi
 fi
 
 case $MODE in
 	480cvbs)
-		echo $CVBS_OFFSETS[@] > /sys/class/graphics/fb0/window_axis
+		echo ${CVBS_OFFSETS[@]} > /sys/class/graphics/fb0/window_axis
     echo 1 > /sys/class/graphics/fb0/freescale_mode
 		echo 0x10001 > /sys/class/graphics/fb0/free_scale
     exit 0
 		;;
 	576cvbs)
-		echo $CVBS_OFFSETS[@] > /sys/class/graphics/fb0/window_axis
+		echo ${CVBS_OFFSETS[@]} > /sys/class/graphics/fb0/window_axis
     echo 1 > /sys/class/graphics/fb0/freescale_mode
 		echo 0x10001 > /sys/class/graphics/fb0/free_scale
     exit 0
