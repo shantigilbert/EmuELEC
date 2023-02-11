@@ -52,7 +52,7 @@ if [ "$EE_DEVICE" != "OdroidGoAdvance" ] && [ "$EE_DEVICE" != "GameForce" ]; the
             echo "device_video_modeline 1280x1024_60.00 108.88 1280 1360 1496 1712 1024 1025 1028 1060 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
         ;;
         "1280x960p60hz")
-            echo "device_video_modeline 1280x960_60.00 108 1280 1376 1488 1800 960 961 964 1000 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
+            echo "device_video_modeline 1280x960 100.8 1280 1312 1504 1600 960 979 983 1050 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
         ;;
         "1024x768p60hz")
             echo "device_video_modeline 1024x768_60.00 64.11 1024 1080 1184 1344 768 769 772 795 +hsync +vsync" >> $CONFIG_DIR/advmame.rc
