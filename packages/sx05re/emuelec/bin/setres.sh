@@ -235,8 +235,8 @@ if [[ "$MODE" == *"cvbs" ]]; then
   CVBS_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
   COUNT_ARGS=${#CVBS_OFFSETS[@]}
   if [[ "$COUNT_ARGS" == "0" ]]; then
-    [[ "$MODE" == "480cvbs" ]] && CVBS_OFFSETS="55 20 664 459"
-    [[ "$MODE" == "576cvbs" ]] && CVBS_OFFSETS="55 20 654 555"
+    [[ "$MODE" == "480cvbs" ]] && CVBS_OFFSETS="60 20 659 459"
+    [[ "$MODE" == "576cvbs" ]] && CVBS_OFFSETS="60 20 659 555"
   elif [[ "$COUNT_ARGS" == "2" ]]; then
       TMP="${CVBS_OFFSETS[0]}"
       CVBS_OFFSETS[2]=$(( $RW - $TMP - 1 ))
