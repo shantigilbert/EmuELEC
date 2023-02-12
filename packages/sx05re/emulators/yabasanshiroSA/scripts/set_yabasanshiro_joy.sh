@@ -8,7 +8,7 @@
 
 # Configure ADVMAME players based on ES settings
 CONFIG_DIR="/storage/roms/saturn/yabasanshiro"
-CONFIG="keymapv3.json"
+CONFIG="${CONFIG_DIR}/keymapv2.json"
 
 CONFIG_TMP=/tmp/jc/yabasan.tmp
 
@@ -19,21 +19,25 @@ declare -A GC_VALUES=(
 [h0.4]="2"
 [h0.8]="1"
 [h0.2]="4"
+
 [b0]="0"
 [b1]="1"
 [b2]="2"
 [b3]="3"
-[b4]="9"
-[b5]="10"
-[b6]="4"
-[b7]="6"
-[b8]="5"
-[b9]="7"
-[b10]="8"
+[b4]="4"
+[b5]="5"
+[b6]="6"
+[b7]="7"
+[b8]="8"
+[b9]="9"
+[b10]="10"
 [b11]="11"
 [b12]="12"
 [b13]="13"
 [b14]="14"
+[b15]="15"
+[b16]="16"
+
 [a0]="0"
 [a1]="1"
 [a2]="2"
@@ -47,6 +51,7 @@ declare -A GC_TYPES=(
 [h0.4]="hat"
 [h0.8]="hat"
 [h0.2]="hat"
+
 [b0]="button"
 [b1]="button"
 [b2]="button"
@@ -62,6 +67,9 @@ declare -A GC_TYPES=(
 [b12]="button"
 [b13]="button"
 [b14]="button"
+[b15]="button"
+[b16]="button"
+
 [a0]="axis"
 [a1]="axis"
 [a2]="axis"
@@ -88,12 +96,10 @@ declare -A GC_BUTTONS=(
   [back]="select"
   [start]="start"
   #[guide]=""
-  [leftx-0]="analogx"
-  [leftx-1]="analogy"
-  [lefty-0]="analogl"
-  [lefty-1]="analogr"
-  #[rightx]=""
-  #[righty]=""
+  [leftx0]="analogx"
+  [leftx1]="analogy"
+  [lefty0]="analogl"
+  [lefty1]="analogr"
 )
 
 # Cleans all the inputs for the gamepad with name $GAMEPAD and player $1
@@ -118,6 +124,8 @@ set_pad() {
   [[ -z $GC_CONFIG ]] && return
 
   touch "${CONFIG_TMP}"
+
+  JOY_NAME="$(echo $GC_CONFIG | cut -d',' -f2)"
 
   local GC_MAP=$(echo $GC_CONFIG | cut -d',' -f3-)
 
@@ -149,26 +157,34 @@ set_pad() {
           [[ ! -z "$VAL" ]] && echo -e "\t\t\"${GC_INDEX}\": { \"id\": 0, \"type\": \"${TYPE}\", \"value\": ${VAL} }," >> ${CONFIG_TMP}
         fi
         if [[ "$BTN_TYPE" == "a" ]]; then
+          case $BUTTON_INDEX in
+            leftx|rightx|lefty|righty)
+              continue
+              ;;
+          esac
           [[ ! -z "$VAL" ]] && echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": 1 }," >> ${CONFIG_TMP}
         fi
       fi
       if [[ "$BTN_TYPE" == "a" ]]; then
-          case $BUTTON_INDEX in
-            leftx|lefty)
-              GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}-1]}"
-              echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": 1 }," >> ${CONFIG_TMP}
-              GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}-0]}"
-              echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": -1 }," >> ${CONFIG_TMP}
-              ;;
-          esac
-      fi
+        case $BUTTON_INDEX in
+          leftx|lefty)
+            GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}0]}"
+            echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": -1 }," >> ${CONFIG_TMP}
+            GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}1]}"
+            echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": 1 }," >> ${CONFIG_TMP}
+            ;;
+        esac
+      fi      
   done
+  echo -e "\t\t\"analogleft\": { \"id\": 4, \"type\": \"axis\", \"value\": 0 }," >> ${CONFIG_TMP}
+  echo -e "\t\t\"analogright\": { \"id\": 5, \"type\": \"axis\", \"value\": 0 }," >> ${CONFIG_TMP}
 
+  # remove last character
   sed -i '$ s/.$//' ${CONFIG_TMP}
 
   echo -e "\t}," >> ${CONFIG_TMP}
   echo -e "\t\"player${1}\": {" >> ${CONFIG_TMP}
-  echo -e "\t\t\"DeviceID\": ${2:2}," >> ${CONFIG_TMP}
+  echo -e "\t\t\"DeviceID\": ${JOY_INDEX}," >> ${CONFIG_TMP}
   echo -e "\t\t\"deviceGUID\": \"${DEVICE_GUID}\"," >> ${CONFIG_TMP}
   echo -e "\t\t\"deviceName\": \"${JOY_NAME}\"," >> ${CONFIG_TMP}
   echo -e "\t\t\"padmode\": 1" >> ${CONFIG_TMP}
