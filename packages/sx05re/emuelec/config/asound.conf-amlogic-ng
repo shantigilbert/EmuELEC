@@ -13,13 +13,6 @@ pcm.dmixer  {
 	    buffer_size 4096
 	    rate 44100
 	}
-	slave {
-	    pcm "hw:0,1"
-	    period_time 0
-	    period_size 1024
-	    buffer_size 4096
-	    rate 44100
-	}	
 	bindings {
 	    0 0
 	    1 1
