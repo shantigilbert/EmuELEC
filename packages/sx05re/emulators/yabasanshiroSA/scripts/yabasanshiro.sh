@@ -38,5 +38,10 @@ if [ "${HLEBIOS}" != 1 ]; then
     fi
 fi
 
+AUTOGP=$(get_ee_setting yabasanshiro_auto_gamepad)
+if [[ "${AUTOGP}" != "0" ]]; then
+  set_yabasanshiro_joy.sh
+fi
+
 # We use { } to avoid SIGUSR signal showing text and messing up with the error handling
 { yabasanshiro -r 2 -i "${1}" ${BIOS}; } > /emuelec/logs/emuelec.log 2>&1
