@@ -166,9 +166,6 @@ fi
 # Here we hide the screen after we are sure that the mode change is good to go.
 hide_screen 1
 
-# Resets the pointer of the current index of the frame buffer to the start.
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
-
 # BPP=Bits Per Pixel.
 BPP=32
 
@@ -189,6 +186,9 @@ echo 0 > /sys/class/ppmgr/ppscaler
 
 # Switch the resolution of the display mode. 
 switch_resolution $MODE
+
+# Resets the pointer of the current index of the frame buffer to the start.
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # Check that the display mode did change or just show the screen and exit. This
 # is a safeguard to prevent continueing with display settings.
@@ -274,6 +274,7 @@ if [[ ! -z "${BORDER_VALS}" ]]; then
   BORDERS=(${BORDER_VALS})
   COUNT_ARGS=${#BORDERS[@]}
   if [[ ${COUNT_ARGS} != 4 && ${COUNT_ARGS} != 2 ]]; then
+    #hide_screen 0
     exit 0
   fi
 fi
@@ -289,7 +290,4 @@ if [[ ! -z "${BORDERS[@]}" ]]; then
   set_display_borders ${BORDERS[0]} ${BORDERS[1]} $PW $PH $RW $RH
 fi
 
-# Lastly we call fbfix to reset its known memory offsets so when the primary 
-# buffer display is used, it's got the correct starting memory address. Note - 
-# This only need appply to new generation devices.
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
+sleep 0.1
