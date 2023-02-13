@@ -204,9 +204,7 @@ set_pad() {
   rm "${CONFIG_TMP}"
 }
 
-sdljoytest > /tmp/sdljoytest.txt &
-sleep 2
-pkill -9 sdljoytest
+sdljoytest -skip_loop > /tmp/sdljoytest.txt
 
 rm ${CONFIG}
 echo "{" >> ${CONFIG}

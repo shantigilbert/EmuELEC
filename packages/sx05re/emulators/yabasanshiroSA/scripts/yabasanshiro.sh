@@ -12,6 +12,7 @@ mkdir -p "/storage/roms/bios/yabasanshiro/"
 ROMNAME=$(basename "${1}")
 BIOS=""
 
+
 # Gamepad Autoconfiguration
 GAMEPAD=$(sdljoytest -skip_loop | grep "0 name" | sed "s|Joystick 0 name ||")
 GAMEPADCONFIG=$(xmlstarlet sel -t -c "//inputList/inputConfig[@deviceName=${GAMEPAD}]" -n /storage/.emulationstation/es_input.cfg)
@@ -40,6 +41,7 @@ fi
 
 AUTOGP=$(get_ee_setting yabasanshiro_auto_gamepad)
 if [[ "${AUTOGP}" != "0" ]]; then
+  cp -n /storage/.emulationstation/es_input.cfg /storage/roms/saturn/yabasanshiro/input.cfg
   set_yabasanshiro_joy.sh
 fi
 
