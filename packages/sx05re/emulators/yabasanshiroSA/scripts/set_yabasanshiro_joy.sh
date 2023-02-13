@@ -134,6 +134,8 @@ set_pad() {
   declare -i JOY_INDEX=$(( $1 - 1 ))
   echo -e "\t\"${JOY_INDEX}_${JOY_NAME}_${DEVICE_GUID}\": {" >> ${CONFIG_TMP}
 
+  local ADD_ANALOG=0
+
   local LINE_INSERT=
   set -f
   local GC_ARRAY=(${GC_MAP//,/ })
@@ -168,6 +170,7 @@ set_pad() {
       if [[ "$BTN_TYPE" == "a" ]]; then
         case $BUTTON_INDEX in
           leftx|lefty)
+            ADD_ANALOG=1
             GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}0]}"
             echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": -1 }," >> ${CONFIG_TMP}
             GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}1]}"
@@ -176,8 +179,14 @@ set_pad() {
         esac
       fi      
   done
-  echo -e "\t\t\"analogleft\": { \"id\": 4, \"type\": \"axis\", \"value\": 0 }," >> ${CONFIG_TMP}
-  echo -e "\t\t\"analogright\": { \"id\": 5, \"type\": \"axis\", \"value\": 0 }," >> ${CONFIG_TMP}
+
+  local AXIS="$( cat /tmp/sdljoytest.txt | grep "Joystick ${JOY_INDEX} Axes" | cut -d' ' -f4 | sed 's/^0*//' )"
+  if [[ "$AXIS" > 0 ]]; then
+    local AXIS_LEFT=$(( AXIS - 2 ))
+    local AXIS_RIGHT=$(( AXIS - 1 ))
+    echo -e "\t\t\"analogleft\": { \"id\": ${AXIS_LEFT}, \"type\": \"axis\", \"value\": 0 }," >> ${CONFIG_TMP}
+    echo -e "\t\t\"analogright\": { \"id\": ${AXIS_RIGHT}, \"type\": \"axis\", \"value\": 0 }," >> ${CONFIG_TMP}
+  fi
 
   # remove last character
   sed -i '$ s/.$//' ${CONFIG_TMP}
@@ -187,7 +196,7 @@ set_pad() {
   echo -e "\t\t\"DeviceID\": ${JOY_INDEX}," >> ${CONFIG_TMP}
   echo -e "\t\t\"deviceGUID\": \"${DEVICE_GUID}\"," >> ${CONFIG_TMP}
   echo -e "\t\t\"deviceName\": \"${JOY_NAME}\"," >> ${CONFIG_TMP}
-  echo -e "\t\t\"padmode\": 1" >> ${CONFIG_TMP}
+  echo -e "\t\t\"padmode\": ${ADD_ANALOG}" >> ${CONFIG_TMP}
   echo -e "\t}" >> ${CONFIG_TMP}
 
   cat "${CONFIG_TMP}" >> ${CONFIG}
@@ -195,7 +204,14 @@ set_pad() {
   rm "${CONFIG_TMP}"
 }
 
+sdljoytest > /tmp/sdljoytest.txt &
+sleep 2
+pkill -9 sdljoytest
+
 rm ${CONFIG}
 echo "{" >> ${CONFIG}
+
 jc_get_players
+
 echo "}" >> ${CONFIG}
+
