@@ -41,7 +41,7 @@ fi
 
 AUTOGP=$(get_ee_setting yabasanshiro_auto_gamepad)
 if [[ "${AUTOGP}" != "0" ]]; then
-  cp -n /storage/.emulationstation/es_input.cfg /storage/roms/saturn/yabasanshiro/input.cfg
+  cp -f /storage/.emulationstation/es_input.cfg /storage/roms/saturn/yabasanshiro/input.cfg
   set_yabasanshiro_joy.sh
 fi
 
