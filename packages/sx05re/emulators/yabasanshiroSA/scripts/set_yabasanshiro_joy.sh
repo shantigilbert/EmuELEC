@@ -181,7 +181,7 @@ set_pad() {
   done
 
   local AXIS="$( cat /tmp/sdljoytest.txt | grep "Joystick ${JOY_INDEX} Axes" | cut -d' ' -f4 | sed 's/^0*//' )"
-  if [[ "$AXIS" > 0 ]]; then
+  if [[ ! -z "$AXIS" ]]; then
     local AXIS_LEFT=$(( AXIS - 2 ))
     local AXIS_RIGHT=$(( AXIS - 1 ))
     echo -e "\t\t\"analogleft\": { \"id\": ${AXIS_LEFT}, \"type\": \"axis\", \"value\": 0 }," >> ${CONFIG_TMP}
