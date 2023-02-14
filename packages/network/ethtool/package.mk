@@ -1,4 +1,4 @@
-# PDX-License-Identifier: GPL-2.0-or-later
+# SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
