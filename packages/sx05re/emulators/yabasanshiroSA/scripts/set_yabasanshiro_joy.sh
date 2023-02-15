@@ -170,7 +170,7 @@ set_pad() {
       if [[ "$BTN_TYPE" == "a" ]]; then
         case $BUTTON_INDEX in
           leftx|lefty)
-            ADD_ANALOG=1
+            #ADD_ANALOG=1
             GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}0]}"
             echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": -1 }," >> ${CONFIG_TMP}
             GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}1]}"
