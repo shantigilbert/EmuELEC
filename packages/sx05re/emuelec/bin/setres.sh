@@ -224,6 +224,8 @@ set_main_framebuffer $RW $RH
 # Clears the screen of any pixel corruption so it becomes fresh and blank.
 blank_buffer
 
+sleep 0.1
+
 # We can show the screen now that we have properly set the dimensions.
 hide_screen 0
 
