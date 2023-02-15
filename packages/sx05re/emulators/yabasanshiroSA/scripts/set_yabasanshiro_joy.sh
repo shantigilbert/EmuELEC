@@ -15,10 +15,10 @@ CONFIG_TMP=/tmp/jc/yabasan.tmp
 source /usr/bin/joy_common.sh "yabasanshiro"
 
 declare -A GC_VALUES=(
-[h0.1]="8"
-[h0.4]="2"
-[h0.8]="1"
-[h0.2]="4"
+[h0.1]="1"
+[h0.4]="4"
+[h0.8]="8"
+[h0.2]="2"
 
 [b0]="0"
 [b1]="1"
