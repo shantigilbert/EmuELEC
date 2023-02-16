@@ -30,6 +30,11 @@ elif [ "${EE_DEVICE}" == "Amlogic-ng" ]; then
   cp /storage/.config/asound.conf-amlogic-ng /storage/.config/asound.conf
 fi
 
+# Allows the user to define the default device sound plays through, e.g. hw:0 or hw:0,1
+ASOUND=
+[[ -f "/storage/.config/ASOUND" ]] && ASOUND=$( cat /storage/.config/ASOUND )
+[[ ! -z "$ASOUND" ]] && sed -i "s|pcm \"hw:0,0\"|pcm \"${ASOUND}\"|g" /storage/.config/asound.conf
+
 HOSTNAME=$(get_ee_setting system.hostname)
 if [ ! -z "${HOSTNAME}" ];then 
     echo "${HOSTNAME}" > /storage/.cache/hostname
