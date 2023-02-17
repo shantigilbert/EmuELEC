@@ -163,8 +163,6 @@ if [[ ! -f "$FILE_MODE" ]] || [[ $MODE == "auto" ]]; then
   exit 0
 fi
 
-# Here we hide the screen after we are sure that the mode change is good to go.
-hide_screen 1
 
 # BPP=Bits Per Pixel.
 BPP=32
@@ -186,6 +184,12 @@ echo 0 > /sys/class/ppmgr/ppscaler
 
 # Switch the resolution of the display mode. 
 switch_resolution $MODE
+
+# Give some time for the res to take effect for the display.
+sleep 0.25
+
+# Here we hide the screen after mode change so the buffer can be set.
+hide_screen 1
 
 # Resets the pointer of the current index of the frame buffer to the start.
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
@@ -223,8 +227,6 @@ set_main_framebuffer $RW $RH
 
 # Clears the screen of any pixel corruption so it becomes fresh and blank.
 blank_buffer
-
-sleep 0.1
 
 # We can show the screen now that we have properly set the dimensions.
 hide_screen 0
@@ -276,7 +278,6 @@ if [[ ! -z "${BORDER_VALS}" ]]; then
   BORDERS=(${BORDER_VALS})
   COUNT_ARGS=${#BORDERS[@]}
   if [[ ${COUNT_ARGS} != 4 && ${COUNT_ARGS} != 2 ]]; then
-    #hide_screen 0
     exit 0
   fi
 fi
@@ -291,5 +292,3 @@ if [[ ! -z "${BORDERS[@]}" ]]; then
   [[ -z "$PH" ]] && PH=$RH
   set_display_borders ${BORDERS[0]} ${BORDERS[1]} $PW $PH $RW $RH
 fi
-
-sleep 0.1
