@@ -48,9 +48,11 @@ elif [[ "${DEVICE}" =~ ^(OdroidGoAdvance|GameForce|RK356x|OdroidM1)$ ]]; then
                            --enable-opengles3_2 \
                            --enable-kms \
                            --disable-mali_fbdev"
-  if [[ "${DEVICE}" =~ ^(OdroidGoAdvance|GameForce)$ ]]; then
+  if [ "${DEVICE}" = "OdroidGoAdvance" ]; then
     PKG_PATCH_DIRS+=" $RA_DIRECTORY/patches/OdroidGoAdvance"
     PKG_CONFIGURE_OPTS_TARGET+=" --enable-odroidgo2"
+  elif [ "${DEVICE}" = "GameForce" ]; then
+    PKG_PATCH_DIRS+=" $RA_DIRECTORY/patches/OdroidGoAdvance"
   fi
 else
   echo "${PKG_NAME}: Unsupported devices ${DEVICE} when only AmlNG, AmlOld, OGA, GF, RK356X, M1 is supported" 1>&2
