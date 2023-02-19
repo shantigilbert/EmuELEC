@@ -34,6 +34,7 @@ switch_resolution()
   case $MODE in
     480cvbs|576cvbs|480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*|*x*)
       echo $MODE > "${FILE_MODE}"
+      sleep 1
       ;;
   esac
 }
@@ -182,22 +183,22 @@ fi
 # This is needed to reset scaling.
 echo 0 > /sys/class/ppmgr/ppscaler
 
+# Resets the pointer of the current index of the frame buffer to the start.
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
+
 # Switch the resolution of the display mode. 
 switch_resolution $MODE
 
 # Give some time for the res to take effect for the display.
-sleep 0.25
+#sleep 0.25
 
 # Here we hide the screen after mode change so the buffer can be set.
-hide_screen 1
-
-# Resets the pointer of the current index of the frame buffer to the start.
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
+#hide_screen 1
 
 # Check that the display mode did change or just show the screen and exit. This
 # is a safeguard to prevent continueing with display settings.
 NEW_MODE=$( cat ${FILE_MODE} )
-[[ "$NEW_MODE" != "$MODE" ]] && hide_screen 0 && exit 1
+[[ "$NEW_MODE" != "$MODE" ]] && exit 1
 
 # Option to Custom set the CVBS Resolution by creating a cvbs_resolution.txt file.
 # File contents must just 2 different integers seperated by a space. e.g. 800 600.
@@ -229,7 +230,7 @@ set_main_framebuffer $RW $RH
 blank_buffer
 
 # We can show the screen now that we have properly set the dimensions.
-hide_screen 0
+#hide_screen 0
 
 # Legacy code - I have no idea about these values but apparently they should
 # make cvbs display properly. The values go over the real values which leads me
