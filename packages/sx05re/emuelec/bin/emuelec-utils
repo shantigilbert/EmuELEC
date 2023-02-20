@@ -19,7 +19,7 @@ function setauddev() {
     local EE_DEF_ASOUND_CFG="/storage/.config/asound.conf-${EE_DEVICE,,}"
     if [[ -f "${EE_DEF_ASOUND_CFG}" ]]; then
       sed -i "s|pcm \"hw:.*|pcm \"hw:${AUDIO_DEVICE}\"|" "${EE_DEF_ASOUND_CFG}"
-      cp "${EE_DEF_ASOUND_CFG}" "/storage/.config/asound.conf"
+      cp -f "${EE_DEF_ASOUND_CFG}" "/storage/.config/asound.conf"
     else
       sed -i "s|pcm \"hw:.*|pcm \"hw:${AUDIO_DEVICE}\"|" /storage/.config/asound.conf  
     fi
