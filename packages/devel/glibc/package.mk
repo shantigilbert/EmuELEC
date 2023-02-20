@@ -14,7 +14,10 @@ PKG_LONGDESC="The Glibc package contains the main C library."
 PKG_BUILD_FLAGS="+bfd"
 
 case "${LINUX}" in
-  amlogic-4.9|rockchip-4.4|gameforce-4.4|odroid-go-a-4.4|rk356x-4.19|OdroidM1-4.19)
+  amlogic-4.9|rk356x-4.19|OdroidM1-4.19)
+    OPT_ENABLE_KERNEL=4.9.0
+    ;;
+  gameforce-4.4|rockchip-4.4|odroid-go-a-4.4)
     OPT_ENABLE_KERNEL=4.4.0
     ;;
   amlogic-5.4)
