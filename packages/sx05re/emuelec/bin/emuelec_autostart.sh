@@ -23,12 +23,6 @@ fi
 
 emuelec-utils setauddev
 
-if [[ -f "/storage/.config/asound.conf-${EE_DEVICE,,}" ]]; then
-  rm /storage/.config/asound.conf > /dev/null 2>&1
-  cp /storage/.config/asound.conf-${EE_DEVICE,,} /storage/.config/asound.conf
-fi
-
-
 HOSTNAME=$(get_ee_setting system.hostname)
 if [ ! -z "${HOSTNAME}" ];then 
     echo "${HOSTNAME}" > /storage/.cache/hostname
