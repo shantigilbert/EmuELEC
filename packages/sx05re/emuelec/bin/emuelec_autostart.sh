@@ -16,7 +16,6 @@ if [ ! -L "$CONFIG_DIR" ]; then
 ln -sf $CONFIG_DIR2 $CONFIG_DIR
 fi
 
-
 if [ "${EE_DEVICE}" == "Amlogic" ]; then
   if [ "$(get_es_setting bool StopMusicOnScreenSaver)" != "false" ]; then 
       sed -i "/<bool name=\"StopMusicOnScreenSaver.*/d" "${ES_CONF}"
@@ -32,12 +31,6 @@ if [[ ! -f "$EE_ASOUND_CFG" ]]; then
   else
     touch $EE_ASOUND_CFG
 fi
-
-if [[ -f "/storage/.config/asound.conf-${EE_DEVICE,,}" ]]; then
-  rm /storage/.config/asound.conf > /dev/null 2>&1
-  cp /storage/.config/asound.conf-${EE_DEVICE,,} /storage/.config/asound.conf
-fi
-
 
 HOSTNAME=$(get_ee_setting system.hostname)
 if [ ! -z "${HOSTNAME}" ];then 
