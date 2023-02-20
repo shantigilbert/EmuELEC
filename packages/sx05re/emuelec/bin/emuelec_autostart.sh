@@ -16,25 +16,18 @@ if [ ! -L "$CONFIG_DIR" ]; then
 ln -sf $CONFIG_DIR2 $CONFIG_DIR
 fi
 
-
-if [ "${EE_DEVICE}" == "Amlogic" ]; then
-  rm /storage/.config/asound.conf > /dev/null 2>&1
-  cp /storage/.config/asound.conf-amlogic /storage/.config/asound.conf
-
-    if [ "$(get_es_setting bool StopMusicOnScreenSaver)" != "false" ]; then 
-        sed -i "/<bool name=\"StopMusicOnScreenSaver.*/d" "${ES_CONF}"
-        sed -i "s|</config>|	<bool name=\"StopMusicOnScreenSaver\" value=\"false\" />\n</config>|g" "${ES_CONF}"
-    fi
-
-elif [ "${EE_DEVICE}" == "Amlogic-ng" ]; then
-  rm /storage/.config/asound.conf > /dev/null 2>&1
-  cp /storage/.config/asound.conf-amlogic-ng /storage/.config/asound.conf
+if [ "$(get_es_setting bool StopMusicOnScreenSaver)" != "false" ]; then 
+    sed -i "/<bool name=\"StopMusicOnScreenSaver.*/d" "${ES_CONF}"
+    sed -i "s|</config>|	<bool name=\"StopMusicOnScreenSaver\" value=\"false\" />\n</config>|g" "${ES_CONF}"
 fi
 
-# Allows the user to define the default device sound plays through, e.g. hw:0 or hw:0,1
-ASOUND=
-[[ -f "/storage/.config/ASOUND" ]] && ASOUND=$( cat /storage/.config/ASOUND )
-[[ ! -z "$ASOUND" ]] && sed -i "s|pcm \"hw:0,0\"|pcm \"${ASOUND}\"|g" /storage/.config/asound.conf
+emuelec-utils setauddev
+
+if [[ -f "/storage/.config/asound.conf-${EE_DEVICE,,}" ]]; then
+  rm /storage/.config/asound.conf > /dev/null 2>&1
+  cp /storage/.config/asound.conf-${EE_DEVICE,,} /storage/.config/asound.conf
+fi
+
 
 HOSTNAME=$(get_ee_setting system.hostname)
 if [ ! -z "${HOSTNAME}" ];then 
