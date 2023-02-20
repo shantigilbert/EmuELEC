@@ -1,0 +1,12 @@
+--- /dev/null
++++ b/v4l/config-mycompat.h
+@@ -0,0 +1,8 @@
++#undef smp_mb__after_atomic
++#define smp_mb__after_atomic()  smp_mb() /*mb*/
++#undef NEED_SMP_MB_AFTER_ATOMIC
++#undef writel_relaxed
++#define writel_relaxed(v,c) ((void)__raw_writel((__force u32)cpu_to_le32(v),(c)))
++#undef NEED_WRITEL_RELAXED
++#undef NEED_PM_RUNTIME_GET
++#undef NEED_OF_NODE_NAME_EQ
+--

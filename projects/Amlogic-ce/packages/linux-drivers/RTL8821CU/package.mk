@@ -2,8 +2,8 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="RTL8821CU"
-PKG_VERSION="76c4656cdc460ad47555851b672ea430fddc662b"
-PKG_SHA256="6a6f20e74ed74af93fc32eb62710d8db6fb71230be69470f5cd6724cb3183e93"
+PKG_VERSION="a0c18978d1c9ab89f96083354f2c55cf15d483f7"
+PKG_SHA256="de10eadfba30b339a061ea8141459f3e4b7316a0af14726155001d9a145ce2d8"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/morrownr/8821cu-20210118"
 PKG_URL="https://github.com/morrownr/8821cu-20210118/archive/$PKG_VERSION.tar.gz"

@@ -3,7 +3,7 @@
 
 PKG_NAME="dvb-tools"
 PKG_VERSION="1.0"
-PKG_REV="107"
+PKG_REV="0"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://libreelec.tv"

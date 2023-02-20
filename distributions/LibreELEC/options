@@ -44,6 +44,9 @@
 # Default supported get handlers (archive, git, file etc.)
   GET_HANDLER_SUPPORT="archive"
 
+# use local ccache on build host, if available, for early package
+# builds before ccache has been built
+  LOCAL_CCACHE_SUPPORT="yes"
 
 ### OS CONFIGURATION ###
 

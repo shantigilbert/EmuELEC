@@ -3,8 +3,8 @@
 # Copyright (C) 2021-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="vulkan-loader"
-PKG_VERSION="1.3.233"
-PKG_SHA256="b095def299ed4fc63cf177412553a5825a9e6ce94aa18074a5bd8a4168d02660"
+PKG_VERSION="1.3.239"
+PKG_SHA256="dcdbe3f5362035ecc5ffce2140393de377038c44e00dfb8bae43816eec57dfc6"
 PKG_LICENSE="Apache-2.0"
 PKG_SITE="https://github.com/KhronosGroup/Vulkan-Loader"
 PKG_URL="https://github.com/KhronosGroup/Vulkan-Loader/archive/v${PKG_VERSION}.tar.gz"
@@ -14,7 +14,7 @@ PKG_LONGDESC="Vulkan Installable Client Driver (ICD) Loader."
 configure_package() {
   # Displayserver Support
   if [ "${DISPLAYSERVER}" = "x11" ]; then
-    PKG_DEPENDS_TARGET+=" libxcb libX11"
+    PKG_DEPENDS_TARGET+=" libxcb libX11 libXrandr"
   elif [ "${DISPLAYSERVER}" = "wl" ]; then
     PKG_DEPENDS_TARGET+=" wayland"
   fi

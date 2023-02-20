@@ -1,7 +1,7 @@
-From 05ac7533cd4575a245623c0647e918c3c95817e0 Mon Sep 17 00:00:00 2001
+From 0efd3bd51c74ee027a993d1a51501dd20c70e9ac Mon Sep 17 00:00:00 2001
 From: Stefan Agner <stefan@agner.ch>
 Date: Wed, 15 Sep 2021 05:00:45 +0000
-Subject: [PATCH 11/74] LOCAL: of: partial revert of fdt.c changes
+Subject: [PATCH 11/92] LOCAL: of: partial revert of fdt.c changes
 
 This resolves reports similar to the below which are present in dmesg
 since Linux 5.10; which are also causing crashes in some distros:
@@ -14,11 +14,11 @@ Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
  1 file changed, 9 deletions(-)
 
 diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
-index 583ca847a39c..f23eb84b1a96 100644
+index 4f88e8bbdd27..efa14615b865 100644
 --- a/drivers/of/fdt.c
 +++ b/drivers/of/fdt.c
-@@ -481,15 +481,6 @@ static int __init early_init_dt_reserve_memory_arch(phys_addr_t base,
- 					phys_addr_t size, bool nomap)
+@@ -481,15 +481,6 @@ static int __init early_init_dt_reserve_memory(phys_addr_t base,
+ 					       phys_addr_t size, bool nomap)
  {
  	if (nomap) {
 -		/*
@@ -34,5 +34,5 @@ index 583ca847a39c..f23eb84b1a96 100644
  	}
  	return memblock_reserve(base, size);
 -- 
-2.17.1
+2.34.1
 

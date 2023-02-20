@@ -3,9 +3,9 @@
 # Copyright (C) 2020-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="driverselect"
-PKG_VERSION="17d69cfa9781b9f987428cccd22a240bec4ebf9b"
-PKG_SHA256="fd9e73b5618b52be9e95a7c2392ac49544a7d153e418c515dcff9915aaee7e2c"
-PKG_REV="100"
+PKG_VERSION="d0f919f165f0814533548e80d4e3c0d24c1b153a"
+PKG_SHA256="bc6ad1996bbc3249aa2963cd5440d9b4e043701ff0883bb54732b7e923068887"
+PKG_REV="0"
 PKG_ARCH="any"
 PKG_LICENSE="OSS"
 PKG_SITE="https://libreelec.tv"

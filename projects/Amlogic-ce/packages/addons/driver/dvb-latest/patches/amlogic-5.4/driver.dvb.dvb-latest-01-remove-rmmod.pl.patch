@@ -1,0 +1,13 @@
+diff --git a/v4l/Makefile b/v4l/Makefile
+index c45102e..4057e7e 100644
+--- a/v4l/Makefile
++++ b/v4l/Makefile
+@@ -51,7 +51,7 @@ default:: prepare
+ 	@echo Kernel build directory is $(OUTDIR)
+ 	$(MAKE) -C ../linux apply_patches
+ 	$(MAKE) -C $(OUTDIR) M=$(PWD) $(MYCFLAGS) modules
+-	./scripts/rmmod.pl check
++#	./scripts/rmmod.pl check
+ #	$(MAKE) checkpatch
+ 
+ mismatch:: prepare

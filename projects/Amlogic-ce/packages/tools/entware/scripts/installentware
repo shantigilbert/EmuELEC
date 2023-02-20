@@ -10,11 +10,6 @@ export PATH=/opt/bin:/opt/sbin:$PATH
 if [ ! -f /opt/bin/opkg ]; then
   wget -O - http://bin.entware.net/@ENTWARE_ARCH@/installer/generic.sh | /bin/sh
 
-  # remove locale which interfere with CoreELEC
-  sed -e "s|^export LANG=\(.*\)|#CE  export LANG=\1|g" \
-      -e "s|^export LC_ALL=\(.*\)|#CE  export LC_ALL=\1|g" \
-      -i /opt/etc/profile
-
   echo ""
   read -p "Would you like to reboot now to finish installation (recommended) [y/N]? " choice
   case "$choice" in

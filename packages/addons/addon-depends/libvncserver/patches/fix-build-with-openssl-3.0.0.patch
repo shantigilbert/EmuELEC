@@ -1,0 +1,68 @@
+From d998b74e9bfaf5c179bf4322b626506469bc694b Mon Sep 17 00:00:00 2001
+From: Peter Vicman <peter.vicman@gmail.com>
+Date: Fri, 20 Jan 2023 12:13:42 +0100
+Subject: [PATCH] common/crypto_openssl.c: fix build with openssl >= 3.0.0 DES
+ encryption is considered legacy and is no longer available by default. To use
+ it legacy provider must be load.
+
+---
+ common/crypto_openssl.c | 26 ++++++++++++++++++++++++--
+ 1 file changed, 24 insertions(+), 2 deletions(-)
+
+diff --git a/common/crypto_openssl.c b/common/crypto_openssl.c
+index 51d7ec2d..50e8073a 100644
+--- a/common/crypto_openssl.c
++++ b/common/crypto_openssl.c
+@@ -28,6 +28,9 @@
+ #include <openssl/dh.h>
+ #include <openssl/evp.h>
+ #include <openssl/rand.h>
++#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
++#include <openssl/provider.h>
++#endif
+ #include "crypto.h"
+ 
+ static unsigned char reverseByte(unsigned char b) {
+@@ -69,13 +72,25 @@ void random_bytes(void *out, size_t len)
+ int encrypt_rfbdes(void *out, int *out_len, const unsigned char key[8], const void *in, const size_t in_len)
+ {
+     int result = 0;
+-    EVP_CIPHER_CTX *des;
++    EVP_CIPHER_CTX *des = NULL;
+     unsigned char mungedkey[8];
+     int i;
++#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
++    OSSL_PROVIDER *providerLegacy = NULL;
++    OSSL_PROVIDER *providerDefault = NULL;
++#endif
+ 
+     for (i = 0; i < 8; i++)
+       mungedkey[i] = reverseByte(key[i]);
+ 
++#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
++    /* Load Multiple providers into the default (NULL) library context */
++    if (!(providerLegacy = OSSL_PROVIDER_load(NULL, "legacy")))
++    	goto out;
++    if (!(providerDefault = OSSL_PROVIDER_load(NULL, "default")))
++    	goto out;
++#endif
++
+     if(!(des = EVP_CIPHER_CTX_new()))
+ 	goto out;
+     if(!EVP_EncryptInit_ex(des, EVP_des_ecb(), NULL, mungedkey, NULL))
+@@ -86,7 +101,14 @@ int encrypt_rfbdes(void *out, int *out_len, const unsigned char key[8], const vo
+     result = 1;
+ 
+  out:
+-    EVP_CIPHER_CTX_free(des);
++    if (des)
++      EVP_CIPHER_CTX_free(des);
++#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
++    if (providerLegacy)
++      OSSL_PROVIDER_unload(providerLegacy);
++    if (providerDefault)
++      OSSL_PROVIDER_unload(providerDefault);
++#endif
+     return result;
+ }
+ 

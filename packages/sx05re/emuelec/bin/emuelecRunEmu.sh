@@ -94,16 +94,18 @@ else
 fi
 
 if [[ "${EMULATOR}" = "libretro" ]]; then
-	EMU="${CORE}_libretro"
-	LIBRETRO="yes"
+    [[ -f "/storage/.config/RA_KILL_KEYS" ]] && set_kill_keys "$RABIN"
+    EMU="${CORE}_libretro"
+    LIBRETRO="yes"
     RETRORUN=""
 else
 	EMU="${CORE}"
 fi
 
 if [[ "${EMULATOR}" = "retrorun" ]]; then
+    [[ -f "/storage/.config/RA_KILL_KEYS" ]] && set_kill_keys "retrorun"
     EMU="${CORE}_libretro"
-	RETRORUN="yes"
+    RETRORUN="yes"
     LIBRETRO=""
 fi
 

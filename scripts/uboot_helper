@@ -120,6 +120,11 @@ devices = \
         'config': 'orangepi_3_defconfig',
         'crust_config': 'orangepi_3_defconfig'
       },
+      'orangepi-3-lts': {
+        'dtb': 'sun50i-h6-orangepi-3-lts.dtb',
+        'config': 'orangepi_3_defconfig',
+        'crust_config': 'orangepi_3_defconfig'
+      },
       'orangepi-lite2': {
         'dtb': 'sun50i-h6-orangepi-lite2.dtb',
         'config': 'orangepi_lite2_defconfig',
@@ -389,7 +394,7 @@ devices = \
   'Amlogic-ce': {
     'Amlogic-ng': {
     },
-    'Amlogic-old': {
+    'Amlogic-ne': {
     },
   },
 }

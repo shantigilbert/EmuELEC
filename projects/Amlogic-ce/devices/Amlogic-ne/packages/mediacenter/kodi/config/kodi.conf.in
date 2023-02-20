@@ -1,0 +1,4 @@
+KODI_AE_SINK=@KODI_AE_SINK@
+HOME=/storage
+KODI_TEMP=/storage/.kodi/temp
+KODI_HOME=/usr/share/kodi/

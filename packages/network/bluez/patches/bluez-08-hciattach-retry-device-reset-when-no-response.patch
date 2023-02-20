@@ -1,4 +1,4 @@
-From d4eafedce242f6c96b46b5a3122a39cc8d2f1373 Mon Sep 17 00:00:00 2001
+From 57f7aead147b138109709bbef9d4c674a3a6dc9b Mon Sep 17 00:00:00 2001
 From: meijjaa <jjmeijer88@gmail.com>
 Date: Mon, 23 Jan 2017 22:35:33 +0100
 Subject: [PATCH] hciattach: retry device reset when no response
@@ -12,21 +12,21 @@ Signed-off-by: meijjaa <jjmeijer88@gmail.com>
  1 file changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/tools/hciattach_bcm43xx.c b/tools/hciattach_bcm43xx.c
-index 81f38cb..4fd01e2 100644
+index bb24483..ad89161 100644
 --- a/tools/hciattach_bcm43xx.c
 +++ b/tools/hciattach_bcm43xx.c
-@@ -35,6 +35,7 @@
- #include <dirent.h>
+@@ -24,6 +24,7 @@
  #include <time.h>
  #include <limits.h>
+ #include <sys/stat.h>
 +#include <signal.h>
- 
+
  #include "lib/bluetooth.h"
  #include "lib/hci.h"
-@@ -97,21 +98,31 @@ fail:
+@@ -82,21 +83,31 @@ fail:
  	return -1;
  }
- 
+
 +int _fd;
 +void expired(int sig)
 +{
@@ -39,7 +39,7 @@ index 81f38cb..4fd01e2 100644
  {
  	unsigned char cmd[] = { HCI_COMMAND_PKT, 0x03, 0x0C, 0x00 };
  	unsigned char resp[CC_MIN_SIZE];
- 
+
 +	_fd = fd;
 +	signal(SIGALRM, expired);
  	if (write(fd, cmd, sizeof(cmd)) != sizeof(cmd)) {
@@ -57,6 +57,5 @@ index 81f38cb..4fd01e2 100644
  	if (resp[4] != cmd[1] || resp[5] != cmd[2] || resp[6] != CMD_SUCCESS) {
  		fprintf(stderr, "Failed to reset chip, command failure\n");
  		return -1;
--- 
-2.7.4
-
+--
+2.38.1

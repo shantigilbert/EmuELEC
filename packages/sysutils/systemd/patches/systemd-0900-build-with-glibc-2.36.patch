@@ -1,0 +1,20 @@
+commit 134db60f65ecea9a5c6536541a74a6ff5e4167de
+Author: Rudi Heitbaum <rudi@heitbaum.com>
+Date:   Tue Jan 31 12:06:56 2023 +0000
+
+    glibc: Conditionally #include <linux/fs.h> to resolve fsconfig_command/mount_attr conflict with glibc 2.36
+
+diff --git a/src/basic/linux/btrfs.h b/src/basic/linux/btrfs.h
+index 0a53bdc38a..74ed9088bd 100644
+--- a/src/basic/linux/btrfs.h
++++ b/src/basic/linux/btrfs.h
+@@ -26,7 +26,9 @@ extern "C" {
+ 
+ #include <linux/types.h>
+ #include <linux/ioctl.h>
++#if WANT_LINUX_FS_H
+ #include <linux/fs.h>
++#endif
+ 
+ #define BTRFS_IOCTL_MAGIC 0x94
+ #define BTRFS_VOL_NAME_MAX 255

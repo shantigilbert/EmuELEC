@@ -62,54 +62,6 @@ diff -Naur a/integration/plugin/graphdriver/external_test.go b/integration/plugi
  	err = os.WriteFile(specFile, b, 0644)
  	assert.NilError(t, err)
  }
-diff -Naur a/integration-cli/docker_cli_daemon_test.go b/integration-cli/docker_cli_daemon_test.go
---- a/integration-cli/docker_cli_daemon_test.go	2022-06-03 10:30:24.000000000 -0700
-+++ b/integration-cli/docker_cli_daemon_test.go	2022-06-07 14:28:05.556328610 -0700
-@@ -558,12 +558,12 @@
- 
- func (s *DockerDaemonSuite) TestDaemonKeyGeneration(c *testing.T) {
- 	// TODO: skip or update for Windows daemon
--	os.Remove("/etc/docker/key.json")
-+	os.Remove("/storage/.kodi/userdata/addon_data/service.system.docker/config/key.json")
- 	c.Setenv("DOCKER_ALLOW_SCHEMA1_PUSH_DONOTUSE", "1")
- 	s.d.Start(c)
- 	s.d.Stop(c)
- 
--	k, err := libtrust.LoadKeyFile("/etc/docker/key.json")
-+	k, err := libtrust.LoadKeyFile("/storage/.kodi/userdata/addon_data/service.system.docker/config/key.json")
- 	if err != nil {
- 		c.Fatalf("Error opening key file")
- 	}
-@@ -1212,13 +1212,13 @@
- 		Y   string `json:"y"`
- 	}
- 
--	os.Remove("/etc/docker/key.json")
-+	os.Remove("/storage/.kodi/userdata/addon_data/service.system.docker/config/key.json")
- 	c.Setenv("DOCKER_ALLOW_SCHEMA1_PUSH_DONOTUSE", "1")
- 	s.d.Start(c)
- 	s.d.Stop(c)
- 
- 	config := &Config{}
--	bytes, err := os.ReadFile("/etc/docker/key.json")
-+	bytes, err := os.ReadFile("/storage/.kodi/userdata/addon_data/service.system.docker/config/key.json")
- 	if err != nil {
- 		c.Fatalf("Error reading key.json file: %s", err)
- 	}
-@@ -1238,11 +1238,11 @@
- 	}
- 
- 	// write back
--	if err := os.WriteFile("/etc/docker/key.json", newBytes, 0400); err != nil {
-+	if err := os.WriteFile("/storage/.kodi/userdata/addon_data/service.system.docker/config/key.json", newBytes, 0400); err != nil {
- 		c.Fatalf("Error os.WriteFile: %s", err)
- 	}
- 
--	defer os.Remove("/etc/docker/key.json")
-+	defer os.Remove("/storage/.kodi/userdata/addon_data/service.system.docker/config/key.json")
- 
- 	if err := s.d.StartWithError(); err == nil {
- 		c.Fatalf("It should not be successful to start daemon with wrong key: %v", err)
 diff -Naur a/integration-cli/docker_cli_external_volume_driver_test.go b/integration-cli/docker_cli_external_volume_driver_test.go
 --- a/integration-cli/docker_cli_external_volume_driver_test.go	2022-06-03 10:30:24.000000000 -0700
 +++ b/integration-cli/docker_cli_external_volume_driver_test.go	2022-06-07 14:28:05.556328610 -0700
@@ -240,12 +192,15 @@ diff -Naur a/libnetwork/libnetwork_unix_test.go b/libnetwork/libnetwork_unix_tes
 diff -Naur a/pkg/plugins/discovery_unix.go b/pkg/plugins/discovery_unix.go
 --- a/pkg/plugins/discovery_unix.go	2022-06-03 10:30:24.000000000 -0700
 +++ b/pkg/plugins/discovery_unix.go	2022-06-07 14:28:05.615329505 -0700
-@@ -3,4 +3,4 @@
+@@ -9,7 +9,7 @@
+ 	"github.com/docker/docker/pkg/rootless"
+ )
  
- package plugins // import "github.com/docker/docker/pkg/plugins"
+-const globalConfigPluginsPath = "/etc/docker/plugins"
++const globalConfigPluginsPath = "/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins"
+ const globalLibPluginsPath = "/usr/lib/docker/plugins"
  
--var specsPaths = []string{"/etc/docker/plugins", "/usr/lib/docker/plugins"}
-+var specsPaths = []string{"/storage/.kodi/userdata/addon_data/service.system.docker/config/plugins", "/usr/lib/docker/plugins"}
+ var globalSpecsPaths = []string{globalConfigPluginsPath, globalLibPluginsPath}
 diff -Naur a/pkg/plugins/plugins.go b/pkg/plugins/plugins.go
 --- a/pkg/plugins/plugins.go	2022-06-03 10:30:24.000000000 -0700
 +++ b/pkg/plugins/plugins.go	2022-06-07 14:28:05.616329521 -0700

@@ -2,8 +2,8 @@
 # Copyright (C) 2019 Trond Haugland (trondah@gmail.com)
 
 PKG_NAME="mame"
-PKG_VERSION="57622367cb780013690d6ef23b2066b500f6ce92"
-PKG_SHA256="9ede7cb09cb48f721b1803a7363f79e10a87d4e7ed25b085bf1ed6c7a02bb519"
+PKG_VERSION="f7761a9902d59030882c58d4482446196e748c50"
+PKG_SHA256="4f0c7ca6aa33c291a396eb01aff0cdde2c79caa2beca1a83140393eb2996a194"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/mame"

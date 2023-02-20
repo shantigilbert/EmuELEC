@@ -8,9 +8,10 @@ PKG_SHA256="50dbc8f39797950aa2c98e939947c527e5ac9ebd2c1b99dd7b06ba33a6767ae6"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.gnu.org/s/gettext/"
 PKG_URL="https://ftp.gnu.org/pub/gnu/gettext/${PKG_NAME}-${PKG_VERSION}.tar.xz"
-PKG_DEPENDS_HOST="ccache:host"
+PKG_DEPENDS_HOST="make:host"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="A program internationalization library and tools."
+PKG_BUILD_FLAGS="+local-cc"
 
 PKG_CONFIGURE_OPTS_HOST="--disable-static --enable-shared \
                          --disable-rpath \

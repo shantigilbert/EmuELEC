@@ -1,0 +1,15 @@
+[Unit]
+Description=Kodi halt script
+After=kodi.service
+Before=systemd-halt.service
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+Environment=HOME=/storage
+ExecStartPre=-/usr/lib/kodi/kodi-after
+ExecStart=-/bin/sh -c ". /etc/profile; exec /bin/sh /storage/.config/shutdown.sh halt"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=halt.target

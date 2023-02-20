@@ -1,0 +1,10 @@
+[Unit]
+Description=CoreELEC BL301 Update Service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/coreelec/update-bl301 -v
+RemainAfterExit=no
+
+[Install]
+WantedBy=basic.target

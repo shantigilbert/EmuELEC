@@ -42,21 +42,21 @@ git_clone() {
 get_pkg_var() {
   local pkg_name="$1" pkg_var="$2"
   cd "${ROOT}"
-  PROJECT="${PROJECT:-Generic}" ARCH="${ARCH:-x86_64}" source config/options ${pkg_name} &>/dev/null
+  PROJECT="${PROJECT:-Generic}" ARCH="${ARCH:-x86_64}" source config/options "${pkg_name}" &>/dev/null
   echo "${!pkg_var}"
 }
 
 resolve_hash() {
   if [ -d "$1" ] ; then
     cd "$1"
-    git rev-parse $2 2>/dev/null
+    git rev-parse "$2" 2>/dev/null
   fi
 }
 
 resolve_hash_in_branch() {
   if [ -d "$1" ] ; then
     cd "$1"
-    git rev-parse origin/$2 2>/dev/null
+    git rev-parse "origin/$2" 2>/dev/null
   fi
 }
 
@@ -70,7 +70,7 @@ resolve_tag_in_branch() {
   local tag tags
   if [ -d "$1" ] ; then
     cd "$1"
-    tag=$(git describe --abbrev=0 --tags origin/$2 2>/dev/null)
+    tag=$(git describe --abbrev=0 --tags "origin/$2" 2>/dev/null)
     if [ -z "${tag}" ]; then
       return
     fi
@@ -114,7 +114,7 @@ EOF
 }
 
 check_package_excluded() {
-  local package="$1" local packages_to_exclude="$2" pkg
+  local package="$1" packages_to_exclude="$2" pkg
   [ -z "${package}" -o -z "${packages_to_exclude}" ] && return 1
   if [[ ${packages_to_exclude} =~ (^|[[:space:]])${package}($|[[:space:]]) ]]; then
     msg_info "SKIPPING excluded package ${package}"
@@ -123,9 +123,14 @@ check_package_excluded() {
   return 1
 }
 
+# args: path var value
+set_pkg_var() {
+  local package_mk="$1/package.mk" pkg_var="$2" pkg_value="$3"
+  sed -e "s|${pkg_var}=.*|${pkg_var}=\"${pkg_value}\"|" -i "${package_mk}"
+}
+
 set_pkg_version() {
-  local package_mk="$1/package.mk" pkg_version="$2"
-  sed -e "s|PKG_VERSION=.*|PKG_VERSION=\"${pkg_version}\"|g" -i "${package_mk}"
+  set_pkg_var "$1" "PKG_VERSION" "$2"
 }
 
 download_pkg_file() {
@@ -144,26 +149,25 @@ cleanup_pkg_tmp() {
 }
 
 set_pkg_sha256() {
-  local package_mk="$1/package.mk"
   local new_sha256=$(sha256sum < "${TMP_PKG_FILE}" | awk '{print $1}')
-  sed -e "s|PKG_SHA256=.*|PKG_SHA256=\"${new_sha256}\"|g" -i "${package_mk}"
+  set_pkg_var "$1" "PKG_SHA256" "${new_sha256}"
 }
 
 bump_pkg_rev() {
-  local package_mk="$1/package.mk" pkg_name="$2"
+  local pkg_name="$2"
   local pkg_rev=$(get_pkg_var "${pkg_name}" PKG_REV)
-  local new_pkg_rev=$((${pkg_rev}+1))
+  local new_pkg_rev=$((pkg_rev+1))
+  set_pkg_var "$1" "PKG_REV" "${new_pkg_rev}"
 
-  sed -e "s|PKG_REV=.*|PKG_REV=\"${new_pkg_rev}\"|" -i "${package_mk}"
   msg_info "BUMPED ${pkg_name} PKG_REV from ${pkg_rev} to ${new_pkg_rev}"
 }
 
 reset_pkg_rev() {
-  local package_mk="$1/package.mk" pkg_name="$2"
+  local pkg_name="$2"
   local pkg_rev=$(get_pkg_var "${pkg_name}" PKG_REV)
   local new_pkg_rev="1"
+  set_pkg_var "$1" "PKG_REV" "${new_pkg_rev}"
 
-  sed -e "s|PKG_REV=.*|PKG_REV=\"${new_pkg_rev}\"|" -i "${package_mk}"
   msg_info "RESET ${pkg_name} PKG_REV from ${pkg_rev} to ${new_pkg_rev}"
 }
 
@@ -188,13 +192,44 @@ update_pkg() {
   fi
 }
 
+update_pkg_and_url() {
+  local pkg_path="$1" pkg_name="$2" pkg_version="$3" pkg_url="$4"
+  local old_version old_url new_sha256
+  local changed=0
+
+  old_url=$(grep "^PKG_URL=" "${pkg_path}/package.mk" | sed -e 's|^PKG_URL="||' -e 's|"$||')
+
+  if [ "${old_url}" != "${pkg_url}" ]; then
+    set_pkg_var "${pkg_path}" "PKG_URL" "${pkg_url}"
+    msg_info "CHANGED ${pkg_name} PKG_URL from ${old_url} to ${pkg_url}"
+    changed=1
+  fi
+
+  old_version=$(get_pkg_var "${pkg_name}" PKG_VERSION)
+
+  if [ "${old_version}" != "${pkg_version}" ]; then
+    set_pkg_var "${pkg_path}" "PKG_VERSION" "${pkg_version}"
+    msg_info "UPDATED ${pkg_name} from ${old_version} to ${pkg_version}"
+    changed=1
+  fi
+
+  if [ $changed -eq 1 ]; then
+    download_pkg_file "${pkg_name}"
+    set_pkg_sha256 "${pkg_path}"
+
+    return 0
+  else
+    return 1
+  fi
+}
+
 # Get url in git:// notation for a package.mk, assuming it is a github.com url
 # Return 1 if not a github domain
 geturl() {
   local addon="$1"
   local domain owner repo PKG_URL
 
-  PKG_URL="$(get_pkg_var ${addon} PKG_URL)"
+  PKG_URL="$(get_pkg_var "${addon}" PKG_URL)"
 
   domain="$(echo "${PKG_URL}" | cut -d/ -f3)"
   [ "${domain}" = "github.com" ] || return 1

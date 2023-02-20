@@ -1,0 +1,18 @@
+#!/usr/bin/python3
+
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2022-present Team LibreELEC (https://libreelec.tv)
+
+import sys
+sys.path.append('/storage/.kodi/addons/browser.chrome/resources')
+import unix_ar
+import tarfile
+
+if len(sys.argv) != 3:
+    print("Parameter error", file=sys.stderr)
+    sys.exit(1)
+
+ar = unix_ar.open(sys.argv[1])
+tarball = ar.open('data.tar.xz/')
+tar = tarfile.open(fileobj=tarball)
+tar.extractall(path=sys.argv[2])

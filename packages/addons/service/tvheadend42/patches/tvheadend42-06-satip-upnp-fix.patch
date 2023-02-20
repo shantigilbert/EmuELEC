@@ -1,0 +1,41 @@
+From 1ebf9bf548540f935ff4ce1d380f5ce7849572f3 Mon Sep 17 00:00:00 2001
+From: Matthieu Poullet <matthieu.poullet@gmail.com>
+Date: Tue, 15 Mar 2022 10:40:44 +0100
+Subject: [PATCH] SAT>IP client: UPnP header field names are case insensitive
+
+- SAT>IP Protocol Specification 1.2.2: 3.3.2 Server Advertisements
+---
+ src/input/mpegts/satip/satip.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/src/input/mpegts/satip/satip.c b/src/input/mpegts/satip/satip.c
+index 4d522e19c4..58e91d30bb 100644
+--- a/src/input/mpegts/satip/satip.c
++++ b/src/input/mpegts/satip/satip.c
+@@ -1175,19 +1175,19 @@ satip_discovery_service_received
+     if (ptr == NULL)
+       break;
+     if (http_tokenize(ptr, argv, 2, ':') == 2) {
+-      if (strcmp(argv[0], "ST") == 0)
++      if (strcasecmp(argv[0], "ST") == 0)
+         st = argv[1];
+-      else if (strcmp(argv[0], "LOCATION") == 0)
++      else if (strcasecmp(argv[0], "LOCATION") == 0)
+         location = argv[1];
+-      else if (strcmp(argv[0], "SERVER") == 0)
++      else if (strcasecmp(argv[0], "SERVER") == 0)
+         server = argv[1];
+-      else if (strcmp(argv[0], "BOOTID.UPNP.ORG") == 0)
++      else if (strcasecmp(argv[0], "BOOTID.UPNP.ORG") == 0)
+         bootid = argv[1];
+-      else if (strcmp(argv[0], "CONFIGID.UPNP.ORG") == 0)
++      else if (strcasecmp(argv[0], "CONFIGID.UPNP.ORG") == 0)
+         configid = argv[1];
+-      else if (strcmp(argv[0], "DEVICEID.SES.COM") == 0)
++      else if (strcasecmp(argv[0], "DEVICEID.SES.COM") == 0)
+         deviceid = argv[1];
+-      else if (strcmp(argv[0], "USN") == 0) {
++      else if (strcasecmp(argv[0], "USN") == 0) {
+         n = http_tokenize(argv[1], argv, ARRAY_SIZE(argv), ':');
+         for (i = 0; i < n-1; i++)
+           if (argv[i] && strcmp(argv[i], "uuid") == 0) {
