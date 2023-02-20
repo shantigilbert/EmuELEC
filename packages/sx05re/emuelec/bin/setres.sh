@@ -34,7 +34,7 @@ switch_resolution()
   case $MODE in
     480cvbs|576cvbs|480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*|*x*)
       echo $MODE > "${FILE_MODE}"
-      sleep 1
+
       ;;
   esac
 }
@@ -186,19 +186,19 @@ echo 0 > /sys/class/ppmgr/ppscaler
 # Resets the pointer of the current index of the frame buffer to the start.
 [[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
+# Hides the screen before we change the display mode and the buffer.
+hide_screen 1
+
 # Switch the resolution of the display mode. 
 switch_resolution $MODE
 
-# Give some time for the res to take effect for the display.
-#sleep 0.25
-
-# Here we hide the screen after mode change so the buffer can be set.
-#hide_screen 1
+# Small sleep to give res switch time to reset if invalid.
+sleep 2
 
 # Check that the display mode did change or just show the screen and exit. This
 # is a safeguard to prevent continueing with display settings.
 NEW_MODE=$( cat ${FILE_MODE} )
-[[ "$NEW_MODE" != "$MODE" ]] && exit 1
+[[ "$NEW_MODE" != "$MODE" ]] && hide_screen 0 && exit 1
 
 # Option to Custom set the CVBS Resolution by creating a cvbs_resolution.txt file.
 # File contents must just 2 different integers seperated by a space. e.g. 800 600.
@@ -249,6 +249,15 @@ if [[ "$MODE" == *"cvbs" ]]; then
       CVBS_OFFSETS[3]=$(( $RH - $TMP - 1 ))
   fi
 fi
+
+# My display takes time to switch displays so I needed to add a sleep or 
+# the display does not take effect properly and the result is no resolution
+# change.
+#sleep 1
+
+# Unhide screen now that the display mode has changed internally and the buffer
+# been set.
+hide_screen 0
 
 case $MODE in
 	480cvbs)
