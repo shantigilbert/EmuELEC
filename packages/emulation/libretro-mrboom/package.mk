@@ -2,12 +2,11 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libretro-mrboom"
-PKG_VERSION="5.2"
-PKG_SUBVER=".454d614"
-PKG_SHA256="50e4fe4bc74b23ac441499c756c4575dfe9faab9e787a3ab942a856ac63cf10d"
+PKG_VERSION="787f7a09dad0e2fd3fea71517261ae34445e5c63"
+PKG_SHA256="4a9e8bad643ae43f327920686d872c56c2c812ab4dbd0abecf02a6315cd3a42c"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/Javanaise/mrboom-libretro"
-PKG_URL="https://github.com/Javanaise/mrboom-libretro/releases/download/${PKG_VERSION}/MrBoom-src-${PKG_VERSION}${PKG_SUBVER}.tar.gz"
+PKG_URL="https://github.com/kodi-game/mrboom-libretro/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain kodi-platform"
 PKG_LONGDESC="game.libretro.mrboom: mrboom for Kodi"
 

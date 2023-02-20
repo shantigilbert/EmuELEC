@@ -67,6 +67,14 @@ if [ -z "$CCACHE_DIR" ]; then
   export CCACHE_DIR=$BUILD/.ccache
 fi
 
+# keep a copy of ccache dir used for toolchain ccache
+export BUILD_CCACHE_DIR="${CCACHE_DIR}"
+
+# local ccache dir in case we build early packages with local ccache
+if [ -z "${LOCAL_CCACHE_DIR}" ]; then
+  export LOCAL_CCACHE_DIR="${BUILD}/.ccache-local"
+fi
+
 if [[ -z "$PATH" || ( "$PATH" != "$TOOLCHAIN/bin:$TOOLCHAIN/sbin" && "$PATH" = "${PATH#$TOOLCHAIN/bin:$TOOLCHAIN/sbin:}" ) ]]; then
   export PATH="$TOOLCHAIN/bin:$TOOLCHAIN/sbin${PATH:+":$PATH"}"
 fi

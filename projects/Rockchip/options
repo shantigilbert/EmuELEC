@@ -62,7 +62,7 @@
     FIRMWARE="misc-firmware wlan-firmware dvb-firmware brcmfmac_sdio-firmware"
 
   # additional packages to install
-    ADDITIONAL_PACKAGES="dtc"
+    ADDITIONAL_PACKAGES+=" dtc"
 
   # build and install CEC framework support (yes / no)
     CEC_FRAMEWORK_SUPPORT="yes"

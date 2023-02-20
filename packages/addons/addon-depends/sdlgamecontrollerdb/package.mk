@@ -2,8 +2,8 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="sdlgamecontrollerdb"
-PKG_VERSION="68d3f1e5d5e204a5975834c5a6cae572bb075445"
-PKG_SHA256="37544b8f21dc3279d96622d9788ebd593142ff2221164e622941f8e6037b33c4"
+PKG_VERSION="adf7ec1edfc0371ebf5fb469b61f301b8e26ec81"
+PKG_SHA256="efe9e6f98e4a635e8d0dc8634bd80b409efae7d45b100179018c9c31d119a857"
 PKG_ARCH="any"
 PKG_LICENSE="zlib"
 PKG_SITE="https://github.com/gabomdq/SDL_GameControllerDB"

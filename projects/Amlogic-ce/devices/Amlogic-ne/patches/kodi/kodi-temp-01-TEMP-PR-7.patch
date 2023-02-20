@@ -1,0 +1,23 @@
+From 4b14769c42b2bc42077c8e783210bb6977244bd3 Mon Sep 17 00:00:00 2001
+From: kszaq <737984+kszaq@users.noreply.github.com>
+Date: Thu, 22 Dec 2022 23:17:07 +0100
+Subject: [PATCH] AMLCodec: prefill to 0.5
+
+Reduces frame stuttering with videos provided by Inputstream Adaptive
+---
+ xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+index ffa268eb33..e8ab77f6de 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+@@ -2532,7 +2532,7 @@ CDVDVideoCodec::VCReturn CAMLCodec::GetPicture(VideoPicture *pVideoPicture)
+     return CDVDVideoCodec::VC_ERROR;
+ 
+   float timesize(GetTimeSize());
+-  if(!m_drain && timesize < 0.2f)
++  if(!m_drain && timesize < 0.5f)
+     return CDVDVideoCodec::VC_BUFFER;
+ 
+   if (DequeueBuffer() == 0)

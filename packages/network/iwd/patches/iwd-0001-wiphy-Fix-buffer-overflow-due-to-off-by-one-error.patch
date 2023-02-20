@@ -1,0 +1,63 @@
+From 54a06835580bc4e15c453ee87db8c14655e900ef Mon Sep 17 00:00:00 2001
+From: Denis Kenzior <denkenz@gmail.com>
+Date: Thu, 26 Jan 2023 09:59:56 -0600
+Subject: wiphy: Fix buffer overflow due to off-by-one error
+
+Since channels numbers are used as indexes into the array, and given
+that channel numbers start at '1' instead of 0, make sure to allocate a
+buffer large enough to not overflow when the max channel number for a
+given band is accessed.
+
+src/manager.c:manager_wiphy_dump_callback() New wiphy phy1 added (1)
+==22290== Invalid write of size 2
+==22290==    at 0x4624B2: nl80211_parse_supported_frequencies (nl80211util.c:570)
+==22290==    by 0x417CA5: parse_supported_bands (wiphy.c:1636)
+==22290==    by 0x418594: wiphy_parse_attributes (wiphy.c:1805)
+==22290==    by 0x418E20: wiphy_update_from_genl (wiphy.c:1991)
+==22290==    by 0x464589: manager_wiphy_dump_callback (manager.c:564)
+==22290==    by 0x4CBDDA: process_unicast (genl.c:944)
+==22290==    by 0x4CC19C: received_data (genl.c:1056)
+==22290==    by 0x4C7140: io_callback (io.c:120)
+==22290==    by 0x4C5A97: l_main_iterate (main.c:476)
+==22290==    by 0x4C5BDC: l_main_run (main.c:523)
+==22290==    by 0x4C5F0F: l_main_run_with_signal (main.c:645)
+==22290==    by 0x40503B: main (main.c:600)
+==22290==  Address 0x4aa76ec is 0 bytes after a block of size 28 alloc'd
+==22290==    at 0x48417B5: malloc (vg_replace_malloc.c:393)
+==22290==    by 0x4BC4D1: l_malloc (util.c:62)
+==22290==    by 0x417BE4: parse_supported_bands (wiphy.c:1619)
+==22290==    by 0x418594: wiphy_parse_attributes (wiphy.c:1805)
+==22290==    by 0x418E20: wiphy_update_from_genl (wiphy.c:1991)
+==22290==    by 0x464589: manager_wiphy_dump_callback (manager.c:564)
+==22290==    by 0x4CBDDA: process_unicast (genl.c:944)
+==22290==    by 0x4CC19C: received_data (genl.c:1056)
+==22290==    by 0x4C7140: io_callback (io.c:120)
+==22290==    by 0x4C5A97: l_main_iterate (main.c:476)
+==22290==    by 0x4C5BDC: l_main_run (main.c:523)
+==22290==    by 0x4C5F0F: l_main_run_with_signal (main.c:645)
+==22290==
+---
+ src/wiphy.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/wiphy.c b/src/wiphy.c
+index fcdc3ab8..2db2d2cd 100644
+--- a/src/wiphy.c
++++ b/src/wiphy.c
+@@ -1616,8 +1616,12 @@ static void parse_supported_bands(struct wiphy *wiphy,
+ 				continue;
+ 
+ 			band->freq = freq;
++			/*
++			 * Since channels start at 1, allocate one extra in
++			 * order to use channel indexes without arithmetic
++			 */
+ 			band->freq_attrs = l_new(struct band_freq_attrs,
+-							num_channels);
++							num_channels + 1);
+ 			band->freqs_len = num_channels;
+ 
+ 			/* Reset iter to beginning */
+-- 
+cgit 
+

@@ -1,0 +1,14 @@
+[Unit]
+Description=Kodi user autostart script
+Before=kodi.service
+After=network-online.target graphical.target
+ConditionPathExists=/storage/.config/autostart.sh
+
+[Service]
+Type=oneshot
+Environment=HOME=/storage
+ExecStart=-/bin/sh -c ". /etc/profile; exec /bin/sh /storage/.config/autostart.sh"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=kodi.service

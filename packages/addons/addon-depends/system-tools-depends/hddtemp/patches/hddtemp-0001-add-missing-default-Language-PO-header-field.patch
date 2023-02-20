@@ -1,0 +1,80 @@
+commit ba91ffb6d96528fa2d449586f0757d1028cdaa6d
+Author: Rudi Heitbaum <rudi@heitbaum.com>
+Date:   Mon Dec 12 11:03:18 2022 +0000
+
+    add missing default Language PO header field
+
+diff --git a/po/de.po b/po/de.po
+index 31d02c7..b0d8b7e 100644
+--- a/po/de.po
++++ b/po/de.po
+@@ -13,7 +13,7 @@ msgstr ""
+ "PO-Revision-Date: 2011-08-30 16:40+0200\n"
+ "Last-Translator: Vinzenz Vietzke <vinz@v1nz.org>\n"
+ "Language-Team: <debian-l10n-german@lists.debian.org>\n"
+-"Language: \n"
++"Language: de_DE\n"
+ "MIME-Version: 1.0\n"
+ "Content-Type: text/plain; charset=UTF-8\n"
+ "Content-Transfer-Encoding: 8bit\n"
+diff --git a/po/fr.po b/po/fr.po
+index 2af6500..433ced0 100644
+--- a/po/fr.po
++++ b/po/fr.po
+@@ -12,7 +12,7 @@ msgstr ""
+ "PO-Revision-Date: 2011-08-30 16:38+0200\n"
+ "Last-Translator: Aurelien Jarno <aurelien@aurel32.net>\n"
+ "Language-Team: FRANCAIS <fr@li.org>\n"
+-"Language: \n"
++"Language: fr_FR\n"
+ "MIME-Version: 1.0\n"
+ "Content-Type: text/plain; charset=ISO-8859-1\n"
+ "Content-Transfer-Encoding: 8bit\n"
+diff --git a/po/hddtemp.pot b/po/hddtemp.pot
+index 40936d9..a3d9af8 100644
+--- a/po/hddtemp.pot
++++ b/po/hddtemp.pot
+@@ -12,6 +12,7 @@ msgstr ""
+ "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+ "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+ "Language-Team: LANGUAGE <LL@li.org>\n"
++"Language: \n"
+ "MIME-Version: 1.0\n"
+ "Content-Type: text/plain; charset=CHARSET\n"
+ "Content-Transfer-Encoding: 8bit\n"
+diff --git a/po/pt.po b/po/pt.po
+index 8583dd6..23c0e49 100644
+--- a/po/pt.po
++++ b/po/pt.po
+@@ -11,6 +11,7 @@ msgstr ""
+ "PO-Revision-Date: 2006-03-29 23:22+0000\n"
+ "Last-Translator: Miguel Figueiredo <elmig@debianp.org>\n"
+ "Language-Team: Portuguese <traduz@debianpt.org>\n"
++"Language: pt_PT\n"
+ "MIME-Version: 1.0\n"
+ "Content-Type: text/plain; charset=UTF-8\n"
+ "Content-Transfer-Encoding: 8bit\n"
+diff --git a/po/ru.po b/po/ru.po
+index 3d06da3..7ebceb0 100644
+--- a/po/ru.po
++++ b/po/ru.po
+@@ -11,6 +11,7 @@ msgstr ""
+ "PO-Revision-Date: 2003-03-08 16:42+0300\n"
+ "Last-Translator: Michael Shigorin <mike@altlinux.ru>\n"
+ "Language-Team: Russian <ru@li.org>\n"
++"Language: ru_RU\n"
+ "MIME-Version: 1.0\n"
+ "Content-Type: text/plain; charset=koi8-r\n"
+ "Content-Transfer-Encoding: 8bit\n"
+diff --git a/po/sv.po b/po/sv.po
+index d235e52..2729e59 100644
+--- a/po/sv.po
++++ b/po/sv.po
+@@ -11,6 +11,7 @@ msgstr ""
+ "PO-Revision-Date: 2005-11-02 19:03+0100\n"
+ "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
+ "Language-Team: Swedish <sv@li.org>\n"
++"Language: sv_SV\n"
+ "MIME-Version: 1.0\n"
+ "Content-Type: text/plain; charset=iso-8859-1\n"
+ "Content-Transfer-Encoding: 8bit\n"

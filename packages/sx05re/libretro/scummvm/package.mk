@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="scummvm"
-PKG_VERSION="fe6ca7910cef5ba4e5c71ba22eac7b8b58ff970a"
+PKG_VERSION="18add58f142f0b0fe1614f79a9a9cb48aa3eb033"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/scummvm"
@@ -33,11 +33,7 @@ PKG_BUILD_FLAGS="-lto"
 
 pre_configure_target() {
 sed -i "s|DEFINES  += -Wno-multichar|#DEFINES  += -Wno-multichar|" Makefile.common
-}
-
-make_target() {
-cd ${PKG_BUILD}
-make platform=rpi4_64
+PKG_MAKE_OPTS_TARGET=" all platform=rpi4_64"
 }
 
 makeinstall_target() {

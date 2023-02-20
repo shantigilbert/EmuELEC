@@ -5,7 +5,7 @@
 PKG_NAME="librespot"
 PKG_VERSION="0.3.1"
 PKG_SHA256="d360eaf61ad4216ee2c4a4d583d61c8ec7367b5efbe512011d049f73e4f24952"
-PKG_REV="130"
+PKG_REV="0"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/librespot-org/librespot/"

@@ -1,2 +1,17 @@
+20.1.0
+- fix password authentication when building with openssl >=3.0.0
+
+20.0.104
+- update language strings file
+
+103
+- improvements
+
+102
+- libvncserver bump
+
+101
+- CoreELEC rebrand
+
 100
 - Initial release

@@ -2,8 +2,8 @@
 # Copyright (C) 2022-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="augustus"
-PKG_VERSION="482f4ff544148c538460d6592bbff450dc391316"
-PKG_SHA256="ee0cbb543a2a5e26131b26e39dd8f6aaf88223dfcf58aca2b302348fd063cc48"
+PKG_VERSION="178ef26e364cafd794c5f2bd41e191850889e1a1"
+PKG_SHA256="d874d450d36deb3f054bc36a4a8bb728a00ad255531aa36dcbe8a78b1babab4b"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"

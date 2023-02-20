@@ -20,7 +20,7 @@ PKG_CMAKE_OPTS_TARGET="-DINSTALL_PKGCONFIG_DIR=/usr/lib/pkgconfig"
 unpack() {
   ${SCRIPTS}/get zlib
   mkdir -p ${PKG_BUILD}
-  tar --strip-components=1 -xf ${SOURCES}/zlib/zlib-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
+  tar --strip-components=1 -xf ${SOURCES}/zlib/zlib-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
 }
 
 post_makeinstall_target() {

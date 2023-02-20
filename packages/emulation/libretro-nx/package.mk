@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libretro-nx"
-PKG_VERSION="45bae99ac99328e8bbfaeafefb80a3996f4b9db8"
-PKG_SHA256="bf32cab2c5aad6c3ad3dddb5b409bd1e2c08d69881c916b880578a1f855463e3"
+PKG_VERSION="1b57d2d1d064a78b551e51bb6ec9ea56c185a3e1"
+PKG_SHA256="bbe9329cb466f19f7569e059189178c04864268e5a8e1fa0cd5500908396a6b8"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/nxengine-libretro"
 PKG_URL="https://github.com/libretro/nxengine-libretro/archive/${PKG_VERSION}.tar.gz"

@@ -5,7 +5,7 @@
 PKG_NAME="pvr.mythtv"
 PKG_VERSION="20.3.0-Nexus"
 PKG_SHA256="8b348aab4d6c155ae5295cb46c3b5b7feaa5895b99248941ab9b43e223c9a940"
-PKG_REV="1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/janbar/pvr.mythtv"

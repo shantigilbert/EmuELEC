@@ -1,0 +1,27 @@
+From 1090b59aa68165e67a39895d7d648c7ff286ed8d Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Wed, 17 Feb 2021 07:59:09 +0100
+Subject: [PATCH] TEMP: fix OnSettingChanged signal
+
+---
+ xbmc/peripherals/dialogs/GUIDialogPeripheralSettings.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/xbmc/peripherals/dialogs/GUIDialogPeripheralSettings.cpp b/xbmc/peripherals/dialogs/GUIDialogPeripheralSettings.cpp
+index d44ae883b3..4ecd11013a 100644
+--- a/xbmc/peripherals/dialogs/GUIDialogPeripheralSettings.cpp
++++ b/xbmc/peripherals/dialogs/GUIDialogPeripheralSettings.cpp
+@@ -75,6 +75,10 @@ void CGUIDialogPeripheralSettings::OnSettingChanged(const std::shared_ptr<const
+     return;
+ 
+   itSetting->second->FromString(setting->ToString());
++
++  PeripheralPtr peripheral = CServiceBroker::GetPeripherals().GetByPath(m_item->GetPath());
++  if (peripheral)
++    peripheral->OnSettingChanged(setting->GetId());
+ }
+ 
+ bool CGUIDialogPeripheralSettings::Save()
+-- 
+2.30.0
+

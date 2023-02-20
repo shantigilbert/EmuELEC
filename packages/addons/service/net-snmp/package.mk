@@ -4,7 +4,7 @@
 PKG_NAME="net-snmp"
 PKG_VERSION="5.9.3"
 PKG_SHA256="2097f29b7e1bf3f1300b4bae52fa2308d0bb8d5d3998dbe02f9462a413a2ef0a"
-PKG_REV="111"
+PKG_REV="0"
 PKG_ARCH="any"
 PKG_LICENSE="BSD"
 PKG_SITE="http://www.net-snmp.org"

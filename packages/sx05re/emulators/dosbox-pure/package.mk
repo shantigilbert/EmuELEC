@@ -16,7 +16,7 @@ pre_configure_target() {
 
 if [ "${DEVICE}" == "Amlogic-old" ]; then
 	PKG_MAKE_OPTS_TARGET=" platform=emuelec"
-elif [ "${DEVICE}" == "Amlogic-ng" ]; then
+elif [ "${DEVICE}" = "Amlogic-ng" || "${DEVICE}" == "Amlogic-ogu" ]; then
 	PKG_MAKE_OPTS_TARGET=" platform=emuelec-ng"
 else
 	PKG_MAKE_OPTS_TARGET=" platform=emuelec-hh"

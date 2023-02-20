@@ -12,8 +12,7 @@ PKG_DEPENDS_TARGET="toolchain util-macros libX11 libXfixes libXext"
 PKG_LONGDESC="LibXi provides an X Window System client interface to the XINPUT extension to the X protocol."
 PKG_BUILD_FLAGS="+pic"
 
-PKG_CONFIGURE_OPTS_TARGET="--enable-static --disable-shared \
-                           --enable-malloc0returnsnull \
+PKG_CONFIGURE_OPTS_TARGET="--enable-malloc0returnsnull \
                            --disable-silent-rules \
                            --disable-docs \
                            --disable-specs \

@@ -106,8 +106,8 @@
   # additional drivers to install:
   # for a list of additional drivers see packages/linux-drivers
   # Space separated list is supported,
-  # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
-    ADDITIONAL_DRIVERS="$ADDITIONAL_DRIVERS bcm2835-driver"
+  # e.g. ADDITIONAL_DRIVERS+=" DRIVER1 DRIVER2"
+    ADDITIONAL_DRIVERS+=" bcm2835-driver"
 
     if [ "${ALSA_SUPPORT}" = "yes" ]; then
       ADDITIONAL_DRIVERS+=" rpi-cirrus-config"
