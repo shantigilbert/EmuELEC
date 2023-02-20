@@ -16,13 +16,7 @@ function setauddev() {
     AUDIO_DEVICE="${1}"
     [ -z "${AUDIO_DEVICE}" ] && AUDIO_DEVICE="$(get_ee_setting ee_audio_device)"
     [[ "${AUDIO_DEVICE}" = "auto" || -z "${AUDIO_DEVICE}" ]] && AUDIO_DEVICE="0,0"
-    local EE_DEF_ASOUND_CFG="/storage/.config/asound.conf-${EE_DEVICE,,}"
-    if [[ -f "${EE_DEF_ASOUND_CFG}" ]]; then
-      sed -i "s|pcm \"hw:.*|pcm \"hw:${AUDIO_DEVICE}\"|" "${EE_DEF_ASOUND_CFG}"
-      cp -f "${EE_DEF_ASOUND_CFG}" "/storage/.config/asound.conf"
-    else
-      sed -i "s|pcm \"hw:.*|pcm \"hw:${AUDIO_DEVICE}\"|" /storage/.config/asound.conf  
-    fi
+    sed -i "s|pcm \"hw:.*|pcm \"hw:${AUDIO_DEVICE}\"|" /storage/.config/asound.conf
 }
 
 function audio() {
