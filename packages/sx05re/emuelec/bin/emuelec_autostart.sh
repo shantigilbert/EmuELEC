@@ -30,6 +30,7 @@ if [[ ! -f "$EE_ASOUND_CFG" ]]; then
     cp -f "${EE_DEV_ASOUND_CFG}" "${EE_ASOUND_CFG}"
   else
     touch $EE_ASOUND_CFG
+  fi
 fi
 
 HOSTNAME=$(get_ee_setting system.hostname)
