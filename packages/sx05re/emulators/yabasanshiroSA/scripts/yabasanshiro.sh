@@ -38,8 +38,9 @@ if [ "${HLEBIOS}" != 1 ]; then
     fi
 fi
 
+# It should be disabled by default unless the user enables it.
 AUTOGP=$(get_ee_setting yabasanshiro_auto_gamepad)
-if [[ "${AUTOGP}" != "0" ]]; then
+if [[ "${AUTOGP}" == "1" ]]; then
   cp -f /storage/.emulationstation/es_input.cfg /storage/roms/saturn/yabasanshiro/input.cfg
   set_yabasanshiro_joy.sh
 fi
