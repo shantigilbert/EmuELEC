@@ -14,27 +14,16 @@
 # Source predefined functions and variables
 . /etc/profile
 
-# hides the screen from the buffer, 1 activates it, 0 otherwise.
-hide_screen()
-{
-  echo $1 > /sys/class/graphics/fb0/blank
-  echo $1 > /sys/class/graphics/fb1/blank
-}
-
 # switches the display mode.
 switch_resolution()
 {
   local MODE=$1
 
-  # Here we first clear the primary display buffer of leftover artifacts then set
-  # the secondary small buffers flag to stop copying across.
-  blank_buffer >> /dev/null
-
   # Makes sure it's a valid mode before trying to set the display mode.
   case $MODE in
     480cvbs|576cvbs|480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*|*x*)
       echo $MODE > "${FILE_MODE}"
-
+      sleep 1
       ;;
   esac
 }
@@ -155,6 +144,10 @@ PLATFORM=$2
 
 FILE_MODE="/sys/class/display/mode"
 
+# Here we first clear the primary display buffer of leftover artifacts then set
+# the secondary small buffers flag to stop copying across.
+blank_buffer >> /dev/null
+
 # Safeguard to prevent a blank mode being set.
 [[ -z "$MODE" ]] && exit 0
 
@@ -183,22 +176,13 @@ fi
 # This is needed to reset scaling.
 echo 0 > /sys/class/ppmgr/ppscaler
 
-# Resets the pointer of the current index of the frame buffer to the start.
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
-
-# Hides the screen before we change the display mode and the buffer.
-hide_screen 1
-
 # Switch the resolution of the display mode. 
 switch_resolution $MODE
-
-# Small sleep to give res switch time to reset if invalid.
-sleep 2
 
 # Check that the display mode did change or just show the screen and exit. This
 # is a safeguard to prevent continueing with display settings.
 NEW_MODE=$( cat ${FILE_MODE} )
-[[ "$NEW_MODE" != "$MODE" ]] && hide_screen 0 && exit 1
+[[ "$NEW_MODE" != "$MODE" ]] && exit 1
 
 # Option to Custom set the CVBS Resolution by creating a cvbs_resolution.txt file.
 # File contents must just 2 different integers seperated by a space. e.g. 800 600.
@@ -226,11 +210,8 @@ RH=${SIZE[3]}
 echo "SET MAIN FRAME BUFFER"
 set_main_framebuffer $RW $RH
 
-# Clears the screen of any pixel corruption so it becomes fresh and blank.
-blank_buffer
-
-# We can show the screen now that we have properly set the dimensions.
-#hide_screen 0
+# Resets the pointer of the current index of the frame buffer to the start.
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
 
 # Legacy code - I have no idea about these values but apparently they should
 # make cvbs display properly. The values go over the real values which leads me
@@ -253,11 +234,7 @@ fi
 # My display takes time to switch displays so I needed to add a sleep or 
 # the display does not take effect properly and the result is no resolution
 # change.
-#sleep 1
-
-# Unhide screen now that the display mode has changed internally and the buffer
-# been set.
-hide_screen 0
+sleep 1
 
 case $MODE in
 	480cvbs)
