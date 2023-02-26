@@ -22,8 +22,9 @@ switch_resolution()
   # Makes sure it's a valid mode before trying to set the display mode.
   case $MODE in
     480cvbs|576cvbs|480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*|*x*)
+      echo null > "${FILE_MODE}"
+      sleep 0.5
       echo $MODE > "${FILE_MODE}"
-      sleep 1
       ;;
   esac
 }
@@ -234,7 +235,7 @@ fi
 # My display takes time to switch displays so I needed to add a sleep or 
 # the display does not take effect properly and the result is no resolution
 # change.
-sleep 1
+#sleep 1
 
 case $MODE in
 	480cvbs)
