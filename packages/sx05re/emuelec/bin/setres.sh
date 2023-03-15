@@ -217,40 +217,34 @@ set_main_framebuffer $RW $RH
 # Legacy code - I have no idea about these values but apparently they should
 # make cvbs display properly. The values go over the real values which leads me
 # to believe that cvbs uses longer pixel ranges because of overscanning.
-declare -a CVBS_OFFSETS
+declare -a CUSTOM_OFFSETS
+if [[ -f "/storage/.config/${MODE}_offsets" ]]; then
+  CUSTOM_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
+fi
+
+COUNT_ARGS=${#CUSTOM_OFFSETS[@]}
 if [[ "$MODE" == *"cvbs" ]]; then
-  CVBS_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
-  COUNT_ARGS=${#CVBS_OFFSETS[@]}
   if [[ "$COUNT_ARGS" == "0" ]]; then
-    [[ "$MODE" == "480cvbs" ]] && CVBS_OFFSETS="60 20 659 459"
-    [[ "$MODE" == "576cvbs" ]] && CVBS_OFFSETS="60 20 659 555"
-  elif [[ "$COUNT_ARGS" == "2" ]]; then
-      TMP="${CVBS_OFFSETS[0]}"
-      CVBS_OFFSETS[2]=$(( $RW - $TMP - 1 ))
-      TMP="${CVBS_OFFSETS[1]}"
-      CVBS_OFFSETS[3]=$(( $RH - $TMP - 1 ))
+    [[ "$MODE" == "480cvbs" ]] && CUSTOM_OFFSETS="60 20 659 459"
+    [[ "$MODE" == "576cvbs" ]] && CUSTOM_OFFSETS="60 20 659 555"
   fi
 fi
 
-# My display takes time to switch displays so I needed to add a sleep or 
-# the display does not take effect properly and the result is no resolution
-# change.
-#sleep 1
+if [[ "$COUNT_ARGS" == "2" ]]; then
+  TMP="${CUSTOM_OFFSETS[0]}"
+  CUSTOM_OFFSETS[2]=$(( $RW - $TMP - 1 ))
+  TMP="${CUSTOM_OFFSETS[1]}"
+  CUSTOM_OFFSETS[3]=$(( $RH - $TMP - 1 ))
+fi
 
-case $MODE in
-	480cvbs)
-		echo ${CVBS_OFFSETS[@]} > /sys/class/graphics/fb0/window_axis
-    echo 1 > /sys/class/graphics/fb0/freescale_mode
-		echo 0x10001 > /sys/class/graphics/fb0/free_scale
-    exit 0
-		;;
-	576cvbs)
-		echo ${CVBS_OFFSETS[@]} > /sys/class/graphics/fb0/window_axis
-    echo 1 > /sys/class/graphics/fb0/freescale_mode
-		echo 0x10001 > /sys/class/graphics/fb0/free_scale
-    exit 0
-		;;
-esac
+COUNT_ARGS=${#CUSTOM_OFFSETS[@]}
+if [[ "$COUNT_ARGS" == "4" ]]; then
+  echo ${CUSTOM_OFFSETS[@]} > /sys/class/graphics/fb0/window_axis
+  echo 1 > /sys/class/graphics/fb0/freescale_mode
+  echo 0x10001 > /sys/class/graphics/fb0/free_scale
+  exit 0
+  ;;
+fi
 
 # Gets the default X, and Y position offsets for cvbs so the display can fit 
 # inside the actual analog diplay resolution which is a bit smaller than the 
