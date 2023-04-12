@@ -19,6 +19,11 @@ PLAYER="${2}"
 case ${PLAYER} in
 	"ffplay")
 MODE=`cat /sys/class/display/mode`;	
+
+if [[ "${EE_DEVICE}" == "Amlogic" ]]; then 
+	MODE="1080p60hz"
+fi
+
 	case "$MODE" in
 		480*)
 			SIZE=" -x 800 -y 480"

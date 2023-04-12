@@ -8,6 +8,10 @@
 
 CUR_MODE=`cat /sys/class/display/mode`;
 
+if [[ "${EE_DEVICE}" == "Amlogic" ]]; then 
+  CUR_MODE="1080p60hz"
+fi
+
 case ${CUR_MODE} in
     480*)
         RES="640,480,32"
