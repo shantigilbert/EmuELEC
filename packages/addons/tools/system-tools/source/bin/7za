@@ -1,4 +1,3 @@
 #!/bin/sh
-file=/storage/.kodi/addons/virtual.system-tools/lib/p7zip/7za
-[ ! -x ${file} ] && chmod +x ${file}
+file=/storage/.kodi/addons/virtual.system-tools/bin/7zz
 exec ${file} "$@"

@@ -1,4 +1,5 @@
-export ROCKCHIP_LEGACY_BOOT=$("${ROOT}"/"${SCRIPTS}"/uboot_helper "${PROJECT}" "${DEVICE}" "${UBOOT_SYSTEM}" rockchip_legacy_boot) || "${ROCKCHIP_LEGACY_BOOT:-}"
+
+[ -z "${ROCKCHIP_LEGACY_BOOT}" ] && export ROCKCHIP_LEGACY_BOOT=$("${ROOT}/${SCRIPTS}/uboot_helper" "${PROJECT}" "${DEVICE}" "${UBOOT_SYSTEM}" rockchip_legacy_boot)
 
 if [ "${ROCKCHIP_LEGACY_BOOT}" = "1" ]; then
   export UBOOT_TARGET="u-boot-dtb.bin"

@@ -29,7 +29,7 @@ install_addon_files "${ADDON_DIRECTORY}"
 debug_strip "${ADDON_DIRECTORY}"
 
 # pack_addon()
-ADDON_INSTALL_DIR="${TARGET_IMG}/${ADDONS}/${ADDON_VERSION}/${PROJECT}/${TARGET_ARCH}/${PKG_ADDON_ID}"
+ADDON_INSTALL_DIR="${TARGET_ADDONS}/${PKG_ADDON_ID}"
 ADDONVER="$(xmlstarlet sel -t -v "/addon/@version" ${ADDON_BUILD}/${PKG_ADDON_ID}/addon.xml)"
 
 if [ -f ${ADDON_INSTALL_DIR}/${PKG_ADDON_ID}-${ADDONVER}.zip ]; then

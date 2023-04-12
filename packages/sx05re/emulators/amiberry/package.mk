@@ -24,7 +24,7 @@ pre_configure_target() {
         AMIBERRY_PLATFORM="a64"
      fi
       ;;
-    Amlogic-ng)
+    Amlogic-ng|Amlogic-ogu)
     if [ $ARCH == "arm" ]; then
         AMIBERRY_PLATFORM="AMLG12B"
      else

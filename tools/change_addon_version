@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2022-present Team LibreELEC (https://libreelec.tv)
+
+# path to the version file
+DISTRIBUTION_PATH="distributions/LibreELEC/version"
+
+# prevents executing from wrong folder
+[ -f ${DISTRIBUTION_PATH} ] || { echo "${DISTRIBUTION_PATH}: No such file or directory" && exit; }
+
+# current addon-version
+DISTRO_ADDON_VERSION=$(grep -oP '(?<=ADDON_VERSION=\").*(?=\")' ${DISTRIBUTION_PATH})
+
+# increase addon-version x.y.z to x.y.(z+1)
+BUMP_ADDON_VERSION="${DISTRO_ADDON_VERSION%.*}.$((${DISTRO_ADDON_VERSION##*.} + 1))"
+
+# update ADDON-VERSION
+update_addon_version() {
+  sed -e "s|ADDON_VERSION=.*|ADDON_VERSION=\"${BUMP_ADDON_VERSION}\"|" -i "${DISTRIBUTION_PATH}"
+
+  echo "git commit \"distro: bump ADDON_VERSION to ${BUMP_ADDON_VERSION}\""
+  git commit -qs -m "distro: bump ADDON_VERSION to ${BUMP_ADDON_VERSION}" "${DISTRIBUTION_PATH}"
+}
+
+update_package() {
+  # update package.mk
+  for package_mk in $(find packages/addons -type f -name "package.mk" -not -path "packages/addons/addon-depends/*"); do
+    sed -e "s|PKG_REV=.*|PKG_REV=\"0\"|" -i "${package_mk}"
+  done
+
+  # update changelog.txt
+  for changelog_txt in $(find packages/addons -type f -name "changelog.txt" -not -path "packages/addons/addon-depends/*"); do
+    echo -e "initial release" >"${changelog_txt}"
+  done
+
+  # commit changes
+  # avoid errors at commit by checking if changes are available
+  git diff --quiet HEAD $REF -- packages/addons || { echo "git commit \"addons: reset version\"" && git commit -qs -m "addons: reset version" "packages/addons"; }
+}
+
+# check if whiptail is installed and directly execute script when argument is supplied
+if [ -z "$1" ]; then
+  if ! command -v whiptail >/dev/null 2>&1; then
+    echo "whiptail not installed, use the command line instead"
+    echo "Usage: $0 1.2.3"
+    exit
+  fi
+else
+  BUMP_ADDON_VERSION="$1"
+  update_addon_version
+  update_package
+  exit
+fi
+
+OPTION=$(whiptail --title "Update ADDON-VERSION" --menu "" 12 60 4 \
+  "1" "Update to ${BUMP_ADDON_VERSION}" \
+  "2" "Update to custom version" \
+  "3" "Exit" 3>&1 1>&2 2>&3)
+
+case $OPTION in
+"1")
+  update_addon_version
+  update_package
+  ;;
+"2")
+  BUMP_ADDON_VERSION=$(whiptail --inputbox "Enter ADDON-VERSION:" 10 25 ${DISTRO_ADDON_VERSION} 3>&1 1>&2 2>&3)
+  EXITSTATUS=$?
+  if [ $EXITSTATUS = 0 ]; then
+    update_addon_version
+    update_package
+  else
+    exit
+  fi
+  ;;
+"3")
+  exit
+  ;;
+esac

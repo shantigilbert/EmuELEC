@@ -1,0 +1,72 @@
+From 92657de6d2ac3ae100a4d78cc37c729142f1a59b Mon Sep 17 00:00:00 2001
+From: Samuel Holland <samuel@sholland.org>
+Date: Sat, 17 Apr 2021 13:33:54 -0500
+Subject: [PATCH 10/13] sunxi: Enable support for SCP firmware on H3
+
+Now that issues with the BROM have been sorted out, we can implement
+PSCI system suspend on H3 by delegating to SCP firmware. Let's start by
+including the firmware in the FIT image and starting the coprocessor if
+valid firmware is loaded.
+
+Signed-off-by: Samuel Holland <samuel@sholland.org>
+---
+ arch/arm/dts/sunxi-u-boot.dtsi | 1 +
+ board/sunxi/board.c            | 8 ++++++++
+ include/configs/sun8i.h        | 3 +++
+ 3 files changed, 12 insertions(+)
+
+diff --git a/arch/arm/dts/sunxi-u-boot.dtsi b/arch/arm/dts/sunxi-u-boot.dtsi
+index a2c74da81aa9..ce062fe94052 100644
+--- a/arch/arm/dts/sunxi-u-boot.dtsi
++++ b/arch/arm/dts/sunxi-u-boot.dtsi
+@@ -9,6 +9,7 @@
+ #if defined(CONFIG_MACH_SUN8I_H3)
+ #ifdef CONFIG_ARMV7_PSCI
+ #define RESUME_ADDR	SUNXI_RESUME_BASE
++#define SCP_ADDR	SUNXI_SCP_BASE
+ #endif
+ #elif defined(CONFIG_MACH_SUN50I) || defined(CONFIG_MACH_SUN50I_H5)
+ #define BL31_ADDR	0x00044000
+diff --git a/board/sunxi/board.c b/board/sunxi/board.c
+index 2b7d655678d0..a25cd11f1124 100644
+--- a/board/sunxi/board.c
++++ b/board/sunxi/board.c
+@@ -18,6 +18,7 @@
+ #include <init.h>
+ #include <log.h>
+ #include <mmc.h>
++#include <remoteproc.h>
+ #include <axp_pmic.h>
+ #include <generic-phy.h>
+ #include <phy-sun4i-usb.h>
+@@ -957,6 +958,13 @@ int board_late_init(void)
+ 	usb_ether_init();
+ #endif
+ 
++#ifdef SUNXI_SCP_BASE
++	if (!rproc_load(0, SUNXI_SCP_BASE, SUNXI_SCP_MAX_SIZE)) {
++		puts("Starting SCP...\n");
++		rproc_start(0);
++	}
++#endif
++
+ 	return 0;
+ }
+ 
+diff --git a/include/configs/sunxi-common.h b/include/configs/sunxi-common.h
+index 2f0d69bdfce2..fda5b235a3e0 100644
+--- a/include/configs/sunxi-common.h
++++ b/include/configs/sunxi-common.h
+@@ -26,6 +26,9 @@
+ #define SUNXI_RESUME_BASE		(CONFIG_ARMV7_SECURE_BASE + \
+ 					 CONFIG_ARMV7_SECURE_MAX_SIZE)
+ #define SUNXI_RESUME_SIZE		1024
++
++#define SUNXI_SCP_BASE			(SUNXI_RESUME_BASE + SUNXI_RESUME_SIZE)
++#define SUNXI_SCP_MAX_SIZE		(16 * 1024)
+ #endif
+ 
+ /*
+-- 
+2.33.0
+

@@ -12,7 +12,7 @@ tz-data.service
 
 --- a/xbmc/platform/posix/PosixTimezone.cpp
 +++ b/xbmc/platform/posix/PosixTimezone.cpp
-@@ -26,6 +26,8 @@
+@@ -25,6 +25,8 @@
  
  #include <algorithm>
  
@@ -21,7 +21,7 @@ tz-data.service
  CPosixTimezone::CPosixTimezone()
  {
     char* line = NULL;
-@@ -143,6 +145,16 @@ void CPosixTimezone::OnSettingChanged(co
+@@ -142,6 +144,16 @@ void CPosixTimezone::OnSettingChanged(co
    const std::string &settingId = setting->GetId();
    if (settingId == CSettings::SETTING_LOCALE_TIMEZONE)
    {

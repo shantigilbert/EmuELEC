@@ -4,7 +4,7 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 case $DTNAME in
-  radxa,zero)
+  radxa,zero*)
     echo "Skipping configuration, eth0 not detected"
     exit 0
     ;;

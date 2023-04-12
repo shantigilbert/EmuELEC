@@ -4,7 +4,7 @@
 PKG_NAME="tinc"
 PKG_VERSION="1.1pre18"
 PKG_SHA256="bd2d010a1bdeb1dd767f6fbc769fce2a2169119fb3d177df928c27d1f20b5775"
-PKG_REV="106"
+PKG_REV="0"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="http://www.tinc-vpn.org/"

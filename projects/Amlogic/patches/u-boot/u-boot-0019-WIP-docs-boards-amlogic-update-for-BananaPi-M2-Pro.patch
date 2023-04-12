@@ -1,0 +1,49 @@
+From b4870c47202687c6a6880b449c97a2e32ec3d278 Mon Sep 17 00:00:00 2001
+From: Christian Hewitt <christianshewitt@gmail.com>
+Date: Fri, 17 Feb 2023 05:49:44 +0000
+Subject: [PATCH 19/25] WIP: docs: boards: amlogic: update for BananaPi M2-Pro
+
+Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
+---
+ board/amlogic/u200/MAINTAINERS | 1 +
+ doc/board/amlogic/index.rst    | 5 +++--
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/board/amlogic/u200/MAINTAINERS b/board/amlogic/u200/MAINTAINERS
+index 47cec234a1..2a2d9d4c49 100644
+--- a/board/amlogic/u200/MAINTAINERS
++++ b/board/amlogic/u200/MAINTAINERS
+@@ -4,6 +4,7 @@ S:	Maintained
+ L:	u-boot-amlogic@groups.io
+ F:	board/amlogic/u200/
+ F:	configs/u200_defconfig
++F:	configs/bananapi-m2-pro_defconfig
+ F:	configs/bananapi-m5_defconfig
+ F:	configs/radxa-zero_defconfig
+ F:	doc/board/amlogic/u200.rst
+diff --git a/doc/board/amlogic/index.rst b/doc/board/amlogic/index.rst
+index b8b6f9b98a..629284fca9 100644
+--- a/doc/board/amlogic/index.rst
++++ b/doc/board/amlogic/index.rst
+@@ -19,7 +19,8 @@ This matrix concerns the actual source code version.
+ |                               | Nanopi-K2 | Khadas-VIM      | Khadas VIM2  | JetHub J100 | SEI510     | Khadas-VIM3 | Khadas-VIM3L |
+ |                               | P200      | LibreTech-CC v1 | Libretech-PC |             | Radxa Zero | GT-King/Pro | Odroid-C4    |
+ |                               | P201      | LibreTech-AC v2 | WeTek Core2  |             |            | GSKing-X    | Odroid-HC4   |
+-|                               |           | JetHub J80      |              |             |            | Radxa Zero2 | BananaPi-M5  |
++|                               |           | JetHub J80      |              |             |            | Radxa Zero2 | BPi-M2-Pro   |
++|                               |           |                 |              |             |            | Radxa Zero2 | BPi-M5       |
+ +-------------------------------+-----------+-----------------+--------------+-------------+------------+-------------+--------------+
+ | UART                          | **Yes**   | **Yes**         | **Yes**      | **Yes**     | **Yes**    | **Yes**     | **Yes**      |
+ +-------------------------------+-----------+-----------------+--------------+-------------+------------+-------------+--------------+
+@@ -37,7 +38,7 @@ This matrix concerns the actual source code version.
+ +-------------------------------+-----------+-----------------+--------------+-------------+------------+-------------+--------------+
+ | Multi-core                    | **Yes**   | **Yes**         | **Yes**      | **Yes**     | **Yes**    | **Yes**     | **Yes**      |
+ +-------------------------------+-----------+-----------------+--------------+-------------+------------+-------------+--------------+
+-| Fuse access                   | **Yes**   | **Yes**         |**Yes**       |**Yes**      |**Yes**     |**Yes**      | **Yes**      |
++| Fuse access                   | **Yes**   | **Yes**         | **Yes**      | **Yes**     | **Yes**    | **Yes**     | **Yes**      |
+ +-------------------------------+-----------+-----------------+--------------+-------------+------------+-------------+--------------+
+ | SPI (FC)                      | **Yes**   | **Yes**         | **Yes**      | **Yes**     |**Yes**     | **Yes**     | No           |
+ +-------------------------------+-----------+-----------------+--------------+-------------+------------+-------------+--------------+
+-- 
+2.34.1
+

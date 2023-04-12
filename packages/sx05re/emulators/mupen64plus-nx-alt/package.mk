@@ -20,25 +20,25 @@ pre_configure_target() {
   sed -e "s|^GIT_VERSION ?.*$|GIT_VERSION := \" ${PKG_VERSION:0:7}\"|" -i Makefile
 
 if [ $ARCH == "arm" ]; then
-	if [ "${DEVICE}" = "Amlogic-ng" ]; then
-		PKG_MAKE_OPTS_TARGET+=" platform=AMLG12B"
-	elif [ "${DEVICE}" = "Amlogic-old" ]; then
+	if [ "${DEVICE}" = "Amlogic-old" ]; then
 		PKG_MAKE_OPTS_TARGET+=" platform=emuelec BOARD=OLD32BIT"
 	elif [ "${DEVICE}" = "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 		sed -i "s|cortex-a53|cortex-a35|g" Makefile
 		PKG_MAKE_OPTS_TARGET+=" platform=odroidgoa"
 	elif [ "$DEVICE" == "OdroidM1" ] || [ "$DEVICE" == "RK356x" ]; then
 		PKG_MAKE_OPTS_TARGET+=" platform=emuelec BOARD=NGRK32BIT"
+	else
+		PKG_MAKE_OPTS_TARGET+=" platform=AMLG12B"
 	fi
 else
-	if [ "${DEVICE}" = "Amlogic-ng" ]; then
-		PKG_MAKE_OPTS_TARGET+=" platform=odroid64 BOARD=N2"
-	elif [ "${DEVICE}" = "Amlogic-old" ]; then 
+	if [ "${DEVICE}" = "Amlogic-old" ]; then 
 		PKG_MAKE_OPTS_TARGET+=" platform=emuelec BOARD=OLD"
 	elif [ "$DEVICE" == "OdroidM1" ] || [ "$DEVICE" == "RK356x" ]; then
 		PKG_MAKE_OPTS_TARGET+=" platform=emuelec BOARD=NGRK"
 	elif [ "${DEVICE}" = "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
 		PKG_MAKE_OPTS_TARGET+=" platform=emuelec BOARD=NGHH"
+	else
+		PKG_MAKE_OPTS_TARGET+=" platform=odroid64 BOARD=N2"
 	fi
 fi
 }

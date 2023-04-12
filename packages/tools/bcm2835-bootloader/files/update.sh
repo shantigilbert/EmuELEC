@@ -47,10 +47,12 @@ else
   fi
 fi
 
-# Add distro config file
-if [ -f $SYSTEM_ROOT/usr/share/bootloader/distroconfig.txt ]; then
-  cp -p $SYSTEM_ROOT/usr/share/bootloader/distroconfig.txt $BOOT_ROOT
-fi
+# Add distro config files
+for distro in "$SYSTEM_ROOT/usr/share/bootloader/distroconfig"*.txt ; do
+  if [ -f "${distro}" ]; then
+    cp -p "${distro}" $BOOT_ROOT
+  fi
+done
 
 # mount $BOOT_ROOT r/o
 sync

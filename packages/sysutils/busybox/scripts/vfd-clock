@@ -23,7 +23,7 @@ do_stop(){
 }
 
 case $(dtname) in
-  oranth,tx3-mini)
+  oranth,tx3-mini|oranth,tx9-pro|sunvell,t95z-plus)
     LED_PATH_COLON="/sys/devices/platform/spi/spi_master/spi0/spi0.0/leds/:colon/brightness"
     LED_PATH_TEXT="/sys/devices/platform/spi/spi_master/spi0/spi0.0/display_text"
     ;;

@@ -63,4 +63,4 @@
     DEBUG_TTY="/dev/console"
 
   # additional packages to install:
-    ADDITIONAL_PACKAGES="dt-overlays"
+    ADDITIONAL_PACKAGES+=" dt-overlays"

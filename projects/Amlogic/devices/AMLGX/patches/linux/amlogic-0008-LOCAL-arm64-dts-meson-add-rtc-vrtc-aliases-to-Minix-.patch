@@ -1,8 +1,8 @@
-From 75bf3dc3379c7c71ab1524e9c6b4b100d15284d7 Mon Sep 17 00:00:00 2001
+From 54396343f2c349acae2c8c31fd07719f3f71577f Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Mon, 1 Feb 2021 19:27:40 +0000
-Subject: [PATCH 08/74] LOCAL: arm64: dts: meson: add rtc/vrtc aliases to Minix
- NEO U9-H
+Subject: [PATCH 008/120] LOCAL: arm64: dts: meson: add rtc/vrtc aliases to
+ Minix NEO U9-H
 
 Add node aliases to prevent meson-vrtc from claiming /dev/rtc0
 
@@ -12,10 +12,10 @@ Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
  1 file changed, 5 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/amlogic/meson-gxm-minix-neo-u9h.dts b/arch/arm64/boot/dts/amlogic/meson-gxm-minix-neo-u9h.dts
-index ea9f234d1fc7..3a0955ce3c39 100644
+index b8ef3bd8b840..0920e7b096f5 100644
 --- a/arch/arm64/boot/dts/amlogic/meson-gxm-minix-neo-u9h.dts
 +++ b/arch/arm64/boot/dts/amlogic/meson-gxm-minix-neo-u9h.dts
-@@ -14,6 +14,11 @@
+@@ -14,6 +14,11 @@ / {
  	compatible = "minix,neo-u9h", "amlogic,s912", "amlogic,meson-gxm";
  	model = "Minix Neo U9-H";
  
@@ -28,5 +28,5 @@ index ea9f234d1fc7..3a0955ce3c39 100644
  		compatible = "gpio-leds";
  
 -- 
-2.17.1
+2.34.1
 

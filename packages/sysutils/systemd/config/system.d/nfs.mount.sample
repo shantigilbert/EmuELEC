@@ -30,7 +30,7 @@ Where=/storage/movies2
 # Any options you usually use with the "-o" parameter in the mount command
 Options=
 
-# filesystem type
+# filesystem type (for NFSv4 use Type=nfs4)
 Type=nfs
 
 
@@ -47,4 +47,3 @@ WantedBy=multi-user.target
 # This means, if we want mount to "/storage/movies2" (see above "Where=/storage/movies2")
 # then this file must be renamed to 'storage-movies2.mount' and can be enabled via ssh with the
 # command 'systemctl enable storage-movies2.mount'
-

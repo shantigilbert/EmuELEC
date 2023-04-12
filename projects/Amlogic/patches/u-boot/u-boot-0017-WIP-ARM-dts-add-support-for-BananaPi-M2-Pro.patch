@@ -1,0 +1,152 @@
+From dbf80e3d843cb58b9098d7c0e24c9ab1208003a7 Mon Sep 17 00:00:00 2001
+From: Christian Hewitt <christianshewitt@gmail.com>
+Date: Fri, 17 Feb 2023 05:38:46 +0000
+Subject: [PATCH 17/25] WIP: ARM: dts: add support for BananaPi M2-Pro
+
+Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
+---
+ arch/arm/dts/Makefile                         |  1 +
+ .../dts/meson-sm1-bananapi-m2-pro-u-boot.dtsi | 13 +++
+ arch/arm/dts/meson-sm1-bananapi-m2-pro.dts    | 98 +++++++++++++++++++
+ 3 files changed, 112 insertions(+)
+ create mode 100644 arch/arm/dts/meson-sm1-bananapi-m2-pro-u-boot.dtsi
+ create mode 100644 arch/arm/dts/meson-sm1-bananapi-m2-pro.dts
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 926ae0aae4..4e9fa81e18 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -203,6 +203,7 @@ dtb-$(CONFIG_ARCH_MESON) += \
+ 	meson-g12b-odroid-n2.dtb \
+ 	meson-g12b-odroid-n2-plus.dtb \
+ 	meson-g12b-radxa-zero2.dtb \
++	meson-sm1-bananapi-m2-pro.dtb \
+ 	meson-sm1-bananapi-m5.dtb \
+ 	meson-sm1-khadas-vim3l.dtb \
+ 	meson-sm1-odroid-c4.dtb \
+diff --git a/arch/arm/dts/meson-sm1-bananapi-m2-pro-u-boot.dtsi b/arch/arm/dts/meson-sm1-bananapi-m2-pro-u-boot.dtsi
+new file mode 100644
+index 0000000000..a86fdb5668
+--- /dev/null
++++ b/arch/arm/dts/meson-sm1-bananapi-m2-pro-u-boot.dtsi
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (c) 2021 BayLibre, SAS
++ * Author: Neil Armstrong <narmstrong@baylibre.com>
++ */
++
++#include "meson-sm1-u-boot.dtsi"
++
++&ethmac {
++	snps,reset-gpio = <&gpio GPIOZ_15 (GPIO_ACTIVE_LOW | GPIO_OPEN_DRAIN)>;
++	snps,reset-delays-us = <0 10000 1000000>;
++	snps,reset-active-low;
++};
+diff --git a/arch/arm/dts/meson-sm1-bananapi-m2-pro.dts b/arch/arm/dts/meson-sm1-bananapi-m2-pro.dts
+new file mode 100644
+index 0000000000..4890d5d9a4
+--- /dev/null
++++ b/arch/arm/dts/meson-sm1-bananapi-m2-pro.dts
+@@ -0,0 +1,98 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (c) 2021 BayLibre SAS
++ * Author: Neil Armstrong <narmstrong@baylibre.com>
++ */
++
++/dts-v1/;
++
++#include "meson-sm1-bananapi.dtsi"
++#include <dt-bindings/sound/meson-g12a-tohdmitx.h>
++
++/ {
++	compatible = "bananapi,bpi-m2-pro", "amlogic,sm1";
++	model = "Banana Pi BPI-M2-PRO";
++
++	sound {
++		compatible = "amlogic,axg-sound-card";
++		model = "BPI-M2-PRO";
++		audio-aux-devs = <&tdmout_b>;
++		audio-routing = "TDMOUT_B IN 0", "FRDDR_A OUT 1",
++				"TDMOUT_B IN 1", "FRDDR_B OUT 1",
++				"TDMOUT_B IN 2", "FRDDR_C OUT 1",
++				"TDM_B Playback", "TDMOUT_B OUT";
++
++		assigned-clocks = <&clkc CLKID_MPLL2>,
++				  <&clkc CLKID_MPLL0>,
++				  <&clkc CLKID_MPLL1>;
++		assigned-clock-parents = <0>, <0>, <0>;
++		assigned-clock-rates = <294912000>,
++				       <270950400>,
++				       <393216000>;
++		status = "okay";
++
++		dai-link-0 {
++			sound-dai = <&frddr_a>;
++		};
++
++		dai-link-1 {
++			sound-dai = <&frddr_b>;
++		};
++
++		dai-link-2 {
++			sound-dai = <&frddr_c>;
++		};
++
++		/* 8ch hdmi interface */
++		dai-link-3 {
++			sound-dai = <&tdmif_b>;
++			dai-format = "i2s";
++			dai-tdm-slot-tx-mask-0 = <1 1>;
++			dai-tdm-slot-tx-mask-1 = <1 1>;
++			dai-tdm-slot-tx-mask-2 = <1 1>;
++			dai-tdm-slot-tx-mask-3 = <1 1>;
++			mclk-fs = <256>;
++
++			codec {
++				sound-dai = <&tohdmitx TOHDMITX_I2S_IN_B>;
++			};
++		};
++
++		/* hdmi glue */
++		dai-link-4 {
++			sound-dai = <&tohdmitx TOHDMITX_I2S_OUT>;
++
++			codec {
++				sound-dai = <&hdmi_tx>;
++			};
++		};
++	};
++};
++
++&clkc_audio {
++	status = "okay";
++};
++
++&frddr_a {
++	status = "okay";
++};
++
++&frddr_b {
++	status = "okay";
++};
++
++&frddr_c {
++	status = "okay";
++};
++
++&tdmif_b {
++	status = "okay";
++};
++
++&tdmout_b {
++	status = "okay";
++};
++
++&tohdmitx {
++	status = "okay";
++};
+-- 
+2.34.1
+

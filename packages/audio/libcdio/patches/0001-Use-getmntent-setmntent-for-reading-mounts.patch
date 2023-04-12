@@ -1,0 +1,68 @@
+From 0d550dc9307901edd817333a5b530241d08ad889 Mon Sep 17 00:00:00 2001
+From: Miguel Borges de Freitas <enen92@kodi.tv>
+Date: Wed, 2 Feb 2022 20:47:02 +0000
+Subject: [PATCH] Use getmntent/setmntent for reading mounts
+
+Since fields in the mtab and fstab files are separated by
+whitespace, octal escapes are used to represent the characters
+space (\040), tab (\011), newline (\012), and backslash (\\) in
+those files when they occur in one of the four strings in a
+mntent structure.  The routines addmntent() and getmntent() will
+convert from string representation to escaped representation and
+back.  When converting from escaped representation, the sequence
+\134 is also converted to a backslash.
+---
+ lib/driver/gnu_linux.c | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/lib/driver/gnu_linux.c b/lib/driver/gnu_linux.c
+index 6a6aa4dd..dddf333c 100644
+--- a/lib/driver/gnu_linux.c
++++ b/lib/driver/gnu_linux.c
+@@ -672,13 +672,13 @@ static int is_mounted (const char * device, char * target) {
+   char real_device_1[PATH_MAX];
+   char real_device_2[PATH_MAX];
+ 
+-  char file_device[PATH_MAX];
+-  char file_target[PATH_MAX];
++  struct mntent *fs;
++
++  fp = setmntent("/proc/mounts", "r");
+ 
+-  fp = fopen ( "/proc/mounts", "r");
+   /* Older systems just have /etc/mtab */
+   if(!fp)
+-    fp = fopen ( "/etc/mtab", "r");
++    fp = setmntent("/etc/mtab", "r");
+ 
+   /* Neither /proc/mounts nor /etc/mtab could be opened, give up here */
+   if(!fp) return 0;
+@@ -691,19 +691,19 @@ static int is_mounted (const char * device, char * target) {
+ 
+   /* Read entries */
+ 
+-  while ( fscanf(fp, "%s %s %*s %*s %*d %*d\n", file_device, file_target) != EOF ) {
+-      if (NULL == cdio_realpath(file_device, real_device_2)) {
++  while ((fs = getmntent(fp)) != NULL) {
++      if (NULL == cdio_realpath(fs->mnt_fsname, real_device_2)) {
+           cdio_debug("Problems resolving device %s: %s\n",
+-                     file_device, strerror(errno));
++                     fs->mnt_fsname, strerror(errno));
+       }
+     if(!strcmp(real_device_1, real_device_2)) {
+-      strcpy(target, file_target);
+-      fclose(fp);
++      strcpy(target, fs->mnt_dir);
++      endmntent(fp);
+       return 1;
+     }
+ 
+   }
+-  fclose(fp);
++  endmntent(fp);
+   return 0;
+ }
+ 
+-- 
+2.30.2
+

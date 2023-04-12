@@ -1,7 +1,7 @@
 From 2fc65ac09a5698b9e2060890de1cd3310a237658 Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Sat, 15 Jan 2022 06:35:47 +0000
-Subject: [PATCH 12/15] WIP: doc: boards: amlogic: update for Radxa Zero2
+Subject: [PATCH 12/25] WIP: doc: boards: amlogic: update for Radxa Zero2
 
 Add documentation bits for the Radxa Zero2
 
@@ -119,5 +119,5 @@ index f5611f52ec..95a42a05d0 100644
  
  This will generate:
 -- 
-2.17.1
+2.34.1
 

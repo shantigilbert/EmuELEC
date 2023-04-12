@@ -65,6 +65,7 @@ EXCLUDED_PACKAGES="game.libretro.chailove
 	game.libretro.lutro
 	game.libretro.parallel_n64
 	game.libretro.pcem
+	game.libretro.picodrive
 	game.libretro.theodore
 	game.netplay
 	game.shader.presets"
@@ -179,7 +180,6 @@ for addon in ${ADDONS_DIR}/*.*/ ; do
       exit 1
     fi
 
-    RETRO_VERSION=$(get_pkg_var "${RETRO_ADDON}" PKG_VERSION)
     extract_pkg_file
 
     RETRO_VERSION_FILE="${TMP_PKG_DIR}/depends/common/${RETRO_NAME}/${RETRO_NAME}.txt"
@@ -191,24 +191,19 @@ for addon in ${ADDONS_DIR}/*.*/ ; do
     fi
 
     VERSION_INFO=$(grep "^${RETRO_NAME}" "${RETRO_VERSION_FILE}" | head -1)
-    if [[ "$VERSION_INFO" =~ github\.com/[^/]+/[^/]+/archive/[^/]+\.zip$ ]] ; then
+    if [[ "$VERSION_INFO" =~ github\.com/[^/]+/[^/]+/archive/[^/]+\.tar\..*$ ]] ; then
       # version referenced by githash
-      RETRO_NEW_VERSION=$(sed -e 's|^.*/archive/||' -e 's|\.zip$||' "${RETRO_VERSION_FILE}")
-    elif [[ "$VERSION_INFO" =~ github\.com/[^/]+/[^/]+/archive/[^/]+\.tar\.gz$ ]] ; then
-      # version referenced by githash
-      RETRO_NEW_VERSION=$(sed -e 's|^.*/archive/||' -e 's|\.tar.gz$||' "${RETRO_VERSION_FILE}")
-    elif [[ "$VERSION_INFO" =~ github\.com/[^/[:space:]]+/[^/[:space:]]+[[:space:]][^[:space:]]+ ]] ; then
-      msg_warn "unmanaged version in kodi package: ${VERSION_INFO}"
-      # unmanaged version, repo plus branch
-      RETRO_SITE=$(echo "${VERSION_INFO}" | awk '{print $2}')
-      RETRO_BRANCH=$(echo "${VERSION_INFO}" | awk '{print $3}')
-      RETRO_NEW_VERSION=$(git ls-remote "${RETRO_SITE}" "${RETRO_BRANCH}" | awk '{print $1}')
+      RETRO_NEW_VERSION=$(echo "${VERSION_INFO}" | sed -E -e 's|^(.+/archive/)([^/]+)(\.tar.*)$|\2|')
+      RETRO_NEW_REPO=$(echo "${VERSION_INFO}" | sed -E -e 's|^(.+github\.com/)([^/]+/[^/]+)(/archive/.*)$|\2|')
+      RETRO_NEW_URL="https://github.com/${RETRO_NEW_REPO}/archive/\${PKG_VERSION}.tar.gz"
     else
       msg_warn "UNSUPPORTED ${RETRO_ADDON} version info, update manually: ${VERSION_INFO}"
       RETRO_NEW_VERSION=""
+      RETRO_NEW_REPO=""
+      RETRO_NEW_URL=""
     fi
 
-    if [ -n "${RETRO_NEW_VERSION}" ] && update_pkg "${RETRO_PATH}" "${RETRO_ADDON}" "${RETRO_NEW_VERSION}"; then
+    if [ -n "${RETRO_NEW_VERSION}" ] && update_pkg_and_url "${RETRO_PATH}" "${RETRO_ADDON}" "${RETRO_NEW_VERSION}" "${RETRO_NEW_URL}"; then
       BUMPED_RETRO="yes"
     fi
   fi

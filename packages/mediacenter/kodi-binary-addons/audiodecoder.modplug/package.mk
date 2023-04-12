@@ -5,7 +5,7 @@
 PKG_NAME="audiodecoder.modplug"
 PKG_VERSION="20.2.0-Nexus"
 PKG_SHA256="619ba20ea19dd9aea15e7d30aa12a146b412c7fcd9e709528f6758e82a3d85e7"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/audiodecoder.modplug"

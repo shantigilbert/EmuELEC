@@ -1,8 +1,1 @@
-103
-- Python3 ABI support 
-102
-- Fix a crash with segfaults on x64 machines
-101
-- Update
-100
-- Initial release
+initial release

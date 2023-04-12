@@ -29,11 +29,15 @@ This project is for Rockchip SoC devices
 * [ROC-RK3399-PC-PLUS](devices/RK3399)
 * [Rockchip Sapphire Board](devices/RK3399)
 
-**My single-board computer is not listed, will it be added in the future?**<br />
+**My single-board computer is not listed, will it be added in the future?**<br>
 If your single-board computer uses a current generation SoC listed on http://opensource.rock-chips.com/wiki_Main_Page the odds are in your favor.
 
-**My Android device is not listed, will it be added in the future?**<br />
+**My Android device is not listed, will it be added in the future?**<br>
 You may have luck if your device vendor is open source friendly, otherwise keep using Android for best support.
+
+**My device does not boot and I don't understand why.**<br>
+If your device has Android or any sort of vendor u-boot preinstalled in EMMC or SPI, make sure to add `ROCKCHIP_LEGACY_BOOT=1` when building an image.
+This is done automatically for supported devices, which are known to come with Android preinstalled.
 
 ## Links
 

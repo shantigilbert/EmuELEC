@@ -1,8 +1,1 @@
-103
-- bump addon rev for new format
-
-101
-- Change repo location for zips
-
-100
-- Initial LibreELEC version
+initial release

@@ -1,0 +1,15 @@
+[Unit]
+Description=Kodi reboot script
+After=kodi.service
+Before=systemd-reboot.service
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+Environment=HOME=/storage
+ExecStartPre=-/usr/lib/kodi/kodi-after
+ExecStart=-/bin/sh -c ". /etc/profile; exec /bin/sh /storage/.config/shutdown.sh reboot"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=reboot.target

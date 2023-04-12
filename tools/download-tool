@@ -4,42 +4,42 @@
 # Copyright (C) 2009-2016 Lukas Rusak (lrusak@libreelec.tv)
 # Copyright (C) 2020-present Team CoreELEC (https://coreelec.org)
 
-if [ -z "$PROJECT" -a -z "$ARCH" ]; then
-  echo "Usage: PROJECT=<project> ARCH=<arch> $0"
+. config/options ""
+
+help() {
+  echo "Usage: PROJECT=<project> DEVICE=<device> ARCH=<arch> [JOBS=<num>] ${0} [package|-a|--all]"
+  echo "Options:"
+  echo "  package: name of single package what should be downloaded"
+  echo "  -a, --all: download all packages needed to build PROJECT=\"${PROJECT}\" DEVICE=\"${DEVICE}\""
+}
+
+if [ -z "${PROJECT}" -a -z "${ARCH}" -o -z "${1}" ]; then
+  help
   exit 0
 fi
 
-help() {
-  echo "Usage: PROJECT=<project> ARCH=<arch> [JOBS=<num>] $0 [-a|--all]"
-  echo "Options:"
-  echo "  -a, --all: download all packages including addons"
-}
-
-case $1 in
+case ${1} in
   -a|--all)
-  ALL_PACKAGES="true"
+  shift
+  LIST=$(scripts/pkgjson|scripts/genbuildplan.py --hide-wants --build ${@:-image} 2>/dev/null | awk '{ split($2,a,":"); print a[1] }' | sort -u)
   ;;
   -h|--help)
   help
   exit 0
+  ;;
+  *)
+  LIST="${1}"
+  shift
+  ;;
 esac
 
 if [ -z $(which parallel) ]; then
   echo "'parallel' is not installed, packages will be download one at a time"
-  for package in $(find packages/ -name package.mk); do
-    if [ -n "$(echo $package | grep addons)" -a -z "$ALL_PACKAGES" ]; then
-      continue
-    fi
-    ./scripts/get $(basename `dirname $package`)
+  for package in ${LIST}; do
+    echo "download package: ${package}"
+  ./scripts/get $package
   done
 else
-  [ -z "$JOBS" ] && JOBS=0
-  package_list=
-  for package in $(find packages/ -name package.mk); do
-    if [ -n "$(echo $package | grep addons)" -a -z "$ALL_PACKAGES" ]; then
-      continue
-    fi
-    package_list+=" $(basename `dirname $package`)"
-  done
-  parallel --jobs $JOBS ./scripts/get {} ::: $package_list
+  [ -z "${JOBS}" ] && JOBS=0
+  parallel --jobs ${JOBS} ./scripts/get {} ::: ${LIST}
 fi

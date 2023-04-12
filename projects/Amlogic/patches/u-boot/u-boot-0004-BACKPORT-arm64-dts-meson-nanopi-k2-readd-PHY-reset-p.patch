@@ -1,7 +1,7 @@
 From 7d8355053316d3f760a5ac14156e77e27aa5f6d5 Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Tue, 25 Oct 2022 14:24:21 +0000
-Subject: [PATCH 04/15] BACKPORT: arm64: dts: meson: nanopi-k2: readd PHY reset
+Subject: [PATCH 04/25] BACKPORT: arm64: dts: meson: nanopi-k2: readd PHY reset
  properties
 
 The sync of device-tree/bindings in 11a48a5a18c6 ("Linux 5.6-rc2") causes
@@ -34,5 +34,5 @@ index c35158d7e9..2a245bbe7f 100644
 +};
 +
 -- 
-2.17.1
+2.34.1
 

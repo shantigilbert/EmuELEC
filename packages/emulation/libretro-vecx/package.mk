@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libretro-vecx"
-PKG_VERSION="28d6efc8972313903d0802a736ff8c3bc115e78f"
-PKG_SHA256="8584af54ce532c4bb37a20a023eda9fcfa90a5d2bea66d5d65abeeab183836eb"
+PKG_VERSION="8e932c1d585ae9e467186dea9e73ce38fe1490f7"
+PKG_SHA256="19eaa6d1ad035c01e979550787319f7d0b2398288f7c657eefea6c6d9b4cf49f"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/libretro-vecx"
 PKG_URL="https://github.com/libretro/libretro-vecx/archive/${PKG_VERSION}.tar.gz"

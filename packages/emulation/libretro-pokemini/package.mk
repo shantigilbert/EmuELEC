@@ -2,11 +2,11 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libretro-pokemini"
-PKG_VERSION="0e0adda7962c3bdfb9c6b7340509f8d1d543d874"
-PKG_SHA256="7fcf2094f32de6bced13ba5896de0970f3500ab6bc7df82aeb0ce5dec3d2a9fc"
+PKG_VERSION="9ba2c2d98bef98794095f3ef50e22f1a3cbc6166"
+PKG_SHA256="7dd450e5e26c9b66ce0811ec4eac125e71b6752951bdbf3851d0312d268c09c2"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/pokemini"
-PKG_URL="https://github.com/libretro/pokemini/archive/${PKG_VERSION}.tar.gz"
+PKG_URL="https://github.com/libretro/PokeMini/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain kodi-platform"
 PKG_LONGDESC="libretro wrapper for PokeMini emulator."
 PKG_TOOLCHAIN="make"

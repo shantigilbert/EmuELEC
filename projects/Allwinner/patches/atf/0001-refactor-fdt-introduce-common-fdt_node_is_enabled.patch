@@ -1,0 +1,84 @@
+From 49b268ce3036b2645c3a0caeaefb625f7a2d5982 Mon Sep 17 00:00:00 2001
+From: Andre Przywara <andre.przywara@arm.com>
+Date: Fri, 3 Feb 2023 11:11:18 +0000
+Subject: [PATCH] refactor(fdt): introduce common fdt_node_is_enabled()
+
+There are several users in the tree which want to check whether a given
+FDT node is enabled or not: the "status" property holds that
+information. So far all those users provide private implementations,
+some of them having issues.
+
+Export a generic implementation of that function in fdt_wrappers.h, as
+a "static inline" function to not increase code size.
+Also replace the existing implementation in Arm's fconf code, which had
+a tiny bug in needlessly using the property length:
+"status = [6f 6b 61 79 20];" would pass the check, where it should not.
+The proper solution is also simpler: status must be a string, and
+strings must be NUL-terminated in a DT. strcmp() would terminate on the
+first NUL in *either* of the two strings it compares, so it would never
+walk beyond the property boundary in the DTB.
+
+Change-Id: I9d89093432f127c09add6cf5c93a725bc534e5de
+Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+---
+ include/common/fdt_wrappers.h               | 10 ++++++++++
+ plat/arm/common/fconf/fconf_ethosn_getter.c | 15 ---------------
+ 2 files changed, 10 insertions(+), 15 deletions(-)
+
+diff --git a/include/common/fdt_wrappers.h b/include/common/fdt_wrappers.h
+index 2929fc23d5bb..b16510f3d971 100644
+--- a/include/common/fdt_wrappers.h
++++ b/include/common/fdt_wrappers.h
+@@ -10,6 +10,7 @@
+ #define FDT_WRAPPERS_H
+ 
+ #include <libfdt_env.h>
++#include <libfdt.h>
+ 
+ /* Number of cells, given total length in bytes. Each cell is 4 bytes long */
+ #define NCELLS(len) ((len) / 4U)
+@@ -53,6 +54,15 @@ static inline uint32_t fdt_blob_size(const void *dtb)
+ 	return fdt32_to_cpu(dtb_header[1]);
+ }
+ 
++static inline bool fdt_node_is_enabled(const void *fdt, int node)
++{
++	int len;
++	const void *prop = fdt_getprop(fdt, node, "status", &len);
++
++	/* A non-existing status property means the device is enabled. */
++	return (prop == NULL) || (len == 5 && strcmp(prop, "okay") == 0);
++}
++
+ #define fdt_for_each_compatible_node(dtb, node, compatible_str)       \
+ for (node = fdt_node_offset_by_compatible(dtb, -1, compatible_str);   \
+      node >= 0;                                                       \
+diff --git a/plat/arm/common/fconf/fconf_ethosn_getter.c b/plat/arm/common/fconf/fconf_ethosn_getter.c
+index 0b48a9816338..251471e63b6a 100644
+--- a/plat/arm/common/fconf/fconf_ethosn_getter.c
++++ b/plat/arm/common/fconf/fconf_ethosn_getter.c
+@@ -20,21 +20,6 @@ struct ethosn_sub_allocator_t {
+ 	uint32_t stream_id;
+ };
+ 
+-static bool fdt_node_is_enabled(const void *fdt, int node)
+-{
+-	int len;
+-	const char *node_status;
+-
+-	node_status = fdt_getprop(fdt, node, "status", &len);
+-	if (node_status == NULL ||
+-	    (len == 5 && /* Includes null character */
+-	     strncmp(node_status, "okay", 4U) == 0)) {
+-		return true;
+-	}
+-
+-	return false;
+-}
+-
+ static bool fdt_node_has_reserved_memory(const void *fdt, int dev_node)
+ {
+ 	return fdt_get_property(fdt, dev_node, "memory-region", NULL) != NULL;
+-- 
+2.39.1
+

@@ -1,5 +1,4 @@
-101
-- Clean up after dtv scan table download
-- Update to new NextPVR version
-100
-- Initial release
+2
+Fix nextpvr-downloader script
+
+initial release

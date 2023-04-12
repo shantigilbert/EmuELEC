@@ -64,14 +64,14 @@
 
   # additional packages to install:
   # Space separated list is supported,
-  # e.g. ADDITIONAL_PACKAGES="PACKAGE1 PACKAGE2"
-    ADDITIONAL_PACKAGES="dtc emmctool"
+  # e.g. ADDITIONAL_PACKAGES+=" PACKAGE1 PACKAGE2"
+    ADDITIONAL_PACKAGES+=" dtc emmctool"
 
   # additional drivers to install:
   # for a list of additional drivers see packages/linux-drivers
   # Space separated list is supported,
-  # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
-    ADDITIONAL_DRIVERS=""
+  # e.g. ADDITIONAL_DRIVERS+=" DRIVER1 DRIVER2"
+    ADDITIONAL_DRIVERS+=""
 
   # build and install driver addons (yes / no)
     DRIVER_ADDONS_SUPPORT="no"

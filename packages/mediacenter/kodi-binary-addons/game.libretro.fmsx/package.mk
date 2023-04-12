@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="game.libretro.fmsx"
-PKG_VERSION="6.0.0.26-Matrix"
-PKG_SHA256="3bbd444a5dab7cc76ed7b20380b01e3f29f024a0793ba8f436fc2fac047cc661"
+PKG_VERSION="6.0.0.33-Nexus"
+PKG_SHA256="964d2761d0bfe9baccfba7a678f03a9dc83bbfecb5f6d0dbc2db7dca8afb0e62"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"

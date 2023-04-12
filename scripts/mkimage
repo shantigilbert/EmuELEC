@@ -224,7 +224,11 @@ EOF
   mcopy "${RELEASE_DIR}/3rdparty/bootloader/fixup.dat" :: >"${SAVE_ERROR}" 2>&1 || show_error
   mcopy "${RELEASE_DIR}/3rdparty/bootloader/start.elf" :: >"${SAVE_ERROR}" 2>&1 || show_error
   mcopy "${RELEASE_DIR}/3rdparty/bootloader/config.txt" :: >"${SAVE_ERROR}" 2>&1 || show_error
-  mcopy "${RELEASE_DIR}/3rdparty/bootloader/distroconfig.txt" :: >"${SAVE_ERROR}" 2>&1 || show_error
+  for distro in "${RELEASE_DIR}/3rdparty/bootloader/distroconfig"*.txt ; do
+    if [ -f "${distro}" ]; then
+      mcopy "${distro}" ::/"${distro##*/}" >"${SAVE_ERROR}" 2>&1 || show_error
+    fi
+  done
 
   for dtb in "${RELEASE_DIR}/3rdparty/bootloader/"*.dtb ; do
     if [ -f "${dtb}" ]; then

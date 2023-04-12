@@ -3,7 +3,7 @@
 
 PKG_NAME="adafruit-libraries"
 PKG_VERSION=""
-PKG_REV="107"
+PKG_REV="0"
 PKG_ARCH="any"
 PKG_ADDON_PROJECTS="RPi ARM"
 PKG_LICENSE="MIT"

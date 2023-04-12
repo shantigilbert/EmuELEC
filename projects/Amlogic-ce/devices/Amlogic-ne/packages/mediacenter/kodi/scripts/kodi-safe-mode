@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
+
+KODI_ROOT=${HOME}/.kodi
+
+KODI_ROOT_FAILED=${KODI_ROOT}.FAILED
+BOOT_STATUS=${HOME}/.config/boot.status
+
+process_boot_status()
+{
+  BOOT_STATE="$(cat ${BOOT_STATUS} 2>/dev/null)"
+
+  if [ "${BOOT_STATE}" = "SAFE" ]; then
+    if [ ! -d ${KODI_ROOT_FAILED} ]; then
+      # entering safe mode - rename failed .kodi, and restart with clean .kodi
+      mv ${KODI_ROOT} ${KODI_ROOT_FAILED}
+      reboot
+    else
+      # exiting safe mode - restore failed .kodi
+      rm -fr ${KODI_ROOT}
+      mv ${KODI_ROOT_FAILED} ${KODI_ROOT}
+      echo "OK" > ${BOOT_STATUS}
+    fi
+  else
+    echo "OK" > ${BOOT_STATUS}
+  fi
+
+  return 0
+}
+
+process_boot_status
+
+exit 0

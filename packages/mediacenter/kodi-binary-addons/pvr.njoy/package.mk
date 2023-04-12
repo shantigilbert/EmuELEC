@@ -5,7 +5,7 @@
 PKG_NAME="pvr.njoy"
 PKG_VERSION="20.3.0-Nexus"
 PKG_SHA256="0e8dc8ddce7830878c816da0836bdf5558c0dd388c48019012735a518eeefb04"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.njoy"

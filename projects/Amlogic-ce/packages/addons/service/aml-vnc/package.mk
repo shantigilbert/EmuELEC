@@ -2,13 +2,13 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="aml-vnc"
-PKG_VERSION="f87a8f41aa6c6463a99ec3be9aebaff3cf31c5ee"
-PKG_SHA256="dbec8fbedc956b8730414654da4f90b035c1cb67e2320e5c572b1343fb029e36"
-PKG_REV="103"
+PKG_VERSION="95c57c106330faf80221f8625efd735e70593043"
+PKG_SHA256="c8c81a9757162ee099e8494d982a5351c0739d20815ab23edd6bbf6b71716c35"
+PKG_REV="0"
 PKG_ARCH="arm aarch64"
 PKG_LICENSE="GPL"
-PKG_SITE="https://github.com/kszaq/aml-vnc"
-PKG_URL="https://github.com/kszaq/my-addons/archive/$PKG_VERSION.tar.gz"
+PKG_SITE="https://github.com/CoreELEC/aml-vnc"
+PKG_URL="https://github.com/CoreELEC/aml-vnc/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain libvncserver"
 PKG_SECTION="service"
 PKG_SHORTDESC="Amlogic VNC server"
@@ -19,9 +19,15 @@ PKG_ADDON_NAME="Amlogic VNC"
 PKG_ADDON_TYPE="xbmc.service"
 
 unpack() {
-  mkdir -p $PKG_BUILD/addon
-  tar --strip-components=3 -xf $SOURCES/$PKG_NAME/$PKG_NAME-$PKG_VERSION.tar.gz -C $PKG_BUILD my-addons-$PKG_VERSION/$PKG_NAME/sources
-  tar --strip-components=3 -xf $SOURCES/$PKG_NAME/$PKG_NAME-$PKG_VERSION.tar.gz -C $PKG_BUILD/addon my-addons-$PKG_VERSION/$PKG_NAME/source
+  mkdir -p ${PKG_BUILD}/addon
+  tar --strip-components=3 -xf $SOURCES/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.tar.gz \
+    -C ${PKG_BUILD}       ${PKG_NAME}-${PKG_VERSION}/${PKG_NAME}/sources
+  tar --strip-components=3 -xf $SOURCES/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.tar.gz \
+    -C ${PKG_BUILD}/addon ${PKG_NAME}-${PKG_VERSION}/${PKG_NAME}/source
+}
+
+pre_configure_target() {
+  export CFLAGS+=" -Wno-stringop-truncation"
 }
 
 makeinstall_target() {
@@ -29,11 +35,11 @@ makeinstall_target() {
 }
 
 addon() {
-  mkdir -p $ADDON_BUILD/$PKG_ADDON_ID/bin
-    cp -P $PKG_BUILD/aml-vnc $ADDON_BUILD/$PKG_ADDON_ID/bin
+  mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+    cp -P ${PKG_BUILD}/aml-vnc ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
 
-  mkdir -p $ADDON_BUILD/$PKG_ADDON_ID/lib
-    cp $(get_build_dir libvncserver)/.${TARGET_NAME}/libvncserver.so.? $ADDON_BUILD/$PKG_ADDON_ID/lib
+  mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/lib
+    cp $(get_build_dir libvncserver)/.${TARGET_NAME}/libvncserver.so.? ${ADDON_BUILD}/${PKG_ADDON_ID}/lib
 
-  cp -PR $PKG_BUILD/addon/* $ADDON_BUILD/$PKG_ADDON_ID
+  cp -PR ${PKG_BUILD}/addon/* ${ADDON_BUILD}/${PKG_ADDON_ID}
 }

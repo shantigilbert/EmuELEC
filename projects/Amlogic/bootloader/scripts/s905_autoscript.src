@@ -1,3 +1,5 @@
+if fatload mmc 0 0x1000000 u-boot.ext; then go 0x1000000; fi;
+if fatload usb 0 0x1000000 u-boot.ext; then go 0x1000000; fi;
 setenv env_addr 0x1040000
 setenv boot_start 'bootm ${loadaddr} - ${dtb_mem_addr}'
 setenv addmac 'if printenv mac; then setenv bootargs ${bootargs} mac=${mac}; elif printenv eth_mac; then setenv bootargs ${bootargs} mac=${eth_mac}; fi'

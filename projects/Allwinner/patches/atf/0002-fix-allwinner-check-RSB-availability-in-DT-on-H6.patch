@@ -1,0 +1,53 @@
+From 8168cbaf31c876e20197dd3c5401292e24e8ae80 Mon Sep 17 00:00:00 2001
+From: Andre Przywara <andre.przywara@arm.com>
+Date: Wed, 1 Feb 2023 22:28:37 +0000
+Subject: [PATCH] fix(allwinner): check RSB availability in DT on H6
+
+At the moment we access the RSB bus on all Allwinner H6 boards
+unconditionally, even though some boards do not have any PMIC at all,
+while others have some I2C devices connected to the same pins.
+The latter case is just fragile, but the first case leads to a hang on
+at least one board, as reported by Jernej.
+
+Scan the devicetree, to check for the availability of the RSB bus node.
+Proceed only if the RSB DT node is actually enabled.
+
+Change-Id: Iea7dcfe3e085e173334d098ec4ddcb6c4b085771
+Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+Reported-by: Jernej Skrabec <jernej.skrabec@gmail.com>
+---
+ plat/allwinner/sun50i_h6/sunxi_power.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/plat/allwinner/sun50i_h6/sunxi_power.c b/plat/allwinner/sun50i_h6/sunxi_power.c
+index d298e6b8adaf..1257076dfd1b 100644
+--- a/plat/allwinner/sun50i_h6/sunxi_power.c
++++ b/plat/allwinner/sun50i_h6/sunxi_power.c
+@@ -8,8 +8,10 @@
+ #include <errno.h>
+ 
+ #include <common/debug.h>
++#include <common/fdt_wrappers.h>
+ #include <drivers/allwinner/axp.h>
+ #include <drivers/allwinner/sunxi_rsb.h>
++#include <libfdt.h>
+ #include <lib/mmio.h>
+ 
+ #include <sunxi_cpucfg.h>
+@@ -63,7 +65,12 @@ static int rsb_init(void)
+ 
+ int sunxi_pmic_setup(uint16_t socid, const void *fdt)
+ {
+-	int ret;
++	int node, ret;
++
++	node = fdt_node_offset_by_compatible(fdt, 0, "allwinner,sun8i-a23-rsb");
++	if ((node < 0) || !fdt_node_is_enabled(fdt, node)) {
++		return -ENODEV;
++	}
+ 
+ 	INFO("PMIC: Probing AXP805 on RSB\n");
+ 
+-- 
+2.39.1
+

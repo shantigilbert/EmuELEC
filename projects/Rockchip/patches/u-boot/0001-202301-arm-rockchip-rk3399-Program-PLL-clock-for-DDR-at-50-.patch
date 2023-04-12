@@ -1,0 +1,115 @@
+From 2cb23b80e4169e121c520ff33cb6a60e0a0ded21 Mon Sep 17 00:00:00 2001
+From: Xavier Drudis Ferran <xdrudis@tinet.cat>
+Date: Sat, 16 Jul 2022 12:31:45 +0200
+Subject: [PATCH] arm: rockchip: rk3399: Program PLL clock for DDR at 50 MHz in
+ documented range
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The original code set up the DDR clock to 48 MHz, not 50MHz as
+requested, and did it in a way that didn't satisfy the Application
+Notes in RK3399 TRM [1]. 2.9.2.B says:
+
+   PLL frequency range requirement
+   [...]
+   FOUTVCO: 800MHz to 3.2GHz
+
+2.9.2.A :
+   PLL output frequency configuration
+   [...]
+   FOUTVCO = FREF / REFDIV * FBDIV
+   FOUTPOSTDIV = FOUTVCO / POSTDIV1 / POSTDIV2
+
+FREF = 24 MHz
+
+The original code gives FOUTVCO: 24MHz/1 * 12 = 288MHz < 800MHz
+And the resulting FOUTPOSTDIV is 288MHz / 3 / 2 = 48MHz
+but the requested frequency was 50MHz
+
+Note:
+2.7.2 Detail Register Description
+PMUCRU_PPLL_CON0 says
+
+   fbdiv
+   Feedback Divide Value
+   Valid divider settings are:
+   [16, 3200] in integer mode
+
+So .fbdiv = 12 wouldn't be right. But 2.9.2.C says:
+
+   PLL setting consideration
+   [...]
+   The following settings are valid for FBDIV:
+   DSMPD=1 (Integer Mode):
+   12,13,14,16-4095 (practical value is limited to 3200, 2400, or 1600
+   (FVCOMAX / FREFMIN))
+   [...]
+
+So .fbdiv = 12 would be right.
+
+In any case FOUTVCO is still wrong. I thank YouMin Chen for
+confirmation and explanation.
+
+Despite documentation, I don't seem to be able to reproduce a
+practical problem with the wrong FOUTVCO. When I initially found it I
+thought some problems with detecting the RAM capacity in my Rock Pi 4B
+could be related to it and my patch seemed to help. But since I'm no
+longer able to reproduce the issue, it works with or without this
+patch. And meanwhile a patch[2] by Lee Jones and YouMin Chen addresses
+this issue. Btw, shouldn't that be commited?
+
+So this patches solves no visible problem.  Yet, to prevent future
+problems, I think it'd be best to stick to spec.
+
+An alternative to this patch could be
+
+    {.refdiv = 1, .fbdiv = 75, .postdiv1 = 6, .postdiv2 = 6};
+
+This would theoretically consume more power and yield less jitter,
+according to 2.9.2.C :
+
+   PLL setting consideration
+   [...]
+   For lowest power operation, the minimum VCO and FREF frequencies
+   should be used. For minimum jitter operation, the highest VCO and
+   FREF frequencies should be used.
+   [...]
+
+But I haven't tried it because I don't think it matters much. 50MHz
+for DDR is only shortly used by TPL at RAM init. Normal operation is
+at 800MHz.  Maybe it's better to use less power until later when more
+complex software can control batteries or charging or whatever ?
+
+Cc: Simon Glass <sjg@chromium.org>
+Cc: Philipp Tomsich <philipp.tomsich@vrull.eu>
+Cc: Kever Yang <kever.yang@rock-chips.com>
+Cc: Lukasz Majewski <lukma@denx.de>
+Cc: Sean Anderson <seanga2@gmail.com>
+
+Link: [1] https://opensource.rock-chips.com/images/e/ee/Rockchip_RK3399TRM_V1.4_Part1-20170408.pdf
+Link: [2] https://patchwork.ozlabs.org/project/uboot/list/?series=305766
+
+Signed-off-by: Xavier Drudis Ferran <xdrudis@tinet.cat>
+Tested-by: Michal Suchánek <msuchanek@suse.de>
+Reviewed-by: Kever Yang <kever.yang@rock-chips.com>
+---
+ drivers/clk/rockchip/clk_rk3399.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/clk/rockchip/clk_rk3399.c b/drivers/clk/rockchip/clk_rk3399.c
+index 97bf1c6e15..eaeac451df 100644
+--- a/drivers/clk/rockchip/clk_rk3399.c
++++ b/drivers/clk/rockchip/clk_rk3399.c
+@@ -856,7 +856,7 @@ static ulong rk3399_ddr_set_clk(struct rockchip_cru *cru,
+ 	switch (set_rate) {
+ 	case 50 * MHz:
+ 		dpll_cfg = (struct pll_div)
+-		{.refdiv = 1, .fbdiv = 12, .postdiv1 = 3, .postdiv2 = 2};
++		{.refdiv = 2, .fbdiv = 75, .postdiv1 = 3, .postdiv2 = 6};
+ 		break;
+ 	case 200 * MHz:
+ 		dpll_cfg = (struct pll_div)
+-- 
+2.39.0
+

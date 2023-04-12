@@ -148,19 +148,31 @@ do_write(){
   do_umount
 
   case $(dtname) in
-    radxa,zero)
+    radxa,zero*)
       do_writeprotect
       ;;
   esac
 
-  if [ "${2: -7}" == ".img.gz" ]; then
-    echo "info: writing ${2} to ${EMMC}"
-    gunzip -c "${2}" | dd of="${EMMC}" bs=1M
-  elif [ "${2: -4}" == ".img" ]; then
-    echo "info: writing ${2} to ${EMMC}"
-    dd if="${2}" of="${EMMC}" bs=1M
+  if [ -e "${2}" ]; then
+    case "${2}" in
+      *box.img.gz|*box.img)
+        echo "error: ${2} is not a bootable image, aborting!"
+        exit 1
+        ;;
+      *.img.gz)
+        echo "info: writing ${2} to ${EMMC}"
+        gunzip -c "${2}" | dd of="${EMMC}" bs=1M
+        ;;
+      *.img)
+        echo "info: writing ${2} to ${EMMC}"
+        dd if="${2}" of="${EMMC}" bs=1M
+        ;;
+      *)
+        echo "error: ${2} is not a valid image file!"
+        exit 1
+    esac
   else
-    echo "error: ${2} is not a valid image file!"
+    echo "error: ${2} not found!"
     exit 1
   fi
 }

@@ -1,0 +1,25 @@
+From 74ffc6f540d6bf0046df984f9eea9e5c08486767 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Sat, 5 Nov 2022 18:52:02 +0100
+Subject: [PATCH] Start debug service after locale to ensure file system is
+ ready
+
+---
+ units/debug-shell.service.in | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/units/debug-shell.service.in b/units/debug-shell.service.in
+index bc3a23f..a1bc7e5 100644
+--- a/units/debug-shell.service.in
++++ b/units/debug-shell.service.in
+@@ -13,6 +13,7 @@ Documentation=man:systemd-debug-generator(8)
+ DefaultDependencies=no
+ IgnoreOnIsolate=yes
+ ConditionPathExists={{DEBUGTTY}}
++After=locale.service
+ 
+ [Service]
+ WorkingDirectory=/storage
+-- 
+2.38.1
+
