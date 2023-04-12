@@ -39,6 +39,10 @@ case $PLATFORM in
 esac
 
 MODE=`cat /sys/class/display/mode`;
+if [[ "${EE_DEVICE}" == "Amlogic" ]]; then 
+  MODE="1080p60hz"
+fi
+
 SPLASHDIR="/storage/roms/splash"
   
 if [ "$ACTION_TYPE" == "intro" ] || [ "$ACTION_TYPE" == "exit" ]; then

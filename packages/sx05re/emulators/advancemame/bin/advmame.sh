@@ -37,6 +37,9 @@ if [ "$EE_DEVICE" != "OdroidGoAdvance" ] && [ "$EE_DEVICE" != "GameForce" ]; the
     if [[ -f "/ee_s905" && "$MODE" == "1080p"* ]]; then
         MODE="720p60hz"
     fi
+    if [[ "${EE_DEVICE}" == "Amlogic" ]]; then 
+      MODE="1080p60hz"
+    fi
 
     case "$MODE" in
         "480p"*)

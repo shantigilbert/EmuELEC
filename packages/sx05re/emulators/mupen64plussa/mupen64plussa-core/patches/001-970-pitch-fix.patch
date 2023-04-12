@@ -1,0 +1,29 @@
+From 8fac78d8cb54da960ca85a49547dcc4fb952457d Mon Sep 17 00:00:00 2001
+From: VarNepvius <14352929+VarNepvius@users.noreply.github.com>
+Date: Tue, 6 Sep 2022 20:31:03 +0200
+Subject: [PATCH] Fix wrong pitch argument in call to SDL_CreateRGBSurfaceFrom.
+
+---
+ src/api/vidext_sdl2_compat.h | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/src/api/vidext_sdl2_compat.h b/src/api/vidext_sdl2_compat.h
+index 06d778dd9..071a64402 100644
+--- a/src/api/vidext_sdl2_compat.h
++++ b/src/api/vidext_sdl2_compat.h
+@@ -474,8 +474,14 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
+         if (SDL_GL_MakeCurrent(SDL_VideoWindow, SDL_VideoContext) < 0) {
+             return NULL;
+         }
++
++        /* Pitch: size of of line in bytes */
++        /* Add 7 to bpp before division, to ensure correct rounding towards infinity
++         * in cases where bits per pixel do not cleanly divide by 8 (such as 15)
++         */
++        int pitch = (bpp + 7) / 8 * width;
+         SDL_VideoSurface =
+-            SDL_CreateRGBSurfaceFrom(NULL, width, height, bpp, 0, 0, 0, 0, 0);
++            SDL_CreateRGBSurfaceFrom(NULL, width, height, bpp, pitch, 0, 0, 0, 0);
+         if (!SDL_VideoSurface) {
+             return NULL;
+         }
