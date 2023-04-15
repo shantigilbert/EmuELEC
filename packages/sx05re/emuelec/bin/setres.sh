@@ -48,14 +48,14 @@ get_resolution_size()
     480cvbs)
       PSW=640
       PSH=480
-      [[ -z "$FBW" ]] && FBW=640
-      [[ -z "$FBH" ]] && FBH=480
+      [[ -z "$FBW" ]] && FBW=1024
+      [[ -z "$FBH" ]] && FBH=768
       ;;
     576cvbs)
       PSW=720
       PSH=576
-      [[ -z "$FBW" ]] && FBW=720
-      [[ -z "$FBH" ]] && FBH=576
+      [[ -z "$FBW" ]] && FBW=1024
+      [[ -z "$FBH" ]] && FBH=768
       ;;
     480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
       # For resolution with 2 width and height resolution numbers extract the Height.
