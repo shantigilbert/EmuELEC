@@ -204,6 +204,14 @@ if [[ "$MODE" == *"cvbs" ]]; then
   fi
 fi
 
+CUSTOM_RES=$(get_ee_setting ${MODE}.ee_framebuffer)
+if [[ ! -z "${CUSTOM_RES}" ]]; then  
+  declare -a RES=($(echo "${CUSTOM_RES}"))
+  if [[ ! -z "${RES[@]}" ]]; then
+      FBW=${RES[0]}
+      FBH=${RES[1]}
+  fi
+fi
 
 switch_resolution $MODE
 
