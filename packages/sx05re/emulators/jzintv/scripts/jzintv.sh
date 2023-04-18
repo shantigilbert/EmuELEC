@@ -6,11 +6,7 @@
 # Source predefined functions and variables
 . /etc/profile
 
-CUR_MODE=`cat /sys/class/display/mode`;
-
-if [[ "${EE_DEVICE}" == "Amlogic" ]]; then 
-  CUR_MODE="1080p60hz"
-fi
+CUR_MODE=`get_resolution`;
 
 case ${CUR_MODE} in
     480*)

@@ -38,10 +38,7 @@ case $PLATFORM in
   ;;
 esac
 
-MODE=`cat /sys/class/display/mode`;
-if [[ "${EE_DEVICE}" == "Amlogic" ]]; then 
-  MODE="1080p60hz"
-fi
+MODE=`get_resolution`;
 
 SPLASHDIR="/storage/roms/splash"
   

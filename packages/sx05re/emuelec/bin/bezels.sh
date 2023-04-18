@@ -120,11 +120,7 @@ check_overlay_dir() {
 }
 
 # Only 720P and 1080P can use bezels. For 480p/i and 576p/i we just delete bezel config.
-hdmimode=$(cat /sys/class/display/mode)
-
-if [[ "${EE_DEVICE}" == "Amlogic" ]]; then 
-  hdmimode="1080p60hz"
-fi
+hdmimode=$(get_resolution)
 
 OGA_VER=$(oga_ver)
 

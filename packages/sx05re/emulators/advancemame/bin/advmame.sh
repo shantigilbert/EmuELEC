@@ -31,15 +31,8 @@ fi
 
 if [ "$EE_DEVICE" != "OdroidGoAdvance" ] && [ "$EE_DEVICE" != "GameForce" ]; then
     unset DISPLAY
-    MODE=`cat /sys/class/display/mode`;
+    MODE=`get_resolution`;
     sed -i '/device_video_modeline/d' $CONFIG_DIR/advmame.rc
-
-    if [[ -f "/ee_s905" && "$MODE" == "1080p"* ]]; then
-        MODE="720p60hz"
-    fi
-    if [[ "${EE_DEVICE}" == "Amlogic" ]]; then 
-      MODE="1080p60hz"
-    fi
 
     case "$MODE" in
         "480p"*)

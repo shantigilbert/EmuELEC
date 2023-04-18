@@ -5,47 +5,6 @@
 
 CONFIGDIR="/emuelec/configs/mupen64plussa"
 
-get_resolution()
-{
-    local MODE=`cat /sys/class/display/mode`;
-    local H=480
-	local W=640
-    
-    if [[ "$MODE" == *"x"* ]]; then
-        W=$(echo $MODE | cut -d'x' -f 1 ) 
-        case $MODE in
-            *p*)
-                H=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1) 
-            ;;
-            *i*) 
-                H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
-            ;;
-        esac
-    else
-        case $MODE in
-            *p*) 
-                H=$(echo $MODE | cut -d'p' -f 1)
-                W=$(($H*16/9))
-                [[ "$MODE" == "480"* ]] && W=854
-            ;;
-            *i*) 
-                H=$(echo $MODE | cut -d'i' -f 1) 
-                W=$(($H*16/9))
-                [[ "$MODE" == "480"* ]] && W=854
-            ;;
-            480cvbs*)
-                H=480
-                W=640
-            ;;
-            576cvbs*)
-                H=576
-                W=720
-            ;;
-        esac
-    fi
-    echo "$W $H"
-}
-
 if [[ ! -f "${CONFIGDIR}/InputAutoCfg.ini" ]]; then
 	mkdir -p ${CONFIGDIR}
 	cp /usr/local/share/mupen64plus/InputAutoCfg.ini ${CONFIGDIR}/

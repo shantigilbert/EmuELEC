@@ -152,12 +152,6 @@ if [[ ! -f "$FILE_MODE" ]] || [[ $MODE == "auto" ]]; then
   exit 0
 fi
 
-# File location of the file that when written to switches the display to match
-# that screen resolution. Note - You do not have to alter anything else, if it's
-# a valid screen value ti will auto-change, if not it will just keep it's
-# original value.
-FILE_MODE="/sys/class/display/mode"
-
 # SH=Height in pixels, SW=Width in pixels, BPP=Bits Per Pixel.
 BPP=32
 
@@ -286,13 +280,6 @@ fi
 # inside the actual analog diplay resolution which is a bit smaller than the 
 # resolution it's usually transmitted as.
 declare -a BORDERS
-
-[[ "$EE_DEVICE" == "Amlogic" ]] && BORDERS=(0 0)
-
-if [[ ! -z $2 && ! -z $3 ]]; then
-  BORDERS=(0 0)
-fi
-
 
 # This monolith slab of code basically gets the users preference of if they want 
 # to resize there screen display to make it smaller so it can fit into a screen
