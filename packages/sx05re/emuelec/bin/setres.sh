@@ -252,6 +252,11 @@ if [[ -f "/storage/.config/${MODE}_offsets" ]]; then
   CUSTOM_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
 fi
 
+OFFSET_SETTING="$(get_ee_setting ${MODE}.ee_offsets)"
+if [[ ! -z "${OFFSET_SETTING}" ]]; then
+  CUSTOM_OFFSETS=( ${OFFSET_SETTING} )
+fi
+
 # Now that the primary buffer has been acquired we blank it again because the new
 # memory allocated, may contain garbage artifact data.
 COUNT_ARGS=${#CUSTOM_OFFSETS[@]}
