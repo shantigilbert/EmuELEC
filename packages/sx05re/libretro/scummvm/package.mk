@@ -1,3 +1,4 @@
+
 ################################################################################
 #      This file is part of OpenELEC - http://www.openelec.tv
 #      Copyright (C) 2009-2012 Stephan Raue (stephan@openelec.tv)
@@ -22,7 +23,7 @@ PKG_NAME="scummvm"
 PKG_VERSION="fe6ca7910cef5ba4e5c71ba22eac7b8b58ff970a"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
-PKG_SITE="https://github.com/libretro/scummvm"
+PKG_SITE="https://github.com/spleen1981/scummvm_mainline"
 PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_SECTION="libretro"
