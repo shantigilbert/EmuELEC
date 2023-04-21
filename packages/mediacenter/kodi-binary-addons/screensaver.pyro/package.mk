@@ -3,9 +3,9 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="screensaver.pyro"
-PKG_VERSION="3.3.0-Matrix"
-PKG_SHA256="83a3375166d6aaed01939bc370981ad46909fe1f1365fe7af22d4614fa6d06e6"
-PKG_REV="4"
+PKG_VERSION="20.1.0-Nexus"
+PKG_SHA256="ec981d070cccdfaa9116244e80a63d86c37f67dccd11aacfcc66dcfcbb608ce1"
+PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/screensaver.pyro"

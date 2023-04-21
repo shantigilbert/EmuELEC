@@ -1,7 +1,7 @@
 From 7416bc16b956d7b9b2761ac5511c6b51ac8b4ca1 Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Thu, 7 Jul 2022 10:27:01 +0000
-Subject: [PATCH 14/15] WIP: boards: amlogic: add Beelink GT1 defconfig
+Subject: [PATCH 14/25] WIP: boards: amlogic: add Beelink GT1 defconfig
 
 Add a board config for Beelink GT1 devices
 
@@ -89,5 +89,5 @@ index 0000000000..77ffc9aa49
 +CONFIG_VIDEO_DT_SIMPLEFB=y
 +CONFIG_OF_LIBFDT_OVERLAY=y
 -- 
-2.17.1
+2.34.1
 

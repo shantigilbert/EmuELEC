@@ -7,11 +7,9 @@ Subject: [PATCH] disable minimize
  xbmc/application/Application.cpp | 1 -
  1 file changed, 1 deletion(-)
 
-diff --git a/xbmc/application/Application.cpp b/xbmc/application/Application.cpp
-index 27b7bc80cb..bafb5de064 100644
 --- a/xbmc/application/Application.cpp
 +++ b/xbmc/application/Application.cpp
-@@ -1572,7 +1572,6 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
+@@ -1609,7 +1609,6 @@ void CApplication::OnApplicationMessage(
      break;
  
    case TMSG_MINIMIZE:
@@ -19,6 +17,3 @@ index 27b7bc80cb..bafb5de064 100644
      break;
  
    case TMSG_EXECUTE_OS:
--- 
-2.34.1
-

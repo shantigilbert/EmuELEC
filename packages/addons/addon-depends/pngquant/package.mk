@@ -2,8 +2,8 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="pngquant"
-PKG_VERSION="2.13.1"
-PKG_SHA256="4b911a11aa0c35d364b608c917d13002126185c8c314ba4aa706b62fd6a95a7a"
+PKG_VERSION="2.17.0"
+PKG_SHA256="a27cf0e64db499ccb3ddae9b36036e881f78293e46ec27a9e7a86a3802fcda66"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://pngquant.org"
 PKG_URL="https://pngquant.org/pngquant-${PKG_VERSION}-src.tar.gz"

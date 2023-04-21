@@ -91,6 +91,11 @@ clean_pad() {
   [[ -f "${CONFIG_TMP_A}" ]] && rm "${CONFIG_TMP_A}"
   [[ -f "${CONFIG_TMP_D}" ]] && rm "${CONFIG_TMP_D}"
   [[ -f "${CONFIG_TMP_E}" ]] && rm "${CONFIG_TMP_E}"
+  sed -i "s/device${1}\.2.*/device${1}.2 = 10/g" "$EMU_FILE"
+  sed -i "s/device${1}\.1.*/device${1}.1 = 10/g" "$EMU_FILE"
+  sed -i "s/device${1} .*/device${1} = 10/g" "$EMU_FILE"
+  local i=$(( $1 - 1 ))
+  sed -i "s/maple_sdl_joystick_${i}.*/maple_sdl_joystick_${i} = -1/g" "$EMU_FILE"  
 }
 
 # Sets pad depending on parameters.
@@ -112,9 +117,8 @@ set_pad() {
   sed -i "/device${1}/d" "$EMU_FILE"
   sed -i "/maple_sdl_joystick_${index}/d" "$EMU_FILE"
 
-  local DEVICE="maple_sdl_joystick_${index} = ${JSI:2}\ndevice${1} = 0\ndevice${1}.1 = 1\ndevice${1}.2 = 1\n"
+  local DEVICE="maple_sdl_joystick_${index} = ${index}\ndevice${1} = 0\ndevice${1}.1 = 1\ndevice${1}.2 = 1\n"
   [[ "$LN" -gt "0" ]] && LN=$(( LN+1 )) && sed -i "${LN} i ${DEVICE}" "$EMU_FILE"
-
 
   local CONFIG="${MAPPING_DIR}/SDL_${JOY_NAME}.cfg"
   [[ -f "${CONFIG}" ]] && return

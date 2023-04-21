@@ -2,10 +2,10 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="fdupes"
-PKG_VERSION="2.1.2"
-PKG_SHA256="cd5cb53b6d898cf20f19b57b81114a5b263cc1149cd0da3104578b083b2837bd"
+PKG_VERSION="2.2.1"
+PKG_SHA256="846bb79ca3f0157856aa93ed50b49217feb68e1b35226193b6bc578be0c5698d"
 PKG_LICENSE="GPL"
-PKG_SITE="http://premium.caribe.net/~adrian2/fdupes.html"
+PKG_SITE="https://github.com/adrianlopezroche/fdupes"
 PKG_URL="https://github.com/adrianlopezroche/fdupes/releases/download/v${PKG_VERSION}/fdupes-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain ncurses"
 PKG_LONGDESC="A program for identifying or deleting duplicate files residing within specified directories."

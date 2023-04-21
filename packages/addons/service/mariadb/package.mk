@@ -2,9 +2,9 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="mariadb"
-PKG_VERSION="10.9.4"
-PKG_REV="108"
-PKG_SHA256="1dff08a0f37ea5cf8f00cbd12d40e80759fae7d73184ccf56b5b51acfdcfc054"
+PKG_VERSION="10.11.2"
+PKG_REV="0"
+PKG_SHA256="1c89dee0caed0f68bc2a1d203eb98a123150e6a179f6ee0f1fc0ba3f08dc71dc"
 PKG_LICENSE="GPL2"
 PKG_SITE="https://mariadb.org"
 PKG_URL="https://downloads.mariadb.com/MariaDB/${PKG_NAME}-${PKG_VERSION}/source/${PKG_NAME}-${PKG_VERSION}.tar.gz"
@@ -20,16 +20,6 @@ PKG_SECTION="service"
 PKG_ADDON_NAME="MariaDB SQL database server"
 PKG_ADDON_TYPE="xbmc.service"
 
-pre_configure_target() {
-  # mariadb does not need / nor build successfully with _FILE_OFFSET_BITS or _TIME_BITS set
-  if [ "${TARGET_ARCH}" = "arm" ]; then
-    export CFLAGS=$(echo ${CFLAGS} | sed -e "s|-D_FILE_OFFSET_BITS=64||g")
-    export CFLAGS=$(echo ${CFLAGS} | sed -e "s|-D_TIME_BITS=64||g")
-    export CXXFLAGS=$(echo ${CXXFLAGS} | sed -e "s|-D_FILE_OFFSET_BITS=64||g")
-    export CXXFLAGS=$(echo ${CXXFLAGS} | sed -e "s|-D_TIME_BITS=64||g")
-  fi
-}
- 
 configure_package() {
   PKG_CMAKE_OPTS_HOST=" \
     -DCMAKE_INSTALL_MESSAGE=NEVER \
@@ -84,7 +74,7 @@ make_host() {
 }
 
 makeinstall_host() {
-  :
+  cp -a strings/uca-dump ${TOOLCHAIN}/bin
 }
 
 post_makeinstall_target() {

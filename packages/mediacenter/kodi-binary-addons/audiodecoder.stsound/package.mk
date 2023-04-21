@@ -5,7 +5,7 @@
 PKG_NAME="audiodecoder.stsound"
 PKG_VERSION="20.2.0-Nexus"
 PKG_SHA256="a8138fb075a480c59d7041a9408eca6e52dc88f188daed519cd9e684b430f333"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/audiodecoder.stsound"

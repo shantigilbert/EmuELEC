@@ -47,9 +47,9 @@ CFLAGS_OPTIM_DEBUG="-ggdb -Og"
 CXXFLAGS_OPTIM_DEBUG="$CFLAGS_OPTIM_DEBUG"
 LDFLAGS_OPTIM_DEBUG="-ggdb"
 # split debug settings (requires gold)
-CFLAGS_OPTIM_DEBUG_SPLIT="-gsplit-dwarf -Og"
+CFLAGS_OPTIM_DEBUG_SPLIT="-gdwarf-4 -gsplit-dwarf -Og"
 CXXFLAGS_OPTIM_DEBUG_SPLIT="$CFLAGS_OPTIM_DEBUG_SPLIT"
-LDFLAGS_OPTIM_DEBUG_SPLIT="-Wl,--gdb-index"
+LDFLAGS_OPTIM_DEBUG_SPLIT="-gdwarf-4 -Wl,--gdb-index"
 
 # position-independent code
 CFLAGS_OPTIM_PIC="-fPIC -DPIC"

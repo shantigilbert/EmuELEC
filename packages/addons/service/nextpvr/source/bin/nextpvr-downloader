@@ -9,7 +9,8 @@ oe_setup_addon service.nextpvr
 ICON="${ADDON_DIR}/resources/icon.png"
 CONTROL_FILE="/tmp/curl.nextpvr.done"
 DATA_FILE="/tmp/curl.nextpvr.data"
-NEXTPVR_FILE="NPVR-@NEXTPVR_VERSION@.zip"
+NEXTPVR_VERSION="@NEXTPVR_VERSION@"
+NEXTPVR_FILE="NPVR-${NEXTPVR_VERSION%~*}.zip"
 
 # check for enough free disk space
 if [ $(df . | awk 'END {print $4}') -lt 400000 ]; then
@@ -39,7 +40,7 @@ echo "Downloading NextPVR"
 # download NextPVR
 rm -f ${CONTROL_FILE} ${DATA_FILE}
 (
-  curl -# -O -C - https://nextpvr.com/stable/linux/${NEXTPVR_FILE} 2>${DATA_FILE}
+  curl -L -# -O -C - https://github.com/sub3/releases/releases/download/${NEXTPVR_VERSION%~*}/${NEXTPVR_FILE}  2>${DATA_FILE}
   touch ${CONTROL_FILE}
 ) |
   while [ : ]; do

@@ -131,9 +131,14 @@ def loadPackages():
         if pkg["hierarchy"] == "global":
             map[pkg["name"]] = initPackage(pkg)
 
-    # Then the "local" packages, as these will replace any matching "global" packages
+    # Then the "project" packages, as these will replace any matching "global" packages
     for pkg in jdata:
-        if pkg["hierarchy"] == "local":
+        if pkg["hierarchy"] == "project":
+            map[pkg["name"]] = initPackage(pkg)
+
+    # Then the "device" packages, as these will replace any matching "project" or "global" packages
+    for pkg in jdata:
+        if pkg["hierarchy"] == "device":
             map[pkg["name"]] = initPackage(pkg)
 
     return map

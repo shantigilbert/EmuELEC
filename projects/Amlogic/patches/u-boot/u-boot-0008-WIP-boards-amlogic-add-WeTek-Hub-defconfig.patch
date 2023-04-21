@@ -1,7 +1,7 @@
 From 8b7dfec310b69a5b7cafacbe11a3ca36b497c78c Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Sat, 27 Feb 2021 06:03:00 +0000
-Subject: [PATCH 08/15] WIP: boards: amlogic: add WeTek Hub defconfig
+Subject: [PATCH 08/25] WIP: boards: amlogic: add WeTek Hub defconfig
 
 Signed-of-by: Christian Hewitt <christianshewitt@gmail.com>
 ---
@@ -87,5 +87,5 @@ index 0000000000..9ad263ca2c
 +CONFIG_BMP_32BPP=y
 +CONFIG_OF_LIBFDT_OVERLAY=y
 -- 
-2.17.1
+2.34.1
 

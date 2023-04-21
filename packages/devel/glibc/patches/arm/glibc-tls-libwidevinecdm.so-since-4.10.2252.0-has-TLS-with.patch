@@ -6,6 +6,8 @@ Subject: [PATCH] tls: libwidevinecdm.so: since 4.10.2252.0 has TLS with
  to use dlopen again. Tests by changing TLS_TCB_ALIGN directly showed up some
  random crashes. Reverence: https://lkml.org/lkml/2020/7/3/754
 
+Without this patch, a SEGV is encountered when dlopen(libwidevinecdm.so),
+inside dl-init.c call_init()
 ---
  elf/dl-tls.c | 5 +++++
  1 file changed, 5 insertions(+)

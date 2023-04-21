@@ -1,0 +1,57 @@
+From 89a5440ab5110d5460c4919865016e66b9dfbc48 Mon Sep 17 00:00:00 2001
+From: John Cox <jc@kynesim.co.uk>
+Date: Wed, 11 Jan 2023 18:34:04 +0000
+Subject: [PATCH] Make capture timeout long once we've started getting frames
+
+---
+ libavcodec/v4l2_m2m.h     |  1 +
+ libavcodec/v4l2_m2m_dec.c | 10 ++++++++--
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/libavcodec/v4l2_m2m.h b/libavcodec/v4l2_m2m.h
+index 058cec5033..87f81febd2 100644
+--- a/libavcodec/v4l2_m2m.h
++++ b/libavcodec/v4l2_m2m.h
+@@ -88,6 +88,7 @@ typedef struct V4L2m2mContext {
+ 
+     /* null frame/packet received */
+     int draining;
++    int running;
+     AVPacket buf_pkt;
+ 
+     /* Reference to self; only valid while codec is active. */
+diff --git a/libavcodec/v4l2_m2m_dec.c b/libavcodec/v4l2_m2m_dec.c
+index d540d00bdd..6078811404 100644
+--- a/libavcodec/v4l2_m2m_dec.c
++++ b/libavcodec/v4l2_m2m_dec.c
+@@ -622,7 +622,7 @@ static int v4l2_receive_frame(AVCodecContext *avctx, AVFrame *frame)
+             const int t =
+                 src_rv == NQ_Q_FULL ? -1 :
+                 src_rv == NQ_DRAINING ? 300 :
+-                prefer_dq ? 5 : 0;
++                prefer_dq ? (s->running ? 100 : 5) : 0;
+ 
+             // Dequeue frame will unref any previous contents of frame
+             // if it returns success so we don't need an explicit unref
+@@ -639,6 +639,11 @@ static int v4l2_receive_frame(AVCodecContext *avctx, AVFrame *frame)
+                 }
+             }
+ 
++            if (s->running != (dst_rv == 0) && prefer_dq) {
++                s->running = (dst_rv == 0);
++                av_log(avctx, AV_LOG_VERBOSE, "%s running\n", s->running ? "Start" : "Stop");
++            }
++
+             if (dst_rv == 0)
+                 set_best_effort_pts(avctx, &s->pts_stat, frame);
+ 
+@@ -1006,7 +1011,8 @@ static void v4l2_decode_flush(AVCodecContext *avctx)
+ 
+     // resend extradata
+     s->extdata_sent = 0;
+-    // clear EOS status vars
++    // clear status vars
++    s->running = 0;
+     s->draining = 0;
+     output->done = 0;
+     capture->done = 0;

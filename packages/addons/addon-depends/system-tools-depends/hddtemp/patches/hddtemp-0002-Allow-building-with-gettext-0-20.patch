@@ -1,0 +1,38 @@
+commit 12eb958f85084485a4c9768e595c64993996f4a6
+Author: Rudi Heitbaum <rudi@heitbaum.com>
+Date:   Mon Dec 12 11:16:29 2022 +0000
+
+    Allow building with gettext ≥ 0.20
+    
+    The use of AM_GNU_GETTEXT_VERSION in configure.ac instructs autopoint to
+    copy po/Makefile.in.in from the exact gettext version. It is fine if the
+    version of gettext installed on the system has the same minor version
+    number with the requested version, but it fails if you have a newer
+    version of gettext because of the mismatch between autoconf macros and
+    Makefile.in.in.
+    
+      *** error: gettext infrastructure mismatch: using a Makefile.in.in
+      from gettext version 0.19 but the autoconf macros are from gettext
+      version 0.20
+    
+    Instead of specifying the exact version with AM_GNU_GETTEXT_VERSION, we
+    can use AM_GNU_GETTEXT_REQUIRE_VERSION to ask autopoint to simply use
+    the gettext version installed on the system to prevent the mismatch.
+    
+    This also bumps the version requirement on gettext to 0.19.6 because
+    AM_GNU_GETTEXT_REQUIRE_VERSION was added in this version.
+
+diff --git a/configure.ac b/configure.ac
+index 6729c9f..d9c4128 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -26,7 +26,8 @@ AC_C_CONST
+ AC_STRUCT_TM
+ 
+ dnl internationalization macros
+-AM_GNU_GETTEXT_VERSION([0.18.1])
++AM_GNU_GETTEXT_VERSION([0.19.6])
++AM_GNU_GETTEXT_REQUIRE_VERSION([0.19.6])
+ AM_GNU_GETTEXT([external])
+ 
+ dnl reasonable guesses for where stuff is installed

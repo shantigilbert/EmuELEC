@@ -1,0 +1,13 @@
+diff --git a/Externals/hidapi/libusb/hid.c b/Externals/hidapi/libusb/hid.c
+index a23bf46125..c82718636f 100644
+--- a/Externals/hidapi/libusb/hid.c
++++ b/Externals/hidapi/libusb/hid.c
+@@ -44,7 +44,7 @@
+ #include <wchar.h>
+ 
+ /* GNU / LibUSB */
+-#include <libusb.h>
++#include <libusb-1.0/libusb.h>
+ #ifndef __ANDROID__
+ #include <iconv.h>
+ #endif

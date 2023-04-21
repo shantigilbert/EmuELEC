@@ -1,0 +1,99 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
+
+. /usr/lib/libreelec/functions
+
+# Get NAME, which is DISTRONAME, ie. CoreELEC
+. /etc/os-release
+
+hidecursor
+
+label=
+target=
+uuid=
+ceemmc=
+
+get_target() {
+  for arg in $(cat /proc/cmdline); do
+    case ${arg} in
+      disk=*)
+        disk="${arg#*=}"
+        case ${disk} in
+          LABEL=*)
+            label="${disk#*=}"
+            target="$(blkid -L ${label})"
+            ;;
+          UUID=*)
+            uuid="${disk#*=}"
+            target="$(blkid -U ${uuid})"
+            ;;
+          FOLDER=*)
+            ceemmc="yes"
+            target="${disk#*=}"
+            ;;
+          /*)
+            target="${disk}"
+            ;;
+        esac
+        ;;
+    esac
+  done
+}
+
+show_reset_msg() {
+  echo "RESET IN PROGRESS"
+  echo ""
+  echo "Please do not reboot or turn off your ${NAME} device!"
+  echo ""
+}
+
+if [ -f /storage/.cache/reset_hard ] ; then
+  # hard reset
+  rm -f /storage/.cache/reset_hard
+  get_target
+  if [ ! -z ${target} ] ; then
+    show_reset_msg
+
+    StartProgress spinner "Performing hard reset... "
+    if [ "${ceemmc}" = "yes" ] ; then
+      # storage is just subfolder on Android data partition
+      rm -rf /storage/* &>/dev/null
+      rm -rf /storage/.[!.]* &>/dev/null
+    else
+      umount /storage
+      mke2fs -t ext4 -m 0 ${target} &>/dev/null
+      if [ ! -z ${label} ] ; then
+        tune2fs -U random -L ${label} ${target} &>/dev/null
+      fi
+      if [ ! -z ${uuid} ] ; then
+        tune2fs -U ${uuid} ${target} &>/dev/null
+      fi
+    fi
+    StopProgress "done!"
+
+    echo
+    StartProgress countdown "Rebooting in 5s... " 5 "NOW"
+  fi
+elif [ -f /storage/.cache/reset_soft ] ; then
+  # soft reset
+  rm -f /storage/.cache/reset_soft
+  get_target
+  if [ ! -z ${target} ] ; then
+    show_reset_msg
+
+    StartProgress spinner "Performing soft reset... "
+      rm -rf /storage/.??* &>/dev/null
+      # Leave a hint that we just did a soft reset
+      mkdir -p /storage/.config
+      echo "RESET-SOFT" > /storage/.config/boot.hint
+      StopProgress "done!"
+
+    echo
+    StartProgress countdown "Rebooting in 5s... " 5 "NOW"
+  fi
+fi
+
+sync
+reboot -f

@@ -4,7 +4,7 @@
 PKG_NAME="vfs.rar"
 PKG_VERSION="20.1.0-Nexus"
 PKG_SHA256="50870b24a3663f8d8d88802b327a8fd2fec441a9fed952baf71faba6854a8e1b"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/vfs.rar"

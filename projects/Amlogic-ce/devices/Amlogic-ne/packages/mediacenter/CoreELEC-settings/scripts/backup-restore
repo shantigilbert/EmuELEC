@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
+
+. /usr/lib/libreelec/functions
+
+# Get NAME, which is DISTRONAME, ie. CoreELEC
+. /etc/os-release
+
+hidecursor
+
+BACKUP_FILE=`ls -1 /storage/.restore/??????????????.tar 2>/dev/null | tail -1`
+
+if [ -f "${BACKUP_FILE}" ] ; then
+  echo "RESTORE IN PROGRESS"
+  echo ""
+  echo "Please do not reboot or turn off your ${NAME} device!"
+  echo ""
+
+  StartProgress spinner "Checking backup file... "
+    tar tf ${BACKUP_FILE} &>/dev/null
+    ret=$?
+
+  if [ ${ret} -eq 0 ] ; then
+    StopProgress "OK"
+
+    echo
+    echo "This may take some time to complete, please be patient."
+    echo
+
+    StartProgress spinner "Restoring... "
+      rm -rf /storage/.kodi &>/dev/null
+      rm -rf /storage/.cache &>/dev/null
+      rm -rf /storage/.config &>/dev/null
+      tar xf ${BACKUP_FILE} -C / &>/dev/null
+      rm -f ${BACKUP_FILE} &>/dev/null
+      # Leave a hint that we just did a restore
+      echo "RESTORE" > /storage/.config/boot.hint
+      sync
+      StopProgress "done!"
+
+    echo
+    StartProgress countdown "Rebooting in 5s... " 5 "NOW"
+  else
+    StopProgress "FAILED"
+
+    echo
+    echo "Backup file is not valid, or corrupt."
+
+    echo
+    StartProgress spinner "Removing file to allow normal restart... "
+      rm -f ${BACKUP_FILE} &>/dev/null
+      sync
+      StopProgress "done"
+
+    echo
+    StartProgress countdown "Rebooting in 30s... " 30 "NOW"
+  fi
+fi
+
+sync
+reboot -f

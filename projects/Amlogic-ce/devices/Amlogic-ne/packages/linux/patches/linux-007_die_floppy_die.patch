@@ -1,0 +1,30 @@
+From 4ff58b642f80dedb20533978123d89b5ac9b1ed5 Mon Sep 17 00:00:00 2001
+From: Kyle McMartin <kyle@phobos.i.jkkm.org>
+Date: Tue, 30 Mar 2010 00:04:29 -0400
+Subject: die-floppy-die
+
+Kill the floppy.ko pnp modalias. We were surviving just fine without
+autoloading floppy drivers, tyvm.
+
+Please feel free to register all complaints in the wastepaper bin.
+---
+ drivers/block/floppy.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/block/floppy.c b/drivers/block/floppy.c
+index 90c4038..f4a0b90 100644
+--- a/drivers/block/floppy.c
++++ b/drivers/block/floppy.c
+@@ -4619,8 +4619,7 @@ static const struct pnp_device_id floppy_pnpids[] = {
+ 	{"PNP0700", 0},
+ 	{}
+ };
+-
+-MODULE_DEVICE_TABLE(pnp, floppy_pnpids);
++/* MODULE_DEVICE_TABLE(pnp, floppy_pnpids); */
+ 
+ #else
+ 
+-- 
+1.7.0.1
+

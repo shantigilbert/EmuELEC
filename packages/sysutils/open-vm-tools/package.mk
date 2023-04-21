@@ -4,13 +4,13 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="open-vm-tools"
-PKG_VERSION="12.1.0"
-PKG_SHA256="4c867a3f8b6c636eb98c9faa76c4280b0fdb75e2923dc0deec77dd24dd3f43b1"
+PKG_VERSION="12.1.5"
+PKG_SHA256="678d08b46fba15f2b4c39245b5bc4deec30284d6f13ee279c233bc3d3627ec8a"
 PKG_ARCH="x86_64"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/vmware/open-vm-tools"
 PKG_URL="https://github.com/vmware/open-vm-tools/archive/stable-${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain fuse glib:host glib libdnet libtirpc"
+PKG_DEPENDS_TARGET="toolchain fuse3 glib:host glib libdnet libtirpc"
 PKG_LONGDESC="open-vm-tools: open source implementation of VMware Tools"
 PKG_TOOLCHAIN="autotools"
 
@@ -26,6 +26,7 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-docs \
                            --without-xerces \
                            --without-icu \
                            --without-kernel-modules \
+                           --with-fuse=fuse3 \
                            --with-udev-rules-dir=/usr/lib/udev/rules.d/ \
                            --with-sysroot=${SYSROOT_PREFIX}"
 

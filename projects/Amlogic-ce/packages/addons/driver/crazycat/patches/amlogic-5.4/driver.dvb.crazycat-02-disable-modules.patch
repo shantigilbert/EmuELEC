@@ -1,0 +1,15 @@
+--- a/v4l/scripts/make_kconfig.pl
++++ b/v4l/scripts/make_kconfig.pl
+@@ -626,6 +626,12 @@ ($$)
+ close OUT;
+ 
+ # These options should default to off
++disable_config('MEDIA_ANALOG_TV_SUPPORT');
++disable_config('MEDIA_CAMERA_SUPPORT');
++disable_config('MEDIA_CEC_SUPPORT');
++disable_config('SOC_CAMERA');
++disable_config('VIDEO_SAA7146_VV');
++disable_config('RC_CORE');
+ disable_config('DVB_AV7110_FIRMWARE');
+ disable_config('DVB_CINERGYT2_TUNING');
+ disable_config('VIDEO_HELPER_CHIPS_AUTO');

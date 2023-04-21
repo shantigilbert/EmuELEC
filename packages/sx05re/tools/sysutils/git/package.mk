@@ -2,8 +2,8 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="git"
-PKG_VERSION="2.34.1"
-PKG_SHA256="fc4eb5ecb9299db91cdd156c06cdeb41833f53adc5631ddf8c0cb13eaa2911c1"
+PKG_VERSION="2.39.2"
+PKG_SHA256="fb6807d1eb4094bb2349ab97d203fe1e6c3eb28af73ea391decfbd3a03c02e85"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"

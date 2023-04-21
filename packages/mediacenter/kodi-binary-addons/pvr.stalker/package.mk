@@ -5,7 +5,7 @@
 PKG_NAME="pvr.stalker"
 PKG_VERSION="20.3.1-Nexus"
 PKG_SHA256="8fdd4ab4cf28d7255550b4c351a397b7ce8eb1aa1f12e93bce7d61a951fbd6f3"
-PKG_REV="1"
+PKG_REV="4"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.stalker"

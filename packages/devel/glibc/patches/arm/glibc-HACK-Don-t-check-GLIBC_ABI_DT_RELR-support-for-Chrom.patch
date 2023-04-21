@@ -4,6 +4,7 @@ Date: Sun, 17 Jul 2022 12:16:20 +0200
 Subject: [PATCH] HACK: Don't check GLIBC_ABI_DT_RELR support for ChromeOS
  libwidevinecdm.so
 
+Required starting with glibc 2.36
 ---
  elf/dl-version.c | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)

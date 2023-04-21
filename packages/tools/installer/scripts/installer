@@ -78,7 +78,7 @@ get_device_unmount() {
   # provides: DEVICES
 
   DEVICES=""
-  DEVICES=$(parted -s -m -l 2>/dev/null | grep -E '^/dev/sd|^/dev/mmcblk|^/dev/nvme' | grep -E -v '.?rpmb|.?boot?' | cut -f1 -d ":")
+  DEVICES=$(parted -s -m -l 2>/dev/null | grep -E '^/dev/sd|^/dev/mmcblk|^/dev/nvme' | grep -E -v '^[^:]*rpmb|^[^:]*boot' | cut -f1 -d ":")
 
   for i in $(cat /proc/mounts | grep -E '^/dev/sd' | cut -f1 -d " " | sed "s/[0-9].*$//"); do
     DEVICES=$(echo $DEVICES | sed -e "s|$i||")

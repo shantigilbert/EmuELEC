@@ -5,7 +5,7 @@
 PKG_NAME="visualization.shadertoy"
 PKG_VERSION="20.3.0-Nexus"
 PKG_SHA256="2f97a34f74ee3e3e1d9fe8cfd37796564f8f88eb4c07d60b27ff635d64a5a724"
-PKG_REV="1"
+PKG_REV="4"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/visualization.shadertoy"

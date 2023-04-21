@@ -10,8 +10,6 @@ credits to vpeter4 for the patch
  xbmc/addons/Addon.cpp | 26 ++++++++++++++++++++++++++
  1 file changed, 26 insertions(+)
 
-diff --git a/xbmc/addons/Addon.cpp b/xbmc/addons/Addon.cpp
-index 90669bb10e..f6aabfc615 100644
 --- a/xbmc/addons/Addon.cpp
 +++ b/xbmc/addons/Addon.cpp
 @@ -29,6 +29,10 @@
@@ -54,6 +52,3 @@ index 90669bb10e..f6aabfc615 100644
    addon->OnPostInstall(update, modal);
  }
  
--- 
-2.34.1
-

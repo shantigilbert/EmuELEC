@@ -3,9 +3,9 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="pvr.hts"
-PKG_VERSION="20.6.0-Nexus"
-PKG_SHA256="00f9f4294d0a455f5684832e8ee5273898f28d4f3bf149cca6ce826524706436"
-PKG_REV="1"
+PKG_VERSION="20.6.1-Nexus"
+PKG_SHA256="d56cf6673bd1008c50e76990f77ffb4a3b6af2ef26968fd217f0d6dbb11328b1"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.hts"

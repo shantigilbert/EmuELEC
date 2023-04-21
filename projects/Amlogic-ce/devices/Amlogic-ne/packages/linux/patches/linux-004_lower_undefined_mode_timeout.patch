@@ -1,0 +1,24 @@
+diff -Naur linux-2.6.23-rc9.orig/arch/i386/boot/tty.c linux-2.6.23-rc9/arch/i386/boot/tty.c
+--- linux-2.6.23-rc9.orig/arch/x86/boot/tty.c	2007-10-06 12:26:14.000000000 +0200
++++ linux-2.6.23-rc9/arch/x86/boot/tty.c	2007-10-06 12:37:47.000000000 +0200
+@@ -92,7 +92,7 @@
+ 
+ int getchar_timeout(void)
+ {
+-	int cnt = 30;
++	int cnt = 3;
+ 	int t0, t1;
+ 
+ 	t0 = gettime();
+diff -Naur linux-2.6.23-rc9.orig/arch/i386/boot/video.c linux-2.6.23-rc9/arch/i386/boot/video.c
+--- linux-2.6.23-rc9.orig/arch/x86/boot/video.c	2007-10-06 12:26:14.000000000 +0200
++++ linux-2.6.23-rc9/arch/x86/boot/video.c	2007-10-06 12:36:05.000000000 +0200
+@@ -329,7 +329,7 @@
+ 	unsigned int sel;
+ 
+ 	puts("Press <ENTER> to see video modes available, "
+-	     "<SPACE> to continue, or wait 30 sec\n");
++	     "<SPACE> to continue, or wait 3 sec\n");
+ 
+ 	kbd_flush();
+ 	while (1) {

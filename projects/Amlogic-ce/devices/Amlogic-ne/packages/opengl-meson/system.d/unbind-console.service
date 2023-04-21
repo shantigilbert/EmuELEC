@@ -1,0 +1,10 @@
+[Unit]
+Description=Unbind framebuffer console
+ConditionPathExists=/sys/class/vtconsole/vtcon1/bind
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo 0 > /sys/class/vtconsole/vtcon1/bind'
+
+[Install]
+WantedBy=graphical.target

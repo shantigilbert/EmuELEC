@@ -24,7 +24,13 @@ json_worker() {
 
     [ ${exited} -eq 1 ] && continue
 
-    [[ ${pkgpath} =~ ^${ROOT}/${PACKAGES}/ ]] && hierarchy="global" || hierarchy="local"
+    if [[ "${pkgpath}" =~ ^${ROOT}/${PACKAGES}/* ]]; then
+      hierarchy="global"
+    elif [[ "${pkgpath}" =~ ^${ROOT}/projects/${PROJECT}/${PACKAGES}/* ]]; then
+      hierarchy="project"
+    elif [[ "${pkgpath}" =~ ^${ROOT}/projects/${PROJECT}/devices/${DEVICE}/* ]]; then
+      hierarchy="device"
+    fi
 
     cat <<EOF
   {

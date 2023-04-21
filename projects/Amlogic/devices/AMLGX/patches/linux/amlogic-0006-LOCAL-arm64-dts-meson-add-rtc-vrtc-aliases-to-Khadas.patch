@@ -1,7 +1,7 @@
-From e0ce9e59459c6e3aa5e7e923c5d7a7953c349565 Mon Sep 17 00:00:00 2001
+From 08655d3530269d8c17410a6dc3fde69e9c23fe2f Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Thu, 21 Jan 2021 01:35:36 +0000
-Subject: [PATCH 06/74] LOCAL: arm64: dts: meson: add rtc/vrtc aliases to
+Subject: [PATCH 006/120] LOCAL: arm64: dts: meson: add rtc/vrtc aliases to
  Khadas VIM
 
 Add aliases to ensure the vrtc time (which normally proves first) is /dev/rtc1
@@ -16,7 +16,7 @@ diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-khadas-vim.dts b/arch/a
 index 6ab1cc125b96..24af15e18026 100644
 --- a/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-khadas-vim.dts
 +++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905x-khadas-vim.dts
-@@ -29,6 +29,8 @@
+@@ -29,6 +29,8 @@ button-function {
  	aliases {
  		serial2 = &uart_AO_B;
  		ethernet0 = &ethmac;
@@ -26,5 +26,5 @@ index 6ab1cc125b96..24af15e18026 100644
  
  	gpio-keys-polled {
 -- 
-2.17.1
+2.34.1
 

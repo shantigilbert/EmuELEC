@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libretro-tyrquake"
-PKG_VERSION="423a217d7ef0f913bc711dc9fceff707196c0f2f"
-PKG_SHA256="0db39ba41e321b843f436b9b0184bc1b74b853948307f827dcc54a5043c09249"
+PKG_VERSION="fdd8d2746d527722dffe2ac9a208a753bef62f7b"
+PKG_SHA256="f2c4a88974230ad7b517dc1de4e24a9cfb2f5b4c0f38b1b0a4c9e5c7721f7fad"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/tyrquake"
 PKG_URL="https://github.com/libretro/tyrquake/archive/${PKG_VERSION}.tar.gz"

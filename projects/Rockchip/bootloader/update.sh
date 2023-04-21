@@ -59,7 +59,7 @@ fi
 # update bootloader
  if [ -f ${SYSTEM_ROOT}/usr/share/bootloader/u-boot-rockchip.bin ]; then
     echo -n "Updating fit image u-boot-rockchip.bin ... "
-    dd if=${SYSTEM_ROOT}/usr/share/bootloader/u-boot-rockchip.bin of=${BOOT_DISK} seek=64 conv=fsync &>/dev/null
+    dd if=${SYSTEM_ROOT}/usr/share/bootloader/u-boot-rockchip.bin of=${BOOT_DISK} bs=32k seek=1 conv=fsync,notrunc &>/dev/null
     echo "done"
   fi
 
