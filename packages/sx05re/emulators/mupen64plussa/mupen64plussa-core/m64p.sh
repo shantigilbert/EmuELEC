@@ -45,15 +45,11 @@ case "$(oga_ver)" in
   ;;
   *)
     RES=$(get_resolution)
-    RES_W=$(echo "$RES" | cut -d' ' -f1)
-    RES_H=$(echo "$RES" | cut -d' ' -f2)
+		declare -a RES=( $MODE )
+		RES_W=${RES[0]}
+		RES_H=${RES[1]}
   ;;
 esac
-
-if [[ -z "${RES_W}" || -z "${RES_H}" ]]; then
-    RES_W="1920"
-    RES_H="1080"
-fi
 
 echo "RESOLUTION=${RES_W} ${RES_H}"
 

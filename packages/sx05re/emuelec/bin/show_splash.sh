@@ -107,48 +107,8 @@ if [[ "$EE_DEVICE" == "OdroidGoAdvance" ]] || [[ "$EE_DEVICE" == "GameForce" ]];
   PLAYER="mpv"
 fi
 
-if [[ "$SIZE" != "NONE" ]]; then
-  case "$MODE" in
-      1280*1024)
-        SIZE=" -x 1280 -y 1024"
-      ;;
-      1024*768)
-        SIZE=" -x 1024 -y 768"
-      ;;
-      800*600)
-        SIZE=" -x 800 -y 600"
-      ;;      
-      640*480)
-        SIZE=" -x 640 -y 480"
-      ;;    
-  		*480)
-  			SIZE=" -x 720 -y 480"
-  		;;
-  		*576)
-  			SIZE=" -x 768 -y 576"
-  		;;
-  		*720)
-  			SIZE=" -x 1280 -y 720"
-  		;;
-  		*1080)
-  			SIZE=" -x 1920 -y 1080"
-  		;;
-      *2160)
-        SIZE=" -x 3840 -y 2160"
-        ;;
-  		*)
-  			SIZE=" -x 1920 -y 1080"
-  		;;
-  esac
-else
-  SIZE=""
-fi
-
-# Blank screen needs to fill entire screen.
-if [ "$ACTION_TYPE" == "blank" ]; then
-  SIZE=" -x 3840 -y 2160"
-fi
-
+declare -a RES=( $MODE )
+SIZE=" -x ${RES[0]} -y ${RES[1]}"
 
 [[ "${ACTION_TYPE}" != "intro" ]] && VIDEO=0 || VIDEO=$(get_ee_setting ee_bootvideo.enabled)
 
