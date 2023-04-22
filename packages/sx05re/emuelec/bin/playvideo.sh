@@ -21,13 +21,13 @@ case ${PLAYER} in
 MODE=`get_resolution`;	
 
 	case "$MODE" in
-		480*)
+		*480)
 			SIZE=" -x 800 -y 480"
 		;;
-		576*)
+		*576)
 			SIZE=" -x 768 -y 576"
 		;;
-		720*)
+		*720)
 			SIZE=" -x 1280 -y 720"
 		;;
 		*)

@@ -134,8 +134,8 @@ set_display_borders() {
 # Here we initialize any arguments and variables to be used in the script.
 # The Mode we want the display to change too.
 MODE=$1
-FBW=$2
-FBH=$3
+FBW=0
+FBH=0
 
 FILE_MODE="/sys/class/display/mode"
 

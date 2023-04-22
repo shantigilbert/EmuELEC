@@ -130,15 +130,15 @@ if [ "${OGA_VER}" == "OGS" ]; then
 fi
 
 case ${hdmimode} in
-  480*)
+  *480)
 	sed -i '/input_overlay = "/d' ${RACONFIG}
 	clear_bezel
   ;;
-  576*)
+  *576)
 	sed -i '/input_overlay = "/d' ${RACONFIG}
 	clear_bezel
   ;;
-  "OGS"|720*)
+  "OGS"|*720)
 	check_overlay_dir "${PLATFORM}"
         case "${PLATFORM}" in
             "gamegear")
