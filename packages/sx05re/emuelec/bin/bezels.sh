@@ -120,7 +120,7 @@ check_overlay_dir() {
 }
 
 # Only 720P and 1080P can use bezels. For 480p/i and 576p/i we just delete bezel config.
-hdmimode=$(cat /sys/class/display/mode)
+hdmimode=$(get_resolution)
 
 OGA_VER=$(oga_ver)
 
@@ -130,15 +130,15 @@ if [ "${OGA_VER}" == "OGS" ]; then
 fi
 
 case ${hdmimode} in
-  480*)
+  *480)
 	sed -i '/input_overlay = "/d' ${RACONFIG}
 	clear_bezel
   ;;
-  576*)
+  *576)
 	sed -i '/input_overlay = "/d' ${RACONFIG}
 	clear_bezel
   ;;
-  "OGS"|720*)
+  "OGS"|*720)
 	check_overlay_dir "${PLATFORM}"
         case "${PLATFORM}" in
             "gamegear")

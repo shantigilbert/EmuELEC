@@ -16,26 +16,17 @@
 
 switch_resolution()
 {
-  local OLD_MODE=$1
-  local MODE=$2
+  local MODE=$1
 
   # Here we first clear the primary display buffer of leftover artifacts then set
   # the secondary small buffers flag to stop copying across.
   blank_buffer >> /dev/null
 
   case $MODE in
-    480cvbs)
-      echo 480cvbs > "${FILE_MODE}"
-      ;;
-    576cvbs)
-      echo 576cvbs > "${FILE_MODE}"
-      ;;
-    480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
+    480cvbs|576cvbs|480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*|*x*)
+      echo null > "${FILE_MODE}"
+      sleep 0.5
       echo $MODE > "${FILE_MODE}"
-      ;;
-    *x*)
-      echo $MODE > "${FILE_MODE}"
-      ;;
   esac
 }
 
@@ -43,43 +34,55 @@ get_resolution_size()
 {
   local MODE=$1
 
-  # Here we set the Height and Width of the particular resolution, RH and RW stands
-  # for Real Width and Real Height respectively.
-  local RW=0
-  local RH=0
+  # Here we set the Height and Width of the particular resolution.
+  # FBW - Frame Buffer Width, PSW - Physical Screen Width.
+  # FBH - Frame Buffer Height, PSH - Physical Screen Height.
+
+  local FBW=$2
+  local FBH=$3
+
+  local PSW=0
+  local PSH=0
+
   case $MODE in
     480cvbs)
-      RW=640
-      RH=480
-      [[ -z "$SW" ]] && SW=1024
-      [[ -z "$SH" ]] && SH=768
+      PSW=640
+      PSH=480
+      [[ -z "$FBW" ]] && FBW=1024
+      [[ -z "$FBH" ]] && FBH=768
       ;;
     576cvbs)
-      RW=720
-      RH=576
-      [[ -z "$SW" ]] && SW=1024
-      [[ -z "$SH" ]] && SH=768
+      PSW=720
+      PSH=576
+      [[ -z "$FBW" ]] && FBW=1024
+      [[ -z "$FBH" ]] && FBH=768
       ;;
     480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
-      SW=$(( $SH*16/9 ))
-      [[ "$MODE" == "480"* ]] && SW=640
-      RW=$SW
-      RH=$SH
+      # For resolution with 2 width and height resolution numbers extract the Height.
+      # *p* stand for progressive and *i* stand for interlaced.
+      case $MODE in
+        *p*) PSH=$(echo $MODE | cut -d'p' -f 1) ;;
+        *i*) PSH=$(echo $MODE | cut -d'i' -f 1) ;;
+      esac
+      PSW=$(( $PSH*16/9 ))
+      [[ "$MODE" == "480"* ]] && PSW=640
+      [[ -z "$FBW" || $FBW == 0 ]] && FBW=$PSW
+      [[ -z "$FBH" || $FBH == 0 ]] && FBH=$PSH
       ;;
     *x*)
-      SW=$(echo $MODE | cut -d'x' -f 1)
-      SH=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
-      [ ! -n "$SH" ] && H=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
-      RW=$SW
-      RH=$SH      
+      PSW=$(echo $MODE | cut -d'x' -f 1)
+      PSH=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
+      [ ! -n "$PSH" ] && PSH=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
+      [[ -z "$FBW" || $FBW == 0 ]] && FBW=$PSW
+      [[ -z "$FBH" || $FBH == 0 ]] && FBH=$PSH
       ;;
   esac
-  echo "$SW $SH $RW $RH"
+  echo "$FBW $FBH $PSW $PSH"
 }
 
 set_main_framebuffer() {
-  local SW=$1
-  local SH=$2
+  local FBW=$1
+  local FBH=$2
   local BPP=32
 
   if [[ -n "$SW" && "$SW" > 0 && -n "$SH" && "$SH" > 0 ]]; then
@@ -134,23 +137,26 @@ set_display_borders() {
 # Here we initialize any arguments and variables to be used in the script.
 # The Mode we want the display to change too.
 MODE=$1
-PLATFORM=$2
+FBW=0
+FBH=0
+
+FILE_MODE="/sys/class/display/mode"
+
+# Here we first clear the primary display buffer of leftover artifacts then set
+# the secondary small buffers flag to stop copying across.
+blank_buffer >> /dev/null
 
 # Safeguard to prevent blank mode being set.
 [[ -z "$MODE" ]] && exit 0
 
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
-
-# File location of the file that when written to switches the display to match
-# that screen resolution. Note - You do not have to alter anything else, if it's
-# a valid screen value ti will auto-change, if not it will just keep it's
-# original value.
-FILE_MODE="/sys/class/display/mode"
+# If the display file mode is NOT present, or the video mode supplied is set to
+# auto then just exit.
+if [[ ! -f "$FILE_MODE" ]] || [[ $MODE == "auto" ]]; then
+  exit 0
+fi
 
 # SH=Height in pixels, SW=Width in pixels, BPP=Bits Per Pixel.
 BPP=32
-SH=0
-SW=0
 
 # The current display mode before it may get changed below.
 OLD_MODE=$( cat ${FILE_MODE} )
@@ -166,20 +172,20 @@ if [[ -n "$BUFF" ]] && [[ $BUFF > 0 ]]; then
   fbset -fb /dev/fb1 -g $BUFF $BUFF $BUFF $BUFF $BPP
 fi
 
-# If the current display is the same as the change just exit. First we hide the
-# primary display buffer by setting the fb1 blank flag so it stops copying chunks
-# of data on to the image, then we blank the buffer by setting all the bits to 0.
-if [[ ! -f "$FILE_MODE" ]] || [[ $MODE == "auto" ]]; then
-  exit 0
-fi
+# This is needed to reset scaling.
+echo 0 > /sys/class/ppmgr/ppscaler
 
-# For resolution with 2 width and height resolution numbers extract the Height.
-# *p* stand for progressive and *i* stand for interlaced.
-if [[ ! "$MODE" == *"x"* ]]; then
-  case $MODE in
-    *p*) SH=$(echo $MODE | cut -d'p' -f 1) ;;
-    *i*) SH=$(echo $MODE | cut -d'i' -f 1) ;;
-  esac
+
+AMLOGIC_RES_FILE="/storage/.config/amlogic_resolution.txt"
+if [[ "$EE_DEVICE" == "Amlogic" ]]; then
+  if [[ ! -f "$AMLOGIC_RES_FILE" ]]; then
+    echo 1920 1080 > $AMLOGIC_RES_FILE
+  fi
+  declare -a AMLOGIC_RES=($(cat "${AMLOGIC_RES_FILE}"))
+  if [[ ! -z "${AMLOGIC_RES[@]}" ]]; then
+      FBW=${AMLOGIC_RES[0]}
+      FBH=${AMLOGIC_RES[1]}
+  fi
 fi
 
 # Option too Custom set the CVBS Resolution by creating a cvbs_resolution.txt file.
@@ -189,23 +195,35 @@ if [[ "$MODE" == *"cvbs" ]]; then
   if [[ -f "${CVBS_RES_FILE}" ]]; then
     declare -a CVBS_RES=($(cat "${CVBS_RES_FILE}"))
     if [[ ! -z "${CVBS_RES[@]}" ]]; then
-        SW=${CVBS_RES[0]}
-        SH=${CVBS_RES[1]}
+        FBW=${CVBS_RES[0]}
+        FBH=${CVBS_RES[1]}
     fi
   fi
 fi
 
-# This is needed to reset scaling.
-echo 0 > /sys/class/ppmgr/ppscaler
+CUSTOM_RES=$(get_ee_setting ${MODE}.ee_framebuffer)
+if [[ ! -z "${CUSTOM_RES}" ]]; then
+  declare -a RES=($(echo "${CUSTOM_RES}"))
+  if [[ ! -z "${RES[@]}" ]]; then
+      FBW=${RES[0]}
+      FBH=${RES[1]}
+  fi
+fi
 
-switch_resolution $OLD_MODE $MODE
+switch_resolution $MODE
 
-declare -a SIZE=($( get_resolution_size $MODE ))
+# Check that the display mode did change or just show the screen and exit. This
+# is a safeguard to prevent continueing with display settings.
+NEW_MODE=$( cat ${FILE_MODE} )
+[[ "$NEW_MODE" != "$MODE" ]] && exit 1
 
-SW=${SIZE[0]}
-SH=${SIZE[1]}
-RW=${SIZE[2]}
-RH=${SIZE[3]}
+
+declare -a SIZE=($( get_resolution_size $MODE $FBW $FBH))
+
+FBW=${SIZE[0]}
+FBH=${SIZE[1]}
+PSW=${SIZE[2]}
+PSH=${SIZE[3]}
 
 # Once we know the Width and Height is valid numbers we set the primary display
 # buffer, and we multiply the 2nd height by a factor of 2 I assume for interlaced 
@@ -213,30 +231,64 @@ RH=${SIZE[3]}
 CURRENT_MODE=$( cat ${FILE_MODE} )
 if [[ "$CURRENT_MODE" == "$MODE" ]]; then
   echo "SET MAIN FRAME BUFFER"
-  set_main_framebuffer $RW $RH
+  set_main_framebuffer $FBW $FBH
   blank_buffer
+fi
+
+# Resets the pointer of the current index of the frame buffer to the start.
+[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
+
+# Now that the primary buffer has been acquired we blank it again because the new
+# memory allocated, may contain garbage artifact data.
+
+# Legacy code - I have no idea about these values but apparently they should
+# make cvbs display properly. The values go over the real values which leads me
+# to believe that cvbs uses longer pixel ranges because of overscanning.
+declare -a CUSTOM_OFFSETS
+if [[ -f "/storage/.config/${MODE}_offsets" ]]; then
+  CUSTOM_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
+fi
+
+OFFSET_SETTING="$(get_ee_setting ${MODE}.ee_offsets)"
+if [[ ! -z "${OFFSET_SETTING}" ]]; then
+  CUSTOM_OFFSETS=( ${OFFSET_SETTING} )
 fi
 
 # Now that the primary buffer has been acquired we blank it again because the new
 # memory allocated, may contain garbage artifact data.
+COUNT_ARGS=${#CUSTOM_OFFSETS[@]}
+if [[ "$MODE" == *"cvbs" ]]; then
+  if [[ "$COUNT_ARGS" == "0" ]]; then
+    [[ "$MODE" == "480cvbs" ]] && CUSTOM_OFFSETS="55 13"
+    [[ "$MODE" == "576cvbs" ]] && CUSTOM_OFFSETS="55 13"
+  fi
+fi
+
+if [[ "$COUNT_ARGS" == "2" ]]; then
+  TMP="${CUSTOM_OFFSETS[0]}"
+  CUSTOM_OFFSETS[2]=$(( $RW - $TMP - 1 ))
+  TMP="${CUSTOM_OFFSETS[1]}"
+  CUSTOM_OFFSETS[3]=$(( $RH - $TMP - 1 ))
+fi
+
+COUNT_ARGS=${#CUSTOM_OFFSETS[@]}
+if [[ "$COUNT_ARGS" == "4" ]]; then
+  echo ${CUSTOM_OFFSETS[@]} > /sys/class/graphics/fb0/window_axis
+  echo 1 > /sys/class/graphics/fb0/freescale_mode
+  echo 0x10001 > /sys/class/graphics/fb0/free_scale
+  exit 0
+fi
 
 # Gets the default X, and Y position offsets for cvbs so the display can fit 
 # inside the actual analog diplay resolution which is a bit smaller than the 
 # resolution it's usually transmitted as.
 declare -a BORDERS
 
-if [[ "${MODE}" == "480cvbs" ]]; then
-  BORDERS=(4 0)
-fi
-if [[ "${MODE}" == "576cvbs" ]]; then
-  BORDERS=(12 0)
-fi
-
 # This monolith slab of code basically gets the users preference of if they want 
 # to resize there screen display to make it smaller so it can fit into a screen
 # properly. If the user suppllies values its coded to restrict the user into not
 # letting the user set a width greater than the screen display size.
-BORDER_VALS=$(get_ee_setting ee_videowindow ${PLATFORM})
+BORDER_VALS=$(get_ee_setting ee_videowindow)
 if [[ ! -z "${BORDER_VALS}" ]]; then
   BORDERS=(${BORDER_VALS})
   COUNT_ARGS=${#BORDERS[@]}
@@ -249,14 +301,10 @@ fi
 # width and height and make sure they are all valid and will not cause issues for
 # when we set the borders, and allow the primary display buffer to resize the screen.
 if [[ ! -z "${BORDERS[@]}" ]]; then
-  PW=${BORDERS[2]}
-  [[ -z "$PW" ]] && PW=$RW
-  PH=${BORDERS[3]}
-  [[ -z "$PH" ]] && PH=$RH
-  set_display_borders ${BORDERS[0]} ${BORDERS[1]} $PW $PH $RW $RH
+  BW=${BORDERS[2]}
+  [[ -z "$BW" ]] && BW=$PSW
+  BH=${BORDERS[3]}
+  [[ -z "$BH" ]] && BH=$PSH
+  set_display_borders ${BORDERS[0]} ${BORDERS[1]} $BW $BH $PSW $PSH
 fi
 
-# Lastly we call fbfix to reset its known memory offsets so when the primary 
-# buffer display is used, it's got the correct starting memory address. Note - 
-# This only need appply to new generation devices.
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
