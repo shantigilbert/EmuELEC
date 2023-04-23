@@ -248,7 +248,8 @@ set_pad(){
     if [ ! -z "$VAL" ]; then
       echo "input_map[ui_select] keyboard[0,enter] or keyboard[1,enter] or joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
     fi
-    button="${GC_ASSOC[b]}"
+
+    button="${GC_ASSOC[leftstick]}"
     VAL="${ADVMAME_VALUES[$button]}"
     if [ ! -z "$VAL" ]; then
       echo "input_map[ui_cancel] keyboard[0,backspace] or keyboard[1,backspace] or joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
