@@ -86,10 +86,14 @@ set_main_framebuffer() {
   local FBH=$2
   local BPP=32
 
-  if [[ -n "$FBW" && "$FBW" > 0 && -n "$FBH" && "$FBH" > 0 ]]; then
-    MFBH=$(( FBH*2 ))
-    fbset -fb /dev/fb0 -g $FBW $FBH $FBW $MFBH $BPP
-    echo 0 0 $(( FBW-1 )) $(( FBH-1 )) > /sys/class/graphics/fb0/free_scale_axis
+  if [[ -n "$SW" && "$SW" > 0 && -n "$SH" && "$SH" > 0 ]]; then
+    MSH=$(( SH*2 ))
+    if [[ ${EE_DEVICE} == "Amlogic" ]]; then
+      fbset -fb /dev/fb0 -g $FBW $FBH 1920 2160 $BPP
+    else
+      fbset -fb /dev/fb0 -g $FBW $FBH $FBW $MFBH $BPP
+    fi
+    echo 0 0 $(( SW-1 )) $(( SH-1 )) > /sys/class/graphics/fb0/free_scale_axis
     echo 0 > /sys/class/graphics/fb0/free_scale
     echo 0 > /sys/class/graphics/fb0/freescale_mode
   fi
