@@ -1,4 +1,4 @@
-#EmuELEC_NinjaBrothers_Fork
+#EmuELEC
 Retro emulação para dispositivos Amlogic.
 Baseado em [CoreELEC](https://github.com/CoreELEC/CoreELEC) e [Lakka](https://github.com/libretro/Lakka-LibreELEC) com petiscos de [Batocera](https://github. com/batocera-linux/batocera.linux). Acabei de combiná-los com [Batocera-Emulationstation](https://github.com/batocera-linux/batocera-emulationstation) e alguns emuladores autônomos ([Advancemame](https://github.com/amadvance/advancemame), [ PPSSPP](https://github.com/hrydgard/ppsspp), [Reicast](https://github.com/reicast/reicast-emulator), [Amiberry](https://github.com/midwan/amiberry ) e outros).
 
@@ -32,12 +32,15 @@ $ PROJECT=Amlogic-ce DEVICE=Amlogic-ng ARCH=aarch64 DISTRO=EmuELEC make image
 ```
 Nota: Em alguns casos, você também pode precisar instalar os pacotes tzdata, xfonts-utils e/ou lzop.
 ```
+$ apt install tzdata xfonts-utils lzop
+```
+
 Para o Odroid GO Advance/Super:
 ```
 $ PROJECT=Rockchip DEVICE=OdroidGoAdvance ARCH=aarch64 DISTRO=EmuELEC make image
 ```
-$ apt install tzdata xfonts-utils lzop
-```
+
+
 
 
 **Lembre-se de usar o DTB adequado para o seu dispositivo!**
