@@ -30,13 +30,11 @@ $ cd EmuELEC
 $ git checkout dev
 $ PROJECT=Amlogic-ce DEVICE=Amlogic-ng ARCH=aarch64 DISTRO=EmuELEC make image
 ```
-
+Nota: Em alguns casos, você também pode precisar instalar os pacotes tzdata, xfonts-utils e/ou lzop.
+```
 Para o Odroid GO Advance/Super:
 ```
 $ PROJECT=Rockchip DEVICE=OdroidGoAdvance ARCH=aarch64 DISTRO=EmuELEC make image
-```
-
-Nota: Em alguns casos, você também pode precisar instalar os pacotes tzdata, xfonts-utils e/ou lzop.
 ```
 $ apt install tzdata xfonts-utils lzop
 ```
