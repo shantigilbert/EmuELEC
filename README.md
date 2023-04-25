@@ -10,7 +10,7 @@ Baseado em [CoreELEC](https://github.com/CoreELEC/CoreELEC) e [Lakka](https://gi
 ### ⚠️**IMPORTANTE**⚠️
 #### EmuELEC agora é APENAS aarch64, compilar e usar a versão ARM após a versão 3.9 não é mais suportada. 
 #### Por favor, dê uma olhada no branch master_32bit se você quiser construir a versão de 32 bits.
-#### PIRATARIA É CRIME, N
+#### PIRATARIA É CRIME, NAO ATAQUE NAVIOS
 ---
 ## COMPILANDO IGUAL UM CONDENADO
 
