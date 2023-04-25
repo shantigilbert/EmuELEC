@@ -243,7 +243,7 @@ set_pad(){
     echo "input_map[ui_left] keyboard[0,left] or keyboard[1,left] or ${DIRS[2]}" >> ${CONFIG}
     echo "input_map[ui_right] keyboard[0,right] or keyboard[1,right] or ${DIRS[3]}" >> ${CONFIG}
 
-    local button="${GC_ASSOC[a]}"
+    local button="${GC_ASSOC[b]}"
     local VAL="${ADVMAME_VALUES[$button]}"
     if [ ! -z "$VAL" ]; then
       echo "input_map[ui_select] keyboard[0,enter] or keyboard[1,enter] or joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
