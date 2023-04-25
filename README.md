@@ -23,6 +23,7 @@ Baseado em [CoreELEC](https://github.com/CoreELEC/CoreELEC) e [Lakka](https://gi
 5) Instalar um sistema operacional com DEBIAN/UBUNTU/SEMELHANTES BASE DEBIAN
 
 Instruções são apenas para sistemas baseados em Debian/Ubuntu.
+
 Abra o terminal de comando na AREA DE TRABALHO/DESKTOP/MESA DE TRABALHO/MESA BRANCA/MESA DE TOMAR CANA, e digite:
 
 ```
