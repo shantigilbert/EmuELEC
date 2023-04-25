@@ -55,6 +55,8 @@ Como inserir ROMS: https://www.youtube.com/watch?v=XVa1CIPj9-w
 
 Como baixar as capas dos jogos (FAZER SCRAPS): https://www.youtube.com/watch?v=SN7N8Nc9a48
 
+Como fugir de uma esposa doida que te persegue: https://www.youtube.com/shorts/Q_3byPcdUAk
+
 
 ### Enviando patches
 Por favor, crie um pull request com as mudanças que você fez no ramo dev e certifique-se de incluir uma breve descrição do que você mudou e por que você fez isso.
