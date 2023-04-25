@@ -23,6 +23,7 @@ Baseado em [CoreELEC](https://github.com/CoreELEC/CoreELEC) e [Lakka](https://gi
 5) Instalar um sistema operacional com DEBIAN/UBUNTU/SEMELHANTES BASE DEBIAN
 
 Instruções são apenas para sistemas baseados em Debian/Ubuntu.
+Abra o terminal de comando na AREA DE TRABALHO/DESKTOP/MESA DE TRABALHO/MESA BRANCA/MESA DE TOMAR CANA, e digite:
 
 ```
 sudo su apt install gcc make git unzip wget xz-utils libsdl2-dev libsdl2-mixer-dev libfreeimage-dev libfreetype6-dev libcurl4-openssl-dev rapidjson-dev libasound2-dev libgl1-mesa-dev build-essential libboost-all-dev cmake fonts-droid-fallback libvlc-dev libvlccore-dev vlc-bin texinfo premake4 golang libssl-dev curl patchelf xmlstarlet default-jre xsltproc tzdata xfonts-utils lzop
