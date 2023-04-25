@@ -48,8 +48,6 @@ Como gravar a iso EmuELEC no cartão SD: https://www.youtube.com/watch?v=MpOx5d8
 
 Como usar o DTB CORRETO, após formatar o cartão: https://www.youtube.com/watch?v=1CSZH_K-6Jg
 
-```
-
 ### Enviando patches
 Por favor, crie um pull request com as mudanças que você fez no ramo dev e certifique-se de incluir uma breve descrição do que você mudou e por que você fez isso.
 
