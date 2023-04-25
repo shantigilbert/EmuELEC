@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libretro-scummvm"
-PKG_VERSION="0b219a46770776e10c954c6242870928113cacc0"
-PKG_SHA256="a1c8a4b7de3b03f762efd96552fe8b5dfa3e2bcec47c031d6791a220aead8d5e"
+PKG_VERSION="80cb7269a33b233dcea27d8d01df084b0d35c80a"
+PKG_SHA256="d35e8bc65e98d530480b4ad13cfed4d0b9c41c32f5de06a360181d8b1c7bda7b"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/scummvm"
 PKG_URL="https://github.com/kodi-game/scummvm/archive/${PKG_VERSION}.tar.gz"
@@ -15,24 +15,13 @@ PKG_LIBNAME="scummvm_libretro.so"
 PKG_LIBPATH="${PKG_LIBNAME}"
 PKG_LIBVAR="SCUMMVM_LIB"
 
-PKG_MAKE_OPTS_TARGET="platform=unix GIT_VERSION=${PKG_VERSION:0:7}"
+PKG_MAKE_OPTS_TARGET="-C backends/platform/libretro/build/"
 
-pre_configure_target() {
+pre_make_target() {
   cd ${PKG_BUILD}
-
-  if [ "${TARGET_ARCH}" = "arm" ]; then
-    PKG_MAKE_OPTS_TARGET+=" TARGET_64BIT=0"
-  else
-    PKG_MAKE_OPTS_TARGET+=" TARGET_64BIT=1"
-  fi
-
-  if target_has_feature neon; then
-    PKG_MAKE_OPTS_TARGET+=" HAVE_NEON=1"
-  fi
-
-  if [ "${BUILD_WITH_DEBUG}" = "yes" ]; then
-    PKG_MAKE_OPTS_TARGET+=" DEBUG=1"
-  fi
+  CXXFLAGS+=" -DHAVE_POSIX_MEMALIGN=1"
+  export AR+=" cru"
+  export LD="${CC}"
 }
 
 makeinstall_target() {
