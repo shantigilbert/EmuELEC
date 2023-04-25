@@ -16,16 +16,21 @@ Baseado em [CoreELEC](https://github.com/CoreELEC/CoreELEC) e [Lakka](https://gi
 
 ### Pré-requisitos de construção
 
-Estas instruções são apenas para sistemas baseados em Debian/Ubuntu.
+1) Um computador no mínimo com processador equivalente a INTEL-I7 ou XENOM;
+2) 32 Gigas de RAM ou mais;
+3) Falta do que fazer;
+4) Um cérebro com um parafuso a mais;
+5) Instalar um sistema operacional com DEBIAN/UBUNTU/SEMELHANTES BASE DEBIAN
+
+Instruções são apenas para sistemas baseados em Debian/Ubuntu.
 
 ```
 $ sudo su apt install gcc make git unzip wget xz-utils libsdl2-dev libsdl2-mixer-dev libfreeimage-dev libfreetype6-dev libcurl4-openssl-dev rapidjson-dev libasound2-dev libgl1-mesa-dev build-essential libboost-all-dev cmake fonts-droid-fallback libvlc-dev libvlccore-dev vlc-bin texinfo premake4 golang libssl-dev curl patchelf xmlstarlet default-jre xsltproc
 ```
-Nota: Em alguns casos, você também pode precisar instalar os pacotes tzdata, xfonts-utils e/ou lzop.
+Nota: Por garantia melhor instalar os pacotes tzdata, xfonts-utils e/ou lzop.
 ```
 $ sudo suapt install tzdata xfonts-utils lzop
 ```
-
 
 ### Construindo EmuELEC
 Para construir o EmuELEC localmente, faça o seguinte:
@@ -36,15 +41,6 @@ $ cd EmuELEC
 $ git checkout dev
 $ PROJECT=Amlogic-ce DEVICE=Amlogic-ng ARCH=aarch64 DISTRO=EmuELEC make image
 ```
-
-
-Para o Odroid GO Advance/Super:
-```
-$ PROJECT=Rockchip DEVICE=OdroidGoAdvance ARCH=aarch64 DISTRO=EmuELEC make image
-```
-
-
-
 
 **Lembre-se de usar o DTB adequado para o seu dispositivo!**
 
