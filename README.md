@@ -1,5 +1,4 @@
-#EmuELEC_NinjaBrothers
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#EmuELEC_NinjaBrothers_Fork
 Retro emulação para dispositivos Amlogic.
 Baseado em [CoreELEC](https://github.com/CoreELEC/CoreELEC) e [Lakka](https://github.com/libretro/Lakka-LibreELEC) com petiscos de [Batocera](https://github. com/batocera-linux/batocera.linux). Acabei de combiná-los com [Batocera-Emulationstation](https://github.com/batocera-linux/batocera-emulationstation) e alguns emuladores autônomos ([Advancemame](https://github.com/amadvance/advancemame), [ PPSSPP](https://github.com/hrydgard/ppsspp), [Reicast](https://github.com/reicast/reicast-emulator), [Amiberry](https://github.com/midwan/amiberry ) e outros).
 
@@ -21,12 +20,9 @@ Estas instruções são apenas para sistemas baseados em Debian/Ubuntu.
 ```
 $ apt install gcc make git unzip wget xz-utils libsdl2-dev libsdl2-mixer-dev libfreeimage-dev libfreetype6-dev libcurl4-openssl-dev rapidjson-dev libasound2-dev libgl1-mesa-dev build-essential libboost-all-dev cmake fonts-droid-fallback libvlc-dev libvlccore-dev vlc-bin texinfo premake4 golang libssl-dev curl patchelf xmlstarlet default-jre xsltproc
 ```
-Nota: Em alguns casos, você também pode precisar instalar os pacotes tzdata, xfonts-utils e/ou lzop.
-```
-$ apt install tzdata xfonts-utils lzop
-```
-### Construindo EmuELEC do zero (COMPILANDO)
-Para compilar o EmuELEC localmente, faça o seguinte:
+
+### Construindo EmuELEC
+Para construir o EmuELEC localmente, faça o seguinte:
 
 ```
 $ git clone https://github.com/EmuELEC/EmuELEC.git
@@ -38,6 +34,11 @@ $ PROJECT=Amlogic-ce DEVICE=Amlogic-ng ARCH=aarch64 DISTRO=EmuELEC make image
 Para o Odroid GO Advance/Super:
 ```
 $ PROJECT=Rockchip DEVICE=OdroidGoAdvance ARCH=aarch64 DISTRO=EmuELEC make image
+```
+
+Nota: Em alguns casos, você também pode precisar instalar os pacotes tzdata, xfonts-utils e/ou lzop.
+```
+$ apt install tzdata xfonts-utils lzop
 ```
 
 
@@ -66,4 +67,4 @@ Como o EmuELEC inclui código de muitos projetos upstream, ele inclui muitos pro
 
 ### Marca
 
-Todos os logotipos, vídeos, imagens e branding relacionados à EmuELEC
+Todos os logotipos, vídeos, imagens e branding relacionados à EmuELEC i
