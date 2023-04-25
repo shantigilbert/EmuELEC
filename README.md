@@ -1,6 +1,6 @@
 #EmuELEC_NinhaBrothers
 Retro emulação para dispositivos Amlogic.
-Baseado em [CoreELEC](https://github.com/CoreELEC/CoreELEC) e [Lakka](https://github.com/libretro/Lakka-LibreELEC) com petiscos de [Batocera](https://github. com/batocera-linux/batocera.linux). Acabei de combiná-los com [Batocera-Emulationstation](https://github.com/batocera-linux/batocera-emulationstation) e alguns emuladores autônomos ([Advancemame](https://github.com/amadvance/advancemame), [ PPSSPP](https://github.com/hrydgard/ppsspp), [Reicast](https://github.com/reicast/reicast-emulator), [Amiberry](https://github.com/midwan/amiberry ) e outros).
+Baseado em [CoreELEC](https://github.com/CoreELEC/CoreELEC) e [Lakka](https://github.com/libretro/Lakka-LibreELEC) com partes de [Batocera](https://github. com/batocera-linux/batocera.linux). Acabei de combiná-los com [Batocera-Emulationstation](https://github.com/batocera-linux/batocera-emulationstation) e alguns emuladores autônomos ([Advancemame](https://github.com/amadvance/advancemame), [ PPSSPP](https://github.com/hrydgard/ppsspp), [Reicast](https://github.com/reicast/reicast-emulator), [Amiberry](https://github.com/midwan/amiberry ) e outros).
 
 ---
 [![GitHub Release](https://img.shields.io/github/release/EmuELEC/EmuELEC.svg)](https://github.com/EmuELEC/EmuELEC/releases/latest)
@@ -8,7 +8,8 @@ Baseado em [CoreELEC](https://github.com/CoreELEC/CoreELEC) e [Lakka](https://gi
 [![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg?logo=discord)](https://discord.gg/cbgtJTu)
 
 ### ⚠️**IMPORTANTE**⚠️
-#### EmuELEC agora é APENAS aarch64, compilar e usar a versão ARM após a versão 3.9 não é mais suportada. Por favor, dê uma olhada no branch master_32bit se você quiser construir a versão de 32 bits.
+#### EmuELEC agora é APENAS aarch64, compilar e usar a versão ARM após a versão 3.9 não é mais suportada. 
+#### Por favor, dê uma olhada no branch master_32bit se você quiser construir a versão de 32 bits.
 
 ---
 ## COMPILANDO IGUAL UM CONDENADO
