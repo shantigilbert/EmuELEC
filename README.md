@@ -36,12 +36,21 @@ Para construir o EmuELEC , faça o seguinte, na area de trabalho, abra o termina
 ```
 git clone https://github.com/andrellvs/EmuELEC_NinjaBrothers.git
 cd EmuELEC
+
 git checkout dev ( se branch dev)
 ou
 git checkout master (se branch master)
 ou
 git checkout escambau (se tudo der errado e voce ficar peidado!)
+
 PROJECT=Amlogic-ce DEVICE=Amlogic-ng ARCH=aarch64 DISTRO=EmuELEC make image
+ou compile por partes:
+
+./scripts/install Crystal 
+./scripts/install Scuumvm
+./scripts/install tic-80
+./scripts/install Crystal 
+
 ```
 
 ### Lembre-se de usar o DTB adequado para o seu dispositivo!
