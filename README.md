@@ -34,7 +34,11 @@ Para construir o EmuELEC localmente, faça o seguinte, na area de trabalho abra 
 ```
 git clone https://github.com/EmuELEC/EmuELEC.git
 cd EmuELEC
-git checkout dev
+git checkout dev ( se branch dev)
+ou
+git checkout master (se branch master)
+ou
+git checkout escambau (se tudo der errado e voce ficar peidado!)
 PROJECT=Amlogic-ce DEVICE=Amlogic-ng ARCH=aarch64 DISTRO=EmuELEC make image
 ```
 
