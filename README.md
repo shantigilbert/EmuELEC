@@ -33,13 +33,13 @@ $ sudo suapt install tzdata xfonts-utils lzop
 ```
 
 ### Construindo EmuELEC
-Para construir o EmuELEC localmente, faça o seguinte:
+Para construir o EmuELEC localmente, faça o seguinte, na area de trabalho abra o terminal e digite (sem sudo su):
 
 ```
-$ git clone https://github.com/EmuELEC/EmuELEC.git
-$ cd EmuELEC
-$ git checkout dev
-$ PROJECT=Amlogic-ce DEVICE=Amlogic-ng ARCH=aarch64 DISTRO=EmuELEC make image
+git clone https://github.com/EmuELEC/EmuELEC.git
+cd EmuELEC
+git checkout dev
+PROJECT=Amlogic-ce DEVICE=Amlogic-ng ARCH=aarch64 DISTRO=EmuELEC make image
 ```
 
 **Lembre-se de usar o DTB adequado para o seu dispositivo!**
