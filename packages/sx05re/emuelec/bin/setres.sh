@@ -59,7 +59,7 @@ get_resolution_size()
       ;;
     480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
       # For resolution with 2 width and height resolution numbers extract the Height.
-      # *p* stand for progressive and *i* stand for interlaced.      
+      # *p* stand for progressive and *i* stand for interlaced.
       case $MODE in
         *p*) PSH=$(echo $MODE | cut -d'p' -f 1) ;;
         *i*) PSH=$(echo $MODE | cut -d'i' -f 1) ;;
@@ -70,7 +70,6 @@ get_resolution_size()
       [[ -z "$FBH" || $FBH == 0 ]] && FBH=$PSH
       ;;
     *x*)
-    
       PSW=$(echo $MODE | cut -d'x' -f 1)
       PSH=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
       [ ! -n "$PSH" ] && PSH=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
@@ -86,14 +85,14 @@ set_main_framebuffer() {
   local FBH=$2
   local BPP=32
 
-  if [[ -n "$SW" && "$SW" > 0 && -n "$SH" && "$SH" > 0 ]]; then
-    MSH=$(( SH*2 ))
+  if [[ -n "$FBW" && "$FBW" > 0 && -n "$FBH" && "$FBH" > 0 ]]; then
+    MFBH=$(( FBH*2 ))
     if [[ ${EE_DEVICE} == "Amlogic" ]]; then
       fbset -fb /dev/fb0 -g $FBW $FBH 1920 2160 $BPP
     else
       fbset -fb /dev/fb0 -g $FBW $FBH $FBW $MFBH $BPP
     fi
-    echo 0 0 $(( SW-1 )) $(( SH-1 )) > /sys/class/graphics/fb0/free_scale_axis
+    echo 0 0 $(( FBW-1 )) $(( FBH-1 )) > /sys/class/graphics/fb0/free_scale_axis
     echo 0 > /sys/class/graphics/fb0/free_scale
     echo 0 > /sys/class/graphics/fb0/freescale_mode
   fi
@@ -203,7 +202,7 @@ if [[ "$MODE" == *"cvbs" ]]; then
 fi
 
 CUSTOM_RES=$(get_ee_setting ${MODE}.ee_framebuffer)
-if [[ ! -z "${CUSTOM_RES}" ]]; then  
+if [[ ! -z "${CUSTOM_RES}" ]]; then
   declare -a RES=($(echo "${CUSTOM_RES}"))
   if [[ ! -z "${RES[@]}" ]]; then
       FBW=${RES[0]}
