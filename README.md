@@ -1,28 +1,32 @@
-# EmuELEC  
-Retro emulation for Amlogic devices.
-Based on  [CoreELEC](https://github.com/CoreELEC/CoreELEC) and [Lakka](https://github.com/libretro/Lakka-LibreELEC) with tidbits from [Batocera](https://github.com/batocera-linux/batocera.linux). I just combine them with [Batocera-Emulationstation](https://github.com/batocera-linux/batocera-emulationstation) and some standalone emulators ([Advancemame](https://github.com/amadvance/advancemame), [PPSSPP](https://github.com/hrydgard/ppsspp), [Reicast](https://github.com/reicast/reicast-emulator), [Amiberry](https://github.com/midwan/amiberry) and others). 
+#EmuELEC_NinjaBrothers
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Retro emulação para dispositivos Amlogic.
+Baseado em [CoreELEC](https://github.com/CoreELEC/CoreELEC) e [Lakka](https://github.com/libretro/Lakka-LibreELEC) com petiscos de [Batocera](https://github. com/batocera-linux/batocera.linux). Acabei de combiná-los com [Batocera-Emulationstation](https://github.com/batocera-linux/batocera-emulationstation) e alguns emuladores autônomos ([Advancemame](https://github.com/amadvance/advancemame), [ PPSSPP](https://github.com/hrydgard/ppsspp), [Reicast](https://github.com/reicast/reicast-emulator), [Amiberry](https://github.com/midwan/amiberry ) e outros).
 
 ---
 [![GitHub Release](https://img.shields.io/github/release/EmuELEC/EmuELEC.svg)](https://github.com/EmuELEC/EmuELEC/releases/latest)
-[![GPL-2.0 Licensed](https://shields.io/badge/license-GPL2-blue)](https://github.com/EmuELEC/EmuELEC/blob/master/licenses/GPL2.txt)
+[![GPL-2.0 licenciado](https://shields.io/badge/license-GPL2-blue)](https://github.com/EmuELEC/EmuELEC/blob/master/licenses/GPL2.txt)
 [![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg?logo=discord)](https://discord.gg/cbgtJTu)
 
-### ⚠️**IMPORTANT**⚠️
-#### EmuELEC is now aarch64 ONLY, compiling and using the ARM version after version 3.9 is no longer supported. Please have a look at the master_32bit branch if you want to build the 32-bit version.
+### ⚠️**IMPORTANTE**⚠️
+#### EmuELEC agora é APENAS aarch64, compilar e usar a versão ARM após a versão 3.9 não é mais suportada. Por favor, dê uma olhada no branch master_32bit se você quiser construir a versão de 32 bits.
 
 ---
-## Development
+## Desenvolvimento
 
-### Build prerequisites
+### Pré-requisitos de construção
 
-These instructions are only for Debian/Ubuntu based systems.
+Estas instruções são apenas para sistemas baseados em Debian/Ubuntu.
 
 ```
 $ apt install gcc make git unzip wget xz-utils libsdl2-dev libsdl2-mixer-dev libfreeimage-dev libfreetype6-dev libcurl4-openssl-dev rapidjson-dev libasound2-dev libgl1-mesa-dev build-essential libboost-all-dev cmake fonts-droid-fallback libvlc-dev libvlccore-dev vlc-bin texinfo premake4 golang libssl-dev curl patchelf xmlstarlet default-jre xsltproc
-```
 
-### Building EmuELEC
-To build EmuELEC locally do the following:
+Nota: Em alguns casos, você também pode precisar instalar os pacotes tzdata, xfonts-utils e/ou lzop.
+
+$ apt install tzdata xfonts-utils lzop
+```
+### Construindo EmuELEC do zero (COMPILANDO)
+Para compilar o EmuELEC localmente, faça o seguinte:
 
 ```
 $ git clone https://github.com/EmuELEC/EmuELEC.git
@@ -31,44 +35,35 @@ $ git checkout dev
 $ PROJECT=Amlogic-ce DEVICE=Amlogic-ng ARCH=aarch64 DISTRO=EmuELEC make image
 ```
 
-For the Odroid GO Advance/Super:
+Para o Odroid GO Advance/Super:
 ```
 $ PROJECT=Rockchip DEVICE=OdroidGoAdvance ARCH=aarch64 DISTRO=EmuELEC make image
 ```
 
-Note: In some cases you may also need to install the tzdata, xfonts-utils and/or lzop packages.
-```
-$ apt install tzdata xfonts-utils lzop
-```
 
+**Lembre-se de usar o DTB adequado para o seu dispositivo!**
 
-**Remember to use the proper DTB for your device!**
+### Enviando patches
+Por favor, crie um pull request com as mudanças que você fez no ramo dev e certifique-se de incluir uma breve descrição do que você mudou e por que você fez isso.
 
-### Submitting patches
-Please create a pull request with the changes you made in the dev branch and make sure to include a brief description of what you changed and why you did it.
+## Entrar em contato
+Se você tiver alguma dúvida, sugestões para novos recursos ou precisar de ajuda para configurar ou instalar o EmuELEC, visite [nosso fórum](https://emuelec.discourse.group/). Você também pode visitar nosso [wiki](https://github.com/EmuELEC/EmuELEC/wiki) ou se juntar ao nosso [Discord](https://discord.gg/cbgtJTu).
 
-## Get in touch
-If you have a question, suggestions for new features, or need help configuring or installing EmuELEC, please visit [our forum](https://emuelec.discourse.group/). You may also want to visit our [wiki](https://github.com/EmuELEC/EmuELEC/wiki) or join our [Discord](https://discord.gg/cbgtJTu).
+**EmuELEC NÃO INCLUI KODI**
 
-**EmuELEC DOES NOT INCLUDE KODI**
+Observe que este é principalmente um projeto pessoal, não posso garantir que funcionará com sua caixa. Passei muitas horas ajustando muitas coisas e garantindo que tudo funcionasse, mas não posso testar tudo e algumas coisas podem não funcionar ainda. Além disso, esteja ciente das limitações de hardware e não espere que tudo funcione a 60FPS (especialmente N64, PSP e Reicast). Não posso garantir que as alterações serão incorporadas para atender às suas necessidades específicas, mas aceito pull requests, ajuda a testar outras caixas e corrigir problemas em geral.
+Estou trabalhando neste projeto em meu tempo livre, não estou ganhando dinheiro com isso, então vou demorar um pouco para testar todas as mudanças corretamente, mas farei o possível para ajudá-lo a corrigir quaisquer problemas que você poderia ter em outras caixas, em meu tempo livre.
 
-Please note, this is mainly a personal project, I can't guarantee it will work with your box. I've spent many hours tweaking many things and making sure everything works, but I can't test everything and some things may not work yet. Also, be aware of hardware limitations and don't expect everything to run at 60FPS (especially N64, PSP, and Reicast). I can't guarantee that changes will be incorporated to fit your specific needs, but I welcome pull requests, help testing other boxes, and fixing problems in general.  
-I'm working on this project in my spare time, I'm not making any money from it, so it will take me a while to test all the changes properly, but I'll do my best to help you fix any problems you might have on other boxes, in my spare time.
+## Licença
 
-## License
+O EmuELEC é baseado no CoreELEC, que por sua vez é licenciado sob a GPLv2 (e GPLv2 ou posterior). Todos os arquivos originais criados pela equipe EmuELEC são licenciados como GPLv2 ou posterior e marcados como tal.
 
-EmuELEC is based on CoreELEC, which in turn is licensed under the GPLv2 (and GPLv2-or-later). All original files created by the EmuELEC team are licensed as GPLv2-or-later and marked as such.
+No entanto, a distro contém muitos emuladores/bibliotecas/núcleos/binários não comerciais e, portanto, **não pode ser vendido, agrupado, oferecido, incluído em produtos/aplicativos comerciais ou qualquer coisa semelhante, incluindo, entre outros, dispositivos Android, smart TVs, TV caixas, dispositivos portáteis, computadores, SBCs ou qualquer outra coisa que possa executar o EmuELEC** com os emuladores/bibliotecas/núcleos/binários incluídos.
 
-However, the distro contains many non-commercial emulators/libraries/cores/binaries and therefore **cannot be sold, bundled, offered, included in commercial products/applications or anything similar, including but not limited to Android devices, smart TVs, TV boxes, handheld devices, computers, SBCs or anything else that can run EmuELEC** with the included emulators/libraries/cores/binaries.
+Observe também a seção de licença do README da equipe CoreELEC, que foi adaptada para EmuELEC:
 
-Also note the license section from the README from the CoreELEC team, which has been adapted for EmuELEC:
+Como o EmuELEC inclui código de muitos projetos upstream, ele inclui muitos proprietários de direitos autorais. A EmuELEC NÃO reivindica direitos autorais sobre qualquer código upstream. Patches para código upstream têm a mesma licença que o projeto upstream, a menos que especificado de outra forma. Para obter uma lista completa de direitos autorais, verifique o código-fonte para examinar os cabeçalhos de licença. A menos que expressamente declarado de outra forma, todo o código enviado ao projeto EmuELEC (em qualquer forma) é licenciado sob GPLv2 ou posterior. Você é absolutamente livre para reter os direitos autorais. Para manter os direitos autorais, basta adicionar um cabeçalho de direitos autorais a cada página de código enviada. Se você enviar um código que não seja de sua autoria, é sua responsabilidade colocar um cabeçalho declarando os direitos autorais.
 
-As EmuELEC includes code from many upstream projects it includes many copyright owners. EmuELEC makes NO claim of copyright on any upstream code. Patches to upstream code have the same license as the upstream project, unless specified otherwise. For a complete copyright list please checkout the source code to examine license headers. Unless expressly stated otherwise all code submitted to the EmuELEC project (in any form) is licensed under GPLv2-or-later. You are absolutely free to retain copyright. To retain copyright simply add a copyright header to each submitted code page. If you submit code that is not your own work it is your responsibility to place a header stating the copyright.
+### Marca
 
-### Branding
-
-All EmuELEC related logos, videos, images and branding in general are the sole property of EmuELEC. They are all copyrighted by the EmuELEC team and may not be included in any commercial application without proper permission (yes, that includes EmuELEC bundled with ROMS for donations!).
-
-However, you have permission to include/modify them in your forks/projects as long as they are fully open source and freely available (i.e. not under a bunch of "click on this sponsored ad to get the link!" buttons) and do not violate any copyright laws, even if you receive donations for such a project (we are not against donations for honest people!), we just ask that you give us the appropriate credits and if possible a link to this repo.
-
-Happy retrogaming!
+Todos os logotipos, vídeos, imagens e branding relacionados à EmuELEC
