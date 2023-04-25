@@ -10,11 +10,11 @@ Baseado em [CoreELEC](https://github.com/CoreELEC/CoreELEC) e [Lakka](https://gi
 ### ⚠️**IMPORTANTE**⚠️
 #### EmuELEC agora é APENAS aarch64, compilar e usar a versão ARM após a versão 3.9 não é mais suportada. 
 #### Por favor, dê uma olhada no branch master_32bit se você quiser construir a versão de 32 bits.
-
+#### PIRATARIA 
 ---
 ## COMPILANDO IGUAL UM CONDENADO
 
-### Pré-requisitos de construção
+### Pré-requisitos:
 
 1) Um computador no mínimo com processador equivalente a INTEL-I7 ou XENOM;
 2) 32 Gigas de RAM ou mais;
@@ -25,11 +25,7 @@ Baseado em [CoreELEC](https://github.com/CoreELEC/CoreELEC) e [Lakka](https://gi
 Instruções são apenas para sistemas baseados em Debian/Ubuntu.
 
 ```
-$ sudo su apt install gcc make git unzip wget xz-utils libsdl2-dev libsdl2-mixer-dev libfreeimage-dev libfreetype6-dev libcurl4-openssl-dev rapidjson-dev libasound2-dev libgl1-mesa-dev build-essential libboost-all-dev cmake fonts-droid-fallback libvlc-dev libvlccore-dev vlc-bin texinfo premake4 golang libssl-dev curl patchelf xmlstarlet default-jre xsltproc
-```
-Nota: Por garantia melhor instalar os pacotes tzdata, xfonts-utils e/ou lzop.
-```
-$ sudo suapt install tzdata xfonts-utils lzop
+sudo su apt install gcc make git unzip wget xz-utils libsdl2-dev libsdl2-mixer-dev libfreeimage-dev libfreetype6-dev libcurl4-openssl-dev rapidjson-dev libasound2-dev libgl1-mesa-dev build-essential libboost-all-dev cmake fonts-droid-fallback libvlc-dev libvlccore-dev vlc-bin texinfo premake4 golang libssl-dev curl patchelf xmlstarlet default-jre xsltproc tzdata xfonts-utils lzop
 ```
 
 ### Construindo EmuELEC
