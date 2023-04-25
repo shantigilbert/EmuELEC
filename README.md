@@ -42,7 +42,7 @@ git checkout escambau (se tudo der errado e voce ficar peidado!)
 PROJECT=Amlogic-ce DEVICE=Amlogic-ng ARCH=aarch64 DISTRO=EmuELEC make image
 ```
 
-**Lembre-se de usar o DTB adequado para o seu dispositivo!**
+###Lembre-se de usar o DTB adequado para o seu dispositivo!
 
 ### Enviando patches
 Por favor, crie um pull request com as mudanças que você fez no ramo dev e certifique-se de incluir uma breve descrição do que você mudou e por que você fez isso.
