@@ -34,7 +34,7 @@ sudo su apt install gcc make git unzip wget xz-utils libsdl2-dev libsdl2-mixer-d
 Para construir o EmuELEC , faça o seguinte, na area de trabalho, abra o terminal e digite (sem sudo su):
 
 ```
-git clone https://github.com/EmuELEC/EmuELEC.git
+git clone https://github.com/andrellvs/EmuELEC_NinjaBrothers.git
 cd EmuELEC
 git checkout dev ( se branch dev)
 ou
