@@ -41,4 +41,5 @@ local.conf
 sx05re-kodi*.log
 
 packages/sx05re/experimental/
+packages/sx05re/tools/scrapers/scraper
 packages/sx05re/emuelec-emulationstation/api_keys.txt
