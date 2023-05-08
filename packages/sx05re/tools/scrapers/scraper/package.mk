@@ -2,55 +2,40 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="scraper"
-PKG_VERSION="509443bf66d9fccb1d6aa2417902124bd48f2141"
-PKG_SHA256="5784ac4aa35919233774c3c0210d5cae4aa296ec30165b6b7a7cb41a7d98cb6d"
-PKG_REV="2"
+PKG_VERSION="19832c4cc13d396a3089d09da773e79d5488217a"
+PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
-PKG_SITE="https://github.com/sselph/scraper"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain go:host"
+PKG_SITE="https://github.com/muldjord/skyscraper"
+PKG_URL="$PKG_SITE.git"
+PKG_DEPENDS_TARGET="toolchain qt-everywhere p7zip:host"
 PKG_PRIORITY="optional"
 PKG_SECTION="emuelec"
-PKG_LONGDESC="A scraper for EmulationStation written in Go using hashing"
-PKG_TOOLCHAIN="manual"
+PKG_SHORTDESC="Powerful and versatile game scraper written in c++ "
+PKG_TOOLCHAIN="make"
+PKG_IS_ADDON="no"
+PKG_AUTORECONF="no"
+GET_HANDLER_SUPPORT="git"
+PKG_TOOLCHAIN="make" 
 
 configure_target() {
+  # Fix install paths / 5schatten
+  sed -e "s#target.path=/usr/local/bin#target.path=$INSTALL/usr/bin#"                                                       -i ${PKG_BUILD}/skyscraper.pro
+  sed -e "s#examples.path=/usr/local/etc/skyscraper#examples.path=$INSTALL/usr/share/skyscraper#"                           -i ${PKG_BUILD}/skyscraper.pro
+  sed -e "s#cacheexamples.path=/usr/local/etc/skyscraper/cache#cacheexamples.path=$INSTALL/usr/share/skyscraper/cache#"     -i ${PKG_BUILD}/skyscraper.pro
+  sed -e "s#impexamples.path=/usr/local/etc/skyscraper/import#impexamples.path=$INSTALL/usr/share/skyscraper/import#"       -i ${PKG_BUILD}/skyscraper.pro
+  sed -e "s#resexamples.path=/usr/local/etc/skyscraper/resources#resexamples.path=$INSTALL/usr/share/skyscraper/resources#" -i ${PKG_BUILD}/skyscraper.pro
 
-  case ${TARGET_ARCH} in
-    x86_64)
-      export GOARCH=amd64
-      ;;
-    arm)
-      export GOARCH=arm
-
-      case ${TARGET_CPU} in
-        arm1176jzf-s)
-          export GOARM=6
-          ;;
-        *)
-          export GOARM=7
-          ;;
-      esac
-      ;;
-    aarch64)
-      export GOARCH=arm64
-      ;;
-  esac
-
-  export GOOS=linux
-  export GOLANG=${TOOLCHAIN}/lib/golang/bin/go
-  export LDFLAGS="-w -extldflags -static -X main.gitCommit=${PKG_VERSION} -X main.versionStr=${PKG_VERSION:0:7} -extld $CC"
+  rm -rf .qmake.stash
+  QMAKEPATH="$(get_build_dir qt-everywhere)/qtbase/bin/qmake"
+  $QMAKEPATH $PKG_BUILD/skyscraper.pro
 }
 
-make_target() {
-  mkdir -p bin
-  cd $PKG_BUILD
-  ${GOLANG} get github.com/sselph/scraper
-  ${GOLANG} build -ldflags "$LDFLAGS" github.com/sselph/scraper
-}
+post_makeinstall_target() {
+  # Install scripts 
+  cp $PKG_DIR/scripts/* $INSTALL/usr/bin/
 
-makeinstall_target() {
-mkdir -p $INSTALL/usr/bin/
-    cp $PKG_BUILD/scraper $INSTALL/usr/bin/
+  # Install config
+  mkdir -p $INSTALL/usr/config/skyscraper
+  cp $PKG_DIR/config/* $INSTALL/usr/config/skyscraper/
 }
