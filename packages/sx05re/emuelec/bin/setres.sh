@@ -137,6 +137,7 @@ set_display_borders() {
 # Here we initialize any arguments and variables to be used in the script.
 # The Mode we want the display to change too.
 MODE=$1
+PLATFORM=$2
 FBW=0
 FBH=0
 
@@ -201,7 +202,8 @@ if [[ "$MODE" == *"cvbs" ]]; then
   fi
 fi
 
-CUSTOM_RES=$(get_ee_setting ${MODE}.ee_framebuffer)
+CUSTOM_RES=$(get_ee_setting ${PLATFORM}.${MODE}.ee_framebuffer)
+[[ -z "$CUSTOM_RES" ]] && CUSTOM_RES=$(get_ee_setting ${MODE}.ee_framebuffer)
 if [[ ! -z "${CUSTOM_RES}" ]]; then
   declare -a RES=($(echo "${CUSTOM_RES}"))
   if [[ ! -z "${RES[@]}" ]]; then
@@ -249,7 +251,8 @@ if [[ -f "/storage/.config/${MODE}_offsets" ]]; then
   CUSTOM_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
 fi
 
-OFFSET_SETTING="$(get_ee_setting ${MODE}.ee_offsets)"
+OFFSET_SETTING="$(get_ee_setting ${PLATFORM}.${MODE}.ee_offsets)"
+[[ -z "${OFFSET_SETTING}" ]] && OFFSET_SETTING="$(get_ee_setting ${MODE}.ee_offsets)"
 if [[ ! -z "${OFFSET_SETTING}" ]]; then
   CUSTOM_OFFSETS=( ${OFFSET_SETTING} )
 fi
