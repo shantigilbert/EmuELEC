@@ -1,4 +1,3 @@
-
 ################################################################################
 #      This file is part of OpenELEC - http://www.openelec.tv
 #      Copyright (C) 2009-2012 Stephan Raue (stephan@openelec.tv)
@@ -20,10 +19,10 @@
 ################################################################################
 
 PKG_NAME="scummvm"
-PKG_VERSION="fe6ca7910cef5ba4e5c71ba22eac7b8b58ff970a"
+PKG_VERSION="b5ca1b340e1a6249997fde8a60f366d039b868b4"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
-PKG_SITE="https://github.com/spleen1981/scummvm_mainline"
+PKG_SITE="https://github.com/libretro/scummvm"
 PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_SECTION="libretro"
@@ -32,13 +31,13 @@ PKG_LONGDESC="ScummVM is a program which allows you to run certain classic graph
 PKG_TOOLCHAIN="manual"
 PKG_BUILD_FLAGS="-lto"
 
-pre_configure_target() {
-sed -i "s|DEFINES  += -Wno-multichar|#DEFINES  += -Wno-multichar|" Makefile.common
+post_unpack() {
+  sed -i "s|DEFINES  += -Wno-multichar|#DEFINES  += -Wno-multichar|" ${PKG_BUILD}/Makefile.common
 }
 
 make_target() {
-cd ${PKG_BUILD}
-make platform=rpi4_64
+  cd "${PKG_BUILD}/backends/platform/libretro"
+  make all platform=rpi4_64
 }
 
 makeinstall_target() {
