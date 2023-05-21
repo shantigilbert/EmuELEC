@@ -29,7 +29,7 @@ PKG_DEPENDS_TARGET="toolchain"
 PKG_SECTION="libretro"
 PKG_SHORTDESC="ScummVM with libretro backend."
 PKG_LONGDESC="ScummVM is a program which allows you to run certain classic graphical point-and-click adventure games, provided you already have their data files."
-PKG_TOOLCHAIN="make"
+PKG_TOOLCHAIN="manual"
 PKG_BUILD_FLAGS="-lto"
 
 pre_configure_target() {
@@ -43,6 +43,5 @@ make platform=rpi4_64
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro
-  cp scummvm_libretro.so $INSTALL/usr/lib/libretro/
-  cp scummvm_libretro.info $INSTALL/usr/lib/libretro/
+  cp "${PKG_BUILD}/backends/platform/libretro/scummvm_libretro."{so,info} $INSTALL/usr/lib/libretro/
 }

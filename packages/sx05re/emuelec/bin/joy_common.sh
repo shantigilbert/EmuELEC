@@ -23,7 +23,7 @@ jc_get_players() {
 
 # Dump gamepad information
   cat /proc/bus/input/devices \
-    | grep -E -B 5 -A 3 "H\: Handlers=(js[0-9] event[0-9]+)|(event[0-9]+ js[0-9])" \
+    | grep -B 5 -A 3 -P "H\: Handlers=(?=.*?js[0-9])(?=.*?event[0-9]+).*$" \
     | grep -Ew -B 8 "B: KEY\=[0-9a-f ]+" > /tmp/input_devices
 
 # Determine how many gamepads/players are connected
@@ -37,9 +37,8 @@ jc_get_players() {
 
   for dev in $(echo $JOYS); do
     local JSI=$dev
-    local DETAILS=$(cat /tmp/input_devices \
-        | grep -E "H\: Handlers=(${JSI} event[0-9]+)|(event[0-9]+ ${JSI})" -B 5)
-    
+    local DETAILS=$(cat /tmp/input_devices | grep -P "H\: Handlers(?=.*?[= ]${JSI} )" -B 5)
+
     local PROC_GUID=$(echo "${DETAILS}" | grep I: | sed "s|I:\ Bus=||" | sed "s|\ Vendor=||" | sed "s|\ Product=||" | sed "s|\ Version=||")
     local DEVICE_GUID=$(jc_generate_guid ${PROC_GUID})
     [[ -z "${DEVICE_GUID}" ]] && continue

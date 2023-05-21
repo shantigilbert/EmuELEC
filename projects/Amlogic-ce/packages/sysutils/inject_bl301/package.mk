@@ -3,13 +3,18 @@
 
 PKG_NAME="inject_bl301"
 PKG_VERSION="cdaff43a6dc6b44381959bab27b687d6c922b1a0"
-
-if [ ${ARCH} == "arm" ]; then 
-PKG_SHA256="65c3c86fe0068c195de6b0afd2791a479ebd4f563317b553cbeaa9326189f3ec"
-else
-	PKG_SHA256="607be0ec8e0d931803a3c452bae6beccaedb443a1f51177981e14d792c435778" 
-fi
-
+case ${ARCH} in 
+  'arm')
+    PKG_SHA256="65c3c86fe0068c195de6b0afd2791a479ebd4f563317b553cbeaa9326189f3ec"
+    ;;
+  'aarch64')
+    PKG_SHA256="607be0ec8e0d931803a3c452bae6beccaedb443a1f51177981e14d792c435778"
+    ;;
+  *)
+    PKG_SHA256=''
+    ;;
+esac
+PKG_ARCH="aarch64 arm"
 PKG_SOURCE_NAME="$PKG_NAME-$ARCH-$PKG_VERSION.tar.xz"
 PKG_LICENSE="proprietary"
 PKG_SITE="https://coreelec.org"
