@@ -44,8 +44,8 @@ case "$(oga_ver)" in
     RES_H="480"
   ;;
   *)
-    RES=$(get_resolution)
-		declare -a RES=( $MODE )
+    RESOLUTION=$(get_resolution)
+		declare -a RES=( $RESOLUTION )
 		RES_W=${RES[0]}
 		RES_H=${RES[1]}
   ;;
