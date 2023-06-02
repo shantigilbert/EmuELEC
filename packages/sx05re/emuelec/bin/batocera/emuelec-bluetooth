@@ -1,29 +1,47 @@
 #!/usr/bin/env python
 
-import time
-from bluetool import Bluetooth
+from subprocess import Popen, PIPE
+
+def execute(cmd):
+    out = []
+    with Popen(cmd, stdout=PIPE, bufsize=1, universal_newlines=True) as p:
+        for line in p.stdout:
+            out.append(line)
+    return out
+        
+def pair_device(mac, isTrusted):
+    if not isTrusted:
+        print("Trusting..."+mac)
+        trust = execute(["bluetoothctl", "trust", mac])
+        print(trust)
+    print("Pairing..."+mac)
+    pair = execute(["bluetoothctl", "pair", mac])
+    print(pair)
+    if "AuthenticationFailed" not in pair[1]:
+        print("Connecting..."+mac)
+        connect = execute(["bluetoothctl", "connect", mac])
+        print(connect)
 
 if __name__ == "__main__":
-        bt = Bluetooth()
-        print('Scanning for available devices for 90 seconds, please wait...')
-        bt.start_scanning(90)
-        time.sleep(15)
-        print('Getting pairable devices, please wait...')
-        devices = bt.get_devices_to_pair()
-        for device in devices:
-            mac = device['mac_address'].decode('utf-8')
-            name = device['name'].decode('utf-8')
-            if bt.get_device_property(mac,'Icon') == 'input-gaming':
-                print('Found MAC: {}\tName: {}'.format(mac,name))
-                print('Found controller {} Name: {}, trusting...'.format(mac,name))
-                bt.trust(mac)
-                if bt.get_device_property(mac,'Trusted') == 1:
-                    print('Trusted {}, quick pause, then pairing...'.format(name))
-                    time.sleep(5)
-                    bt.pair(mac)
-                    if bt.get_device_property(mac,'Paired') == 1:
-                        print('Paired {}, quick pause, then connecting...'.format(name))
-                        time.sleep(5)
-                        bt.connect(mac)
-                        if bt.get_device_property(mac,'Connected') == 1:
-                            print('Connected {}, exiting...'.format(name))
+    print("Scanning available devices for 10 seconds, please wait...")
+    execute(["bluetoothctl", "power", "on"])
+    execute(["bluetoothctl", "agent", "on"])
+    execute(["bluetoothctl", "discoverable", "on"])
+    execute(["bluetoothctl", "pairable", "on"])
+    execute(["bluetoothctl", "--timeout", "10", "scan", "on"])
+
+    print("listing pairable devices, please wait...")
+
+    devices = execute(["bluetoothctl", "devices"])
+    for device in devices:
+        print(device)
+        mac = device[7 : 7 + 17]
+        unknown = mac.replace(":","-")
+        isGamepad = any(
+            cont in device.lower() for cont in ["controller", "input", "joypad", "gamepad"])
+        name = device[25:-2]
+        isGamepad = isGamepad or unknown in device
+        trustListed = execute(["batocera-bluetooth", "list", " | grep "+mac])
+        print(trustListed)
+        isTrusted = mac in trustListed[0]
+        pair_device(mac, isTrusted)
