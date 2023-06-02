@@ -132,31 +132,26 @@ class BluetoothCTL:
         return [self._parse_device_info(dev.split()[1]) for dev in devs]
 
     def trust(self, dev: BluetoothDevice) -> bool:
-        #print("trusting.") # debugging
         return "succeeded" in self._execute_lookup(
             ["bluetoothctl", "trust", dev.mac], "trust succeeded"
         )
 
     def untrust(self, dev: BluetoothDevice) -> bool:
-        #print("untrusting.") # debugging
         return "succeeded" in self._execute_lookup(
             ["bluetoothctl", "untrust", dev.mac], "untrust succeeded"
         )
 
     def pair(self, dev: BluetoothDevice) -> bool:
-        #print("pairing.") # debugging
         return "successful" in self._execute_lookup(
             ["bluetoothctl", "pair", dev.mac], "Pairing successful"
         )
 
     def connect(self, dev: BluetoothDevice) -> bool:
-        #print("connecting") # debugging
         return "successful" in self._execute_lookup(
             ["bluetoothctl", "connect", dev.mac], "Connection successful"
         )
 
     def forget(self, dev: BluetoothDevice) -> bool:
-        #print("forgeting") # debugging
         return "removed" in self._execute_lookup(
             ["bluetoothctl", "remove", dev.mac], "Device has been removed"
         )
