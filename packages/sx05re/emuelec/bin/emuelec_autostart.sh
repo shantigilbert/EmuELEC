@@ -124,7 +124,7 @@ systemctl stop bluetooth
 rm /storage/.cache/services/bluez.conf & 
 else
 systemctl restart bluetooth
-emuelec-bluetooth 10 30 &
+emuelec-bluetooth 15 45 &
 fi
 
 # What to start at boot?
