@@ -35,7 +35,7 @@ do_remove() {
 }
 
 do_trust() {
-emuelec-bluetooth
+emuelec-bluetooth 15 45
 }
 
 case "${ACTION}" in
