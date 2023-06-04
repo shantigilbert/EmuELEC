@@ -82,7 +82,7 @@ set_main_framebuffer() {
   local SH=$2
   local BPP=32
 
-  if [[ ${EE_DEVICE} == "Amlogic" ]]; then
+  if [[ "${EE_DEVICE}" == "Amlogic" ]]; then
     SW=1920
     SH=1080
   fi
