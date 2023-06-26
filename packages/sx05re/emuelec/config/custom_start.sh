@@ -13,9 +13,6 @@ case "${1}" in
 
 # Any commands that you want to run before the frontend begins should go here
 
-# To enable bluetooth polling uncomment the line below:
-# emuelec-bluetooth 36000 20 & # To poll for 10 hours (36000 seconds), with period of 20 seconds.
-
 # example BT config, use only as a last resort
 # Bluetooth, Make sure you change your BT MAC address, you need to do this by SSH the first time
 # by running 
@@ -42,6 +39,9 @@ case "${1}" in
 	;;
 *)
 # Any commands that you want to run after the frontend has started goes here
+
+# To enable bluetooth polling uncomment the line below:
+# emuelec-bluetooth 36000 20 & # To poll for 10 hours (36000 seconds), with period of 20 seconds.
 
     exit 0
 	;;
