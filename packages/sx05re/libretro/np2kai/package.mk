@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="np2kai"
-PKG_VERSION="606fafa7081b62df5f4727c34560da23927c21cd"
+PKG_VERSION="6089943a80a45b6c18d765765f7f31d7a5c0d9c6"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
