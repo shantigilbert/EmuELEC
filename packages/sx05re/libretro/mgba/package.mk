@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="mgba"
-PKG_VERSION="a69c3434afe8b26cb8f9463077794edfa7d5efad"
-PKG_SHA256="e166ad04c46b631f9001fff6155dbde956b57983fdcb4e50d8bbb57980b99840"
+PKG_VERSION="314bf7b676f5b820f396209eb0c7d6fbe8103486"
+PKG_SHA256="66d9766d6f129bff9bfacc8a94787daa018b9c4a9a56fd49673c019eba19ae53"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MPLv2.0"
