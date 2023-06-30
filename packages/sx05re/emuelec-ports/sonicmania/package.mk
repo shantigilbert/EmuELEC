@@ -2,7 +2,7 @@
 # Copyright (C) 2022-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="sonicmania"
-PKG_VERSION="ff82bdcfc1d9f32a889c580220f3eacfad74cfd5"
+PKG_VERSION="4ef543749a29f17ce904217140c8bbff6eea3e77"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/Rubberduckycooly/Sonic-Mania-Decompilation"
 PKG_URL="$PKG_SITE.git"
