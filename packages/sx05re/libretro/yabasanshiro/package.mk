@@ -53,7 +53,7 @@ else
 		PKG_MAKE_OPTS_TARGET+=" -C yabause/src/libretro platform=odroid-n2"
 
 # yabasanshiro seems to only work in debug mode, it is not recomended for use as it will be slow. But until a fix is found this will have to do
-sed -i "s|DEBUG = 0|DEBUG = 1|g" $PKG_BUILD/yabause/src/libretro/Makefile
+#sed -i "s|DEBUG = 0|DEBUG = 1|g" $PKG_BUILD/yabause/src/libretro/Makefile
 
 fi
 }
