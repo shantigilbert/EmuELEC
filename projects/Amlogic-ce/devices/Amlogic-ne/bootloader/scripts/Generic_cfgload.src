@@ -1,4 +1,4 @@
-echo "Using device ${device}, number ${devnr}, partition ${partnr}, CoreELEC on eMMC: ${ce_on_emmc}"
+echo "Using device ${device}, number ${devnr}, partition ${partnr}, EmuELEC on eMMC: ${ce_on_emmc}"
 
 setenv remotewakeup "0xffffffff"
 setenv decode_type "0"
@@ -8,7 +8,7 @@ setenv vout "1080p60hz"
 setenv frac_rate_policy "0"
 setenv consoleopt "console=tty0 no_console_suspend"
 
-setenv rootopt "BOOT_IMAGE=kernel.img boot=LABEL=COREELEC disk=LABEL=STORAGE"
+setenv rootopt "BOOT_IMAGE=kernel.img boot=LABEL=EMUELEC disk=LABEL=STORAGE"
 if test "${ce_on_emmc}" = "yes"; then setenv rootopt "BOOT_IMAGE=kernel.img boot=LABEL=CE_FLASH disk=FOLDER=/dev/CE_STORAGE"; fi
 
 if fatload ${device} ${devnr}:${partnr} ${loadaddr} resolution.ini; then env import -t ${loadaddr} ${filesize}; fi
