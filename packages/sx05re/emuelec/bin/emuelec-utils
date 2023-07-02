@@ -225,12 +225,12 @@ function resolutions() {
   fi
 
   if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
-    RESOLUTIONS+="480x320p60hz"
+    RESOLUTIONS+=("480x320p60hz")
   fi
 
-	[[ ! $RESOLUTIONS == *"640x480p60hz"* ]] && RESOLUTIONS+="640x480p60hz"
-	[[ ! $RESOLUTIONS == *"480i60hz"* ]] && RESOLUTIONS+="480i60hz"
-	
+	[[ ! ${RESOLUTIONS[@]} == *"640x480p60hz"* ]] && RESOLUTIONS+=("640x480p60hz")
+	[[ ! ${RESOLUTIONS[@]} == *"480i60hz"* ]] && RESOLUTIONS+=("480i60hz")
+
   RESOLUTIONS=($(printf "%s\n" "${RESOLUTIONS[@]}" | sort -u))
 
 	IFS=","
