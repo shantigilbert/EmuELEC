@@ -228,10 +228,9 @@ function resolutions() {
     RESOLUTIONS+="480x320p60hz"
   fi
 
-  if [ "$EE_DEVICE" == "GameForce" ]; then
-    RESOLUTIONS+="640x480p60hz"
-  fi
-
+	[[ ! $RESOLUTIONS == *"640x480p60hz"* ]] && RESOLUTIONS+="640x480p60hz"
+	[[ ! $RESOLUTIONS == *"480i60hz"* ]] && RESOLUTIONS+="480i60hz"
+	
   RESOLUTIONS=($(printf "%s\n" "${RESOLUTIONS[@]}" | sort -u))
 
 	IFS=","
