@@ -28,6 +28,8 @@ switch_resolution()
       sleep 0.5
       echo $MODE > "${FILE_MODE}"
   esac
+	NEW_MODE=$( cat ${FILE_MODE} )
+	[[ "$NEW_MODE" != "$MODE" ]] && exit 1
 }
 
 get_resolution_size()
@@ -87,56 +89,30 @@ set_main_framebuffer() {
 
   if [[ -n "$FBW" && "$FBW" > 0 && -n "$FBH" && "$FBH" > 0 ]]; then
     MFBH=$(( FBH*2 ))
-    if [[ ${EE_DEVICE} == "Amlogic" ]]; then
-      fbset -fb /dev/fb0 -g $FBW $FBH 1920 2160 $BPP
-    else
-      fbset -fb /dev/fb0 -g $FBW $FBH $FBW $MFBH $BPP
-    fi
+    fbset -fb /dev/fb0 -g $FBW $FBH $FBW $MFBH $BPP
     echo 0 0 $(( FBW-1 )) $(( FBH-1 )) > /sys/class/graphics/fb0/free_scale_axis
     echo 0 > /sys/class/graphics/fb0/free_scale
     echo 0 > /sys/class/graphics/fb0/freescale_mode
   fi
 }
 
-set_display_borders() {
-  local PX=$1
-  local PY=$2
-  local PW=$3
-  local PH=$4
-  local RW=$5
-  local RH=$6
-  
-  if [[ -z "$PX" || -z "$PY" || -z "$PW" || -z "$PH" ]]; then
-    return 1
-  elif [[ ! -n "$PX" || ! -n "$PY" || ! -n "$PW" || ! -n "$PH" ]]; then
-    return 2
-  elif [[ "$PW" == "0" || "$PH" == "0" ]]; then
-    return 3
-  fi
-  echo "PX:$PX PY:$PY PW:$PW PH:$PH"
-
-  # Sets the default 2nd point of the display which should always be slightly
-  # smaller then the acual size of the screen display.
-  PX2=$(( RW-PX-1 ))
-  PY2=$(( RH-PY-1 ))
-
-  # If the real width and height are defined particularly for cvbs then use
-  # the real values of the screen resolution not the display buffers resolution
-  # which may differ and generally be allot bigger so all the gui objects are
-  # kept in perspective.
-  [[ ${RW} != ${PW} ]] && PX2=$(( PW+PX-1 ))
-  [[ ${RH} != ${PH} ]] && PY2=$(( PH+PY-1 ))
-
-  echo "PX:${PX} PY:${PY} PX2:${PX2} PY2:${PY2}"
-  echo 1 > /sys/class/graphics/fb0/freescale_mode
-  echo "${PX} ${PY} ${PX2} ${PY2}" > /sys/class/graphics/fb0/window_axis
-  echo 0x10001 > /sys/class/graphics/fb0/free_scale
-  return 0
+set_fb_borders() {
+	local CUSTOM_OFFSETS=( $1 $2 $3 $4 )
+	local COUNT_ARGS=${#CUSTOM_OFFSETS[@]}
+	if [[ "$COUNT_ARGS" == "4" ]]; then
+	  echo ${CUSTOM_OFFSETS[@]} > /sys/class/graphics/fb0/window_axis
+	  echo 1 > /sys/class/graphics/fb0/freescale_mode
+	  echo 0x10001 > /sys/class/graphics/fb0/free_scale
+	fi
 }
 
 # Here we initialize any arguments and variables to be used in the script.
 # The Mode we want the display to change too.
 MODE=$1
+PLATFORM=$2
+EMU_MODE="ee_es"
+[[ ! -z $PLATFORM ]] && EMU_MODE="ee_emu"
+
 FBW=0
 FBH=0
 
@@ -175,19 +151,6 @@ fi
 # This is needed to reset scaling.
 echo 0 > /sys/class/ppmgr/ppscaler
 
-
-AMLOGIC_RES_FILE="/storage/.config/amlogic_resolution.txt"
-if [[ "$EE_DEVICE" == "Amlogic" ]]; then
-  if [[ ! -f "$AMLOGIC_RES_FILE" ]]; then
-    echo 1920 1080 > $AMLOGIC_RES_FILE
-  fi
-  declare -a AMLOGIC_RES=($(cat "${AMLOGIC_RES_FILE}"))
-  if [[ ! -z "${AMLOGIC_RES[@]}" ]]; then
-      FBW=${AMLOGIC_RES[0]}
-      FBH=${AMLOGIC_RES[1]}
-  fi
-fi
-
 # Option too Custom set the CVBS Resolution by creating a cvbs_resolution.txt file.
 # File contents must just 2 different integers seperated by a space. e.g. 800 600.
 CVBS_RES_FILE="/storage/.config/cvbs_resolution.txt"
@@ -201,7 +164,8 @@ if [[ "$MODE" == *"cvbs" ]]; then
   fi
 fi
 
-CUSTOM_RES=$(get_ee_setting ${MODE}.ee_framebuffer)
+CUSTOM_RES=$(get_ee_setting framebuffer.${MODE} ${EMU_MODE})
+#[[ -z "$CUSTOM_RES" ]] && CUSTOM_RES=$(get_ee_setting ee_framebuffer.${MODE})
 if [[ ! -z "${CUSTOM_RES}" ]]; then
   declare -a RES=($(echo "${CUSTOM_RES}"))
   if [[ ! -z "${RES[@]}" ]]; then
@@ -210,12 +174,9 @@ if [[ ! -z "${CUSTOM_RES}" ]]; then
   fi
 fi
 
-switch_resolution $MODE
 
-# Check that the display mode did change or just show the screen and exit. This
-# is a safeguard to prevent continueing with display settings.
-NEW_MODE=$( cat ${FILE_MODE} )
-[[ "$NEW_MODE" != "$MODE" ]] && exit 1
+[[ $MODE != "auto" ]] && switch_resolution $MODE
+MODE=$( cat ${FILE_MODE} )
 
 
 declare -a SIZE=($( get_resolution_size $MODE $FBW $FBH))
@@ -224,6 +185,12 @@ FBW=${SIZE[0]}
 FBH=${SIZE[1]}
 PSW=${SIZE[2]}
 PSH=${SIZE[3]}
+
+
+if [[ "${EE_DEVICE}" == "Amlogic" ]]; then
+  FBW=1920
+  FBH=1080
+fi
 
 # Once we know the Width and Height is valid numbers we set the primary display
 # buffer, and we multiply the 2nd height by a factor of 2 I assume for interlaced 
@@ -249,7 +216,8 @@ if [[ -f "/storage/.config/${MODE}_offsets" ]]; then
   CUSTOM_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
 fi
 
-OFFSET_SETTING="$(get_ee_setting ${MODE}.ee_offsets)"
+OFFSET_SETTING="$(get_ee_setting framebuffer_border.${MODE} ${EMU_MODE})"
+#[[ -z "${OFFSET_SETTING}" ]] && OFFSET_SETTING="$(get_ee_setting ${MODE}.ee_offsets)"
 if [[ ! -z "${OFFSET_SETTING}" ]]; then
   CUSTOM_OFFSETS=( ${OFFSET_SETTING} )
 fi
@@ -259,23 +227,23 @@ fi
 COUNT_ARGS=${#CUSTOM_OFFSETS[@]}
 if [[ "$MODE" == *"cvbs" ]]; then
   if [[ "$COUNT_ARGS" == "0" ]]; then
-    [[ "$MODE" == "480cvbs" ]] && CUSTOM_OFFSETS="55 13"
-    [[ "$MODE" == "576cvbs" ]] && CUSTOM_OFFSETS="55 13"
+    [[ "$MODE" == "480cvbs" ]] && CUSTOM_OFFSETS="5 13"
+    [[ "$MODE" == "576cvbs" ]] && CUSTOM_OFFSETS="5 13"
   fi
 fi
 
-if [[ "$COUNT_ARGS" == "2" ]]; then
+COUNT_ARGS=${#CUSTOM_OFFSETS[@]}
+if [[ "$COUNT_ARGS" == "0" ]] && [[ $FBW != $PSW || $FBH != $PSH ]]; then
+	CUSTOM_OFFSETS=(0 0 $(( PSW - 1 )) $(( PSH - 1 )))
+elif [[ "$COUNT_ARGS" == "2" ]]; then
   TMP="${CUSTOM_OFFSETS[0]}"
-  CUSTOM_OFFSETS[2]=$(( $RW - $TMP - 1 ))
+  CUSTOM_OFFSETS[2]=$(( $PSW - $TMP - 1 ))
   TMP="${CUSTOM_OFFSETS[1]}"
-  CUSTOM_OFFSETS[3]=$(( $RH - $TMP - 1 ))
+  CUSTOM_OFFSETS[3]=$(( $PSH - $TMP - 1 ))
 fi
 
-COUNT_ARGS=${#CUSTOM_OFFSETS[@]}
-if [[ "$COUNT_ARGS" == "4" ]]; then
-  echo ${CUSTOM_OFFSETS[@]} > /sys/class/graphics/fb0/window_axis
-  echo 1 > /sys/class/graphics/fb0/freescale_mode
-  echo 0x10001 > /sys/class/graphics/fb0/free_scale
+if [[ "${#CUSTOM_OFFSETS[@]}" == "4" ]]; then
+	set_fb_borders ${CUSTOM_OFFSETS[@]}
   exit 0
 fi
 
@@ -283,11 +251,6 @@ fi
 # inside the actual analog diplay resolution which is a bit smaller than the 
 # resolution it's usually transmitted as.
 declare -a BORDERS
-
-# This monolith slab of code basically gets the users preference of if they want 
-# to resize there screen display to make it smaller so it can fit into a screen
-# properly. If the user suppllies values its coded to restrict the user into not
-# letting the user set a width greater than the screen display size.
 BORDER_VALS=$(get_ee_setting ee_videowindow)
 if [[ ! -z "${BORDER_VALS}" ]]; then
   BORDERS=(${BORDER_VALS})
@@ -295,16 +258,18 @@ if [[ ! -z "${BORDER_VALS}" ]]; then
   if [[ ${COUNT_ARGS} != 4 && ${COUNT_ARGS} != 2 ]]; then
     exit 0
   fi
-fi
+  A1=${BORDERS[0]}
+  A2=${BORDERS[1]}
+  A3=${BORDERS[2]}
+  [[ -z "$A3" ]] && A3=$PSW
+  A4=${BORDERS[3]}
+  [[ -z "$A4" ]] && A4=$PSH
 
-# If border values have been supplied then we can check the offsets and the
-# width and height and make sure they are all valid and will not cause issues for
-# when we set the borders, and allow the primary display buffer to resize the screen.
-if [[ ! -z "${BORDERS[@]}" ]]; then
-  BW=${BORDERS[2]}
-  [[ -z "$BW" ]] && BW=$PSW
-  BH=${BORDERS[3]}
-  [[ -z "$BH" ]] && BH=$PSH
-  set_display_borders ${BORDERS[0]} ${BORDERS[1]} $BW $BH $PSW $PSH
+  if [[ ! -n "$A1" || ! -n "$A2" || ! -n "$A3" || ! -n "$A4" ]]; then
+    exit 0
+  fi
+  A3=$(( PSW-A1-1 ))
+  A4=$(( PSH-A2-1 ))
+	set_fb_borders ${A1} ${A2} ${A3} ${A4}
 fi
-
+# End Legacy code
