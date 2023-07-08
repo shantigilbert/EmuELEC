@@ -231,7 +231,7 @@ def is_bluetooth_running():
 
 def on_device_discovered(dev: BluetoothDevice) -> bool:
     if dev.blocked:
-        return False
+        return True
 
     if (
         not dev.connected  # exclude already connected devices
@@ -285,10 +285,12 @@ if __name__ == "__main__":
     print("running scan on " + str(SCAN_TIME))
     bt = BluetoothCTL()
 
-#    if is_bluetooth_running():
-    while is_bluetooth_running():
-        print("bluetooth is already running, waiting.")
-        time.sleep(1)
+    if is_bluetooth_running():
+        print("bluetooth is already running, exiting.")
+        exit()
+#    while is_bluetooth_running():
+#        print("bluetooth is already running, waiting.")
+#        time.sleep(1)
 
 
     bt.power = True

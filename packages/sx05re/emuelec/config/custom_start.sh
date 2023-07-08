@@ -40,9 +40,6 @@ case "${1}" in
 *)
 # Any commands that you want to run after the frontend has started goes here
 
-# To enable bluetooth polling uncomment the line below:
-# emuelec-bluetooth 36000 20 & # To poll for 10 hours (36000 seconds), with period of 20 seconds.
-
     exit 0
 	;;
 esac
