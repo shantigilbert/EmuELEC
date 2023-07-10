@@ -147,6 +147,7 @@ class BluetoothCTL:
         process = Popen(cmd.split(), stdout=PIPE, universal_newlines=True)
         while True:
             line = process.stdout.readline()
+            print(line)
             if line == "" and process.poll() is not None:
                 break
             if line:
@@ -228,10 +229,12 @@ def is_bluetooth_running():
             return False if str(os.getpid()) in o else True
     return False
 
+#ef is_bluetooth_scanning():
+#   return ShellIO.execute_lookup(["ps", "-ef"], "bluetoothctl -- scan", debug=False)
 
 def on_device_discovered(dev: BluetoothDevice) -> bool:
     if dev.blocked:
-        return True
+        return False
 
     if (
         not dev.connected  # exclude already connected devices
@@ -271,7 +274,8 @@ def on_device_removed(dev: BluetoothDevice):
     pass
 
 
-SCAN_TIME = 60
+LIFE_TIME = 60
+SCAN_TIME = LIFE_TIME
 
 ELAPSED_TIME = 0
 UPDATE_INTERVAL = 5
@@ -279,14 +283,19 @@ UPDATE_INTERVAL = 5
 BT_THREAD: Process = None
 
 if __name__ == "__main__":
-    if len(sys.argv) >= 2:
-        SCAN_TIME = int(sys.argv[1])
+    if len(sys.argv) > 1:
+        LIFE_TIME = int(sys.argv[1])
+    if len(sys.argv) > 2:
+        SCAN_TIME = int(sys.argv[2])
 
     print("running scan on " + str(SCAN_TIME))
     bt = BluetoothCTL()
 
-    if is_bluetooth_running():
-        exit()
+#    if is_bluetooth_running():
+    while is_bluetooth_running():
+        print("bluetooth is already running, waiting.")
+        time.sleep(1)
+
 
     bt.power = True
     bt.agent = True
@@ -294,17 +303,21 @@ if __name__ == "__main__":
     bt.pairable = True
 
     while True:
-        if SCAN_TIME >= 0:
-            if ELAPSED_TIME > SCAN_TIME:
+        if LIFE_TIME >= 0:
+            if ELAPSED_TIME > LIFE_TIME:
                 exit()
 
         devices_count = len([d for d in bt.devices() if d.connected])
-#        print("devices_count=", devices_count)
-        if (not is_in_game() or devices_count == 0) and not bt.scanning:
+        if (
+            (
+                not is_in_game() or
+                (is_in_game() and devices_count == 0)
+            ) and not bt.scanning
+        ):
             print("emustation is active now, resuming scan")
             BT_THREAD = Process(target=bt.scan_async, args=(SCAN_TIME,))
             BT_THREAD.start()
-        elif (is_in_game() or devices_count > 0) and bt.scanning:
+        elif is_in_game() and bt.scanning and devices_count > 0:
             print("emustation is inactive now, stopping scan")
             if BT_THREAD is not None:
                 BT_THREAD.terminate()
