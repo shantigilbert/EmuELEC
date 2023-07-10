@@ -286,12 +286,7 @@ if __name__ == "__main__":
     bt = BluetoothCTL()
 
     if is_bluetooth_running():
-        print("bluetooth is already running, exiting.")
         exit()
-#    while is_bluetooth_running():
-#        print("bluetooth is already running, waiting.")
-#        time.sleep(1)
-
 
     bt.power = True
     bt.agent = True
@@ -305,11 +300,11 @@ if __name__ == "__main__":
 
         devices_count = len([d for d in bt.devices() if d.connected])
 #        print("devices_count=", devices_count)
-        if (not is_in_game() and not bt.scanning) or devices_count == 0:
+        if (not is_in_game() or devices_count == 0) and not bt.scanning:
             print("emustation is active now, resuming scan")
             BT_THREAD = Process(target=bt.scan_async, args=(SCAN_TIME,))
             BT_THREAD.start()
-        elif is_in_game() and bt.scanning:
+        elif (is_in_game() or devices_count > 0) and bt.scanning:
             print("emustation is inactive now, stopping scan")
             if BT_THREAD is not None:
                 BT_THREAD.terminate()
