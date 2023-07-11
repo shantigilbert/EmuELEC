@@ -346,7 +346,8 @@ uzem \
 vba-next \
 vbam \
 vecx \
-vice"
+vice \
+yabasanshiro"
 
 LIBRETRO_EXTRA_CORES="chailove \
 crocods \
