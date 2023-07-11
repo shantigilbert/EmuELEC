@@ -298,16 +298,12 @@ if __name__ == "__main__":
                 exit()
 
         devices_count = len([d for d in bt.devices() if d.connected])
-        if (
-            (
-                not is_in_game() or devices_count == 0
-            ) and not bt.scanning
-        ):
-            print("emustation is active now, resuming scan")
+        if not bt.scanning and (not is_in_game() or devices_count == 0):
+            print("emustation is active now or no devices found, resuming scan")
             BT_THREAD = Process(target=bt.scan_async, args=(SCAN_TIME,))
             BT_THREAD.start()
         elif is_in_game() and bt.scanning and devices_count > 0:
-            print("emustation is inactive now, stopping scan")
+            print("emustation is inactive now and devices connected, stopping scan")
             if BT_THREAD is not None:
                 BT_THREAD.terminate()
             bt.scan_stop()
