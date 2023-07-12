@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python -u
 
 from subprocess import Popen, PIPE, STDOUT
 from dataclasses import dataclass
@@ -273,7 +273,7 @@ def on_device_removed(dev: BluetoothDevice):
 SCAN_TIME = 60
 
 ELAPSED_TIME = 0
-UPDATE_INTERVAL = 5
+UPDATE_INTERVAL = 1
 
 BT_THREAD: Process = None
 
