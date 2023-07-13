@@ -1,5 +1,16 @@
 #!/usr/bin/python -u
 
+################################################################################
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2023-present ebeem (https://github.com/ebeem)
+# Modifications made by:
+#   Langerz82 (https://github.com/Langerz82)
+#   wang80919 (https://github.com/wang80919)
+# Testing done by:
+#   junm6802030 (https://github.com/junm6802030)
+# Special thanks to everyone who worked on this.
+################################################################################
+
 from subprocess import Popen, PIPE, STDOUT
 from dataclasses import dataclass
 import time
