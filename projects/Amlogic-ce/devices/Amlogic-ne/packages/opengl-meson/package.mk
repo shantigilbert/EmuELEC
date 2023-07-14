@@ -12,9 +12,22 @@ PKG_LONGDESC="OpenGL ES pre-compiled libraries for Mali GPUs found in Amlogic Me
 PKG_TOOLCHAIN="manual"
 
 makeinstall_target() {
+  local _ARCH
+  case "${ARCH}" in
+    'arm')
+      _ARCH=eabihf
+      ;;
+    'aarch64')
+      _ARCH=arm64
+      ;;
+    *)
+      echo "${PKG_NAME} could not be installed for ${ARCH} !!!" >&2
+      false
+      ;;
+  esac
   mkdir -p ${INSTALL}/usr/lib
-    cp -p lib/eabihf/gondul/r25p0/fbdev/libMali.so ${INSTALL}/usr/lib/libMali.gondul.so
-    cp -p lib/eabihf/dvalin/r25p0/fbdev/libMali.so ${INSTALL}/usr/lib/libMali.dvalin.so
+    cp -p lib/${_ARCH}/gondul/r25p0/fbdev/libMali.so ${INSTALL}/usr/lib/libMali.gondul.so
+    cp -p lib/${_ARCH}/dvalin/r25p0/fbdev/libMali.so ${INSTALL}/usr/lib/libMali.dvalin.so
 
     ln -sf /var/lib/libMali.so ${INSTALL}/usr/lib/libMali.so
 
@@ -41,16 +54,33 @@ makeinstall_target() {
     cp ${PKG_DIR}/scripts/libmali-overlay-setup ${INSTALL}/usr/sbin
   # install needed files for compiling
   mkdir -p ${SYSROOT_PREFIX}/usr/include/EGL
-    cp -pr include/EGL ${SYSROOT_PREFIX}/usr/include
+    cp -pr include/* ${SYSROOT_PREFIX}/usr/include
     cp -pr include/EGL_platform/platform_fbdev/* ${SYSROOT_PREFIX}/usr/include/EGL
-  mkdir -p ${SYSROOT_PREFIX}/usr/include/GLES2
-    cp -pr include/GLES2 ${SYSROOT_PREFIX}/usr/include
-  mkdir -p ${SYSROOT_PREFIX}/usr/include/KHR
-    cp -pr include/KHR ${SYSROOT_PREFIX}/usr/include
   mkdir -p ${SYSROOT_PREFIX}/usr/lib
     cp -pr lib/pkgconfig ${SYSROOT_PREFIX}/usr/lib
-    ln ${INSTALL}/usr/lib/libMali.gondul.so ${SYSROOT_PREFIX}/usr/lib/libEGL.so
-    ln ${INSTALL}/usr/lib/libMali.gondul.so ${SYSROOT_PREFIX}/usr/lib/libGLESv2.so
+    cp -p lib/${_ARCH}/gondul/r25p0/fbdev/libMali.so ${SYSROOT_PREFIX}/usr/lib/libMali.so
+    local LINK_LIST="libmali.so \
+                      libmali.so.0 \
+                      libEGL.so \
+                      libEGL.so.1 \
+                      libEGL.so.1.0.0 \
+                      libGLES_CM.so.1 \
+                      libGLESv1_CM.so \
+                      libGLESv1_CM.so.1 \
+                      libGLESv1_CM.so.1.0.1 \
+                      libGLESv1_CM.so.1.1 \
+                      libGLESv2.so \
+                      libGLESv2.so.2 \
+                      libGLESv2.so.2.0 \
+                      libGLESv2.so.2.0.0 \
+                      libGLESv3.so \
+                      libGLESv3.so.3 \
+                      libGLESv3.so.3.0 \
+                      libGLESv3.so.3.0.0"
+    local LINK_NAME
+    for LINK_NAME in $LINK_LIST; do
+      ln -sf libMali.so ${SYSROOT_PREFIX}/usr/lib/${LINK_NAME}
+    done
 }
 
 post_install() {

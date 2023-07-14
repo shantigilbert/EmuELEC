@@ -19,7 +19,6 @@ cd ${PKG_BUILD}
 	--prefix=/usr \
 	--sdl2=${PKG_ORIG_SYSROOT_PREFIX}/usr \
 	--64bits \
-	--disable-vgui \
 	--disable-gl \
 	--enable-gles2"
   ./waf configure ${ARGS}

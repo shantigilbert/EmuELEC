@@ -43,7 +43,7 @@ pre_make_target() {
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/bin
-    cp $PKG_DIR/ppsspp.sh $INSTALL/usr/bin/ppsspp.sh
+    cp $PKG_DIR/scripts/*.sh $INSTALL/usr/bin
     cp `find . -name "PPSSPPSDL" | xargs echo` $INSTALL/usr/bin/PPSSPPSDL
     ln -sf /storage/.config/ppsspp/assets $INSTALL/usr/bin/assets
     mkdir -p $INSTALL/usr/config/ppsspp/

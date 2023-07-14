@@ -15,25 +15,12 @@ PKG_PATCH_DIRS+=" $(get_pkg_directory opengl-meson)/patches"
 PKG_TOOLCHAIN="manual"
 PKG_BUILD_FLAGS="lib32"
 
-# unpack() {
-#   ${SCRIPTS}/get opengl-meson
-#   mkdir -p ${PKG_BUILD}
-#   tar --strip-components=1 -xf ${SOURCES}/opengl-meson/opengl-meson-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
-#   local REMOVE_NAME
-#   for REMOVE_NAME in 'arm64' \
-#                      'lib*' \
-#                      'pkgconfig' \
-#                      'r3p2*' \
-#                      'r4p*'; do                     
-#     safe_remove ${PKG_BUILD}/lib/${REMOVE_NAME}
-#   done
-# }
-
 makeinstall_target() {
   mkdir -p ${INSTALL}/usr/lib32
   mkdir -p ${SYSROOT_PREFIX}/usr/lib
   local DIR_MESON="$(get_build_dir opengl-meson)"
   local DIR_ARM=${DIR_MESON}/lib/eabihf
+  local SINGLE_LIBMALI='no'
   case "${DEVICE}" in 
     Amlogic-ng)
       cp -p ${DIR_ARM}/gondul/r12p0/fbdev/libMali.so ${INSTALL}/usr/lib32/libMali.gondul.so
@@ -44,14 +31,20 @@ makeinstall_target() {
     Amlogic-old)
       cp -p ${DIR_ARM}/m450/r7p0/fbdev/libMali.so ${INSTALL}/usr/lib32/
       cp -p ${DIR_ARM}/m450/r7p0/fbdev/libMali.so ${SYSROOT_PREFIX}/usr/lib/
+      SINGLE_LIBMALI='yes'
+    ;;
+    Amlogic-ne)
+      cp -p ${DIR_ARM}/gondul/r25p0/fbdev/libMali.so ${INSTALL}/usr/lib32/libMali.gondul.so
+      cp -p ${DIR_ARM}/dvalin/r25p0/fbdev/libMali.so ${INSTALL}/usr/lib32/libMali.dvalin.so
+      cp -p ${DIR_ARM}/gondul/r25p0/fbdev/libMali.so ${SYSROOT_PREFIX}/usr/lib/
     ;;
     *)
-      echo "${PKG_NAME}: Trying to install for device ${DEVICE} when only Amlogic-ng and Amlogic-old is supported" 1>&2
+      echo "${PKG_NAME}: Trying to install for device ${DEVICE} when only Amlogic-ng, Amlogic-old and Amlogic-ne are supported" 1>&2
       return 1
     ;;
   esac
 
-  if [ "${DEVICE}" = "Amlogic-ng" ]; then
+  if [[ "${SINGLE_LIBMALI}" == 'no' ]]; then
     ln -sf /var/lib32/libMali.so ${INSTALL}/usr/lib32/libMali.so
   fi
 
@@ -81,7 +74,7 @@ makeinstall_target() {
 
 # install headers and libraries to TOOLCHAIN
   cp -rf ${DIR_MESON}/include/* ${SYSROOT_PREFIX}/usr/include
-  cp -rf $(get_pkg_directory opengl-meson)/sources/pkgconfig/* ${SYSROOT_PREFIX}/usr/lib/pkgconfig
+  cp -rf "$(get_build_dir opengl-meson)/lib/pkgconfig/"* ${SYSROOT_PREFIX}/usr/lib/pkgconfig
   cp ${SYSROOT_PREFIX}/usr/include/EGL_platform/platform_fbdev/* ${SYSROOT_PREFIX}/usr/include/EGL
   rm -rf ${SYSROOT_PREFIX}/usr/include/EGL_platform
 }

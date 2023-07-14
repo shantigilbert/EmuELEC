@@ -3,6 +3,7 @@
 
 PKG_NAME="amiberry"
 PKG_VERSION="fc0645c51ce095f3f46c4faa70f9afab71d49526"
+PKG_ARCH="aarch64 arm"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/midwan/amiberry"
 PKG_URL="https://github.com/midwan/amiberry.git"
@@ -14,40 +15,42 @@ PKG_EE_UPDATE=no
 
 pre_configure_target() {
   cd ${PKG_BUILD}
-  export SYSROOT_PREFIX=${SYSROOT_PREFIX}
+  local DEVICE_PLATFORMS=('aarch64' 'arm')
 
-  case ${DEVICE} in
-    Amlogic-old)
-     if [ $ARCH == "arm" ]; then
-        AMIBERRY_PLATFORM="AMLGX"
-     else 
-        AMIBERRY_PLATFORM="a64"
-     fi
+  case "${DEVICE}" in
+    'Amlogic-old')
+      DEVICE_PLATFORMS=('a64' 'AMLGX')
       ;;
-    Amlogic-ng|Amlogic-ogu)
-    if [ $ARCH == "arm" ]; then
-        AMIBERRY_PLATFORM="AMLG12B"
-     else
-         AMIBERRY_PLATFORM="n2"
-     fi
+    'Amlogic-ng'|'Amlogic-ne'|'Amlogic-ogu')
+      DEVICE_PLATFORMS=('n2' 'AMLG12B')
+      ;;
+    'OdroidGoAdvance'|'GameForce')
+      DEVICE_PLATFORMS=('oga' 'RK3326')
+      ;;
+    'RK356x'|'OdroidM1')
+      DEVICE_PLATFORMS=('a64' 'a64')
+      ;;
+    *)
+      echo "Refuse to build ${PKG_NAME} for device ${DEVICE}!" >&2
+      false
       ;;
   esac
- 
-if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
-if [ $ARCH == "arm" ]; then
-AMIBERRY_PLATFORM="RK3326"
-else 
-AMIBERRY_PLATFORM="oga"
-fi
+  local AMIBERRY_PLATFORM
+  case "${ARCH}" in 
+    'aarch64')
+      AMIBERRY_PLATFORM="${DEVICE_PLATFORMS[0]}"
+      ;;
+    'arm')
+      AMIBERRY_PLATFORM="${DEVICE_PLATFORMS[1]}"
+      ;;
+    *)
+      echo "Refuse to build ${PKG_NAME} for arch ${ARCH}!" >&2
+      false
+      ;;
+  esac
 
-fi
-
-if [ "$DEVICE" == "RK356x" ] || [ "$DEVICE" == "OdroidM1" ]; then
-	AMIBERRY_PLATFORM="a64"
-fi
-
-sed -i "s|AS     = as|AS     \?= as|" Makefile
-PKG_MAKE_OPTS_TARGET+=" all PLATFORM=${AMIBERRY_PLATFORM} SDL_CONFIG=${SYSROOT_PREFIX}/usr/bin/sdl2-config"
+  sed -i "s|AS     = as|AS     \?= as|" Makefile
+  PKG_MAKE_OPTS_TARGET+=" all PLATFORM=${AMIBERRY_PLATFORM} SDL_CONFIG=${SYSROOT_PREFIX}/usr/bin/sdl2-config"
 }
 
 makeinstall_target() {
