@@ -164,7 +164,7 @@ if [[ "$MODE" == *"cvbs" ]]; then
   fi
 fi
 
-CUSTOM_RES=$(get_ee_setting framebuffer.${MODE} ${EMU_MODE})
+CUSTOM_RES=$(get_ee_setting ${EMU_MODE}.framebuffer.${MODE} ${PLATFORM})
 #[[ -z "$CUSTOM_RES" ]] && CUSTOM_RES=$(get_ee_setting ee_framebuffer.${MODE})
 if [[ ! -z "${CUSTOM_RES}" ]]; then
   declare -a RES=($(echo "${CUSTOM_RES}"))
@@ -216,7 +216,7 @@ if [[ -f "/storage/.config/${MODE}_offsets" ]]; then
   CUSTOM_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
 fi
 
-OFFSET_SETTING="$(get_ee_setting framebuffer_border.${MODE} ${EMU_MODE})"
+OFFSET_SETTING="$(get_ee_setting ${EMU_MODE}.framebuffer_border.${MODE} ${PLATFORM})"
 #[[ -z "${OFFSET_SETTING}" ]] && OFFSET_SETTING="$(get_ee_setting ${MODE}.ee_offsets)"
 if [[ ! -z "${OFFSET_SETTING}" ]]; then
   CUSTOM_OFFSETS=( ${OFFSET_SETTING} )
