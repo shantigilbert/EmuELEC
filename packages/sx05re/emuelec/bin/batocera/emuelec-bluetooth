@@ -67,7 +67,7 @@ class ShellIO:
 
 
 class BluetoothCTL:
-    async_bluetooth_process: Popen | None
+    async_bluetooth_process: "Popen | None"
 
     def __init__(self):
         self.async_bluetooth_process = None
