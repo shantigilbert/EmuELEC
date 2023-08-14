@@ -11,21 +11,21 @@
 @@ -595,6 +596,14 @@
           }
        }
- 
+
 +   if (settings->bools.video_oga_vertical_enable) {
 +    vid->rotation = HAL_TRANSFORM_ROT_270;
 +
 +   if (settings->bools.video_ogs_vertical_enable)
 +    vid->rotation = HAL_TRANSFORM_ROT_90;
-+    
++
 +       // RARCH_LOG("EmuELEC Rotation set to %d", vid->rotation);
-+} 
++}
        oga_calc_bounds(&r, vid->drm_width, vid->drm_height, width, height, aspect_ratio, vid->display_ar);
        oga_blit(vid->frame_surface, 0, 0, width, height,
              page_surface, r.y, r.x, r.h, r.w, vid->rotation, vid->scale_mode, blend);
 @@ -608,19 +617,38 @@
        height = vid->menu_surface->height;
- 
+
        aspect_ratio = (float)width / height;
 -
 +   if (settings->bools.video_oga_vertical_enable) {
@@ -33,9 +33,9 @@
 +
 +   if (settings->bools.video_ogs_vertical_enable)
 +    vid->rotation = HAL_TRANSFORM_ROT_180;
-+    
++
 +       // RARCH_LOG("EmuELEC Rotation set to %d", vid->rotation);
-+} 
++}
        oga_rect_t r;
        oga_calc_bounds(&r, vid->drm_width, vid->drm_height, width, height, aspect_ratio, vid->display_ar);
        oga_blit(vid->menu_surface, 0, 0, width, height,
@@ -43,16 +43,16 @@
 +            page_surface, r.y, r.x, r.h, r.w, vid->rotation, vid->scale_mode, 0);
     }
  #endif
- 
+
     if (msg)
     {
-+       
++
 +   if (settings->bools.video_oga_vertical_enable) {
 +    int rotation2 = 0;
 +
 +   if (settings->bools.video_ogs_vertical_enable)
 +    rotation2 = HAL_TRANSFORM_ROT_180;
-+   
++
 +         oga_blit(vid->msg_surface, 0, 0, vid->msg_width, vid->msg_height,
 +            page_surface, 0, 0, vid->msg_width, vid->msg_height,
 +            rotation2, vid->scale_mode, 0xff0105);
@@ -62,7 +62,7 @@
              HAL_TRANSFORM_ROT_270, vid->scale_mode, 0xff0105);
 + }
     }
- 
+
     if (unlikely(drmModeSetCrtc(vid->fd, vid->crtc_id, page->fb_id, 0, 0, &vid->connector_id, 1, &vid->mode) != 0))
 @@ -716,6 +744,14 @@
     oga_video_t *vid = (oga_video_t*)data;
@@ -70,50 +70,50 @@
        return;
 +
 +   settings_t *settings                 = config_get_ptr();
-+   
++
 +   if (settings->bools.video_oga_vertical_enable)
 +   rotation = 3;
 +
 +   if (settings->bools.video_ogs_vertical_enable)
 +   rotation = 2;
- 
+
     switch (rotation)
     {
 
 --- a/gfx/drivers_context/drm_go2_ctx.c
 +++ b/gfx/drivers_context/drm_go2_ctx.c
-@@ -295,6 +295,7 @@
- 
- static void gfx_ctx_go2_drm_swap_buffers(void *data)
- {
-+settings_t *settings                 = config_get_ptr();
-    gfx_ctx_go2_drm_data_t 
-       *drm   = (gfx_ctx_go2_drm_data_t*)data;
- 
-@@ -321,11 +322,26 @@
+@@ -295,7 +295,8 @@
+    int src_w = drm->fb_width;
+    int src_h = drm->fb_height;
+    int src_x = 0;
+    int src_y = drm->ctx_h - drm->fb_height;
++    settings_t *settings = config_get_ptr();
+
+    if (out_w != src_w || out_h != src_h)
+    {
+@@ -321,10 +322,25 @@
     go2_context_swap_buffers(drm->context);
- 
-    go2_surface_t* surface = go2_context_surface_lock(drm->context);
+    surf     = go2_context_surface_lock(drm->context);
 +
 +if (settings->bools.video_oga_vertical_enable) {
-+    
++
 +    auto ee_rotation = GO2_ROTATION_DEGREES_0;
-+    
++
 +    if (settings->bools.video_ogs_vertical_enable)
 +       ee_rotation = GO2_ROTATION_DEGREES_180;
-+    
++
 +   go2_presenter_post(drm->presenter,
-+         surface,
++         surf,
 +         src_x, src_y, src_w, src_h,
 +         out_y, out_x, out_h, out_w,
 +         ee_rotation, 2);
 +} else {
     go2_presenter_post(drm->presenter,
-          surface,
+          surf,
           src_x, src_y, src_w, src_h,
           out_y, out_x, out_h, out_w,
           GO2_ROTATION_DEGREES_270, 2);
 +}
-    go2_context_surface_unlock(drm->context, surface);
+    go2_context_surface_unlock(drm->context, surf);
  #endif
  }
