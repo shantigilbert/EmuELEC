@@ -2,12 +2,14 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="duckstation"
-PKG_VERSION="35f272b336667cffd35d149d9da6f85e958ddfa2"
+PKG_VERSION="fd3507c16d098fb32806c281caaefb205946da8a"
+#PKG_VERSION="35f272b336667cffd35d149d9da6f85e958ddfa2"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/stenzek/duckstation"
 PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain SDL2 nasm:host ${OPENGLES} libevdev"
+PKG_SECTION="libretro"
 PKG_SHORTDESC="Fast PlayStation 1 emulator for x86-64/AArch32/AArch64 "
 PKG_TOOLCHAIN="cmake"
 
@@ -21,6 +23,8 @@ pre_configure_target() {
 	PKG_CMAKE_OPTS_TARGET+=" -DANDROID=OFF \
 	                         -DENABLE_DISCORD_PRESENCE=OFF \
 	                         -DUSE_X11=OFF \
+                                 -DBUILD_LIBRETRO_CORE=OFF \
+				 -DBUILD_GO2_FRONTEND=OFF \
 	                         -DBUILD_QT_FRONTEND=OFF \
 	                         -DBUILD_NOGUI_FRONTEND=ON \
 	                         -DCMAKE_BUILD_TYPE=Release \

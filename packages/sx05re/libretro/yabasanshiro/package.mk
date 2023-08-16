@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="yabasanshiro"
-PKG_VERSION="fd459968aae4a251d839174404a346b1f428912a"
+PKG_VERSION="7513c8459034a0fe415d3cae4d692a54d0f90296"
 PKG_GIT_CLONE_BRANCH="yabasanshiro"
 PKG_REV="1"
 PKG_ARCH="any"
@@ -53,7 +53,7 @@ else
 		PKG_MAKE_OPTS_TARGET+=" -C yabause/src/libretro platform=odroid-n2"
 
 # yabasanshiro seems to only work in debug mode, it is not recomended for use as it will be slow. But until a fix is found this will have to do
-sed -i "s|DEBUG = 0|DEBUG = 1|g" $PKG_BUILD/yabause/src/libretro/Makefile
+#sed -i "s|DEBUG = 0|DEBUG = 1|g" $PKG_BUILD/yabause/src/libretro/Makefile
 
 fi
 }

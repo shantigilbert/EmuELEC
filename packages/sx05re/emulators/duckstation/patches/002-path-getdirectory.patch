@@ -2,12 +2,13 @@ diff --git a/src/common/file_system.cpp b/src/common/file_system.cpp
 index ceb2f08..0fa5a04 100644
 --- a/src/common/file_system.cpp
 +++ b/src/common/file_system.cpp
-@@ -324,6 +324,8 @@
+@@ -683,6 +683,9 @@ std::string GetDisplayNameFromPath(const std::string_view& path)
  
- std::string_view Path::GetFileName(const std::string_view& path)
+ std::string_view GetPathDirectory(const std::string_view& path)
  {
-+    return "/emuelec/configs/duckstation";
-+    
-   const std::string_view::size_type pos = GetLastSeperatorPosition(path, true);
++
++  return "/emuelec/configs/duckstation";
++
+   std::string::size_type pos = GetLastSeperatorPosition(path, false);
    if (pos == std::string_view::npos)
-     return path;
+     return {};
