@@ -1,6 +1,6 @@
 --- a/menu/menu_displaylist.c
 +++ b/menu/menu_displaylist.c
-@@ -13794,13 +13794,6 @@
+@@ -13884,12 +13884,6 @@
              menu_entries_clear(info->list);
              {
  #ifdef HAVE_LAKKA
@@ -10,10 +10,9 @@
 -                        MENU_ENUM_LABEL_UPDATE_LAKKA,
 -                        MENU_SETTING_ACTION, 0, 0, NULL))
 -                  count++;
--
-                if (settings->bools.menu_show_legacy_thumbnail_updater)
-                {
-                   if (menu_entries_append(info->list,
+
+                if (menu_entries_append(info->list,
+                         msg_hash_to_str(MENU_ENUM_LABEL_VALUE_DOWNLOAD_CORE_CONTENT),
 --- a/menu/menu_setting.c
 +++ b/menu/menu_setting.c
 @@ -9781,7 +9781,7 @@
