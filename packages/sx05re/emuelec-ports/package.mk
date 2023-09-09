@@ -40,7 +40,9 @@ PKG_DEPENDS_TARGET+=" commander-genius \
                 xash3d \
                 sonicmania \
                 shovelknight \
-                tmntsr"
+                tmntsr \
+                falloutce1 \
+                falloutce2"
 
 amlogicports=""
 hhports=" openjazz"

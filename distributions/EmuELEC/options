@@ -1,4 +1,4 @@
-### DISTRO INFORMATION ###
+## DISTRO INFORMATION ###
 
 # Name of the Distro to build (full name, without special characters)
   DISTRONAME="EmuELEC"
@@ -330,6 +330,7 @@ puae \
 px68k \
 reminiscence \
 sameboy \
+sameduck \
 scummvm \
 snes9x \
 snes9x2002 \
@@ -359,6 +360,7 @@ snes9x2005 \
 yabause"
 
 LIBRETRO_S922X_CORES="mesen \
+mame \
 mesen-s \
 quicknes \
 virtualjaguar"
