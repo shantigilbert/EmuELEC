@@ -1,12 +1,9 @@
---- a/configure	2016-10-19 00:05:10.219995829 +0200
-+++ b/configure	2016-10-19 00:06:41.154100063 +0200
-@@ -12945,44 +12945,10 @@
- 
-         if test x$have_x = xyes; then
-             CFLAGS="$CFLAGS $X_CFLAGS"
--            SYS_GL_LIBS="$X_LIBS -lGL"
--        else
--            SYS_GL_LIBS="-lGL"
+--- a/configure		2023-09-23 21:31:10.041141600 +0200
++++ b/configure		2023-09-23 21:32:57.917914080 +0200
+@@ -19383,48 +19383,10 @@
+             SYS_GL_LIBS="$X_LIBS -lGL"
+         else
+             SYS_GL_LIBS="-lGL"
 +            SYS_GL_LIBS="$X_LIBS -lGL -DHAVE_OPENGL"
          fi
          ;;
@@ -14,6 +11,8 @@
 -{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for OpenGL support" >&5
 -$as_echo_n "checking for OpenGL support... " >&6; }
 -have_opengl=no
+-save_LIBS="$LIBS"
+-LIBS="$LIBS $SYS_GL_LIBS"
 -cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 -/* end confdefs.h.  */
 -
@@ -23,26 +22,31 @@
 -main ()
 -{
 -
-- GLuint texture;
+- glOrtho( -2.0, 2.0, -2.0, 2.0, -20.0, 20.0 );
 -
 -  ;
 -  return 0;
 -}
 -_ACEOF
--if ac_fn_c_try_compile "$LINENO"; then :
--
--have_opengl=yes
--
+-if ac_fn_c_try_link "$LINENO"; then :
+-  have_opengl=yes
 -fi
--rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+-rm -f core conftest.err conftest.$ac_objext \
+-    conftest$ac_exeext conftest.$ac_ext
 -{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_opengl" >&5
 -$as_echo "$have_opengl" >&6; }
+-LIBS="$save_LIBS"
 -if test x$have_opengl = xyes; then
 -    CFLAGS="$CFLAGS -DHAVE_OPENGL"
 -    GL_LIBS="$SYS_GL_LIBS"
 -else
 -    GL_LIBS=""
 -fi
+-
+-
+-
+-
+-
  
- 
- 
+ # Finally create all the generated files
+ ac_config_files="$ac_config_files Makefile SDL2_ttf.spec SDL2_ttf.pc"
