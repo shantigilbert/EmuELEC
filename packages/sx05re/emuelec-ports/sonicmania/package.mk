@@ -2,35 +2,23 @@
 # Copyright (C) 2022-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="sonicmania"
-PKG_VERSION="4ef543749a29f17ce904217140c8bbff6eea3e77"
+PKG_VERSION="634eb0ab9cded555a364cafd01f645157ccbbfd0"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/Rubberduckycooly/Sonic-Mania-Decompilation"
 PKG_URL="$PKG_SITE.git"
-PKG_DEPENDS_TARGET="toolchain SDL2"
+PKG_DEPENDS_TARGET="toolchain SDL2 portaudio"
 PKG_SHORTDESC="Sonic Mania Decompilation"
-PKG_TOOLCHAIN="make"
-PKG_BUILD_FLAGS="-gold"
+PKG_TOOLCHAIN="cmake"
 
 pre_configure_target() {
-PKG_MAKE_OPTS_TARGET=" STATIC=0 DEBUG=0"
-cd ${PKG_BUILD}
-
-# There is a space on the Makefile that will result in an error *** missing separator. Stop
-sed -i "s| 	\$(STRIP) \$@|	\$(STRIP) \$@|" ${PKG_BUILD}/Makefile
-}
-
-make_target(){
-cd ${PKG_BUILD}/dependencies/RSDKv5
-make PLATFORM=Linux SUBSYSTEM=SDL2
-
-cd ${PKG_BUILD}
-make ${PKG_MAKE_OPTS_TARGET}
+PKG_CMAKE_OPTS_TARGET="-DRETRO_SUBSYSTEM=SDL2"
 }
 
 makeinstall_target() {
 mkdir -p $INSTALL/usr/bin/sonic_mania
-cp dependencies/RSDKv5/bin/Linux/SDL2/RSDKv5 $INSTALL/usr/bin/sonicmania
-cp dependencies/RSDKv5/bin/Linux/SDL2/Game.so $INSTALL/usr/bin/sonic_mania/Game.so
+echo "$PKG_BUILD"
+cp $PKG_BUILD/.${TARGET_NAME}/dependencies/RSDKv5/RSDKv5U $INSTALL/usr/bin/sonicmania
+cp $PKG_BUILD/.${TARGET_NAME}/dependencies/RSDKv5/libGame.so $INSTALL/usr/bin/sonic_mania/Game.so
 
 mkdir -p $INSTALL/usr/config/emuelec/configs/sonicmania
 cp $PKG_DIR/config/* $INSTALL/usr/config/emuelec/configs/sonicmania
