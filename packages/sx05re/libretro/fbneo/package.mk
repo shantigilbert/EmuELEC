@@ -2,7 +2,7 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="fbneo"
-PKG_VERSION="1b1c67c29d3c9e8e50272da24d9e327d85d82066"
+PKG_VERSION="9e22c4c7ac42d5f1e5ffacdecb26acae60c663eb"
 PKG_SHA256="743fc94c76712b3f055658a4200a4c19120c82b6f89b15623cf1f0f16ec25986"
 PKG_REV="1"
 PKG_ARCH="any"
