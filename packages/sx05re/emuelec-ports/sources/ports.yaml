@@ -118,7 +118,35 @@ Heart of Darkness:
   audio: "alsa"
   commands:
     - ${PORT} --datapath=/storage/roms/ports/hode/ --savepath=/storage/roms/ports/hode/ >> $EE_LOG 2>&1
- 
+
+Fallout:
+  description: Fallout A Post Nuclear Role Playing Game In a mid-22nd century post-apocalyptic and retro-futuristic world, decades after a global nuclear war between the United States and China, the Vault Dweller, inhabits the underground nuclear shelter Vault 13.
+  rating: 0.9
+  release_date: 19971007T000000
+  developer: Interplay Productions
+  publisher: Interplay Productions
+
+  init_port: true
+  port_exe: "fallout-ce"
+  audio: "alsa"
+  commands:
+    - cd /storage/roms/ports/falloutce1
+    - falloutce1.sh >> $EE_LOG 2>&1
+
+Fallout 2:
+  description: Fallout 2 is a sequel to Fallout, featuring similar graphics and game mechanics. The game story takes place in 2241, 80 years after the events of Fallout and 164 years after the atomic war which reduced the vast majority of the world to a nuclear wasteland. The player assumes the role of The Chosen One, the grandchild of the first game protagonist, and undertakes a quest to save their small village on the West Coast of the United States.
+  rating: 0.9
+  release_date: 19980930T000000
+  developer: Black Isle Studios
+  publisher: Interplay Productions
+
+  init_port: true
+  port_exe: "fallout2-ce"
+  audio: "alsa"
+  commands:
+    - cd /storage/roms/ports/falloutce2
+    - falloutce2.sh >> $EE_LOG 2>&1
+
 Mr. Boom:
   description: Mr. Boom is an up to 8 player Bomberman clone. The goal of the game is to bomb away your enemies and other players.
   rating: 0.8

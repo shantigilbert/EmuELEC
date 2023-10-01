@@ -18,21 +18,10 @@ PLAYER="${2}"
 
 case ${PLAYER} in
 	"ffplay")
-MODE=`cat /sys/class/display/mode`;	
-	case "$MODE" in
-		480*)
-			SIZE=" -x 800 -y 480"
-		;;
-		576*)
-			SIZE=" -x 768 -y 576"
-		;;
-		720*)
-			SIZE=" -x 1280 -y 720"
-		;;
-		*)
-			SIZE=" -x 1920 -y 1080"
-		;;
-	esac
+MODE=`get_resolution`;
+declare -a RES=( $MODE )
+SIZE=" -x ${RES[0]} -y ${RES[1]}"
+
 	player="ffplay -fs -autoexit -loglevel warning -hide_banner ${SIZE}"
 	;;
 	"vlc")

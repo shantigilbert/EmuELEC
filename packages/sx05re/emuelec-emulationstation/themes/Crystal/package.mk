@@ -2,7 +2,7 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="Crystal"
-PKG_VERSION="a18103de15b5537ea6d59e83af5530c2f0dc8bb8"
+PKG_VERSION="43f80b3972f98cb67a61713d9cd83255dec0ee97"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
