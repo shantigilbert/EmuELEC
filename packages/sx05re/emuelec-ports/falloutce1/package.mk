@@ -2,7 +2,7 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="falloutce1"
-PKG_VERSION="6be823cf7c614a693aca3ab6a4a8aa1df2537793"
+PKG_VERSION="1db15fe6b5d65cbf7aaa3e5f543e3291b6eb547d"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/alexbatalov/fallout1-ce"
