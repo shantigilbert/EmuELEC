@@ -28,7 +28,7 @@ switch_resolution()
   case $MODE in
     480cvbs|576cvbs|480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*|*x*)
       echo null > "${FILE_MODE}"
-      sleep 0.5
+      sleep 1
       echo $MODE > "${FILE_MODE}"
   esac
 	NEW_MODE=$( cat ${FILE_MODE} )
