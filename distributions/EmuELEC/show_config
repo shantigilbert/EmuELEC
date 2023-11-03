@@ -1,0 +1,42 @@
+show_distro_config() {
+  # Hardware decoder support
+
+  config_message+="\n\n Kodi Hardware configuration:"
+  config_message+="\n $dashes$dashes"
+
+  config_message+="\n - Video Acceleration provider:\t\t $KODIPLAYER_DRIVER"
+
+  # Input device configuration
+
+  config_message+="\n - Remote support:\t\t\t $REMOTE_SUPPORT"
+  config_message+="\n - CEC Adapter support:\t\t\t $CEC_SUPPORT"
+  config_message+="\n - CEC Framework support:\t\t $CEC_FRAMEWORK_SUPPORT"
+  config_message+="\n - Kodi Joystick support:\t\t $JOYSTICK_SUPPORT"
+
+  # Kodi configuration
+
+  config_message+="\n\n Kodi Software configuration:"
+  config_message+="\n $dashes$dashes"
+
+  config_message+="\n - Kodi Blu-ray support:\t\t $KODI_BLURAY_SUPPORT"
+  if [ "$KODI_BLURAY_SUPPORT" = "yes" ] ; then
+    config_message+="\n   - Blu-ray BD+ support:\t\t $BLURAY_BDPLUS_SUPPORT"
+    config_message+="\n   - Blu-ray AACS support:\t\t $BLURAY_AACS_SUPPORT"
+  fi
+  config_message+="\n - Kodi DVDCSS support:\t\t\t $KODI_DVDCSS_SUPPORT"
+  config_message+="\n - Kodi Airplay support:\t\t $KODI_AIRPLAY_SUPPORT"
+  config_message+="\n - Kodi Airtunes support:\t\t $KODI_AIRTUNES_SUPPORT"
+  config_message+="\n - Kodi NFS support:\t\t\t $KODI_NFS_SUPPORT"
+  config_message+="\n - Kodi MySQL support:\t\t\t $KODI_MYSQL_SUPPORT"
+  config_message+="\n - Kodi Optical Drive support:\t\t $KODI_OPTICAL_SUPPORT"
+  config_message+="\n - Kodi SAMBA client support:\t\t $KODI_SAMBA_SUPPORT"
+  config_message+="\n - Kodi UPNP support:\t\t\t $KODI_UPNP_SUPPORT"
+  config_message+="\n - Kodi Webserver support:\t\t $KODI_WEBSERVER_SUPPORT"
+
+  for config_skin in $SKINS; do
+    config_message+="\n - Include Skin:\t\t\t $config_skin"
+  done
+
+  config_message+="\n - Default Skin:\t\t\t $SKIN_DEFAULT"
+  config_message+="\n - Include extra fonts:\t\t\t $KODI_EXTRA_FONTS"
+}
