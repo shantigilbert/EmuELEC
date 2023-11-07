@@ -15,7 +15,7 @@ PKG_PATCH_DIRS+=" $(get_pkg_directory libmodplug)/patches"
 PKG_LONGDESC="libmodplug renders mod music files as raw audio data, for playing or conversion."
 PKG_BUILD_FLAGS="lib32 +pic"
 
-PKG_CONFIGURE_OPTS_TARGET="--enable-static --disable-shared"
+PKG_CONFIGURE_OPTS_TARGET="--enable-static --enable-shared"
 
 unpack() {
   ${SCRIPTS}/get libmodplug
