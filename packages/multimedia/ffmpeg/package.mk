@@ -8,7 +8,7 @@ PKG_SHA256="eadbad9e9ab30b25f5520fbfde99fae4a92a1ae3c0257a8d68569a4651e30e02"
 PKG_LICENSE="GPL-3.0-only"
 PKG_SITE="https://ffmpeg.org"
 PKG_URL="http://ffmpeg.org/releases/ffmpeg-${PKG_VERSION}.tar.xz"
-PKG_DEPENDS_TARGET="toolchain zlib bzip2 openssl speex SDL2 lame x264"
+PKG_DEPENDS_TARGET="toolchain zlib bzip2 openssl speex SDL2 lame x264 libtheora"
 PKG_LONGDESC="FFmpeg is a complete, cross-platform solution to record, convert and stream audio and video."
 PKG_PATCH_DIRS="kodi libreelec"
 
@@ -193,6 +193,7 @@ fi
               --disable-hardcoded-tables \
               --enable-encoder=ac3 \
               --enable-encoder=libmp3lame \
+              --enable-encoder=libtheora \
               --enable-encoder=aac \
               --enable-encoder=wmav2 \
               --enable-encoder=mjpeg \
@@ -226,7 +227,7 @@ fi
               --disable-librtmp \
               ${PKG_FFMPEG_AV1} \
               --enable-libspeex \
-              --disable-libtheora \
+              --enable-libtheora \
               --disable-libvo-amrwbenc \
               --disable-libvorbis \
               --disable-libvpx \
