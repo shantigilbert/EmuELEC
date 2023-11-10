@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="retroarch-assets"
-PKG_VERSION="7b735ef18bcc6508b1c9a626eb237779ff787179"
-PKG_SHA256="1049bd7750aeadffcefcf3bd03c6a2488b477867af87bc593a51182e530f5a9a"
+PKG_VERSION="df019d548b0a890ac224862ce83129c02c4d7c32"
+PKG_SHA256="12ef13fc08eb681d9695ba3f0c82dec93570955c6ccdc2ed0e14603108011e32"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/libretro/retroarch-assets"
 PKG_URL="https://github.com/libretro/retroarch-assets/archive/$PKG_VERSION.tar.gz"
