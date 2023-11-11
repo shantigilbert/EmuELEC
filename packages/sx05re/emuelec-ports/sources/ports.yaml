@@ -567,3 +567,32 @@ TMNTSR:
   commands:
     - /usr/bin/show_splash.sh gameloading "ports" "tmntsr"
     - tmntsr.sh >> $EE_LOG 2>&1
+
+Celeste Classic:
+  description: "Celeste Classic"
+  rating: 1.0
+  release_date: 2016
+  developer: Extremely OK Games, Ltd., Maddy Makes Games
+  publisher: Maddy Makes Games Inc.
+
+  init_port: true
+  port_exe: "ccleste"
+  audio: "alsa"
+  commands:
+    - /usr/bin/show_splash.sh gameloading "ports" "ccleste"
+    - cd /emuelec/configs/ccleste
+    - ${PORT} >> $EE_LOG 2>&1
+
+Celeste:
+  description: "Celeste Itch.io"
+  rating: 1.0
+  release_date: 2018
+  developer: Extremely OK Games, Ltd., Maddy Makes Games
+  publisher: Maddy Makes Games Inc.
+
+  init_port: true
+  port_exe: "mono"
+  audio: "alsa"
+  commands:
+    - /usr/bin/show_splash.sh gameloading "ports" "celeste"
+    - celeste.sh >> $EE_LOG 2>&1
