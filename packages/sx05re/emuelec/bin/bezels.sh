@@ -29,6 +29,7 @@ case ${PLATFORM} in
   if [ -f "/storage/.config/bezels_enabled" ]; then
   clear_bezel
   sed -i '/input_overlay = "/d' ${RACONFIG}
+  sed -i '/input_overlay_enable = "/d' ${RACONFIG}
   rm "/storage/.config/bezels_enabled"
   fi
    exit 0
@@ -66,6 +67,7 @@ clear_bezel() {
 		sed -i '/custom_viewport_y = "/d' ${RACONFIG}
 		sed -i '/video_scale_integer = "/d' ${RACONFIG}
 		sed -i '/input_overlay_opacity = "/d' ${RACONFIG}
+        sed -i '/input_overlay_enable = "/d' ${RACONFIG}
 		echo "video_scale_integer = \"${DEFAULT_SCALE}\"" >> ${RACONFIG}
 		echo "aspect_ratio_index = \"${DEFAULT_RATIO}\"" >> ${RACONFIG}
 		echo 'input_overlay_opacity = "0.150000"' >> ${RACONFIG}
@@ -88,6 +90,7 @@ set_bezel() {
 		sed -i "5i custom_viewport_x = \"${3}\"" ${RACONFIG}
 		sed -i "6i custom_viewport_y = \"${4}\"" ${RACONFIG}
 		sed -i "7i video_scale_integer = \"${5}\"" ${RACONFIG}
+        sed -i "8i input_overlay_enable = \"true\"" ${RACONFIG}
 }
 
 check_overlay_dir() {
