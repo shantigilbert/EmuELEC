@@ -2,7 +2,7 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="falloutce2"
-PKG_VERSION="91806d8ccb4215c9df3bf626112d4f101fba6e6b"
+PKG_VERSION="f411d75643211dce56772ff54c7a21494b6a1d9f"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/alexbatalov/fallout2-ce"
