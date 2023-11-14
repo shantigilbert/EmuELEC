@@ -7,8 +7,8 @@ PKG_SHA256="7a6ba86a478648ce617e3a5e9277181bc67f7ce9876605eea6affd4a0d6eea8f"
 PKG_LICENSE="GPLv3"
 PKG_SITE="http://www.libsdl.org/projects/SDL_mixer/release"
 PKG_URL="$PKG_SITE/$PKG_NAME-$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain alsa-lib SDL2 mpg123-compat libvorbis libvorbisidec libogg opusfile libmodplug flac fluidsynth"
-PKG_LONGDESC="SDL2 mixer"
+PKG_DEPENDS_TARGET="toolchain alsa-lib SDL2 mpg123-compat libvorbis libvorbisidec libogg opusfile libmodplug flac"
+PKG_LONGDESC="SDL2 mixer 2.6.3"
 PKG_DEPENDS_HOST="toolchain:host SDL2:host"
 
 pre_configure_host() {
