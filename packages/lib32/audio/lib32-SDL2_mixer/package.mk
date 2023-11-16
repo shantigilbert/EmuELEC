@@ -4,6 +4,7 @@
 
 PKG_NAME="lib32-SDL2_mixer"
 PKG_VERSION="2.0.4"
+PKG_SHA256="b4cf5a382c061cd75081cf246c2aa2f9df8db04bdda8dcdc6b6cca55bede2419"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPLv3"
 PKG_SITE="http://www.libsdl.org/projects/SDL_mixer/release"
