@@ -20,7 +20,8 @@ PKG_CMAKE_OPTS_TARGET="-DLIBRETRO=ON \
                         -DUSE_OPENMP=OFF \ 
                         -DCMAKE_BUILD_TYPE=Release \
                         -DUSE_GLES2=OFF \
-                        -DUSE_GLES=ON"
+                        -DUSE_GLES=ON \
+                        -DUSE_VULKAN=OFF"
 
 unpack() {
   ${SCRIPTS}/get flycast
