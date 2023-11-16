@@ -2,13 +2,13 @@
 # Copyright (C) 2019-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="SDL2_mixer"
-PKG_VERSION="2.6.3"
-PKG_SHA256="7a6ba86a478648ce617e3a5e9277181bc67f7ce9876605eea6affd4a0d6eea8f"
+PKG_VERSION="d79638a1b6ff6563a82b57732ce05ca27cc54338"
+PKG_GIT_CLONE_BRANCH="SDL2"
 PKG_LICENSE="GPLv3"
-PKG_SITE="http://www.libsdl.org/projects/SDL_mixer/release"
-PKG_URL="$PKG_SITE/$PKG_NAME-$PKG_VERSION.tar.gz"
+PKG_SITE="https://github.com/libsdl-org/SDL_mixer"
+PKG_URL="$PKG_SITE.git"
 PKG_DEPENDS_TARGET="toolchain alsa-lib SDL2 mpg123-compat libvorbis libvorbisidec libogg opusfile libmodplug flac"
-PKG_LONGDESC="SDL2 mixer 2.6.3"
+PKG_LONGDESC="An audio mixer that supports various file formats for Simple Directmedia Layer. "
 PKG_DEPENDS_HOST="toolchain:host SDL2:host"
 
 pre_configure_host() {
@@ -35,4 +35,3 @@ PKG_CMAKE_OPTS_TARGET="-DSDL2MIXER_MIDI_FLUIDSYNTH=OFF \
                        -DSDL2MIXER_MOD_XMP=OFF \
                        -DSDL2MIXER_WAVPACK=OFF"
 }
-
