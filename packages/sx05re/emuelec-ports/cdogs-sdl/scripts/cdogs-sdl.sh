@@ -6,8 +6,8 @@
 # Source predefined functions and variables
 . /etc/profile
 
-DATAFILE="C-Dogs.SDL-1.0.0-Linux.tar.gz"
-DATA="https://github.com/cxong/cdogs-sdl/releases/download/1.0.0/${DATAFILE}"
+DATAFILE="C-Dogs.SDL-1.5.0-Linux.tar.gz"
+DATA="https://github.com/cxong/cdogs-sdl/releases/download/1.5.0/${DATAFILE}"
 CONFIGFOLDER="/storage/roms/ports/cdogs-sdl"
 PORTNAME="Cdogs-sdl"
 FLAGS=""
@@ -29,8 +29,8 @@ if [ ! -e "${CONFIGFOLDER}/data/ammo.json" ]; then
             wget "${DATA}" -q --show-progress > /dev/tty0 2>&1
             echo "Installing ${PORTNAME} data, please wait..." > /dev/tty0
             tar -xvf "${DATAFILE}" -C "${CONFIGFOLDER}" > /dev/tty0
-            mv C-Dogs.SDL-1.0.0-Linux/* "${CONFIGFOLDER}"
-            rm -rf C-Dogs.SDL-1.0.0-Linux bin share > /dev/tty0 2>&1
+            mv C-Dogs.SDL-1.5.0-Linux/* "${CONFIGFOLDER}"
+            rm -rf C-Dogs.SDL-1.5.0-Linux bin share > /dev/tty0 2>&1
             rm "${DATAFILE}" > /dev/tty0 2>&1
             echo "Starting ${PORTNAME} for the first time, please wait..." > /dev/tty0
             ee_console disable
