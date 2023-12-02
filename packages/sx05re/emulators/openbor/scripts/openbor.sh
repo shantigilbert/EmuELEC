@@ -5,6 +5,9 @@
 
 # OpenBOR only works with Pak files, if you have an extracted game you will need to create a pak first.
 
+OB=${2}
+[[ -z ${OB} ]] && OB=OpenBOR
+
 pakname=$(basename "$1")
 pakname="${pakname%.*}"
 
@@ -21,7 +24,11 @@ SAVES="${CONFIGDIR}/Saves"
 
 # only create symlink to master.cfg if its the first time running the pak
 	if [ ! -f "${SAVES}/${pakname}.cfg" ]; then
-		ln -sf "${CONFIGDIR}/master.cfg" "${SAVES}/${pakname}.cfg"
+        if [ ${OB} = "OpenBORff" ]; then
+            ln -sf "${CONFIGDIR}/masterff.cfg" "${SAVES}/${pakname}.cfg"
+        else
+            ln -sf "${CONFIGDIR}/master.cfg" "${SAVES}/${pakname}.cfg"
+        fi
 	fi
 
 # We start the fake keyboard
@@ -29,7 +36,7 @@ gptokeyb openbor &
 
 # Run OpenBOR in the config folder
     cd "${CONFIGDIR}"
-	SDL_AUDIODRIVER=alsa OpenBOR
+	SDL_AUDIODRIVER=alsa ${OB}
 
 # Clear PAKS folder to avoid getting the launcher on nex run
 rm -rf ${PAKS}/*
