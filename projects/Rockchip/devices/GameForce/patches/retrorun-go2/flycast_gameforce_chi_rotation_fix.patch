@@ -1,0 +1,15 @@
+diff --git a/src/video.cpp b/src/video.cpp
+index d168eda..4ea5733 100755
+--- a/src/video.cpp
++++ b/src/video.cpp
+@@ -762,8 +762,8 @@ void core_video_refresh(const void *data, unsigned width, unsigned height, size_
+         printf("-RR- Color format:%s\n", color_format == DRM_FORMAT_RGBA5551 ? "DRM_FORMAT_RGBA5551" : "NOT DRM_FORMAT_RGBA5551");
+ 
+         real_aspect_ratio = aspect_ratio;
+-        _351BlitRotation = isTate ? GO2_ROTATION_DEGREES_270 : GO2_ROTATION_DEGREES_0;
+-        _351Rotation = isTate ? GO2_ROTATION_DEGREES_180 : GO2_ROTATION_DEGREES_270;
++        _351BlitRotation = GO2_ROTATION_DEGREES_0;
++        _351Rotation = GO2_ROTATION_DEGREES_270;
+         first_video_refresh = false;
+     }
+     if (height != currentHeight || width != currentWidth)
