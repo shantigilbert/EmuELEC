@@ -225,7 +225,7 @@ fi
 # Now that the primary buffer has been acquired we blank it again because the new
 # memory allocated, may contain garbage artifact data.
 COUNT_ARGS=${#CUSTOM_OFFSETS[@]}
-if [[ "$MODE" == *"cvbs" ]]; then
+if [[ -z "${OFFSET_SETTING}" ]] && [[ "$MODE" == *"cvbs" ]]; then
   if [[ "$COUNT_ARGS" == "0" ]]; then
     [[ "$MODE" == "480cvbs" ]] && CUSTOM_OFFSETS="30 10 669 469"
     [[ "$MODE" == "576cvbs" ]] && CUSTOM_OFFSETS="35 20 680 565"
