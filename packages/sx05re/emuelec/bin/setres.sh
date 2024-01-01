@@ -228,7 +228,7 @@ COUNT_ARGS=${#CUSTOM_OFFSETS[@]}
 if [[ "$MODE" == *"cvbs" ]]; then
   if [[ "$COUNT_ARGS" == "0" ]]; then
     [[ "$MODE" == "480cvbs" ]] && CUSTOM_OFFSETS="30 10 669 469"
-    [[ "$MODE" == "576cvbs" ]] && CUSTOM_OFFSETS="5 13"
+    [[ "$MODE" == "576cvbs" ]] && CUSTOM_OFFSETS="35 20 680 565"
   fi
 fi
 
