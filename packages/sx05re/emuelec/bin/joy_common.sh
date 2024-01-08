@@ -41,9 +41,6 @@ jc_get_players() {
     local JSI=$dev
     local DETAILS=$(cat /tmp/input_devices | grep -P "H\: Handlers(?=.*?[= ]${JSI} )" -B 5)
 
-    local JOY_NAME=$(echo "${DETAILS}" | grep -E "^N\: Name.*[\= ]?.*$" | cut -d "=" -f 2 | tr -d '"' | tr -s '[:space:]')
-    [[ -z "$JOY_NAME" ]] && continue
-
     local PROC_GUID=$(echo "${DETAILS}" | grep I: | sed "s|I:\ Bus=||" | sed "s|\ Vendor=||" | sed "s|\ Product=||" | sed "s|\ Version=||")
     local DEVICE_GUID=$(jc_generate_guid $((PLAYER-1)))
     [[ -z "${DEVICE_GUID}" ]] && continue
@@ -52,6 +49,8 @@ jc_get_players() {
     echo "GC_CONFIG=$GC_CONFIG"
     [[ -z $GC_CONFIG ]] && continue
 
+    local JOY_NAME=$(echo "${DETAILS}" | grep -E "^N\: Name.*[\= ]?.*$" | cut -d "=" -f 2 | tr -d '"')
+    [[ -z "$JOY_NAME" ]] && continue
 
     # Add the joy config to array if guid and joyname set.
     if [[ ! -z "${DEVICE_GUID}" && ! -z "$JOY_NAME" ]]; then
