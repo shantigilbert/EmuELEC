@@ -9,9 +9,10 @@ name=${name%.*}
 config="/storage/.config/emuelec/configs/hypseus"
 configfile="${config}/hypinput.ini"
 
-if [[ ! -f "$configfile" ]]; then
-    cp "/usr/config/emuelec/configs/hypseus/hypinput.ini" "$configfile"
+if [[ ! -f "${config}/ee_updated" ]]; then
+    cp "/usr/config/emuelec/configs/hypseus/hypinput_gamepad.ini" "$configfile"
 fi
+touch "${config}/ee_updated"
 
 if [[ -f "${dir}/${name}.commands" ]]; then
     params=$(<"${dir}/${name}.commands")
