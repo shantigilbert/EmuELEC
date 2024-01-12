@@ -2,7 +2,7 @@
 # Copyright (C) 2022-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="fake_08"
-PKG_VERSION="49f4eb1bd465639d36ef6657e038da892399c7d9"
+PKG_VERSION="d52e9ba89ca25e70b94cf8872aad7931f4184e5f"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/jtothebell/fake-08"
 PKG_URL="${PKG_SITE}.git"

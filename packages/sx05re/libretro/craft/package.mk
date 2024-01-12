@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="craft"
-PKG_VERSION="fce88570e83003b24cce34085928c890adae141d"
-PKG_SHA256="b60f482e2d93fd10a14b3dec2b11246290d44113c7ac0bc7cc878e97593e6876"
+PKG_VERSION="34c1341caa094ff4fe4f06e8ceb6ec316062b1fa"
+PKG_SHA256="02e21345732e2e883921590e07329fac0eb68c2397abc8a58aaf64d427d4a4aa"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
