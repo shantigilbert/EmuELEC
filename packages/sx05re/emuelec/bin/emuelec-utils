@@ -6,6 +6,11 @@
 # Source predefined functions and variables
 . /etc/profile
 
+function test() {
+    echo "success"
+    exit 1
+}
+
 function error() {
     text_viewer /emuelec/logs/emuelec.log -w -t "Error! ${2}" -f 24
 	show_splash.sh exit
@@ -186,6 +191,27 @@ IP="$(ifconfig wlan0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')"
  fi
 }
 
+function dimensions() {
+
+	DIMENSIONS=()
+
+	local FILEPATH="/emuelec/configs/dimensions.conf"
+
+	[[ ! -f "$FILEPATH" ]] && cp /usr/config/emuelec/configs/dimensions.conf /emuelec/configs
+
+  # Screen supported dimensions
+  SCREEN_DIMENSIONS=`/usr/bin/cat "$FILEPATH"`
+  for SD in $SCREEN_DIMENSIONS
+  do
+    DIMENSIONS+=($SD)
+  done
+
+  DIMENSIONS=($(printf "%s\n" "${DIMENSIONS[@]}" | sort -u))
+
+	IFS=","
+	echo "${DIMENSIONS[*]}"
+}
+
 function resolutions() {
 
 	RESOLUTIONS=()
@@ -225,12 +251,24 @@ function resolutions() {
   fi
 
   if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
-    RESOLUTIONS+="480x320p60hz"
+    RESOLUTIONS+=("480x320p60hz")
   fi
 
-  if [ "$EE_DEVICE" == "GameForce" ]; then
-    RESOLUTIONS+="640x480p60hz"
-  fi
+	[[ ! ${RESOLUTIONS[@]} == *"640x480p60hz"* ]] && RESOLUTIONS+=("640x480p60hz")
+	[[ ! ${RESOLUTIONS[@]} == *"480i60hz"* ]] && RESOLUTIONS+=("480i60hz")
+
+	local FILEPATH="/emuelec/configs/resolutions_amlogic.conf"
+	if [[ "$DEVICE" == "Rockchip" ]]; then
+		FILEPATH="/emuelec/configs/resolutions_rockchip.conf"
+	fi
+
+	if [[ -f "$FILEPATH" ]]; then
+	  SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat '$FILEPATH'`
+	  for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
+	  do
+	    RESOLUTIONS+=($SSR)
+	  done
+	fi
 
   RESOLUTIONS=($(printf "%s\n" "${RESOLUTIONS[@]}" | sort -u))
 

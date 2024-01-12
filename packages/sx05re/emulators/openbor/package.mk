@@ -2,12 +2,12 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="openbor"
-PKG_VERSION="7f6f17507078848be625e6d1c1b4f41823151387"
-PKG_SHA256="a3bae331f8862a4c589b64e1d3c28751dd7b3d570252b5fa369671b52e506447"
+PKG_VERSION="b2111a911ae64045803ed6f6371c9fccfbea9693"
+PKG_SHA256="2aa948c1193e35bf4d85ff9862b02ef7fedbc39df2157138fd21061ff4ec22b1"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/DCurrent/openbor"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain SDL2 libogg libvorbisidec libvpx libpng"
+PKG_DEPENDS_TARGET="toolchain SDL2 libogg libvorbisidec libvpx libpng openborff"
 PKG_SHORTDESC="OpenBOR is the ultimate 2D side scrolling engine for beat em' ups, shooters, and more! "
 PKG_LONGDESC="OpenBOR is the ultimate 2D side scrolling engine for beat em' ups, shooters, and more! "
 PKG_TOOLCHAIN="make"

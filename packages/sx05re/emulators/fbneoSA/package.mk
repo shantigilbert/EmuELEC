@@ -2,7 +2,7 @@
 # Copyright (C) 2022-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="fbneoSA"
-PKG_VERSION="fc8faa9cf92071c1e3e55b6b55898d7d9111bf3f"
+PKG_VERSION="f473d375a526c832e582bec119854f6730dd7795"
 PKG_ARCH="aarch64"
 PKG_LICENSE="Custom"
 PKG_SITE="https://github.com/finalburnneo/FBNeo"
@@ -12,7 +12,7 @@ PKG_LONGDESC="https://github.com/finalburnneo/FBNeo/blob/master/src/license.txt"
 GET_HANDLER_SUPPORT="git"
 PKG_TOOLCHAIN="make"
 
-PKG_MAKE_OPTS_TARGET=" sdl2 RELEASEBUILD=1 FORCE_SYSTEM_LIBPNG=1"
+PKG_MAKE_OPTS_TARGET=" sdl2 RELEASEBUILD=1"
 
 pre_configure_target() {
 sed -i "s|\`sdl2-config|\`${SYSROOT_PREFIX}/usr/bin/sdl2-config|g" makefile.sdl2

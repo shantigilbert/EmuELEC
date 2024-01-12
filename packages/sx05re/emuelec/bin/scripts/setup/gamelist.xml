@@ -1,13 +1,22 @@
 <?xml version="1.0"?>
 <gameList>
 	<game>
+		<path>./install_portmaster.sh</path>
+		<name>Install PortMaster</name>
+		<desc>Install latest PortMaster</desc>
+		<developer>shantigilbert</developer>
+		<publisher>Emuelec</publisher>
+		<genre>script</genre>
+		<image>./setup_images/portmaster.png</image>
+	</game>
+	<game>
 		<path>./file_manager.sh</path>
 		<name>File Manager</name>
 		<desc>MC File Manager. NO keyboard required</desc>
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/File Manager.png</image>
+		<image>./setup_images/File Manager.png</image>
 	</game>
 	<game>
 		<path>./wifi.sh</path>
@@ -16,7 +25,7 @@
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/wifi.png</image>
+		<image>./setup_images/wifi.png</image>
 	</game>
 	<game>
 		<path>./install_drastic.sh</path>
@@ -25,7 +34,7 @@
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/drastic.png</image>
+		<image>./setup_images/drastic.png</image>
 	</game>
 	<game>
 		<path>./install_pixelcade.sh</path>
@@ -34,7 +43,7 @@
 		<developer>pixelcade</developer>
 		<publisher>pixelcade.org</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/pixelcade.png</image>
+		<image>./setup_images/pixelcade.png</image>
 	</game>
 	<game>
 		<path>./sselphs_scraper.sh</path>
@@ -43,7 +52,7 @@
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/help.png</image>
+		<image>./setup_images/help.png</image>
 	</game>
 	<game>
 		<path>./skyscraper.sh</path>
@@ -52,7 +61,7 @@
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/sh.png</image>
+		<image>./setup_images/sh.png</image>
 	</game>
 	<game>
 		<path>./send_logs.sh</path>
@@ -61,7 +70,7 @@
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/logs.png</image>
+		<image>./setup_images/logs.png</image>
 	</game>
 	<game>
 		<path>./system_info.sh</path>
@@ -70,7 +79,7 @@
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/info.png</image>
+		<image>./setup_images/info.png</image>
 	</game>
 	<game>
 		<path>./copy_usb_roms_to_device.sh</path>
@@ -79,7 +88,7 @@
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/usb.png</image>
+		<image>./setup_images/usb.png</image>
 	</game>
 	<game>
 		<path>./show_last_emuelec.log.sh</path>
@@ -88,7 +97,7 @@
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/last.png</image>
+		<image>./setup_images/last.png</image>
 	</game>
 	<game>
 		<path>./launch_terminal_(kb).sh</path>
@@ -97,7 +106,7 @@
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/terminal.png</image>
+		<image>./setup_images/terminal.png</image>
 	</game>
 	<game>
 		<path>./youtube_search.sh</path>
@@ -106,7 +115,7 @@
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/youtube.png</image>
+		<image>./setup_images/youtube.png</image>
 	</game>
 	<game>
 		<path>./scan_scummVM_games.sh</path>
@@ -115,6 +124,6 @@
 		<developer>shantigilbert </developer>
 		<publisher>Emuelec</publisher>
 		<genre>script</genre>
-		<image>./downloaded_images/scummvm.png</image>
+		<image>./setup_images/scummvm.png</image>
 	</game>
 </gameList>

@@ -37,6 +37,10 @@ PKG_AUTORECONF="no"
 PKG_BUILD_FLAGS="-lto"
 PKG_TOOLCHAIN="make"
 
+pre_make_target() {
+  git submodule update --init
+}
+
 make_target() {
   if [ "$ARCH" = "aarch64" ]; then 
     make -C libretro target=arm64 WITH_EMBEDDED_SDL=0 WITH_FAKE_SDL=1

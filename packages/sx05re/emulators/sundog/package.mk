@@ -2,8 +2,8 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="sundog"
-PKG_VERSION="dd9ea5de8648c26d218b152746bf66109ca611bf"
-PKG_SHA256="1ac9d7c1b01c9013a23219e3b79cbbb29e38b6a148e6e72e6a247c64cef65d20"
+PKG_VERSION="64d854dde3fc5df250a9c108c92ec697847ba8af"
+PKG_SHA256="8be3593de48d07701f67d505b1ccf7db4613fd17eade186fa3c6fd8049367622"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/laanwj/sundog"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"

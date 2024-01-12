@@ -2,7 +2,7 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="picodrivesa"
-PKG_VERSION="9ec3b5ac0e3f5d47bd967db7a2743949d278850c"
+PKG_VERSION="ca980e1b0a60cc459f96fbf36e6ee837d25d2c9e"
 PKG_REV="1"
 PKG_LICENSE="GPL2"
 PKG_SITE="https://github.com/irixxxx/picodrive"

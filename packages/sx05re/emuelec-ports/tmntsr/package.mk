@@ -7,7 +7,7 @@ PKG_ARCH="any"
 PKG_LICENSE="GPL2"
 PKG_SITE=""
 PKG_URL=""
-PKG_DEPENDS_TARGET="toolchain"
+PKG_DEPENDS_TARGET="toolchain progressor"
 PKG_SHORTDESC="Script file to run teenage mutant ninja turtles shredder's revenge"
 PKG_TOOLCHAIN="manual"
 

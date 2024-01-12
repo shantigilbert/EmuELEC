@@ -17,8 +17,8 @@
 ################################################################################
 
 PKG_NAME="mame2015"
-PKG_VERSION="2599c8aeaf84f62fe16ea00daa460a19298c121c"
-PKG_SHA256="8f9a295f5d280130101c473e9754ec68ccbf45a1c1fe72d3405183ee6270b50d"
+PKG_VERSION="316cd06349f2b34b4719f04f7c0d07569a74c764"
+PKG_SHA256="45c5bda01876545c5a2b39ec700baab43c34ce38ab710e14abe14aae3b33afc4"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"

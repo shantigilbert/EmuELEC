@@ -1,0 +1,96 @@
+From 5d057e7b6b350e2faa75c041d0081fb2963e980d Mon Sep 17 00:00:00 2001
+From: 5schatten <supervisedthinking@gmail.com>
+Date: Sat, 12 Oct 2019 19:24:14 +0200
+Subject: [PATCH] engine/Makefile: updated platform
+
+---
+ engine/Makefile | 48 +++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 47 insertions(+), 1 deletion(-)
+
+diff --git a/engine/Makefile b/engine/Makefile
+index 8b0f9a65..6e8198e0 100644
+--- a/engine/Makefile
++++ b/engine/Makefile
+@@ -95,6 +95,31 @@
+ BUILD_DEBUG     = 1
+ endif
+ endif
++
++ifdef BUILD_LINUX_aarch64
++TARGET 	        = $(VERSION_NAME).elf
++TARGET_FINAL    = $(VERSION_NAME)
++TARGET_PLATFORM = LINUX
++BUILD_LINUX     = 1
++BUILD_SDL       = 1
++BUILD_GFX       = 1
++BUILD_PTHREAD   = 1
++BUILD_SDL_IO    = 1
++BUILD_VORBIS    = 1
++BUILD_WEBM      = 1
++BUILDING        = 1
++INCLUDES        = $(SDKPATH)/usr/include \
++                  $(SDKPATH)/usr/include/SDL2
++OBJTYPE         = elf
++LIBRARIES       = $(SDKPATH)/usr/lib
++# Workaround for GCC 9
++CFLAGS          += -Wno-error=address -Wno-error=format-overflow -Wno-error=stringop-truncation -Wno-error=implicit-function-declaration -Wno-error=unused-variable -Wno-error=unused-label
++
++ifeq ($(BUILD_LINUX_aarch64), 0)
++BUILD_DEBUG     = 1
++endif
++endif
++
+ 
+ ifdef BUILD_DARWIN
+ TARGET          = $(VERSION_NAME).elf
+@@ -208,7 +233,7 @@
+ STRIP 	        = strip$(EXTENSION) $(TARGET) -o $(TARGET_FINAL)
+ endif
+ ifdef BUILD_LINUX
+-STRIP 	        = strip $(TARGET) -o $(TARGET_FINAL)
++STRIP 	        = cp $(TARGET) $(TARGET_FINAL)
+ endif
+ ifdef BUILD_DARWIN
+ STRIP           = $(PREFIX)strip $(TARGET) -o $(TARGET_FINAL)
+
+--- a/engine/openbor.h
++++ b/engine/openbor.h
+@@ -1902,7 +1902,7 @@
+     struct animlist *next;
+ };
+ typedef struct animlist s_anim_list;
+-s_anim_list *anim_list;
++extern s_anim_list *anim_list;
+ 
+ typedef struct
+ {
+@@ -2248,7 +2248,7 @@
+     int clearcount;
+     int selectcol;
+ } s_modelcache;
+-s_modelcache *model_cache;
++extern s_modelcache *model_cache;
+ 
+ // Caskey, Damon V.
+ // 2013-12-08
+--- a/engine/openbor.c
++++ b/engine/openbor.c
+@@ -45,6 +45,9 @@
+ //when there are more entities than this, those with lower priority will be erased
+ int spawnoverride = 999999;
+ int maxentities = 999999;
++
++s_modelcache *model_cache;
++s_anim_list *anim_list;
+ 
+ int	global_model = -1;
+ #define global_model_scripts ((global_model>=0 && model_cache[global_model].model)?model_cache[global_model].model->scripts:NULL)
+@@ -2424,7 +2427,7 @@
+     savedata.logo = 0;
+     savedata.uselog = 1;
+     savedata.debuginfo = 0;
+-    savedata.fullscreen = 0;
++    savedata.fullscreen = 1;
+     #ifdef RASPBERRY
+     savedata.fullscreen = 1;
+     #endif

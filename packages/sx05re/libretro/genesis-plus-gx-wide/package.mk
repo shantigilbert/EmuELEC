@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="genesis-plus-gx-wide"
-PKG_VERSION="a68a3398634816be0704566a14ea2f4ce1e2a585"
-PKG_SHA256="74f3a3b2879fdb33259de06dda0aeb6b370576e9c9ce5af75664eb838e85fdb9"
+PKG_VERSION="d5531ca58d628a2ba6f791804aa01e2fb2cb0e13"
+PKG_SHA256="6071f49037ed3123cbc5895c3e6a98e13c26123ca2193e7d35378b399ee26fb0"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Non-commercial"

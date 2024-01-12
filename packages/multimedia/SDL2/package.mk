@@ -4,15 +4,15 @@
 # Copyright (C) 2022-present 7Ji (https://github.com/7Ji)
 
 PKG_NAME="SDL2"
-PKG_VERSION="2.28.2"
-PKG_SHA256="64b1102fa22093515b02ef33dd8739dee1ba57e9dbba6a092942b8bbed1a1c5e"
+PKG_VERSION="2.28.5"
+PKG_SHA256="332cb37d0be20cb9541739c61f79bae5a477427d79ae85e352089afdaf6666e4"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.libsdl.org/"
 PKG_URL="https://www.libsdl.org/release/SDL2-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain alsa-lib systemd dbus ${OPENGLES} pulseaudio"
 PKG_LONGDESC="Simple DirectMedia Layer is a cross-platform development library designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware."
 PKG_DEPENDS_HOST="toolchain:host distutilscross:host"
-PKG_CMAKE_OPTS_HOST="-DSDL_MALI=OFF -DSDL_KMSDRM=OFF"
+PKG_CMAKE_OPTS_HOST="-DSDL_MALI=OFF -DSDL_KMSDRM=OFF -DSDL_X11=OFF"
 
 PKG_CMAKE_OPTS_TARGET="-DSDL_STATIC=OFF \
                        -DSDL_LIBC=ON \

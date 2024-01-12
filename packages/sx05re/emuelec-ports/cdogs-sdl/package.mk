@@ -2,12 +2,12 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="cdogs-sdl"
-PKG_VERSION="80e64fb16e9e0533196a7c02ec3cf23f388a09cc"
+PKG_VERSION="d64c961d03f6c9bd6a4ee8c77f43ffd345e4dbd2"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/cxong/cdogs-sdl"
 PKG_URL="$PKG_SITE.git"
 PKG_DEPENDS_TARGET="toolchain SDL2 python3-protobuf:host"
-PKG_SHORTDESC="Classic overhead run-and-gun game "
+PKG_SHORTDESC="Classic overhead run-and-gun game"
 PKG_TOOLCHAIN="cmake-make"
 
 pre_configure_target() {

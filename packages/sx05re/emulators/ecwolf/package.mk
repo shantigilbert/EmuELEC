@@ -2,7 +2,7 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="ecwolf"
-PKG_VERSION="3ce6e4d064b54eec72386fe949ec7be20746c16c"
+PKG_VERSION="601d5b2a0f12b7491205d311ca462c3fcf6ada21"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://bitbucket.org/ecwolf/ecwolf"
 PKG_URL="$PKG_SITE.git"

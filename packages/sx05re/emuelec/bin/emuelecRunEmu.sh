@@ -84,6 +84,7 @@ GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 SET_DISPLAY_SH="setres.sh"
 VIDEO="$(cat /sys/class/display/mode)"
 VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
+[[ -z "$VIDEO_EMU" ]] && VIDEO_EMU=$VIDEO
 
 if [[ "${CORE}" == *"_32b"* ]]; then
     BIT32="yes"
@@ -165,8 +166,8 @@ case ${PLATFORM} in
 		fi
 		;;
 	"openbor")
-		set_kill_keys "OpenBOR"
-		RUNTHIS='${TBASH} openbor.sh "${ROMNAME}"'
+		set_kill_keys "${EMU}"
+		RUNTHIS='${TBASH} openbor.sh "${ROMNAME}" "${EMU}"'
 		;;
 	"setup")
         if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then 

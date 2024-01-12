@@ -14,6 +14,9 @@
 # Source predefined functions and variables
 . /etc/profile
 
+FILE_MODE="/sys/class/display/mode"
+PLATFORM=""
+
 switch_resolution()
 {
   local MODE=$1
@@ -25,7 +28,7 @@ switch_resolution()
   case $MODE in
     480cvbs|576cvbs|480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*|*x*)
       echo null > "${FILE_MODE}"
-      sleep 0.5
+      sleep 1
       echo $MODE > "${FILE_MODE}"
   esac
 	NEW_MODE=$( cat ${FILE_MODE} )
@@ -106,33 +109,32 @@ set_fb_borders() {
 	fi
 }
 
+
+
 # Here we initialize any arguments and variables to be used in the script.
 # The Mode we want the display to change too.
-MODE=$1
-PLATFORM=$2
-EMU_MODE="ee_es"
-[[ ! -z $PLATFORM ]] && EMU_MODE="ee_emu"
+
+MODE=$( cat ${FILE_MODE} )
+BPP=32
+
+ES_MODE=""
+
+if [[ $# == 1 ]]; then
+	MODE=$1
+	ES_MODE="ee_es."
+fi
+
+if [[ $# == 2 ]]; then
+	MODE=$1
+	PLATFORM=$2
+fi
 
 FBW=0
 FBH=0
 
-FILE_MODE="/sys/class/display/mode"
-
 # Here we first clear the primary display buffer of leftover artifacts then set
 # the secondary small buffers flag to stop copying across.
 blank_buffer >> /dev/null
-
-# Safeguard to prevent blank mode being set.
-[[ -z "$MODE" ]] && exit 0
-
-# If the display file mode is NOT present, or the video mode supplied is set to
-# auto then just exit.
-if [[ ! -f "$FILE_MODE" ]] || [[ $MODE == "auto" ]]; then
-  exit 0
-fi
-
-# SH=Height in pixels, SW=Width in pixels, BPP=Bits Per Pixel.
-BPP=32
 
 # The current display mode before it may get changed below.
 OLD_MODE=$( cat ${FILE_MODE} )
@@ -164,7 +166,7 @@ if [[ "$MODE" == *"cvbs" ]]; then
   fi
 fi
 
-CUSTOM_RES=$(get_ee_setting ${EMU_MODE}.framebuffer.${MODE} ${PLATFORM})
+CUSTOM_RES=$(get_ee_setting ${ES_MODE}framebuffer.${MODE} ${PLATFORM})
 #[[ -z "$CUSTOM_RES" ]] && CUSTOM_RES=$(get_ee_setting ee_framebuffer.${MODE})
 if [[ ! -z "${CUSTOM_RES}" ]]; then
   declare -a RES=($(echo "${CUSTOM_RES}"))
@@ -175,7 +177,7 @@ if [[ ! -z "${CUSTOM_RES}" ]]; then
 fi
 
 
-[[ $MODE != "auto" ]] && switch_resolution $MODE
+[[ $OLD_MODE != $MODE ]] && switch_resolution $MODE
 MODE=$( cat ${FILE_MODE} )
 
 
@@ -185,7 +187,6 @@ FBW=${SIZE[0]}
 FBH=${SIZE[1]}
 PSW=${SIZE[2]}
 PSH=${SIZE[3]}
-
 
 if [[ "${EE_DEVICE}" == "Amlogic" ]]; then
   FBW=1920
@@ -216,7 +217,7 @@ if [[ -f "/storage/.config/${MODE}_offsets" ]]; then
   CUSTOM_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
 fi
 
-OFFSET_SETTING="$(get_ee_setting ${EMU_MODE}.framebuffer_border.${MODE} ${PLATFORM})"
+OFFSET_SETTING="$(get_ee_setting ${ES_MODE}framebuffer_border.${MODE} ${PLATFORM})"
 #[[ -z "${OFFSET_SETTING}" ]] && OFFSET_SETTING="$(get_ee_setting ${MODE}.ee_offsets)"
 if [[ ! -z "${OFFSET_SETTING}" ]]; then
   CUSTOM_OFFSETS=( ${OFFSET_SETTING} )
@@ -225,10 +226,10 @@ fi
 # Now that the primary buffer has been acquired we blank it again because the new
 # memory allocated, may contain garbage artifact data.
 COUNT_ARGS=${#CUSTOM_OFFSETS[@]}
-if [[ "$MODE" == *"cvbs" ]]; then
+if [[ -z "${OFFSET_SETTING}" ]] && [[ "$MODE" == *"cvbs" ]]; then
   if [[ "$COUNT_ARGS" == "0" ]]; then
-    [[ "$MODE" == "480cvbs" ]] && CUSTOM_OFFSETS="5 13"
-    [[ "$MODE" == "576cvbs" ]] && CUSTOM_OFFSETS="5 13"
+    [[ "$MODE" == "480cvbs" ]] && CUSTOM_OFFSETS="30 10 669 469"
+    [[ "$MODE" == "576cvbs" ]] && CUSTOM_OFFSETS="35 20 680 565"
   fi
 fi
 
