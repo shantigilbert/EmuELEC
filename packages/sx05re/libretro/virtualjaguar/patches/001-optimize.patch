@@ -1,0 +1,60 @@
+diff --git a/src/blitter.c b/src/blitter.c
+index 12f8398..02ee24b 100644
+--- a/src/blitter.c
++++ b/src/blitter.c
+@@ -980,6 +980,8 @@ uint8_t BlitterReadByte(uint32_t offset, uint32_t who/*=UNKNOWN*/)
+ {
+ 	offset &= 0xFF;
+ 
++	if (offset <= 0x3B)
++	{
+ 	// status register
+ //This isn't cycle accurate--how to fix? !!! FIX !!!
+ //Probably have to do some multi-threaded implementation or at least a reentrant safe implementation...
+@@ -1003,6 +1005,7 @@ uint8_t BlitterReadByte(uint32_t offset, uint32_t who/*=UNKNOWN*/)
+ 	if (offset >= 0x2C && offset <= 0x2F)
+ 		return blitter_ram[offset + 0x04];		// A2_PIXEL ($F02230) read at $F0222C
+ 
++	}
+ 	return blitter_ram[offset];
+ }
+ 
+diff --git a/src/dac.c b/src/dac.c
+index 4b5bc7b..f105602 100644
+--- a/src/dac.c
++++ b/src/dac.c
+@@ -107,7 +107,7 @@ void DSPSampleCallback(void)
+       return;
+    }
+ 
+-   SetCallbackTime(DSPSampleCallback, 1000000.0 / (double)DAC_AUDIO_RATE, EVENT_JERRY);
++   SetCallbackTime(DSPSampleCallback, (1000000.0 / (double)DAC_AUDIO_RATE)*2, EVENT_JERRY);
+ }
+ 
+ // Approach: Run the DSP for however many cycles needed to correspond to whatever sample rate
+@@ -157,7 +157,7 @@ void SoundCallback(void * userdata, uint16_t * buffer, int length)
+    numberOfSamples = length;
+    bufferDone      = false;
+ 
+-   SetCallbackTime(DSPSampleCallback, 1000000.0 / (double)DAC_AUDIO_RATE, EVENT_JERRY);
++   SetCallbackTime(DSPSampleCallback, (1000000.0 / (double)DAC_AUDIO_RATE)*2, EVENT_JERRY);
+ 
+    // These timings are tied to NTSC, need to fix that in event.cpp/h! [FIXED]
+    do
+diff --git a/src/event.h b/src/event.h
+index 1d01c3d..d6b42f6 100644
+--- a/src/event.h
++++ b/src/event.h
+@@ -14,10 +14,10 @@ extern "C" {
+ enum { EVENT_MAIN, EVENT_JERRY };
+ 
+ //NTSC Timings...
+-#define RISC_CYCLE_IN_USEC			0.03760684198
++#define RISC_CYCLE_IN_USEC			0.03760684198 * 2
+ #define M68K_CYCLE_IN_USEC			(RISC_CYCLE_IN_USEC * 2)
+ //PAL Timings
+-#define RISC_CYCLE_PAL_IN_USEC		0.03760260812
++#define RISC_CYCLE_PAL_IN_USEC		0.03760260812 * 2
+ #define M68K_CYCLE_PAL_IN_USEC		(RISC_CYCLE_PAL_IN_USEC * 2)
+ 
+ #define HORIZ_PERIOD_IN_USEC_NTSC	63.555555555
