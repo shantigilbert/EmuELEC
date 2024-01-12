@@ -24,6 +24,7 @@ ln -fs /usr/share/daphne/pics $INSTALL/usr/config/emuelec/configs/hypseus/pics
 }
 
 post_makeinstall_target() {
-cp -rf $PKG_BUILD/doc/hypinput_gamepad.ini $INSTALL/usr/config/emuelec/configs/hypseus/hypinput.ini
+cp -rf $PKG_BUILD/doc/hypinput.ini $INSTALL/usr/config/emuelec/configs/hypseus/hypinput.ini
+cp -rf $PKG_BUILD/doc/hypinput_gamepad.ini $INSTALL/usr/config/emuelec/configs/hypseus/hypinput_gamepad.ini
 ln -fs /storage/.config/emuelec/configs/hypseus/hypinput.ini $INSTALL/usr/share/daphne/hypinput.ini
 }
