@@ -9,6 +9,10 @@ name=${name%.*}
 config="/storage/.config/emuelec/configs/hypseus"
 configfile="${config}/hypinput.ini"
 
+if [[ ! -f "$configfile" ]]; then
+    cp "/usr/config/emuelec/configs/hypseus/hypinput.ini" "$configfile"
+fi
+
 if [[ -f "${dir}/${name}.commands" ]]; then
     params=$(<"${dir}/${name}.commands")
 fi
