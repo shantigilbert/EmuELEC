@@ -4,6 +4,8 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 # Copyright (C) 2022-present Joshua L (https://github.com/Langerz82)
 
+# 08/01/23 - Joshua L - Fixed a couple of issues.
+
 # Source predefined functions and variables
 . /etc/profile
 
@@ -40,10 +42,10 @@ declare -A ADVMAME_VALUES=(
   ["b15"]="button16"
   ["b16"]="button17"
   ["b17"]="button18"
-  ["h0.1"]="stick$BTN_H0,y,up"
-  ["h0.4"]="stick$BTN_H0,y,down"
-  ["h0.8"]="stick$BTN_H0,x,left"
-  ["h0.2"]="stick$BTN_H0,x,right"  
+  ["h0.1"]="stick${BTN_H0},y,up"
+  ["h0.4"]="stick${BTN_H0},y,down"
+  ["h0.8"]="stick${BTN_H0},x,left"
+  ["h0.2"]="stick${BTN_H0},x,right"
   ["a0,1"]="stick,y,up"
   ["a0,2"]="stick,y,down"
   ["a1,1"]="stick,x,left"
@@ -51,7 +53,7 @@ declare -A ADVMAME_VALUES=(
   ["a2,1"]="1,0,0"
   ["a2,2"]="1,0,1"
   ["a5,1"]="2,1,0"
-  ["a5,2"]="2,1,1"  
+  ["a5,2"]="2,1,1"
 )
 
 declare GC_ORDER=(
@@ -110,22 +112,24 @@ set_pad(){
     | sed "s|(||" | sed "s|)||" | sed -e 's/[^A-Za-z0-9._-]/ /g' | sed 's/[[:blank:]]*$//' \
     | sed 's/-//' | sed -e 's/[^A-Za-z0-9._-]/_/g' |tr '[:upper:]' '[:lower:]' | tr -d '.')"
 
-  if [[ "${P_INDEX}" -gt "0" ]]; then
-    BTN_H0=$(advj | grep -B 1 -E "^joy 0 .*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
-    if [[ ! -z "$BTN_H0" ]]; then
-      ADVMAME_VALUES["h0.1"]="stick${BTN_H0},y,up"
-      ADVMAME_VALUES["h0.4"]="stick${BTN_H0},y,down"
-      ADVMAME_VALUES["h0.8"]="stick${BTN_H0},x,left"
-      ADVMAME_VALUES["h0.2"]="stick${BTN_H0},x,right"
-    fi
-  fi
+  BTN_H0=$(advj | grep -B 1 -E "^joy [0-9] '$GAMEPAD' .*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
+  ADVMAME_VALUES["h0.1"]="stick${BTN_H0},y,up"
+  ADVMAME_VALUES["h0.4"]="stick${BTN_H0},y,down"
+  ADVMAME_VALUES["h0.8"]="stick${BTN_H0},x,left"
+  ADVMAME_VALUES["h0.2"]="stick${BTN_H0},x,right"
 
-  if [[ -f "/storage/.config/JP_ADVMAME_INVERT_AXIS" ]]; then
-    ADVMAME_VALUES["a1,1"]="stick,y,up"
-    ADVMAME_VALUES["a1,2"]="stick,y,down"
-    ADVMAME_VALUES["a0,1"]="stick,x,left"
-    ADVMAME_VALUES["a0,2"]="stick,x,right"
-  fi
+  ADVMAME_VALUES["a0,1"]="stick,y,up"
+  ADVMAME_VALUES["a0,2"]="stick,y,down"
+  ADVMAME_VALUES["a1,1"]="stick,x,left"
+  ADVMAME_VALUES["a1,2"]="stick,x,right"
+
+local INVERT_AXIS=$(get_ee_setting "advmame_invert_axis")
+  if [[ INVERT_AXIS == 1 ]]; then
+      ADVMAME_VALUES["a1,1"]="stick,y,up"
+      ADVMAME_VALUES["a1,2"]="stick,y,down"
+      ADVMAME_VALUES["a0,1"]="stick,x,left"
+      ADVMAME_VALUES["a0,2"]="stick,x,right"
+    fi
 
   local NAME_NUM="${GC_NAMES[$GAMEPAD]}"
   if [[ -z "NAME_NUM" ]]; then
@@ -134,6 +138,7 @@ set_pad(){
     GC_NAMES[$GAMEPAD]=$(( NAME_NUM+1 ))
   fi
 	[[ "${GC_NAMES[$GAMEPAD]}" -gt "1" ]] && GAMEPAD="${GAMEPAD}_${GC_NAMES[$GAMEPAD]}"
+#  GAMEPAD=0
 
   local GC_MAP=$(echo $GC_CONFIG | cut -d',' -f3-)
 
@@ -172,22 +177,22 @@ set_pad(){
         dpup|dpdown|dpleft|dpright)
           [[ ! -z "$DIR" ]] && DIR+=" or "
     		  if [[ "$BTN_TYPE" == "a" ]]; then
-    			local direction
-    			case $GC_INDEX in
-    				dpleft|dpup)
-    					direction=1
-    					;;
-    				dpright|dpdown)
-    					direction=2
-    					;;
-    			esac
-    			VAL="${ADVMAME_VALUES[${TVAL},${direction}]}"
-    			DIR+="joystick_digital[${GAMEPAD},${VAL}]"
-    			DIRS["$I"]="$DIR"
+      			local direction
+      			case $GC_INDEX in
+      				dpleft|dpup)
+      					direction=1
+      					;;
+      				dpright|dpdown)
+      					direction=2
+      					;;
+      			esac
+      			VAL="${ADVMAME_VALUES[${TVAL},${direction}]}"
+      			DIR+="joystick_digital[${GAMEPAD},${VAL}]"
+      			DIRS["$I"]="$DIR"
     		  else
-    			[[ "$BTN_TYPE" == "b" ]] && DIR+="joystick_button[${GAMEPAD},${VAL}]"
-    			[[ "$BTN_TYPE" == "h" ]] && DIR+="joystick_digital[${GAMEPAD},${VAL}]"
-    			DIRS["$I"]="$DIR"
+      			[[ "$BTN_TYPE" == "b" ]] && DIR+="joystick_button[${GAMEPAD},${VAL}]"
+      			[[ "$BTN_TYPE" == "h" ]] && DIR+="joystick_digital[${GAMEPAD},${VAL}]"
+      			DIRS["$I"]="$DIR"
     		  fi
           ;;
         leftx|lefty)
@@ -214,7 +219,7 @@ set_pad(){
     local button="${GC_ORDER[$bi]}"
     [[ -z "$button" ]] && continue
     button="${GC_ASSOC[$button]}"
-    
+
     local BTN_TYPE="${button:0:1}"
     if [[ "$BTN_TYPE" == "a" ]]; then
       local STR="input_map[p${1}_button${i}]"
@@ -249,12 +254,16 @@ set_pad(){
       echo "input_map[ui_select] keyboard[0,enter] or keyboard[1,enter] or joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
     fi
 
+    local record="input_map[ui_cancel] keyboard[0,backspace] or keyboard[1,backspace]"
     button="${GC_ASSOC[leftstick]}"
-    VAL="${ADVMAME_VALUES[$button]}"
-    if [ ! -z "$VAL" ]; then
-      echo "input_map[ui_cancel] keyboard[0,backspace] or keyboard[1,backspace] or joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
+    if [[ ! -z "$button" ]]; then
+      VAL="${ADVMAME_VALUES[$button]}"
+      if [ ! -z "$VAL" ]; then
+        record="${record} or joystick_button[${GAMEPAD},${VAL}]"
+      fi
     fi
-    
+    echo "${record}"  >> ${CONFIG}
+
     VAL=""
     button="${GC_ASSOC[rightstick]}"
     if [[ ! -z "$button" ]]; then
@@ -263,11 +272,12 @@ set_pad(){
       button="${GC_ASSOC[guide]}"
       VAL="${ADVMAME_VALUES[$button]}"
     fi
-    
-    echo -n "input_map[ui_configure] keyboard[1,tab] or keyboard[0,tab]" >> ${CONFIG}
+
+    record="input_map[ui_configure] keyboard[1,tab] or keyboard[0,tab]"
     if [ ! -z "$VAL" ]; then
-      echo " or joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
-    fi  
+      record="${record} or joystick_button[${GAMEPAD},${VAL}]"
+    fi
+    echo "${record}" >> ${CONFIG}
   fi
 }
 
