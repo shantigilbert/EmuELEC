@@ -123,16 +123,13 @@ set_pad(){
   ADVMAME_VALUES["a1,1"]="stick,x,left"
   ADVMAME_VALUES["a1,2"]="stick,x,right"
 
-  local INVERT_FILE="/storage/.config/JP_ADVMAME_INVERT_AXIS"
-  if [[ -f "$INVERT_FILE" ]]; then
-    local invert_contents="$(cat $INVERT_FILE)"
-    if [[ -z "$invert_contents" ]] || [[ "$invert_contents" = *"${1}"* ]]; then
+local INVERT_AXIS=$(get_ee_setting "advmame_invert_axis")
+  if [[ INVERT_AXIS == 1 ]]; then
       ADVMAME_VALUES["a1,1"]="stick,y,up"
       ADVMAME_VALUES["a1,2"]="stick,y,down"
       ADVMAME_VALUES["a0,1"]="stick,x,left"
       ADVMAME_VALUES["a0,2"]="stick,x,right"
     fi
-  fi
 
   local NAME_NUM="${GC_NAMES[$GAMEPAD]}"
   if [[ -z "NAME_NUM" ]]; then
