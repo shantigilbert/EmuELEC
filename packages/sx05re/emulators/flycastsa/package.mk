@@ -2,7 +2,7 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="flycastsa"
-PKG_VERSION="ab25cc73a95d34e0a7a57fe3a071ad4ba78e771c"
+PKG_VERSION="552e5b7d7a24ec4e5c64007b54f0d5cc4a2a1b78"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/flyinghead/flycast"
 PKG_URL="$PKG_SITE.git"
@@ -15,6 +15,11 @@ PKG_GIT_CLONE_BRANCH="master"
 if [ "${ARCH}" == "arm" ]; then
 	PKG_PATCH_DIRS="arm"
 fi
+
+pre_make_target() {
+  git submodule update --init
+}
+
 pre_configure_target() {
 export CXXFLAGS="${CXXFLAGS} -Wno-error=array-bounds"
 PKG_CMAKE_OPTS_TARGET+="-DUSE_GLES=ON -DUSE_VULKAN=OFF -DUSE_HOST_SDL=ON"

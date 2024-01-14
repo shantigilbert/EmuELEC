@@ -2,8 +2,8 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="mame2003-xtreme"
-PKG_VERSION="11026b59f290f57352dbdf69c8b9689951891882"
-PKG_SHA256="4da2b1fe847e1da33a50b9d93250eadcb38998753e16d0cf57dfce06d9025e12"
+PKG_VERSION="ca7712a5488b27ab7fdec1c51a17a8edf21f9f23"
+PKG_SHA256="8dc70c46c423d52e08c9fd34ca44f6d2d410b1935a4c288aae7f417297b57f98"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MAME"

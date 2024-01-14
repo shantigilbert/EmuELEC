@@ -4,6 +4,8 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 # Copyright (C) 2022-present Joshua L (https://github.com/Langerz82)
 
+# 08/01/23 - Joshua L - Modified get GUID thanks to shantigilbert.
+
 # Source predefined functions and variables
 . /etc/profile
 
@@ -40,7 +42,7 @@ jc_get_players() {
     local DETAILS=$(cat /tmp/input_devices | grep -P "H\: Handlers(?=.*?[= ]${JSI} )" -B 5)
 
     local PROC_GUID=$(echo "${DETAILS}" | grep I: | sed "s|I:\ Bus=||" | sed "s|\ Vendor=||" | sed "s|\ Product=||" | sed "s|\ Version=||")
-    local DEVICE_GUID=$(jc_generate_guid ${PROC_GUID})
+    local DEVICE_GUID=$(jc_generate_guid $((PLAYER-1)))
     [[ -z "${DEVICE_GUID}" ]] && continue
 
     local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep "platform:Linux" | head -1)
@@ -118,18 +120,6 @@ jc_get_players() {
 }
 
 jc_generate_guid() {
-  local GUID_STRING="$1"
-
-  local p1=${GUID_STRING::4}
-  local p2=${GUID_STRING:4:4}
-  local p3=${GUID_STRING:8:4}
-  local p4=${GUID_STRING:12:4}
-
-  local v=$(echo ${p1:6:2}${p1:4:2}${p1:2:2}${p1:0:2})0000
-        v+=$(echo ${p2:6:2}${p2:4:2}${p2:2:2}${p2:0:2})0000
-        v+=$(echo ${p3:6:2}${p3:4:2}${p3:2:2}${p3:0:2})0000
-        v+=$(echo ${p4:6:2}${p4:4:2}${p4:2:2}${p4:0:2})0000
-
-  echo "$v"
+  local GUID_INDEX=$1
+  echo $(sdljoytest -skip_loop | grep "Joystick $GUID_INDEX Guid" | cut -d' ' -f 4)
 }
-

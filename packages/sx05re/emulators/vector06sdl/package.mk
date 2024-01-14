@@ -2,8 +2,8 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="vector06sdl"
-PKG_VERSION="feadc1f42d3a08bed8bc4d80003c40225d040147"
-PKG_SHA256="3358f60bb4ce25851236af9a90cdf7467a319b3cb17dc4c64623f1abfbec5f1e"
+PKG_VERSION="5cbd54023df430446e283cb874cac36d71359d73"
+PKG_SHA256="553b018d9a45dc7fb7558583ddf7db12481c29b8ed00a56b22ef41df165ff65a"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/svofski/vector06sdl"
 PKG_URL="${PKG_SITE}/archive/$PKG_VERSION.tar.gz"
