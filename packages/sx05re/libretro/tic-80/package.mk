@@ -16,7 +16,8 @@ PKG_CMAKE_OPTS_TARGET="-DBUILD_LIBRETRO=ON \
                        -DBUILD_SOKOL=OFF \
                        -DBUILD_SDL=ON \
                        -DBUILD_WITH_MRUBY=OFF \
-                       -DCMAKE_BUILD_TYPE=Release"
+                       -DCMAKE_BUILD_TYPE=Release \
+                       -DBUILD_WITH_JANET=Off"
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro

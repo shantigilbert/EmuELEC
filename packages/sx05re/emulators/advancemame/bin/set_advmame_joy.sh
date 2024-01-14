@@ -124,7 +124,7 @@ set_pad(){
   ADVMAME_VALUES["a1,2"]="stick,x,right"
 
 local INVERT_AXIS=$(get_ee_setting "advmame_invert_axis")
-  if [[ INVERT_AXIS == 1 ]]; then
+  if [[ ${INVERT_AXIS} == 1 ]]; then
       ADVMAME_VALUES["a1,1"]="stick,y,up"
       ADVMAME_VALUES["a1,2"]="stick,y,down"
       ADVMAME_VALUES["a0,1"]="stick,x,left"

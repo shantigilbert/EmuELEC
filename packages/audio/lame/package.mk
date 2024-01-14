@@ -12,8 +12,8 @@ PKG_LONGDESC="A high quality MPEG Audio Layer III (MP3) encoder."
 PKG_BUILD_FLAGS="-parallel +pic"
 
 # package specific configure options
-PKG_CONFIGURE_OPTS_TARGET="--enable-static \
-                           --disable-shared \
+PKG_CONFIGURE_OPTS_TARGET="--disable-static \
+                           --enable-shared \
                            --disable-nasm \
                            --disable-rpath \
                            --disable-cpml \

@@ -10,10 +10,10 @@ PKG_DEPENDS_TARGET="toolchain SDL2 SDL2_image SDL2_mixer"
 PKG_SHORTDESC="A fan-made multiplayer Super Mario Bros. style deathmatch game "
 PKG_TOOLCHAIN="cmake"
 
-PKG_CMAKE_OPTS_TARGET=" -DUSE_PNG_SAVE=ON"
+PKG_CMAKE_OPTS_TARGET=" -DUSE_PNG_SAVE=ON -DSDL2_FORCE_GLES=ON"
 
 makeinstall_target() {
 mkdir -p $INSTALL/usr/bin
-cp $PKG_BUILD/.${TARGET_NAME}/Binaries/Release/* $INSTALL/usr/bin
-cp $PKG_DIR/scripts/* $INSTALL/usr/bin
+cp ${PKG_BUILD}/.${TARGET_NAME}/smw* $INSTALL/usr/bin
+cp ${PKG_DIR}/scripts/* $INSTALL/usr/bin
 } 
