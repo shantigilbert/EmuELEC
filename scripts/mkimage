@@ -332,12 +332,12 @@ fi
 
 # gzip
 echo "image: compressing..."
-pigz --best --force "${DISK}"
+#pigz --best --force "${DISK}"
 
 # create sha256 checksum of image
 (
   cd "${TARGET_IMG}"
-  sha256sum "${DISK##*/}.gz" > "${DISK##*/}.gz.sha256"
+  #sha256sum "${DISK##*/}.gz" > "${DISK##*/}.gz.sha256"
 )
 
 # cleanup
