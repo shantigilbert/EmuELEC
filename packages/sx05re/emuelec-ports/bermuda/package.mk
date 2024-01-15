@@ -9,7 +9,7 @@ PKG_ARCH="any"
 PKG_LICENSE="Unspecified"
 PKG_SITE="https://github.com/cyxx/bermuda"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain SDL2"
+PKG_DEPENDS_TARGET="toolchain SDL2 SDL2_mixer SDL2_image"
 PKG_LONGDESC="Bermuda Syndrome engine reimplementation (Emscripten, libretro, SDL) "
 PKG_TOOLCHAIN="make"
 
