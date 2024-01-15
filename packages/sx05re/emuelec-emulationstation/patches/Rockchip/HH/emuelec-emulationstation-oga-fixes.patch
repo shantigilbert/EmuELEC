@@ -34,7 +34,7 @@
  	const std::string rom = Utils::FileSystem::getEscapedPath(getPath());
 --- a/es-core/src/InputManager.cpp
 +++ b/es-core/src/InputManager.cpp
-@@ -298,16 +298,6 @@
+@@ -587,15 +587,6 @@
  		if (ev.key.repeat)
  			return false;
  
@@ -42,16 +42,15 @@
 -		/* use the POWER KEY to turn off EmuELEC, specially useful for GTKING-PRO and Odroid Go Advance*/
 -        if(ev.key.keysym.sym == SDLK_POWER) {
 -			Scripting::fireEvent("quit", "shutdown");
--			quitES(QuitMode::SHUTDOWN);
+-			Utils::Platform::quitES(Utils::Platform::QuitMode::SHUTDOWN);
 -			/*LOG(LogError) << "no quit?";*/
 -			return false;
 -		}
 -#endif
--
+ 
  #if !WIN32
  		if (ev.key.keysym.sym == SDLK_F4)
- 		{
-@@ -318,11 +308,11 @@
+@@ -607,11 +598,11 @@
  		}
  #endif
  

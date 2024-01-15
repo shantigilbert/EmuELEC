@@ -13,7 +13,7 @@ PKG_DEPENDS_TARGET="toolchain SDL2 harfbuzz"
 PKG_LONGDESC="SuperTuxKart is a free kart racing game. It focuses on fun and not on realistic kart physics. Instructions can be found on the in-game help page."
 
 pre_configure_target() {
-PKG_CMAKE_OPTS_TARGET+=" -DBUILD_RECORDER=0 -DUSE_WIIUSE=OFF -DCHECK_ASSETS=off -DCMAKE_BUILD_TYPE=Release"
+PKG_CMAKE_OPTS_TARGET+=" -DNO_SHADERC=on -DBUILD_RECORDER=0 -DUSE_WIIUSE=OFF -DCHECK_ASSETS=off -DCMAKE_BUILD_TYPE=Release"
 }
 
 makeinstall_target() {

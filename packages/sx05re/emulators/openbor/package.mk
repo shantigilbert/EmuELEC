@@ -33,6 +33,7 @@ pre_configure_target() {
 
 pre_make_target() {
 cd $PKG_BUILD/engine
+chmod +x ./version.sh
 ./version.sh
 }
 
