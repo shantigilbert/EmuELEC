@@ -2,7 +2,7 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="emuelec-emulationstation"
-PKG_VERSION="9c2070552d8636e766abe28d0184ea36d852d34e"
+PKG_VERSION="602d96f953ccce0f7d32d066956f30cd6f3ffac9"
 PKG_GIT_CLONE_BRANCH="EmuELEC"
 PKG_REV="1"
 PKG_ARCH="any"
@@ -15,6 +15,15 @@ PKG_NEED_UNPACK="$(get_pkg_directory busybox) $(get_pkg_directory bash)"
 PKG_SHORTDESC="Emulationstation emulator frontend"
 PKG_BUILD_FLAGS="-gold"
 GET_HANDLER_SUPPORT="git"
+
+
+if [[ ${DEVICE} == "OdroidGoAdvance"  ]] || [[ ${DEVICE} == "GameForce"  ]]; then 
+	PKG_PATCH_DIRS="Rockchip/HH"
+fi
+
+if [[ ${DEVICE} == "OdroidM1"  ]] || [[ ${DEVICE} == "RK356x"  ]]; then 
+	PKG_PATCH_DIRS="Rockchip"
+fi
 
 # themes for Emulationstation
 PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET Crystal"
