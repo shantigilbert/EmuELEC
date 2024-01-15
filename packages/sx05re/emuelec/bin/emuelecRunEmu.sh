@@ -193,7 +193,7 @@ case ${PLATFORM} in
 	"mame"|"arcade"|"cps1"|"cps2"|"cps3")
 		if [ "$EMU" = "AdvanceMame" ]; then
             set_kill_keys "advmame" 3
-            RUNTHIS='${TBASH} advmame.sh "${ROMNAME}"'
+            RUNTHIS='${TBASH} advmame.sh "${PLATFORM}" "${ROMNAME}"'
 		elif [ "$EMU" = "FbneoSA" ]; then
             set_kill_keys "fbneo"
             RUNTHIS='fbneo.sh "${ROMNAME}"'

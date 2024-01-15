@@ -16,7 +16,8 @@ ES_FEATURES="/storage/.config/emulationstation/es_features.cfg"
 
 source joy_common.sh "advmame"
 
-ROMNAME=$1
+PLATFORM=$1
+ROMNAME=$2
 
 
 BTN_CFG="0 1 2 3 4 5 6 7"
@@ -70,12 +71,9 @@ declare GC_ORDER=(
 declare -A GC_NAMES=()
 
 get_button_cfg() {
-	local BTN_INDEX=$(get_ee_setting "AdvanceMame.joy_btn_index2" "${ROMNAME}")
-#  [[ -z $BTN_INDEX ]] && BTN_INDEX=$(get_ee_setting "mame.joy_btn_cfg")
-
+	local BTN_INDEX=$(get_ee_setting "joy_btn_index" "${PLATFORM}" "${ROMNAME}")
   if [[ ! -z $BTN_INDEX ]]; then
-#		local REMAP_NAME=$(get_ee_setting "joy_btn_names" "AdvanceMame" | cut -d',' -f$BTN_INDEX)
-		local BTN_SETTING="AdvanceMame.joy_btn_order2.$BTN_INDEX"
+		local BTN_SETTING="AdvanceMame.joy_btn_order.$BTN_INDEX"
     local BTN_CFG_TMP="$(get_ee_setting $BTN_SETTING)"
 		[[ ! -z $BTN_CFG_TMP ]] && BTN_CFG="${BTN_CFG_TMP}"
 	fi
