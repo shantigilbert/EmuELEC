@@ -191,6 +191,12 @@ class BluetoothCTL:
     def scanning(self) -> bool:
         return "yes" in ShellIO.execute_lookup(["bluetoothctl", "show"], "Discovering")
 
+    @property
+    def controllers(self) -> list[str]:
+        controllers = ShellIO.execute(["bluetoothctl", "list"], debug=False)
+        return [ctrl.split()[1] for ctrl in controllers]
+
+    @property
     def devices(self) -> list[BluetoothDevice]:
         devs = ShellIO.execute(["bluetoothctl", "devices"], debug=False)
         return [self._parse_device_info(dev.split()[1]) for dev in devs]
@@ -295,7 +301,8 @@ if __name__ == "__main__":
     print("running scan on " + str(SCAN_TIME))
     bt = BluetoothCTL()
 
-    if is_bluetooth_running():
+    if is_bluetooth_running() or len(bt.controllers) == 0:
+        print("bluetooth is already running, exiting.")
         exit()
 
     bt.power = True
