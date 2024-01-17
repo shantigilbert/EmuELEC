@@ -173,7 +173,7 @@ class BluetoothCTL:
                         or "DEL" in line.split()[0]
                     )
                 ):
-                    devs = [x for x in bt.devices() if x.mac == line.split()[2]]
+                    devs = [x for x in bt.devices if x.mac == line.split()[2]]
                     if len(devs) > 0:
                         if "DEL" in line.split()[0]:
                             on_device_removed(devs[0])
@@ -315,7 +315,7 @@ if __name__ == "__main__":
             if ELAPSED_TIME > SCAN_TIME:
                 exit()
 
-        devices_count = len([d for d in bt.devices() if d.connected])
+        devices_count = len([d for d in bt.devices if d.connected])
         if not bt.scanning and (not is_in_game() or devices_count == 0):
             print("emustation is active now or no devices found, resuming scan")
             BT_THREAD = Process(target=bt.scan_async, args=(SCAN_TIME,))
