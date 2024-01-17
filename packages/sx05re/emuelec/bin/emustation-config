@@ -152,12 +152,12 @@ else
     # Use stored volume instead of system default, this is only for Amlogic devices using AV as output
     AUDIO_DEVICE="hw:$(get_ee_setting ee_audio_device)"
 
-		VOLUME=100
+		VOLUME=98
 
 		STORED_VOLUME=$(get_ee_setting audio.volume)
 		[[ ! -z "$STORED_VOLUME" ]] && VOLUME=$STORED_VOLUME
 
-    amixer set 'DAC Extra Digital Gain' 6dB
+    amixer set 'DAC Extra Digital Gain' 2dB
     amixer set 'DAC Digital' "$VOLUME%"
 fi
 
