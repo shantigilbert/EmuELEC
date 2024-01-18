@@ -18,7 +18,7 @@ import sys
 import os
 from multiprocessing import Process
 
-DEBUG = True
+DEBUG = False
 
 
 @dataclass
@@ -112,12 +112,7 @@ class BluetoothCTL:
             if i.startswith("LegacyPairing:"):
                 dev.legacy_pairing = i.split(":")[1].strip() == "yes"
             if i.startswith("RSSI:"):
-                if DEBUG:
-                    print(i)
-                if (i.index("(") >= 0):
-                    dev.rssi = int(i.split("(")[1].strip()[:-1])
-                else:
-                    dev.rssi = int(i.split(":")[1].strip())
+                dev.rssi = int(i.split(":")[1].replace("(","").replace(")","").strip())
         return dev
 
     @property
