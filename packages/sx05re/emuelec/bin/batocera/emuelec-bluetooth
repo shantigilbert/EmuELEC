@@ -194,10 +194,9 @@ class BluetoothCTL:
         return "yes" in ShellIO.execute_lookup(["bluetoothctl", "show"], "Discovering", debug=False)
 
     @property
-    def has_controller(self) -> bool:
-        return "Controller" in ShellIO.execute_lookup(
-            ["bluetoothctl", "list"], "Controller"
-        )
+    def controllers(self) -> list[str]:
+        controllers = ShellIO.execute(["bluetoothctl", "list"], debug=False)
+        return [ctrl.split()[1] for ctrl in controllers]
 
     @property
     def devices(self) -> list[BluetoothDevice]:
@@ -273,7 +272,7 @@ def on_device_discovered(dev: BluetoothDevice) -> bool:
             print("forgot device {}".format(dev.name))
     elif (
         dev.connected and not dev.trusted
-        and dev.rssi == 0
+#       and dev.rssi == 0
 #       and "input-" in dev.icon
     ):
         print(
@@ -308,8 +307,12 @@ if __name__ == "__main__":
     print("running scan on " + str(SCAN_TIME))
     bt = BluetoothCTL()
 
-    if is_bluetooth_running() or not bt.has_controller:
+    if is_bluetooth_running():
         print("bluetooth is already running, exiting.")
+        exit()
+
+    if len(bt.controllers) == 0:
+        print("no controller found, exiting.")
         exit()
 
     bt.power = True
@@ -325,15 +328,17 @@ if __name__ == "__main__":
         if not BEEN_IN_GAME:
             BEEN_IN_GAME = is_in_game()
 
-        devices_count = len([d for d in bt.devices if d.connected])
+        connected_devs = [dev for dev in bt.devices if dev.connected]
         if not bt.scanning and (
-            not BEEN_IN_GAME or devices_count == 0 or SCAN_TIME > 0
+            not BEEN_IN_GAME or len(connected_devs) == 0 or SCAN_TIME > 0
         ):
-            print("emustation is active now or no devices found, resuming scan")
+            print("resuming scan")
             BT_THREAD = Process(target=bt.scan_async, args=(SCAN_TIME,))
             BT_THREAD.start()
-        elif bt.scanning and BEEN_IN_GAME and (devices_count > 0 or SCAN_TIME < 0):
-            print("emustation is inactive now and devices connected, stopping scan")
+        elif (
+            bt.scanning and BEEN_IN_GAME and (len(connected_devs) > 0 or SCAN_TIME < 0)
+        ):
+            print("stopping scan")
             if BT_THREAD is not None:
                 BT_THREAD.terminate()
             bt.scan_stop()
