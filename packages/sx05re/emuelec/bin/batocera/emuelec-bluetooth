@@ -16,11 +16,9 @@ from dataclasses import dataclass
 import time
 import sys
 import os
-import re
-from threading import Thread
 from multiprocessing import Process
 
-DEBUG = False
+DEBUG = True
 
 
 @dataclass
@@ -114,20 +112,25 @@ class BluetoothCTL:
             if i.startswith("LegacyPairing:"):
                 dev.legacy_pairing = i.split(":")[1].strip() == "yes"
             if i.startswith("RSSI:"):
-                dev.rssi = int(i.split(":")[1].strip())
+                if DEBUG:
+                    print(i)
+                if (i.index("(") >= 0):
+                    dev.rssi = int(i.split("(")[1].strip()[:-1])
+                else:
+                    dev.rssi = int(i.split(":")[1].strip())
         return dev
 
     @property
     def power(self) -> bool:
-        return "yes" in ShellIO.execute_lookup(["bluetoothctl", "show"], "Pairable")
+        return "yes" in ShellIO.execute_lookup(["bluetoothctl", "show"], "Pairable", debug=False)
 
     @property
     def discoverable(self) -> bool:
-        return "yes" in ShellIO.execute_lookup(["bluetoothctl", "show"], "Discoverable")
+        return "yes" in ShellIO.execute_lookup(["bluetoothctl", "show"], "Discoverable", debug=False)
 
     @property
     def pairable(self) -> bool:
-        return "yes" in ShellIO.execute_lookup(["bluetoothctl", "show"], "Pairable")
+        return "yes" in ShellIO.execute_lookup(["bluetoothctl", "show"], "Pairable", debug=False)
 
     @power.setter
     def power(self, value):
@@ -173,6 +176,8 @@ class BluetoothCTL:
                         or "DEL" in line.split()[0]
                     )
                 ):
+                    if DEBUG:
+                        print(bt.devices)
                     devs = [x for x in bt.devices if x.mac == line.split()[2]]
                     if len(devs) > 0:
                         if "DEL" in line.split()[0]:
@@ -180,6 +185,8 @@ class BluetoothCTL:
                         elif "NEW" in line.split()[0] or (
                             "CHG" in line.split()[0] and "RSSI:" in line
                         ):
+                            if DEBUG:
+                                print(devs)
                             if not on_device_discovered(devs[0]):
                                 print("stopping thread")
                                 break
@@ -189,12 +196,13 @@ class BluetoothCTL:
 
     @property
     def scanning(self) -> bool:
-        return "yes" in ShellIO.execute_lookup(["bluetoothctl", "show"], "Discovering")
+        return "yes" in ShellIO.execute_lookup(["bluetoothctl", "show"], "Discovering", debug=False)
 
     @property
-    def controllers(self) -> list[str]:
-        controllers = ShellIO.execute(["bluetoothctl", "list"], debug=False)
-        return [ctrl.split()[1] for ctrl in controllers]
+    def has_controller(self) -> bool:
+        return "Controller" in ShellIO.execute_lookup(
+            ["bluetoothctl", "list"], "Controller"
+        )
 
     @property
     def devices(self) -> list[BluetoothDevice]:
@@ -246,9 +254,11 @@ def is_bluetooth_running():
     return False
 
 def on_device_discovered(dev: BluetoothDevice) -> bool:
+    if DEBUG:
+        print(dev)
     if dev.blocked:
         return True
-
+    
     if (
         not dev.connected  # exclude already connected devices
         and dev.rssi != 0  # exclude inactive devices (saved)
@@ -268,7 +278,8 @@ def on_device_discovered(dev: BluetoothDevice) -> bool:
             print("forgot device {}".format(dev.name))
     elif (
         dev.connected and not dev.trusted
-        and "input-" in dev.icon
+        and dev.rssi == 0
+#       and "input-" in dev.icon
     ):
         print(
             "trusting and pairing device {}, mac: {}, icon: {}, paired: {}".format(
@@ -292,16 +303,17 @@ SCAN_TIME = 60
 ELAPSED_TIME = 0
 UPDATE_INTERVAL = 1
 
+BEEN_IN_GAME = False
 BT_THREAD: Process = None
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        LIFE_TIME = int(sys.argv[1])
+    if len(sys.argv) >= 2:
+        SCAN_TIME = int(sys.argv[1])
 
     print("running scan on " + str(SCAN_TIME))
     bt = BluetoothCTL()
 
-    if is_bluetooth_running() or len(bt.controllers) == 0:
+    if is_bluetooth_running() or not bt.has_controller:
         print("bluetooth is already running, exiting.")
         exit()
 
@@ -315,12 +327,17 @@ if __name__ == "__main__":
             if ELAPSED_TIME > SCAN_TIME:
                 exit()
 
+        if not BEEN_IN_GAME:
+            BEEN_IN_GAME = is_in_game()
+
         devices_count = len([d for d in bt.devices if d.connected])
-        if not bt.scanning and (not is_in_game() or devices_count == 0):
+        if not bt.scanning and (
+            not BEEN_IN_GAME or devices_count == 0 or SCAN_TIME > 0
+        ):
             print("emustation is active now or no devices found, resuming scan")
             BT_THREAD = Process(target=bt.scan_async, args=(SCAN_TIME,))
             BT_THREAD.start()
-        elif is_in_game() and bt.scanning and devices_count > 0:
+        elif bt.scanning and BEEN_IN_GAME and (devices_count > 0 or SCAN_TIME < 0):
             print("emustation is inactive now and devices connected, stopping scan")
             if BT_THREAD is not None:
                 BT_THREAD.terminate()
