@@ -116,11 +116,6 @@ show_splash.sh intro
 # Just make sure all the subshells are finished before starting front-end
 wait
 
-# Check if this is an update
-if [[ -f /storage/ee_updated ]]; then
-    ee_update.sh
-fi
-
 # Start Scanning for Bluetooth Controllers
 BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 BTSCANTIME=$(get_ee_setting ee_bluetooth.scantime)
@@ -137,16 +132,15 @@ DEFE=$(get_ee_setting ee_boot)
 
 case "$DEFE" in
 "Retroarch")
-    rm /var/lock/start.games
 	rm -rf /var/lock/start.retro
 	touch /var/lock/start.retro
-    systemctl stop emustation
 	systemctl start retroarch
 	;;
-    *)
-    touch /var/lock/start.games
+*)
+	rm /var/lock/start.games
+	touch /var/lock/start.games
     systemctl start emustation
-    ;;
+	;;
 esac
 
 # run custom_start ending scripts

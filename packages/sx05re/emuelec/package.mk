@@ -98,7 +98,7 @@ makeinstall_target() {
 
   # Added for compatibility with portmaster
   ln -sf /storage/roms ${INSTALL}/roms
-  # ln -sf /storage/roms/ports/portmaster ${INSTALL}/portmaster
+  ln -sf /storage/roms/ports/portmaster ${INSTALL}/portmaster
 
   find ${INSTALL}/usr/config/emuelec/ -type f -exec chmod o+x {} \;
 
