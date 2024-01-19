@@ -1,0 +1,14 @@
+diff --unified --recursive --text --color bluez-5.61.org/profiles/input/sixaxis.h bluez-5.61.new/profiles/input/sixaxis.h
+--- bluez-5.61.org/profiles/input/sixaxis.h	2021-02-23 04:26:59.000000000 +0800
++++ bluez-5.61.new/profiles/input/sixaxis.h	2021-08-29 16:30:07.102346000 +0800
+@@ -87,6 +87,10 @@
+ 		return &devices[i];
+ 	}
+ 
++	if ( vid == 0x054c && pid == 0x0268 )
++
++		return &devices[1];
++
+ 	return NULL;
+ }
+ 
