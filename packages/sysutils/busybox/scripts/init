@@ -1111,6 +1111,10 @@ check_update() {
   umount /sysroot
   update_file "System" "$UPDATE_SYSTEM" "/flash/$IMAGE_SYSTEM"
   update_bootloader
+  
+  # create a flag file to trigger update scripts
+  touch /storage/ee_updated
+  
   do_cleanup
 
   if [ -f /flash/user-update.sh ]; then
