@@ -112,7 +112,8 @@ class BluetoothCTL:
             if i.startswith("LegacyPairing:"):
                 dev.legacy_pairing = i.split(":")[1].strip() == "yes"
             if i.startswith("RSSI:"):
-                dev.rssi = int(i.split(":")[1].replace("(","").replace(")","").strip())
+# Following code tested on bluez 5.66, and should work with 5.72 too.				
+                dev.rssi = int(i.split(" ")[-1].replace("(","").replace(")","").strip())
         return dev
 
     @property
