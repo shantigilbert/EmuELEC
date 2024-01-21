@@ -53,7 +53,7 @@ BIGFONT="1080"
 
 TEE_PID=""
 
-FORCE_SPLASH="no"
+FORCE_SPLASH="yes"
 
 # Get a serial number if present (eg. RPi) otherwise use MAC address from eth0
 MACHINE_UID="$(awk '/^Serial/{s='0000000' $3; print substr(s, length(s) - 7)}' /proc/cpuinfo)"
@@ -471,21 +471,29 @@ load_splash() {
       if [ -z "$SPLASHIMAGE" ]; then
         vres="$(fbset 2>/dev/null | awk '/geometry/ { print $3 }')"
 
-        for s in /flash/oemsplash-${vres}.png \
+        for s in /flash/progress/oemsplash-${vres}- \
+                 /flash/progress/oemsplash-1080- \
+                 /flash/progress/oemsplash- \
+                 /flash/oemsplash-${vres}.png \
                  /flash/oemsplash-1080.png \
                  /flash/oemsplash.png \
+                 /splash/progress/splash-${vres}- \
+                 /splash/progress/splash-1080- \
                  /splash/splash-${vres}.png \
                  /splash/splash-1080.png \
                  ; do
           if [ -f "${s}" ]; then
             SPLASHIMAGE="${s}"
             break
+          elif [ "$FORCE_SPLASH" = "no" -a -f "${s}config" ]; then
+            SPLASHIMAGE="${s}"
+            break
           fi
         done
       fi
 
-      if [ -n "$SPLASHIMAGE" -a -f "$SPLASHIMAGE" ]; then
-        ply-image $SPLASHIMAGE > /dev/null 2>&1
+      if [ -n "$SPLASHIMAGE" ]; then
+        splash-image $SPLASHIMAGE > /dev/null 2>&1
       fi
 
       debug_msg "Framebuffer vertical res: $vres"
