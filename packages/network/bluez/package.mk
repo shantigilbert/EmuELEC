@@ -74,6 +74,11 @@ post_makeinstall_target() {
   # pulseaudio checks for bluez via pkgconfig but lib is not actually needed
     sed -i 's/-lbluetooth//g' ${PKG_BUILD}/lib/bluez.pc
     cp -P ${PKG_BUILD}/lib/bluez.pc ${SYSROOT_PREFIX}/usr/lib/pkgconfig
+  
+  # copy bluezutils.py  
+    mkdir -p ${INSTALL}/usr/lib/${PKG_PYTHON_VERSION}
+	cp -rf ${INSTALL}/usr/lib/bluez/test/bluezutils.py ${INSTALL}/usr/lib/${PKG_PYTHON_VERSION}
+	rm -rf ${INSTALL}/usr/lib/bluez/test
 }
 
 post_install() {
