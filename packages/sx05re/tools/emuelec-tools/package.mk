@@ -51,7 +51,8 @@ PKG_DEPENDS_TARGET+=" ffmpeg \
                       rclone \
                       grep \
                       eemount \
-                      dasbus"
+                      dasbus \
+                      diffutils"
 
 if [ "${PROJECT}" == "Amlogic-ce" ]; then
                       PKG_DEPENDS_TARGET+=" CoreELEC-Debug-Scripts"
