@@ -24,8 +24,6 @@ pre_configure_target() {
 }
 
 post_makeinstall_target() {
-  python_remove_source
-
   rm -rf ${INSTALL}/usr/bin
   rm -rf ${INSTALL}/usr/share/pygobject
 }
