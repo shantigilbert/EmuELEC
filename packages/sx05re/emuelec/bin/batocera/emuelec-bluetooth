@@ -112,7 +112,8 @@ class BluetoothCTL:
             if i.startswith("LegacyPairing:"):
                 dev.legacy_pairing = i.split(":")[1].strip() == "yes"
             if i.startswith("RSSI:"):
-                dev.rssi = int(i.split(":")[1].replace("(","").replace(")","").strip())
+# Following code tested on bluez 5.66, and should work with 5.72 too.				
+                dev.rssi = int(i.split(" ")[-1].replace("(","").replace(")","").strip())
         return dev
 
     @property
@@ -253,6 +254,10 @@ def on_device_discovered(dev: BluetoothDevice) -> bool:
     if dev.blocked:
         return True
     
+
+    if (dev.trusted and dev.paired and not dev.connected and bt.connect(dev)):
+        return True
+
     if (
         not dev.connected  # exclude already connected devices
         and dev.rssi != 0  # exclude inactive devices (saved)
@@ -283,7 +288,7 @@ def on_device_discovered(dev: BluetoothDevice) -> bool:
 
         if bt.trust(dev):
             bt.pair(dev)
-            print("successfully trusted {} now connect cable.".format(dev.name))
+            print("connect cable.")
 
     return True
 
@@ -294,7 +299,7 @@ def on_device_removed(dev: BluetoothDevice):
 
 SCAN_TIME = 60
 
-ELAPSED_TIME = 0
+# ELAPSED_TIME = 0
 UPDATE_INTERVAL = 1
 
 BEEN_IN_GAME = False
@@ -304,7 +309,7 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         SCAN_TIME = int(sys.argv[1])
 
-    print("running scan on " + str(SCAN_TIME))
+    print("running scan for " + str(SCAN_TIME) + " seconds.")
     bt = BluetoothCTL()
 
     if is_bluetooth_running():
@@ -320,9 +325,13 @@ if __name__ == "__main__":
     bt.discoverable = True
     bt.pairable = True
 
+    start_time = time.perf_counter()
     while True:
-        if SCAN_TIME >= 0:
-            if ELAPSED_TIME > SCAN_TIME:
+        diff_time = time.perf_counter() - start_time
+#        if SCAN_TIME >= 0:
+#            if ELAPSED_TIME > SCAN_TIME:
+#        print(diff_time)
+        if SCAN_TIME != -1 and diff_time > SCAN_TIME:
                 exit()
 
         if not BEEN_IN_GAME:
@@ -344,4 +353,4 @@ if __name__ == "__main__":
             bt.scan_stop()
 
         time.sleep(UPDATE_INTERVAL)
-        ELAPSED_TIME += UPDATE_INTERVAL
+#        ELAPSED_TIME += UPDATE_INTERVAL
