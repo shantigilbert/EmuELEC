@@ -288,7 +288,7 @@ def on_device_discovered(dev: BluetoothDevice) -> bool:
 
         if bt.trust(dev):
             bt.pair(dev)
-            print("successfully trusted {} now connect cable.".format(dev.name))
+            print("connect cable.")
 
     return True
 
