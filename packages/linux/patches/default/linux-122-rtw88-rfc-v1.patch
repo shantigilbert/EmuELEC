@@ -657,7 +657,7 @@ diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
 index 74f9d9a6d330..bba39d4565da 100644
 --- a/include/linux/mmc/sdio_ids.h
 +++ b/include/linux/mmc/sdio_ids.h
-@@ -111,6 +111,15 @@
+@@ -115,6 +115,15 @@
  #define SDIO_VENDOR_ID_MICROCHIP_WILC		0x0296
  #define SDIO_DEVICE_ID_MICROCHIP_WILC1000	0x5347
  
@@ -1547,7 +1547,7 @@ diff --git a/drivers/net/wireless/realtek/rtw88/mac.c b/drivers/net/wireless/rea
 index 4e5c194aac29..bf1291902661 100644
 --- a/drivers/net/wireless/realtek/rtw88/mac.c
 +++ b/drivers/net/wireless/realtek/rtw88/mac.c
-@@ -269,15 +269,23 @@ static int rtw_mac_power_switch(struct rtw_dev *rtwdev, bool pwr_on)
+@@ -273,16 +273,24 @@ static int rtw_mac_power_switch(struct rtw_dev *rtwdev, bool pwr_on)
  	if (pwr_on == cur_pwr)
  		return -EALREADY;
  
@@ -1558,8 +1558,9 @@ index 4e5c194aac29..bf1291902661 100644
 +	rtw_hci_power_switch(rtwdev, false);
 +
  	pwr_seq = pwr_on ? chip->pwr_on_seq : chip->pwr_off_seq;
- 	if (rtw_pwr_seq_parser(rtwdev, pwr_seq))
- 		return -EINVAL;
+ 	ret = rtw_pwr_seq_parser(rtwdev, pwr_seq);
+ 	if (ret)
+ 		return ret;
 
  	if (pwr_on)
  		set_bit(RTW_FLAG_POWERON, rtwdev->flags);
@@ -1665,7 +1666,7 @@ diff --git a/drivers/net/wireless/realtek/rtw88/mac.c b/drivers/net/wireless/rea
 index c04938691add..8e1fa824b32b 100644
 --- a/drivers/net/wireless/realtek/rtw88/mac.c
 +++ b/drivers/net/wireless/realtek/rtw88/mac.c
-@@ -1041,6 +1041,9 @@ static int txdma_queue_mapping(struct rtw_dev *rtwdev)
+@@ -1053,6 +1053,9 @@ static int txdma_queue_mapping(struct rtw_dev *rtwdev)
  		else
  			return -EINVAL;
  		break;
@@ -1675,7 +1676,7 @@ index c04938691add..8e1fa824b32b 100644
  	default:
  		return -EINVAL;
  	}
-@@ -1203,6 +1206,9 @@ static int priority_queue_cfg(struct rtw_dev *rtwdev)
+@@ -1215,6 +1218,9 @@ static int priority_queue_cfg(struct rtw_dev *rtwdev)
  		else
  			return -EINVAL;
  		break;
@@ -1830,8 +1831,8 @@ index 8e1fa824b32b..ad71f9838d1d 100644
 +	u32 imr;
  	u8 rpwm;
  	bool cur_pwr;
- 
-@@ -278,17 +301,24 @@ static int rtw_mac_power_switch(struct rtw_dev *rtwdev, bool pwr_on)
+ 	int ret;
+@@ -279,18 +302,25 @@ static int rtw_mac_power_switch(struct rtw_dev *rtwdev, bool pwr_on)
  	 */
  	rtw_hci_power_switch(rtwdev, false);
  
@@ -1839,10 +1840,11 @@ index 8e1fa824b32b..ad71f9838d1d 100644
 +	rtw_write32(rtwdev, REG_SDIO_HIMR, 0);
 +
  	pwr_seq = pwr_on ? chip->pwr_on_seq : chip->pwr_off_seq;
--	if (rtw_pwr_seq_parser(rtwdev, pwr_seq))
-+	if (rtw_pwr_seq_parser(rtwdev, pwr_seq)) {
+ 	ret = rtw_pwr_seq_parser(rtwdev, pwr_seq);
+-	if (ret)
++	if (ret) {
 +		rtw_write32(rtwdev, REG_SDIO_HIMR, imr);
- 		return -EINVAL;
+ 		return ret;
 +	}
  
  	if (pwr_on)
@@ -1857,7 +1859,7 @@ index 8e1fa824b32b..ad71f9838d1d 100644
  	return 0;
  }
  
-@@ -450,6 +480,9 @@ static void download_firmware_reg_backup(struct rtw_dev *rtwdev,
+@@ -462,6 +492,9 @@ static void download_firmware_reg_backup(struct rtw_dev *rtwdev,
  	rtw_write16(rtwdev, REG_FIFOPAGE_INFO_1, 0x200);
  	rtw_write32(rtwdev, REG_RQPN_CTRL_2, bckp[bckp_idx - 1].val);
  
@@ -1867,7 +1869,7 @@ index 8e1fa824b32b..ad71f9838d1d 100644
  	/* Disable beacon related functions */
  	tmp = rtw_read8(rtwdev, REG_BCN_CTRL);
  	bckp[bckp_idx].len = 1;
-@@ -1062,8 +1095,12 @@ static int txdma_queue_mapping(struct rtw_dev *rtwdev)
+@@ -1074,8 +1107,12 @@ static int txdma_queue_mapping(struct rtw_dev *rtwdev)
  	if (rtw_chip_wcpu_11ac(rtwdev))
  		rtw_write32(rtwdev, REG_H2CQ_CSR, BIT_H2CQ_FULL);
  
@@ -3611,7 +3613,7 @@ index 888427cf3bdf..9435cb43d1dc 100644
  
  bool rtw_disable_lps_deep_mode;
  EXPORT_SYMBOL(rtw_disable_lps_deep_mode);
-@@ -1783,6 +1784,10 @@ static int rtw_chip_parameter_setup(struct rtw_dev *rtwdev)
+@@ -1785,6 +1786,10 @@ static int rtw_chip_parameter_setup(struct rtw_dev *rtwdev)
  		rtwdev->hci.rpwm_addr = 0x03d9;
  		rtwdev->hci.cpwm_addr = 0x03da;
  		break;
@@ -3721,7 +3723,7 @@ diff --git a/drivers/net/wireless/realtek/rtw88/main.c b/drivers/net/wireless/re
 index 9435cb43d1dc..bcdf1f8c8450 100644
 --- a/drivers/net/wireless/realtek/rtw88/main.c
 +++ b/drivers/net/wireless/realtek/rtw88/main.c
-@@ -2161,9 +2161,11 @@ int rtw_register_hw(struct rtw_dev *rtwdev, struct ieee80211_hw *hw)
+@@ -2163,9 +2163,11 @@ int rtw_register_hw(struct rtw_dev *rtwdev, struct ieee80211_hw *hw)
  	int max_tx_headroom = 0;
  	int ret;
  

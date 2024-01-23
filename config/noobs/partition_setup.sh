@@ -46,7 +46,7 @@ fi
 
 # create bootloader configuration
   echo "creating bootloader configuration..."
-  echo "boot=$id1 disk=$id2 quiet" > $MOUNTPOINT/cmdline.txt
+  echo "boot=$id1 disk=$id2 quiet @EXTRA_CMDLINE@" > $MOUNTPOINT/cmdline.txt
 
 # cleanup mountpoint
   umount $MOUNTPOINT

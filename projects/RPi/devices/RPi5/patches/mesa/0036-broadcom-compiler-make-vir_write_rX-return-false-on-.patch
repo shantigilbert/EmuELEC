@@ -1,0 +1,37 @@
+From c9f6faa3ddc91024b3d9dc67ce2221187daac128 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 29 Sep 2021 11:54:18 +0200
+Subject: [PATCH 036/142] broadcom/compiler: make vir_write_rX return false on
+ platforms without accums
+
+---
+ src/broadcom/compiler/vir.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/broadcom/compiler/vir.c b/src/broadcom/compiler/vir.c
+index 007cb0a941b..d75cd777b6d 100644
+--- a/src/broadcom/compiler/vir.c
++++ b/src/broadcom/compiler/vir.c
+@@ -158,6 +158,9 @@ vir_is_tex(const struct v3d_device_info *devinfo, struct qinst *inst)
+ bool
+ vir_writes_r3(const struct v3d_device_info *devinfo, struct qinst *inst)
+ {
++        if (!devinfo->has_accumulators)
++                return false;
++
+         for (int i = 0; i < vir_get_nsrc(inst); i++) {
+                 switch (inst->src[i].file) {
+                 case QFILE_VPM:
+@@ -180,6 +183,9 @@ vir_writes_r3(const struct v3d_device_info *devinfo, struct qinst *inst)
+ bool
+ vir_writes_r4(const struct v3d_device_info *devinfo, struct qinst *inst)
+ {
++        if (!devinfo->has_accumulators)
++                return false;
++
+         switch (inst->dst.file) {
+         case QFILE_MAGIC:
+                 switch (inst->dst.index) {
+-- 
+2.39.2
+

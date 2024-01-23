@@ -1,0 +1,56 @@
+From aec0c613e651984e577f580aedceb3561d6a3b19 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 31 May 2023 10:38:59 +0200
+Subject: [PATCH 134/142] v3dv: expose depthClamp in V3D 7.x
+
+---
+ src/broadcom/vulkan/v3dv_device.c    | 2 +-
+ src/broadcom/vulkan/v3dvx_pipeline.c | 5 ++++-
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_device.c b/src/broadcom/vulkan/v3dv_device.c
+index ca5f676b6f7..30a9894789b 100644
+--- a/src/broadcom/vulkan/v3dv_device.c
++++ b/src/broadcom/vulkan/v3dv_device.c
+@@ -224,7 +224,7 @@ get_features(const struct v3dv_physical_device *physical_device,
+       .logicOp = true,
+       .multiDrawIndirect = false,
+       .drawIndirectFirstInstance = true,
+-      .depthClamp = false, /* Only available since V3D 4.5.1.1 */
++      .depthClamp = physical_device->devinfo.ver >= 71,
+       .depthBiasClamp = true,
+       .fillModeNonSolid = true,
+       .depthBounds = physical_device->devinfo.ver >= 71,
+diff --git a/src/broadcom/vulkan/v3dvx_pipeline.c b/src/broadcom/vulkan/v3dvx_pipeline.c
+index c9b537f4b32..ad22add155d 100644
+--- a/src/broadcom/vulkan/v3dvx_pipeline.c
++++ b/src/broadcom/vulkan/v3dvx_pipeline.c
+@@ -243,6 +243,7 @@ pack_cfg_bits(struct v3dv_pipeline *pipeline,
+        * supported in the driver yet, so in practice we are always enabling Z
+        * clipping for now.
+        */
++      bool z_clamp_enable = rs_info && rs_info->depthClampEnable;
+       bool z_clip_enable = false;
+       const VkPipelineRasterizationDepthClipStateCreateInfoEXT *clip_info =
+          ds_info ? vk_find_struct_const(ds_info->pNext,
+@@ -250,7 +251,7 @@ pack_cfg_bits(struct v3dv_pipeline *pipeline,
+                    NULL;
+       if (clip_info)
+          z_clip_enable = clip_info->depthClipEnable;
+-      else if (!(rs_info && rs_info->depthClampEnable))
++      else if (!z_clamp_enable)
+          z_clip_enable = true;
+ 
+       if (z_clip_enable) {
+@@ -260,6 +261,8 @@ pack_cfg_bits(struct v3dv_pipeline *pipeline,
+          config.z_clipping_mode = V3D_Z_CLIP_MODE_NONE;
+       }
+ 
++      config.z_clamp_mode = z_clamp_enable;
++
+       config.depth_bounds_test_enable =
+               ds_info && ds_info->depthBoundsTestEnable && has_ds_attachment;
+ #endif
+-- 
+2.39.2
+

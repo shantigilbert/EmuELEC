@@ -1,0 +1,106 @@
+From eca19c911d9af3b0ab3b563ea65dc455e3d27987 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Wed, 4 Aug 2021 01:11:16 +0200
+Subject: [PATCH 010/142] broadcom/qpu: add v71 signal map
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Compared with v41, the differences are:
+   * 14, 15, 29 and 30 are now about immediate a, b, c, d respectively
+   * 23 is now reserved. On v42 this was for rotate signals, that are
+     gone on v71.
+
+Signed-off-by: Alejandro Piñeiro <apinheiro@igalia.com>
+Signed-off-by: Iago Toral Quiroga <itoral@igalia.com>
+---
+ src/broadcom/qpu/qpu_pack.c | 47 ++++++++++++++++++++++++++++++++++---
+ 1 file changed, 44 insertions(+), 3 deletions(-)
+
+diff --git a/src/broadcom/qpu/qpu_pack.c b/src/broadcom/qpu/qpu_pack.c
+index beac591d3c1..2820d9d4c56 100644
+--- a/src/broadcom/qpu/qpu_pack.c
++++ b/src/broadcom/qpu/qpu_pack.c
+@@ -112,12 +112,15 @@
+ #define LDTMU .ldtmu = true
+ #define LDVARY .ldvary = true
+ #define LDVPM .ldvpm = true
+-#define SMIMM_B .small_imm_b = true
+ #define LDTLB .ldtlb = true
+ #define LDTLBU .ldtlbu = true
+ #define UCB .ucb = true
+ #define ROT .rotate = true
+ #define WRTMUC .wrtmuc = true
++#define SMIMM_A .small_imm_a = true
++#define SMIMM_B .small_imm_b = true
++#define SMIMM_C .small_imm_c = true
++#define SMIMM_D .small_imm_d = true
+ 
+ static const struct v3d_qpu_sig v33_sig_map[] = {
+         /*      MISC   R3       R4      R5 */
+@@ -213,6 +216,40 @@ static const struct v3d_qpu_sig v41_sig_map[] = {
+         [31] = { SMIMM_B,          LDTMU, },
+ };
+ 
++
++static const struct v3d_qpu_sig v71_sig_map[] = {
++        /*      MISC       phys    RF0 */
++        [0]  = {                          },
++        [1]  = { THRSW,                   },
++        [2]  = {                   LDUNIF },
++        [3]  = { THRSW,            LDUNIF },
++        [4]  = {           LDTMU,         },
++        [5]  = { THRSW,    LDTMU,         },
++        [6]  = {           LDTMU,  LDUNIF },
++        [7]  = { THRSW,    LDTMU,  LDUNIF },
++        [8]  = {           LDVARY,        },
++        [9]  = { THRSW,    LDVARY,        },
++        [10] = {           LDVARY, LDUNIF },
++        [11] = { THRSW,    LDVARY, LDUNIF },
++        [12] = { LDUNIFRF                 },
++        [13] = { THRSW,    LDUNIFRF       },
++        [14] = { SMIMM_A,                 },
++        [15] = { SMIMM_B,                 },
++        [16] = {           LDTLB,         },
++        [17] = {           LDTLBU,        },
++        [18] = {                          WRTMUC },
++        [19] = { THRSW,                   WRTMUC },
++        [20] = {           LDVARY,        WRTMUC },
++        [21] = { THRSW,    LDVARY,        WRTMUC },
++        [22] = { UCB,                     },
++        /* 23 reserved */
++        [24] = {                   LDUNIFA},
++        [25] = { LDUNIFARF                },
++        /* 26-29 reserved */
++        [30] = { SMIMM_C,                 },
++        [31] = { SMIMM_D,                 },
++};
++
+ bool
+ v3d_qpu_sig_unpack(const struct v3d_device_info *devinfo,
+                    uint32_t packed_sig,
+@@ -221,7 +258,9 @@ v3d_qpu_sig_unpack(const struct v3d_device_info *devinfo,
+         if (packed_sig >= ARRAY_SIZE(v33_sig_map))
+                 return false;
+ 
+-        if (devinfo->ver >= 41)
++        if (devinfo->ver >= 71)
++                *sig = v71_sig_map[packed_sig];
++        else if (devinfo->ver >= 41)
+                 *sig = v41_sig_map[packed_sig];
+         else if (devinfo->ver == 40)
+                 *sig = v40_sig_map[packed_sig];
+@@ -240,7 +279,9 @@ v3d_qpu_sig_pack(const struct v3d_device_info *devinfo,
+ {
+         static const struct v3d_qpu_sig *map;
+ 
+-        if (devinfo->ver >= 41)
++        if (devinfo->ver >= 71)
++                map = v71_sig_map;
++        else if (devinfo->ver >= 41)
+                 map = v41_sig_map;
+         else if (devinfo->ver == 40)
+                 map = v40_sig_map;
+-- 
+2.39.2
+

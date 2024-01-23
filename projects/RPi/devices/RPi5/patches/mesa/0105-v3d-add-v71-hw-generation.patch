@@ -1,0 +1,336 @@
+From 46ffdc57ac7fbe71e92b22e1fe93185f3d33a3ac Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Tue, 23 May 2023 23:32:37 +0200
+Subject: [PATCH 105/142] v3d: add v71 hw generation
+
+Starting point for v71 version inclusion:
+ * Adds as one of the versions to be compiled on meson
+ * Updated the v3d_X and v3dX macros to include version 71
+ * Update the code enough to get it building when using v71.
+
+Any real v71 support will be implemented on following commits.
+---
+ src/gallium/drivers/v3d/meson.build   |  2 +-
+ src/gallium/drivers/v3d/v3d_context.h | 22 +++++++++++++----
+ src/gallium/drivers/v3d/v3dx_draw.c   | 21 +++++++++++++---
+ src/gallium/drivers/v3d/v3dx_emit.c   | 11 +++++++++
+ src/gallium/drivers/v3d/v3dx_rcl.c    | 35 ++++++++++++++++++++++-----
+ src/gallium/drivers/v3d/v3dx_state.c  | 12 +++++++++
+ 6 files changed, 88 insertions(+), 15 deletions(-)
+
+diff --git a/src/gallium/drivers/v3d/meson.build b/src/gallium/drivers/v3d/meson.build
+index dfa1e88097b..526a131ae9b 100644
+--- a/src/gallium/drivers/v3d/meson.build
++++ b/src/gallium/drivers/v3d/meson.build
+@@ -58,7 +58,7 @@ if dep_v3dv3.found()
+   v3d_args += '-DUSE_V3D_SIMULATOR'
+ endif
+ 
+-v3d_versions = ['33', '42']
++v3d_versions = ['33', '42', '71']
+ 
+ per_version_libs = []
+ foreach ver : v3d_versions
+diff --git a/src/gallium/drivers/v3d/v3d_context.h b/src/gallium/drivers/v3d/v3d_context.h
+index 97850b0363e..ad267d5033c 100644
+--- a/src/gallium/drivers/v3d/v3d_context.h
++++ b/src/gallium/drivers/v3d/v3d_context.h
+@@ -818,13 +818,21 @@ void v3d_disk_cache_store(struct v3d_context *v3d,
+ 
+ /* Helper to call hw ver specific functions */
+ #define v3d_X(devinfo, thing) ({                                \
+-        __typeof(&v3d42_##thing) v3d_X_thing;                   \
+-        if ((devinfo)->ver >= 42)                               \
+-                v3d_X_thing = &v3d42_##thing;                   \
+-        else if ((devinfo)->ver >= 33)                          \
++        __typeof(&v3d33_##thing) v3d_X_thing;                   \
++        switch (devinfo->ver) {                                 \
++        case 33:                                                \
++        case 40:                                                \
+                 v3d_X_thing = &v3d33_##thing;                   \
+-        else                                                    \
++                break;                                          \
++        case 42:                                                \
++                v3d_X_thing = &v3d42_##thing;                   \
++                break;                                          \
++        case 71:                                                \
++                v3d_X_thing = &v3d71_##thing;                   \
++                break;                                          \
++        default:                                                \
+                 unreachable("Unsupported hardware generation"); \
++        }                                                       \
+         v3d_X_thing;                                            \
+ })
+ 
+@@ -838,6 +846,10 @@ void v3d_disk_cache_store(struct v3d_context *v3d,
+ #  define v3dX(x) v3d42_##x
+ #  include "v3dx_context.h"
+ #  undef v3dX
++
++#  define v3dX(x) v3d71_##x
++#  include "v3dx_context.h"
++#  undef v3dX
+ #endif
+ 
+ #endif /* V3D_CONTEXT_H */
+diff --git a/src/gallium/drivers/v3d/v3dx_draw.c b/src/gallium/drivers/v3d/v3dx_draw.c
+index 17442500ea9..2c74c5973c9 100644
+--- a/src/gallium/drivers/v3d/v3dx_draw.c
++++ b/src/gallium/drivers/v3d/v3dx_draw.c
+@@ -95,7 +95,11 @@ v3dX(start_binning)(struct v3d_context *v3d, struct v3d_job *job)
+ #endif
+ 
+         assert(!job->msaa || !job->double_buffer);
+-#if V3D_VERSION >= 40
++#if V3D_VERSION >= 71
++        unreachable("HW generation 71 not supported yet.");
++#endif
++
++#if V3D_VERSION >= 40 && V3D_VERSION <= 42
+         cl_emit(&job->bcl, TILE_BINNING_MODE_CFG, config) {
+                 config.width_in_pixels = job->draw_width;
+                 config.height_in_pixels = job->draw_height;
+@@ -107,7 +111,8 @@ v3dX(start_binning)(struct v3d_context *v3d, struct v3d_job *job)
+ 
+                 config.maximum_bpp_of_all_render_targets = job->internal_bpp;
+         }
+-#else /* V3D_VERSION < 40 */
++#endif
++#if V3D_VERSION < 40
+         /* "Binning mode lists start with a Tile Binning Mode Configuration
+          * item (120)"
+          *
+@@ -134,7 +139,7 @@ v3dX(start_binning)(struct v3d_context *v3d, struct v3d_job *job)
+ 
+                 config.maximum_bpp_of_all_render_targets = job->internal_bpp;
+         }
+-#endif /* V3D_VERSION < 40 */
++#endif
+ 
+         /* There's definitely nothing in the VCD cache we want. */
+         cl_emit(&job->bcl, FLUSH_VCD_CACHE, bin);
+@@ -655,10 +660,15 @@ v3d_emit_gl_shader_state(struct v3d_context *v3d,
+                 /* XXX: Use combined input/output size flag in the common
+                  * case.
+                  */
++#if V3D_VERSION <= 42
+                 shader.coordinate_shader_has_separate_input_and_output_vpm_blocks =
+                         v3d->prog.cs->prog_data.vs->separate_segments;
+                 shader.vertex_shader_has_separate_input_and_output_vpm_blocks =
+                         v3d->prog.vs->prog_data.vs->separate_segments;
++#endif
++#if V3D_VERSION >= 71
++                unreachable("HW generation 71 not supported yet.");
++#endif
+ 
+                 shader.coordinate_shader_input_vpm_segment_size =
+                         v3d->prog.cs->prog_data.vs->separate_segments ?
+@@ -724,9 +734,14 @@ v3d_emit_gl_shader_state(struct v3d_context *v3d,
+                 shader.instance_id_read_by_vertex_shader =
+                         v3d->prog.vs->prog_data.vs->uses_iid;
+ 
++#if V3D_VERSION <= 42
+                 shader.address_of_default_attribute_values =
+                         cl_address(v3d_resource(vtx->defaults)->bo,
+                                    vtx->defaults_offset);
++#endif
++#if V3D_VERSION >= 71
++                unreachable("HW generation 71 not supported yet.");
++#endif
+         }
+ 
+         bool cs_loaded_any = false;
+diff --git a/src/gallium/drivers/v3d/v3dx_emit.c b/src/gallium/drivers/v3d/v3dx_emit.c
+index 0ad3fb68b1e..5af3d03b337 100644
+--- a/src/gallium/drivers/v3d/v3dx_emit.c
++++ b/src/gallium/drivers/v3d/v3dx_emit.c
+@@ -512,6 +512,7 @@ v3dX(emit_state)(struct pipe_context *pctx)
+                         /* Note: EZ state may update based on the compiled FS,
+                          * along with ZSA
+                          */
++#if V3D_VERSION <= 42
+                         config.early_z_updates_enable =
+                                 (job->ez_state != V3D_EZ_DISABLED);
+                         if (v3d->zsa->base.depth_enabled) {
+@@ -524,6 +525,10 @@ v3dX(emit_state)(struct pipe_context *pctx)
+                         } else {
+                                 config.depth_test_function = PIPE_FUNC_ALWAYS;
+                         }
++#endif
++#if V3D_VERSION >= 71
++                        unreachable("HW generation 71 not supported yet.");
++#endif
+ 
+                         config.stencil_enable =
+                                 v3d->zsa->base.stencil[0].enabled;
+@@ -564,12 +569,18 @@ v3dX(emit_state)(struct pipe_context *pctx)
+         }
+ 
+         if (v3d->dirty & V3D_DIRTY_VIEWPORT) {
++#if V3D_VERSION <= 42
+                 cl_emit(&job->bcl, CLIPPER_XY_SCALING, clip) {
+                         clip.viewport_half_width_in_1_256th_of_pixel =
+                                 v3d->viewport.scale[0] * 256.0f;
+                         clip.viewport_half_height_in_1_256th_of_pixel =
+                                 v3d->viewport.scale[1] * 256.0f;
+                 }
++#endif
++#if V3D_VERSION >= 71
++                unreachable("HW generation 71 not supported yet.");
++#endif
++
+ 
+                 cl_emit(&job->bcl, CLIPPER_Z_SCALE_AND_OFFSET, clip) {
+                         clip.viewport_z_offset_zc_to_zs =
+diff --git a/src/gallium/drivers/v3d/v3dx_rcl.c b/src/gallium/drivers/v3d/v3dx_rcl.c
+index 82547437c25..166cc34e4ee 100644
+--- a/src/gallium/drivers/v3d/v3dx_rcl.c
++++ b/src/gallium/drivers/v3d/v3dx_rcl.c
+@@ -419,10 +419,16 @@ v3d_rcl_emit_stores(struct v3d_job *job, struct v3d_cl *cl, int layer)
+          * clearing Z/S.
+          */
+         if (job->clear) {
++#if V3D_VERSION <= 42
+                 cl_emit(cl, CLEAR_TILE_BUFFERS, clear) {
+                         clear.clear_z_stencil_buffer = !job->early_zs_clear;
+                         clear.clear_all_render_targets = true;
+                 }
++#endif
++#if V3D_VERSION >= 71
++                unreachable("HW generation 71 not supported yet.");
++#endif
++
+         }
+ #endif /* V3D_VERSION >= 40 */
+ }
+@@ -483,7 +489,7 @@ v3d_rcl_emit_generic_per_tile_list(struct v3d_job *job, int layer)
+         }
+ }
+ 
+-#if V3D_VERSION >= 40
++#if V3D_VERSION >= 40 && V3D_VERSION <= 42
+ static void
+ v3d_setup_render_target(struct v3d_job *job, int cbuf,
+                         uint32_t *rt_bpp, uint32_t *rt_type, uint32_t *rt_clamp)
+@@ -507,9 +513,9 @@ v3d_setup_render_target(struct v3d_job *job, int cbuf,
+         else
+                 *rt_clamp = V3D_RENDER_TARGET_CLAMP_NONE;
+ }
++#endif
+ 
+-#else /* V3D_VERSION < 40 */
+-
++#if V3D_VERSION < 40
+ static void
+ v3d_emit_z_stencil_config(struct v3d_job *job, struct v3d_surface *surf,
+                           struct v3d_resource *rsc, bool is_separate_stencil)
+@@ -656,7 +662,8 @@ emit_render_layer(struct v3d_job *job, uint32_t layer)
+         cl_emit(&job->rcl, STORE_TILE_BUFFER_GENERAL, store) {
+                 store.buffer_to_store = NONE;
+         }
+-#else
++#endif
++#if V3D_VERSION >= 40 && V3D_VERSION <= 42
+         for (int i = 0; i < 2; i++) {
+                 if (i > 0)
+                         cl_emit(&job->rcl, TILE_COORDINATES, coords);
+@@ -673,6 +680,10 @@ emit_render_layer(struct v3d_job *job, uint32_t layer)
+                 cl_emit(&job->rcl, END_OF_TILE_MARKER, end);
+         }
+ #endif
++#if V3D_VERSION >= 71
++        unreachable("HW generation 71 not supported yet.");
++#endif
++
+ 
+         cl_emit(&job->rcl, FLUSH_VCD_CACHE, flush);
+ 
+@@ -775,7 +786,13 @@ v3dX(emit_rcl)(struct v3d_job *job)
+                 config.multisample_mode_4x = job->msaa;
+                 config.double_buffer_in_non_ms_mode = job->double_buffer;
+ 
++#if V3D_VERSION <= 42
+                 config.maximum_bpp_of_all_render_targets = job->internal_bpp;
++#endif
++#if V3D_VERSION >= 71
++                unreachable("HW generation 71 not supported yet.");
++#endif
++
+         }
+ 
+         for (int i = 0; i < job->nr_cbufs; i++) {
+@@ -786,7 +803,7 @@ v3dX(emit_rcl)(struct v3d_job *job)
+                 struct v3d_resource *rsc = v3d_resource(psurf->texture);
+ 
+                 UNUSED uint32_t config_pad = 0;
+-                uint32_t clear_pad = 0;
++                UNUSED uint32_t clear_pad = 0;
+ 
+                 /* XXX: Set the pad for raster. */
+                 if (surf->tiling == V3D_TILING_UIF_NO_XOR ||
+@@ -819,6 +836,7 @@ v3dX(emit_rcl)(struct v3d_job *job)
+                 }
+ #endif /* V3D_VERSION < 40 */
+ 
++#if V3D_VERSION <= 42
+                 cl_emit(&job->rcl, TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART1,
+                         clear) {
+                         clear.clear_color_low_32_bits = job->clear_color[i][0];
+@@ -847,9 +865,10 @@ v3dX(emit_rcl)(struct v3d_job *job)
+                                 clear.render_target_number = i;
+                         };
+                 }
++#endif
+         }
+ 
+-#if V3D_VERSION >= 40
++#if V3D_VERSION >= 40 && V3D_VERSION <= 42
+         cl_emit(&job->rcl, TILE_RENDERING_MODE_CFG_COLOR, rt) {
+                 v3d_setup_render_target(job, 0,
+                                         &rt.render_target_0_internal_bpp,
+@@ -870,6 +889,10 @@ v3dX(emit_rcl)(struct v3d_job *job)
+         }
+ #endif
+ 
++#if V3D_VERSION >= 71
++        unreachable("HW generation 71 not supported yet.");
++#endif
++
+ #if V3D_VERSION < 40
+         /* FIXME: Don't bother emitting if we don't load/clear Z/S. */
+         if (job->zsbuf) {
+diff --git a/src/gallium/drivers/v3d/v3dx_state.c b/src/gallium/drivers/v3d/v3dx_state.c
+index 0f1735fee66..a93d5be091e 100644
+--- a/src/gallium/drivers/v3d/v3dx_state.c
++++ b/src/gallium/drivers/v3d/v3dx_state.c
+@@ -990,7 +990,13 @@ v3dX(create_texture_shader_state_bo)(struct v3d_context *v3d,
+                                                                    cso->u.buf.size);
+                 }
+ 
++#if V3D_VERSION <= 42
+                 tex.srgb = util_format_is_srgb(cso->format);
++#endif
++
++#if V3D_VERSION >= 71
++                unreachable("HW generation 71 not supported yet.");
++#endif
+ 
+ #if V3D_VERSION >= 40
+                 tex.swizzle_r = v3d_translate_pipe_swizzle(so->swizzle[0]);
+@@ -1040,7 +1046,13 @@ v3dX(create_texture_shader_state_bo)(struct v3d_context *v3d,
+                          * shader code if we wanted to read an MSAA sRGB
+                          * texture without sRGB decode.
+                          */
++#if V3D_VERSION <= 42
+                         tex.srgb = false;
++#endif
++#if V3D_VERSION >= 71
++                        unreachable("HW generation 71 not supported yet.");
++#endif
++
+                 } else {
+                         tex.texture_type = v3d_get_tex_format(&screen->devinfo,
+                                                               cso->format);
+-- 
+2.39.2
+

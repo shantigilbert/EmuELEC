@@ -220,9 +220,12 @@ EOF
   mcopy "${RELEASE_DIR}/target/KERNEL.md5" "::/${KERNEL_NAME}.md5" >"${SAVE_ERROR}" 2>&1 || show_error
   mcopy "${RELEASE_DIR}/target/SYSTEM.md5" ::/SYSTEM.md5 >"${SAVE_ERROR}" 2>&1 || show_error
 
-  mcopy "${RELEASE_DIR}/3rdparty/bootloader/bootcode.bin" :: >"${SAVE_ERROR}" 2>&1 || show_error
-  mcopy "${RELEASE_DIR}/3rdparty/bootloader/fixup.dat" :: >"${SAVE_ERROR}" 2>&1 || show_error
-  mcopy "${RELEASE_DIR}/3rdparty/bootloader/start.elf" :: >"${SAVE_ERROR}" 2>&1 || show_error
+  for f in bootcode.bin fixup.dat start.elf ; do
+    if [ -f "${RELEASE_DIR}/3rdparty/bootloader/$f" ]; then
+      mcopy "${RELEASE_DIR}/3rdparty/bootloader/$f" :: >"${SAVE_ERROR}" 2>&1 || show_error
+    fi
+  done
+
   mcopy "${RELEASE_DIR}/3rdparty/bootloader/config.txt" :: >"${SAVE_ERROR}" 2>&1 || show_error
   for distro in "${RELEASE_DIR}/3rdparty/bootloader/distroconfig"*.txt ; do
     if [ -f "${distro}" ]; then

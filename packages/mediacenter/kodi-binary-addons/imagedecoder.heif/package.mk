@@ -4,7 +4,7 @@
 PKG_NAME="imagedecoder.heif"
 PKG_VERSION="20.1.0-Nexus"
 PKG_SHA256="17f50aada11528c02db2ff3871a355c89709ab7e2a5e6b5e33957b790cf207ff"
-PKG_REV="5"
+PKG_REV="6"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/imagedecoder.heif"

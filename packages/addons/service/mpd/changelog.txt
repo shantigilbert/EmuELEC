@@ -1,1 +1,2 @@
-initial release
+1
+- mpd: update to 0.23.12

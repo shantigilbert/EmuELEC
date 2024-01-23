@@ -46,7 +46,7 @@ create_patch() {
       ;;
     rpi)
       REPO="https://github.com/jc-kynesim/rpi-ffmpeg"
-      REFSPEC="dev/4.4/rpi_import_1"
+      REFSPEC="test/4.4.1/main"
       PATCH_CREATE_DIFF="yes"
       ;;
     kodi)

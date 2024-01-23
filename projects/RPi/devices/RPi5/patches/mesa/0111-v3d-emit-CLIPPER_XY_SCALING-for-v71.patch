@@ -1,0 +1,30 @@
+From 0683f6db1cd50659829fe53f49427bfdacb707b6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 21 Oct 2021 13:14:32 +0200
+Subject: [PATCH 111/142] v3d: emit CLIPPER_XY_SCALING for v71
+
+---
+ src/gallium/drivers/v3d/v3dx_emit.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/v3d/v3dx_emit.c b/src/gallium/drivers/v3d/v3dx_emit.c
+index de05ae29d04..58c886bb29e 100644
+--- a/src/gallium/drivers/v3d/v3dx_emit.c
++++ b/src/gallium/drivers/v3d/v3dx_emit.c
+@@ -577,7 +577,12 @@ v3dX(emit_state)(struct pipe_context *pctx)
+                 }
+ #endif
+ #if V3D_VERSION >= 71
+-                unreachable("HW generation 71 not supported yet.");
++                cl_emit(&job->bcl, CLIPPER_XY_SCALING, clip) {
++                        clip.viewport_half_width_in_1_64th_of_pixel =
++                                v3d->viewport.scale[0] * 64.0f;
++                        clip.viewport_half_height_in_1_64th_of_pixel =
++                                v3d->viewport.scale[1] * 64.0f;
++                }
+ #endif
+ 
+ 
+-- 
+2.39.2
+

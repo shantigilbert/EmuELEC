@@ -1,0 +1,83 @@
+From 851704169d59e28c5429b06d05e5ef952be893a2 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Mon, 15 May 2023 10:02:10 +0200
+Subject: [PATCH 071/142] broadcom/compiler: only assign rf0 as last resort in
+ V3D 7.x
+
+So we can use it for ldunif(a) and avoid generating ldunif(a)rf which
+can't be paired with conditional instructions.
+
+shader-db (pi5):
+
+total instructions in shared programs: 11357802 -> 11338883 (-0.17%)
+instructions in affected programs: 7117889 -> 7098970 (-0.27%)
+helped: 24264
+HURT: 17574
+Instructions are helped.
+
+total uniforms in shared programs: 3857808 -> 3857815 (<.01%)
+uniforms in affected programs: 92 -> 99 (7.61%)
+helped: 0
+HURT: 1
+
+total max-temps in shared programs: 2230904 -> 2230199 (-0.03%)
+max-temps in affected programs: 52309 -> 51604 (-1.35%)
+helped: 1219
+HURT: 725
+Max-temps are helped.
+
+total sfu-stalls in shared programs: 15021 -> 15236 (1.43%)
+sfu-stalls in affected programs: 6848 -> 7063 (3.14%)
+helped: 1866
+HURT: 1704
+Inconclusive result
+
+total inst-and-stalls in shared programs: 11372823 -> 11354119 (-0.16%)
+inst-and-stalls in affected programs: 7149177 -> 7130473 (-0.26%)
+helped: 24315
+HURT: 17561
+Inst-and-stalls are helped.
+
+total nops in shared programs: 273624 -> 273711 (0.03%)
+nops in affected programs: 31562 -> 31649 (0.28%)
+helped: 1619
+HURT: 1854
+Inconclusive result (value mean confidence interval includes 0).
+---
+ src/broadcom/compiler/vir_register_allocate.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/src/broadcom/compiler/vir_register_allocate.c b/src/broadcom/compiler/vir_register_allocate.c
+index 0ab0474424f..8eac2b75bd7 100644
+--- a/src/broadcom/compiler/vir_register_allocate.c
++++ b/src/broadcom/compiler/vir_register_allocate.c
+@@ -950,6 +950,11 @@ v3d_ra_select_rf(struct v3d_ra_select_callback_data *v3d_ra,
+ 
+         for (int i = 0; i < PHYS_COUNT; i++) {
+                 int phys_off = (v3d_ra->next_phys + i) % PHYS_COUNT;
++
++                /* Try to keep rf0 available for ldunif in 7.x (see above). */
++                if (v3d_ra->devinfo->ver >= 71 && phys_off == 0)
++                        continue;
++
+                 int phys = v3d_ra->phys_index + phys_off;
+ 
+                 if (BITSET_TEST(regs, phys)) {
+@@ -959,6 +964,14 @@ v3d_ra_select_rf(struct v3d_ra_select_callback_data *v3d_ra,
+                 }
+         }
+ 
++        /* If we couldn't allocate, do try to assign rf0 if it is available. */
++        if (v3d_ra->devinfo->ver >= 71 &&
++            BITSET_TEST(regs, v3d_ra->phys_index)) {
++                v3d_ra->next_phys = 1;
++                *out = v3d_ra->phys_index;
++                return true;
++        }
++
+         return false;
+ }
+ 
+-- 
+2.39.2
+

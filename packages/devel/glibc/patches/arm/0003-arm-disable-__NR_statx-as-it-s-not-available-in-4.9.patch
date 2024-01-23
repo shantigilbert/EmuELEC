@@ -1,0 +1,25 @@
+From d466d07f9bf8c3fd42d92b4f9412df50c0faff42 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Wed, 17 May 2023 15:36:51 +0200
+Subject: [PATCH 3/3] arm: disable __NR_statx as it's not available in 4.9
+
+---
+ sysdeps/unix/sysv/linux/arm/arch-syscall.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sysdeps/unix/sysv/linux/arm/arch-syscall.h b/sysdeps/unix/sysv/linux/arm/arch-syscall.h
+index e7ba04c106..7ad958d643 100644
+--- a/sysdeps/unix/sysv/linux/arm/arch-syscall.h
++++ b/sysdeps/unix/sysv/linux/arm/arch-syscall.h
+@@ -355,7 +355,7 @@
+ #define __NR_stat64 195
+ #define __NR_statfs 99
+ #define __NR_statfs64 266
+-#define __NR_statx 397
++//#define __NR_statx 397
+ #define __NR_swapoff 115
+ #define __NR_swapon 87
+ #define __NR_symlink 83
+-- 
+2.41.0
+

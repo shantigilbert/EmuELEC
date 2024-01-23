@@ -1,0 +1,55 @@
+From 7b820fa6812e8389613238c6ab3a12fc1dee0276 Mon Sep 17 00:00:00 2001
+From: Dom Cobley <popcornmix@gmail.com>
+Date: Tue, 31 Jan 2023 14:13:00 +0000
+Subject: [PATCH 6/7] VideoBufferDMA: Support exporting YCbCr444 buffers
+
+The current code assumes chroma is decimated by two, but that is not necessarily the case.
+DRMPRIME decode with EGL rendering of YCbCr444 video will have corrupted colours.
+
+Ask ffmpeg what the chroma decimation is.
+---
+ .../VideoPlayer/Buffers/VideoBufferDMA.cpp    | 21 ++++++++++++-------
+ 1 file changed, 14 insertions(+), 7 deletions(-)
+
+diff --git a/xbmc/cores/VideoPlayer/Buffers/VideoBufferDMA.cpp b/xbmc/cores/VideoPlayer/Buffers/VideoBufferDMA.cpp
+index 2dd7c1341d..3e6bf0dc7a 100644
+--- a/xbmc/cores/VideoPlayer/Buffers/VideoBufferDMA.cpp
++++ b/xbmc/cores/VideoPlayer/Buffers/VideoBufferDMA.cpp
+@@ -119,20 +119,27 @@ bool CVideoBufferDMA::Alloc()
+ 
+ void CVideoBufferDMA::Export(AVFrame* frame, uint32_t width, uint32_t height)
+ {
+-  m_planes = av_pix_fmt_count_planes(static_cast<AVPixelFormat>(frame->format));
++  AVPixelFormat pix_fmt = static_cast<AVPixelFormat>(frame->format);
++  m_planes = av_pix_fmt_count_planes(pix_fmt);
++  int h_shift;
++  int v_shift;
+ 
+-  if (m_planes < 2)
+-    throw std::runtime_error(
+-        "non-planar formats not supported: " +
+-        std::string(av_get_pix_fmt_name(static_cast<AVPixelFormat>(frame->format))));
++  if (av_pix_fmt_get_chroma_sub_sample(pix_fmt, &h_shift, &v_shift))
++    throw std::runtime_error("unable to determine chroma_sub_sample: " +
++                             std::string(av_get_pix_fmt_name(pix_fmt)));
++
++  if (m_planes < 2 || m_planes > 3)
++    throw std::runtime_error("only 2 or 3 plane formats supported: " +
++                             std::string(av_get_pix_fmt_name(pix_fmt)));
+ 
+   for (uint32_t plane = 0; plane < m_planes; plane++)
+   {
+     m_strides[plane] =
+         av_image_get_linesize(static_cast<AVPixelFormat>(frame->format), width, plane);
+-    m_offsets[plane] =
+-        plane == 0 ? 0 : (m_offsets[plane - 1] + m_strides[plane - 1] * (height >> (plane - 1)));
+   }
++  m_offsets[0] = 0;
++  m_offsets[1] = m_strides[0] * height;
++  m_offsets[2] = m_offsets[1] + (m_strides[1] * height >> v_shift);
+ 
+   if (CServiceBroker::GetLogging().CanLogComponent(LOGVIDEO))
+   {
+-- 
+2.39.2
+

@@ -1,0 +1,92 @@
+From fe89703008f2a3d6bfe6e260791f712013be5e48 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 9 Sep 2021 23:59:28 +0200
+Subject: [PATCH 022/142] broadcom/qpu_schedule: add process_raddr_deps
+
+On v71 we don't have muxes, but more raddr. Adding a equivalent add
+deps function.
+---
+ src/broadcom/compiler/qpu_schedule.c | 52 +++++++++++++++++++++++-----
+ 1 file changed, 44 insertions(+), 8 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 455fa3867be..89254643c90 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -155,6 +155,7 @@ static void
+ process_mux_deps(struct schedule_state *state, struct schedule_node *n,
+                  enum v3d_qpu_mux mux)
+ {
++        assert(state->devinfo->ver < 71);
+         switch (mux) {
+         case V3D_QPU_MUX_A:
+                 add_read_dep(state, state->last_rf[n->inst->qpu.raddr_a], n);
+@@ -171,6 +172,17 @@ process_mux_deps(struct schedule_state *state, struct schedule_node *n,
+         }
+ }
+ 
++
++static void
++process_raddr_deps(struct schedule_state *state, struct schedule_node *n,
++                   uint8_t raddr, bool is_small_imm)
++{
++        assert(state->devinfo->ver >= 71);
++
++        if (!is_small_imm)
++                add_read_dep(state, state->last_rf[raddr], n);
++}
++
+ static bool
+ tmu_write_is_sequence_terminator(uint32_t waddr)
+ {
+@@ -305,15 +317,39 @@ calculate_deps(struct schedule_state *state, struct schedule_node *n)
+ 
+         /* XXX: LOAD_IMM */
+ 
+-        if (v3d_qpu_add_op_num_src(inst->alu.add.op) > 0)
+-                process_mux_deps(state, n, inst->alu.add.a.mux);
+-        if (v3d_qpu_add_op_num_src(inst->alu.add.op) > 1)
+-                process_mux_deps(state, n, inst->alu.add.b.mux);
++        if (v3d_qpu_add_op_num_src(inst->alu.add.op) > 0) {
++                if (devinfo->ver < 71) {
++                        process_mux_deps(state, n, inst->alu.add.a.mux);
++                } else {
++                        process_raddr_deps(state, n, inst->alu.add.a.raddr,
++                                           inst->sig.small_imm_a);
++                }
++        }
++        if (v3d_qpu_add_op_num_src(inst->alu.add.op) > 1) {
++                if (devinfo->ver < 71) {
++                        process_mux_deps(state, n, inst->alu.add.b.mux);
++                } else {
++                        process_raddr_deps(state, n, inst->alu.add.b.raddr,
++                                           inst->sig.small_imm_b);
++                }
++        }
+ 
+-        if (v3d_qpu_mul_op_num_src(inst->alu.mul.op) > 0)
+-                process_mux_deps(state, n, inst->alu.mul.a.mux);
+-        if (v3d_qpu_mul_op_num_src(inst->alu.mul.op) > 1)
+-                process_mux_deps(state, n, inst->alu.mul.b.mux);
++        if (v3d_qpu_mul_op_num_src(inst->alu.mul.op) > 0) {
++                if (devinfo->ver < 71) {
++                        process_mux_deps(state, n, inst->alu.mul.a.mux);
++                } else {
++                        process_raddr_deps(state, n, inst->alu.mul.a.raddr,
++                                           inst->sig.small_imm_c);
++                }
++        }
++        if (v3d_qpu_mul_op_num_src(inst->alu.mul.op) > 1) {
++                if (devinfo->ver < 71) {
++                        process_mux_deps(state, n, inst->alu.mul.b.mux);
++                } else {
++                        process_raddr_deps(state, n, inst->alu.mul.b.raddr,
++                                           inst->sig.small_imm_d);
++                }
++        }
+ 
+         switch (inst->alu.add.op) {
+         case V3D_QPU_A_VPMSETUP:
+-- 
+2.39.2
+

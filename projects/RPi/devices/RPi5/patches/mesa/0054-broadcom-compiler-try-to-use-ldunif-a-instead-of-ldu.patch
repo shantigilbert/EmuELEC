@@ -1,0 +1,144 @@
+From 0670d642bb91fc68ce73f2d9fb88c482295a446d Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Thu, 28 Oct 2021 14:13:29 +0200
+Subject: [PATCH 054/142] broadcom/compiler: try to use ldunif(a) instead of
+ ldunif(a)rf in v71
+
+The rf variants need to encode the destination in the cond bits, which
+prevents these to be merged with any other instruction that need them.
+
+In 4.x, ldunif(a) write to r5 which is a special register that only
+ldunif(a) and ldvary can write so we have a special register class for
+it and only allow it for them. Then when we need to choose a register
+for a node, if this register is available we always use it.
+
+In 7.x these instructions write to rf0, which can be used by any
+instruction, so instead of restricting rf0, we track the temps that
+are used as ldunif(a) destinations and use that information to favor
+rf0 for them.
+---
+ src/broadcom/compiler/v3d_compiler.h          |  3 ++
+ src/broadcom/compiler/vir_register_allocate.c | 34 ++++++++++++++++---
+ src/broadcom/compiler/vir_to_qpu.c            | 11 ++++--
+ 3 files changed, 41 insertions(+), 7 deletions(-)
+
+diff --git a/src/broadcom/compiler/v3d_compiler.h b/src/broadcom/compiler/v3d_compiler.h
+index 7e8f3bfc1a7..36adf8830b5 100644
+--- a/src/broadcom/compiler/v3d_compiler.h
++++ b/src/broadcom/compiler/v3d_compiler.h
+@@ -613,6 +613,9 @@ struct v3d_ra_node_info {
+         struct {
+                 uint32_t priority;
+                 uint8_t class_bits;
++
++                /* V3D 7.x */
++                bool is_ldunif_dst;
+         } *info;
+         uint32_t alloc_count;
+ };
+diff --git a/src/broadcom/compiler/vir_register_allocate.c b/src/broadcom/compiler/vir_register_allocate.c
+index e0adc1de7a4..1be091f8518 100644
+--- a/src/broadcom/compiler/vir_register_allocate.c
++++ b/src/broadcom/compiler/vir_register_allocate.c
+@@ -384,6 +384,7 @@ add_node(struct v3d_compile *c, uint32_t temp, uint8_t class_bits)
+         /* We fill the node priority after we are done inserting spills */
+         c->nodes.info[node].class_bits = class_bits;
+         c->nodes.info[node].priority = 0;
++        c->nodes.info[node].is_ldunif_dst = false;
+ }
+ 
+ /* The spill offset for this thread takes a bit of setup, so do it once at
+@@ -899,9 +900,22 @@ v3d_ra_select_accum(struct v3d_ra_select_callback_data *v3d_ra,
+ 
+ static bool
+ v3d_ra_select_rf(struct v3d_ra_select_callback_data *v3d_ra,
++                 unsigned int node,
+                  BITSET_WORD *regs,
+                  unsigned int *out)
+ {
++        /* In V3D 7.x, try to assign rf0 to temps used as ldunif's dst
++         * so we can avoid turning them into ldunifrf (which uses the
++         * cond field to encode the dst and would prevent merge with
++         * instructions that use cond flags).
++         */
++        if (v3d_ra->nodes->info[node].is_ldunif_dst &&
++            BITSET_TEST(regs, v3d_ra->phys_index)) {
++                assert(v3d_ra->devinfo->ver >= 71);
++                *out = v3d_ra->phys_index;
++                return true;
++        }
++
+         for (int i = 0; i < PHYS_COUNT; i++) {
+                 int phys_off = (v3d_ra->next_phys + i) % PHYS_COUNT;
+                 int phys = v3d_ra->phys_index + phys_off;
+@@ -927,7 +941,7 @@ v3d_ra_select_callback(unsigned int n, BITSET_WORD *regs, void *data)
+                 return reg;
+         }
+ 
+-        if (v3d_ra_select_rf(v3d_ra, regs, &reg))
++        if (v3d_ra_select_rf(v3d_ra, n, regs, &reg))
+                 return reg;
+ 
+         /* If we ran out of physical registers try to assign an accumulator
+@@ -1139,15 +1153,24 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c,
+                                 }
+                         }
+                 } else {
+-                        /* If the instruction has an implicit write
+-                         * we can't allocate its dest to the same
+-                         * register.
++                        /* Make sure we don't allocate the ldvary's
++                         * destination to rf0, since it would clash
++                         * with its implicit write to that register.
+                          */
+-                        if (v3d_qpu_writes_rf0_implicitly(c->devinfo, &inst->qpu)) {
++                        if (inst->qpu.sig.ldvary) {
+                                 ra_add_node_interference(c->g,
+                                                          temp_to_node(c, inst->dst.index),
+                                                          implicit_rf_nodes[0]);
+                         }
++                        /* Flag dst temps from ldunif(a) instructions
++                         * so we can try to assign rf0 to them and avoid
++                         * converting these to ldunif(a)rf.
++                         */
++                        if (inst->qpu.sig.ldunif || inst->qpu.sig.ldunifa) {
++                                const uint32_t dst_n =
++                                        temp_to_node(c, inst->dst.index);
++                                c->nodes.info[dst_n].is_ldunif_dst = true;
++                        }
+                 }
+         }
+ 
+@@ -1222,6 +1245,7 @@ v3d_register_allocate(struct v3d_compile *c)
+          * without accumulators that can have implicit writes to phys regs.
+          */
+         for (uint32_t i = 0; i < num_ra_nodes; i++) {
++                c->nodes.info[i].is_ldunif_dst = false;
+                 if (c->devinfo->has_accumulators && i < ACC_COUNT) {
+                         acc_nodes[i] = i;
+                         ra_set_node_reg(c->g, acc_nodes[i], ACC_INDEX + i);
+diff --git a/src/broadcom/compiler/vir_to_qpu.c b/src/broadcom/compiler/vir_to_qpu.c
+index afc4941fdb1..cbbb495592b 100644
+--- a/src/broadcom/compiler/vir_to_qpu.c
++++ b/src/broadcom/compiler/vir_to_qpu.c
+@@ -345,8 +345,15 @@ v3d_generate_code_block(struct v3d_compile *c,
+                                 assert(qinst->qpu.alu.add.op == V3D_QPU_A_NOP);
+                                 assert(qinst->qpu.alu.mul.op == V3D_QPU_M_NOP);
+ 
+-                                if (!dst.magic ||
+-                                    dst.index != V3D_QPU_WADDR_R5) {
++                                bool use_rf;
++                                if (c->devinfo->has_accumulators) {
++                                        use_rf = !dst.magic ||
++                                                 dst.index != V3D_QPU_WADDR_R5;
++                                } else {
++                                        use_rf = dst.magic || dst.index != 0;
++                                }
++
++                                if (use_rf) {
+                                         assert(c->devinfo->ver >= 40);
+ 
+                                         if (qinst->qpu.sig.ldunif) {
+-- 
+2.39.2
+

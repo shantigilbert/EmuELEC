@@ -11,7 +11,7 @@ diff --git a/cmake/build_configurations/mysql_release.cmake b/cmake/build_config
 index 37a6c45..e2a4ba8 100644
 --- a/cmake/build_configurations/mysql_release.cmake
 +++ b/cmake/build_configurations/mysql_release.cmake
-@@ -124,7 +124,7 @@ ENDIF()
+@@ -147,7 +147,7 @@ ENDIF()
  
  IF(UNIX)
    SET(WITH_EXTRA_CHARSETS all CACHE STRING "")
@@ -19,7 +19,7 @@ index 37a6c45..e2a4ba8 100644
 +  SET(PLUGIN_AUTH_PAM NO CACHE BOOL "")
  
    IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-     IF(NOT IGNORE_AIO_CHECK)
+     FIND_PACKAGE(URING)
 -- 
 2.7.4
 

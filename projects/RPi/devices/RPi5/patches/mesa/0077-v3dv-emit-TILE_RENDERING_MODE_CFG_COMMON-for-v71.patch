@@ -1,0 +1,53 @@
+From 1934ac07df73cb685f6550b8b0f5b4f2ead11396 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Tue, 20 Jul 2021 14:33:00 +0200
+Subject: [PATCH 077/142] v3dv: emit TILE_RENDERING_MODE_CFG_COMMON for v71
+
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c  | 9 ++++++++-
+ src/broadcom/vulkan/v3dvx_meta_common.c | 9 ++++++++-
+ 2 files changed, 16 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index 17b2f46850d..7837b460051 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -850,7 +850,14 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+       config.maximum_bpp_of_all_render_targets = tiling->internal_bpp;
+ #endif
+ #if V3D_VERSION >= 71
+-      unreachable("HW generation 71 not supported yet.");
++      config.log2_tile_width = log2_tile_size(tiling->tile_width);
++      config.log2_tile_height = log2_tile_size(tiling->tile_height);
++      /* FIXME: ideallly we would like next assert on the packet header (as is
++       * general, so also applies to GL). We would need to expand
++       * gen_pack_header for that.
++       */
++      assert(config.log2_tile_width == config.log2_tile_height ||
++             config.log2_tile_width == config.log2_tile_height + 1);
+ #endif
+ 
+       if (ds_attachment_idx != VK_ATTACHMENT_UNUSED) {
+diff --git a/src/broadcom/vulkan/v3dvx_meta_common.c b/src/broadcom/vulkan/v3dvx_meta_common.c
+index 2db07ea7427..e4084d851fc 100644
+--- a/src/broadcom/vulkan/v3dvx_meta_common.c
++++ b/src/broadcom/vulkan/v3dvx_meta_common.c
+@@ -62,7 +62,14 @@ emit_rcl_prologue(struct v3dv_job *job,
+       config.maximum_bpp_of_all_render_targets = tiling->internal_bpp;
+ #endif
+ #if V3D_VERSION >= 71
+-      unreachable("Hardware generation 71 not supported yet.");
++      config.log2_tile_width = log2_tile_size(tiling->tile_width);
++      config.log2_tile_height = log2_tile_size(tiling->tile_height);
++      /* FIXME: ideallly we would like next assert on the packet header (as is
++       * general, so also applies to GL). We would need to expand
++       * gen_pack_header for that.
++       */
++      assert(config.log2_tile_width == config.log2_tile_height ||
++             config.log2_tile_width == config.log2_tile_height + 1);
+ #endif
+       config.internal_depth_type = fb->internal_depth_type;
+    }
+-- 
+2.39.2
+

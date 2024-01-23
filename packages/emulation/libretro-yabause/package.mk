@@ -24,6 +24,9 @@ pre_configure_target() {
       PKG_MAKE_OPTS_TARGET+="-neon"
     fi
     PKG_MAKE_OPTS_TARGET+="-${TARGET_FLOAT}float-${TARGET_CPU}"
+  elif [ "${TARGET_ARCH}" = "aarch64" ]; then
+    sed -i "s|FLAGS += -marm||" ${PKG_BUILD}/yabause/src/libretro/Makefile
+    PKG_MAKE_OPTS_TARGET+=" platform=armv"
   fi
 }
 
@@ -36,4 +39,3 @@ makeinstall_target() {
   cp ${PKG_LIBPATH} ${SYSROOT_PREFIX}/usr/lib/${PKG_LIBNAME}
   echo "set(${PKG_LIBVAR} ${SYSROOT_PREFIX}/usr/lib/${PKG_LIBNAME})" > ${SYSROOT_PREFIX}/usr/lib/cmake/${PKG_NAME}/${PKG_NAME}-config.cmake
 }
-

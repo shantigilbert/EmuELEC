@@ -1,0 +1,369 @@
+From d0f2a99045fa9835fea822ada58a344e2fdc1b13 Mon Sep 17 00:00:00 2001
+From: Jose Maria Casanova Crespo <jmcasanova@igalia.com>
+Date: Thu, 21 Oct 2021 22:04:57 +0200
+Subject: [PATCH 138/142] v3d: Ignore SCANOUT usage flags when not needed under
+ X
+
+These downstream patches force the usage of tiled formats
+when possible, they have been tested for the Rasbperry Pi OS
+desktop enviroment using Mutter+Xserver.
+
+It includes the following 3 patches:
+ - v3d: Add driconf options to rewrite SCANOUT usages
+ - v3d: Check if are under X session
+ - v3d: enable options to ignore SCANOUT flag on resource creation
+
+v3d: Add driconf options to rewrite SCANOUT usages
+
+We create a new eviroment variable V3D_IGNORE_SCANOUT_USAGES
+that will affect v3d_resource_create_with_modifiers so
+SCANOUT usages can be ignored. It can be enabled under X11
+with a compositor so applications are forces to use tiled render
+buffers instead of the default behaviour that uses SCANOUT and
+consume the limited CMA memory in the RPi4.
+
+The two new driconf options modulate the effect on two applications
+Xorg and mutter.
+
+"v3d_maintain_ignorable_scanout": is enabled in mutter, could be used
+in other compositors, the objective is that the enviroment has enable
+the V3D_IGNORE_SCANOUT_USAGES, they aren't ignored in the compositor.
+
+"v3d_is_xserver_process": is used to handle a particular case
+to avoid checking if an Xserver connection is available using XCB
+as in some cases the call stalls the Xserver on boot.
+
+Following patches will use this configuration options to ignore or not
+the SCANOUT usage on v3d_resource_allocation with modifiers.
+
+Upstreaming this patch need to review the effects of:
+ ad50b47a14e9 ("gbm: assume USE_SCANOUT in create_with_modifiers")
+
+v2: driconf for v3d_is_xserver_process is needed under XWayland
+    to avoid XCB connections in the XWayland process.
+
+v3d: Check if are under X session
+
+If we are using Wayland + XWayland, this is considered *not* being under
+X session.
+
+v3d: enable options to ignore SCANOUT flag on resource creation
+
+This is a downstream patch for enabling the usage of more tiled
+buffers in Raspberry OS under an enviroment using mutter and Xorg.
+
+This patch enables the following behaviour in order to reduce the
+number of CMA usage and use tiled layouts because we ignore
+the possible SCANOUT usage of the resource.
+
+This patch makes mutter to not ignore SCANOUT flags because as
+compositor it should allocate linear render buffers suitable for display.
+
+Then if the Xserver has enabled the dmabuf_capable option, the
+buffers backing the windows pixmaps will allocate using modifiers,
+in the patched Xserver downstream making pixmaps exportable will use
+gbm_gbm_bo_create_with_modifiers2 that does not add the SCANOUT flag
+for exporting pixmaps. With the Mutter compositor we didn't find a
+situation were this pixmaps needed to be SCANOUT. But this is not sure,
+but it allows us to not use CMA for every window opened, and having them
+in tiled format saves all linear->tiled conversion for sampling.
+
+Finally to take advantage of using Tiled render buffers for applications
+we can enable in the enviroment V3D_IGNORE_SCANOUT_USAGES so all render
+targes use the tiled UIF format without CMA memory instead of a linear one.
+As the compositor mutter will composite the final surface for display we
+aren't going to use the SCANOUT flag. This only applies if we are under
+an X11 session.
+
+v2: v3d: ignore V3D_IGNORE_SCANOUT if only LINEAR modifier available
+    This is a fixup for the behaviour of ignoring SCANOUT flags
+    so we don't allocate CMA memory on V3D for render targets under
+    X11 as UIF isn't included and only LINEAR is a valid modifier
+    when Xserver is using msdri3. So we cannot ignore the SCANOUT flag.
+    As the Xserver in this situation is limiting the available modifiers
+    to linear, we can identify this case just not ignoring the SCANOUT
+    flag when we can only allocate linear resources.
+---
+ src/gallium/drivers/v3d/driinfo_v3d.h  |  2 +
+ src/gallium/drivers/v3d/meson.build    | 17 +++++---
+ src/gallium/drivers/v3d/v3d_resource.c | 31 ++++++++++++--
+ src/gallium/drivers/v3d/v3d_screen.c   | 59 ++++++++++++++++++++++++++
+ src/gallium/drivers/v3d/v3d_screen.h   |  6 +++
+ src/util/00-mesa-defaults.conf         |  3 ++
+ src/util/driconf.h                     |  8 ++++
+ 7 files changed, 117 insertions(+), 9 deletions(-)
+
+diff --git a/src/gallium/drivers/v3d/driinfo_v3d.h b/src/gallium/drivers/v3d/driinfo_v3d.h
+index 147ad0b49bd..8f989e8aa57 100644
+--- a/src/gallium/drivers/v3d/driinfo_v3d.h
++++ b/src/gallium/drivers/v3d/driinfo_v3d.h
+@@ -2,4 +2,6 @@
+ 
+ DRI_CONF_SECTION_MISCELLANEOUS
+    DRI_CONF_V3D_NONMSAA_TEXTURE_SIZE_LIMIT(false)
++   DRI_CONF_V3D_MAINTAIN_IGNORABLE_SCANOUT(false)
++   DRI_CONF_V3D_IS_XSERVER_PROCESS(false)
+ DRI_CONF_SECTION_END
+diff --git a/src/gallium/drivers/v3d/meson.build b/src/gallium/drivers/v3d/meson.build
+index 289473d2ca1..e47682db1aa 100644
+--- a/src/gallium/drivers/v3d/meson.build
++++ b/src/gallium/drivers/v3d/meson.build
+@@ -61,6 +61,16 @@ endif
+ 
+ v3d_versions = ['33', '42', '71']
+ 
++v3d_deps = [dep_v3dv3, dep_libdrm, dep_valgrind, idep_nir_headers]
++
++if with_platform_x11
++  v3d_deps += dep_xcb
++endif
++
++if with_platform_wayland
++  v3d_deps += dep_wayland_client
++endif
++
+ per_version_libs = []
+ foreach ver : v3d_versions
+   per_version_libs += static_library(
+@@ -72,7 +82,7 @@ foreach ver : v3d_versions
+     ],
+     c_args : [v3d_args, '-DV3D_VERSION=' + ver],
+     gnu_symbol_visibility : 'hidden',
+-    dependencies : [dep_v3dv3, dep_libdrm, dep_valgrind, idep_nir_headers],
++    dependencies : v3d_deps,
+ )
+ 
+ endforeach
+@@ -95,10 +105,7 @@ libv3d = static_library(
+   c_args : [v3d_args],
+   cpp_args : [v3d_args],
+   gnu_symbol_visibility : 'hidden',
+-  dependencies : [
+-    dep_v3dv3, dep_libdrm, dep_valgrind,
+-    idep_nir_headers, idep_mesautil,
+-  ],
++  dependencies : v3d_deps + idep_mesautil,
+   link_with: [per_version_libs],
+ )
+ 
+diff --git a/src/gallium/drivers/v3d/v3d_resource.c b/src/gallium/drivers/v3d/v3d_resource.c
+index a0a210ccad5..46de1b16ae0 100644
+--- a/src/gallium/drivers/v3d/v3d_resource.c
++++ b/src/gallium/drivers/v3d/v3d_resource.c
+@@ -439,7 +439,7 @@ v3d_resource_get_handle(struct pipe_screen *pscreen,
+         case WINSYS_HANDLE_TYPE_SHARED:
+                 return v3d_bo_flink(bo, &whandle->handle);
+         case WINSYS_HANDLE_TYPE_KMS:
+-                if (screen->ro) {
++                if (screen->ro && rsc->scanout) {
+                         if (renderonly_get_handle(rsc->scanout, whandle)) {
+                                 whandle->stride = rsc->slices[0].stride;
+                                 return true;
+@@ -785,6 +785,27 @@ v3d_resource_setup(struct pipe_screen *pscreen,
+         return rsc;
+ }
+ 
++static bool
++v3d_resource_should_scanout(struct pipe_screen *pscreen,
++                            const struct pipe_resource *tmpl,
++                            const uint64_t *modifiers,
++                            int count)
++{
++        struct v3d_screen *screen = v3d_screen(pscreen);
++
++        if (tmpl->bind & PIPE_BIND_SCANOUT) {
++                if (screen->maintain_ignorable_scanout)
++                        return true;
++                if (screen->has_x_session && screen->ignore_scanout_usages) {
++                        if (drm_find_modifier(DRM_FORMAT_MOD_BROADCOM_UIF,
++                                              modifiers, count))
++                                return false;
++                }
++                return true;
++        }
++        return false;
++}
++
+ static struct pipe_resource *
+ v3d_resource_create_with_modifiers(struct pipe_screen *pscreen,
+                                    const struct pipe_resource *tmpl,
+@@ -798,6 +819,8 @@ v3d_resource_create_with_modifiers(struct pipe_screen *pscreen,
+         struct pipe_resource *prsc = &rsc->base;
+         /* Use a tiled layout if we can, for better 3D performance. */
+         bool should_tile = true;
++        bool should_scanout = v3d_resource_should_scanout(pscreen, tmpl,
++                                                          modifiers, count);
+ 
+         assert(tmpl->target != PIPE_BUFFER ||
+                (tmpl->format == PIPE_FORMAT_NONE ||
+@@ -827,7 +850,7 @@ v3d_resource_create_with_modifiers(struct pipe_screen *pscreen,
+         /* If using the old-school SCANOUT flag, we don't know what the screen
+          * might support other than linear. Just force linear.
+          */
+-        if (tmpl->bind & PIPE_BIND_SCANOUT)
++        if ((tmpl->bind & PIPE_BIND_SCANOUT) && should_scanout)
+                 should_tile = false;
+ 
+         /* No user-specified modifier; determine our own. */
+@@ -849,7 +872,7 @@ v3d_resource_create_with_modifiers(struct pipe_screen *pscreen,
+ 
+         v3d_setup_slices(rsc, 0, tmpl->bind & PIPE_BIND_SHARED);
+ 
+-        if (screen->ro && (tmpl->bind & PIPE_BIND_SCANOUT)) {
++        if (screen->ro && should_scanout) {
+                 struct winsys_handle handle;
+                 struct pipe_resource scanout_tmpl = {
+                         .target = prsc->target,
+@@ -979,7 +1002,7 @@ v3d_resource_from_handle(struct pipe_screen *pscreen,
+                  }
+         }
+ 
+-        if (screen->ro) {
++        if (screen->ro && !rsc->tiled) {
+                 /* Make sure that renderonly has a handle to our buffer in the
+                  * display's fd, so that a later renderonly_get_handle()
+                  * returns correct handles or GEM names.
+diff --git a/src/gallium/drivers/v3d/v3d_screen.c b/src/gallium/drivers/v3d/v3d_screen.c
+index 2225edf85bd..1d4f619d710 100644
+--- a/src/gallium/drivers/v3d/v3d_screen.c
++++ b/src/gallium/drivers/v3d/v3d_screen.c
+@@ -47,6 +47,42 @@
+ #include "compiler/v3d_compiler.h"
+ #include "drm-uapi/drm_fourcc.h"
+ 
++#ifdef HAVE_WAYLAND_PLATFORM
++#include <wayland-client.h>
++#endif
++
++#ifdef HAVE_X11_PLATFORM
++#include <xcb/xcb.h>
++#endif
++
++static bool
++check_x_session()
++{
++        bool xcb_connection = false;
++
++#ifdef HAVE_WAYLAND_PLATFORM
++        struct wl_display *display;
++
++        display = wl_display_connect(NULL);
++
++        if (display) {
++                wl_display_disconnect(display);
++                return xcb_connection;
++        }
++#endif
++
++#ifdef HAVE_X11_PLATFORM
++        xcb_connection_t *conn;
++
++        conn = xcb_connect(NULL, NULL);
++
++        if (!xcb_connection_has_error(conn))
++                xcb_connection = true;
++        xcb_disconnect(conn);
++#endif
++        return xcb_connection;
++}
++
+ static const char *
+ v3d_screen_get_name(struct pipe_screen *pscreen)
+ {
+@@ -945,6 +981,29 @@ v3d_screen_create(int fd, const struct pipe_screen_config *config,
+                 v3d_has_feature(screen, DRM_V3D_PARAM_SUPPORTS_CACHE_FLUSH);
+         screen->has_perfmon = v3d_has_feature(screen, DRM_V3D_PARAM_SUPPORTS_PERFMON);
+ 
++        screen->ignore_scanout_usages = getenv("V3D_IGNORE_SCANOUT_USAGES");
++
++        const char *is_xserver_process =
++                "v3d_is_xserver_process";
++        screen->is_xserver_process =
++                driCheckOption(config->options,
++                               is_xserver_process,
++                               DRI_BOOL) &&
++                driQueryOptionb(config->options,
++                                is_xserver_process);
++
++        const char *maintain_ignorable_scanout_name =
++                "v3d_maintain_ignorable_scanout";
++        screen->maintain_ignorable_scanout =
++                driCheckOption(config->options,
++                               maintain_ignorable_scanout_name,
++                               DRI_BOOL) &&
++                driQueryOptionb(config->options,
++                                maintain_ignorable_scanout_name);
++
++        screen->has_x_session = !screen->is_xserver_process &&
++                                check_x_session();
++
+         v3d_fence_init(screen);
+ 
+         v3d_process_debug_variable();
+diff --git a/src/gallium/drivers/v3d/v3d_screen.h b/src/gallium/drivers/v3d/v3d_screen.h
+index 1da9b83c965..c0f22707075 100644
+--- a/src/gallium/drivers/v3d/v3d_screen.h
++++ b/src/gallium/drivers/v3d/v3d_screen.h
+@@ -83,6 +83,12 @@ struct v3d_screen {
+         bool has_cache_flush;
+         bool has_perfmon;
+         bool nonmsaa_texture_size_limit;
++        bool ignore_scanout_usages;
++        bool is_xserver_process;
++        bool maintain_ignorable_scanout;
++
++        /* Are we running in an X session? */
++        bool has_x_session;
+ 
+         struct v3d_simulator_file *sim_file;
+ 
+diff --git a/src/util/00-mesa-defaults.conf b/src/util/00-mesa-defaults.conf
+index 948c1ef78ba..2de7505521c 100644
+--- a/src/util/00-mesa-defaults.conf
++++ b/src/util/00-mesa-defaults.conf
+@@ -77,6 +77,7 @@ TODO: document the other workarounds.
+         <!-- using vulkan wsi for xservers causes deadlocks -->
+         <application name="Xwayland" executable="Xwayland">
+             <option name="disable_xcb_surface" value="true" />
++            <option name="v3d_is_xserver_process" value="true" />
+         </application>
+ 
+         <application name="Unigine Heaven (32-bit)" executable="heaven_x86">
+@@ -767,6 +768,7 @@ TODO: document the other workarounds.
+         <application name="mutter" executable="mutter">
+             <option name="adaptive_sync" value="false" />
+             <option name="v3d_nonmsaa_texture_size_limit" value="true" />
++            <option name="v3d_maintain_ignorable_scanout" value="true" />
+         </application>
+         <application name="muffin" executable="muffin">
+             <option name="adaptive_sync" value="false" />
+@@ -818,6 +820,7 @@ TODO: document the other workarounds.
+         </application>
+         <application name="Xorg" executable="Xorg">
+             <option name="v3d_nonmsaa_texture_size_limit" value="true" />
++            <option name="v3d_is_xserver_process" value="true" />
+         </application>
+ 
+         <application name="gfxbench" executable="testfw_app">
+diff --git a/src/util/driconf.h b/src/util/driconf.h
+index 042ee27d9a3..56511f6615e 100644
+--- a/src/util/driconf.h
++++ b/src/util/driconf.h
+@@ -521,6 +521,14 @@
+    DRI_CONF_OPT_B(v3d_nonmsaa_texture_size_limit, def, \
+                   "Report the non-MSAA-only texture size limit")
+ 
++#define DRI_CONF_V3D_IS_XSERVER_PROCESS(def) \
++   DRI_CONF_OPT_B(v3d_is_xserver_process, def, \
++                  "Identifies if the application is the Xserver.")
++
++#define DRI_CONF_V3D_MAINTAIN_IGNORABLE_SCANOUT(def)   \
++   DRI_CONF_OPT_B(v3d_maintain_ignorable_scanout, def, \
++                  "Maintain SCANOUT usage on resource allocations when the environment allows ignoring SCANOUT usage.")
++
+ /**
+  * \brief virgl specific configuration options
+  */
+-- 
+2.39.2
+

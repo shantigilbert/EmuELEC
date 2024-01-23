@@ -1,0 +1,52 @@
+From 70456e27b039174f767010f96d9b649e5e42d84f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Tue, 19 Oct 2021 23:52:30 +0200
+Subject: [PATCH 049/142] broadcom/compiler: update payload registers handling
+ when computing live intervals
+
+As for v71 the payload registers are not the same. Specifically now
+rf3 is used as payload register, so this is needed to avoid rf3 being
+selected as a instruction dst by the register allocator, overwriting
+the payload value that could be still used.
+---
+ src/broadcom/compiler/vir_live_variables.c | 21 +++++++++++++--------
+ 1 file changed, 13 insertions(+), 8 deletions(-)
+
+diff --git a/src/broadcom/compiler/vir_live_variables.c b/src/broadcom/compiler/vir_live_variables.c
+index 575b0481dc8..87a7e2b5b81 100644
+--- a/src/broadcom/compiler/vir_live_variables.c
++++ b/src/broadcom/compiler/vir_live_variables.c
+@@ -179,17 +179,22 @@ vir_setup_def_use(struct v3d_compile *c)
+                                 flags_inst = NULL;
+                         }
+ 
+-                        /* Payload registers: r0/1/2 contain W, centroid W,
+-                         * and Z at program start.  Register allocation will
+-                         * force their nodes to R0/1/2.
++                        /* Payload registers: for fragment shaders, W,
++                         * centroid W, and Z will be initialized at r0/1/2
++                         * until v42, or r1/r2/r3 from v71.
++                         *
++                         * For compute shaders, payload would be r0/r2 until
++                         * v42, r3/r2 from v71
++                         *
++                         * Register allocation will force their nodes to those
++                         * registers.
+                          */
+                         if (inst->src[0].file == QFILE_REG) {
+-                                switch (inst->src[0].index) {
+-                                case 0:
+-                                case 1:
+-                                case 2:
++                                uint32_t min_payload_r = c->devinfo->ver >= 71 ? 1 : 0;
++                                uint32_t max_payload_r = c->devinfo->ver >= 71 ? 3 : 2;
++                                if (inst->src[0].index >= min_payload_r ||
++                                    inst->src[0].index <= max_payload_r) {
+                                         c->temp_start[inst->dst.index] = 0;
+-                                        break;
+                                 }
+                         }
+ 
+-- 
+2.39.2
+

@@ -1,0 +1,72 @@
+From abad3ebbbea8de81c7f92d5caea3da94d54b0614 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Thu, 26 Jan 2023 11:39:43 +0100
+Subject: [PATCH 04/21] WinSystemAmlogicGLES: clean up GLES references on
+ window destroy
+
+---
+ .../amlogic/WinSystemAmlogicGLESContext.cpp    | 18 +++++++++++++-----
+ .../amlogic/WinSystemAmlogicGLESContext.h      |  2 ++
+ 2 files changed, 15 insertions(+), 5 deletions(-)
+
+diff --git a/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp b/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp
+index f6cbac696b..39fbaf03a1 100644
+--- a/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp
++++ b/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp
+@@ -58,17 +58,19 @@ bool CWinSystemAmlogicGLESContext::InitWindowSystem()
+   return true;
+ }
+ 
++bool CWinSystemAmlogicGLESContext::DestroyWindowSystem()
++{
++  m_pGLContext.DestroyContext();
++  m_pGLContext.Destroy();
++  return CWinSystemAmlogic::DestroyWindowSystem();
++}
++
+ bool CWinSystemAmlogicGLESContext::CreateNewWindow(const std::string& name,
+                                                bool fullScreen,
+                                                RESOLUTION_INFO& res)
+ {
+   m_pGLContext.DestroySurface();
+ 
+-  if (!CWinSystemAmlogic::DestroyWindow())
+-  {
+-    return false;
+-  }
+-
+   if (!CWinSystemAmlogic::CreateNewWindow(name, fullScreen, res))
+   {
+     return false;
+@@ -95,6 +97,12 @@ bool CWinSystemAmlogicGLESContext::CreateNewWindow(const std::string& name,
+   return true;
+ }
+ 
++bool CWinSystemAmlogicGLESContext::DestroyWindow()
++{
++  m_pGLContext.DestroySurface();
++  return CWinSystemAmlogic::DestroyWindow();
++}
++
+ bool CWinSystemAmlogicGLESContext::ResizeWindow(int newWidth, int newHeight, int newLeft, int newTop)
+ {
+   CRenderSystemGLES::ResetRenderSystem(newWidth, newHeight);
+diff --git a/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.h b/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.h
+index d2f0e84e90..7d7467ee1a 100644
+--- a/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.h
++++ b/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.h
+@@ -32,9 +32,11 @@ public:
+   // Implementation of CWinSystemBase via CWinSystemAmlogic
+   CRenderSystemBase *GetRenderSystem() override { return this; }
+   bool InitWindowSystem() override;
++  bool DestroyWindowSystem() override;
+   bool CreateNewWindow(const std::string& name,
+                        bool fullScreen,
+                        RESOLUTION_INFO& res) override;
++  bool DestroyWindow() override;
+ 
+   bool ResizeWindow(int newWidth, int newHeight, int newLeft, int newTop) override;
+   bool SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool blankOtherDisplays) override;
+-- 
+2.43.0
+

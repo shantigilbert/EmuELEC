@@ -1,0 +1,144 @@
+From 9b2dfe0286212aba3687a06023cc5b4ce9944ee0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Mon, 23 Aug 2021 02:18:43 +0200
+Subject: [PATCH 018/142] broadcom/compiler: phys index depends on hw version
+
+For 7.1 there are not accumulators. So we replace the macro with a
+function call.
+---
+ src/broadcom/compiler/vir_register_allocate.c | 39 ++++++++++++++-----
+ 1 file changed, 29 insertions(+), 10 deletions(-)
+
+diff --git a/src/broadcom/compiler/vir_register_allocate.c b/src/broadcom/compiler/vir_register_allocate.c
+index aa9473d124b..a358b616e13 100644
+--- a/src/broadcom/compiler/vir_register_allocate.c
++++ b/src/broadcom/compiler/vir_register_allocate.c
+@@ -28,9 +28,19 @@
+ 
+ #define ACC_INDEX     0
+ #define ACC_COUNT     6
+-#define PHYS_INDEX    (ACC_INDEX + ACC_COUNT)
+-#define PHYS_COUNT    64
+ 
++#define PHYS_COUNT 64
++
++static uint8_t
++get_phys_index(const struct v3d_device_info *devinfo)
++{
++        if (devinfo->has_accumulators)
++                return ACC_INDEX + ACC_COUNT;
++        else
++                return 0;
++}
++
++/* ACC as accumulator */
+ #define CLASS_BITS_PHYS   (1 << 0)
+ #define CLASS_BITS_ACC    (1 << 1)
+ #define CLASS_BITS_R5     (1 << 4)
+@@ -771,9 +781,11 @@ v3d_spill_reg(struct v3d_compile *c, int *acc_nodes, int spill_temp)
+ }
+ 
+ struct v3d_ra_select_callback_data {
++        uint32_t phys_index;
+         uint32_t next_acc;
+         uint32_t next_phys;
+         struct v3d_ra_node_info *nodes;
++        const struct v3d_device_info *devinfo;
+ };
+ 
+ /* Choosing accumulators improves chances of merging QPU instructions
+@@ -794,7 +806,7 @@ v3d_ra_favor_accum(struct v3d_ra_select_callback_data *v3d_ra,
+         static const int available_rf_threshold = 5;
+         int available_rf = 0 ;
+         for (int i = 0; i < PHYS_COUNT; i++) {
+-                if (BITSET_TEST(regs, PHYS_INDEX + i))
++                if (BITSET_TEST(regs, v3d_ra->phys_index + i))
+                         available_rf++;
+                 if (available_rf >= available_rf_threshold)
+                         break;
+@@ -854,7 +866,7 @@ v3d_ra_select_rf(struct v3d_ra_select_callback_data *v3d_ra,
+ {
+         for (int i = 0; i < PHYS_COUNT; i++) {
+                 int phys_off = (v3d_ra->next_phys + i) % PHYS_COUNT;
+-                int phys = PHYS_INDEX + phys_off;
++                int phys = v3d_ra->phys_index + phys_off;
+ 
+                 if (BITSET_TEST(regs, phys)) {
+                         v3d_ra->next_phys = phys_off + 1;
+@@ -896,8 +908,9 @@ vir_init_reg_sets(struct v3d_compiler *compiler)
+          * register file can be divided up for fragment shader threading.
+          */
+         int max_thread_index = (compiler->devinfo->ver >= 40 ? 2 : 3);
++        uint8_t phys_index = get_phys_index(compiler->devinfo);
+ 
+-        compiler->regs = ra_alloc_reg_set(compiler, PHYS_INDEX + PHYS_COUNT,
++        compiler->regs = ra_alloc_reg_set(compiler, phys_index + PHYS_COUNT,
+                                           false);
+         if (!compiler->regs)
+                 return false;
+@@ -912,8 +925,8 @@ vir_init_reg_sets(struct v3d_compiler *compiler)
+                 compiler->reg_class_phys[threads] =
+                         ra_alloc_contig_reg_class(compiler->regs, 1);
+ 
+-                for (int i = PHYS_INDEX;
+-                     i < PHYS_INDEX + (PHYS_COUNT >> threads); i++) {
++                for (int i = phys_index;
++                     i < phys_index + (PHYS_COUNT >> threads); i++) {
+                         ra_class_add_reg(compiler->reg_class_phys_or_acc[threads], i);
+                         ra_class_add_reg(compiler->reg_class_phys[threads], i);
+                         ra_class_add_reg(compiler->reg_class_any[threads], i);
+@@ -1026,7 +1039,8 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+                         assert(inst->dst.file == QFILE_TEMP);
+                         uint32_t node = temp_to_node(c, inst->dst.index);
+                         ra_set_node_reg(c->g, node,
+-                                        PHYS_INDEX + inst->src[0].index);
++                                        get_phys_index(c->devinfo) +
++                                        inst->src[0].index);
+                         break;
+                 }
+                 }
+@@ -1086,13 +1100,17 @@ v3d_register_allocate(struct v3d_compile *c)
+                                           c->num_temps + ACC_COUNT),
+         };
+ 
++        uint32_t phys_index = get_phys_index(c->devinfo);
++
+         struct v3d_ra_select_callback_data callback_data = {
++                .phys_index = phys_index,
+                 .next_acc = 0,
+                 /* Start at RF3, to try to keep the TLB writes from using
+                  * RF0-2.
+                  */
+                 .next_phys = 3,
+                 .nodes = &c->nodes,
++                .devinfo = c->devinfo,
+         };
+ 
+         vir_calculate_live_intervals(c);
+@@ -1139,6 +1157,7 @@ v3d_register_allocate(struct v3d_compile *c)
+         vir_for_each_inst_inorder(inst, c) {
+                 inst->ip = ip++;
+                 update_graph_and_reg_classes_for_inst(c, acc_nodes, inst);
++
+         }
+ 
+         /* Set the register classes for all our temporaries in the graph */
+@@ -1202,13 +1221,13 @@ v3d_register_allocate(struct v3d_compile *c)
+         temp_registers = calloc(c->num_temps, sizeof(*temp_registers));
+         for (uint32_t i = 0; i < c->num_temps; i++) {
+                 int ra_reg = ra_get_node_reg(c->g, temp_to_node(c, i));
+-                if (ra_reg < PHYS_INDEX) {
++                if (ra_reg < phys_index) {
+                         temp_registers[i].magic = true;
+                         temp_registers[i].index = (V3D_QPU_WADDR_R0 +
+                                                    ra_reg - ACC_INDEX);
+                 } else {
+                         temp_registers[i].magic = false;
+-                        temp_registers[i].index = ra_reg - PHYS_INDEX;
++                        temp_registers[i].index = ra_reg - phys_index;
+                 }
+         }
+ 
+-- 
+2.39.2
+

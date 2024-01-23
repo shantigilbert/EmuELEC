@@ -1,0 +1,39 @@
+From ecc1a5fa6b09a684a1e831c342121ec417f1a101 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Fri, 22 Oct 2021 14:26:29 +0200
+Subject: [PATCH 120/142] v3d: handle Z clipping in v71
+
+---
+ src/gallium/drivers/v3d/v3dx_emit.c | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/v3d/v3dx_emit.c b/src/gallium/drivers/v3d/v3dx_emit.c
+index 58c886bb29e..75751dc9ab6 100644
+--- a/src/gallium/drivers/v3d/v3dx_emit.c
++++ b/src/gallium/drivers/v3d/v3dx_emit.c
+@@ -539,8 +539,21 @@ v3dX(emit_state)(struct pipe_context *pctx)
+                                 v3d_line_smoothing_enabled(v3d) ?
+                                 V3D_LINE_RASTERIZATION_PERP_END_CAPS :
+                                 V3D_LINE_RASTERIZATION_DIAMOND_EXIT;
+-                }
+ 
++#if V3D_VERSION >= 71
++                        /* The following follows the logic implemented at v3dv
++                         * plus the definition of depth_clip_near/far and
++                         * depth_clamp.
++                         *
++                         * Note: some extensions are not supported by v3d
++                         * (like ARB_depth_clamp) that would affect this, but
++                         * the values on rasterizer are taking that into
++                         * account.
++                         */
++                        config.z_clipping_mode = v3d->rasterizer->base.depth_clip_near ||
++                           v3d->rasterizer->base.depth_clip_far;
++#endif
++                }
+         }
+ 
+         if (v3d->dirty & V3D_DIRTY_RASTERIZER &&
+-- 
+2.39.2
+

@@ -1,0 +1,131 @@
+From 40f2d0145580ae8c20a431351b4dbe74aae1f928 Mon Sep 17 00:00:00 2001
+From: Arthur Liberman <arthur_liberman@hotmail.com>
+Date: Thu, 28 Dec 2023 00:44:36 +0200
+Subject: [PATCH 17/21] AMLCodec: Restart codec in `dec_mode=STREAM_TYPE_FRAME`
+ on DoVi P7 MEL Dolby Vision Profile 7 Minimum Enhancement Layer (MEL) can't
+ use `STREAM_TYPE_STREAM` decoder mode. The kernel can detect MEL content, it
+ sets `is_mel=true` in sysfs, we detect it, and restart the codec in the
+ correct mode
+
+---
+ .../VideoPlayer/DVDCodecs/Video/AMLCodec.cpp  | 26 ++++++++++++++++++-
+ .../VideoPlayer/DVDCodecs/Video/AMLCodec.h    |  2 ++
+ .../DVDCodecs/Video/DVDVideoCodecAmlogic.cpp  | 12 ++++++++-
+ .../DVDCodecs/Video/DVDVideoCodecAmlogic.h    |  1 +
+ 4 files changed, 39 insertions(+), 2 deletions(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+index dad0690ef2..3962cb904d 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+@@ -1814,6 +1814,8 @@ CAMLCodec::CAMLCodec(CProcessInfo &processInfo)
+   , m_bufferIndex(-1)
+   , m_state(0)
+   , m_processInfo(processInfo)
++  , m_is_dv_p7_mel(false)
++  , m_dolby_vision_wait_delay(0)
+ {
+   am_private = new am_private_t;
+   memset(am_private, 0, sizeof(am_private_t));
+@@ -2020,13 +2022,20 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
+     }
+ 
+     am_private->gcodec.dv_enable = 1;
+-    if (hints.dovi.dv_profile == 7 && CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
++    if (!m_is_dv_p7_mel && hints.dovi.dv_profile == 7 && CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
+         CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI) == 0)
+     {
+       CSysfsPath amdolby_vision_debug{"/sys/class/amdolby_vision/debug"};
+       if (amdolby_vision_debug.Exists())
+         amdolby_vision_debug.Set("enable_fel 1");
+       am_private->gcodec.dec_mode  = STREAM_TYPE_STREAM;
++
++      CSysfsPath dolby_vision_wait_delay{"/sys/module/amdolby_vision/parameters/dolby_vision_wait_delay"};
++      if (dolby_vision_wait_delay.Exists())
++      {
++        m_dolby_vision_wait_delay = dolby_vision_wait_delay.Get<unsigned int>().value();
++        CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder DoVi P7 MEL detection frame delay got set to {:d} frames", m_dolby_vision_wait_delay);
++      }
+     }
+   }
+   else if (device_support_dv)
+@@ -2642,6 +2651,21 @@ CDVDVideoCodec::VCReturn CAMLCodec::GetPicture(VideoPicture *pVideoPicture)
+     CLog::Log(LOGDEBUG, LOGVIDEO, "CAMLCodec::GetPicture: index: {:d}, pts: {:.3f}, dur:{:.3f}ms ar:{:.2f} elf:{:d}ms",
+       m_bufferIndex, pVideoPicture->pts / DVD_TIME_BASE, pVideoPicture->iDuration / 1000, m_hints.aspect, elapsed_since_last_frame.count());
+ 
++    if (m_dolby_vision_wait_delay > 0 && !m_is_dv_p7_mel)
++    {
++      m_dolby_vision_wait_delay--;
++      CSysfsPath is_mel{"/sys/module/amdolby_vision/parameters/is_mel"};
++      if (is_mel.Exists())
++      {
++        if (is_mel.Get<char>().value() == 'Y')
++        {
++          CLog::Log(LOGDEBUG, LOGVIDEO, "CAMLCodec::GetPicture: DoVi P7 MEL content detected, request to reopen decoder");
++          m_is_dv_p7_mel = true;
++          return CDVDVideoCodec::VC_REOPEN;
++        }
++      }
++    }
++
+     return CDVDVideoCodec::VC_PICTURE;
+   }
+   else if (m_drain)
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.h b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.h
+index cfc6fafe31..2fe9212845 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.h
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.h
+@@ -109,6 +109,8 @@ private:
+   uint64_t         m_cur_pts;
+   uint64_t         m_last_pts;
+   uint32_t         m_bufferIndex;
++  bool             m_is_dv_p7_mel;
++  uint32_t         m_dolby_vision_wait_delay;
+ 
+   CRect            m_dst_rect;
+   CRect            m_display_rect;
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp
+index 12f81442d7..c2e8518f2d 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp
+@@ -436,6 +436,12 @@ void CDVDVideoCodecAmlogic::Reset(void)
+     m_bitstream->ResetStartDecode();
+ }
+ 
++void CDVDVideoCodecAmlogic::Reopen(void)
++{
++  if (m_Codec && !m_Codec->OpenDecoder(m_hints))
++    CLog::Log(LOGERROR, "{}: Failed to reopen Amlogic Codec", __MODULE_NAME__);
++}
++
+ CDVDVideoCodec::VCReturn CDVDVideoCodecAmlogic::GetPicture(VideoPicture* pVideoPicture)
+ {
+   if (!m_Codec)
+@@ -443,7 +449,11 @@ CDVDVideoCodec::VCReturn CDVDVideoCodecAmlogic::GetPicture(VideoPicture* pVideoP
+ 
+   VCReturn retVal = m_Codec->GetPicture(&m_videobuffer);
+ 
+-  if (retVal == VC_PICTURE)
++  if (retVal == VC_REOPEN)
++  {
++    m_Codec->CloseDecoder();
++  }
++  else if (retVal == VC_PICTURE)
+   {
+     pVideoPicture->SetParams(m_videobuffer);
+ 
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.h b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.h
+index 8a1d66e485..b0d422909a 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.h
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.h
+@@ -70,6 +70,7 @@ public:
+   virtual bool Open(CDVDStreamInfo &hints, CDVDCodecOptions &options) override;
+   virtual bool AddData(const DemuxPacket &packet) override;
+   virtual void Reset() override;
++  virtual void Reopen() override;
+   virtual VCReturn GetPicture(VideoPicture* pVideoPicture) override;
+   virtual void SetSpeed(int iSpeed) override;
+   virtual void SetCodecControl(int flags) override;
+-- 
+2.43.0
+

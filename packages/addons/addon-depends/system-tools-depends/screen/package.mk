@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="screen"
-PKG_VERSION="4.9.0"
-PKG_SHA256="f9335281bb4d1538ed078df78a20c2f39d3af9a4e91c57d084271e0289c730f4"
+PKG_VERSION="4.9.1"
+PKG_SHA256="26cef3e3c42571c0d484ad6faf110c5c15091fbf872b06fa7aa4766c7405ac69"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.gnu.org/software/screen/"
 PKG_URL="http://ftpmirror.gnu.org/screen/${PKG_NAME}-${PKG_VERSION}.tar.gz"

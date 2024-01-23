@@ -1,9 +1,0 @@
-{
-	"enabled": 0,
-	"ondemand": 0,
-	"path": "/storage/.kodi/userdata/addon_data/service.tvheadend43/cache/timeshift",
-	"unlimited_period": 0,
-	"max_period": 3600,
-	"unlimited_size": 0,
-	"max_size": 3072
-}

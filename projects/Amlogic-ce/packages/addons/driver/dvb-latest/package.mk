@@ -42,7 +42,7 @@ pre_make_target() {
 make_target() {
   cp -RP $(get_build_dir media_tree)/* ${PKG_BUILD}/linux
 
-  if [ "${DEVICE}" = "Amlogic-ng" ]; then
+  if [[ "${DEVICE}" = "Amlogic-ng"* ]]; then
     cp -Lr $(get_build_dir media_tree_aml)/* ${PKG_BUILD}/linux
 
     # compile modules

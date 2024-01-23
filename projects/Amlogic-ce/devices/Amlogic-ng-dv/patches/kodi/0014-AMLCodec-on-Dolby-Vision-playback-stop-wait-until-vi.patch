@@ -1,0 +1,57 @@
+From c405fada82ff51a770e18ef5b84b3ac695051d73 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Fri, 21 Apr 2023 10:39:45 +0200
+Subject: [PATCH 14/21] AMLCodec: on Dolby Vision playback stop wait until
+ video is off The driver need first to clean up on video off.
+
+---
+ .../VideoPlayer/DVDCodecs/Video/AMLCodec.cpp  | 19 +++++++++++++++----
+ 1 file changed, 15 insertions(+), 4 deletions(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+index 1609177451..dad0690ef2 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+@@ -2007,7 +2007,7 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
+   if (dv_enable)
+   {
+     // enable Dolby Vision
+-    CSysfsPath("/sys/module/amdolby_vision/parameters/dolby_vision_enable", 1);
++    CSysfsPath("/sys/module/amdolby_vision/parameters/dolby_vision_enable", 'Y');
+ 
+     // force player led mode when enabled
+     CSysfsPath dolby_vision_flags{"/sys/module/amdolby_vision/parameters/dolby_vision_flags"};
+@@ -2032,7 +2032,7 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
+   else if (device_support_dv)
+   {
+     // disable Dolby Vision
+-    CSysfsPath("/sys/module/amdolby_vision/parameters/dolby_vision_enable", 0);
++    CSysfsPath("/sys/module/amdolby_vision/parameters/dolby_vision_enable", 'N');
+   }
+ 
+   // DEC_CONTROL_FLAG_DISABLE_FAST_POC
+@@ -2293,8 +2293,19 @@ void CAMLCodec::CloseDecoder()
+   // return tsync to default so external apps work
+   CSysfsPath("/sys/class/tsync/enable", 1);
+   // disable Dolby Vision driver
+-  //CSysfsPath("/sys/module/amdolby_vision/parameters/dolby_vision_enable", 0);
+-  // don't disable it as it would not switch back to non DV mode anymore
++  CSysfsPath dolby_vision_enable{"/sys/module/amdolby_vision/parameters/dolby_vision_enable"};
++  if (dolby_vision_enable.Exists() && StringUtils::EqualsNoCase(dolby_vision_enable.Get<std::string>().value(), "Y"))
++  {
++    CSysfsPath dv_video_on{"/sys/class/amdolby_vision/dv_video_on"};
++    if (dv_video_on.Exists())
++    {
++      std::chrono::time_point<std::chrono::system_clock> now(std::chrono::system_clock::now());
++      while(dv_video_on.Get<int>().value() == 1 && (std::chrono::system_clock::now() - now) < std::chrono::seconds(m_decoder_timeout))
++        usleep(10000); // wait 10ms
++    }
++    dolby_vision_enable.Set('N');
++  }
++
+   CSysfsPath amdolby_vision_debug{"/sys/class/amdolby_vision/debug"};
+   if (amdolby_vision_debug.Exists())
+     amdolby_vision_debug.Set("enable_fel 0");
+-- 
+2.43.0
+

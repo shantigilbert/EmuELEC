@@ -1,0 +1,51 @@
+From c6b60ee47c50474030f8a0a92bd4c6a071f926dc Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 14 Feb 2023 10:09:53 +0100
+Subject: [PATCH 103/142] v3dv: fix depth clipping then Z scale is too small in
+ V3D 7.x
+
+When the Z scale is too small guardband clipping may not clip
+correctly, so disable it, which is a new option in V3D 7.x.
+
+This fixes this test in V3D 7.x without needing any workarounds:
+dEQP-VK.draw.renderpass.inverted_depth_ranges.nodepthclamp_deltazero
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index f7c13a22423..3566649aafd 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -1363,10 +1363,28 @@ v3dX(cmd_buffer_emit_viewport)(struct v3dv_cmd_buffer *cmd_buffer)
+    v3dv_cmd_buffer_state_get_viewport_z_xform(&cmd_buffer->state, 0,
+                                               &translate_z, &scale_z);
+ 
++#if V3D_VERSION == 42
+    cl_emit(&job->bcl, CLIPPER_Z_SCALE_AND_OFFSET, clip) {
+       clip.viewport_z_offset_zc_to_zs = translate_z;
+       clip.viewport_z_scale_zc_to_zs = scale_z;
+    }
++#endif
++
++#if V3D_VERSION >= 71
++   /* If the Z scale is too small guardband clipping may not clip correctly */
++   if (fabsf(scale_z) < 0.01f) {
++      cl_emit(&job->bcl, CLIPPER_Z_SCALE_AND_OFFSET_NO_GUARDBAND, clip) {
++         clip.viewport_z_offset_zc_to_zs = translate_z;
++         clip.viewport_z_scale_zc_to_zs = scale_z;
++      }
++   } else {
++      cl_emit(&job->bcl, CLIPPER_Z_SCALE_AND_OFFSET, clip) {
++         clip.viewport_z_offset_zc_to_zs = translate_z;
++         clip.viewport_z_scale_zc_to_zs = scale_z;
++      }
++   }
++#endif
++
+    cl_emit(&job->bcl, CLIPPER_Z_MIN_MAX_CLIPPING_PLANES, clip) {
+       /* Vulkan's default Z NDC is [0..1]. If 'negative_one_to_one' is enabled,
+        * we are using OpenGL's [-1, 1] instead.
+-- 
+2.39.2
+

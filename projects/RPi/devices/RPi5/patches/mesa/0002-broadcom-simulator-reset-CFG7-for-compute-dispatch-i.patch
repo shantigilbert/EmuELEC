@@ -1,0 +1,30 @@
+From 9e85edd1b347b0e779b393f463f42044a720bcff Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 28 Sep 2021 13:16:49 +0200
+Subject: [PATCH 002/142] broadcom/simulator: reset CFG7 for compute dispatch
+ in v71
+
+This register is new in 7.x, it doesn't seem that we need to
+do anything specific for now, but let's make sure it is reset
+every time.
+---
+ src/broadcom/simulator/v3dx_simulator.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/broadcom/simulator/v3dx_simulator.c b/src/broadcom/simulator/v3dx_simulator.c
+index 723796b16c9..f23b0538de3 100644
+--- a/src/broadcom/simulator/v3dx_simulator.c
++++ b/src/broadcom/simulator/v3dx_simulator.c
+@@ -227,6 +227,9 @@ v3dX(simulator_submit_csd_ioctl)(struct v3d_hw *v3d,
+         V3D_WRITE(V3D_CSD_0_QUEUED_CFG4, args->cfg[4]);
+         V3D_WRITE(V3D_CSD_0_QUEUED_CFG5, args->cfg[5]);
+         V3D_WRITE(V3D_CSD_0_QUEUED_CFG6, args->cfg[6]);
++#if V3D_VERSION >= 71
++        V3D_WRITE(V3D_CSD_0_QUEUED_CFG7, 0);
++#endif
+         /* CFG0 kicks off the job */
+         V3D_WRITE(V3D_CSD_0_QUEUED_CFG0, args->cfg[0]);
+ 
+-- 
+2.39.2
+

@@ -1,0 +1,30 @@
+From d38d8056903b9a4f96ab56261ac3b3c3be0af4fb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Wed, 15 Sep 2021 11:12:59 +0200
+Subject: [PATCH 027/142] broadcom/qpu_schedule: update write deps for v71
+
+We just need to add a write dep if rf0 is written implicitly.
+
+Note that we don't need to check if we have accumulators when checking
+for r3/r4/r5, as v3d_qpu_writes_rX would return false for hw version
+that doesn't have accumulators.
+---
+ src/broadcom/compiler/qpu_schedule.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 89254643c90..2fa9031d7b6 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -422,6 +422,8 @@ calculate_deps(struct schedule_state *state, struct schedule_node *n)
+                 add_write_dep(state, &state->last_r[4], n);
+         if (v3d_qpu_writes_r5(devinfo, inst))
+                 add_write_dep(state, &state->last_r[5], n);
++        if (v3d_qpu_writes_rf0_implicitly(devinfo, inst))
++                add_write_dep(state, &state->last_rf[0], n);
+ 
+         /* If we add any more dependencies here we should consider whether we
+          * also need to update qpu_inst_after_thrsw_valid_in_delay_slot.
+-- 
+2.39.2
+

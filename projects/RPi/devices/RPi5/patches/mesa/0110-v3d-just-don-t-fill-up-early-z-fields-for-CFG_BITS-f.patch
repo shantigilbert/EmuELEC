@@ -1,0 +1,43 @@
+From 4de1ace1c7b3b6436a5de8e4c6a2f52d6308ff5c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 21 Oct 2021 13:09:03 +0200
+Subject: [PATCH 110/142] v3d: just don't fill up early-z fields for CFG_BITS
+ for v71
+
+v71 doesn't include early_z_enable/early_z_updates_enable. They are
+configured with packet 121.
+---
+ src/gallium/drivers/v3d/v3dx_emit.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/src/gallium/drivers/v3d/v3dx_emit.c b/src/gallium/drivers/v3d/v3dx_emit.c
+index 5af3d03b337..de05ae29d04 100644
+--- a/src/gallium/drivers/v3d/v3dx_emit.c
++++ b/src/gallium/drivers/v3d/v3dx_emit.c
+@@ -515,20 +515,19 @@ v3dX(emit_state)(struct pipe_context *pctx)
+ #if V3D_VERSION <= 42
+                         config.early_z_updates_enable =
+                                 (job->ez_state != V3D_EZ_DISABLED);
++#endif
+                         if (v3d->zsa->base.depth_enabled) {
+                                 config.z_updates_enable =
+                                         v3d->zsa->base.depth_writemask;
++#if V3D_VERSION <= 42
+                                 config.early_z_enable =
+                                         config.early_z_updates_enable;
++#endif
+                                 config.depth_test_function =
+                                         v3d->zsa->base.depth_func;
+                         } else {
+                                 config.depth_test_function = PIPE_FUNC_ALWAYS;
+                         }
+-#endif
+-#if V3D_VERSION >= 71
+-                        unreachable("HW generation 71 not supported yet.");
+-#endif
+ 
+                         config.stencil_enable =
+                                 v3d->zsa->base.stencil[0].enabled;
+-- 
+2.39.2
+

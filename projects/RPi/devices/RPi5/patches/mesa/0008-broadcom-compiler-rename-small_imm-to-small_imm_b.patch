@@ -1,0 +1,241 @@
+From 18de3cc85cf8bbe294e044f7a12abe14e554de0a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Sun, 19 Sep 2021 03:20:18 +0200
+Subject: [PATCH 008/142] broadcom/compiler: rename small_imm to small_imm_b
+
+Current small_imm is associated with the "B" read address.
+
+We do this change in advance for v71 support, where we will have 4
+different small_imm (a/b/c/d), so we start with a renaming.
+---
+ src/broadcom/compiler/qpu_schedule.c          | 22 +++++++++----------
+ .../compiler/vir_opt_small_immediates.c       |  4 ++--
+ src/broadcom/compiler/vir_to_qpu.c            |  2 +-
+ src/broadcom/qpu/qpu_disasm.c                 |  2 +-
+ src/broadcom/qpu/qpu_instr.h                  |  2 +-
+ src/broadcom/qpu/qpu_pack.c                   | 22 +++++++++----------
+ 6 files changed, 27 insertions(+), 27 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 3b32b48f86f..a10fa03ed10 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -160,7 +160,7 @@ process_mux_deps(struct schedule_state *state, struct schedule_node *n,
+                 add_read_dep(state, state->last_rf[n->inst->qpu.raddr_a], n);
+                 break;
+         case V3D_QPU_MUX_B:
+-                if (!n->inst->qpu.sig.small_imm) {
++                if (!n->inst->qpu.sig.small_imm_b) {
+                         add_read_dep(state,
+                                      state->last_rf[n->inst->qpu.raddr_b], n);
+                 }
+@@ -615,7 +615,7 @@ qpu_instruction_uses_rf(const struct v3d_qpu_instr *inst,
+               return true;
+ 
+         if (v3d_qpu_uses_mux(inst, V3D_QPU_MUX_B) &&
+-            !inst->sig.small_imm && (inst->raddr_b == waddr))
++            !inst->sig.small_imm_b && (inst->raddr_b == waddr))
+               return true;
+ 
+         return false;
+@@ -790,11 +790,11 @@ qpu_raddrs_used(const struct v3d_qpu_instr *a,
+         uint64_t raddrs_used = 0;
+         if (v3d_qpu_uses_mux(a, V3D_QPU_MUX_A))
+                 raddrs_used |= (1ll << a->raddr_a);
+-        if (!a->sig.small_imm && v3d_qpu_uses_mux(a, V3D_QPU_MUX_B))
++        if (!a->sig.small_imm_b && v3d_qpu_uses_mux(a, V3D_QPU_MUX_B))
+                 raddrs_used |= (1ll << a->raddr_b);
+         if (v3d_qpu_uses_mux(b, V3D_QPU_MUX_A))
+                 raddrs_used |= (1ll << b->raddr_a);
+-        if (!b->sig.small_imm && v3d_qpu_uses_mux(b, V3D_QPU_MUX_B))
++        if (!b->sig.small_imm_b && v3d_qpu_uses_mux(b, V3D_QPU_MUX_B))
+                 raddrs_used |= (1ll << b->raddr_b);
+ 
+         return raddrs_used;
+@@ -816,16 +816,16 @@ qpu_merge_raddrs(struct v3d_qpu_instr *result,
+         if (naddrs > 2)
+                 return false;
+ 
+-        if ((add_instr->sig.small_imm || mul_instr->sig.small_imm)) {
++        if ((add_instr->sig.small_imm_b || mul_instr->sig.small_imm_b)) {
+                 if (naddrs > 1)
+                         return false;
+ 
+-                if (add_instr->sig.small_imm && mul_instr->sig.small_imm)
++                if (add_instr->sig.small_imm_b && mul_instr->sig.small_imm_b)
+                         if (add_instr->raddr_b != mul_instr->raddr_b)
+                                 return false;
+ 
+-                result->sig.small_imm = true;
+-                result->raddr_b = add_instr->sig.small_imm ?
++                result->sig.small_imm_b = true;
++                result->raddr_b = add_instr->sig.small_imm_b ?
+                         add_instr->raddr_b : mul_instr->raddr_b;
+         }
+ 
+@@ -836,7 +836,7 @@ qpu_merge_raddrs(struct v3d_qpu_instr *result,
+         raddrs_used &= ~(1ll << raddr_a);
+         result->raddr_a = raddr_a;
+ 
+-        if (!result->sig.small_imm) {
++        if (!result->sig.small_imm_b) {
+                 if (v3d_qpu_uses_mux(add_instr, V3D_QPU_MUX_B) &&
+                     raddr_a == add_instr->raddr_b) {
+                         if (add_instr->alu.add.a == V3D_QPU_MUX_B)
+@@ -1025,7 +1025,7 @@ qpu_merge_inst(const struct v3d_device_info *devinfo,
+         merge.sig.ldtmu |= b->sig.ldtmu;
+         merge.sig.ldvary |= b->sig.ldvary;
+         merge.sig.ldvpm |= b->sig.ldvpm;
+-        merge.sig.small_imm |= b->sig.small_imm;
++        merge.sig.small_imm_b |= b->sig.small_imm_b;
+         merge.sig.ldtlb |= b->sig.ldtlb;
+         merge.sig.ldtlbu |= b->sig.ldtlbu;
+         merge.sig.ucb |= b->sig.ucb;
+@@ -1614,7 +1614,7 @@ qpu_inst_valid_in_thrend_slot(struct v3d_compile *c,
+                         return false;
+ 
+                 if (inst->raddr_b < 3 &&
+-                    !inst->sig.small_imm &&
++                    !inst->sig.small_imm_b &&
+                     v3d_qpu_uses_mux(inst, V3D_QPU_MUX_B)) {
+                         return false;
+                 }
+diff --git a/src/broadcom/compiler/vir_opt_small_immediates.c b/src/broadcom/compiler/vir_opt_small_immediates.c
+index 47d7722968d..df0d6c36c9b 100644
+--- a/src/broadcom/compiler/vir_opt_small_immediates.c
++++ b/src/broadcom/compiler/vir_opt_small_immediates.c
+@@ -80,7 +80,7 @@ vir_opt_small_immediates(struct v3d_compile *c)
+                          */
+                         struct v3d_qpu_sig new_sig = inst->qpu.sig;
+                         uint32_t sig_packed;
+-                        new_sig.small_imm = true;
++                        new_sig.small_imm_b = true;
+                         if (!v3d_qpu_sig_pack(c->devinfo, &new_sig, &sig_packed))
+                                 continue;
+ 
+@@ -89,7 +89,7 @@ vir_opt_small_immediates(struct v3d_compile *c)
+                                 vir_dump_inst(c, inst);
+                                 fprintf(stderr, "\n");
+                         }
+-                        inst->qpu.sig.small_imm = true;
++                        inst->qpu.sig.small_imm_b = true;
+                         inst->qpu.raddr_b = packed;
+ 
+                         inst->src[i].file = QFILE_SMALL_IMM;
+diff --git a/src/broadcom/compiler/vir_to_qpu.c b/src/broadcom/compiler/vir_to_qpu.c
+index 45e6bfa1470..15c2e3674c2 100644
+--- a/src/broadcom/compiler/vir_to_qpu.c
++++ b/src/broadcom/compiler/vir_to_qpu.c
+@@ -94,7 +94,7 @@ static void
+ set_src(struct v3d_qpu_instr *instr, enum v3d_qpu_mux *mux, struct qpu_reg src)
+ {
+         if (src.smimm) {
+-                assert(instr->sig.small_imm);
++                assert(instr->sig.small_imm_b);
+                 *mux = V3D_QPU_MUX_B;
+                 return;
+         }
+diff --git a/src/broadcom/qpu/qpu_disasm.c b/src/broadcom/qpu/qpu_disasm.c
+index 28fb2357b97..6aca3c28e78 100644
+--- a/src/broadcom/qpu/qpu_disasm.c
++++ b/src/broadcom/qpu/qpu_disasm.c
+@@ -62,7 +62,7 @@ v3d_qpu_disasm_raddr(struct disasm_state *disasm,
+         if (mux == V3D_QPU_MUX_A) {
+                 append(disasm, "rf%d", instr->raddr_a);
+         } else if (mux == V3D_QPU_MUX_B) {
+-                if (instr->sig.small_imm) {
++                if (instr->sig.small_imm_b) {
+                         uint32_t val;
+                         ASSERTED bool ok =
+                                 v3d_qpu_small_imm_unpack(disasm->devinfo,
+diff --git a/src/broadcom/qpu/qpu_instr.h b/src/broadcom/qpu/qpu_instr.h
+index 19bf721dbe1..9cd831863b4 100644
+--- a/src/broadcom/qpu/qpu_instr.h
++++ b/src/broadcom/qpu/qpu_instr.h
+@@ -50,7 +50,7 @@ struct v3d_qpu_sig {
+         bool ldvpm:1;
+         bool ldtlb:1;
+         bool ldtlbu:1;
+-        bool small_imm:1;
++        bool small_imm_b:1;
+         bool ucb:1;
+         bool rotate:1;
+         bool wrtmuc:1;
+diff --git a/src/broadcom/qpu/qpu_pack.c b/src/broadcom/qpu/qpu_pack.c
+index a875683c6f8..beac591d3c1 100644
+--- a/src/broadcom/qpu/qpu_pack.c
++++ b/src/broadcom/qpu/qpu_pack.c
+@@ -112,7 +112,7 @@
+ #define LDTMU .ldtmu = true
+ #define LDVARY .ldvary = true
+ #define LDVPM .ldvpm = true
+-#define SMIMM .small_imm = true
++#define SMIMM_B .small_imm_b = true
+ #define LDTLB .ldtlb = true
+ #define LDTLBU .ldtlbu = true
+ #define UCB .ucb = true
+@@ -135,8 +135,8 @@ static const struct v3d_qpu_sig v33_sig_map[] = {
+         [11] = { THRSW, LDVARY,         LDUNIF },
+         [12] = {        LDVARY, LDTMU,         },
+         [13] = { THRSW, LDVARY, LDTMU,         },
+-        [14] = { SMIMM, LDVARY,                },
+-        [15] = { SMIMM,                        },
++        [14] = { SMIMM_B, LDVARY,              },
++        [15] = { SMIMM_B,                      },
+         [16] = {        LDTLB,                 },
+         [17] = {        LDTLBU,                },
+         /* 18-21 reserved */
+@@ -148,8 +148,8 @@ static const struct v3d_qpu_sig v33_sig_map[] = {
+         [27] = { THRSW, LDVPM,          LDUNIF },
+         [28] = {        LDVPM, LDTMU,          },
+         [29] = { THRSW, LDVPM, LDTMU,          },
+-        [30] = { SMIMM, LDVPM,                 },
+-        [31] = { SMIMM,                        },
++        [30] = { SMIMM_B, LDVPM,               },
++        [31] = { SMIMM_B,                      },
+ };
+ 
+ static const struct v3d_qpu_sig v40_sig_map[] = {
+@@ -167,8 +167,8 @@ static const struct v3d_qpu_sig v40_sig_map[] = {
+         [10] = {        LDVARY,         LDUNIF },
+         [11] = { THRSW, LDVARY,         LDUNIF },
+         /* 12-13 reserved */
+-        [14] = { SMIMM, LDVARY,                },
+-        [15] = { SMIMM,                        },
++        [14] = { SMIMM_B, LDVARY,              },
++        [15] = { SMIMM_B,                      },
+         [16] = {        LDTLB,                 },
+         [17] = {        LDTLBU,                },
+         [18] = {                        WRTMUC },
+@@ -178,7 +178,7 @@ static const struct v3d_qpu_sig v40_sig_map[] = {
+         [22] = { UCB,                          },
+         [23] = { ROT,                          },
+         /* 24-30 reserved */
+-        [31] = { SMIMM,         LDTMU,         },
++        [31] = { SMIMM_B,       LDTMU,         },
+ };
+ 
+ static const struct v3d_qpu_sig v41_sig_map[] = {
+@@ -197,8 +197,8 @@ static const struct v3d_qpu_sig v41_sig_map[] = {
+         [11] = { THRSW,    LDVARY, LDUNIF },
+         [12] = { LDUNIFRF                 },
+         [13] = { THRSW,    LDUNIFRF       },
+-        [14] = { SMIMM,    LDVARY,        },
+-        [15] = { SMIMM,                   },
++        [14] = { SMIMM_B,    LDVARY       },
++        [15] = { SMIMM_B,                 },
+         [16] = {           LDTLB,         },
+         [17] = {           LDTLBU,        },
+         [18] = {                          WRTMUC },
+@@ -210,7 +210,7 @@ static const struct v3d_qpu_sig v41_sig_map[] = {
+         [24] = {                   LDUNIFA},
+         [25] = { LDUNIFARF                },
+         /* 26-30 reserved */
+-        [31] = { SMIMM,            LDTMU, },
++        [31] = { SMIMM_B,          LDTMU, },
+ };
+ 
+ bool
+-- 
+2.39.2
+

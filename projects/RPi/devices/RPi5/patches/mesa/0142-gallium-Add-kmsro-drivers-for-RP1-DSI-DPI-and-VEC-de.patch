@@ -1,0 +1,43 @@
+From 3322c102282cf726ae575b122358060abd5b24db Mon Sep 17 00:00:00 2001
+From: Dave Stevenson <dave.stevenson@raspberrypi.com>
+Date: Thu, 5 Oct 2023 19:32:10 +0100
+Subject: [PATCH 142/142] gallium: Add kmsro drivers for RP1 DSI, DPI, and VEC
+ devices
+
+Signed-off-by: Dave Stevenson <dave.stevenson@raspberrypi.com>
+---
+ src/gallium/targets/dri/meson.build | 3 +++
+ src/gallium/targets/dri/target.c    | 3 +++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/src/gallium/targets/dri/meson.build b/src/gallium/targets/dri/meson.build
+index fbec1da957b..59daf3b6fb6 100644
+--- a/src/gallium/targets/dri/meson.build
++++ b/src/gallium/targets/dri/meson.build
+@@ -68,6 +68,9 @@ libgallium_dri = shared_library(
+ 
+ foreach d : [[with_gallium_kmsro, [
+                'armada-drm_dri.so',
++               'drm-rp1-dpi_dri.so',
++               'drm-rp1-dsi_dri.so',
++               'drm-rp1-vec_dri.so',
+                'exynos_dri.so',
+                'hx8357d_dri.so',
+                'ili9225_dri.so',
+diff --git a/src/gallium/targets/dri/target.c b/src/gallium/targets/dri/target.c
+index d506869cbb4..ecb25edd03b 100644
+--- a/src/gallium/targets/dri/target.c
++++ b/src/gallium/targets/dri/target.c
+@@ -98,6 +98,9 @@ DEFINE_LOADER_DRM_ENTRYPOINT(tegra);
+ 
+ #if defined(GALLIUM_KMSRO)
+ DEFINE_LOADER_DRM_ENTRYPOINT(armada_drm)
++DEFINE_LOADER_DRM_ENTRYPOINT(drm_rp1_dpi)
++DEFINE_LOADER_DRM_ENTRYPOINT(drm_rp1_dsi)
++DEFINE_LOADER_DRM_ENTRYPOINT(drm_rp1_vec)
+ DEFINE_LOADER_DRM_ENTRYPOINT(exynos)
+ DEFINE_LOADER_DRM_ENTRYPOINT(hx8357d)
+ DEFINE_LOADER_DRM_ENTRYPOINT(ili9225)
+-- 
+2.39.2
+

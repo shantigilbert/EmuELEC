@@ -1,0 +1,38 @@
+From cb4bf320748f701a0ed835d4a410f2960f1ce0bd Mon Sep 17 00:00:00 2001
+From: Rod Smith <rodsmith@rodsbooks.com>
+Date: Fri, 10 Mar 2023 13:28:00 -0500
+Subject: [PATCH 12/12] Minor code cleanup based on valgrind analysis
+
+---
+ NEWS   | 2 ++
+ gpt.cc | 1 +
+ 2 files changed, 3 insertions(+)
+
+diff --git a/NEWS b/NEWS
+index 5c6dfa1..29d99e3 100644
+--- a/NEWS
++++ b/NEWS
+@@ -18,6 +18,8 @@
+ - Make explicit casts in gptcurses.cc to eliminate compiler warnings about
+   mis-matched types in printw() statements.
+ 
++- Minor code cleanup based on valgrind analysis.
++
+ - In previous versions, rEFInd accepted only integer values for partition
+   start points, end points, and sizes, and it interpreted decimal values
+   incorrectly. That is, if you typed "+9.5G" as the partition end point,
+diff --git a/gpt.cc b/gpt.cc
+index 76cd9ad..24d6918 100644
+--- a/gpt.cc
++++ b/gpt.cc
+@@ -80,6 +80,7 @@ GPTData::GPTData(void) {
+    beQuiet = 0;
+    whichWasUsed = use_new;
+    mainHeader.numParts = 0;
++   mainHeader.firstUsableLBA = 0;
+    mainHeader.lastUsableLBA = 0;
+    numParts = 0;
+    SetGPTSize(NUM_GPT_ENTRIES);
+-- 
+2.31.1
+

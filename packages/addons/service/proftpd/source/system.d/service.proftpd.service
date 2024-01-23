@@ -11,4 +11,4 @@ RestartSec=2
 StartLimitInterval=0
 
 [Install]
-WantedBy=kodi.target
+WantedBy=multi-user.target

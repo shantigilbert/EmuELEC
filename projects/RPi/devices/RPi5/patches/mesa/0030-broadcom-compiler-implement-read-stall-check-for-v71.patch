@@ -1,0 +1,118 @@
+From 3fb3333bdf9699157cf0a2bd46ba4c25058bc5c1 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Thu, 23 Sep 2021 11:44:59 +0200
+Subject: [PATCH 030/142] broadcom/compiler: implement read stall check for v71
+
+---
+ src/broadcom/compiler/qpu_schedule.c | 32 +++++++++++++++++-----------
+ src/broadcom/qpu/qpu_instr.c         | 12 +++++++++++
+ src/broadcom/qpu/qpu_instr.h         |  2 ++
+ 3 files changed, 34 insertions(+), 12 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 4db0c2e72da..b78abe003e9 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -679,29 +679,37 @@ pixel_scoreboard_too_soon(struct v3d_compile *c,
+ }
+ 
+ static bool
+-qpu_instruction_uses_rf(const struct v3d_qpu_instr *inst,
++qpu_instruction_uses_rf(const struct v3d_device_info *devinfo,
++                        const struct v3d_qpu_instr *inst,
+                         uint32_t waddr) {
+ 
+         if (inst->type != V3D_QPU_INSTR_TYPE_ALU)
+            return false;
+ 
+-        if (v3d_qpu_uses_mux(inst, V3D_QPU_MUX_A) &&
+-            inst->raddr_a == waddr)
+-              return true;
++        if (devinfo->ver < 71) {
++                if (v3d_qpu_uses_mux(inst, V3D_QPU_MUX_A) &&
++                    inst->raddr_a == waddr)
++                        return true;
+ 
+-        if (v3d_qpu_uses_mux(inst, V3D_QPU_MUX_B) &&
+-            !inst->sig.small_imm_b && (inst->raddr_b == waddr))
+-              return true;
++                if (v3d_qpu_uses_mux(inst, V3D_QPU_MUX_B) &&
++                    !inst->sig.small_imm_b && (inst->raddr_b == waddr))
++                        return true;
++        } else {
++                /* FIXME: skip if small immediate */
++                if (v3d71_qpu_reads_raddr(inst, waddr))
++                        return true;
++        }
+ 
+         return false;
+ }
+ 
+ static bool
+-mux_read_stalls(struct choose_scoreboard *scoreboard,
+-                const struct v3d_qpu_instr *inst)
++read_stalls(const struct v3d_device_info *devinfo,
++            struct choose_scoreboard *scoreboard,
++            const struct v3d_qpu_instr *inst)
+ {
+         return scoreboard->tick == scoreboard->last_stallable_sfu_tick + 1 &&
+-                qpu_instruction_uses_rf(inst,
++                qpu_instruction_uses_rf(devinfo, inst,
+                                         scoreboard->last_stallable_sfu_reg);
+ }
+ 
+@@ -1319,7 +1327,7 @@ retry:
+ 
+                 int prio = get_instruction_priority(c->devinfo, inst);
+ 
+-                if (mux_read_stalls(scoreboard, inst)) {
++                if (read_stalls(c->devinfo, scoreboard, inst)) {
+                         /* Don't merge an instruction that stalls */
+                         if (prev_inst)
+                                 continue;
+@@ -2389,7 +2397,7 @@ schedule_instructions(struct v3d_compile *c,
+                                         }
+                                 }
+                         }
+-                        if (mux_read_stalls(scoreboard, inst))
++                        if (read_stalls(c->devinfo, scoreboard, inst))
+                                 c->qpu_inst_stalled_count++;
+                 }
+ 
+diff --git a/src/broadcom/qpu/qpu_instr.c b/src/broadcom/qpu/qpu_instr.c
+index 7ec3c867260..e8bbb2141b0 100644
+--- a/src/broadcom/qpu/qpu_instr.c
++++ b/src/broadcom/qpu/qpu_instr.c
+@@ -956,6 +956,18 @@ v3d_qpu_uses_mux(const struct v3d_qpu_instr *inst, enum v3d_qpu_mux mux)
+                 (mul_nsrc > 1 && inst->alu.mul.b.mux == mux));
+ }
+ 
++bool
++v3d71_qpu_reads_raddr(const struct v3d_qpu_instr *inst, uint8_t raddr)
++{
++        int add_nsrc = v3d_qpu_add_op_num_src(inst->alu.add.op);
++        int mul_nsrc = v3d_qpu_mul_op_num_src(inst->alu.mul.op);
++
++        return (add_nsrc > 0 && inst->alu.add.a.raddr == raddr) ||
++               (add_nsrc > 1 && inst->alu.add.b.raddr == raddr) ||
++               (mul_nsrc > 0 && inst->alu.mul.a.raddr == raddr) ||
++               (mul_nsrc > 1 && inst->alu.mul.b.raddr == raddr);
++}
++
+ bool
+ v3d_qpu_sig_writes_address(const struct v3d_device_info *devinfo,
+                            const struct v3d_qpu_sig *sig)
+diff --git a/src/broadcom/qpu/qpu_instr.h b/src/broadcom/qpu/qpu_instr.h
+index a25be8e0ee6..9f7582ab06d 100644
+--- a/src/broadcom/qpu/qpu_instr.h
++++ b/src/broadcom/qpu/qpu_instr.h
+@@ -494,4 +494,6 @@ bool v3d_qpu_unpacks_f32(const struct v3d_qpu_instr *inst) ATTRIBUTE_CONST;
+ bool v3d_qpu_unpacks_f16(const struct v3d_qpu_instr *inst) ATTRIBUTE_CONST;
+ 
+ bool v3d_qpu_is_nop(struct v3d_qpu_instr *inst) ATTRIBUTE_CONST;
++
++bool v3d71_qpu_reads_raddr(const struct v3d_qpu_instr *inst, uint8_t raddr);
+ #endif
+-- 
+2.39.2
+

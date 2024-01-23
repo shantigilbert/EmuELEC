@@ -1,0 +1,26 @@
+From 733957e20ecb3c1694ac5952a85974da11e5ae22 Mon Sep 17 00:00:00 2001
+From: quietvoid <39477805+quietvoid@users.noreply.github.com>
+Date: Sat, 11 Mar 2023 08:40:06 -0500
+Subject: [PATCH 08/21] tools/depends: Enable libdovi by default
+
+Temporarily
+---
+ tools/depends/configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/depends/configure.ac b/tools/depends/configure.ac
+index 929300b31e..f084ce9d2b 100644
+--- a/tools/depends/configure.ac
++++ b/tools/depends/configure.ac
+@@ -133,7 +133,7 @@ AC_ARG_ENABLE([libdovi],
+   [AS_HELP_STRING([--enable-libdovi],
+   [enable libdovi (optional for android). default is no])],
+   [use_libdovi=$enableval],
+-  [use_libdovi=no])
++  [use_libdovi=yes])
+ 
+ if test "$use_ccache" = "yes"; then
+   AC_CHECK_PROG(HAVE_CCACHE,ccache,"yes","no",)
+-- 
+2.43.0
+

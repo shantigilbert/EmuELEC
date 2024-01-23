@@ -1,0 +1,35 @@
+From 151c13365703631f88ad77ba07afbd2ba9fa172c Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 31 May 2023 09:23:51 +0200
+Subject: [PATCH 133/142] v3dv: expose fullDrawIndexUint32 in V3D 7.x
+
+---
+ src/broadcom/vulkan/v3dv_device.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_device.c b/src/broadcom/vulkan/v3dv_device.c
+index b520bfa0002..ca5f676b6f7 100644
+--- a/src/broadcom/vulkan/v3dv_device.c
++++ b/src/broadcom/vulkan/v3dv_device.c
+@@ -214,7 +214,7 @@ get_features(const struct v3dv_physical_device *physical_device,
+    *features = (struct vk_features) {
+       /* Vulkan 1.0 */
+       .robustBufferAccess = true, /* This feature is mandatory */
+-      .fullDrawIndexUint32 = false, /* Only available since V3D 4.4.9.1 */
++      .fullDrawIndexUint32 = physical_device->devinfo.ver >= 71,
+       .imageCubeArray = true,
+       .independentBlend = true,
+       .geometryShader = true,
+@@ -1451,7 +1451,8 @@ v3dv_GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
+       .subPixelPrecisionBits                    = V3D_COORD_SHIFT,
+       .subTexelPrecisionBits                    = 8,
+       .mipmapPrecisionBits                      = 8,
+-      .maxDrawIndexedIndexValue                 = 0x00ffffff,
++      .maxDrawIndexedIndexValue                 = pdevice->devinfo.ver >= 71 ?
++                                                  0xffffffff : 0x00ffffff,
+       .maxDrawIndirectCount                     = 0x7fffffff,
+       .maxSamplerLodBias                        = 14.0f,
+       .maxSamplerAnisotropy                     = 16.0f,
+-- 
+2.39.2
+

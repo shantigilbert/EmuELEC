@@ -15,14 +15,3 @@ PKG_TOOLCHAIN="manual"
 makeinstall_target() {
   DESTDIR=${INSTALL}/$(get_kernel_overlay_dir) ./install
 }
-
-post_makeinstall_target() {
-  # Install rpi btuart script to bring up Bluetooth
-  mkdir -p ${INSTALL}/usr/bin
-    cp -P ${PKG_DIR}/scripts/rpi-btuart ${INSTALL}/usr/bin
-    cp -P ${PKG_DIR}/scripts/rpi-udev ${INSTALL}/usr/bin
-}
-
-post_install() {
-  enable_service brcmfmac_sdio-firmware.service
-}

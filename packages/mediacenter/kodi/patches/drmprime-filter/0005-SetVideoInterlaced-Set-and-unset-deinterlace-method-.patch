@@ -1,7 +1,7 @@
-From 6d40c431345c8bac66fb1a3bb06e29a0f944ac3d Mon Sep 17 00:00:00 2001
+From c17af60a355973986d9ea5b6baefb96577299b9f Mon Sep 17 00:00:00 2001
 From: Dom Cobley <popcornmix@gmail.com>
 Date: Tue, 30 Nov 2021 16:05:06 +0000
-Subject: [PATCH 5/6] SetVideoInterlaced: Set and unset deinterlace method name
+Subject: [PATCH 5/7] SetVideoInterlaced: Set and unset deinterlace method name
  reported
 
 ---
@@ -37,5 +37,5 @@ index 6ba0804904..9139233bc4 100644
    {
      CLog::Log(LOGDEBUG, LOGVIDEO, "CDVDVideoCodecDRMPRIME::FilterClose - Freeing filter graph");
 -- 
-2.34.1
+2.39.2
 

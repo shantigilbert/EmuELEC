@@ -1,0 +1,38 @@
+From 167510aa43bbcf06e57a64495cee40e8cdaf5f8b Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Fri, 26 Nov 2021 10:37:05 +0100
+Subject: [PATCH 061/142] broadcom/compiler: start allocating from RF 4 in V7.x
+
+In V3D 4.x we start at RF3 so that we allocate RF0-2 only if there
+aren't any other RFs available. This is useful with small shaders
+to ensure that our TLB writes don't use these registers because
+these are the last instructions we emit in fragment shaders and
+the last instructions in a program can't write to these registers,
+so if we do, we need to emit NOPs.
+
+In V3D 7.x the registers affected by this restriction are RF2-3,
+so we choose to start at RF4.
+---
+ src/broadcom/compiler/vir_register_allocate.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/compiler/vir_register_allocate.c b/src/broadcom/compiler/vir_register_allocate.c
+index 6f7b1ca0589..440b093a636 100644
+--- a/src/broadcom/compiler/vir_register_allocate.c
++++ b/src/broadcom/compiler/vir_register_allocate.c
+@@ -1234,9 +1234,10 @@ v3d_register_allocate(struct v3d_compile *c)
+                 .phys_index = phys_index,
+                 .next_acc = 0,
+                 /* Start at RF3, to try to keep the TLB writes from using
+-                 * RF0-2.
++                 * RF0-2. Start at RF4 in 7.x to prevent TLB writes from
++                 * using RF2-3.
+                  */
+-                .next_phys = 3,
++                .next_phys = c->devinfo->ver <= 42 ? 3 : 4,
+                 .nodes = &c->nodes,
+                 .devinfo = c->devinfo,
+         };
+-- 
+2.39.2
+

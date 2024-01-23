@@ -1,0 +1,332 @@
+From f62aa2640f92796ff5216da0a5d3c8f46a2855b4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Mon, 26 Apr 2021 00:02:21 +0200
+Subject: [PATCH 001/142] broadcom(cle,clif,common,simulator): add 7.1 version
+ on the list of versions to build
+
+This adds 7.1 to the list of available V3D_VERSION, and first changes
+on the simulator needed to get it working.
+
+Note that we needed to touch all those 4 codebases because it is
+needed if we want to use V3D_DEBUG=clif with the simulator, that it is
+the easier way to see which packets a vulkan program is using.
+
+About the simulator, this commit only handle the rename of some
+registers. Any additional changes needed to get a proper support for
+v71 will be handled them on following commits.
+---
+ src/broadcom/cle/meson.build            |  3 +-
+ src/broadcom/cle/v3dx_pack.h            |  2 +
+ src/broadcom/clif/clif_private.h        |  2 +
+ src/broadcom/common/v3d_device_info.c   |  1 +
+ src/broadcom/common/v3d_macros.h        |  3 +
+ src/broadcom/meson.build                |  2 +-
+ src/broadcom/simulator/v3d_simulator.c  | 81 +++++++++++++++++++------
+ src/broadcom/simulator/v3d_simulator.h  |  5 ++
+ src/broadcom/simulator/v3dx_simulator.c | 31 ++++++++--
+ 9 files changed, 106 insertions(+), 24 deletions(-)
+
+diff --git a/src/broadcom/cle/meson.build b/src/broadcom/cle/meson.build
+index 31a0d5bfa94..8ac32b313e4 100644
+--- a/src/broadcom/cle/meson.build
++++ b/src/broadcom/cle/meson.build
+@@ -23,7 +23,8 @@ v3d_versions = [
+   [21, 21],
+   [33, 33],
+   [41, 33],
+-  [42, 33]
++  [42, 33],
++  [71, 33]
+ ]
+ 
+ v3d_xml_files = []
+diff --git a/src/broadcom/cle/v3dx_pack.h b/src/broadcom/cle/v3dx_pack.h
+index 5762e5aaa70..e5a1eb26698 100644
+--- a/src/broadcom/cle/v3dx_pack.h
++++ b/src/broadcom/cle/v3dx_pack.h
+@@ -37,6 +37,8 @@
+ #  include "cle/v3d_packet_v41_pack.h"
+ #elif (V3D_VERSION == 42)
+ #  include "cle/v3d_packet_v42_pack.h"
++#elif (V3D_VERSION == 71)
++#  include "cle/v3d_packet_v71_pack.h"
+ #else
+ #  error "Need to add a pack header include for this v3d version"
+ #endif
+diff --git a/src/broadcom/clif/clif_private.h b/src/broadcom/clif/clif_private.h
+index 6ace62b0310..cda407a00bf 100644
+--- a/src/broadcom/clif/clif_private.h
++++ b/src/broadcom/clif/clif_private.h
+@@ -101,6 +101,8 @@ bool v3d41_clif_dump_packet(struct clif_dump *clif, uint32_t offset,
+                             const uint8_t *cl, uint32_t *size, bool reloc_mode);
+ bool v3d42_clif_dump_packet(struct clif_dump *clif, uint32_t offset,
+                             const uint8_t *cl, uint32_t *size, bool reloc_mode);
++bool v3d71_clif_dump_packet(struct clif_dump *clif, uint32_t offset,
++                            const uint8_t *cl, uint32_t *size, bool reloc_mode);
+ 
+ static inline void
+ out(struct clif_dump *clif, const char *fmt, ...)
+diff --git a/src/broadcom/common/v3d_device_info.c b/src/broadcom/common/v3d_device_info.c
+index 272190eb2e5..7e0862f1f02 100644
+--- a/src/broadcom/common/v3d_device_info.c
++++ b/src/broadcom/common/v3d_device_info.c
+@@ -66,6 +66,7 @@ v3d_get_device_info(int fd, struct v3d_device_info* devinfo, v3d_ioctl_fun drm_i
+         case 33:
+         case 41:
+         case 42:
++        case 71:
+                 break;
+         default:
+                 fprintf(stderr,
+diff --git a/src/broadcom/common/v3d_macros.h b/src/broadcom/common/v3d_macros.h
+index fe89398208a..b4291fb5350 100644
+--- a/src/broadcom/common/v3d_macros.h
++++ b/src/broadcom/common/v3d_macros.h
+@@ -41,6 +41,9 @@
+ #elif (V3D_VERSION == 42)
+ #  define V3DX(x) V3D42_##x
+ #  define v3dX(x) v3d42_##x
++#elif (V3D_VERSION == 71)
++#  define V3DX(x) V3D71_##x
++#  define v3dX(x) v3d71_##x
+ #else
+ #  error "Need to add prefixing macros for this v3d version"
+ #endif
+diff --git a/src/broadcom/meson.build b/src/broadcom/meson.build
+index 2c10e46b188..73cb7aa0575 100644
+--- a/src/broadcom/meson.build
++++ b/src/broadcom/meson.build
+@@ -22,7 +22,7 @@ inc_broadcom = include_directories('.', 'cle')
+ 
+ subdir('cle')
+ 
+-v3d_versions = ['33', '41', '42']
++v3d_versions = ['33', '41', '42', '71']
+ v3d_libs = []
+ 
+ if with_gallium_v3d or with_broadcom_vk
+diff --git a/src/broadcom/simulator/v3d_simulator.c b/src/broadcom/simulator/v3d_simulator.c
+index eea5d3f050e..5cceb1a82cc 100644
+--- a/src/broadcom/simulator/v3d_simulator.c
++++ b/src/broadcom/simulator/v3d_simulator.c
+@@ -490,10 +490,20 @@ v3d_simulator_submit_cl_ioctl(int fd, struct drm_v3d_submit_cl *submit)
+ 
+         v3d_simulator_perfmon_switch(fd, submit->perfmon_id);
+ 
+-        if (sim_state.ver >= 41)
+-                v3d41_simulator_submit_cl_ioctl(sim_state.v3d, submit, file->gmp->ofs);
+-        else
+-                v3d33_simulator_submit_cl_ioctl(sim_state.v3d, submit, file->gmp->ofs);
++        switch(sim_state.ver) {
++        case 33:
++           v3d33_simulator_submit_cl_ioctl(sim_state.v3d, submit, file->gmp->ofs);
++           break;
++        case 41:
++        case 42:
++           v3d41_simulator_submit_cl_ioctl(sim_state.v3d, submit, file->gmp->ofs);
++           break;
++        case 71:
++           v3d71_simulator_submit_cl_ioctl(sim_state.v3d, submit, file->gmp->ofs);
++           break;
++        default:
++           unreachable("Unsupported V3D version\n");
++        }
+ 
+         util_dynarray_foreach(&sim_state.bin_oom, struct v3d_simulator_bo *,
+                               sim_bo) {
+@@ -635,10 +645,17 @@ v3d_simulator_gem_close_ioctl(int fd, struct drm_gem_close *args)
+ static int
+ v3d_simulator_get_param_ioctl(int fd, struct drm_v3d_get_param *args)
+ {
+-        if (sim_state.ver >= 41)
+-                return v3d41_simulator_get_param_ioctl(sim_state.v3d, args);
+-        else
++        switch(sim_state.ver) {
++        case 33:
+                 return v3d33_simulator_get_param_ioctl(sim_state.v3d, args);
++        case 41:
++        case 42:
++                return v3d41_simulator_get_param_ioctl(sim_state.v3d, args);
++        case 71:
++                return v3d71_simulator_get_param_ioctl(sim_state.v3d, args);
++        default:
++                unreachable("Unsupported V3D version\n");
++        }
+ }
+ 
+ static int
+@@ -652,10 +669,20 @@ v3d_simulator_submit_tfu_ioctl(int fd, struct drm_v3d_submit_tfu *args)
+         v3d_simulator_copy_in_handle(file, args->bo_handles[2]);
+         v3d_simulator_copy_in_handle(file, args->bo_handles[3]);
+ 
+-        if (sim_state.ver >= 41)
+-                ret = v3d41_simulator_submit_tfu_ioctl(sim_state.v3d, args);
+-        else
++        switch(sim_state.ver) {
++        case 33:
+                 ret = v3d33_simulator_submit_tfu_ioctl(sim_state.v3d, args);
++                break;
++        case 41:
++        case 42:
++                ret = v3d41_simulator_submit_tfu_ioctl(sim_state.v3d, args);
++                break;
++        case 71:
++                ret = v3d71_simulator_submit_tfu_ioctl(sim_state.v3d, args);
++                break;
++        default:
++                unreachable("Unsupported V3D version\n");
++        }
+ 
+         v3d_simulator_copy_out_handle(file, args->bo_handles[0]);
+ 
+@@ -682,11 +709,19 @@ v3d_simulator_submit_csd_ioctl(int fd, struct drm_v3d_submit_csd *args)
+ 
+         v3d_simulator_perfmon_switch(fd, args->perfmon_id);
+ 
+-        if (sim_state.ver >= 41)
+-                ret = v3d41_simulator_submit_csd_ioctl(sim_state.v3d, args,
+-                                                       file->gmp->ofs);
+-        else
+-                ret = -1;
++        switch(sim_state.ver) {
++        case 41:
++        case 42:
++           ret = v3d41_simulator_submit_csd_ioctl(sim_state.v3d, args,
++                                                  file->gmp->ofs);
++           break;
++        case 71:
++           ret = v3d71_simulator_submit_csd_ioctl(sim_state.v3d, args,
++                                                  file->gmp->ofs);
++           break;
++        default:
++           ret = -1;
++        }
+ 
+         for (int i = 0; i < args->bo_handle_count; i++)
+                 v3d_simulator_copy_out_handle(file, bo_handles[i]);
+@@ -880,10 +915,20 @@ v3d_simulator_init_global()
+ 
+         util_dynarray_init(&sim_state.bin_oom, NULL);
+ 
+-        if (sim_state.ver >= 41)
+-                v3d41_simulator_init_regs(sim_state.v3d);
+-        else
++        switch(sim_state.ver) {
++        case 33:
+                 v3d33_simulator_init_regs(sim_state.v3d);
++                break;
++        case 41:
++        case 42:
++                v3d41_simulator_init_regs(sim_state.v3d);
++                break;
++        case 71:
++                v3d71_simulator_init_regs(sim_state.v3d);
++                break;
++        default:
++                unreachable("Not supported V3D version\n");
++        }
+ }
+ 
+ struct v3d_simulator_file *
+diff --git a/src/broadcom/simulator/v3d_simulator.h b/src/broadcom/simulator/v3d_simulator.h
+index ddb079c1455..1472c313a03 100644
+--- a/src/broadcom/simulator/v3d_simulator.h
++++ b/src/broadcom/simulator/v3d_simulator.h
+@@ -52,6 +52,11 @@ uint32_t v3d_simulator_get_mem_free(void);
+ #  define v3dX(x) v3d41_##x
+ #  include "v3dx_simulator.h"
+ #  undef v3dX
++
++#  define v3dX(x) v3d71_##x
++#  include "v3dx_simulator.h"
++#  undef v3dX
++
+ #endif
+ 
+ #endif
+diff --git a/src/broadcom/simulator/v3dx_simulator.c b/src/broadcom/simulator/v3dx_simulator.c
+index c9322f0397b..723796b16c9 100644
+--- a/src/broadcom/simulator/v3dx_simulator.c
++++ b/src/broadcom/simulator/v3dx_simulator.c
+@@ -46,11 +46,15 @@
+ 
+ #define HW_REGISTER_RO(x) (x)
+ #define HW_REGISTER_RW(x) (x)
+-#if V3D_VERSION >= 41
++#if V3D_VERSION == 71
++#include "libs/core/v3d/registers/7.1.5.1/v3d.h"
++#else
++#if V3D_VERSION == 41 || V3D_VERSION == 42
+ #include "libs/core/v3d/registers/4.1.35.0/v3d.h"
+ #else
+ #include "libs/core/v3d/registers/3.3.0.0/v3d.h"
+ #endif
++#endif
+ 
+ #define V3D_WRITE(reg, val) v3d_hw_write_reg(v3d, reg, val)
+ #define V3D_READ(reg) v3d_hw_read_reg(v3d, reg)
+@@ -310,16 +314,17 @@ v3d_isr_core(struct v3d_hw *v3d,
+                 return;
+         }
+ 
++#if V3D_VERSION <= 42
+         if (core_status & V3D_CTL_0_INT_STS_INT_GMPV_SET) {
+                 fprintf(stderr, "GMP violation at 0x%08x\n",
+                         V3D_READ(V3D_GMP_VIO_ADDR));
+-                abort();
+         } else {
+                 fprintf(stderr,
+                         "Unexpected ISR with core status 0x%08x\n",
+                         core_status);
+         }
+         abort();
++#endif
+ }
+ 
+ static void
+@@ -396,6 +401,18 @@ v3d_isr_hub(struct v3d_hw *v3d)
+         }
+ 
+         handle_mmu_interruptions(v3d, hub_status);
++
++#if V3D_VERSION == 71
++        if (hub_status & V3D_HUB_CTL_INT_STS_INT_GMPV_SET) {
++                fprintf(stderr, "GMP violation at 0x%08x\n",
++                        V3D_READ(V3D_GMP_VIO_ADDR));
++        } else {
++                fprintf(stderr,
++                        "Unexpected ISR with status 0x%08x\n",
++                        hub_status);
++        }
++        abort();
++#endif
+ }
+ 
+ static void
+@@ -436,8 +453,11 @@ v3dX(simulator_init_regs)(struct v3d_hw *v3d)
+          * for tracing. Perhaps we should evaluate to do the same here and add
+          * some debug options.
+          */
+-        uint32_t core_interrupts = (V3D_CTL_0_INT_STS_INT_GMPV_SET |
+-                                    V3D_CTL_0_INT_STS_INT_OUTOMEM_SET);
++        uint32_t core_interrupts = V3D_CTL_0_INT_STS_INT_OUTOMEM_SET;
++#if V3D_VERSION <= 42
++        core_interrupts |= V3D_CTL_0_INT_STS_INT_GMPV_SET;
++#endif
++
+         V3D_WRITE(V3D_CTL_0_INT_MSK_SET, ~core_interrupts);
+         V3D_WRITE(V3D_CTL_0_INT_MSK_CLR, core_interrupts);
+ 
+@@ -447,6 +467,9 @@ v3dX(simulator_init_regs)(struct v3d_hw *v3d)
+             V3D_HUB_CTL_INT_STS_INT_MMU_CAP_SET |  /* CAP exceeded */
+             V3D_HUB_CTL_INT_STS_INT_TFUC_SET); /* TFU conversion */
+ 
++#if V3D_VERSION == 71
++        hub_interrupts |= V3D_HUB_CTL_INT_STS_INT_GMPV_SET;
++#endif
+         V3D_WRITE(V3D_HUB_CTL_INT_MSK_SET, ~hub_interrupts);
+         V3D_WRITE(V3D_HUB_CTL_INT_MSK_CLR, hub_interrupts);
+ 
+-- 
+2.39.2
+

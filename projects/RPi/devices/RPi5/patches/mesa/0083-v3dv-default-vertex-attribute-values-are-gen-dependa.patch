@@ -1,0 +1,219 @@
+From e3b1a578f45ea830d790970115b6de978d56edb8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Wed, 28 Jul 2021 12:01:38 +0200
+Subject: [PATCH 083/142] v3dv: default vertex attribute values are gen
+ dependant
+
+Content, structure and size would depend on the generation. Even if it
+is needed at all.
+
+So let's move it to the v3dvx files.
+---
+ src/broadcom/vulkan/v3dv_device.c    |  2 +-
+ src/broadcom/vulkan/v3dv_pipeline.c  | 61 ++-------------------------
+ src/broadcom/vulkan/v3dv_private.h   |  4 --
+ src/broadcom/vulkan/v3dvx_pipeline.c | 63 ++++++++++++++++++++++++++++
+ src/broadcom/vulkan/v3dvx_private.h  |  8 ++++
+ 5 files changed, 75 insertions(+), 63 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_device.c b/src/broadcom/vulkan/v3dv_device.c
+index c8719d33f15..01e2dd7ac2d 100644
+--- a/src/broadcom/vulkan/v3dv_device.c
++++ b/src/broadcom/vulkan/v3dv_device.c
+@@ -2043,7 +2043,7 @@ v3dv_CreateDevice(VkPhysicalDevice physicalDevice,
+    v3dv_pipeline_cache_init(&device->default_pipeline_cache, device, 0,
+                             device->instance->default_pipeline_cache_enabled);
+    device->default_attribute_float =
+-      v3dv_pipeline_create_default_attribute_values(device, NULL);
++      v3dv_X(device, create_default_attribute_values)(device, NULL);
+ 
+    device->device_address_mem_ctx = ralloc_context(NULL);
+    util_dynarray_init(&device->device_address_bo_list,
+diff --git a/src/broadcom/vulkan/v3dv_pipeline.c b/src/broadcom/vulkan/v3dv_pipeline.c
+index 22f01bdf64b..d012ff8f948 100644
+--- a/src/broadcom/vulkan/v3dv_pipeline.c
++++ b/src/broadcom/vulkan/v3dv_pipeline.c
+@@ -2802,62 +2802,6 @@ pipeline_set_ez_state(struct v3dv_pipeline *pipeline,
+    }
+ }
+ 
+-static bool
+-pipeline_has_integer_vertex_attrib(struct v3dv_pipeline *pipeline)
+-{
+-   for (uint8_t i = 0; i < pipeline->va_count; i++) {
+-      if (vk_format_is_int(pipeline->va[i].vk_format))
+-         return true;
+-   }
+-   return false;
+-}
+-
+-/* @pipeline can be NULL. We assume in that case that all the attributes have
+- * a float format (we only create an all-float BO once and we reuse it with
+- * all float pipelines), otherwise we look at the actual type of each
+- * attribute used with the specific pipeline passed in.
+- */
+-struct v3dv_bo *
+-v3dv_pipeline_create_default_attribute_values(struct v3dv_device *device,
+-                                              struct v3dv_pipeline *pipeline)
+-{
+-   uint32_t size = MAX_VERTEX_ATTRIBS * sizeof(float) * 4;
+-   struct v3dv_bo *bo;
+-
+-   bo = v3dv_bo_alloc(device, size, "default_vi_attributes", true);
+-
+-   if (!bo) {
+-      fprintf(stderr, "failed to allocate memory for the default "
+-              "attribute values\n");
+-      return NULL;
+-   }
+-
+-   bool ok = v3dv_bo_map(device, bo, size);
+-   if (!ok) {
+-      fprintf(stderr, "failed to map default attribute values buffer\n");
+-      return false;
+-   }
+-
+-   uint32_t *attrs = bo->map;
+-   uint8_t va_count = pipeline != NULL ? pipeline->va_count : 0;
+-   for (int i = 0; i < MAX_VERTEX_ATTRIBS; i++) {
+-      attrs[i * 4 + 0] = 0;
+-      attrs[i * 4 + 1] = 0;
+-      attrs[i * 4 + 2] = 0;
+-      VkFormat attr_format =
+-         pipeline != NULL ? pipeline->va[i].vk_format : VK_FORMAT_UNDEFINED;
+-      if (i < va_count && vk_format_is_int(attr_format)) {
+-         attrs[i * 4 + 3] = 1;
+-      } else {
+-         attrs[i * 4 + 3] = fui(1.0);
+-      }
+-   }
+-
+-   v3dv_bo_unmap(device, bo);
+-
+-   return bo;
+-}
+-
+ static void
+ pipeline_set_sample_mask(struct v3dv_pipeline *pipeline,
+                          const VkPipelineMultisampleStateCreateInfo *ms_info)
+@@ -2992,9 +2936,10 @@ pipeline_init(struct v3dv_pipeline *pipeline,
+ 
+    v3dv_X(device, pipeline_pack_compile_state)(pipeline, vi_info, vd_info);
+ 
+-   if (pipeline_has_integer_vertex_attrib(pipeline)) {
++   if (v3dv_X(device, pipeline_needs_default_attribute_values)(pipeline)) {
+       pipeline->default_attribute_values =
+-         v3dv_pipeline_create_default_attribute_values(pipeline->device, pipeline);
++         v3dv_X(pipeline->device, create_default_attribute_values)(pipeline->device, pipeline);
++
+       if (!pipeline->default_attribute_values)
+          return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+    } else {
+diff --git a/src/broadcom/vulkan/v3dv_private.h b/src/broadcom/vulkan/v3dv_private.h
+index cd6811b19c2..a9fab24d19e 100644
+--- a/src/broadcom/vulkan/v3dv_private.h
++++ b/src/broadcom/vulkan/v3dv_private.h
+@@ -2500,10 +2500,6 @@ void
+ v3dv_pipeline_cache_upload_pipeline(struct v3dv_pipeline *pipeline,
+                                     struct v3dv_pipeline_cache *cache);
+ 
+-struct v3dv_bo *
+-v3dv_pipeline_create_default_attribute_values(struct v3dv_device *device,
+-                                              struct v3dv_pipeline *pipeline);
+-
+ VkResult
+ v3dv_create_compute_pipeline_from_nir(struct v3dv_device *device,
+                                       nir_shader *nir,
+diff --git a/src/broadcom/vulkan/v3dvx_pipeline.c b/src/broadcom/vulkan/v3dvx_pipeline.c
+index 922698b08a2..e235220cb14 100644
+--- a/src/broadcom/vulkan/v3dvx_pipeline.c
++++ b/src/broadcom/vulkan/v3dvx_pipeline.c
+@@ -664,3 +664,66 @@ v3dX(pipeline_pack_compile_state)(struct v3dv_pipeline *pipeline,
+       }
+    }
+ }
++
++static bool
++pipeline_has_integer_vertex_attrib(struct v3dv_pipeline *pipeline)
++{
++   for (uint8_t i = 0; i < pipeline->va_count; i++) {
++      if (vk_format_is_int(pipeline->va[i].vk_format))
++         return true;
++   }
++   return false;
++}
++
++bool
++v3dX(pipeline_needs_default_attribute_values)(struct v3dv_pipeline *pipeline)
++{
++   return pipeline_has_integer_vertex_attrib(pipeline);
++}
++
++/* @pipeline can be NULL. In that case we assume the most common case. For
++ * example, for v42 we assume in that case that all the attributes have a
++ * float format (we only create an all-float BO once and we reuse it with all
++ * float pipelines), otherwise we look at the actual type of each attribute
++ * used with the specific pipeline passed in.
++ */
++struct v3dv_bo *
++v3dX(create_default_attribute_values)(struct v3dv_device *device,
++                                      struct v3dv_pipeline *pipeline)
++{
++   uint32_t size = MAX_VERTEX_ATTRIBS * sizeof(float) * 4;
++   struct v3dv_bo *bo;
++
++   bo = v3dv_bo_alloc(device, size, "default_vi_attributes", true);
++
++   if (!bo) {
++      fprintf(stderr, "failed to allocate memory for the default "
++              "attribute values\n");
++      return NULL;
++   }
++
++   bool ok = v3dv_bo_map(device, bo, size);
++   if (!ok) {
++      fprintf(stderr, "failed to map default attribute values buffer\n");
++      return NULL;
++   }
++
++   uint32_t *attrs = bo->map;
++   uint8_t va_count = pipeline != NULL ? pipeline->va_count : 0;
++   for (int i = 0; i < MAX_VERTEX_ATTRIBS; i++) {
++      attrs[i * 4 + 0] = 0;
++      attrs[i * 4 + 1] = 0;
++      attrs[i * 4 + 2] = 0;
++      VkFormat attr_format =
++         pipeline != NULL ? pipeline->va[i].vk_format : VK_FORMAT_UNDEFINED;
++      if (i < va_count && vk_format_is_int(attr_format)) {
++         attrs[i * 4 + 3] = 1;
++      } else {
++         attrs[i * 4 + 3] = fui(1.0);
++      }
++   }
++
++   v3dv_bo_unmap(device, bo);
++
++   return bo;
++}
+diff --git a/src/broadcom/vulkan/v3dvx_private.h b/src/broadcom/vulkan/v3dvx_private.h
+index ff9ba75cf93..036ce11b455 100644
+--- a/src/broadcom/vulkan/v3dvx_private.h
++++ b/src/broadcom/vulkan/v3dvx_private.h
+@@ -306,6 +306,14 @@ void
+ v3dX(pipeline_pack_compile_state)(struct v3dv_pipeline *pipeline,
+                                   const VkPipelineVertexInputStateCreateInfo *vi_info,
+                                   const VkPipelineVertexInputDivisorStateCreateInfoEXT *vd_info);
++
++bool
++v3dX(pipeline_needs_default_attribute_values)(struct v3dv_pipeline *pipeline);
++
++struct v3dv_bo *
++v3dX(create_default_attribute_values)(struct v3dv_device *device,
++                                      struct v3dv_pipeline *pipeline);
++
+ /* Used at v3dv_queue */
+ void
+ v3dX(job_emit_noop)(struct v3dv_job *job);
+-- 
+2.39.2
+

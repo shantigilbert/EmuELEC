@@ -1,0 +1,39 @@
+From 090b784913a5ff0a823510553f97c0d7b1115f57 Mon Sep 17 00:00:00 2001
+From: cdu13a <cdu13a@gmail.com>
+Date: Sat, 23 Nov 2019 14:08:13 -0500
+Subject: hid: stop hid-generic from being greedy with the xbox one controller
+
+---
+ drivers/hid/hid-core.c | 2 ++
+ drivers/hid/hid-ids.h  | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/drivers/hid/hid-core.c b/drivers/hid/hid-core.c
+index f5e17e8ce9ba..188c25a30870 100644
+--- a/drivers/hid/hid-core.c
++++ b/drivers/hid/hid-core.c
+@@ -2004,6 +2004,8 @@ static const struct hid_device_id hid_have_special_driver[] = {
+ 	{ HID_USB_DEVICE(USB_VENDOR_ID_MICROSOFT, USB_DEVICE_ID_MS_DIGITAL_MEDIA_600) },
+ 	{ HID_USB_DEVICE(USB_VENDOR_ID_MICROSOFT, USB_DEVICE_ID_MS_DIGITAL_MEDIA_3KV1) },
+ 	{ HID_USB_DEVICE(USB_VENDOR_ID_MICROSOFT, USB_DEVICE_ID_MS_POWER_COVER) },
++	{ HID_BLUETOOTH_DEVICE(USB_VENDOR_ID_MICROSOFT, USB_DEVICE_ID_MS_XBOX_ONE_S) },
++	{ HID_BLUETOOTH_DEVICE(USB_VENDOR_ID_MICROSOFT, USB_DEVICE_ID_MS_XBOX_ONE_S_2016) },
+ 	{ HID_USB_DEVICE(USB_VENDOR_ID_MONTEREY, USB_DEVICE_ID_GENIUS_KB29E) },
+ 	{ HID_USB_DEVICE(USB_VENDOR_ID_MSI, USB_DEVICE_ID_MSI_GT683R_LED_PANEL) },
+ 	{ HID_USB_DEVICE(USB_VENDOR_ID_NTRIG, USB_DEVICE_ID_NTRIG_TOUCH_SCREEN) },
+diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
+index 8b5d1166416a..4d753184436a 100644
+--- a/drivers/hid/hid-ids.h
++++ b/drivers/hid/hid-ids.h
+@@ -745,6 +745,8 @@
+ #define USB_DEVICE_ID_MS_TYPE_COVER_PRO_3_JP 0x07dd
+ #define USB_DEVICE_ID_MS_TYPE_COVER_PRO_4_JP 0x07e9
+ #define USB_DEVICE_ID_MS_POWER_COVER     0x07da
++#define USB_DEVICE_ID_MS_XBOX_ONE_S         0x02fd
++#define USB_DEVICE_ID_MS_XBOX_ONE_S_2016    0x02e0
+ 
+ #define USB_VENDOR_ID_MOJO		0x8282
+ #define USB_DEVICE_ID_RETRO_ADAPTER	0x3201
+-- 
+2.17.1
+

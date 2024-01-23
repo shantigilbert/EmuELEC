@@ -174,7 +174,7 @@ TARGET_MESON_OPTS="--prefix=/usr \
                    --libexecdir=/usr/lib \
                    --localstatedir=/var \
                    --buildtype=${MESON_BUILD_TYPE}"
-if [ ${BUILD_WITH_DEBUG} != yes ] && flag_enabled "strip" "yes"; then
+if [ "${BUILD_WITH_DEBUG}" != "yes" ] && flag_enabled "strip" "yes"; then
   TARGET_MESON_OPTS+=" -Dstrip=true"
 fi
 
@@ -531,7 +531,7 @@ if [ "${TARGET}" = "target" -o "${TARGET}" = "init" ]; then
 
     python_fix_abi "${INSTALL}"
 
-    if [ ! "${BUILD_WITH_DEBUG}" = "yes" ]; then
+    if [ "${BUILD_WITH_DEBUG}" != "yes" ] && flag_enabled "strip" "yes"; then
       ${STRIP} $(find ${INSTALL} \
         -type f -name "*.so*" \
         ! -name "ld-*.so" \

@@ -1,0 +1,29 @@
+From ceb088c05f351b40df14069bd6e0de777288ece4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Fri, 22 Oct 2021 12:17:45 +0200
+Subject: [PATCH 118/142] v3d: GFX-1461 does not affect V3D 7.x
+
+---
+ src/gallium/drivers/v3d/v3dx_draw.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/src/gallium/drivers/v3d/v3dx_draw.c b/src/gallium/drivers/v3d/v3dx_draw.c
+index 4bff2ea6478..04cc3bc3ae1 100644
+--- a/src/gallium/drivers/v3d/v3dx_draw.c
++++ b/src/gallium/drivers/v3d/v3dx_draw.c
+@@ -1593,9 +1593,10 @@ v3d_tlb_clear(struct v3d_job *job, unsigned buffers,
+         /* GFXH-1461: If we were to emit a load of just depth or just stencil,
+          * then the clear for the other may get lost.  We need to decide now
+          * if it would be possible to need to emit a load of just one after
+-         * we've set up our TLB clears.
++         * we've set up our TLB clears. This issue is fixed since V3D 4.3.18.
+          */
+-        if (buffers & PIPE_CLEAR_DEPTHSTENCIL &&
++        if (v3d->screen->devinfo.ver <= 42 &&
++            buffers & PIPE_CLEAR_DEPTHSTENCIL &&
+             (buffers & PIPE_CLEAR_DEPTHSTENCIL) != PIPE_CLEAR_DEPTHSTENCIL &&
+             job->zsbuf &&
+             util_format_is_depth_and_stencil(job->zsbuf->texture->format)) {
+-- 
+2.39.2
+

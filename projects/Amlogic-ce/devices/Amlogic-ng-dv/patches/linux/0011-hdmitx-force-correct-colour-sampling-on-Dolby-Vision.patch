@@ -1,0 +1,185 @@
+From ffabebaefea3f14771aba270cd0fcd7ff0cd475a Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Fri, 14 Apr 2023 08:39:30 +0200
+Subject: [PATCH 11/18] hdmitx: force correct colour sampling on Dolby Vision
+ 'fmt_attr' is not set in auto mode. It does require to force correct colour
+ sampling and colour depth with Dolby Vision, supported by the used display.
+
+---
+ .../vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c     | 143 ++++++++++++++----
+ 1 file changed, 113 insertions(+), 30 deletions(-)
+
+diff --git a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+index c1b843ccd08b..b8a18129638f 100644
+--- a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
++++ b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+@@ -609,6 +609,7 @@ static int set_disp_mode_auto(void)
+ 	unsigned char mode[32];
+ 	enum hdmi_vic vic = HDMI_Unknown;
+ 	int colour_depths[] = { 8, 10, 12, 16 };
++	char* colour_sampling[] = {"RGB","YUV422","YUV444","YUV420"};
+ 
+ 	memset(mode, 0, sizeof(mode));
+ 	hdev->ready = 0;
+@@ -674,46 +675,128 @@ static int set_disp_mode_auto(void)
+ 	hdev->para = para;
+ 	vic = hdmitx_edid_get_VIC(hdev, mode, 1);
+ 
+-	if (strstr(hdev->fmt_attr,"bit") != NULL) {
+-		pr_info("hdmitx: display colourdepth forced by attr to %d bits (VIC: %d)\n", colour_depths[para->cd - COLORDEPTH_24B], vic);
+-	} else {
+-		// parse and set maximum colourdepth given by edid
+-		if (hdev->rxcap.ColorDeepSupport & 0x78 && hdev->para->cs != COLORSPACE_YUV420) {
+-			enum hdmi_color_depth cd;
+-			for (cd = COLORDEPTH_36B; cd >= COLORDEPTH_24B; cd--) {
+-				if (hdev->rxcap.ColorDeepSupport & (1 << (cd - 1))) {
+-					para->cd = cd;
+-					break;
++	// auto detect colour sampling
++	if (strstr(hdev->fmt_attr, "rgb") == NULL &&
++	    strstr(hdev->fmt_attr, "420") == NULL &&
++	    strstr(hdev->fmt_attr, "422") == NULL &&
++	    strstr(hdev->fmt_attr, "444") == NULL) {
++		// force colour subsampling when DV mode
++		switch (hdev->hdmi_current_eotf_type) {
++			case EOTF_T_DOLBYVISION:
++			case EOTF_T_LL_MODE:
++			case EOTF_T_DV_AHEAD:
++				{
++					int cs = para->cs;
++					switch (hdev->hdmi_current_tunnel_mode) {
++						case RGB_8BIT:
++						case RGB_10_12BIT:
++							para->cs = COLORSPACE_RGB444;
++							break;
++						case YUV422_BIT12:
++							para->cs = COLORSPACE_YUV422;
++							break;
++						case YUV444_10_12BIT:
++							para->cs = COLORSPACE_YUV444;
++							break;
++						default:
++							break;
++					}
++					if (cs != para->cs)
++						pr_info("hdmitx: display colour subsampling is forced to %s by Dolby Vision tunneling\n",
++							colour_sampling[para->cs]);
+ 				}
+-			}
+-		} else if (hdev->rxcap.hf_ieeeoui == HF_IEEEOUI) {
+-			if (hdev->rxcap.dc_36bit_420)
+-				para->cd = COLORDEPTH_36B;
+-			else if (hdev->rxcap.dc_30bit_420)
+-				para->cd = COLORDEPTH_30B;
+-			else
+-				para->cd = COLORDEPTH_24B;
++				break;
++			default:
++				break;
+ 		}
++		pr_info("hdmitx: display colour subsampling is auto set to %s (VIC: %d)\n",
++			colour_sampling[para->cs], vic);
++	}
+ 
++	// auto detect colourdepth
++	if (strstr(hdev->fmt_attr,"bit") != NULL) {
++		pr_info("hdmitx: display colourdepth is forced by attr to %d bits (VIC: %d)\n",
++			colour_depths[para->cd - COLORDEPTH_24B], vic);
++	} else {
++		// parse and set maximum colourdepth given by edid
+ 		// check for colour subsampling limit
+-		switch (vic & 0xff) {
+-			case HDMI_3840x2160p50_16x9:
+-			case HDMI_3840x2160p60_16x9:
+-			case HDMI_4096x2160p50_256x135:
+-			case HDMI_4096x2160p60_256x135:
+-			case HDMI_3840x2160p50_64x27:
+-			case HDMI_3840x2160p60_64x27:
+-				if (para->cs == COLORSPACE_RGB444 || para->cs == COLORSPACE_YUV444)
++		switch (hdev->hdmi_current_eotf_type) {
++			case EOTF_T_DOLBYVISION:
++			case EOTF_T_LL_MODE:
++			case EOTF_T_DV_AHEAD:
+ 				{
+-					para->cd = COLORDEPTH_24B;
+-					pr_info("hdmitx: forced colourdepth to %d bits because of current video information code\n", colour_depths[para->cd - COLORDEPTH_24B]);
++					const struct dv_info *dv_info = &hdev->rxcap.dv_info;
++					int cd = para->cd;
++					switch (hdev->hdmi_current_tunnel_mode) {
++						case RGB_8BIT:
++								para->cd = COLORDEPTH_24B;
++							break;
++						case RGB_10_12BIT:
++						case YUV444_10_12BIT:
++							if (dv_info->ver == 2) {
++								switch (dv_info->sup_10b_12b_444) {
++									case 1:
++										para->cd = COLORDEPTH_30B;
++										break;
++									case 2:
++										para->cd = COLORDEPTH_36B;
++										break;
++									default:
++										break;
++								}
++							}
++							break;
++						case YUV422_BIT12:
++							para->cd = COLORDEPTH_36B;
++							break;
++						default:
++							break;
++					}
++
++					if (cd != para->cd)
++						pr_info("hdmitx: display colourdepth is forced to %d bits because of Dolby Vision sink capability\n",
++							colour_depths[para->cd - COLORDEPTH_24B]);
+ 				}
+ 				break;
+ 			default:
++				if (hdev->rxcap.ColorDeepSupport & 0x78 && hdev->para->cs != COLORSPACE_YUV420) {
++					enum hdmi_color_depth cd;
++					for (cd = COLORDEPTH_36B; cd >= COLORDEPTH_24B; cd--) {
++						if (hdev->rxcap.ColorDeepSupport & (1 << (cd - 1))) {
++							para->cd = cd;
++							break;
++						}
++					}
++				} else if (hdev->rxcap.hf_ieeeoui == HF_IEEEOUI) {
++					if (hdev->rxcap.dc_36bit_420)
++						para->cd = COLORDEPTH_36B;
++					else if (hdev->rxcap.dc_30bit_420)
++						para->cd = COLORDEPTH_30B;
++					else
++						para->cd = COLORDEPTH_24B;
++				}
++
++				switch (vic & 0xff) {
++					case HDMI_3840x2160p50_16x9:
++					case HDMI_3840x2160p60_16x9:
++					case HDMI_4096x2160p50_256x135:
++					case HDMI_4096x2160p60_256x135:
++					case HDMI_3840x2160p50_64x27:
++					case HDMI_3840x2160p60_64x27:
++						if (para->cs == COLORSPACE_RGB444 || para->cs == COLORSPACE_YUV444)
++						{
++							para->cd = COLORDEPTH_24B;
++							pr_info("hdmitx: display colourdepth is forced to %d bits because of current video information code\n",
++								colour_depths[para->cd - COLORDEPTH_24B]);
++						}
++						break;
++					default:
++						break;
+ 				break;
++			}
+ 		}
+-
+-		pr_info("hdmitx: display colourdepth is auto set to %d bits (VIC: %d)\n", colour_depths[para->cd - COLORDEPTH_24B], vic);
++		pr_info("hdmitx: display colourdepth is auto set to %d bits (VIC: %d)\n",
++			colour_depths[para->cd - COLORDEPTH_24B], vic);
+ 	}
+ 
+ 	if (strncmp(info->name, "2160p30hz", strlen("2160p30hz")) == 0) {
+-- 
+2.25.1
+

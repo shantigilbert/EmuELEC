@@ -1,0 +1,31 @@
+From 3c4a9fbd1d71fbd3aff0c83ec3ac9b2a0d9ba748 Mon Sep 17 00:00:00 2001
+From: Rod Smith <rodsmith@rodsbooks.com>
+Date: Sun, 5 Mar 2023 10:57:24 -0500
+Subject: [PATCH 07/12] Document recent merge.
+
+---
+ NEWS | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/NEWS b/NEWS
+index 9ec7e63..f9f7f19 100644
+--- a/NEWS
++++ b/NEWS
+@@ -1,4 +1,4 @@
+-1.0.10 (?/??/2022):
++1.0.10 (?/??/2023):
+ -------------------
+ 
+ - Fixed problem that caused sgdisk to crash with errors about being unable
+@@ -8,6 +8,8 @@
+ 
+ - Updated guid.cc to deal with minor change in libuuid.
+ 
++- Fixed potential NULL derefernce bug in sgdisk.
++
+ 1.0.9 (4/14/2022):
+ ------------------
+ 
+-- 
+2.31.1
+

@@ -3,27 +3,40 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
 
+StartProgressLog() {
+  if [ "$1" = "spinner" ]; then
+    echo "*** $3" >>$LOG
+  fi
+  StartProgress "$@"
+}
+
 if [ -e /storage/.please_resize_me ] ; then
   . /usr/lib/libreelec/functions
 
   hidecursor
+
+  mount -o remount,rw /flash
+  LOG=/flash/fs-resize.log
+  date -Iseconds >>$LOG
 
   # this sh** was never intended to be used
   # on already installed and runing system
   if [ -d /storage/.kodi -o -d /storage/.config -o -d /storage/.cache ] ; then
     rm -f /storage/.please_resize_me
     sync
-    echo "Resizing is not permitted - the system has already been initialised."
+    echo "Resizing is not permitted - the system has already been initialised." | tee -a $LOG
+    mount -o remount,ro /flash
     StartProgress countdown "Rebooting in 15s... " 15 "NOW"
     reboot -f
   fi
 
   # get the disk. /storage on 2nd partition
+  echo $(grep "/storage " /proc/mounts) >>$LOG
   PART=$(grep "/storage " /proc/mounts | cut -d" " -f1 | grep '2$')
 
   # get disk: /dev/sdx2 -> /dev/sdx, /dev/mmcblkxp2 -> /dev/mmcblkx
   case $PART in
-    "/dev/mmcblk"* | "/dev/nvme"*)
+    "/dev/mmcblk"*|"/dev/nvme"*)
       DISK=$(echo $PART | sed s/p2$//g)
       ROMS_PART_NAME="${DISK}p3"
       ;;
@@ -35,6 +48,8 @@ if [ -e /storage/.please_resize_me ] ; then
 
   rm -f /storage/.please_resize_me
   sync
+
+  echo "DISK: $DISK  PART: $PART" >>$LOG
 
   # just in case
   if [ ! -z "$DISK" -a ! -z "$PART" ] ; then
@@ -66,7 +81,7 @@ if [ -e /storage/.please_resize_me ] ; then
     # identify the partition scheme, and if gpt fix minor issues such as gpt header not at end of disk
     SCHEME=$(blkid -s PTTYPE -o value $DISK)
     if [ "$SCHEME" = "gpt" ]; then
-      StartProgress spinner "Checking layout...      " "sgdisk -e $DISK &>/dev/null"
+      StartProgressLog spinner "Checking layout...      " "sgdisk -e $DISK >>$LOG 2>&1"
     fi
     
     if [ "$ROMS_CREATE" ]; then
@@ -134,5 +149,6 @@ if [ -e /storage/.please_resize_me ] ; then
     fi
     StartProgress countdown "Rebooting in 5s...     " 5 "NOW"
   fi
+  mount -o remount,ro /flash
 fi
 reboot -f &>/dev/null

@@ -1,0 +1,34 @@
+From ef1159ad68e4969992a61b1fcdf9103409f689ca Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 8 Feb 2023 08:41:12 +0100
+Subject: [PATCH 128/142] v3dv: fix color write mask for v3d 7.x
+
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index 580aeb8ba2b..6827c829934 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -1627,9 +1627,15 @@ v3dX(cmd_buffer_emit_color_write_mask)(struct v3dv_cmd_buffer *cmd_buffer)
+ 
+    struct v3dv_pipeline *pipeline = cmd_buffer->state.gfx.pipeline;
+    struct v3dv_dynamic_state *dynamic = &cmd_buffer->state.dynamic;
++   uint32_t color_write_mask = ~dynamic->color_write_enable |
++                               pipeline->blend.color_write_masks;
++#if V3D_VERSION <= 42
++   /* Only 4 RTs */
++   color_write_mask &= 0xffff;
++#endif
++
+    cl_emit(&job->bcl, COLOR_WRITE_MASKS, mask) {
+-      mask.mask = (~dynamic->color_write_enable |
+-                   pipeline->blend.color_write_masks) & 0xffff;
++      mask.mask = color_write_mask;
+    }
+ 
+    cmd_buffer->state.dirty &= ~V3DV_CMD_DIRTY_COLOR_WRITE_ENABLE;
+-- 
+2.39.2
+

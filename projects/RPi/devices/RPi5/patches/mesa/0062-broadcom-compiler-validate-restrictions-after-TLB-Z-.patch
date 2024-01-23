@@ -1,0 +1,71 @@
+From d47ea903b96e43b07bdef21f8026da818e30fcd1 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Thu, 25 Nov 2021 13:00:34 +0100
+Subject: [PATCH 062/142] broadcom/compiler: validate restrictions after TLB Z
+ write
+
+---
+ src/broadcom/compiler/qpu_validate.c | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+
+diff --git a/src/broadcom/compiler/qpu_validate.c b/src/broadcom/compiler/qpu_validate.c
+index 4f09aa8aef4..1082fb7d50a 100644
+--- a/src/broadcom/compiler/qpu_validate.c
++++ b/src/broadcom/compiler/qpu_validate.c
+@@ -41,6 +41,7 @@ struct v3d_qpu_validate_state {
+         int last_sfu_write;
+         int last_branch_ip;
+         int last_thrsw_ip;
++        int first_tlb_z_write;
+ 
+         /* Set when we've found the last-THRSW signal, or if we were started
+          * in single-segment mode.
+@@ -110,11 +111,37 @@ static void
+ qpu_validate_inst(struct v3d_qpu_validate_state *state, struct qinst *qinst)
+ {
+         const struct v3d_device_info *devinfo = state->c->devinfo;
++
++        if (qinst->is_tlb_z_write && state->ip < state->first_tlb_z_write)
++                state->first_tlb_z_write = state->ip;
++
+         const struct v3d_qpu_instr *inst = &qinst->qpu;
+ 
++        if (inst->type == V3D_QPU_INSTR_TYPE_BRANCH &&
++            state->first_tlb_z_write >= 0 &&
++            state->ip > state->first_tlb_z_write &&
++            inst->branch.msfign != V3D_QPU_MSFIGN_NONE &&
++            inst->branch.cond != V3D_QPU_BRANCH_COND_ALWAYS &&
++            inst->branch.cond != V3D_QPU_BRANCH_COND_A0 &&
++            inst->branch.cond != V3D_QPU_BRANCH_COND_NA0) {
++                fail_instr(state, "Implicit branch MSF read after TLB Z write");
++        }
++
+         if (inst->type != V3D_QPU_INSTR_TYPE_ALU)
+                 return;
+ 
++        if (inst->alu.add.op == V3D_QPU_A_SETMSF &&
++            state->first_tlb_z_write >= 0 &&
++            state->ip > state->first_tlb_z_write) {
++                fail_instr(state, "SETMSF after TLB Z write");
++        }
++
++        if (state->first_tlb_z_write >= 0 &&
++            state->ip > state->first_tlb_z_write &&
++            inst->alu.add.op == V3D_QPU_A_MSF) {
++                fail_instr(state, "MSF read after TLB Z write");
++        }
++
+         if (devinfo->ver < 71) {
+                 if (inst->sig.small_imm_a || inst->sig.small_imm_c ||
+                     inst->sig.small_imm_d) {
+@@ -348,6 +375,7 @@ qpu_validate(struct v3d_compile *c)
+                 .last_sfu_write = -10,
+                 .last_thrsw_ip = -10,
+                 .last_branch_ip = -10,
++                .first_tlb_z_write = INT_MAX,
+                 .ip = 0,
+ 
+                 .last_thrsw_found = !c->last_thrsw,
+-- 
+2.39.2
+

@@ -1,0 +1,189 @@
+From 0c6910721eb50b38b3388c2d2344b6ecfe0fee58 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 27 Oct 2021 11:35:12 +0200
+Subject: [PATCH 053/142] broadcom/compiler: enable ldvary pipelining on v71
+
+---
+ src/broadcom/compiler/qpu_schedule.c | 121 ++++++++++++++++++---------
+ 1 file changed, 80 insertions(+), 41 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 7048d9257b6..334ffdc6d58 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -2312,46 +2312,72 @@ emit_branch(struct v3d_compile *c,
+ }
+ 
+ static bool
+-alu_reads_register(struct v3d_qpu_instr *inst,
++alu_reads_register(const struct v3d_device_info *devinfo,
++                   struct v3d_qpu_instr *inst,
+                    bool add, bool magic, uint32_t index)
+ {
+         uint32_t num_src;
+-        enum v3d_qpu_mux mux_a, mux_b;
+-
+-        if (add) {
++        if (add)
+                 num_src = v3d_qpu_add_op_num_src(inst->alu.add.op);
+-                mux_a = inst->alu.add.a.mux;
+-                mux_b = inst->alu.add.b.mux;
+-        } else {
++        else
+                 num_src = v3d_qpu_mul_op_num_src(inst->alu.mul.op);
+-                mux_a = inst->alu.mul.a.mux;
+-                mux_b = inst->alu.mul.b.mux;
+-        }
+ 
+-        for (int i = 0; i < num_src; i++) {
+-                if (magic) {
+-                        if (i == 0 && mux_a == index)
+-                                return true;
+-                        if (i == 1 && mux_b == index)
+-                                return true;
++        if (devinfo->ver <= 42) {
++                enum v3d_qpu_mux mux_a, mux_b;
++                if (add) {
++                        mux_a = inst->alu.add.a.mux;
++                        mux_b = inst->alu.add.b.mux;
+                 } else {
+-                        if (i == 0 && mux_a == V3D_QPU_MUX_A &&
+-                            inst->raddr_a == index) {
+-                                return true;
+-                        }
+-                        if (i == 0 && mux_a == V3D_QPU_MUX_B &&
+-                            inst->raddr_b == index) {
+-                                return true;
+-                        }
+-                        if (i == 1 && mux_b == V3D_QPU_MUX_A &&
+-                            inst->raddr_a == index) {
+-                                return true;
+-                        }
+-                        if (i == 1 && mux_b == V3D_QPU_MUX_B &&
+-                            inst->raddr_b == index) {
+-                                return true;
++                        mux_a = inst->alu.mul.a.mux;
++                        mux_b = inst->alu.mul.b.mux;
++                }
++
++                for (int i = 0; i < num_src; i++) {
++                        if (magic) {
++                                if (i == 0 && mux_a == index)
++                                        return true;
++                                if (i == 1 && mux_b == index)
++                                        return true;
++                        } else {
++                                if (i == 0 && mux_a == V3D_QPU_MUX_A &&
++                                    inst->raddr_a == index) {
++                                        return true;
++                                }
++                                if (i == 0 && mux_a == V3D_QPU_MUX_B &&
++                                    inst->raddr_b == index) {
++                                        return true;
++                                }
++                                if (i == 1 && mux_b == V3D_QPU_MUX_A &&
++                                    inst->raddr_a == index) {
++                                        return true;
++                                }
++                                if (i == 1 && mux_b == V3D_QPU_MUX_B &&
++                                    inst->raddr_b == index) {
++                                        return true;
++                                }
+                         }
+                 }
++
++                return false;
++        }
++
++        assert(devinfo->ver >= 71);
++        assert(!magic);
++
++        uint32_t raddr_a, raddr_b;
++        if (add) {
++                raddr_a = inst->alu.add.a.raddr;
++                raddr_b = inst->alu.add.b.raddr;
++        } else {
++                raddr_a = inst->alu.mul.a.raddr;
++                raddr_b = inst->alu.mul.b.raddr;
++        }
++
++        for (int i = 0; i < num_src; i++) {
++                if (i == 0 && raddr_a == index)
++                        return true;
++                if (i == 1 && raddr_b == index)
++                        return true;
+         }
+ 
+         return false;
+@@ -2386,6 +2412,8 @@ fixup_pipelined_ldvary(struct v3d_compile *c,
+                        struct qblock *block,
+                        struct v3d_qpu_instr *inst)
+ {
++        const struct v3d_device_info *devinfo = c->devinfo;
++
+         /* We only call this if we have successfully merged an ldvary into a
+          * previous instruction.
+          */
+@@ -2398,9 +2426,9 @@ fixup_pipelined_ldvary(struct v3d_compile *c,
+          * the ldvary destination, if it does, then moving the ldvary before
+          * it would overwrite it.
+          */
+-        if (alu_reads_register(inst, true, ldvary_magic, ldvary_index))
++        if (alu_reads_register(devinfo, inst, true, ldvary_magic, ldvary_index))
+                 return false;
+-        if (alu_reads_register(inst, false, ldvary_magic, ldvary_index))
++        if (alu_reads_register(devinfo, inst, false, ldvary_magic, ldvary_index))
+                 return false;
+ 
+         /* The implicit ldvary destination may not be written to by a signal
+@@ -2436,13 +2464,13 @@ fixup_pipelined_ldvary(struct v3d_compile *c,
+         }
+ 
+         /* The previous instruction cannot have a conflicting signal */
+-        if (v3d_qpu_sig_writes_address(c->devinfo, &prev->qpu.sig))
++        if (v3d_qpu_sig_writes_address(devinfo, &prev->qpu.sig))
+                 return false;
+ 
+         uint32_t sig;
+         struct v3d_qpu_sig new_sig = prev->qpu.sig;
+         new_sig.ldvary = true;
+-        if (!v3d_qpu_sig_pack(c->devinfo, &new_sig, &sig))
++        if (!v3d_qpu_sig_pack(devinfo, &new_sig, &sig))
+                 return false;
+ 
+         /* The previous instruction cannot use flags since ldvary uses the
+@@ -2471,14 +2499,25 @@ fixup_pipelined_ldvary(struct v3d_compile *c,
+         inst->sig_magic = false;
+         inst->sig_addr = 0;
+ 
+-        /* By moving ldvary to the previous instruction we make it update
+-         * r5 in the current one, so nothing else in it should write r5.
+-         * This should've been prevented by our dependency tracking, which
++        /* Update rf0 flops tracking for new ldvary delayed rf0 write tick */
++        if (devinfo->ver >= 71) {
++                scoreboard->last_implicit_rf0_write_tick = scoreboard->tick;
++                set_has_rf0_flops_conflict(scoreboard, inst, devinfo);
++        }
++
++        /* By moving ldvary to the previous instruction we make it update r5
++         * (rf0 for ver >= 71) in the current one, so nothing else in it
++         * should write this register.
++         *
++         * This should've been prevented by our depedency tracking, which
+          * would not allow ldvary to be paired up with an instruction that
+-         * writes r5 (since our dependency tracking doesn't know that the
+-         * ldvary write r5 happens in the next instruction).
++         * writes r5/rf0 (since our dependency tracking doesn't know that the
++         * ldvary write to r5/rf0 happens in the next instruction).
+          */
+-        assert(!v3d_qpu_writes_r5(c->devinfo, inst));
++        assert(!v3d_qpu_writes_r5(devinfo, inst));
++        assert(devinfo->ver <= 42 ||
++               (!v3d_qpu_writes_rf0_implicitly(devinfo, inst) &&
++                !v3d71_qpu_writes_waddr_explicitly(devinfo, inst, 0)));
+ 
+         return true;
+ }
+-- 
+2.39.2
+

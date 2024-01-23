@@ -1,0 +1,53 @@
+From a5211a4d71acc53183d2a90eb1694d8cce6eb44f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 5 Aug 2021 01:03:11 +0200
+Subject: [PATCH 006/142] broadcom/qpu: add comments on waddr not used on V3D
+ 7.x
+
+---
+ src/broadcom/qpu/qpu_instr.h | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/src/broadcom/qpu/qpu_instr.h b/src/broadcom/qpu/qpu_instr.h
+index 2e133472698..45a0cad9760 100644
+--- a/src/broadcom/qpu/qpu_instr.h
++++ b/src/broadcom/qpu/qpu_instr.h
+@@ -88,11 +88,11 @@ enum v3d_qpu_uf {
+ };
+ 
+ enum v3d_qpu_waddr {
+-        V3D_QPU_WADDR_R0 = 0,
+-        V3D_QPU_WADDR_R1 = 1,
+-        V3D_QPU_WADDR_R2 = 2,
+-        V3D_QPU_WADDR_R3 = 3,
+-        V3D_QPU_WADDR_R4 = 4,
++        V3D_QPU_WADDR_R0 = 0,    /* Reserved on V3D 7.x */
++        V3D_QPU_WADDR_R1 = 1,    /* Reserved on V3D 7.x */
++        V3D_QPU_WADDR_R2 = 2,    /* Reserved on V3D 7.x */
++        V3D_QPU_WADDR_R3 = 3,    /* Reserved on V3D 7.x */
++        V3D_QPU_WADDR_R4 = 4,    /* Reserved on V3D 7.x */
+         V3D_QPU_WADDR_R5 = 5,
+         V3D_QPU_WADDR_NOP = 6,
+         V3D_QPU_WADDR_TLB = 7,
+@@ -108,12 +108,12 @@ enum v3d_qpu_waddr {
+         V3D_QPU_WADDR_SYNC = 16,
+         V3D_QPU_WADDR_SYNCU = 17,
+         V3D_QPU_WADDR_SYNCB = 18,
+-        V3D_QPU_WADDR_RECIP = 19,
+-        V3D_QPU_WADDR_RSQRT = 20,
+-        V3D_QPU_WADDR_EXP = 21,
+-        V3D_QPU_WADDR_LOG = 22,
+-        V3D_QPU_WADDR_SIN = 23,
+-        V3D_QPU_WADDR_RSQRT2 = 24,
++        V3D_QPU_WADDR_RECIP = 19,  /* Reserved on V3D 7.x */
++        V3D_QPU_WADDR_RSQRT = 20,  /* Reserved on V3D 7.x */
++        V3D_QPU_WADDR_EXP = 21,    /* Reserved on V3D 7.x */
++        V3D_QPU_WADDR_LOG = 22,    /* Reserved on V3D 7.x */
++        V3D_QPU_WADDR_SIN = 23,    /* Reserved on V3D 7.x */
++        V3D_QPU_WADDR_RSQRT2 = 24, /* Reserved on V3D 7.x */
+         V3D_QPU_WADDR_TMUC = 32,
+         V3D_QPU_WADDR_TMUS = 33,
+         V3D_QPU_WADDR_TMUT = 34,
+-- 
+2.39.2
+

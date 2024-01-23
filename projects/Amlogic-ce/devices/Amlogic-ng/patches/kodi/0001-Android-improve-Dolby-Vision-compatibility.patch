@@ -1,0 +1,158 @@
+From 9df5de35edf290042854693658f7fb77c14a19c8 Mon Sep 17 00:00:00 2001
+From: thexai <58434170+thexai@users.noreply.github.com>
+Date: Wed, 29 Mar 2023 12:30:11 +0200
+Subject: [PATCH 01/21] [Android] improve Dolby Vision compatibility
+
+---
+ .../Video/DVDVideoCodecAndroidMediaCodec.cpp        |  8 +++++++-
+ xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemux.h       |  2 ++
+ .../VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp      | 13 ++++++++++++-
+ xbmc/cores/VideoPlayer/DVDStreamInfo.cpp            |  8 ++++++++
+ xbmc/cores/VideoPlayer/DVDStreamInfo.h              |  5 ++++-
+ 5 files changed, 33 insertions(+), 3 deletions(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp
+index 48050cfb9d..0be40dd87c 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp
+@@ -512,7 +512,13 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
+                   "Display: {}, MediaCodec: {}",
+                   displaySupportsDovi, mediaCodecSupportsDovi);
+ 
+-        if (displaySupportsDovi && mediaCodecSupportsDovi)
++        // For Dolby Vision profiles that don't have HDR10 fallback, always use
++        // the dvhe decoder even if the display not supports Dolby Vision.
++        // For profiles that has HDR10 fallback (7, 8) is better use HEVC decoder to
++        // ensure HDR10 output if display is not DV capable.
++        bool notHasHDR10fallback = (m_hints.dovi.dv_profile == 4 || m_hints.dovi.dv_profile == 5);
++
++        if (mediaCodecSupportsDovi && (displaySupportsDovi || notHasHDR10fallback))
+         {
+           m_mime = "video/dolby-vision";
+           m_formatname = isDvhe ? "amc-dvhe" : "amc-dvh1";
+diff --git a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemux.h b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemux.h
+index 5bf4da346f..43dcd465fb 100644
+--- a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemux.h
++++ b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemux.h
+@@ -32,6 +32,7 @@ class IAddonProvider;
+ extern "C"
+ {
+ #include <libavcodec/avcodec.h>
++#include <libavutil/dovi_meta.h>
+ #include <libavutil/mastering_display_metadata.h>
+ }
+ 
+@@ -166,6 +167,7 @@ public:
+ 
+   std::string stereo_mode; // expected stereo mode
+   StreamHdrType hdr_type = StreamHdrType::HDR_TYPE_NONE; // type of HDR for this stream (hdr10, etc)
++  AVDOVIDecoderConfigurationRecord dovi{};
+   bool bInterlaced; // progressive/interlaced flag
+   bool bUnknownIP; // progressive/interlace unknown
+ };
+diff --git a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
+index 66ff48b731..e88b1f1da3 100644
+--- a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
++++ b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
+@@ -53,8 +53,10 @@ extern "C"
+ #include <stdint.h>
+ #endif
+ 
+-extern "C" {
++extern "C"
++{
+ #include <libavutil/dict.h>
++#include <libavutil/dovi_meta.h>
+ #include <libavutil/opt.h>
+ }
+ 
+@@ -1719,6 +1721,15 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
+         int size = 0;
+         uint8_t* side_data = nullptr;
+ 
++        if (st->hdr_type == StreamHdrType::HDR_TYPE_DOLBYVISION)
++        {
++          side_data = av_stream_get_side_data(pStream, AV_PKT_DATA_DOVI_CONF, &size);
++          if (side_data && size)
++          {
++            st->dovi = *reinterpret_cast<AVDOVIDecoderConfigurationRecord*>(side_data);
++          }
++        }
++
+         side_data = av_stream_get_side_data(pStream, AV_PKT_DATA_MASTERING_DISPLAY_METADATA, &size);
+         if (side_data && size)
+         {
+diff --git a/xbmc/cores/VideoPlayer/DVDStreamInfo.cpp b/xbmc/cores/VideoPlayer/DVDStreamInfo.cpp
+index 556a9182c3..0bac726df6 100644
+--- a/xbmc/cores/VideoPlayer/DVDStreamInfo.cpp
++++ b/xbmc/cores/VideoPlayer/DVDStreamInfo.cpp
+@@ -11,6 +11,8 @@
+ #include "DVDDemuxers/DVDDemux.h"
+ #include "cores/VideoPlayer/Interface/DemuxCrypto.h"
+ 
++#include <cstring>
++
+ CDVDStreamInfo::CDVDStreamInfo()                                                     { extradata = NULL; Clear(); }
+ CDVDStreamInfo::CDVDStreamInfo(const CDVDStreamInfo &right, bool withextradata )     { extradata = NULL; Clear(); Assign(right, withextradata); }
+ CDVDStreamInfo::CDVDStreamInfo(const CDemuxStream &right, bool withextradata )       { extradata = NULL; Clear(); Assign(right, withextradata); }
+@@ -63,6 +65,7 @@ void CDVDStreamInfo::Clear()
+   masteringMetadata = nullptr;
+   contentLightMetadata = nullptr;
+   stereo_mode.clear();
++  dovi = {};
+ 
+   channels   = 0;
+   samplerate = 0;
+@@ -150,6 +153,9 @@ bool CDVDStreamInfo::Equal(const CDVDStreamInfo& right, int compare)
+   else if (contentLightMetadata || right.contentLightMetadata)
+     return false;
+ 
++  if (0 != std::memcmp(&dovi, &right.dovi, sizeof(AVDOVIDecoderConfigurationRecord)))
++    return false;
++
+   // AUDIO
+   if( channels      != right.channels
+   ||  samplerate    != right.samplerate
+@@ -234,6 +240,7 @@ void CDVDStreamInfo::Assign(const CDVDStreamInfo& right, bool withextradata)
+   masteringMetadata = right.masteringMetadata;
+   contentLightMetadata = right.contentLightMetadata;
+   stereo_mode = right.stereo_mode;
++  dovi = right.dovi;
+ 
+   // AUDIO
+   channels      = right.channels;
+@@ -309,6 +316,7 @@ void CDVDStreamInfo::Assign(const CDemuxStream& right, bool withextradata)
+     masteringMetadata = stream->masteringMetaData;
+     contentLightMetadata = stream->contentLightMetaData;
+     stereo_mode = stream->stereo_mode;
++    dovi = stream->dovi;
+   }
+   else if (right.type == STREAM_SUBTITLE)
+   {
+diff --git a/xbmc/cores/VideoPlayer/DVDStreamInfo.h b/xbmc/cores/VideoPlayer/DVDStreamInfo.h
+index 5c30334f8e..8d2989af75 100644
+--- a/xbmc/cores/VideoPlayer/DVDStreamInfo.h
++++ b/xbmc/cores/VideoPlayer/DVDStreamInfo.h
+@@ -10,8 +10,10 @@
+ 
+ #include "DVDDemuxers/DVDDemux.h"
+ 
+-extern "C" {
++extern "C"
++{
+ #include <libavcodec/avcodec.h>
++#include <libavutil/dovi_meta.h>
+ }
+ #include "DVDClock.h"
+ 
+@@ -78,6 +80,7 @@ public:
+   std::shared_ptr<AVMasteringDisplayMetadata> masteringMetadata;
+   std::shared_ptr<AVContentLightMetadata> contentLightMetadata;
+   std::string stereo_mode; // stereoscopic 3d mode
++  AVDOVIDecoderConfigurationRecord dovi{};
+   CDVDClock *pClock;
+ 
+   // AUDIO
+-- 
+2.43.0
+

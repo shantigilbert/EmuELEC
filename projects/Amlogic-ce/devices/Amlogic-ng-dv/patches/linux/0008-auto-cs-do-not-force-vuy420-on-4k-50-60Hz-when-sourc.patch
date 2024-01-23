@@ -1,0 +1,55 @@
+From 2fc70ce7b25427b1208f8e2b045be4363df846ea Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Fri, 31 Mar 2023 09:30:05 +0200
+Subject: [PATCH 08/18] auto cs: do not force vuy420 on 4k/50/60Hz when source
+ is Dolby Vision
+
+---
+ .../vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c     | 27 ++++++++++++-------
+ 1 file changed, 18 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+index d97b4c2ab736..c1b843ccd08b 100644
+--- a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
++++ b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+@@ -5502,19 +5502,28 @@ static enum vmode_e hdmitx_validate_vmode(char *mode, unsigned int frac)
+ 
+ 	// force 4k50/60Hz to 420 unless manually set
+ 	if (strstr(hdev->fmt_attr, "rgb") == NULL &&
++	    strstr(hdev->fmt_attr, "420") == NULL &&
+ 	    strstr(hdev->fmt_attr, "422") == NULL &&
+ 	    strstr(hdev->fmt_attr, "444") == NULL) {
+-		switch (hdmitx_edid_vic_tab_map_vic(mode)) {
+-			case HDMI_3840x2160p50_16x9:
+-			case HDMI_3840x2160p60_16x9:
+-			case HDMI_4096x2160p50_256x135:
+-			case HDMI_4096x2160p60_256x135:
+-			case HDMI_3840x2160p50_64x27:
+-			case HDMI_3840x2160p60_64x27:
+-				if (!strstr(mode, "420"))
+-					strncat(mode, "420", 3);
++		switch (hdev->hdmi_current_eotf_type) {
++			case EOTF_T_DOLBYVISION:
++			case EOTF_T_LL_MODE:
++			case EOTF_T_DV_AHEAD:
+ 				break;
+ 			default:
++				switch (hdmitx_edid_vic_tab_map_vic(mode)) {
++					case HDMI_3840x2160p50_16x9:
++					case HDMI_3840x2160p60_16x9:
++					case HDMI_4096x2160p50_256x135:
++					case HDMI_4096x2160p60_256x135:
++					case HDMI_3840x2160p50_64x27:
++					case HDMI_3840x2160p60_64x27:
++						if (!strstr(mode, "420"))
++							strncat(mode, "420", 3);
++						break;
++					default:
++						break;
++				}
+ 				break;
+ 		}
+ 	}
+-- 
+2.25.1
+

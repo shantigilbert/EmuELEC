@@ -1,0 +1,30 @@
+From 46e2b22f43290e6fe92f5435af174c4b18bb6ef5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 21 Oct 2021 22:52:47 +0200
+Subject: [PATCH 104/142] v3d: add a non-conformant warning for not fully
+ supported hw
+
+---
+ src/gallium/drivers/v3d/v3d_screen.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/gallium/drivers/v3d/v3d_screen.c b/src/gallium/drivers/v3d/v3d_screen.c
+index 98ca9bb69e6..efdb7d615ae 100644
+--- a/src/gallium/drivers/v3d/v3d_screen.c
++++ b/src/gallium/drivers/v3d/v3d_screen.c
+@@ -922,6 +922,12 @@ v3d_screen_create(int fd, const struct pipe_screen_config *config,
+         if (!v3d_get_device_info(screen->fd, &screen->devinfo, &v3d_ioctl))
+                 goto fail;
+ 
++        if (screen->devinfo.ver >= 71) {
++                fprintf(stderr, "WARNING: v3d support for hw version %i is neither "
++                        "a complete nor a conformant OpenGL implementation. Testing "
++                        "use only.\n", screen->devinfo.ver);
++        }
++
+         driParseConfigFiles(config->options, config->options_info, 0, "v3d",
+                             NULL, NULL, NULL, 0, NULL, 0);
+ 
+-- 
+2.39.2
+

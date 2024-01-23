@@ -1,0 +1,12 @@
+[Unit]
+Description=Amlogic media_modules-aml service
+Before=kodi.service
+After=opentee_linuxdriver.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/coreelec/media_modules-aml
+
+[Install]
+WantedBy=multi-user.target

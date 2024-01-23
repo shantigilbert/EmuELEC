@@ -2,12 +2,12 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="RTL8822BU-aml"
-PKG_VERSION="f2bccb96ac8e54b63ef35a3c873075f21fb95030"
-PKG_SHA256="9ff7b6d7ef6c37576edb2d6ea2765385dd1512f476f6a49202d11b7516194f96"
+PKG_VERSION="cd2b6cbd9c8fbfebee8a1f28fab8e4434450456c"
+PKG_SHA256="63c7e297a0ab0202e0d4c1c25428a98841e18b7fca0c21cba5d43a941ff37b62"
 PKG_ARCH="arm aarch64"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/khadas/android_hardware_wifi_realtek_drivers_8822bu"
-PKG_URL="https://github.com/cilynx/rtl88x2bu/archive/$PKG_VERSION.tar.gz"
+PKG_URL="https://github.com/morrownr/88x2bu-20210702/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain linux"
 PKG_NEED_UNPACK="$LINUX_DEPENDS"
 PKG_LONGDESC="Realtek RTL8822BU Linux driver"

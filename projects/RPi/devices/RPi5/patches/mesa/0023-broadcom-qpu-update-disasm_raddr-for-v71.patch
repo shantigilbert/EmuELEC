@@ -1,0 +1,128 @@
+From 20ce426df1ab2546332141f4bc4531ada754cdea Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Fri, 10 Sep 2021 01:20:44 +0200
+Subject: [PATCH 023/142] broadcom/qpu: update disasm_raddr for v71
+
+---
+ src/broadcom/qpu/qpu_disasm.c | 72 ++++++++++++++++++++++++++++++++---
+ 1 file changed, 66 insertions(+), 6 deletions(-)
+
+diff --git a/src/broadcom/qpu/qpu_disasm.c b/src/broadcom/qpu/qpu_disasm.c
+index 588a665f770..b613de781dc 100644
+--- a/src/broadcom/qpu/qpu_disasm.c
++++ b/src/broadcom/qpu/qpu_disasm.c
+@@ -56,8 +56,9 @@ pad_to(struct disasm_state *disasm, int n)
+ 
+ 
+ static void
+-v3d_qpu_disasm_raddr(struct disasm_state *disasm,
+-                     const struct v3d_qpu_instr *instr, uint8_t mux)
++v3d33_qpu_disasm_raddr(struct disasm_state *disasm,
++                       const struct v3d_qpu_instr *instr,
++                       enum v3d_qpu_mux mux)
+ {
+         if (mux == V3D_QPU_MUX_A) {
+                 append(disasm, "rf%d", instr->raddr_a);
+@@ -82,6 +83,65 @@ v3d_qpu_disasm_raddr(struct disasm_state *disasm,
+         }
+ }
+ 
++enum v3d_qpu_input_class {
++        V3D_QPU_ADD_A,
++        V3D_QPU_ADD_B,
++        V3D_QPU_MUL_A,
++        V3D_QPU_MUL_B
++};
++
++static void
++v3d71_qpu_disasm_raddr(struct disasm_state *disasm,
++                       const struct v3d_qpu_instr *instr,
++                       uint8_t raddr,
++                       enum v3d_qpu_input_class input_class)
++{
++        bool is_small_imm = false;
++        switch(input_class) {
++        case V3D_QPU_ADD_A:
++                is_small_imm = instr->sig.small_imm_a;
++                break;
++        case V3D_QPU_ADD_B:
++                is_small_imm = instr->sig.small_imm_b;
++                break;
++        case V3D_QPU_MUL_A:
++                is_small_imm = instr->sig.small_imm_c;
++                break;
++        case V3D_QPU_MUL_B:
++                is_small_imm = instr->sig.small_imm_d;
++                break;
++        }
++
++        if (is_small_imm) {
++                unreachable("Pending handling small immediates");
++                uint32_t val;
++                ASSERTED bool ok =
++                        v3d_qpu_small_imm_unpack(disasm->devinfo,
++                                                 raddr,
++                                                 &val);
++
++                if ((int)val >= -16 && (int)val <= 15)
++                        append(disasm, "%d", val);
++                else
++                        append(disasm, "0x%08x", val);
++                assert(ok);
++        } else {
++                append(disasm, "rf%d", raddr);
++        }
++}
++
++static void
++v3d_qpu_disasm_raddr(struct disasm_state *disasm,
++                     const struct v3d_qpu_instr *instr,
++                     const struct v3d_qpu_input *input,
++                     enum v3d_qpu_input_class input_class)
++{
++        if (disasm->devinfo->ver < 71)
++                v3d33_qpu_disasm_raddr(disasm, instr, input->mux);
++        else
++                v3d71_qpu_disasm_raddr(disasm, instr, input->raddr, input_class);
++}
++
+ static void
+ v3d_qpu_disasm_waddr(struct disasm_state *disasm, uint32_t waddr, bool magic)
+ {
+@@ -121,14 +181,14 @@ v3d_qpu_disasm_add(struct disasm_state *disasm,
+         if (num_src >= 1) {
+                 if (has_dst)
+                         append(disasm, ", ");
+-                v3d_qpu_disasm_raddr(disasm, instr, instr->alu.add.a.mux);
++                v3d_qpu_disasm_raddr(disasm, instr, &instr->alu.add.a, V3D_QPU_ADD_A);
+                 append(disasm, "%s",
+                        v3d_qpu_unpack_name(instr->alu.add.a.unpack));
+         }
+ 
+         if (num_src >= 2) {
+                 append(disasm, ", ");
+-                v3d_qpu_disasm_raddr(disasm, instr, instr->alu.add.b.mux);
++                v3d_qpu_disasm_raddr(disasm, instr, &instr->alu.add.b, V3D_QPU_ADD_B);
+                 append(disasm, "%s",
+                        v3d_qpu_unpack_name(instr->alu.add.b.unpack));
+         }
+@@ -164,14 +224,14 @@ v3d_qpu_disasm_mul(struct disasm_state *disasm,
+         if (num_src >= 1) {
+                 if (has_dst)
+                         append(disasm, ", ");
+-                v3d_qpu_disasm_raddr(disasm, instr, instr->alu.mul.a.mux);
++                v3d_qpu_disasm_raddr(disasm, instr, &instr->alu.mul.a, V3D_QPU_MUL_A);
+                 append(disasm, "%s",
+                        v3d_qpu_unpack_name(instr->alu.mul.a.unpack));
+         }
+ 
+         if (num_src >= 2) {
+                 append(disasm, ", ");
+-                v3d_qpu_disasm_raddr(disasm, instr, instr->alu.mul.b.mux);
++                v3d_qpu_disasm_raddr(disasm, instr, &instr->alu.mul.b, V3D_QPU_MUL_B);
+                 append(disasm, "%s",
+                        v3d_qpu_unpack_name(instr->alu.mul.b.unpack));
+         }
+-- 
+2.39.2
+

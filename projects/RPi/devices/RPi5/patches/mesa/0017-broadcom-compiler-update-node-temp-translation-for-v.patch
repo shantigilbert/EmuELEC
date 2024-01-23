@@ -1,0 +1,261 @@
+From ebba9019461083687f6afd23ff0d4646c1a667cb Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Sun, 29 Jan 2023 00:27:11 +0100
+Subject: [PATCH 017/142] broadcom/compiler: update node/temp translation for
+ v71
+
+As the offset applied needs to take into account if we have
+accumulators or not.
+---
+ src/broadcom/compiler/vir_register_allocate.c | 68 +++++++++----------
+ 1 file changed, 34 insertions(+), 34 deletions(-)
+
+diff --git a/src/broadcom/compiler/vir_register_allocate.c b/src/broadcom/compiler/vir_register_allocate.c
+index b22f915d1df..aa9473d124b 100644
+--- a/src/broadcom/compiler/vir_register_allocate.c
++++ b/src/broadcom/compiler/vir_register_allocate.c
+@@ -39,30 +39,31 @@
+                            CLASS_BITS_R5)
+ 
+ static inline uint32_t
+-temp_to_node(uint32_t temp)
++temp_to_node(struct v3d_compile *c, uint32_t temp)
+ {
+-        return temp + ACC_COUNT;
++        return temp + (c->devinfo->has_accumulators ? ACC_COUNT : 0);
+ }
+ 
+ static inline uint32_t
+-node_to_temp(uint32_t node)
++node_to_temp(struct v3d_compile *c, uint32_t node)
+ {
+-        assert(node >= ACC_COUNT);
+-        return node - ACC_COUNT;
++        assert((c->devinfo->has_accumulators && node >= ACC_COUNT) ||
++               (!c->devinfo->has_accumulators && node >= 0));
++        return node - (c->devinfo->has_accumulators ? ACC_COUNT : 0);
+ }
+ 
+ static inline uint8_t
+-get_temp_class_bits(struct v3d_ra_node_info *nodes,
++get_temp_class_bits(struct v3d_compile *c,
+                     uint32_t temp)
+ {
+-        return nodes->info[temp_to_node(temp)].class_bits;
++        return c->nodes.info[temp_to_node(c, temp)].class_bits;
+ }
+ 
+ static inline void
+-set_temp_class_bits(struct v3d_ra_node_info *nodes,
++set_temp_class_bits(struct v3d_compile *c,
+                     uint32_t temp, uint8_t class_bits)
+ {
+-        nodes->info[temp_to_node(temp)].class_bits = class_bits;
++        c->nodes.info[temp_to_node(c, temp)].class_bits = class_bits;
+ }
+ 
+ static struct ra_class *
+@@ -84,7 +85,7 @@ static inline struct ra_class *
+ choose_reg_class_for_temp(struct v3d_compile *c, uint32_t temp)
+ {
+         assert(temp < c->num_temps && temp < c->nodes.alloc_count);
+-        return choose_reg_class(c, get_temp_class_bits(&c->nodes, temp));
++        return choose_reg_class(c, get_temp_class_bits(c, temp));
+ }
+ 
+ static inline bool
+@@ -313,7 +314,7 @@ v3d_choose_spill_node(struct v3d_compile *c)
+ 
+         for (unsigned i = 0; i < c->num_temps; i++) {
+                 if (BITSET_TEST(c->spillable, i)) {
+-                        ra_set_node_spill_cost(c->g, temp_to_node(i),
++                        ra_set_node_spill_cost(c->g, temp_to_node(c, i),
+                                                spill_costs[i]);
+                 }
+         }
+@@ -482,7 +483,7 @@ v3d_emit_spill_tmua(struct v3d_compile *c,
+                         c->temp_start[i] < ip && c->temp_end[i] >= ip :
+                         c->temp_start[i] <= ip && c->temp_end[i] > ip;
+                 if (thrsw_cross) {
+-                        ra_set_node_class(c->g, temp_to_node(i),
++                        ra_set_node_class(c->g, temp_to_node(c, i),
+                                           choose_reg_class(c, CLASS_BITS_PHYS));
+                 }
+         }
+@@ -509,8 +510,7 @@ v3d_emit_tmu_spill(struct v3d_compile *c,
+          * same register class bits as the original.
+          */
+         if (inst == position) {
+-                uint8_t class_bits = get_temp_class_bits(&c->nodes,
+-                                                         inst->dst.index);
++                uint8_t class_bits = get_temp_class_bits(c, inst->dst.index);
+                 inst->dst = vir_get_temp(c);
+                 add_node(c, inst->dst.index, class_bits);
+         } else {
+@@ -574,7 +574,7 @@ v3d_spill_reg(struct v3d_compile *c, int *acc_nodes, int spill_temp)
+                 reconstruct_op = orig_def->qpu.alu.add.op;
+         }
+ 
+-        uint32_t spill_node = temp_to_node(spill_temp);
++        uint32_t spill_node = temp_to_node(c, spill_temp);
+ 
+         /* We must disable the ldunif optimization if we are spilling uniforms */
+         bool had_disable_ldunif_opt = c->disable_ldunif_opt;
+@@ -739,12 +739,12 @@ v3d_spill_reg(struct v3d_compile *c, int *acc_nodes, int spill_temp)
+          * update node priorities based one new liveness data.
+          */
+         uint32_t sb_temp =c->spill_base.index;
+-        uint32_t sb_node = temp_to_node(sb_temp);
++        uint32_t sb_node = temp_to_node(c, sb_temp);
+         for (uint32_t i = 0; i < c->num_temps; i++) {
+                 if (c->temp_end[i] == -1)
+                         continue;
+ 
+-                uint32_t node_i = temp_to_node(i);
++                uint32_t node_i = temp_to_node(c, i);
+                 c->nodes.info[node_i].priority =
+                         c->temp_end[i] - c->temp_start[i];
+ 
+@@ -752,7 +752,7 @@ v3d_spill_reg(struct v3d_compile *c, int *acc_nodes, int spill_temp)
+                      j < c->num_temps; j++) {
+                         if (interferes(c->temp_start[i], c->temp_end[i],
+                                        c->temp_start[j], c->temp_end[j])) {
+-                                uint32_t node_j = temp_to_node(j);
++                                uint32_t node_j = temp_to_node(c, j);
+                                 ra_add_node_interference(c->g, node_i, node_j);
+                         }
+                 }
+@@ -958,7 +958,7 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+                 for (int i = 0; i < c->num_temps; i++) {
+                         if (c->temp_start[i] < ip && c->temp_end[i] > ip) {
+                                 ra_add_node_interference(c->g,
+-                                                         temp_to_node(i),
++                                                         temp_to_node(c, i),
+                                                          acc_nodes[3]);
+                         }
+                 }
+@@ -968,7 +968,7 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+                 for (int i = 0; i < c->num_temps; i++) {
+                         if (c->temp_start[i] < ip && c->temp_end[i] > ip) {
+                                 ra_add_node_interference(c->g,
+-                                                         temp_to_node(i),
++                                                         temp_to_node(c, i),
+                                                          acc_nodes[4]);
+                         }
+                 }
+@@ -987,7 +987,7 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+                          * decides whether the LDVPM is in or out)
+                          */
+                         assert(inst->dst.file == QFILE_TEMP);
+-                        set_temp_class_bits(&c->nodes, inst->dst.index,
++                        set_temp_class_bits(c, inst->dst.index,
+                                             CLASS_BITS_PHYS);
+                         break;
+                 }
+@@ -1002,7 +1002,7 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+                          * phys regfile.
+                          */
+                         assert(inst->dst.file == QFILE_TEMP);
+-                        set_temp_class_bits(&c->nodes, inst->dst.index,
++                        set_temp_class_bits(c, inst->dst.index,
+                                             CLASS_BITS_PHYS);
+                         break;
+                 }
+@@ -1024,7 +1024,7 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+                          */
+                         assert(inst->qpu.alu.mul.op == V3D_QPU_M_MOV);
+                         assert(inst->dst.file == QFILE_TEMP);
+-                        uint32_t node = temp_to_node(inst->dst.index);
++                        uint32_t node = temp_to_node(c, inst->dst.index);
+                         ra_set_node_reg(c->g, node,
+                                         PHYS_INDEX + inst->src[0].index);
+                         break;
+@@ -1043,9 +1043,9 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+                  */
+                 if (!inst->qpu.sig.ldunif) {
+                         uint8_t class_bits =
+-                                get_temp_class_bits(&c->nodes, inst->dst.index) &
++                                get_temp_class_bits(c, inst->dst.index) &
+                                 ~CLASS_BITS_R5;
+-                        set_temp_class_bits(&c->nodes, inst->dst.index,
++                        set_temp_class_bits(c, inst->dst.index,
+                                             class_bits);
+ 
+                 } else {
+@@ -1054,7 +1054,7 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+                          * loads interfere with each other.
+                          */
+                         if (c->devinfo->ver < 40) {
+-                                set_temp_class_bits(&c->nodes, inst->dst.index,
++                                set_temp_class_bits(c, inst->dst.index,
+                                                     CLASS_BITS_R5);
+                         }
+                 }
+@@ -1064,7 +1064,7 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+         if (inst->qpu.sig.thrsw) {
+                 for (int i = 0; i < c->num_temps; i++) {
+                         if (c->temp_start[i] < ip && c->temp_end[i] > ip) {
+-                                set_temp_class_bits(&c->nodes, i,
++                                set_temp_class_bits(c, i,
+                                                     CLASS_BITS_PHYS);
+                         }
+                 }
+@@ -1125,7 +1125,7 @@ v3d_register_allocate(struct v3d_compile *c)
+                         c->nodes.info[i].priority = 0;
+                         c->nodes.info[i].class_bits = 0;
+                 } else {
+-                        uint32_t t = node_to_temp(i);
++                        uint32_t t = node_to_temp(c, i);
+                         c->nodes.info[i].priority =
+                                 c->temp_end[t] - c->temp_start[t];
+                         c->nodes.info[i].class_bits = CLASS_BITS_ANY;
+@@ -1143,7 +1143,7 @@ v3d_register_allocate(struct v3d_compile *c)
+ 
+         /* Set the register classes for all our temporaries in the graph */
+         for (uint32_t i = 0; i < c->num_temps; i++) {
+-                ra_set_node_class(c->g, temp_to_node(i),
++                ra_set_node_class(c->g, temp_to_node(c, i),
+                                   choose_reg_class_for_temp(c, i));
+         }
+ 
+@@ -1153,8 +1153,8 @@ v3d_register_allocate(struct v3d_compile *c)
+                         if (interferes(c->temp_start[i], c->temp_end[i],
+                                        c->temp_start[j], c->temp_end[j])) {
+                                 ra_add_node_interference(c->g,
+-                                                         temp_to_node(i),
+-                                                         temp_to_node(j));
++                                                         temp_to_node(c, i),
++                                                         temp_to_node(c, j));
+                         }
+                 }
+         }
+@@ -1171,7 +1171,7 @@ v3d_register_allocate(struct v3d_compile *c)
+                 if (c->spill_size <
+                     V3D_CHANNELS * sizeof(uint32_t) * force_register_spills) {
+                         int node = v3d_choose_spill_node(c);
+-                        uint32_t temp = node_to_temp(node);
++                        uint32_t temp = node_to_temp(c, node);
+                         if (node != -1) {
+                                 v3d_spill_reg(c, acc_nodes, temp);
+                                 continue;
+@@ -1186,7 +1186,7 @@ v3d_register_allocate(struct v3d_compile *c)
+                 if (node == -1)
+                         goto spill_fail;
+ 
+-                uint32_t temp = node_to_temp(node);
++                uint32_t temp = node_to_temp(c, node);
+                 enum temp_spill_type spill_type =
+                         get_spill_type_for_temp(c, temp);
+                 if (spill_type != SPILL_TYPE_TMU || tmu_spilling_allowed(c)) {
+@@ -1201,7 +1201,7 @@ v3d_register_allocate(struct v3d_compile *c)
+         /* Allocation was successful, build the 'temp -> reg' map */
+         temp_registers = calloc(c->num_temps, sizeof(*temp_registers));
+         for (uint32_t i = 0; i < c->num_temps; i++) {
+-                int ra_reg = ra_get_node_reg(c->g, temp_to_node(i));
++                int ra_reg = ra_get_node_reg(c->g, temp_to_node(c, i));
+                 if (ra_reg < PHYS_INDEX) {
+                         temp_registers[i].magic = true;
+                         temp_registers[i].index = (V3D_QPU_WADDR_R0 +
+-- 
+2.39.2
+

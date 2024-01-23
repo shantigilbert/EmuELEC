@@ -1,0 +1,504 @@
+From 52b5ac62b367ae89574c8031fdcf7c1dae05c942 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Tue, 29 Jun 2021 11:59:53 +0200
+Subject: [PATCH 073/142] v3dv/meson: add v71 hw generation
+
+Starting point for v71 version inclusion.
+
+This just adds it as one of the versions to be compiled (on meson),
+updates the v3dX/v3dv_X macros, and update the code enough to get it
+compiling when building using the two versions. For any packet not
+available on v71 we just provide a generic asserted placeholder of
+generation not supported.
+
+Any real v71 support will be implemented on following commits.
+---
+ src/broadcom/vulkan/meson.build         |  6 +-
+ src/broadcom/vulkan/v3dv_private.h      |  7 +++
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c  | 75 +++++++++++++++++++++++--
+ src/broadcom/vulkan/v3dvx_image.c       | 16 +++++-
+ src/broadcom/vulkan/v3dvx_meta_common.c | 32 +++++++++++
+ src/broadcom/vulkan/v3dvx_pipeline.c    |  5 ++
+ src/broadcom/vulkan/v3dvx_queue.c       | 11 ++++
+ 7 files changed, 142 insertions(+), 10 deletions(-)
+
+diff --git a/src/broadcom/vulkan/meson.build b/src/broadcom/vulkan/meson.build
+index ad032d832ad..3da7364686f 100644
+--- a/src/broadcom/vulkan/meson.build
++++ b/src/broadcom/vulkan/meson.build
+@@ -27,6 +27,7 @@ v3dv_entrypoints = custom_target(
+     '--out-h', '@OUTPUT0@', '--out-c', '@OUTPUT1@', '--prefix', 'v3dv',
+     '--beta', with_vulkan_beta.to_string(),
+     '--device-prefix', 'ver42',
++    '--device-prefix', 'ver71',
+   ],
+   depend_files : vk_entrypoints_gen_depend_files,
+ )
+@@ -67,10 +68,7 @@ files_per_version = files(
+   'v3dvx_queue.c',
+ )
+ 
+-# The vulkan driver only supports version >= 42, which is the version present in
+-# Rpi4. We need to explicitly set it as we are reusing pieces from the GL v3d
+-# driver.
+-v3d_versions = ['42']
++v3d_versions = ['42', '71']
+ 
+ v3dv_flags = []
+ 
+diff --git a/src/broadcom/vulkan/v3dv_private.h b/src/broadcom/vulkan/v3dv_private.h
+index c6707211529..6bdf338c67b 100644
+--- a/src/broadcom/vulkan/v3dv_private.h
++++ b/src/broadcom/vulkan/v3dv_private.h
+@@ -2608,6 +2608,9 @@ u64_compare(const void *key1, const void *key2)
+    case 42:                                           \
+       v3d_X_thing = &v3d42_##thing;                   \
+       break;                                          \
++   case 71:                                           \
++      v3d_X_thing = &v3d71_##thing;                   \
++      break;                                          \
+    default:                                           \
+       unreachable("Unsupported hardware generation"); \
+    }                                                  \
+@@ -2626,6 +2629,10 @@ u64_compare(const void *key1, const void *key2)
+ #  define v3dX(x) v3d42_##x
+ #  include "v3dvx_private.h"
+ #  undef v3dX
++
++#  define v3dX(x) v3d71_##x
++#  include "v3dvx_private.h"
++#  undef v3dX
+ #endif
+ 
+ #ifdef ANDROID
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index f182b790d36..b958e634c82 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -56,10 +56,15 @@ v3dX(job_emit_enable_double_buffer)(struct v3dv_job *job)
+    };
+    config.width_in_pixels = tiling->width;
+    config.height_in_pixels = tiling->height;
++#if V3D_VERSION == 42
+    config.number_of_render_targets = MAX2(tiling->render_target_count, 1);
+    config.multisample_mode_4x = tiling->msaa;
+    config.double_buffer_in_non_ms_mode = tiling->double_buffer;
+    config.maximum_bpp_of_all_render_targets = tiling->internal_bpp;
++#endif
++#if V3D_VERSION >= 71
++      unreachable("HW generation 71 not supported yet.");
++#endif
+ 
+    uint8_t *rewrite_addr = (uint8_t *)job->bcl_tile_binning_mode_ptr;
+    cl_packet_pack(TILE_BINNING_MODE_CFG)(NULL, rewrite_addr, &config);
+@@ -82,10 +87,15 @@ v3dX(job_emit_binning_prolog)(struct v3dv_job *job,
+    cl_emit(&job->bcl, TILE_BINNING_MODE_CFG, config) {
+       config.width_in_pixels = tiling->width;
+       config.height_in_pixels = tiling->height;
++#if V3D_VERSION == 42
+       config.number_of_render_targets = MAX2(tiling->render_target_count, 1);
+       config.multisample_mode_4x = tiling->msaa;
+       config.double_buffer_in_non_ms_mode = tiling->double_buffer;
+       config.maximum_bpp_of_all_render_targets = tiling->internal_bpp;
++#endif
++#if V3D_VERSION >= 71
++      unreachable("HW generation 71 not supported yet.");
++#endif
+    }
+ 
+    /* There's definitely nothing in the VCD cache we want. */
+@@ -649,10 +659,15 @@ cmd_buffer_render_pass_emit_stores(struct v3dv_cmd_buffer *cmd_buffer,
+     * bit and instead we have to emit a single clear of all tile buffers.
+     */
+    if (use_global_zs_clear || use_global_rt_clear) {
++#if V3D_VERSION == 42
+       cl_emit(cl, CLEAR_TILE_BUFFERS, clear) {
+          clear.clear_z_stencil_buffer = use_global_zs_clear;
+          clear.clear_all_render_targets = use_global_rt_clear;
+       }
++#endif
++#if V3D_VERSION >= 71
++      unreachable("Hardware generation 71 not supported yet.");
++#endif
+    }
+ }
+ 
+@@ -824,7 +839,12 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+       config.number_of_render_targets = MAX2(subpass->color_count, 1);
+       config.multisample_mode_4x = tiling->msaa;
+       config.double_buffer_in_non_ms_mode = tiling->double_buffer;
++#if V3D_VERSION == 42
+       config.maximum_bpp_of_all_render_targets = tiling->internal_bpp;
++#endif
++#if V3D_VERSION >= 71
++      unreachable("HW generation 71 not supported yet.");
++#endif
+ 
+       if (ds_attachment_idx != VK_ATTACHMENT_UNUSED) {
+          const struct v3dv_image_view *iview =
+@@ -920,7 +940,7 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+       const struct v3d_resource_slice *slice =
+          &image->planes[plane].slices[iview->vk.base_mip_level];
+ 
+-      const uint32_t *clear_color =
++      UNUSED const uint32_t *clear_color =
+          &state->attachments[attachment_idx].clear_value.color[0];
+ 
+       uint32_t clear_pad = 0;
+@@ -937,13 +957,19 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+          }
+       }
+ 
++#if V3D_VERSION == 42
+       cl_emit(rcl, TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART1, clear) {
+          clear.clear_color_low_32_bits = clear_color[0];
+          clear.clear_color_next_24_bits = clear_color[1] & 0xffffff;
+          clear.render_target_number = i;
+       };
++#endif
++#if V3D_VERSION >= 71
++         unreachable("HW generation 71 not supported yet.");
++#endif
+ 
+       if (iview->planes[0].internal_bpp >= V3D_INTERNAL_BPP_64) {
++#if V3D_VERSION == 42
+          cl_emit(rcl, TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART2, clear) {
+             clear.clear_color_mid_low_32_bits =
+                ((clear_color[1] >> 24) | (clear_color[2] << 8));
+@@ -951,17 +977,28 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+                ((clear_color[2] >> 24) | ((clear_color[3] & 0xffff) << 8));
+             clear.render_target_number = i;
+          };
++#endif
++#if V3D_VERSION >= 71
++         unreachable("HW generation 71 not supported yet.");
++#endif
++
+       }
+ 
+       if (iview->planes[0].internal_bpp >= V3D_INTERNAL_BPP_128 || clear_pad) {
++#if V3D_VERSION == 42
+          cl_emit(rcl, TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART3, clear) {
+             clear.uif_padded_height_in_uif_blocks = clear_pad;
+             clear.clear_color_high_16_bits = clear_color[3] >> 16;
+             clear.render_target_number = i;
+          };
++#endif
++#if V3D_VERSION >= 71
++         unreachable("HW generation 71 not supported yet.");
++#endif
+       }
+    }
+ 
++#if V3D_VERSION == 42
+    cl_emit(rcl, TILE_RENDERING_MODE_CFG_COLOR, rt) {
+       v3dX(cmd_buffer_render_pass_setup_render_target)
+          (cmd_buffer, 0, &rt.render_target_0_internal_bpp,
+@@ -976,6 +1013,10 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+          (cmd_buffer, 3, &rt.render_target_3_internal_bpp,
+           &rt.render_target_3_internal_type, &rt.render_target_3_clamp);
+    }
++#endif
++#if V3D_VERSION >= 71
++   unreachable("Hardware generation 71 not supported yet.");
++#endif
+ 
+    /* Ends rendering mode config. */
+    if (ds_attachment_idx != VK_ATTACHMENT_UNUSED) {
+@@ -1036,10 +1077,15 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+       }
+       if (cmd_buffer->state.tile_aligned_render_area &&
+           (i == 0 || v3dv_do_double_initial_tile_clear(tiling))) {
++#if V3D_VERSION == 42
+          cl_emit(rcl, CLEAR_TILE_BUFFERS, clear) {
+             clear.clear_z_stencil_buffer = !job->early_zs_clear;
+             clear.clear_all_render_targets = true;
+          }
++#endif
++#if V3D_VERSION >= 71
++         unreachable("HW generation 71 not supported yet.");
++#endif
+       }
+       cl_emit(rcl, END_OF_TILE_MARKER, end);
+    }
+@@ -1065,7 +1111,9 @@ v3dX(cmd_buffer_emit_viewport)(struct v3dv_cmd_buffer *cmd_buffer)
+     * now, would need to change if we allow multiple viewports
+     */
+    float *vptranslate = dynamic->viewport.translate[0];
++#if V3D_VERSION == 42
+    float *vpscale = dynamic->viewport.scale[0];
++#endif
+ 
+    struct v3dv_job *job = cmd_buffer->state.job;
+    assert(job);
+@@ -1078,10 +1126,15 @@ v3dX(cmd_buffer_emit_viewport)(struct v3dv_cmd_buffer *cmd_buffer)
+    v3dv_cl_ensure_space_with_branch(&job->bcl, required_cl_size);
+    v3dv_return_if_oom(cmd_buffer, NULL);
+ 
++#if V3D_VERSION == 42
+    cl_emit(&job->bcl, CLIPPER_XY_SCALING, clip) {
+       clip.viewport_half_width_in_1_256th_of_pixel = vpscale[0] * 256.0f;
+       clip.viewport_half_height_in_1_256th_of_pixel = vpscale[1] * 256.0f;
+    }
++#endif
++#if V3D_VERSION >= 71
++   unreachable("HW generation 71 not supported yet.");
++#endif
+ 
+    float translate_z, scale_z;
+    v3dv_cmd_buffer_state_get_viewport_z_xform(&cmd_buffer->state, 0,
+@@ -1591,16 +1644,20 @@ v3dX(cmd_buffer_emit_configuration_bits)(struct v3dv_cmd_buffer *cmd_buffer)
+    struct v3dv_pipeline *pipeline = cmd_buffer->state.gfx.pipeline;
+    assert(pipeline);
+ 
+-   bool enable_ez = job_update_ez_state(job, pipeline, cmd_buffer);
+-
+    v3dv_cl_ensure_space_with_branch(&job->bcl, cl_packet_length(CFG_BITS));
+    v3dv_return_if_oom(cmd_buffer, NULL);
+ 
++#if V3D_VERSION == 42
++   bool enable_ez = job_update_ez_state(job, pipeline, cmd_buffer);
+    cl_emit_with_prepacked(&job->bcl, CFG_BITS, pipeline->cfg_bits, config) {
+       config.early_z_enable = enable_ez;
+       config.early_z_updates_enable = config.early_z_enable &&
+          pipeline->z_updates_enable;
+    }
++#endif
++#if V3D_VERSION >= 71
++   unreachable("HW generation 71 not supported yet.");
++#endif
+ }
+ 
+ void
+@@ -2031,10 +2088,12 @@ v3dX(cmd_buffer_emit_gl_shader_state)(struct v3dv_cmd_buffer *cmd_buffer)
+                                 pipeline->vpm_cfg.Gv);
+    }
+ 
++#if V3D_VERSION == 42
+    struct v3dv_bo *default_attribute_values =
+       pipeline->default_attribute_values != NULL ?
+       pipeline->default_attribute_values :
+       pipeline->device->default_attribute_float;
++#endif
+ 
+    cl_emit_with_prepacked(&job->indirect, GL_SHADER_STATE_RECORD,
+                           pipeline->shader_state_record, shader) {
+@@ -2060,8 +2119,10 @@ v3dX(cmd_buffer_emit_gl_shader_state)(struct v3dv_cmd_buffer *cmd_buffer)
+       shader.vertex_shader_uniforms_address = cmd_buffer->state.uniforms.vs;
+       shader.fragment_shader_uniforms_address = cmd_buffer->state.uniforms.fs;
+ 
++#if V3D_VERSION == 42
+       shader.address_of_default_attribute_values =
+          v3dv_cl_address(default_attribute_values, 0);
++#endif
+ 
+       shader.any_shader_reads_hardware_written_primitive_id =
+          (pipeline->has_gs && prog_data_gs->uses_pid) || prog_data_fs->uses_pid;
+@@ -2399,11 +2460,17 @@ v3dX(cmd_buffer_render_pass_setup_render_target)(struct v3dv_cmd_buffer *cmd_buf
+ 
+    assert(iview->plane_count == 1);
+    *rt_bpp = iview->planes[0].internal_bpp;
+-   *rt_type = iview->planes[0].internal_type;
+    if (vk_format_is_int(iview->vk.view_format))
++#if V3D_VERSION == 42
++   *rt_type = iview->planes[0].internal_type;
++   if (vk_format_is_int(iview->vk.format))
+       *rt_clamp = V3D_RENDER_TARGET_CLAMP_INT;
+    else if (vk_format_is_srgb(iview->vk.view_format))
+       *rt_clamp = V3D_RENDER_TARGET_CLAMP_NORM;
+    else
+       *rt_clamp = V3D_RENDER_TARGET_CLAMP_NONE;
++#endif
++#if V3D_VERSION >= 71
++   unreachable("HW generation 71 not supported yet.");
++#endif
+ }
+diff --git a/src/broadcom/vulkan/v3dvx_image.c b/src/broadcom/vulkan/v3dvx_image.c
+index 80a3e5bfde8..dac6ff2741f 100644
+--- a/src/broadcom/vulkan/v3dvx_image.c
++++ b/src/broadcom/vulkan/v3dvx_image.c
+@@ -76,8 +76,6 @@ pack_texture_shader_state_helper(struct v3dv_device *device,
+          tex.swizzle_b = v3d_translate_pipe_swizzle(image_view->planes[plane].swizzle[2]);
+          tex.swizzle_a = v3d_translate_pipe_swizzle(image_view->planes[plane].swizzle[3]);
+ 
+-         tex.reverse_standard_border_color = image_view->planes[plane].channel_reverse;
+-
+          tex.texture_type = image_view->format->planes[plane].tex_type;
+ 
+          if (image->vk.image_type == VK_IMAGE_TYPE_3D) {
+@@ -110,7 +108,16 @@ pack_texture_shader_state_helper(struct v3dv_device *device,
+ 
+          tex.array_stride_64_byte_aligned = image->planes[iplane].cube_map_stride / 64;
+ 
++#if V3D_VERSION == 42
++         tex.reverse_standard_border_color = image_view->planes[plane].channel_reverse;
++#endif
++
++#if V3D_VERSION == 42
+          tex.srgb = vk_format_is_srgb(image_view->vk.view_format);
++#endif
++#if V3D_VERSION >= 71
++      unreachable("Hardware generation 71 not supported yet.");
++#endif
+ 
+          /* At this point we don't have the job. That's the reason the first
+           * parameter is NULL, to avoid a crash when cl_pack_emit_reloc tries to
+@@ -166,7 +173,12 @@ v3dX(pack_texture_shader_state_from_buffer_view)(struct v3dv_device *device,
+ 
+       assert(buffer_view->format->plane_count == 1);
+       tex.texture_type = buffer_view->format->planes[0].tex_type;
++#if V3D_VERSION == 42
+       tex.srgb = vk_format_is_srgb(buffer_view->vk_format);
++#endif
++#if V3D_VERSION >= 71
++      unreachable("Hardware generation 71 not supported yet.");
++#endif
+ 
+       /* At this point we don't have the job. That's the reason the first
+        * parameter is NULL, to avoid a crash when cl_pack_emit_reloc tries to
+diff --git a/src/broadcom/vulkan/v3dvx_meta_common.c b/src/broadcom/vulkan/v3dvx_meta_common.c
+index 04147b82cbd..2db07ea7427 100644
+--- a/src/broadcom/vulkan/v3dvx_meta_common.c
++++ b/src/broadcom/vulkan/v3dvx_meta_common.c
+@@ -58,7 +58,12 @@ emit_rcl_prologue(struct v3dv_job *job,
+       config.number_of_render_targets = 1;
+       config.multisample_mode_4x = tiling->msaa;
+       config.double_buffer_in_non_ms_mode = tiling->double_buffer;
++#if V3D_VERSION == 42
+       config.maximum_bpp_of_all_render_targets = tiling->internal_bpp;
++#endif
++#if V3D_VERSION >= 71
++      unreachable("Hardware generation 71 not supported yet.");
++#endif
+       config.internal_depth_type = fb->internal_depth_type;
+    }
+ 
+@@ -88,14 +93,20 @@ emit_rcl_prologue(struct v3dv_job *job,
+          }
+       }
+ 
++#if V3D_VERSION == 42
+       const uint32_t *color = &clear_info->clear_value->color[0];
+       cl_emit(rcl, TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART1, clear) {
+          clear.clear_color_low_32_bits = color[0];
+          clear.clear_color_next_24_bits = color[1] & 0x00ffffff;
+          clear.render_target_number = 0;
+       };
++#endif
++#if V3D_VERSION >= 71
++   unreachable("Hardware generation 71 not supported yet.");
++#endif
+ 
+       if (tiling->internal_bpp >= V3D_INTERNAL_BPP_64) {
++#if V3D_VERSION == 42
+          cl_emit(rcl, TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART2, clear) {
+             clear.clear_color_mid_low_32_bits =
+               ((color[1] >> 24) | (color[2] << 8));
+@@ -103,22 +114,37 @@ emit_rcl_prologue(struct v3dv_job *job,
+               ((color[2] >> 24) | ((color[3] & 0xffff) << 8));
+             clear.render_target_number = 0;
+          };
++#endif
++#if V3D_VERSION >= 71
++   unreachable("Hardware generation 71 not supported yet.");
++#endif
++
+       }
+ 
+       if (tiling->internal_bpp >= V3D_INTERNAL_BPP_128 || clear_pad) {
++#if V3D_VERSION == 42
+          cl_emit(rcl, TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART3, clear) {
+             clear.uif_padded_height_in_uif_blocks = clear_pad;
+             clear.clear_color_high_16_bits = color[3] >> 16;
+             clear.render_target_number = 0;
+          };
++#endif
++#if V3D_VERSION >= 71
++   unreachable("Hardware generation 71 not supported yet.");
++#endif
+       }
+    }
+ 
++#if V3D_VERSION == 42
+    cl_emit(rcl, TILE_RENDERING_MODE_CFG_COLOR, rt) {
+       rt.render_target_0_internal_bpp = tiling->internal_bpp;
+       rt.render_target_0_internal_type = fb->internal_type;
+       rt.render_target_0_clamp = V3D_RENDER_TARGET_CLAMP_NONE;
+    }
++#endif
++#if V3D_VERSION >= 71
++   unreachable("Hardware generation 71 not supported yet.");
++#endif
+ 
+    cl_emit(rcl, TILE_RENDERING_MODE_CFG_ZS_CLEAR_VALUES, clear) {
+       clear.z_clear_value = clear_info ? clear_info->clear_value->z : 1.0f;
+@@ -179,10 +205,16 @@ emit_frame_setup(struct v3dv_job *job,
+        */
+       if (clear_value &&
+           (i == 0 || v3dv_do_double_initial_tile_clear(tiling))) {
++#if V3D_VERSION == 42
+          cl_emit(rcl, CLEAR_TILE_BUFFERS, clear) {
+             clear.clear_z_stencil_buffer = true;
+             clear.clear_all_render_targets = true;
+          }
++#endif
++#if V3D_VERSION >= 71
++      unreachable("Hardware generation 71 not supported yet.");
++#endif
++
+       }
+       cl_emit(rcl, END_OF_TILE_MARKER, end);
+    }
+diff --git a/src/broadcom/vulkan/v3dvx_pipeline.c b/src/broadcom/vulkan/v3dvx_pipeline.c
+index 5d32d414ed8..922698b08a2 100644
+--- a/src/broadcom/vulkan/v3dvx_pipeline.c
++++ b/src/broadcom/vulkan/v3dvx_pipeline.c
+@@ -447,10 +447,15 @@ pack_shader_state_record(struct v3dv_pipeline *pipeline)
+       /* FIXME: Use combined input/output size flag in the common case (also
+        * on v3d, see v3dx_draw).
+        */
++#if V3D_VERSION == 42
+       shader.coordinate_shader_has_separate_input_and_output_vpm_blocks =
+          prog_data_vs_bin->separate_segments;
+       shader.vertex_shader_has_separate_input_and_output_vpm_blocks =
+          prog_data_vs->separate_segments;
++#endif
++#if V3D_VERSION >= 71
++      unreachable("HW generation 71 not supported yet.");
++#endif
+ 
+       shader.coordinate_shader_input_vpm_segment_size =
+          prog_data_vs_bin->separate_segments ?
+diff --git a/src/broadcom/vulkan/v3dvx_queue.c b/src/broadcom/vulkan/v3dvx_queue.c
+index efe63de425c..1a26d04aef7 100644
+--- a/src/broadcom/vulkan/v3dvx_queue.c
++++ b/src/broadcom/vulkan/v3dvx_queue.c
+@@ -42,14 +42,25 @@ v3dX(job_emit_noop)(struct v3dv_job *job)
+       config.image_height_pixels = 1;
+       config.number_of_render_targets = 1;
+       config.multisample_mode_4x = false;
++#if V3D_VERSION == 42
+       config.maximum_bpp_of_all_render_targets = V3D_INTERNAL_BPP_32;
++#endif
++#if V3D_VERSION >= 71
++      unreachable("HW generation 71 not supported yet.");
++#endif
+    }
+ 
++#if V3D_VERSION == 42
+    cl_emit(rcl, TILE_RENDERING_MODE_CFG_COLOR, rt) {
+       rt.render_target_0_internal_bpp = V3D_INTERNAL_BPP_32;
+       rt.render_target_0_internal_type = V3D_INTERNAL_TYPE_8;
+       rt.render_target_0_clamp = V3D_RENDER_TARGET_CLAMP_NONE;
+    }
++#endif
++#if V3D_VERSION >= 71
++   unreachable("Hardware generation 71 not supported yet.");
++#endif
++
+ 
+    cl_emit(rcl, TILE_RENDERING_MODE_CFG_ZS_CLEAR_VALUES, clear) {
+       clear.z_clear_value = 1.0f;
+-- 
+2.39.2
+

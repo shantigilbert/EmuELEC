@@ -1,0 +1,150 @@
+From 7a4a4a239cdaf507a44539aeef91ccd0f8060e13 Mon Sep 17 00:00:00 2001
+From: yao liu <yao.liu@amlogic.com>
+Date: Thu, 28 Jul 2022 17:20:49 +0800
+Subject: [PATCH 02/18] amdv: dv not enabled when dolby_vision_policy changed
+ [1/1]
+
+PD#SWPL-89319
+
+Problem:
+dv not enabled when dolby_vision_policy changed
+
+Solution:
+1.Config dolby_vision_hdr10_policy for sdr in both
+always hdr and adaptive hdr mode. SDR processed
+by dv by default.
+2.Add vs12 control for tv, vs12 is not enabled by
+default, due to some hdr nts test fail.
+
+Verify:
+t7
+
+Change-Id: Ibf14be850214b5af1ba91ef394d16ca63433317c
+Signed-off-by: yao liu <yao.liu@amlogic.com>
+---
+ .../amdolby_vision/amdolby_vision.c           | 49 ++++++++++---------
+ 1 file changed, 27 insertions(+), 22 deletions(-)
+
+diff --git a/drivers/amlogic/media/enhancement/amdolby_vision/amdolby_vision.c b/drivers/amlogic/media/enhancement/amdolby_vision/amdolby_vision.c
+index f6a30c011a9c..c59aa708b0c7 100644
+--- a/drivers/amlogic/media/enhancement/amdolby_vision/amdolby_vision.c
++++ b/drivers/amlogic/media/enhancement/amdolby_vision/amdolby_vision.c
+@@ -137,19 +137,22 @@ static unsigned int last_dolby_vision_policy;
+ /* bit3: follow sink 0: bypass hlg to vpp, 1: process hlg by dolby core */
+ /* bit4: follow source 0: bypass hlg to vpp, 1: process hlg by dolby core */
+ /* === SDR === */
+-/* bit5: 0: bypass SDR to vpp, 1: process SDR by dolby core */
+-/* set by policy_process */
++/* bit5: follow sink 0: bypass SDR to vpp, 1: process SDR by dolby core */
++/* bit6: follow source 0: bypass SDR to vpp, 1: process SDR by dolby core */
+ #define HDR_BY_DV_F_SINK 0x1
+ #define HDR_BY_DV_F_SRC 0x2
+ #define HDRP_BY_DV 0x4
+ #define HLG_BY_DV_F_SINK 0x8
+ #define HLG_BY_DV_F_SRC 0x10
+-#define SDR_BY_DV 0x20
++#define SDR_BY_DV_F_SINK 0x20
++#define SDR_BY_DV_F_SRC 0x40
+ 
+-static unsigned int dolby_vision_hdr10_policy = HDR_BY_DV_F_SINK;
++static unsigned int dolby_vision_hdr10_policy;
+ module_param(dolby_vision_hdr10_policy, uint, 0664);
+ MODULE_PARM_DESC(dolby_vision_hdr10_policy, "\n dolby_vision_hdr10_policy\n");
+-static unsigned int last_dolby_vision_hdr10_policy = HDR_BY_DV_F_SINK;
++static unsigned int last_dolby_vision_hdr10_policy;
++
++static bool enable_amvs12_for_tv;
+ 
+ /* enable hdmi dv std to stb core */
+ static uint hdmi_to_stb_policy = 1;
+@@ -5455,13 +5458,6 @@ static int dolby_vision_policy_process
+ 				}
+ 			}
+ 		}
+-		if (src_format == FORMAT_SDR &&
+-		    (mode_change || *mode == dolby_vision_mode)) {
+-			if (*mode == DOLBY_VISION_OUTPUT_MODE_BYPASS)
+-				dolby_vision_hdr10_policy &= ~SDR_BY_DV;
+-			else
+-				dolby_vision_hdr10_policy |= SDR_BY_DV;
+-		}
+ 		return mode_change;
+ 	}
+ 
+@@ -5728,14 +5724,6 @@ static int dolby_vision_policy_process
+ 			mode_change = 1;
+ 		}
+ 	}
+-
+-	if (src_format == FORMAT_SDR &&
+-	    (mode_change || *mode == dolby_vision_mode)) {
+-		if (*mode == DOLBY_VISION_OUTPUT_MODE_BYPASS)
+-			dolby_vision_hdr10_policy &= ~SDR_BY_DV;
+-		else
+-			dolby_vision_hdr10_policy |= SDR_BY_DV;
+-	}
+ 	return mode_change;
+ }
+ 
+@@ -10580,16 +10568,20 @@ int get_dolby_vision_hdr_policy(void)
+ 		/* policy == FOLLOW_SRC, check hdr/hlg policy */
+ 		ret |= (dolby_vision_hdr10_policy & HDR_BY_DV_F_SRC) ? 1 : 0;
+ 		ret |= (dolby_vision_hdr10_policy & HLG_BY_DV_F_SRC) ? 2 : 0;
++		ret |= (dolby_vision_hdr10_policy & SDR_BY_DV_F_SRC) ? 0x40 : 0;
+ 	} else if (dolby_vision_policy == DOLBY_VISION_FOLLOW_SINK) {
+ 		/* policy == FOLLOW_SINK, check hdr/hlg policy */
+ 		ret |= (dolby_vision_hdr10_policy & HDR_BY_DV_F_SINK) ? 1 : 0;
+ 		ret |= (dolby_vision_hdr10_policy & HLG_BY_DV_F_SINK) ? 2 : 0;
++		ret |= (dolby_vision_hdr10_policy & SDR_BY_DV_F_SINK) ? 0x20 : 0;
+ 	} else {
+ 		/* policy == FORCE, check hdr/hlg policy */
+ 		ret |= (dolby_vision_hdr10_policy & HDR_BY_DV_F_SRC) ? 1 : 0;
+ 		ret |= (dolby_vision_hdr10_policy & HLG_BY_DV_F_SRC) ? 2 : 0;
+ 		ret |= (dolby_vision_hdr10_policy & HDR_BY_DV_F_SINK) ? 1 : 0;
+ 		ret |= (dolby_vision_hdr10_policy & HLG_BY_DV_F_SINK) ? 2 : 0;
++		ret |= (dolby_vision_hdr10_policy & SDR_BY_DV_F_SINK) ? 0x20 : 0;
++		ret |= (dolby_vision_hdr10_policy & SDR_BY_DV_F_SRC) ? 0x40 : 0;
+ 	}
+ 	return ret;
+ }
+@@ -11924,6 +11916,13 @@ int register_dv_functions(const struct dolby_vision_func_s *func)
+ 				if (!tv_dovi_setting)
+ 					return -ENOMEM;
+ 			}
++			dolby_vision_hdr10_policy |= SDR_BY_DV_F_SINK;
++			dolby_vision_hdr10_policy |= HDR_BY_DV_F_SINK;
++			last_dolby_vision_hdr10_policy = dolby_vision_hdr10_policy;
++			if (ko_info)
++				pr_info("hdr10_policy %d, ko_info %s\n",
++					dolby_vision_hdr10_policy, ko_info);
++
+ 		} else if (func->tv_control_path && !p_funcs_tv) {
+ 			pr_info("*** register_dv_tv_functions\n");
+ 			if (!ko_info) {
+@@ -11966,6 +11965,14 @@ int register_dv_functions(const struct dolby_vision_func_s *func)
+ 				memset(tv_input_info, 0,
+ 				       sizeof(struct tv_input_info_s));
+ 			}
++			if (enable_amvs12_for_tv) {
++				dolby_vision_hdr10_policy |= HLG_BY_DV_F_SINK;
++				dolby_vision_hdr10_policy |= HDR_BY_DV_F_SINK;
++			}
++			last_dolby_vision_hdr10_policy = dolby_vision_hdr10_policy;
++			if (ko_info)
++				pr_info("hdr10_policy %d, ko_info %s\n",
++					dolby_vision_hdr10_policy, ko_info);
+ 		} else {
+ 			return ret;
+ 		}
+@@ -13370,8 +13377,6 @@ static int amdolby_vision_probe(struct platform_device *pdev)
+ 	pr_info("\n cpu_id=%d tvmode=%d\n", dv_meson_dev.cpu_id, tv_mode);
+ 	memset(devp, 0, (sizeof(struct amdolby_vision_dev_s)));
+ 	if (is_meson_tm2_tvmode()) {
+-		dolby_vision_hdr10_policy |= HLG_BY_DV_F_SINK;
+-		pr_info("enable DV HLG when follow sink.\n");
+ 		dolby_vision_flags |= FLAG_RX_EMP_VSEM;
+ 		pr_info("enable DV VSEM.\n");
+ 	}
+-- 
+2.25.1
+

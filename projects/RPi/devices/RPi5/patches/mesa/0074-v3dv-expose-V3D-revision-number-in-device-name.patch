@@ -1,0 +1,29 @@
+From 7aa016bca8bb1bf449ea79505692353c0bd174b8 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 10 Nov 2021 10:06:50 +0100
+Subject: [PATCH 074/142] v3dv: expose V3D revision number in device name
+
+---
+ src/broadcom/vulkan/v3dv_device.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_device.c b/src/broadcom/vulkan/v3dv_device.c
+index d29ffad3531..3034b561480 100644
+--- a/src/broadcom/vulkan/v3dv_device.c
++++ b/src/broadcom/vulkan/v3dv_device.c
+@@ -1123,8 +1123,10 @@ create_physical_device(struct v3dv_instance *instance,
+    device->next_program_id = 0;
+ 
+    ASSERTED int len =
+-      asprintf(&device->name, "V3D %d.%d",
+-               device->devinfo.ver / 10, device->devinfo.ver % 10);
++      asprintf(&device->name, "V3D %d.%d.%d",
++               device->devinfo.ver / 10,
++               device->devinfo.ver % 10,
++               device->devinfo.rev);
+    assert(len != -1);
+ 
+    v3dv_physical_device_init_disk_cache(device);
+-- 
+2.39.2
+

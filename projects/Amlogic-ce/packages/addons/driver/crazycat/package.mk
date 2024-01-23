@@ -43,7 +43,7 @@ pre_make_target() {
 
 make_target() {
   cp -RP $(get_build_dir media_tree_cc)/* ${PKG_BUILD}/linux
-  if [ "${DEVICE}" = "Amlogic-ng" ]; then
+  if [[ "${DEVICE}" = "Amlogic-ng"* ]]; then
     cp -Lr $(get_build_dir media_tree_aml)/* ${PKG_BUILD}/linux
     echo "obj-y += video_dev/" >> "${PKG_BUILD}/linux/drivers/media/platform/meson/Makefile"
     echo "obj-y += dvb/" >> "${PKG_BUILD}/linux/drivers/media/platform/meson/Makefile"

@@ -1,0 +1,29 @@
+From 270deb428f1de371492a5e6185fe410c4329eab4 Mon Sep 17 00:00:00 2001
+From: Jose Maria Casanova Crespo <jmcasanova@igalia.com>
+Date: Mon, 25 Sep 2023 21:16:59 +0200
+Subject: [PATCH 140/142] vc4: Fix mask RGBA validation at YUV blit
+
+Solves regression on video players using GPU for
+video decoding that just displays the video in green.
+
+Fixes: d13da7782cd80 ("vc4: call blit paths in chain")
+---
+ src/gallium/drivers/vc4/vc4_blit.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/vc4/vc4_blit.c b/src/gallium/drivers/vc4/vc4_blit.c
+index 2cf65b5f585..87b2369b7ad 100644
+--- a/src/gallium/drivers/vc4/vc4_blit.c
++++ b/src/gallium/drivers/vc4/vc4_blit.c
+@@ -347,7 +347,7 @@ vc4_yuv_blit(struct pipe_context *pctx, struct pipe_blit_info *info)
+         struct vc4_resource *dst = vc4_resource(info->dst.resource);
+         bool ok;
+ 
+-        if (info->mask & PIPE_MASK_RGBA)
++        if (!(info->mask & PIPE_MASK_RGBA))
+                 return;
+ 
+         if (src->tiled)
+-- 
+2.39.2
+

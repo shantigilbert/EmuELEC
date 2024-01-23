@@ -1,0 +1,77 @@
+From 34c8d1baaac620e55bcd1cd565e1ae66a925f995 Mon Sep 17 00:00:00 2001
+From: hang cheng <hang.cheng@amlogic.com>
+Date: Wed, 18 May 2022 16:37:23 +0800
+Subject: [PATCH 03/18] hdmitx: forcely send bt.2020 for all DV case [1/2]
+
+PD#SWPL-79072
+
+Problem:
+Dolby Vision IDK2.6 kit chapter 4.4.1 Expected AVI-IF
+for Dolby Vision output, need BT.2020 under all DV
+output case
+
+Solution:
+forcely send bt.2020 for all DV case
+
+Verify:
+an400
+
+Change-Id: Ie0b74b4c4196ca4d20bbb07cbce99487f9479162
+Signed-off-by: hang cheng <hang.cheng@amlogic.com>
+---
+ .../vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c     | 23 +++++++++++--------
+ 1 file changed, 14 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+index c66d30e2d696..d97b4c2ab736 100644
+--- a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
++++ b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+@@ -1911,8 +1911,11 @@ void hdmitx_set_vsif_pkt(enum eotf_type type,
+ 			hdmitx_device.hwop.setpacket(HDMI_PACKET_DRM,
+ 				NULL, NULL);
+ 			hdev->hwop.setpacket(HDMI_PACKET_VEND, VEN_DB1, VEN_HB);
++			/* Dolby Vision Source System-on-Chip Platform Kit Version 2.6:
++			 * 4.4.1 Expected AVI-IF for Dolby Vision output, need BT2020 for DV
++			 */
+ 			hdev->hwop.cntlconfig(hdev, CONF_AVI_BT2020,
+-				CLR_AVI_BT2020);/*BT709*/
++				SET_AVI_BT2020);/*BT.2020*/
+ 			if (tunnel_mode == RGB_8BIT) {
+ 				hdev->hwop.cntlconfig(hdev,
+ 					CONF_AVI_RGBYCC_INDIC,
+@@ -2013,8 +2016,11 @@ void hdmitx_set_vsif_pkt(enum eotf_type type,
+ 			hdmitx_device.hwop.setpacket(HDMI_PACKET_DRM,
+ 				NULL, NULL);
+ 			hdev->hwop.setpacket(HDMI_PACKET_VEND, VEN_DB2, VEN_HB);
++			/* Dolby Vision Source System-on-Chip Platform Kit Version 2.6:
++			 * 4.4.1 Expected AVI-IF for Dolby Vision output, need BT2020 for DV
++			 */
+ 			hdev->hwop.cntlconfig(hdev, CONF_AVI_BT2020,
+-				CLR_AVI_BT2020);/*BT709*/
++				SET_AVI_BT2020);/*BT.2020*/
+ 			if (tunnel_mode == RGB_8BIT) {/*RGB444*/
+ 				hdev->hwop.cntlconfig(hdev,
+ 					CONF_AVI_RGBYCC_INDIC,
+@@ -2035,13 +2041,12 @@ void hdmitx_set_vsif_pkt(enum eotf_type type,
+ 			hdmitx_device.hwop.setpacket(HDMI_PACKET_DRM,
+ 				NULL, NULL);
+ 			hdev->hwop.setpacket(HDMI_PACKET_VEND, VEN_DB2, VEN_HB);
+-			if (hdev->rxcap.colorimetry_data & 0xe0)
+-				/*if RX support BT2020, then output BT2020*/
+-				hdev->hwop.cntlconfig(hdev, CONF_AVI_BT2020,
+-					SET_AVI_BT2020);/*BT2020*/
+-			else
+-				hdev->hwop.cntlconfig(hdev, CONF_AVI_BT2020,
+-					CLR_AVI_BT2020);/*BT709*/
++			/* Dolby vision HDMI Signaling Case25,
++			 * UCD323 not declare bt2020 colorimetry,
++			 * need to forcely send BT.2020
++			 */
++			hdev->hwop.cntlconfig(hdev, CONF_AVI_BT2020,
++				SET_AVI_BT2020);/*BT2020*/
+ 			if (tunnel_mode == RGB_10_12BIT) {/*10/12bit RGB444*/
+ 				hdev->hwop.cntlconfig(hdev,
+ 					CONF_AVI_RGBYCC_INDIC,
+-- 
+2.25.1
+

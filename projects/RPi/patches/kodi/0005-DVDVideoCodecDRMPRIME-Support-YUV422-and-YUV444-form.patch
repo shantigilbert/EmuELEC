@@ -1,0 +1,93 @@
+From a11461db2d442e0648ebb9255a2399a647d8f5be Mon Sep 17 00:00:00 2001
+From: Dom Cobley <popcornmix@gmail.com>
+Date: Wed, 25 Jan 2023 18:42:24 +0000
+Subject: [PATCH 5/7] DVDVideoCodecDRMPRIME: Support YUV422 and YUV444 formats
+
+See: https://github.com/xbmc/xbmc/issues/20017
+
+We currently can't play YUV422 and YUV444 videos with drm
+but they can be made to work with straightforward plumbing
+---
+ .../Buffers/VideoBufferPoolDMA.cpp            |  6 +++++
+ .../DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp | 27 +++++++++++++++----
+ 2 files changed, 28 insertions(+), 5 deletions(-)
+
+diff --git a/xbmc/cores/VideoPlayer/Buffers/VideoBufferPoolDMA.cpp b/xbmc/cores/VideoPlayer/Buffers/VideoBufferPoolDMA.cpp
+index fb2dfc6c78..e6b071117e 100644
+--- a/xbmc/cores/VideoPlayer/Buffers/VideoBufferPoolDMA.cpp
++++ b/xbmc/cores/VideoPlayer/Buffers/VideoBufferPoolDMA.cpp
+@@ -123,6 +123,12 @@ uint32_t CVideoBufferPoolDMA::TranslateFormat(AVPixelFormat format)
+     case AV_PIX_FMT_YUV420P:
+     case AV_PIX_FMT_YUVJ420P:
+       return DRM_FORMAT_YUV420;
++    case AV_PIX_FMT_YUV422P:
++    case AV_PIX_FMT_YUVJ422P:
++      return DRM_FORMAT_YUV422;
++    case AV_PIX_FMT_YUV444P:
++    case AV_PIX_FMT_YUVJ444P:
++      return DRM_FORMAT_YUV444;
+     default:
+       return 0;
+   }
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
+index d5b3289680..4af903ecf5 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
+@@ -142,7 +142,8 @@ static bool IsSupportedHwFormat(const enum AVPixelFormat fmt)
+ 
+ static bool IsSupportedSwFormat(const enum AVPixelFormat fmt)
+ {
+-  return fmt == AV_PIX_FMT_YUV420P || fmt == AV_PIX_FMT_YUVJ420P;
++  return fmt == AV_PIX_FMT_YUV420P || fmt == AV_PIX_FMT_YUVJ420P || fmt == AV_PIX_FMT_YUV422P ||
++         fmt == AV_PIX_FMT_YUVJ422P || fmt == AV_PIX_FMT_YUV444P || fmt == AV_PIX_FMT_YUVJ444P;
+ }
+ 
+ static const AVCodecHWConfig* FindHWConfig(const AVCodec* codec)
+@@ -206,7 +207,14 @@ enum AVPixelFormat CDVDVideoCodecDRMPRIME::GetFormat(struct AVCodecContext* avct
+     }
+   }
+ 
+-  CLog::Log(LOGERROR, "CDVDVideoCodecDRMPRIME::{} - unsupported pixel format", __FUNCTION__);
++  std::vector<std::string> formats;
++  for (int n = 0; fmt[n] != AV_PIX_FMT_NONE; n++)
++  {
++    formats.emplace_back(av_get_pix_fmt_name(fmt[n]));
++  }
++  CLog::Log(LOGERROR, "CDVDVideoCodecDRMPRIME::{} - no supported pixel formats: {}", __FUNCTION__,
++            StringUtils::Join(formats, ", "));
++
+   return AV_PIX_FMT_NONE;
+ }
+ 
+@@ -226,6 +234,14 @@ int CDVDVideoCodecDRMPRIME::GetBuffer(struct AVCodecContext* avctx, AVFrame* fra
+       case AV_PIX_FMT_YUVJ420P:
+         size = width * height * 3 / 2;
+         break;
++      case AV_PIX_FMT_YUV422P:
++      case AV_PIX_FMT_YUVJ422P:
++        size = width * height * 2;
++        break;
++      case AV_PIX_FMT_YUV444P:
++      case AV_PIX_FMT_YUVJ444P:
++        size = width * height * 3;
++        break;
+       default:
+         return -1;
+     }
+@@ -512,9 +528,10 @@ bool CDVDVideoCodecDRMPRIME::SetPictureParams(VideoPicture* pVideoPicture)
+         (static_cast<int>(lrint(pVideoPicture->iWidth / aspect_ratio))) & -3;
+   }
+ 
+-  pVideoPicture->color_range = m_pFrame->color_range == AVCOL_RANGE_JPEG ||
+-                               m_pFrame->format == AV_PIX_FMT_YUVJ420P ||
+-                               m_hints.colorRange == AVCOL_RANGE_JPEG;
++  pVideoPicture->color_range =
++      m_pFrame->color_range == AVCOL_RANGE_JPEG || m_pFrame->format == AV_PIX_FMT_YUVJ420P ||
++      m_pFrame->format == AV_PIX_FMT_YUVJ422P || m_pFrame->format == AV_PIX_FMT_YUVJ444P ||
++      m_hints.colorRange == AVCOL_RANGE_JPEG;
+   pVideoPicture->color_primaries = m_pFrame->color_primaries == AVCOL_PRI_UNSPECIFIED
+                                        ? m_hints.colorPrimaries
+                                        : m_pFrame->color_primaries;
+-- 
+2.39.2
+

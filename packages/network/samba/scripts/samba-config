@@ -2,40 +2,120 @@
 
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2017 Stephan Raue (stephan@openelec.tv)
+# Copyright (C) 2020-present Team LibreELEC (https://libreelec.tv)
 
 SMB_USERCONF="/storage/.config/samba.conf"
 SMB_DEFCONF="/etc/samba/smb.conf"
 SMB_CONF="/run/samba/smb.conf"
+
+SMB_DIR=$(dirname ${SMB_CONF})
+mkdir -p ${SMB_DIR}
+
+# exclusive access
+SMB_LOCK="${SMB_DIR}/samba-config.lock"
+exec 200>"${SMB_LOCK}"
+flock 200
+
+SMB_TMP=$(mktemp -p ${SMB_DIR})
 
 SMB_USERCONF_IS_VALID=no
 SMB_CONFIG_VERSION=4
 
 # If user config is based on legacy OpenELEC, or old version (or no version)
 # then don't use it, and log a warning.
-if [ -f $SMB_USERCONF ]; then
-  SMB_IS_LEGACY="$(awk 'NR <= 2 && /This file is part of OpenELEC/{ print }' $SMB_USERCONF)"
-  SMB_THIS_VER="$(awk '/^# samba.conf v[0-9\.]*/{ print substr($3,2); exit }' $SMB_USERCONF)"
+if [ -f ${SMB_USERCONF} ]; then
+  SMB_IS_LEGACY="$(awk 'NR <= 2 && /This file is part of OpenELEC/{ print }' ${SMB_USERCONF})"
+  SMB_THIS_VER="$(awk '/^# samba.conf v[0-9\.]*/{ print substr($3,2); exit }' ${SMB_USERCONF})"
   if [ -n "${SMB_IS_LEGACY}" ]; then
-    echo "WARNING: Ignoring user config $SMB_USERCONF due to incompatibility [Old style OpenELEC]"
+    echo "WARNING: Ignoring user config ${SMB_USERCONF} due to incompatibility [Old style OpenELEC]"
   elif [ -z "${SMB_THIS_VER}" ]; then
-    echo "WARNING: Ignoring user config $SMB_USERCONF due to incompatibility [version is unknown or invalid]"
+    echo "WARNING: Ignoring user config ${SMB_USERCONF} due to incompatibility [version is unknown or invalid]"
   elif [ ${SMB_THIS_VER} !=  ${SMB_CONFIG_VERSION} ]; then
-    echo "WARNING: Ignoring user config $SMB_USERCONF due to incompatibility [version ${SMB_THIS_VER} is not the required version $SMB_CONFIG_VERSION]"
+    echo "WARNING: Ignoring user config ${SMB_USERCONF} due to incompatibility [version ${SMB_THIS_VER} is not the required version ${SMB_CONFIG_VERSION}]"
   else
     SMB_USERCONF_IS_VALID=yes
   fi
 fi
 
-mkdir -p $(dirname $SMB_CONF)
-  if [ $SMB_USERCONF_IS_VALID = yes ]; then
-    cp $SMB_USERCONF $SMB_CONF
-  else
-    cp $SMB_DEFCONF $SMB_CONF
+if [ ${SMB_USERCONF_IS_VALID} = yes ]; then
+  cp ${SMB_USERCONF} ${SMB_TMP}
+else
+  cp ${SMB_DEFCONF} ${SMB_TMP}
+fi
+
+echo >>${SMB_TMP}
+
+if [ ! -f /storage/.cache/services/samba.disabled ]; then
+
+  ### Generate smb.conf
+
+  if [ ! -f /storage/.cache/services/samba.conf ]; then
+    cp /usr/share/services/samba.conf /storage/.cache/services
   fi
 
-# Generate smb.conf, unless disabled
-if [ ! -f /storage/.cache/services/samba.disabled ]; then
-  /usr/lib/samba/smbd-config
+  # Specify defaults here, in case these new properties not yet added in .cache
+  SAMBA_WORKGROUP=WORKGROUP
+  SAMBA_MINPROTOCOL=SMB2
+  SAMBA_MAXPROTOCOL=SMB3
+
+  . /storage/.cache/services/samba.conf
+
+  # fixup synonyms
+  sed -i 's/browsable/browseable/g; s/writable/writeable/g' ${SMB_TMP}
+
+  # handle external drives
+  if [ "${SAMBA_AUTOSHARE}" = "true" ] ; then
+    for dir in /media/* ; do
+      if [ -d "$dir" ] ; then
+        name=$(basename "$dir")
+        echo -e "[$name]\n  path = $dir\n  available = yes\n  browseable = yes\n  public = yes\n  writeable = yes\n" >> ${SMB_TMP}
+      fi
+    done
+  fi
+
+  # Allow access to a "failed" (safe mode) Kodi installation
+  if [ -d /storage/.kodi.FAILED ]; then
+    echo -e "[Kodi-Failed]\n  path = /storage/.kodi.FAILED\n  available = yes\n  browseable = yes\n  public = yes\n  writeable = yes\n" >> ${SMB_TMP}
+  fi
+
+  ADD_CONFIG=
+
+  # If workgroup is not set, don't set it - who knows, user may know better.
+  if [ -n "$SAMBA_WORKGROUP" ]; then
+    # Remove any existing workgroup setting
+    sed -E '/^[[:space:]]*workgroup[[:space:]]*=/d' -i ${SMB_TMP}
+    ADD_CONFIG="${ADD_CONFIG}  workgroup = ${SAMBA_WORKGROUP:-WORKGROUP}\n"
+  fi
+
+  ADD_CONFIG="${ADD_CONFIG}  server min protocol = ${SAMBA_MINPROTOCOL/SMB1/NT1}\n"
+  ADD_CONFIG="${ADD_CONFIG}  server max protocol = ${SAMBA_MAXPROTOCOL/SMB1/NT1}\n"
+
+  # Add extra config after [global], escaping spaces so that all are retained by sed
+  sed -e "/\[global\]/ a ${ADD_CONFIG// /\\ }" -i ${SMB_TMP}
+
+  if [ "${SAMBA_SECURE}" = "true" -a -n "${SAMBA_USERNAME}" -a -n "${SAMBA_PASSWORD}" ] ; then
+    # username map: first line makes sure plain root does not work all the time
+    # processing continues, so if user chooses root as username, second line overrides the first
+    # this is done always in case user uses passwords in userconf.
+    # many thanks to viljoviitanen for this
+    sed -e 's|^.[ \t]*.public.=.*|  public = no |' \
+        -e 's|^.[ \t]*.username map.=.*||' \
+        -e 's|^.[ \t]*.security.=.*|  security = user\n  username map = /run/samba/samba.map|' \
+        -e 's|^.[ \t]*.map.to.guest.=.*|  map to guest = Never|' \
+        -i ${SMB_TMP}
+
+    printf "%s\n%s" "${SAMBA_PASSWORD}" "${SAMBA_PASSWORD}" | smbpasswd -c ${SMB_TMP} -s -a root
+    printf 'nobody = root\nroot = "%s"\n' "${SAMBA_USERNAME}" > /run/samba/samba.map
+
+  else
+    sed -e 's|^.[ \t]*.public.=.*|  public = yes |' \
+        -e 's|^.[ \t]*.username map.=.*||' \
+        -e 's|^.[ \t]*.security.=.*|  security = user|' \
+        -e 's|^.[ \t]*.map.to.guest.=.*|  map to guest = Bad User|' \
+        -i ${SMB_TMP}
+  fi
 fi
+
+mv -f ${SMB_TMP} ${SMB_CONF}
 
 exit 0

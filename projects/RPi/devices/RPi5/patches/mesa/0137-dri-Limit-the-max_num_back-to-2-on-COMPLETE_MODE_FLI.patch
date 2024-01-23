@@ -1,0 +1,42 @@
+From b58e1d7fd1c315e6ada0ad9ec4961b65c88f0c2a Mon Sep 17 00:00:00 2001
+From: Jose Maria Casanova Crespo <jmcasanova@igalia.com>
+Date: Mon, 4 Oct 2021 14:30:30 +0200
+Subject: [PATCH 137/142] dri: Limit the max_num_back to 2 on
+ COMPLETE_MODE_FLIP present mode
+
+This is limiting the number of back buffers that mesa can allocate, so
+this avoids triple buffering, although that is desirable in some cases.
+
+To get this to upstream, we could convert it to a DRI option
+and enable it only in the case of using mutter.
+It seems to be feasible to limit this to some kind of configuration, as
+we have access to the size of the back-buffer allocated. For example,
+only limit for 4k-dual screen setup.
+
+With this Raspberry OS start-up CMA usage is 210Mb with 4k-dual screen
+setup instead of 276Mb.
+
+The correct approach would be to check if we can make Mutter to wait
+for buffer swaps before starting a new frame.
+
+https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/7033
+---
+ src/loader/loader_dri3_helper.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/loader/loader_dri3_helper.c b/src/loader/loader_dri3_helper.c
+index 32135770e9d..2534c817dcc 100644
+--- a/src/loader/loader_dri3_helper.c
++++ b/src/loader/loader_dri3_helper.c
+@@ -275,7 +275,7 @@ dri3_update_max_num_back(struct loader_dri3_drawable *draw)
+       if (draw->swap_interval == 0)
+          draw->max_num_back = 4;
+       else
+-         draw->max_num_back = 3;
++         draw->max_num_back = 2;
+ 
+       assert(draw->max_num_back <= LOADER_DRI3_MAX_BACK);
+       break;
+-- 
+2.39.2
+

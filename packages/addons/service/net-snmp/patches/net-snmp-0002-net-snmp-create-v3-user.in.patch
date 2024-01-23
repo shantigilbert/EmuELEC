@@ -1,14 +1,14 @@
 --- net-snmp-5.9/net-snmp-create-v3-user.in	2020-08-14 21:41:47.000000000 +0000
 +++ net-snmp-5.9/net-snmp-create-v3-user.in	2021-01-14 07:04:26.196982169 +0000
-@@ -5,10 +5,8 @@
+@@ -3,10 +3,8 @@
  # this shell script is designed to add new SNMPv3 users
  # to Net-SNMP config file.
  
--if @PSCMD@ | egrep ' snmpd *$' > /dev/null 2>&1 ; then
--    echo "Apparently at least one snmpd demon is already running."
+-if @PSCMD@ | @EGREP@ ' snmpd *$' > /dev/null 2>&1 ; then
+-    echo "Apparently at least one snmpd daemon is already running."
 -    echo "You must stop them in order to use this command."
 -    exit 1
-+if @PSCMD@ | egrep 'snmpd'> /dev/null 2>&1 ; then
++if @PSCMD@ | @EGREP@ 'snmpd' > /dev/null 2>&1 ; then
 +    systemctl stop service.net-snmp.service
  fi
  

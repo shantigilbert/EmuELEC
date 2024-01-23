@@ -1,0 +1,91 @@
+From ed7e118a6cc0c9bba9f02929e98bc51252331950 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 16 May 2023 00:28:27 +0200
+Subject: [PATCH 122/142] v3d/v3dv: fix texture state array stride packing for
+ V3D 7.1.5
+
+---
+ src/broadcom/vulkan/v3dvx_image.c    |  7 +++++++
+ src/gallium/drivers/v3d/v3dx_state.c | 20 +++++++++++++++-----
+ 2 files changed, 22 insertions(+), 5 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_image.c b/src/broadcom/vulkan/v3dvx_image.c
+index 437d4588c7e..ae6eaa88d0c 100644
+--- a/src/broadcom/vulkan/v3dvx_image.c
++++ b/src/broadcom/vulkan/v3dvx_image.c
+@@ -118,6 +118,13 @@ pack_texture_shader_state_helper(struct v3dv_device *device,
+ #endif
+ #if V3D_VERSION >= 71
+          tex.transfer_func = is_srgb ? TRANSFER_FUNC_SRGB : TRANSFER_FUNC_NONE;
++
++         /* V3D 7.1.5 has array stride starting one bit later than previous
++          * V3D versions to make room for the new RB swap bit, but we don't
++          * handle that in the CLE parser.
++          */
++         if (device->devinfo.rev >= 5)
++            tex.array_stride_64_byte_aligned <<= 1;
+ #endif
+ 
+          /* At this point we don't have the job. That's the reason the first
+diff --git a/src/gallium/drivers/v3d/v3dx_state.c b/src/gallium/drivers/v3d/v3dx_state.c
+index 348a7bcf3da..88e57cd072b 100644
+--- a/src/gallium/drivers/v3d/v3dx_state.c
++++ b/src/gallium/drivers/v3d/v3dx_state.c
+@@ -889,7 +889,8 @@ v3d_setup_texture_shader_state_from_buffer(struct V3DX(TEXTURE_SHADER_STATE) *te
+ }
+ 
+ static void
+-v3d_setup_texture_shader_state(struct V3DX(TEXTURE_SHADER_STATE) *tex,
++v3d_setup_texture_shader_state(const struct v3d_device_info *devinfo,
++                               struct V3DX(TEXTURE_SHADER_STATE) *tex,
+                                struct pipe_resource *prsc,
+                                int base_level, int last_level,
+                                int first_layer, int last_layer,
+@@ -949,15 +950,22 @@ v3d_setup_texture_shader_state(struct V3DX(TEXTURE_SHADER_STATE) *tex,
+ 
+         tex->texture_base_pointer = cl_address(NULL, base_offset);
+ #endif
++
++        tex->array_stride_64_byte_aligned = rsc->cube_map_stride / 64;
++
+ #if V3D_VERSION >= 71
+         tex->chroma_offset_x = 1;
+         tex->chroma_offset_y = 1;
+         /* See comment in XML field definition for rationale of the shifts */
+         tex->texture_base_pointer_cb = base_offset >> 6;
+         tex->texture_base_pointer_cr = base_offset >> 6;
+-#endif
+ 
+-        tex->array_stride_64_byte_aligned = rsc->cube_map_stride / 64;
++        /* V3D 7.1.5 has array stride start at bit 33 instead of bit 32 to
++         * make room for the RB swap bit.
++         */
++        if (devinfo->rev >= 5)
++                tex->array_stride_64_byte_aligned <<= 1;
++#endif
+ 
+         /* Since other platform devices may produce UIF images even
+          * when they're not big enough for V3D to assume they're UIF,
+@@ -1006,7 +1014,8 @@ v3dX(create_texture_shader_state_bo)(struct v3d_context *v3d,
+ 
+         v3dx_pack(map, TEXTURE_SHADER_STATE, tex) {
+                 if (prsc->target != PIPE_BUFFER) {
+-                        v3d_setup_texture_shader_state(&tex, prsc,
++                        v3d_setup_texture_shader_state(&v3d->screen->devinfo,
++                                                       &tex, prsc,
+                                                        cso->u.tex.first_level,
+                                                        cso->u.tex.last_level,
+                                                        cso->u.tex.first_layer,
+@@ -1442,7 +1451,8 @@ v3d_create_image_view_texture_shader_state(struct v3d_context *v3d,
+ 
+         v3dx_pack(map, TEXTURE_SHADER_STATE, tex) {
+                 if (prsc->target != PIPE_BUFFER) {
+-                        v3d_setup_texture_shader_state(&tex, prsc,
++                        v3d_setup_texture_shader_state(&v3d->screen->devinfo,
++                                                       &tex, prsc,
+                                                        iview->base.u.tex.level,
+                                                        iview->base.u.tex.level,
+                                                        iview->base.u.tex.first_layer,
+-- 
+2.39.2
+

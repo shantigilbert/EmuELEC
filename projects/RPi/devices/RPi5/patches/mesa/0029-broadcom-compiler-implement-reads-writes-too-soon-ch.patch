@@ -1,0 +1,109 @@
+From 0157228c729b8812dc4900fa24db63b7d27aa342 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Thu, 23 Sep 2021 11:19:58 +0200
+Subject: [PATCH 029/142] broadcom/compiler: implement "reads/writes too soon"
+ checks for v71
+
+---
+ src/broadcom/compiler/qpu_schedule.c | 65 ++++++++++++++++++++++------
+ 1 file changed, 51 insertions(+), 14 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 2fa9031d7b6..4db0c2e72da 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -562,7 +562,24 @@ mux_reads_too_soon(struct choose_scoreboard *scoreboard,
+ }
+ 
+ static bool
+-reads_too_soon_after_write(struct choose_scoreboard *scoreboard,
++reads_too_soon(struct choose_scoreboard *scoreboard,
++               const struct v3d_qpu_instr *inst, uint8_t raddr)
++{
++        switch (raddr) {
++        case 0: /* ldvary delayed write of C coefficient to rf0 */
++                if (scoreboard->tick - scoreboard->last_ldvary_tick <= 1)
++                        return true;
++                break;
++        default:
++                break;
++        }
++
++        return false;
++}
++
++static bool
++reads_too_soon_after_write(const struct v3d_device_info *devinfo,
++                           struct choose_scoreboard *scoreboard,
+                            struct qinst *qinst)
+ {
+         const struct v3d_qpu_instr *inst = &qinst->qpu;
+@@ -574,24 +591,44 @@ reads_too_soon_after_write(struct choose_scoreboard *scoreboard,
+         assert(inst->type == V3D_QPU_INSTR_TYPE_ALU);
+ 
+         if (inst->alu.add.op != V3D_QPU_A_NOP) {
+-                if (v3d_qpu_add_op_num_src(inst->alu.add.op) > 0 &&
+-                    mux_reads_too_soon(scoreboard, inst, inst->alu.add.a.mux)) {
+-                        return true;
++                if (v3d_qpu_add_op_num_src(inst->alu.add.op) > 0) {
++                        if (devinfo->ver < 71) {
++                                if (mux_reads_too_soon(scoreboard, inst, inst->alu.add.a.mux))
++                                        return true;
++                        } else {
++                                if (reads_too_soon(scoreboard, inst, inst->alu.add.a.raddr))
++                                        return true;
++                        }
+                 }
+-                if (v3d_qpu_add_op_num_src(inst->alu.add.op) > 1 &&
+-                    mux_reads_too_soon(scoreboard, inst, inst->alu.add.b.mux)) {
+-                        return true;
++                if (v3d_qpu_add_op_num_src(inst->alu.add.op) > 1) {
++                        if (devinfo->ver < 71) {
++                                if (mux_reads_too_soon(scoreboard, inst, inst->alu.add.b.mux))
++                                        return true;
++                        } else {
++                                if (reads_too_soon(scoreboard, inst, inst->alu.add.b.raddr))
++                                        return true;
++                        }
+                 }
+         }
+ 
+         if (inst->alu.mul.op != V3D_QPU_M_NOP) {
+-                if (v3d_qpu_mul_op_num_src(inst->alu.mul.op) > 0 &&
+-                    mux_reads_too_soon(scoreboard, inst, inst->alu.mul.a.mux)) {
+-                        return true;
++                if (v3d_qpu_mul_op_num_src(inst->alu.mul.op) > 0) {
++                        if (devinfo->ver < 71) {
++                                if (mux_reads_too_soon(scoreboard, inst, inst->alu.mul.a.mux))
++                                        return true;
++                        } else {
++                                if (reads_too_soon(scoreboard, inst, inst->alu.mul.b.raddr))
++                                        return true;
++                        }
+                 }
+-                if (v3d_qpu_mul_op_num_src(inst->alu.mul.op) > 1 &&
+-                    mux_reads_too_soon(scoreboard, inst, inst->alu.mul.b.mux)) {
+-                        return true;
++                if (v3d_qpu_mul_op_num_src(inst->alu.mul.op) > 1) {
++                        if (devinfo->ver < 71) {
++                                if (mux_reads_too_soon(scoreboard, inst, inst->alu.mul.b.mux))
++                                        return true;
++                        } else {
++                                if (reads_too_soon(scoreboard, inst, inst->alu.mul.b.raddr))
++                                        return true;
++                        }
+                 }
+         }
+ 
+@@ -1147,7 +1184,7 @@ retry:
+                  *  regfile A or B that was written to by the previous
+                  *  instruction."
+                  */
+-                if (reads_too_soon_after_write(scoreboard, n->inst))
++                if (reads_too_soon_after_write(c->devinfo, scoreboard, n->inst))
+                         continue;
+ 
+                 if (writes_too_soon_after_write(c->devinfo, scoreboard, n->inst))
+-- 
+2.39.2
+

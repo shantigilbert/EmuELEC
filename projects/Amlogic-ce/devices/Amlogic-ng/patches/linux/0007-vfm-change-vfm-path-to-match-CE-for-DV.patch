@@ -1,0 +1,26 @@
+From 4a39e55285b046b7858061626b2e085de96050d7 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Wed, 29 Mar 2023 16:40:49 +0200
+Subject: [PATCH 07/18] vfm: change vfm path to match CE for DV use
+ FRAME_BASE_PATH_AMLVIDEO_AMVIDEO path
+
+---
+ drivers/amlogic/media/common/vfm/vfm.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/amlogic/media/common/vfm/vfm.c b/drivers/amlogic/media/common/vfm/vfm.c
+index 4c4e81143732..a4661005bdf1 100644
+--- a/drivers/amlogic/media/common/vfm/vfm.c
++++ b/drivers/amlogic/media/common/vfm/vfm.c
+@@ -402,7 +402,7 @@ static void vfm_init(void)
+ #ifdef CONFIG_AMLOGIC_MEDIA_ENHANCEMENT_DOLBYVISION
+ 	char def_dvbl_id[VFM_NAME_LEN] = "dvblpath";
+ /*	char def_dvbl_chain[] = "dvbldec dvbl amvideo";*/
+-	char def_dvbl_chain[] = "dvbldec amvideo";
++	char def_dvbl_chain[] = "dvbldec amlvideo ppmgr deinterlace amvideo";
+ 
+ 	char def_dvel_id[VFM_NAME_LEN] = "dvelpath";
+ 	char def_dvel_chain[] = "dveldec dvel";
+-- 
+2.25.1
+

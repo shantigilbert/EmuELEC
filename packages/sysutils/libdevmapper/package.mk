@@ -3,8 +3,8 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="libdevmapper"
-PKG_VERSION="2.03.09"
-PKG_SHA256="c03a8b8d5c03ba8ac54ebddf670ae0d086edac54a6577e8c50721a8e174eb975"
+PKG_VERSION="2.03.23"
+PKG_SHA256="74e794a9e9dee1bcf8a2065f65b9196c44fdf321e22d63b98ed7de8c9aa17a5d"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2 LGPL2.1"
 PKG_SITE="https://sourceware.org/lvm2"
@@ -13,9 +13,7 @@ PKG_SOURCE_DIR="LVM2.$PKG_VERSION"
 PKG_DEPENDS_TARGET="toolchain libaio util-linux"
 PKG_SECTION="sysutils"
 PKG_SHORTDESC="Logical Volume Manager 2 - only libdevmapper library."
-
-PKG_IS_ADDON="no"
-PKG_AUTORECONF="no"
+PKG_BUILD_FLAGS="-gold"
 
 LVM2_CONFIG_DEFAULT="ac_cv_func_malloc_0_nonnull=yes \
                      ac_cv_func_realloc_0_nonnull=yes \
@@ -47,8 +45,7 @@ PKG_CONFIGURE_OPTS_TARGET="$LVM2_CONFIG_DEFAULT \
 
 PKG_MAKEINSTALL_OPTS_TARGET="install_dynamic \
                              install_include \
-                             -C libdm \
-                             SUBDIRS="
+                             -C libdm"
 
 makeinstall_target() {
   make install DESTDIR=${SYSROOT_PREFIX} -j1 \

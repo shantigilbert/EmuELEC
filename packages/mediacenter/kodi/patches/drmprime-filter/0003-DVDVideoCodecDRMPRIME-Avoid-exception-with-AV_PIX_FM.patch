@@ -1,7 +1,7 @@
-From c2b50468de1a8a72a4e00e53492e4e26f2573490 Mon Sep 17 00:00:00 2001
+From cb187a5456d0e992b4875ad965a6b628726c557f Mon Sep 17 00:00:00 2001
 From: popcornmix <popcornmix@gmail.com>
 Date: Fri, 27 Aug 2021 20:29:50 +0100
-Subject: [PATCH 3/6] DVDVideoCodecDRMPRIME: Avoid exception with
+Subject: [PATCH 3/7] DVDVideoCodecDRMPRIME: Avoid exception with
  AV_PIX_FMT_NONE
 
 ---
@@ -22,5 +22,5 @@ index 1843e72e55..709311e75f 100644
      return false;
    }
 -- 
-2.34.1
+2.39.2
 

@@ -100,6 +100,19 @@
     </green_led_off>
   </green_led>
 
+  <bct3236_led status="on" version="0">
+    <bct3236_led_on name="on">
+      <cmd path="/soc/apb4@fe000000/i2c@6c000/bct3236@3c linux,default-trigger" type="s" >
+        <value>default-on</value>
+      </cmd>
+    </bct3236_led_on>
+    <bct3236_led_off name="off">
+      <cmd path="/soc/apb4@fe000000/i2c@6c000/bct3236@3c linux,default-trigger" type="s" >
+        <value>none</value>
+      </cmd>
+    </bct3236_led_off>
+  </bct3236_led>
+
   <remote_type status="NEC" version="0">
     <remote_type_nec name="NEC">
       <cmd path="/meson-remote protocol" type="i" >
@@ -155,5 +168,18 @@
       </cmd>
     </motorcomm_a>
   </motorcomm>
+
+  <wol status="migrated" version="0">
+    <wol_on name="on">
+      <cmd path="/soc/ethernet@fdc00000 wol" type="i" >
+        <value>1</value>
+      </cmd>
+    </wol_on>
+    <wol_off name="off">
+      <cmd path="/soc/ethernet@fdc00000 wol" type="i" >
+        <value>0</value>
+      </cmd>
+    </wol_off>
+  </wol>
 
 </dtb-settings>

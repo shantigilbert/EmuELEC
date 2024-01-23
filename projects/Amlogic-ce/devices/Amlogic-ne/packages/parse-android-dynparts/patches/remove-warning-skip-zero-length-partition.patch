@@ -1,0 +1,11 @@
+--- a/main.cpp	2021-04-14 23:31:17.000000000 +0200
++++ b/main.cpp	2022-10-20 15:57:48.632068796 +0200
+@@ -30,8 +30,6 @@ int main(int argc, char* argv[]) {
+   // Code structure taken from Android's system/core/fs_mgr/fs_mgr_dm_linear.cpp
+   for (auto partition : metadata->partitions) {
+     if (!partition.num_extents) {
+-      cerr << "Skipping zero-length logical partition: "
+-           << GetPartitionName(partition) << endl;
+       continue;
+     }
+     if (partition.attributes & LP_PARTITION_ATTR_DISABLED) {

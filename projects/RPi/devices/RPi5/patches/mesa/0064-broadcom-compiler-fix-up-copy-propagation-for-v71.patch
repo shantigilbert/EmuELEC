@@ -1,0 +1,134 @@
+From acc54637f0787ba4dc887130c25c628ccdaf4e38 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 9 Nov 2021 11:34:59 +0100
+Subject: [PATCH 064/142] broadcom/compiler: fix up copy propagation for v71
+
+Update rules for unsafe copy propagations to match v7.x.
+---
+ .../compiler/vir_opt_copy_propagate.c         | 83 +++++++++++++------
+ 1 file changed, 56 insertions(+), 27 deletions(-)
+
+diff --git a/src/broadcom/compiler/vir_opt_copy_propagate.c b/src/broadcom/compiler/vir_opt_copy_propagate.c
+index c4aa7255a17..1260838ca05 100644
+--- a/src/broadcom/compiler/vir_opt_copy_propagate.c
++++ b/src/broadcom/compiler/vir_opt_copy_propagate.c
+@@ -35,7 +35,7 @@
+ #include "v3d_compiler.h"
+ 
+ static bool
+-is_copy_mov(struct qinst *inst)
++is_copy_mov(const struct v3d_device_info *devinfo, struct qinst *inst)
+ {
+         if (!inst)
+                 return false;
+@@ -62,36 +62,65 @@ is_copy_mov(struct qinst *inst)
+                 return false;
+         }
+ 
+-        switch (inst->src[0].file) {
+-        case QFILE_MAGIC:
+-                /* No copy propagating from R3/R4/R5 -- the MOVs from those
+-                 * are there to register allocate values produced into R3/4/5
+-                 * to other regs (though hopefully r3/4/5).
+-                 */
+-                switch (inst->src[0].index) {
+-                case V3D_QPU_WADDR_R3:
+-                case V3D_QPU_WADDR_R4:
+-                case V3D_QPU_WADDR_R5:
+-                        return false;
++        if (devinfo->ver <= 42) {
++                switch (inst->src[0].file) {
++                case QFILE_MAGIC:
++                        /* No copy propagating from R3/R4/R5 -- the MOVs from
++                         * those are there to register allocate values produced
++                         * into R3/4/5 to other regs (though hopefully r3/4/5).
++                         */
++                        switch (inst->src[0].index) {
++                        case V3D_QPU_WADDR_R3:
++                        case V3D_QPU_WADDR_R4:
++                        case V3D_QPU_WADDR_R5:
++                                return false;
++                        default:
++                                break;
++                        }
++                        break;
++
++                case QFILE_REG:
++                        switch (inst->src[0].index) {
++                        case 0:
++                        case 1:
++                        case 2:
++                                /* MOVs from rf0/1/2 are only to track the live
++                                 * intervals for W/centroid W/Z.
++                                 */
++                                return false;
++                        }
++                        break;
++
+                 default:
+                         break;
+                 }
+-                break;
+-
+-        case QFILE_REG:
+-                switch (inst->src[0].index) {
+-                case 0:
+-                case 1:
+-                case 2:
+-                        /* MOVs from rf0/1/2 are only to track the live
++        } else {
++                assert(devinfo->ver >= 71);
++                switch (inst->src[0].file) {
++                case QFILE_REG:
++                        switch (inst->src[0].index) {
++                        /* MOVs from rf1/2/3 are only to track the live
+                          * intervals for W/centroid W/Z.
++                         *
++                         * Note: rf0 can be implicitly written by ldvary
++                         * (no temp involved), so it is not an SSA value and
++                         * could clash with writes to other temps that are
++                         * also allocated to rf0. In theory, that would mean
++                         * that we can't copy propagate from it, but we handle
++                         * this at register allocation time, preventing temps
++                         * from being allocated to rf0 while the rf0 value from
++                         * ldvary is still live.
+                          */
+-                        return false;
+-                }
+-                break;
++                        case 1:
++                        case 2:
++                        case 3:
++                                return false;
++                        }
++                        break;
+ 
+-        default:
+-                break;
++                default:
++                        break;
++                }
+         }
+ 
+         return true;
+@@ -135,7 +164,7 @@ try_copy_prop(struct v3d_compile *c, struct qinst *inst, struct qinst **movs)
+                  */
+                 struct qinst *mov = movs[inst->src[i].index];
+                 if (!mov) {
+-                        if (!is_copy_mov(c->defs[inst->src[i].index]))
++                        if (!is_copy_mov(c->devinfo, c->defs[inst->src[i].index]))
+                                 continue;
+                         mov = c->defs[inst->src[i].index];
+ 
+@@ -245,7 +274,7 @@ vir_opt_copy_propagate(struct v3d_compile *c)
+ 
+                         apply_kills(c, movs, inst);
+ 
+-                        if (is_copy_mov(inst))
++                        if (is_copy_mov(c->devinfo, inst))
+                                 movs[inst->dst.index] = inst;
+                 }
+         }
+-- 
+2.39.2
+

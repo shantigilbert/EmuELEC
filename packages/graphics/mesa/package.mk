@@ -3,8 +3,13 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="mesa"
-PKG_VERSION="22.3.7"
-PKG_SHA256="894ce2f4a1c2e76177cdd2284620192d0da3066b243eec2fbb1d7cf37f13042c"
+if [ "${DEVICE}" = "RPi5" ]; then
+  PKG_VERSION="23.2.1"
+  PKG_SHA256="64de0616fc2d801f929ab1ac2a4f16b3e2783c4309a724c8a259b20df8bbc1cc"
+else
+  PKG_VERSION="22.3.7"
+  PKG_SHA256="894ce2f4a1c2e76177cdd2284620192d0da3066b243eec2fbb1d7cf37f13042c"
+fi
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.mesa3d.org/"
 PKG_URL="https://mesa.freedesktop.org/archive/mesa-${PKG_VERSION}.tar.xz"
@@ -13,8 +18,7 @@ PKG_LONGDESC="Mesa is a 3-D graphics library with an API."
 
 get_graphicdrivers
 
-PKG_MESON_OPTS_TARGET="-Ddri-drivers= \
-                       -Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
+PKG_MESON_OPTS_TARGET="-Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
                        -Dgallium-extra-hud=false \
                        -Dgallium-omx=disabled \
                        -Dgallium-nine=false \
@@ -30,6 +34,12 @@ PKG_MESON_OPTS_TARGET="-Ddri-drivers= \
                        -Dbuild-tests=false \
                        -Dselinux=false \
                        -Dosmesa=false"
+
+if [ "${DEVICE}" = "RPi5" ]; then
+  PKG_MESON_OPTS_TARGET+=" -Ddraw-use-llvm=false"
+else
+  PKG_MESON_OPTS_TARGET+=" -Ddri-drivers="
+fi
 
 if [ "${DISPLAYSERVER}" = "x11" ]; then
   PKG_DEPENDS_TARGET+=" xorgproto libXext libXdamage libXfixes libXxf86vm libxcb libX11 libxshmfence libXrandr"

@@ -1,1 +1,32 @@
-initial release
+4
+- bottom: update to 0.9.4
+- libmtp: update to 1.1.21
+- mc: update to 4.8.30
+- screen: update to 4.9.1
+- smartmontools: update to 7.4
+- stress-ng: update to 0.16.04
+
+3
+- file: update to 5.45
+- libssh2: dont build shared library
+  - fix build of mc
+- pv: update to 1.7.24
+- unrar: update to 6.2.10
+
+2
+- replace dstat with dool
+- bottom: update to 0.9.3
+- diffutils: update to 3.10
+- libssh2: update to 1.11.0
+- stress-ng: update to 0.16.02
+- unrar: update to 6.2.8
+
+1
+- bottom: update to 0.8.0
+- diffutils: update to 3.9
+- htop: update to 3.2.2
+- lshw: fix lshw -version display
+- mc: update to 4.8.29
+- stress-ng: update to 0.15.06
+- unrar: update to 6.2.6
+- vim: update to 9.0.1417

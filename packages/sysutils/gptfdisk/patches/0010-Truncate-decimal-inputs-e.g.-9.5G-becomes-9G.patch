@@ -1,0 +1,49 @@
+From e1cc654ef71996d836c5d051278130f50f768f84 Mon Sep 17 00:00:00 2001
+From: Rod Smith <rodsmith@rodsbooks.com>
+Date: Mon, 6 Mar 2023 17:22:32 -0500
+Subject: [PATCH 10/12] Truncate decimal inputs (e.g., '9.5G' becomes '9G')
+
+---
+ support.cc | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/support.cc b/support.cc
+index 0d3bd6f..3cbabf7 100644
+--- a/support.cc
++++ b/support.cc
+@@ -124,6 +124,8 @@ char GetYN(void) {
+ // inValue works out to something outside the range low-high, returns the
+ // computed value; the calling function is responsible for checking the
+ // validity of this value.
++// If inValue contains a decimal number (e.g., "9.5G"), quietly truncate it
++// (to "9G" in this example).
+ // NOTE: There's a difference in how GCC and VC++ treat oversized values
+ // (say, "999999999999999999999") read via the ">>" operator; GCC turns
+ // them into the maximum value for the type, whereas VC++ turns them into
+@@ -158,6 +160,15 @@ uint64_t IeeeToInt(string inValue, uint64_t sSize, uint64_t low, uint64_t high,
+       badInput = 1;
+    inString >> response >> suffix;
+    suffix = toupper(suffix);
++   foundAt = suffixes.find(suffix);
++   // If suffix is invalid, try to find a valid one. Done because users
++   // sometimes enter decimal numbers; when they do, suffix becomes
++   // '.', and we need to truncate the number and find the real suffix.
++   while (foundAt > (suffixes.length() - 1) && inString.peek() != -1) {
++      inString >> suffix;
++      foundAt = suffixes.find(suffix);
++      suffix = toupper(suffix);
++   }
+ 
+    // If no response, or if response == 0, use default (def)
+    if ((inValue.length() == 0) || (response == 0)) {
+@@ -167,7 +178,6 @@ uint64_t IeeeToInt(string inValue, uint64_t sSize, uint64_t low, uint64_t high,
+    } // if
+ 
+    // Find multiplication and division factors for the suffix
+-   foundAt = suffixes.find(suffix);
+    if (foundAt != string::npos) {
+       bytesPerUnit = UINT64_C(1) << (10 * (foundAt + 1));
+       mult = bytesPerUnit / sSize;
+-- 
+2.31.1
+
