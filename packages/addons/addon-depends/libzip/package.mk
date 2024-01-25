@@ -10,15 +10,3 @@ PKG_SITE="http://www.nih.at/libzip/"
 PKG_URL="http://www.nih.at/libzip/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_TARGET="toolchain zlib zstd"
 PKG_LONGDESC="A C library for reading, creating, and modifying zip archives."
-
-PKG_CMAKE_OPTS_TARGET="-DENABLE_COMMONCRYPTO=OFF \
-                       -DENABLE_GNUTLS=OFF \
-                       -DENABLE_MBEDTLS=OFF \
-                       -DENABLE_OPENSSL=OFF \
-                       -DENABLE_WINDOWS_CRYPTO=OFF \
-                       -DENABLE_ZSTD=OFF \
-                       -DBUILD_TOOLS=OFF \
-                       -DBUILD_REGRESS=OFF \
-                       -DBUILD_EXAMPLES=OFF \
-                       -DBUILD_DOC=OFF \
-                       -DBUILD_SHARED_LIBS=OFF"
