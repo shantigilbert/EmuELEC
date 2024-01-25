@@ -143,5 +143,7 @@ case "$DEFE" in
 	;;
 esac
 
+mkdir -p /storage/roms/zerotier_networks
+
 # run custom_start ending scripts
 /storage/.config/custom_start.sh after
