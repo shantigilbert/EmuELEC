@@ -1,0 +1,499 @@
+From 48893b056a07b7eda4fe3dea7f068c403981b621 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Fri, 12 Nov 2021 10:35:59 +0100
+Subject: [PATCH 123/142] v3d,v3dv: support up to 8 render targets in v7.1+
+
+---
+ src/broadcom/common/v3d_limits.h       |  3 +-
+ src/broadcom/common/v3d_util.c         | 49 ++++++++++++++++++++++++--
+ src/broadcom/common/v3d_util.h         |  6 ++--
+ src/broadcom/compiler/nir_to_vir.c     | 10 +++---
+ src/broadcom/vulkan/v3dv_cmd_buffer.c  |  5 +--
+ src/broadcom/vulkan/v3dv_device.c      |  6 ++--
+ src/broadcom/vulkan/v3dv_limits.h      |  2 --
+ src/broadcom/vulkan/v3dv_meta_clear.c  |  8 +++--
+ src/broadcom/vulkan/v3dv_pass.c        |  6 ++--
+ src/broadcom/vulkan/v3dv_pipeline.c    |  4 ++-
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c |  7 ++--
+ src/broadcom/vulkan/v3dvx_device.c     |  1 -
+ src/gallium/drivers/v3d/v3d_blit.c     |  2 +-
+ src/gallium/drivers/v3d/v3d_context.c  |  5 +--
+ src/gallium/drivers/v3d/v3d_context.h  |  3 +-
+ src/gallium/drivers/v3d/v3d_job.c      |  6 ++--
+ src/gallium/drivers/v3d/v3d_screen.c   |  3 +-
+ src/gallium/drivers/v3d/v3dx_emit.c    | 14 +++++---
+ src/gallium/drivers/v3d/v3dx_state.c   |  5 +--
+ 19 files changed, 104 insertions(+), 41 deletions(-)
+
+diff --git a/src/broadcom/common/v3d_limits.h b/src/broadcom/common/v3d_limits.h
+index 46f38bd7484..354c8784914 100644
+--- a/src/broadcom/common/v3d_limits.h
++++ b/src/broadcom/common/v3d_limits.h
+@@ -42,7 +42,8 @@
+ 
+ #define V3D_MAX_SAMPLES 4
+ 
+-#define V3D_MAX_DRAW_BUFFERS 4
++#define V3D_MAX_DRAW_BUFFERS 8
++#define V3D_MAX_RENDER_TARGETS(ver) (ver < 71 ? 4 : 8)
+ 
+ #define V3D_MAX_POINT_SIZE 512.0f
+ #define V3D_MAX_LINE_WIDTH 32
+diff --git a/src/broadcom/common/v3d_util.c b/src/broadcom/common/v3d_util.c
+index 26f5c6b336f..209a5eceaa1 100644
+--- a/src/broadcom/common/v3d_util.c
++++ b/src/broadcom/common/v3d_util.c
+@@ -88,8 +88,10 @@ v3d_csd_choose_workgroups_per_supergroup(struct v3d_device_info *devinfo,
+ }
+ 
+ void
+-v3d_choose_tile_size(uint32_t color_attachment_count, uint32_t max_color_bpp,
+-                     bool msaa, bool double_buffer,
++v3d_choose_tile_size(const struct v3d_device_info *devinfo,
++                     uint32_t color_attachment_count,
++                     uint32_t max_color_bpp, bool msaa,
++                     bool double_buffer,
+                      uint32_t *width, uint32_t *height)
+ {
+    static const uint8_t tile_sizes[] = {
+@@ -103,7 +105,9 @@ v3d_choose_tile_size(uint32_t color_attachment_count, uint32_t max_color_bpp,
+    };
+ 
+    uint32_t idx = 0;
+-   if (color_attachment_count > 2)
++   if (color_attachment_count > 4)
++      idx += 3;
++   else if (color_attachment_count > 2)
+       idx += 2;
+    else if (color_attachment_count > 1)
+       idx += 1;
+@@ -117,6 +121,45 @@ v3d_choose_tile_size(uint32_t color_attachment_count, uint32_t max_color_bpp,
+ 
+    idx += max_color_bpp;
+ 
++   if (devinfo->ver >= 71) {
++      /* In V3D 7.x the TLB has an auxiliary buffer of 8KB that will be
++       * automatically used for depth instead of the main 16KB depth TLB buffer
++       * when the depth tile fits in the auxiliary buffer, allowing the hardware
++       * to allocate the 16KB from the main depth TLB to the color TLB. If
++       * we can do that, then we are effectively doubling the memory we have
++       * for color and we can increase our tile dimensions by a factor of 2
++       * (reduce idx by 1).
++       *
++       * If we have computed a tile size that would be smaller than the minimum
++       * of 8x8, then it is certain that depth will fit in the aux depth TLB
++       * (even in MSAA mode).
++       *
++       * Otherwise, we need check if we can fit depth in the aux TLB buffer
++       * using a larger tile size.
++       *
++       * FIXME: the docs state that depth TLB memory can be used for color
++       * if depth testing is not used by setting the 'depth disable' bit in the
++       * rendering configuration. However, this comes with a requirement that
++       * occlussion queries must not be active. We need to clarify if this means
++       * active at the point at which we emit a tile rendering configuration
++       * item, meaning that the we have a query spanning a full render pass
++       * (this is something we can tell before we emit the rendering
++       * configuration item) or active in the subpass for which we are enabling
++       * the bit (which we can't tell until later, when we record commands for
++       * the subpass). If it is the latter, then we cannot use this feature.
++       */
++      if (idx >= ARRAY_SIZE(tile_sizes) / 2) {
++         idx--;
++      } else if (idx > 0) {
++         /* Depth is always 32bpp (4x32bpp for 4x MSAA) */
++         uint32_t depth_bpp = !msaa ? 4 : 16;
++         uint32_t tile_w = tile_sizes[(idx - 1) * 2];
++         uint32_t tile_h = tile_sizes[(idx - 1) * 2 + 1];
++         if (tile_w * tile_h * depth_bpp <= 8192)
++            idx--;
++      }
++   }
++
+    assert(idx < ARRAY_SIZE(tile_sizes) / 2);
+ 
+    *width = tile_sizes[idx * 2];
+diff --git a/src/broadcom/common/v3d_util.h b/src/broadcom/common/v3d_util.h
+index 864fc949ffa..5a7e244a0a5 100644
+--- a/src/broadcom/common/v3d_util.h
++++ b/src/broadcom/common/v3d_util.h
+@@ -37,8 +37,10 @@ v3d_csd_choose_workgroups_per_supergroup(struct v3d_device_info *devinfo,
+                                          uint32_t wg_size);
+ 
+ void
+-v3d_choose_tile_size(uint32_t color_attachment_count, uint32_t max_color_bpp,
+-                     bool msaa, bool double_buffer,
++v3d_choose_tile_size(const struct v3d_device_info *devinfo,
++                     uint32_t color_attachment_count,
++                     uint32_t max_color_bpp, bool msaa,
++                     bool double_buffer,
+                      uint32_t *width, uint32_t *height);
+ 
+ uint32_t
+diff --git a/src/broadcom/compiler/nir_to_vir.c b/src/broadcom/compiler/nir_to_vir.c
+index a8cf02dd386..531e85a1212 100644
+--- a/src/broadcom/compiler/nir_to_vir.c
++++ b/src/broadcom/compiler/nir_to_vir.c
+@@ -2483,15 +2483,17 @@ ntq_setup_outputs(struct v3d_compile *c)
+ 
+                 switch (var->data.location) {
+                 case FRAG_RESULT_COLOR:
+-                        c->output_color_var[0] = var;
+-                        c->output_color_var[1] = var;
+-                        c->output_color_var[2] = var;
+-                        c->output_color_var[3] = var;
++                        for (int i = 0; i < V3D_MAX_DRAW_BUFFERS; i++)
++                                c->output_color_var[i] = var;
+                         break;
+                 case FRAG_RESULT_DATA0:
+                 case FRAG_RESULT_DATA1:
+                 case FRAG_RESULT_DATA2:
+                 case FRAG_RESULT_DATA3:
++                case FRAG_RESULT_DATA4:
++                case FRAG_RESULT_DATA5:
++                case FRAG_RESULT_DATA6:
++                case FRAG_RESULT_DATA7:
+                         c->output_color_var[var->data.location -
+                                             FRAG_RESULT_DATA0] = var;
+                         break;
+diff --git a/src/broadcom/vulkan/v3dv_cmd_buffer.c b/src/broadcom/vulkan/v3dv_cmd_buffer.c
+index bda0a614523..11d161b19b7 100644
+--- a/src/broadcom/vulkan/v3dv_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dv_cmd_buffer.c
+@@ -365,7 +365,8 @@ job_compute_frame_tiling(struct v3dv_job *job,
+    /* Double-buffer is incompatible with MSAA */
+    assert(!tiling->msaa || !tiling->double_buffer);
+ 
+-   v3d_choose_tile_size(render_target_count, max_internal_bpp,
++   v3d_choose_tile_size(&job->device->devinfo,
++                        render_target_count, max_internal_bpp,
+                         tiling->msaa, tiling->double_buffer,
+                         &tiling->tile_width, &tiling->tile_height);
+ 
+@@ -1374,7 +1375,7 @@ cmd_buffer_emit_subpass_clears(struct v3dv_cmd_buffer *cmd_buffer)
+    }
+ 
+    uint32_t att_count = 0;
+-   VkClearAttachment atts[V3D_MAX_DRAW_BUFFERS + 1]; /* 4 color + D/S */
++   VkClearAttachment atts[V3D_MAX_DRAW_BUFFERS + 1]; /* +1 for D/S */
+ 
+    /* We only need to emit subpass clears as draw calls for color attachments
+     * if the render area is not aligned to tile boundaries.
+diff --git a/src/broadcom/vulkan/v3dv_device.c b/src/broadcom/vulkan/v3dv_device.c
+index 01e2dd7ac2d..19e58542414 100644
+--- a/src/broadcom/vulkan/v3dv_device.c
++++ b/src/broadcom/vulkan/v3dv_device.c
+@@ -1366,6 +1366,8 @@ v3dv_GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
+    const VkSampleCountFlags supported_sample_counts =
+       VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT;
+ 
++   const uint8_t max_rts = V3D_MAX_RENDER_TARGETS(pdevice->devinfo.ver);
++
+    struct timespec clock_res;
+    clock_getres(CLOCK_MONOTONIC, &clock_res);
+    const float timestamp_period =
+@@ -1436,7 +1438,7 @@ v3dv_GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
+       .maxFragmentInputComponents               = max_varying_components,
+       .maxFragmentOutputAttachments             = 4,
+       .maxFragmentDualSrcAttachments            = 0,
+-      .maxFragmentCombinedOutputResources       = MAX_RENDER_TARGETS +
++      .maxFragmentCombinedOutputResources       = max_rts +
+                                                   MAX_STORAGE_BUFFERS +
+                                                   MAX_STORAGE_IMAGES,
+ 
+@@ -1476,7 +1478,7 @@ v3dv_GetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
+       .framebufferDepthSampleCounts             = supported_sample_counts,
+       .framebufferStencilSampleCounts           = supported_sample_counts,
+       .framebufferNoAttachmentsSampleCounts     = supported_sample_counts,
+-      .maxColorAttachments                      = MAX_RENDER_TARGETS,
++      .maxColorAttachments                      = max_rts,
+       .sampledImageColorSampleCounts            = supported_sample_counts,
+       .sampledImageIntegerSampleCounts          = supported_sample_counts,
+       .sampledImageDepthSampleCounts            = supported_sample_counts,
+diff --git a/src/broadcom/vulkan/v3dv_limits.h b/src/broadcom/vulkan/v3dv_limits.h
+index 9cda9f0d6d2..8ac99724105 100644
+--- a/src/broadcom/vulkan/v3dv_limits.h
++++ b/src/broadcom/vulkan/v3dv_limits.h
+@@ -50,8 +50,6 @@
+ #define MAX_DYNAMIC_BUFFERS (MAX_DYNAMIC_UNIFORM_BUFFERS + \
+                              MAX_DYNAMIC_STORAGE_BUFFERS)
+ 
+-#define MAX_RENDER_TARGETS 4
+-
+ #define MAX_MULTIVIEW_VIEW_COUNT 16
+ 
+ /* These are tunable parameters in the HW design, but all the V3D
+diff --git a/src/broadcom/vulkan/v3dv_meta_clear.c b/src/broadcom/vulkan/v3dv_meta_clear.c
+index d376c179e1c..0a7905b49d5 100644
+--- a/src/broadcom/vulkan/v3dv_meta_clear.c
++++ b/src/broadcom/vulkan/v3dv_meta_clear.c
+@@ -747,7 +747,7 @@ get_color_clear_pipeline_cache_key(uint32_t rt_idx,
+    uint32_t bit_offset = 0;
+ 
+    key |= rt_idx;
+-   bit_offset += 2;
++   bit_offset += 3;
+ 
+    key |= ((uint64_t) format) << bit_offset;
+    bit_offset += 32;
+@@ -1189,9 +1189,11 @@ v3dv_CmdClearAttachments(VkCommandBuffer commandBuffer,
+ {
+    V3DV_FROM_HANDLE(v3dv_cmd_buffer, cmd_buffer, commandBuffer);
+ 
+-   /* We can only clear attachments in the current subpass */
+-   assert(attachmentCount <= 5); /* 4 color + D/S */
++   /* We can have at most max_color_RTs + 1 D/S attachments */
++   assert(attachmentCount <=
++          V3D_MAX_RENDER_TARGETS(cmd_buffer->device->devinfo.ver) + 1);
+ 
++   /* We can only clear attachments in the current subpass */
+    struct v3dv_render_pass *pass = cmd_buffer->state.pass;
+ 
+    assert(cmd_buffer->state.subpass_idx < pass->subpass_count);
+diff --git a/src/broadcom/vulkan/v3dv_pass.c b/src/broadcom/vulkan/v3dv_pass.c
+index 3e82c15df88..7f2e2bbc710 100644
+--- a/src/broadcom/vulkan/v3dv_pass.c
++++ b/src/broadcom/vulkan/v3dv_pass.c
+@@ -322,11 +322,11 @@ subpass_get_granularity(struct v3dv_device *device,
+    /* Granularity is defined by the tile size */
+    assert(subpass_idx < pass->subpass_count);
+    struct v3dv_subpass *subpass = &pass->subpasses[subpass_idx];
+-   const uint32_t color_attachment_count = subpass->color_count;
++   const uint32_t color_count = subpass->color_count;
+ 
+    bool msaa = false;
+    uint32_t max_bpp = 0;
+-   for (uint32_t i = 0; i < color_attachment_count; i++) {
++   for (uint32_t i = 0; i < color_count; i++) {
+       uint32_t attachment_idx = subpass->color_attachments[i].attachment;
+       if (attachment_idx == VK_ATTACHMENT_UNUSED)
+          continue;
+@@ -349,7 +349,7 @@ subpass_get_granularity(struct v3dv_device *device,
+     * heuristics so we choose a conservative granularity here, with it disabled.
+     */
+    uint32_t width, height;
+-   v3d_choose_tile_size(color_attachment_count, max_bpp, msaa,
++   v3d_choose_tile_size(&device->devinfo, color_count, max_bpp, msaa,
+                         false /* double-buffer */, &width, &height);
+    *granularity = (VkExtent2D) {
+       .width = width,
+diff --git a/src/broadcom/vulkan/v3dv_pipeline.c b/src/broadcom/vulkan/v3dv_pipeline.c
+index 2156176d4cc..3bcdcc9a853 100644
+--- a/src/broadcom/vulkan/v3dv_pipeline.c
++++ b/src/broadcom/vulkan/v3dv_pipeline.c
+@@ -2632,6 +2632,7 @@ pipeline_init_dynamic_state(
+    const VkPipelineColorWriteCreateInfoEXT *pColorWriteState)
+ {
+    /* Initialize to default values */
++   const struct v3d_device_info *devinfo = &pipeline->device->devinfo;
+    struct v3dv_dynamic_state *dynamic = &pipeline->dynamic_state;
+    memset(dynamic, 0, sizeof(*dynamic));
+    dynamic->stencil_compare_mask.front = ~0;
+@@ -2639,7 +2640,8 @@ pipeline_init_dynamic_state(
+    dynamic->stencil_write_mask.front = ~0;
+    dynamic->stencil_write_mask.back = ~0;
+    dynamic->line_width = 1.0f;
+-   dynamic->color_write_enable = (1ull << (4 * V3D_MAX_DRAW_BUFFERS)) - 1;
++   dynamic->color_write_enable =
++      (1ull << (4 * V3D_MAX_RENDER_TARGETS(devinfo->ver))) - 1;
+ 
+    /* Create a mask of enabled dynamic states */
+    uint32_t dynamic_states = 0;
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index 3566649aafd..bf5e47018e8 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -1550,10 +1550,13 @@ v3dX(cmd_buffer_emit_blend)(struct v3dv_cmd_buffer *cmd_buffer)
+    struct v3dv_pipeline *pipeline = cmd_buffer->state.gfx.pipeline;
+    assert(pipeline);
+ 
++   const struct v3d_device_info *devinfo = &cmd_buffer->device->devinfo;
++   const uint32_t max_color_rts = V3D_MAX_RENDER_TARGETS(devinfo->ver);
++
+    const uint32_t blend_packets_size =
+       cl_packet_length(BLEND_ENABLES) +
+       cl_packet_length(BLEND_CONSTANT_COLOR) +
+-      cl_packet_length(BLEND_CFG) * V3D_MAX_DRAW_BUFFERS;
++      cl_packet_length(BLEND_CFG) * max_color_rts;
+ 
+    v3dv_cl_ensure_space_with_branch(&job->bcl, blend_packets_size);
+    v3dv_return_if_oom(cmd_buffer, NULL);
+@@ -1565,7 +1568,7 @@ v3dX(cmd_buffer_emit_blend)(struct v3dv_cmd_buffer *cmd_buffer)
+          }
+       }
+ 
+-      for (uint32_t i = 0; i < V3D_MAX_DRAW_BUFFERS; i++) {
++      for (uint32_t i = 0; i < max_color_rts; i++) {
+          if (pipeline->blend.enables & (1 << i))
+             cl_emit_prepacked(&job->bcl, &pipeline->blend.cfg[i]);
+       }
+diff --git a/src/broadcom/vulkan/v3dvx_device.c b/src/broadcom/vulkan/v3dvx_device.c
+index 72daefadb08..4d17a2691a5 100644
+--- a/src/broadcom/vulkan/v3dvx_device.c
++++ b/src/broadcom/vulkan/v3dvx_device.c
+@@ -49,7 +49,6 @@ vk_to_v3d_compare_func[] = {
+    [VK_COMPARE_OP_ALWAYS]                       = V3D_COMPARE_FUNC_ALWAYS,
+ };
+ 
+-
+ static union pipe_color_union encode_border_color(
+    const VkSamplerCustomBorderColorCreateInfoEXT *bc_info)
+ {
+diff --git a/src/gallium/drivers/v3d/v3d_blit.c b/src/gallium/drivers/v3d/v3d_blit.c
+index 96179f654a4..51ddc292ff7 100644
+--- a/src/gallium/drivers/v3d/v3d_blit.c
++++ b/src/gallium/drivers/v3d/v3d_blit.c
+@@ -369,7 +369,7 @@ v3d_tlb_blit(struct pipe_context *pctx, struct pipe_blit_info *info)
+         bool double_buffer = V3D_DBG(DOUBLE_BUFFER) && !msaa;
+ 
+         uint32_t tile_width, tile_height, max_bpp;
+-        v3d_get_tile_buffer_size(msaa, double_buffer,
++        v3d_get_tile_buffer_size(devinfo, msaa, double_buffer,
+                                  is_color_blit ? 1 : 0, surfaces, src_surf,
+                                  &tile_width, &tile_height, &max_bpp);
+ 
+diff --git a/src/gallium/drivers/v3d/v3d_context.c b/src/gallium/drivers/v3d/v3d_context.c
+index f12e8c92139..def546e9ef5 100644
+--- a/src/gallium/drivers/v3d/v3d_context.c
++++ b/src/gallium/drivers/v3d/v3d_context.c
+@@ -220,7 +220,8 @@ v3d_flag_dirty_sampler_state(struct v3d_context *v3d,
+ }
+ 
+ void
+-v3d_get_tile_buffer_size(bool is_msaa,
++v3d_get_tile_buffer_size(const struct v3d_device_info *devinfo,
++                         bool is_msaa,
+                          bool double_buffer,
+                          uint32_t nr_cbufs,
+                          struct pipe_surface **cbufs,
+@@ -247,7 +248,7 @@ v3d_get_tile_buffer_size(bool is_msaa,
+                 *max_bpp = MAX2(*max_bpp, bsurf->internal_bpp);
+         }
+ 
+-        v3d_choose_tile_size(max_cbuf_idx + 1, *max_bpp,
++        v3d_choose_tile_size(devinfo, max_cbuf_idx + 1, *max_bpp,
+                              is_msaa, double_buffer,
+                              tile_width, tile_height);
+ }
+diff --git a/src/gallium/drivers/v3d/v3d_context.h b/src/gallium/drivers/v3d/v3d_context.h
+index 21ee10a90cc..eb184b4b203 100644
+--- a/src/gallium/drivers/v3d/v3d_context.h
++++ b/src/gallium/drivers/v3d/v3d_context.h
+@@ -795,7 +795,8 @@ void v3d_ensure_prim_counts_allocated(struct v3d_context *ctx);
+ void v3d_flag_dirty_sampler_state(struct v3d_context *v3d,
+                                   enum pipe_shader_type shader);
+ 
+-void v3d_get_tile_buffer_size(bool is_msaa,
++void v3d_get_tile_buffer_size(const struct v3d_device_info *devinfo,
++                              bool is_msaa,
+                               bool double_buffer,
+                               uint32_t nr_cbufs,
+                               struct pipe_surface **cbufs,
+diff --git a/src/gallium/drivers/v3d/v3d_job.c b/src/gallium/drivers/v3d/v3d_job.c
+index b022ed45073..577890a06c3 100644
+--- a/src/gallium/drivers/v3d/v3d_job.c
++++ b/src/gallium/drivers/v3d/v3d_job.c
+@@ -383,9 +383,11 @@ v3d_get_job_for_fbo(struct v3d_context *v3d)
+                 job->double_buffer = false;
+         }
+ 
+-        v3d_get_tile_buffer_size(job->msaa, job->double_buffer,
++        v3d_get_tile_buffer_size(&v3d->screen->devinfo,
++                                 job->msaa, job->double_buffer,
+                                  job->nr_cbufs, job->cbufs, job->bbuf,
+-                                 &job->tile_width, &job->tile_height,
++                                 &job->tile_width,
++                                 &job->tile_height,
+                                  &job->internal_bpp);
+ 
+         /* The dirty flags are tracking what's been updated while v3d->job has
+diff --git a/src/gallium/drivers/v3d/v3d_screen.c b/src/gallium/drivers/v3d/v3d_screen.c
+index efdb7d615ae..2225edf85bd 100644
+--- a/src/gallium/drivers/v3d/v3d_screen.c
++++ b/src/gallium/drivers/v3d/v3d_screen.c
+@@ -255,9 +255,8 @@ v3d_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
+         case PIPE_CAP_MAX_TEXTURE_ARRAY_LAYERS:
+                 return V3D_MAX_ARRAY_LAYERS;
+ 
+-                /* Render targets. */
+         case PIPE_CAP_MAX_RENDER_TARGETS:
+-                return 4;
++                return V3D_MAX_RENDER_TARGETS(screen->devinfo.ver);
+ 
+         case PIPE_CAP_VENDOR_ID:
+                 return 0x14E4;
+diff --git a/src/gallium/drivers/v3d/v3dx_emit.c b/src/gallium/drivers/v3d/v3dx_emit.c
+index 75751dc9ab6..87e75281dc9 100644
+--- a/src/gallium/drivers/v3d/v3dx_emit.c
++++ b/src/gallium/drivers/v3d/v3dx_emit.c
+@@ -661,8 +661,10 @@ v3dX(emit_state)(struct pipe_context *pctx)
+                         }
+ #endif
+ 
++                        const uint32_t max_rts =
++                                V3D_MAX_RENDER_TARGETS(v3d->screen->devinfo.ver);
+                         if (blend->base.independent_blend_enable) {
+-                                for (int i = 0; i < V3D_MAX_DRAW_BUFFERS; i++)
++                                for (int i = 0; i < max_rts; i++)
+                                         emit_rt_blend(v3d, job, &blend->base, i,
+                                                       (1 << i),
+                                                       v3d->blend_dst_alpha_one & (1 << i));
+@@ -678,16 +680,16 @@ v3dX(emit_state)(struct pipe_context *pctx)
+                                  * RTs without.
+                                  */
+                                 emit_rt_blend(v3d, job, &blend->base, 0,
+-                                              ((1 << V3D_MAX_DRAW_BUFFERS) - 1) &
++                                              ((1 << max_rts) - 1) &
+                                                    v3d->blend_dst_alpha_one,
+                                               true);
+                                 emit_rt_blend(v3d, job, &blend->base, 0,
+-                                              ((1 << V3D_MAX_DRAW_BUFFERS) - 1) &
++                                              ((1 << max_rts) - 1) &
+                                                    ~v3d->blend_dst_alpha_one,
+                                               false);
+                         } else {
+                                 emit_rt_blend(v3d, job, &blend->base, 0,
+-                                              (1 << V3D_MAX_DRAW_BUFFERS) - 1,
++                                              (1 << max_rts) - 1,
+                                               v3d->blend_dst_alpha_one);
+                         }
+                 }
+@@ -696,8 +698,10 @@ v3dX(emit_state)(struct pipe_context *pctx)
+         if (v3d->dirty & V3D_DIRTY_BLEND) {
+                 struct pipe_blend_state *blend = &v3d->blend->base;
+ 
++                const uint32_t max_rts =
++                        V3D_MAX_RENDER_TARGETS(v3d->screen->devinfo.ver);
+                 cl_emit(&job->bcl, COLOR_WRITE_MASKS, mask) {
+-                        for (int i = 0; i < 4; i++) {
++                        for (int i = 0; i < max_rts; i++) {
+                                 int rt = blend->independent_blend_enable ? i : 0;
+                                 int rt_mask = blend->rt[rt].colormask;
+ 
+diff --git a/src/gallium/drivers/v3d/v3dx_state.c b/src/gallium/drivers/v3d/v3dx_state.c
+index 88e57cd072b..970a082aa85 100644
+--- a/src/gallium/drivers/v3d/v3dx_state.c
++++ b/src/gallium/drivers/v3d/v3dx_state.c
+@@ -138,8 +138,9 @@ v3d_create_blend_state(struct pipe_context *pctx,
+ 
+         so->base = *cso;
+ 
++        uint32_t max_rts = V3D_MAX_RENDER_TARGETS(V3D_VERSION);
+         if (cso->independent_blend_enable) {
+-                for (int i = 0; i < V3D_MAX_DRAW_BUFFERS; i++) {
++                for (int i = 0; i < max_rts; i++) {
+                         so->blend_enables |= cso->rt[i].blend_enable << i;
+ 
+                         /* V3D 4.x is when we got independent blend enables. */
+@@ -148,7 +149,7 @@ v3d_create_blend_state(struct pipe_context *pctx,
+                 }
+         } else {
+                 if (cso->rt[0].blend_enable)
+-                        so->blend_enables = (1 << V3D_MAX_DRAW_BUFFERS) - 1;
++                        so->blend_enables = (1 << max_rts) - 1;
+         }
+ 
+         return so;
+-- 
+2.39.2
+

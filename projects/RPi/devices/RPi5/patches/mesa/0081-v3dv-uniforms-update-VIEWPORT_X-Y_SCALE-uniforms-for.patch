@@ -1,0 +1,97 @@
+From 611bf6a7445837c7e20416ff9f11a6dad9c543d7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Tue, 14 Sep 2021 10:08:19 +0200
+Subject: [PATCH 081/142] v3dv/uniforms: update VIEWPORT_X/Y_SCALE uniforms for
+ v71
+
+As the packet CLIPPER_XY scaling, this needs to be computed on 1/64ths
+of pixel, instead of 1/256ths of pixels.
+
+As this is the usual values that we get from macros, we add manually a
+v42 and v71 macro, and define a new helper (V3DV_X) to get the value
+for the current hw version.
+---
+ src/broadcom/vulkan/v3dv_private.h  | 17 +++++++++++++++++
+ src/broadcom/vulkan/v3dv_uniforms.c |  7 ++++---
+ src/broadcom/vulkan/v3dvx_private.h |  9 +++++++++
+ 3 files changed, 30 insertions(+), 3 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_private.h b/src/broadcom/vulkan/v3dv_private.h
+index 6bdf338c67b..cd6811b19c2 100644
+--- a/src/broadcom/vulkan/v3dv_private.h
++++ b/src/broadcom/vulkan/v3dv_private.h
+@@ -2617,6 +2617,23 @@ u64_compare(const void *key1, const void *key2)
+    v3d_X_thing;                                       \
+ })
+ 
++/* Helper to get hw-specific macro values */
++#define V3DV_X(device, thing) ({                                \
++   __typeof(V3D42_##thing) V3D_X_THING;                         \
++   switch (device->devinfo.ver) {                               \
++   case 42:                                                     \
++      V3D_X_THING = V3D42_##thing;                              \
++      break;                                                    \
++   case 71:                                                     \
++      V3D_X_THING = V3D71_##thing;                              \
++      break;                                                    \
++   default:                                                     \
++      unreachable("Unsupported hardware generation");           \
++   }                                                            \
++   V3D_X_THING;                                                 \
++})
++
++
+ 
+ /* v3d_macros from common requires v3dX and V3DX definitions. Below we need to
+  * define v3dX for each version supported, because when we compile code that
+diff --git a/src/broadcom/vulkan/v3dv_uniforms.c b/src/broadcom/vulkan/v3dv_uniforms.c
+index 72fa9a1b39c..0e681cc4ee2 100644
+--- a/src/broadcom/vulkan/v3dv_uniforms.c
++++ b/src/broadcom/vulkan/v3dv_uniforms.c
+@@ -497,7 +497,8 @@ v3dv_write_uniforms_wg_offsets(struct v3dv_cmd_buffer *cmd_buffer,
+    struct v3dv_cl_reloc uniform_stream = v3dv_cl_get_address(&job->indirect);
+ 
+    struct v3dv_cl_out *uniforms = cl_start(&job->indirect);
+-
++   float clipper_xy_granularity =
++      V3DV_X(cmd_buffer->device, CLIPPER_XY_GRANULARITY);
+    for (int i = 0; i < uinfo->count; i++) {
+       uint32_t data = uinfo->data[i];
+ 
+@@ -520,11 +521,11 @@ v3dv_write_uniforms_wg_offsets(struct v3dv_cmd_buffer *cmd_buffer,
+          break;
+ 
+       case QUNIFORM_VIEWPORT_X_SCALE:
+-         cl_aligned_f(&uniforms, dynamic->viewport.scale[0][0] * 256.0f);
++         cl_aligned_f(&uniforms, dynamic->viewport.scale[0][0] * clipper_xy_granularity);
+          break;
+ 
+       case QUNIFORM_VIEWPORT_Y_SCALE:
+-         cl_aligned_f(&uniforms, dynamic->viewport.scale[0][1] * 256.0f);
++         cl_aligned_f(&uniforms, dynamic->viewport.scale[0][1] * clipper_xy_granularity);
+          break;
+ 
+       case QUNIFORM_VIEWPORT_Z_OFFSET: {
+diff --git a/src/broadcom/vulkan/v3dvx_private.h b/src/broadcom/vulkan/v3dvx_private.h
+index a4157d11c7c..ff9ba75cf93 100644
+--- a/src/broadcom/vulkan/v3dvx_private.h
++++ b/src/broadcom/vulkan/v3dvx_private.h
+@@ -319,6 +319,15 @@ uint32_t v3dX(combined_image_sampler_texture_state_offset)(uint8_t plane);
+ 
+ uint32_t v3dX(combined_image_sampler_sampler_state_offset)(uint8_t plane);
+ 
++/* General utils */
++
++uint32_t
++v3dX(clamp_for_format_and_type)(uint32_t rt_type,
++                                VkFormat vk_format);
++
++#define V3D42_CLIPPER_XY_GRANULARITY 256.0f
++#define V3D71_CLIPPER_XY_GRANULARITY 64.0f
++
+ uint32_t
+ v3dX(clamp_for_format_and_type)(uint32_t rt_type,
+                                 VkFormat vk_format);
+-- 
+2.39.2
+

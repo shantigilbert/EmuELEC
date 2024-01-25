@@ -11,7 +11,7 @@
   fi
 
 # TARGET_CPU:
-# generic cortex-a35 cortex-a53 cortex-a55 cortex-a57 cortex-a72
+# generic cortex-a35 cortex-a53 cortex-a55 cortex-a57 cortex-a72 cortex-a76
 # exynos-m1 qdf24xx thunderx xgene1 cortex-a57.cortex-a53
 # cortex-a72.cortex-a53
 
@@ -21,6 +21,10 @@
       TARGET_SUBARCH=aarch64
       TARGET_VARIANT=armv8-a
       TARGET_EXTRA_FLAGS="-mcpu=${TARGET_CPU}${TARGET_CPU_FLAGS}"
+      ;;
+    cortex-a76)
+      TARGET_SUBARCH=aarch64
+      TARGET_VARIANT=armv8.2-a
       ;;
   cortex-a55)
       TARGET_SUBARCH=aarch64

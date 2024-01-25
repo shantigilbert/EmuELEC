@@ -1,0 +1,137 @@
+From 8a013649ea33ea8ce2f4bfd432260de1609eb977 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Thu, 6 Oct 2022 16:47:58 +0200
+Subject: [PATCH 03/21] WinSystemAmlogic: rework EGL native window The
+ <EGL/fbdev_window.h> include was missing and native window was NULL as
+ _FBDEV_WINDOW_H_ was not defined.
+
+---
+ xbmc/windowing/amlogic/WinSystemAmlogic.cpp   | 33 ++++++++-----------
+ xbmc/windowing/amlogic/WinSystemAmlogic.h     |  4 +--
+ .../amlogic/WinSystemAmlogicGLESContext.cpp   |  2 +-
+ 3 files changed, 17 insertions(+), 22 deletions(-)
+
+diff --git a/xbmc/windowing/amlogic/WinSystemAmlogic.cpp b/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
+index 3d40e6b24d..0a52b95144 100644
+--- a/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
++++ b/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
+@@ -38,8 +38,9 @@
+ 
+ using namespace KODI;
+ 
+-CWinSystemAmlogic::CWinSystemAmlogic() :
+-  m_libinput(new CLibInputHandler)
++CWinSystemAmlogic::CWinSystemAmlogic()
++:  m_nativeWindow(NULL)
++,  m_libinput(new CLibInputHandler)
+ {
+   const char *env_framebuffer = getenv("FRAMEBUFFER");
+ 
+@@ -53,7 +54,6 @@ CWinSystemAmlogic::CWinSystemAmlogic() :
+   }
+ 
+   m_nativeDisplay = EGL_NO_DISPLAY;
+-  m_nativeWindow = static_cast<EGLNativeWindowType>(NULL);
+ 
+   m_displayWidth = 0;
+   m_displayHeight = 0;
+@@ -64,14 +64,6 @@ CWinSystemAmlogic::CWinSystemAmlogic() :
+   m_libinput->Start();
+ }
+ 
+-CWinSystemAmlogic::~CWinSystemAmlogic()
+-{
+-  if(m_nativeWindow)
+-  {
+-    m_nativeWindow = static_cast<EGLNativeWindowType>(NULL);
+-  }
+-}
+-
+ bool CWinSystemAmlogic::InitWindowSystem()
+ {
+   const std::shared_ptr<CSettings> settings = CServiceBroker::GetSettingsComponent()->GetSettings();
+@@ -146,6 +138,12 @@ bool CWinSystemAmlogic::CreateNewWindow(const std::string& name,
+   m_displayHeight = res.iScreenHeight;
+   m_fRefreshRate  = res.fRefreshRate;
+ 
++  if (m_nativeWindow == NULL)
++    m_nativeWindow = new fbdev_window;
++
++  m_nativeWindow->width = m_nWidth;
++  m_nativeWindow->height = m_nHeight;
++
+   if ((m_bWindowCreated && aml_get_native_resolution(&current_resolution)) &&
+     current_resolution.iWidth == res.iWidth && current_resolution.iHeight == res.iHeight &&
+     current_resolution.iScreenWidth == res.iScreenWidth && current_resolution.iScreenHeight == res.iScreenHeight &&
+@@ -175,13 +173,6 @@ bool CWinSystemAmlogic::CreateNewWindow(const std::string& name,
+   m_stereo_mode = stereo_mode;
+   m_bFullScreen = fullScreen;
+ 
+-#ifdef _FBDEV_WINDOW_H_
+-  fbdev_window *nativeWindow = new fbdev_window;
+-  nativeWindow->width = res.iWidth;
+-  nativeWindow->height = res.iHeight;
+-  m_nativeWindow = static_cast<EGLNativeWindowType>(nativeWindow);
+-#endif
+-
+   aml_set_native_resolution(res, m_framebuffer_name, stereo_mode);
+ 
+   if (!m_delayDispReset)
+@@ -199,7 +190,11 @@ bool CWinSystemAmlogic::CreateNewWindow(const std::string& name,
+ 
+ bool CWinSystemAmlogic::DestroyWindow()
+ {
+-  m_nativeWindow = static_cast<EGLNativeWindowType>(NULL);
++  if (m_nativeWindow != NULL)
++  {
++    delete(m_nativeWindow);
++    m_nativeWindow = NULL;
++  }
+ 
+   return true;
+ }
+diff --git a/xbmc/windowing/amlogic/WinSystemAmlogic.h b/xbmc/windowing/amlogic/WinSystemAmlogic.h
+index 7cfb2dc7c3..2c70086caa 100644
+--- a/xbmc/windowing/amlogic/WinSystemAmlogic.h
++++ b/xbmc/windowing/amlogic/WinSystemAmlogic.h
+@@ -14,6 +14,7 @@
+ #include "windowing/WinSystem.h"
+ #include "threads/SystemClock.h"
+ #include "system_egl.h"
++#include <EGL/fbdev_window.h>
+ 
+ class IDispResource;
+ 
+@@ -21,7 +22,6 @@ class CWinSystemAmlogic : public CWinSystemBase
+ {
+ public:
+   CWinSystemAmlogic();
+-  virtual ~CWinSystemAmlogic();
+ 
+   bool InitWindowSystem() override;
+   bool DestroyWindowSystem() override;
+@@ -42,7 +42,7 @@ public:
+ protected:
+   std::string m_framebuffer_name;
+   EGLDisplay m_nativeDisplay;
+-  EGLNativeWindowType m_nativeWindow;
++  fbdev_window *m_nativeWindow;
+ 
+   int m_displayWidth;
+   int m_displayHeight;
+diff --git a/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp b/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp
+index 16ba54a02f..f6cbac696b 100644
+--- a/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp
++++ b/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp
+@@ -74,7 +74,7 @@ bool CWinSystemAmlogicGLESContext::CreateNewWindow(const std::string& name,
+     return false;
+   }
+ 
+-  if (!m_pGLContext.CreateSurface(m_nativeWindow))
++  if (!m_pGLContext.CreateSurface(static_cast<EGLNativeWindowType>(m_nativeWindow)))
+   {
+     return false;
+   }
+-- 
+2.43.0
+

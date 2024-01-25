@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="file"
-PKG_VERSION="5.44"
-PKG_SHA256="64c72d99926d2af13c2f20df1e136059d762e3c6ba450e26d5fb3fe5af5fd26f"
+PKG_VERSION="5.45"
+PKG_SHA256="28c01a5ef1a127ef71758222ca019ba6c6bfa4a8fe20c2b525ce75943ee9da3c"
 PKG_LICENSE="BSD"
 PKG_SITE="http://www.darwinsys.com/file/"
 PKG_URL="https://github.com/file/file/archive/FILE${PKG_VERSION/./_}.tar.gz"

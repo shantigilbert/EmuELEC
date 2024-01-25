@@ -1,0 +1,15 @@
+# Ignore power button input devices in libinput so logind can handle them
+ACTION=="remove", GOTO="end"
+SUBSYSTEM!="input", GOTO="end"
+KERNEL!="event*", GOTO="end"
+
+IMPORT{parent}="KEY"
+
+# match devices that only generate KEY_POWER (code 116) events
+ENV{KEY}=="10000000000000 0", ENV{LIBINPUT_IGNORE_DEVICE}="1"
+
+# 32bit systems report the bitmap in 32bit chunks
+ENV{KEY}=="100000 0 0 0", ENV{LIBINPUT_IGNORE_DEVICE}="1"
+
+LABEL="end"
+

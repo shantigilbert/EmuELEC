@@ -1,0 +1,83 @@
+From 684e791b37f4a0c60af89c3a28bf1404d4cd0614 Mon Sep 17 00:00:00 2001
+From: Serghei Scobici <serghei.scobici@endava.com>
+Date: Sun, 8 Jan 2023 17:08:09 +0200
+Subject: [PATCH 02/21] Improve Dolby Vision detection for Android
+
+---
+ .../DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp | 10 ++++++++++
+ xbmc/cores/VideoPlayer/DVDStreamInfo.cpp               |  4 ++++
+ xbmc/cores/VideoPlayer/DVDStreamInfo.h                 |  1 +
+ 3 files changed, 15 insertions(+)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp
+index 0be40dd87c..ae8943655e 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp
+@@ -501,6 +501,16 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
+       bool isDvhe = (m_hints.codec_tag == MKTAG('d', 'v', 'h', 'e'));
+       bool isDvh1 = (m_hints.codec_tag == MKTAG('d', 'v', 'h', '1'));
+ 
++      // some files don't have dvhe or dvh1 tag set up but have Dolby Vision side data
++      if (!isDvhe && !isDvh1 && m_hints.hdrType == StreamHdrType::HDR_TYPE_DOLBYVISION)
++      {
++        // page 10, table 2 from https://professional.dolby.com/siteassets/content-creation/dolby-vision-for-content-creators/dolby-vision-streams-within-the-http-live-streaming-format-v2.0-13-november-2018.pdf
++        if (m_hints.codec_tag == MKTAG('h', 'v', 'c', '1'))
++          isDvh1 = true;
++        else
++          isDvhe = true;
++      }
++
+       if (isDvhe || isDvh1)
+       {
+         bool displaySupportsDovi = CAndroidUtils::GetDisplayHDRCapabilities().SupportsDolbyVision();
+diff --git a/xbmc/cores/VideoPlayer/DVDStreamInfo.cpp b/xbmc/cores/VideoPlayer/DVDStreamInfo.cpp
+index 0bac726df6..df9dc537fb 100644
+--- a/xbmc/cores/VideoPlayer/DVDStreamInfo.cpp
++++ b/xbmc/cores/VideoPlayer/DVDStreamInfo.cpp
+@@ -58,6 +58,7 @@ void CDVDStreamInfo::Clear()
+   ptsinvalid = false;
+   forced_aspect = false;
+   bitsperpixel = 0;
++  hdrType = StreamHdrType::HDR_TYPE_NONE;
+   colorSpace = AVCOL_SPC_UNSPECIFIED;
+   colorRange = AVCOL_RANGE_UNSPECIFIED;
+   colorPrimaries = AVCOL_PRI_UNSPECIFIED;
+@@ -109,6 +110,7 @@ bool CDVDStreamInfo::Equal(const CDVDStreamInfo& right, int compare)
+   || bitsperpixel != right.bitsperpixel
+   || bitdepth != right.bitdepth
+   || vfr != right.vfr
++  || hdrType != right.hdrType
+   || colorSpace != right.colorSpace
+   || colorRange != right.colorRange
+   || colorPrimaries != right.colorPrimaries
+@@ -233,6 +235,7 @@ void CDVDStreamInfo::Assign(const CDVDStreamInfo& right, bool withextradata)
+   bitdepth = right.bitdepth;
+   vfr = right.vfr;
+   codecOptions = right.codecOptions;
++  hdrType = right.hdrType;
+   colorSpace = right.colorSpace;
+   colorRange = right.colorRange;
+   colorPrimaries = right.colorPrimaries;
+@@ -309,6 +312,7 @@ void CDVDStreamInfo::Assign(const CDemuxStream& right, bool withextradata)
+     orientation = stream->iOrientation;
+     bitsperpixel = stream->iBitsPerPixel;
+     bitdepth = stream->bitDepth;
++    hdrType = stream->hdr_type;
+     colorSpace = stream->colorSpace;
+     colorRange = stream->colorRange;
+     colorPrimaries = stream->colorPrimaries;
+diff --git a/xbmc/cores/VideoPlayer/DVDStreamInfo.h b/xbmc/cores/VideoPlayer/DVDStreamInfo.h
+index 8d2989af75..ed94acd6b3 100644
+--- a/xbmc/cores/VideoPlayer/DVDStreamInfo.h
++++ b/xbmc/cores/VideoPlayer/DVDStreamInfo.h
+@@ -73,6 +73,7 @@ public:
+   int orientation; // orientation of the video in degrees counter clockwise
+   int bitsperpixel;
+   int bitdepth;
++  StreamHdrType hdrType;
+   AVColorSpace colorSpace;
+   AVColorRange colorRange;
+   AVColorPrimaries colorPrimaries;
+-- 
+2.43.0
+

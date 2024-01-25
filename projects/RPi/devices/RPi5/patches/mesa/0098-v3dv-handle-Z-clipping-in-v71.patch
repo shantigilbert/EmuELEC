@@ -1,0 +1,60 @@
+From d8083cb8f104e0f035f5b812e000a500fa52d66f Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Fri, 15 Oct 2021 13:06:31 +0200
+Subject: [PATCH 098/142] v3dv: handle Z clipping in v71
+
+Fixes the following tests:
+
+dEQP-VK.clipping.clip_volume.*
+dEQP-VK.draw.inverted_depth_ranges.nodepthclamp_* (except deltazero)
+---
+ src/broadcom/vulkan/v3dvx_pipeline.c | 33 ++++++++++++++++++++++++++++
+ 1 file changed, 33 insertions(+)
+
+diff --git a/src/broadcom/vulkan/v3dvx_pipeline.c b/src/broadcom/vulkan/v3dvx_pipeline.c
+index a72ca3c241b..7b1133f8173 100644
+--- a/src/broadcom/vulkan/v3dvx_pipeline.c
++++ b/src/broadcom/vulkan/v3dvx_pipeline.c
+@@ -227,6 +227,39 @@ pack_cfg_bits(struct v3dv_pipeline *pipeline,
+          ds_info ? ds_info->stencilTestEnable && has_ds_attachment: false;
+ 
+       pipeline->z_updates_enable = config.z_updates_enable;
++
++#if V3D_VERSION >= 71
++      /* From the Vulkan spec:
++       *
++       *    "depthClampEnable controls whether to clamp the fragment’s depth
++       *     values as described in Depth Test. If the pipeline is not created
++       *     with VkPipelineRasterizationDepthClipStateCreateInfoEXT present
++       *     then enabling depth clamp will also disable clipping primitives to
++       *     the z planes of the frustrum as described in Primitive Clipping.
++       *     Otherwise depth clipping is controlled by the state set in
++       *     VkPipelineRasterizationDepthClipStateCreateInfoEXT."
++       *
++       * Note: neither depth clamping nor VK_EXT_depth_clip_enable are actually
++       * supported in the driver yet, so in practice we are always enabling Z
++       * clipping for now.
++       */
++      bool z_clip_enable = false;
++      const VkPipelineRasterizationDepthClipStateCreateInfoEXT *clip_info =
++         ds_info ? vk_find_struct_const(ds_info->pNext,
++                                        PIPELINE_RASTERIZATION_DEPTH_CLIP_STATE_CREATE_INFO_EXT) :
++                   NULL;
++      if (clip_info)
++         z_clip_enable = clip_info->depthClipEnable;
++      else if (!(rs_info && rs_info->depthClampEnable))
++         z_clip_enable = true;
++
++      if (z_clip_enable) {
++         config.z_clipping_mode = pipeline->negative_one_to_one ?
++	    V3D_Z_CLIP_MODE_MIN_ONE_TO_ONE : V3D_Z_CLIP_MODE_ZERO_TO_ONE;
++      } else {
++         config.z_clipping_mode = V3D_Z_CLIP_MODE_NONE;
++      }
++#endif
+    };
+ }
+ 
+-- 
+2.39.2
+

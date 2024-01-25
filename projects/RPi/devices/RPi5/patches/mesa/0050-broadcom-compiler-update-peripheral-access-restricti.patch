@@ -1,0 +1,235 @@
+From f9a76b3a1e316e5ed6387819b87eaaf60f989a2b Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 26 Oct 2021 11:43:02 +0200
+Subject: [PATCH 050/142] broadcom/compiler: update peripheral access
+ restrictions for v71
+
+In V3D 4.x only a couple of simultaneous accesses where allowed, but
+V3D 7.x is a bit more flexible, so rather than trying to check for all
+the allowed combinations it is easier to check if we are one of the
+disallows.
+
+Shader-db (pi5):
+
+total instructions in shared programs: 11338883 -> 11307386 (-0.28%)
+instructions in affected programs: 2727201 -> 2695704 (-1.15%)
+helped: 12555
+HURT: 289
+Instructions are helped.
+
+total max-temps in shared programs: 2230199 -> 2229260 (-0.04%)
+max-temps in affected programs: 20508 -> 19569 (-4.58%)
+helped: 608
+HURT: 4
+Max-temps are helped.
+
+total sfu-stalls in shared programs: 15236 -> 15293 (0.37%)
+sfu-stalls in affected programs: 148 -> 205 (38.51%)
+helped: 38
+HURT: 64
+Inconclusive result (%-change mean confidence interval includes 0).
+
+total inst-and-stalls in shared programs: 11354119 -> 11322679 (-0.28%)
+inst-and-stalls in affected programs: 2732262 -> 2700822 (-1.15%)
+helped: 12550
+HURT: 304
+Inst-and-stalls are helped.
+
+total nops in shared programs: 273711 -> 274095 (0.14%)
+nops in affected programs: 9626 -> 10010 (3.99%)
+helped: 186
+HURT: 397
+Nops are HURT.
+---
+ src/broadcom/compiler/qpu_schedule.c | 88 +++++++++++++++++++++-------
+ src/broadcom/compiler/qpu_validate.c |  2 +-
+ src/broadcom/qpu/qpu_instr.c         | 16 +++--
+ src/broadcom/qpu/qpu_instr.h         |  2 +
+ 4 files changed, 82 insertions(+), 26 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index e8197661f89..adb501e85ce 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -790,7 +790,8 @@ enum {
+         V3D_PERIPHERAL_TMU_WAIT           = (1 << 6),
+         V3D_PERIPHERAL_TMU_WRTMUC_SIG     = (1 << 7),
+         V3D_PERIPHERAL_TSY                = (1 << 8),
+-        V3D_PERIPHERAL_TLB                = (1 << 9),
++        V3D_PERIPHERAL_TLB_READ           = (1 << 9),
++        V3D_PERIPHERAL_TLB_WRITE          = (1 << 10),
+ };
+ 
+ static uint32_t
+@@ -815,8 +816,10 @@ qpu_peripherals(const struct v3d_device_info *devinfo,
+         if (v3d_qpu_uses_sfu(inst))
+                 result |= V3D_PERIPHERAL_SFU;
+ 
+-        if (v3d_qpu_uses_tlb(inst))
+-                result |= V3D_PERIPHERAL_TLB;
++        if (v3d_qpu_reads_tlb(inst))
++                result |= V3D_PERIPHERAL_TLB_READ;
++        if (v3d_qpu_writes_tlb(inst))
++                result |= V3D_PERIPHERAL_TLB_WRITE;
+ 
+         if (inst->type == V3D_QPU_INSTR_TYPE_ALU) {
+                 if (inst->alu.add.op != V3D_QPU_A_NOP &&
+@@ -847,32 +850,75 @@ qpu_compatible_peripheral_access(const struct v3d_device_info *devinfo,
+         if (devinfo->ver < 41)
+                 return false;
+ 
+-        /* V3D 4.1+ allow WRTMUC signal with TMU register write (other than
+-         * tmuc).
++        /* V3D 4.x can't do more than one peripheral access except in a
++         * few cases:
+          */
+-        if (a_peripherals == V3D_PERIPHERAL_TMU_WRTMUC_SIG &&
+-            b_peripherals == V3D_PERIPHERAL_TMU_WRITE) {
+-                return v3d_qpu_writes_tmu_not_tmuc(devinfo, b);
++        if (devinfo->ver <= 42) {
++                /* WRTMUC signal with TMU register write (other than tmuc). */
++                if (a_peripherals == V3D_PERIPHERAL_TMU_WRTMUC_SIG &&
++                    b_peripherals == V3D_PERIPHERAL_TMU_WRITE) {
++                        return v3d_qpu_writes_tmu_not_tmuc(devinfo, b);
++                }
++                if (b_peripherals == V3D_PERIPHERAL_TMU_WRTMUC_SIG &&
++                    a_peripherals == V3D_PERIPHERAL_TMU_WRITE) {
++                        return v3d_qpu_writes_tmu_not_tmuc(devinfo, a);
++                }
++
++                /* TMU read with VPM read/write. */
++                if (a_peripherals == V3D_PERIPHERAL_TMU_READ &&
++                    (b_peripherals == V3D_PERIPHERAL_VPM_READ ||
++                     b_peripherals == V3D_PERIPHERAL_VPM_WRITE)) {
++                        return true;
++                }
++                if (b_peripherals == V3D_PERIPHERAL_TMU_READ &&
++                    (a_peripherals == V3D_PERIPHERAL_VPM_READ ||
++                     a_peripherals == V3D_PERIPHERAL_VPM_WRITE)) {
++                        return true;
++                }
++
++                return false;
+         }
+ 
+-        if (a_peripherals == V3D_PERIPHERAL_TMU_WRITE &&
+-            b_peripherals == V3D_PERIPHERAL_TMU_WRTMUC_SIG) {
+-                return v3d_qpu_writes_tmu_not_tmuc(devinfo, a);
++        /* V3D 7.x can't have more than one of these restricted peripherals */
++        const uint32_t restricted = V3D_PERIPHERAL_TMU_WRITE |
++                                    V3D_PERIPHERAL_TMU_WRTMUC_SIG |
++                                    V3D_PERIPHERAL_TSY |
++                                    V3D_PERIPHERAL_TLB_READ |
++                                    V3D_PERIPHERAL_SFU |
++                                    V3D_PERIPHERAL_VPM_READ |
++                                    V3D_PERIPHERAL_VPM_WRITE;
++
++        const uint32_t a_restricted = a_peripherals & restricted;
++        const uint32_t b_restricted = b_peripherals & restricted;
++        if (a_restricted && b_restricted) {
++                /* WRTMUC signal with TMU register write (other than tmuc) is
++                 * allowed though.
++                 */
++                if (!((a_restricted == V3D_PERIPHERAL_TMU_WRTMUC_SIG &&
++                       b_restricted == V3D_PERIPHERAL_TMU_WRITE &&
++                       v3d_qpu_writes_tmu_not_tmuc(devinfo, b)) ||
++                      (b_restricted == V3D_PERIPHERAL_TMU_WRTMUC_SIG &&
++                       a_restricted == V3D_PERIPHERAL_TMU_WRITE &&
++                       v3d_qpu_writes_tmu_not_tmuc(devinfo, a)))) {
++                        return false;
++                }
+         }
+ 
+-        /* V3D 4.1+ allows TMU read with VPM read/write. */
+-        if (a_peripherals == V3D_PERIPHERAL_TMU_READ &&
+-            (b_peripherals == V3D_PERIPHERAL_VPM_READ ||
+-             b_peripherals == V3D_PERIPHERAL_VPM_WRITE)) {
+-                return true;
++        /* Only one TMU read per instruction */
++        if ((a_peripherals & V3D_PERIPHERAL_TMU_READ) &&
++            (b_peripherals & V3D_PERIPHERAL_TMU_READ)) {
++                return false;
+         }
+-        if (b_peripherals == V3D_PERIPHERAL_TMU_READ &&
+-            (a_peripherals == V3D_PERIPHERAL_VPM_READ ||
+-             a_peripherals == V3D_PERIPHERAL_VPM_WRITE)) {
+-                return true;
++
++        /* Only one TLB access per instruction */
++        if ((a_peripherals & (V3D_PERIPHERAL_TLB_WRITE |
++                              V3D_PERIPHERAL_TLB_READ)) &&
++            (b_peripherals & (V3D_PERIPHERAL_TLB_WRITE |
++                              V3D_PERIPHERAL_TLB_READ))) {
++                return false;
+         }
+ 
+-        return false;
++        return true;
+ }
+ 
+ /* Compute a bitmask of which rf registers are used between
+diff --git a/src/broadcom/compiler/qpu_validate.c b/src/broadcom/compiler/qpu_validate.c
+index 12788692432..fde6695d59b 100644
+--- a/src/broadcom/compiler/qpu_validate.c
++++ b/src/broadcom/compiler/qpu_validate.c
+@@ -227,7 +227,7 @@ qpu_validate_inst(struct v3d_qpu_validate_state *state, struct qinst *qinst)
+             vpm_writes +
+             tlb_writes +
+             tsy_writes +
+-            inst->sig.ldtmu +
++            (devinfo->ver <= 42 ? inst->sig.ldtmu : 0) +
+             inst->sig.ldtlb +
+             inst->sig.ldvpm +
+             inst->sig.ldtlbu > 1) {
+diff --git a/src/broadcom/qpu/qpu_instr.c b/src/broadcom/qpu/qpu_instr.c
+index 195a0dcd232..f54ce7210fb 100644
+--- a/src/broadcom/qpu/qpu_instr.c
++++ b/src/broadcom/qpu/qpu_instr.c
+@@ -649,12 +649,14 @@ v3d_qpu_add_op_writes_vpm(enum  v3d_qpu_add_op op)
+ }
+ 
+ bool
+-v3d_qpu_uses_tlb(const struct v3d_qpu_instr *inst)
++v3d_qpu_reads_tlb(const struct v3d_qpu_instr *inst)
+ {
+-        if (inst->sig.ldtlb ||
+-            inst->sig.ldtlbu)
+-                return true;
++        return inst->sig.ldtlb || inst->sig.ldtlbu;
++}
+ 
++bool
++v3d_qpu_writes_tlb(const struct v3d_qpu_instr *inst)
++{
+         if (inst->type == V3D_QPU_INSTR_TYPE_ALU) {
+                 if (inst->alu.add.op != V3D_QPU_A_NOP &&
+                     inst->alu.add.magic_write &&
+@@ -672,6 +674,12 @@ v3d_qpu_uses_tlb(const struct v3d_qpu_instr *inst)
+         return false;
+ }
+ 
++bool
++v3d_qpu_uses_tlb(const struct v3d_qpu_instr *inst)
++{
++        return  v3d_qpu_writes_tlb(inst) || v3d_qpu_reads_tlb(inst);
++}
++
+ bool
+ v3d_qpu_uses_sfu(const struct v3d_qpu_instr *inst)
+ {
+diff --git a/src/broadcom/qpu/qpu_instr.h b/src/broadcom/qpu/qpu_instr.h
+index 4b34d17bd4c..dece45c5c54 100644
+--- a/src/broadcom/qpu/qpu_instr.h
++++ b/src/broadcom/qpu/qpu_instr.h
+@@ -472,6 +472,8 @@ bool v3d_qpu_magic_waddr_is_tlb(enum v3d_qpu_waddr waddr) ATTRIBUTE_CONST;
+ bool v3d_qpu_magic_waddr_is_vpm(enum v3d_qpu_waddr waddr) ATTRIBUTE_CONST;
+ bool v3d_qpu_magic_waddr_is_tsy(enum v3d_qpu_waddr waddr) ATTRIBUTE_CONST;
+ bool v3d_qpu_magic_waddr_loads_unif(enum v3d_qpu_waddr waddr) ATTRIBUTE_CONST;
++bool v3d_qpu_reads_tlb(const struct v3d_qpu_instr *inst) ATTRIBUTE_CONST;
++bool v3d_qpu_writes_tlb(const struct v3d_qpu_instr *inst) ATTRIBUTE_CONST;
+ bool v3d_qpu_uses_tlb(const struct v3d_qpu_instr *inst) ATTRIBUTE_CONST;
+ bool v3d_qpu_instr_is_sfu(const struct v3d_qpu_instr *inst) ATTRIBUTE_CONST;
+ bool v3d_qpu_instr_is_legacy_sfu(const struct v3d_qpu_instr *inst) ATTRIBUTE_CONST;
+-- 
+2.39.2
+

@@ -1,0 +1,39 @@
+From 339096598660ec34be8087007dd4d66581de1c4e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Wed, 28 Jul 2021 13:45:52 +0200
+Subject: [PATCH 085/142] v3dv/pipeline: handle GL_SHADER_STATE_RECORD changed
+ size on v71
+
+It is likely that we would need more changes, as this packet changed,
+but this is enough to get basic tests running. Any additional support
+will be handled with new commits.
+---
+ src/broadcom/vulkan/v3dvx_pipeline.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_pipeline.c b/src/broadcom/vulkan/v3dvx_pipeline.c
+index 4dc6d70efe1..a640c1d084a 100644
+--- a/src/broadcom/vulkan/v3dvx_pipeline.c
++++ b/src/broadcom/vulkan/v3dvx_pipeline.c
+@@ -360,7 +360,7 @@ v3dX(pipeline_pack_state)(struct v3dv_pipeline *pipeline,
+ static void
+ pack_shader_state_record(struct v3dv_pipeline *pipeline)
+ {
+-   assert(sizeof(pipeline->shader_state_record) ==
++   assert(sizeof(pipeline->shader_state_record) >=
+           cl_packet_length(GL_SHADER_STATE_RECORD));
+ 
+    struct v3d_fs_prog_data *prog_data_fs =
+@@ -453,9 +453,6 @@ pack_shader_state_record(struct v3dv_pipeline *pipeline)
+       shader.vertex_shader_has_separate_input_and_output_vpm_blocks =
+          prog_data_vs->separate_segments;
+ #endif
+-#if V3D_VERSION >= 71
+-      unreachable("HW generation 71 not supported yet.");
+-#endif
+ 
+       shader.coordinate_shader_input_vpm_segment_size =
+          prog_data_vs_bin->separate_segments ?
+-- 
+2.39.2
+

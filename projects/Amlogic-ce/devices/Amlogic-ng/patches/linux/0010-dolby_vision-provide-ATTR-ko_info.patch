@@ -1,0 +1,42 @@
+From 917ccf3a49f38dd6db6de142972d6730d4b0d40e Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Tue, 4 Apr 2023 11:52:13 +0200
+Subject: [PATCH 10/18] dolby_vision: provide ATTR 'ko_info'
+
+---
+ .../enhancement/amdolby_vision/amdolby_vision.c      | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/drivers/amlogic/media/enhancement/amdolby_vision/amdolby_vision.c b/drivers/amlogic/media/enhancement/amdolby_vision/amdolby_vision.c
+index dc4d2bd2c2e9..f19c9cf2b98a 100644
+--- a/drivers/amlogic/media/enhancement/amdolby_vision/amdolby_vision.c
++++ b/drivers/amlogic/media/enhancement/amdolby_vision/amdolby_vision.c
+@@ -12465,6 +12465,16 @@ static const struct file_operations amdolby_vision_fops = {
+ 	.poll = amdolby_vision_poll,
+ };
+ 
++static ssize_t amdolby_vision_ko_info_show
++		(struct class *cla,
++		 struct class_attribute *attr, char *buf)
++{
++	if (ko_info)
++		return sprintf(buf, "%s", ko_info);
++	else
++		return 0;
++}
++
+ static const char *amdolby_vision_debug_usage_str = {
+ 	"Usage:\n"
+ 	"echo dolby_crc 0/1 > /sys/class/amdolby_vision/debug; dolby_crc insert or clr\n"
+@@ -13230,6 +13240,8 @@ static ssize_t  amdolby_vision_crc_show(struct class *cla,
+ }
+ 
+ static struct class_attribute amdolby_vision_class_attrs[] = {
++	__ATTR(ko_info, 0444,
++	amdolby_vision_ko_info_show, NULL),
+ 	__ATTR(debug, 0644,
+ 	amdolby_vision_debug_show, amdolby_vision_debug_store),
+ 	__ATTR(dv_mode, 0644,
+-- 
+2.25.1
+

@@ -18,6 +18,7 @@ make_target() {
   if [ "${TARGET_ARCH}" = "arm" ]; then
     make ARM=1
   else
+    sed -i "s|IS_X86 = 1|IS_X86 = 0|g" Makefile
     make
   fi
 }

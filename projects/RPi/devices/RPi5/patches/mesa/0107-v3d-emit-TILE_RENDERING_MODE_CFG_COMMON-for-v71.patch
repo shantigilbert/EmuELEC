@@ -1,0 +1,44 @@
+From dfdfcf3853d7178acff288a368dfc169018c186a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Wed, 20 Oct 2021 14:42:43 +0200
+Subject: [PATCH 107/142] v3d: emit TILE_RENDERING_MODE_CFG_COMMON for v71
+
+---
+ src/gallium/drivers/v3d/v3dx_rcl.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/src/gallium/drivers/v3d/v3dx_rcl.c b/src/gallium/drivers/v3d/v3dx_rcl.c
+index 166cc34e4ee..3f5eb293c4e 100644
+--- a/src/gallium/drivers/v3d/v3dx_rcl.c
++++ b/src/gallium/drivers/v3d/v3dx_rcl.c
+@@ -23,8 +23,9 @@
+ 
+ #include "util/format/u_format.h"
+ #include "v3d_context.h"
+-#include "broadcom/common/v3d_tiling.h"
+ #include "broadcom/common/v3d_macros.h"
++#include "broadcom/common/v3d_tiling.h"
++#include "broadcom/common/v3d_util.h"
+ #include "broadcom/cle/v3dx_pack.h"
+ 
+ #define PIPE_CLEAR_COLOR_BUFFERS (PIPE_CLEAR_COLOR0 |                   \
+@@ -790,7 +791,15 @@ v3dX(emit_rcl)(struct v3d_job *job)
+                 config.maximum_bpp_of_all_render_targets = job->internal_bpp;
+ #endif
+ #if V3D_VERSION >= 71
+-                unreachable("HW generation 71 not supported yet.");
++                config.log2_tile_width = log2_tile_size(job->tile_width);
++                config.log2_tile_height = log2_tile_size(job->tile_height);
++
++                /* FIXME: ideallly we would like next assert on the packet header (as is
++                 * general, so also applies to GL). We would need to expand
++                 * gen_pack_header for that.
++                 */
++                assert(config.log2_tile_width == config.log2_tile_height ||
++                       config.log2_tile_width == config.log2_tile_height + 1);
+ #endif
+ 
+         }
+-- 
+2.39.2
+

@@ -1,0 +1,37 @@
+From 26fea727a9f34b75a3fe3f6a806accaddcc317f6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Tue, 19 Oct 2021 11:51:32 +0200
+Subject: [PATCH 048/142] broadcom/compiler: update ldunif/ldvary comment for
+ v71
+
+For v42 and below ldunif/ldvary write both on r5, but with a different
+delay, so we need to take that into account when scheduling both.
+
+For v71 the register used is rf0, but the behaviour is the same. So
+the scheduling code can be the same, but the comment needs update.
+---
+ src/broadcom/compiler/qpu_schedule.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 25f79aa6f46..e8197661f89 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -1234,10 +1234,11 @@ retry:
+                 if (pixel_scoreboard_too_soon(c, scoreboard, inst))
+                         continue;
+ 
+-                /* ldunif and ldvary both write r5, but ldunif does so a tick
+-                 * sooner.  If the ldvary's r5 wasn't used, then ldunif might
++                /* ldunif and ldvary both write the same register (r5 for v42
++                 * and below, rf0 for v71), but ldunif does so a tick sooner.
++                 * If the ldvary's register wasn't used, then ldunif might
+                  * otherwise get scheduled so ldunif and ldvary try to update
+-                 * r5 in the same tick.
++                 * the register in the same tick.
+                  */
+                 if ((inst->sig.ldunif || inst->sig.ldunifa) &&
+                     scoreboard->tick == scoreboard->last_ldvary_tick + 1) {
+-- 
+2.39.2
+

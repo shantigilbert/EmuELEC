@@ -1,2 +1,0 @@
-KERNEL=="ttyAMA[01]", PROGRAM="/usr/bin/rpi-udev 0", SYMLINK+="serial%c"
-KERNEL=="ttyS0", PROGRAM="/usr/bin/rpi-udev 1", SYMLINK+="serial%c"

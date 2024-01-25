@@ -1,0 +1,69 @@
+From 5be7f484210103e40b77fa3135042da4a8406659 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 28 Sep 2021 08:59:08 +0200
+Subject: [PATCH 093/142] v3dv: update thread end restrictions validation for
+ v71
+
+---
+ src/broadcom/compiler/qpu_validate.c | 37 +++++++++++++++++++++++++---
+ 1 file changed, 34 insertions(+), 3 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_validate.c b/src/broadcom/compiler/qpu_validate.c
+index 1082fb7d50a..0466ee5d0b6 100644
+--- a/src/broadcom/compiler/qpu_validate.c
++++ b/src/broadcom/compiler/qpu_validate.c
+@@ -316,17 +316,48 @@ qpu_validate_inst(struct v3d_qpu_validate_state *state, struct qinst *qinst)
+             inst->type == V3D_QPU_INSTR_TYPE_ALU) {
+                 if ((inst->alu.add.op != V3D_QPU_A_NOP &&
+                      !inst->alu.add.magic_write)) {
+-                        fail_instr(state, "RF write after THREND");
++                        if (devinfo->ver <= 42) {
++                                fail_instr(state, "RF write after THREND");
++                        } else if (devinfo->ver >= 71) {
++                                if (state->last_thrsw_ip - state->ip == 0) {
++                                        fail_instr(state,
++                                                   "ADD RF write at THREND");
++                                }
++                                if (inst->alu.add.waddr == 2 ||
++                                    inst->alu.add.waddr == 3) {
++                                        fail_instr(state,
++                                                   "RF2-3 write after THREND");
++                                }
++                        }
+                 }
+ 
+                 if ((inst->alu.mul.op != V3D_QPU_M_NOP &&
+                      !inst->alu.mul.magic_write)) {
+-                        fail_instr(state, "RF write after THREND");
++                        if (devinfo->ver <= 42) {
++                                fail_instr(state, "RF write after THREND");
++                        } else if (devinfo->ver >= 71) {
++                                if (state->last_thrsw_ip - state->ip == 0) {
++                                        fail_instr(state,
++                                                   "MUL RF write at THREND");
++                                }
++
++                                if (inst->alu.mul.waddr == 2 ||
++                                    inst->alu.mul.waddr == 3) {
++                                        fail_instr(state,
++                                                   "RF2-3 write after THREND");
++                                }
++                        }
+                 }
+ 
+                 if (v3d_qpu_sig_writes_address(devinfo, &inst->sig) &&
+                     !inst->sig_magic) {
+-                        fail_instr(state, "RF write after THREND");
++                        if (devinfo->ver <= 42) {
++                                fail_instr(state, "RF write after THREND");
++                        } else if (devinfo->ver >= 71 &&
++                                   (inst->sig_addr == 2 ||
++                                    inst->sig_addr == 3)) {
++                                fail_instr(state, "RF2-3 write after THREND");
++                        }
+                 }
+ 
+                 /* GFXH-1625: No TMUWT in the last instruction */
+-- 
+2.39.2
+

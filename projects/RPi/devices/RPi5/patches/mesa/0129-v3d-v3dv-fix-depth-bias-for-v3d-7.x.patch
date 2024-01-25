@@ -1,0 +1,68 @@
+From aee0180b79a6a546d1e7263d89ef868016082687 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 8 Feb 2023 09:04:02 +0100
+Subject: [PATCH 129/142] v3d,v3dv: fix depth bias for v3d 7.x
+
+In v3d 7.x we don't need to scale up depth bias for D16 buffers.
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c | 2 ++
+ src/gallium/drivers/v3d/v3dx_emit.c    | 3 ++-
+ src/gallium/drivers/v3d/v3dx_state.c   | 4 +++-
+ 3 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index 6827c829934..1bd634f5027 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -1499,8 +1499,10 @@ v3dX(cmd_buffer_emit_depth_bias)(struct v3dv_cmd_buffer *cmd_buffer)
+    cl_emit(&job->bcl, DEPTH_OFFSET, bias) {
+       bias.depth_offset_factor = dynamic->depth_bias.slope_factor;
+       bias.depth_offset_units = dynamic->depth_bias.constant_factor;
++#if V3D_VERSION <= 42
+       if (pipeline->depth_bias.is_z16)
+          bias.depth_offset_units *= 256.0f;
++#endif
+       bias.limit = dynamic->depth_bias.depth_bias_clamp;
+    }
+ 
+diff --git a/src/gallium/drivers/v3d/v3dx_emit.c b/src/gallium/drivers/v3d/v3dx_emit.c
+index 87e75281dc9..82a45e44f82 100644
+--- a/src/gallium/drivers/v3d/v3dx_emit.c
++++ b/src/gallium/drivers/v3d/v3dx_emit.c
+@@ -558,7 +558,8 @@ v3dX(emit_state)(struct pipe_context *pctx)
+ 
+         if (v3d->dirty & V3D_DIRTY_RASTERIZER &&
+             v3d->rasterizer->base.offset_tri) {
+-                if (job->zsbuf &&
++                if (v3d->screen->devinfo.ver <= 42 &&
++                    job->zsbuf &&
+                     job->zsbuf->format == PIPE_FORMAT_Z16_UNORM) {
+                         cl_emit_prepacked_sized(&job->bcl,
+                                                 v3d->rasterizer->depth_offset_z16,
+diff --git a/src/gallium/drivers/v3d/v3dx_state.c b/src/gallium/drivers/v3d/v3dx_state.c
+index 8cca1a5030b..a7fad572a2d 100644
+--- a/src/gallium/drivers/v3d/v3dx_state.c
++++ b/src/gallium/drivers/v3d/v3dx_state.c
+@@ -111,9 +111,10 @@ v3d_create_rasterizer_state(struct pipe_context *pctx,
+ #endif
+         }
+ 
+-        /* The HW treats polygon offset units based on a Z24 buffer, so we
++        /* V3d 4.x treats polygon offset units based on a Z24 buffer, so we
+          * need to scale up offset_units if we're only Z16.
+          */
++#if V3D_VERSION <= 42
+         v3dx_pack(&so->depth_offset_z16, DEPTH_OFFSET, depth) {
+                 depth.depth_offset_factor = cso->offset_scale;
+                 depth.depth_offset_units = cso->offset_units * 256.0;
+@@ -121,6 +122,7 @@ v3d_create_rasterizer_state(struct pipe_context *pctx,
+                 depth.limit = cso->offset_clamp;
+ #endif
+         }
++#endif
+ 
+         return so;
+ }
+-- 
+2.39.2
+

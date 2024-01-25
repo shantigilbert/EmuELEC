@@ -1,0 +1,296 @@
+From c74ba2b39e7b9fe6c5415c20c98cd231d2674df6 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 16 May 2023 00:38:40 +0200
+Subject: [PATCH 127/142] v3dv: use new texture shader state rb_swap and
+ reverse fields in v3d 7.x
+
+In v3d 4.x we handle formats that are reversed or R/B swapped by
+applying a format swizzle. This doesn't work on border colors though,
+and for that there is a specific bit to reverse the border color in
+the texture shader state.
+
+In v3d 7.x we have new reverse and swap R/B bits and we no longer have
+a bit to reverse the border color because the new reverse bit applies
+to border texels too. Because of this, we absolutely need to use these
+new bits in order to get correct border colors in all cases with these
+formats.
+
+When we enable the reverse and/or swap R/B bits, we are effectively
+applying the format swizzle through them, so in these cases we need to
+make sure the swizzle we program in the texture shader state is the
+view swizzle provided by the API and not the composition of the format
+swizzle with the view swizzle like we do in 4.x for all formats. The
+same applies to custom border colors: we must not apply the format
+swizzle to them for formats that are reversed or R/B swapped, because
+again, this format swizzle is already applied through these new bits.
+
+While we are doing this, we also fully adopt the texture shader state
+spec from v3d 7.1.5 for v3d 7.x instead of using a description from
+7.1.2 which is incompatible and required the driver to manually pack
+some of the bits.
+---
+ src/broadcom/vulkan/v3dv_device.c    |  2 +-
+ src/broadcom/vulkan/v3dv_image.c     |  7 ++--
+ src/broadcom/vulkan/v3dv_private.h   | 13 ++++++-
+ src/broadcom/vulkan/v3dvx_device.c   | 24 ++++++++++--
+ src/broadcom/vulkan/v3dvx_image.c    | 56 ++++++++++++++++++----------
+ src/broadcom/vulkan/v3dvx_private.h  |  3 +-
+ src/gallium/drivers/v3d/v3dx_state.c |  6 ---
+ 7 files changed, 75 insertions(+), 36 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_device.c b/src/broadcom/vulkan/v3dv_device.c
+index 1de9b5ce683..b520bfa0002 100644
+--- a/src/broadcom/vulkan/v3dv_device.c
++++ b/src/broadcom/vulkan/v3dv_device.c
+@@ -2989,7 +2989,7 @@ v3dv_CreateSampler(VkDevice _device,
+       }
+    }
+ 
+-   v3dv_X(device, pack_sampler_state)(sampler, pCreateInfo, bc_info);
++   v3dv_X(device, pack_sampler_state)(device, sampler, pCreateInfo, bc_info);
+ 
+    *pSampler = v3dv_sampler_to_handle(sampler);
+ 
+diff --git a/src/broadcom/vulkan/v3dv_image.c b/src/broadcom/vulkan/v3dv_image.c
+index ebbd60e4c03..e01e2e1bd19 100644
+--- a/src/broadcom/vulkan/v3dv_image.c
++++ b/src/broadcom/vulkan/v3dv_image.c
+@@ -671,7 +671,6 @@ create_image_view(struct v3dv_device *device,
+     * makes sense to implement swizzle composition using VkSwizzle directly.
+     */
+    VkFormat format;
+-   uint8_t image_view_swizzle[4];
+    if (pCreateInfo->format == VK_FORMAT_D24_UNORM_S8_UINT &&
+        range->aspectMask == VK_IMAGE_ASPECT_STENCIL_BIT) {
+       format = VK_FORMAT_R8G8B8A8_UINT;
+@@ -682,11 +681,11 @@ create_image_view(struct v3dv_device *device,
+       vk_component_mapping_to_pipe_swizzle(iview->vk.swizzle, view_swizzle);
+ 
+       util_format_compose_swizzles(stencil_aspect_swizzle, view_swizzle,
+-                                   image_view_swizzle);
++                                   iview->view_swizzle);
+    } else {
+       format = pCreateInfo->format;
+       vk_component_mapping_to_pipe_swizzle(iview->vk.swizzle,
+-                                           image_view_swizzle);
++                                           iview->view_swizzle);
+    }
+ 
+    iview->vk.view_format = format;
+@@ -711,7 +710,7 @@ create_image_view(struct v3dv_device *device,
+ 
+       const uint8_t *format_swizzle =
+          v3dv_get_format_swizzle(device, format, plane);
+-      util_format_compose_swizzles(format_swizzle, image_view_swizzle,
++      util_format_compose_swizzles(format_swizzle, iview->view_swizzle,
+                                    iview->planes[plane].swizzle);
+ 
+       iview->planes[plane].swap_rb = v3dv_format_swizzle_needs_rb_swap(format_swizzle);
+diff --git a/src/broadcom/vulkan/v3dv_private.h b/src/broadcom/vulkan/v3dv_private.h
+index a074e0a981c..8adb8873efd 100644
+--- a/src/broadcom/vulkan/v3dv_private.h
++++ b/src/broadcom/vulkan/v3dv_private.h
+@@ -776,6 +776,8 @@ struct v3dv_image_view {
+ 
+    const struct v3dv_format *format;
+ 
++   uint8_t view_swizzle[4];
++
+    uint8_t plane_count;
+    struct {
+       uint8_t image_plane;
+@@ -786,8 +788,8 @@ struct v3dv_image_view {
+       uint32_t internal_type;
+       uint32_t offset;
+ 
+-      /* Precomputed (composed from createinfo->components and formar swizzle)
+-       * swizzles to pass in to the shader key.
++      /* Precomputed swizzle (composed from the view swizzle and the format
++       * swizzle).
+        *
+        * This could be also included on the descriptor bo, but the shader state
+        * packet doesn't need it on a bo, so we can just avoid a memory copy
+@@ -2358,6 +2360,13 @@ struct v3dv_pipeline {
+    uint8_t stencil_cfg[2][V3DV_STENCIL_CFG_LENGTH];
+ };
+ 
++static inline bool
++v3dv_texture_shader_state_has_rb_swap_reverse_bits(const struct v3dv_device *device)
++{
++   return device->devinfo.ver > 71 ||
++          (device->devinfo.ver == 71 && device->devinfo.rev >= 5);
++}
++
+ static inline VkPipelineBindPoint
+ v3dv_pipeline_get_binding_point(struct v3dv_pipeline *pipeline)
+ {
+diff --git a/src/broadcom/vulkan/v3dvx_device.c b/src/broadcom/vulkan/v3dvx_device.c
+index 61ad98c1217..1b50d51e19f 100644
+--- a/src/broadcom/vulkan/v3dvx_device.c
++++ b/src/broadcom/vulkan/v3dvx_device.c
+@@ -50,6 +50,7 @@ vk_to_v3d_compare_func[] = {
+ };
+ 
+ static union pipe_color_union encode_border_color(
++   const struct v3dv_device *device,
+    const VkSamplerCustomBorderColorCreateInfoEXT *bc_info)
+ {
+    const struct util_format_description *desc =
+@@ -76,12 +77,28 @@ static union pipe_color_union encode_border_color(
+     * colors so we need to fix up the swizzle manually for this case.
+     */
+    uint8_t swizzle[4];
+-   if (v3dv_format_swizzle_needs_reverse(format->planes[0].swizzle) &&
++   const bool v3d_has_reverse_swap_rb_bits =
++      v3dv_texture_shader_state_has_rb_swap_reverse_bits(device);
++   if (!v3d_has_reverse_swap_rb_bits &&
++       v3dv_format_swizzle_needs_reverse(format->planes[0].swizzle) &&
+        v3dv_format_swizzle_needs_rb_swap(format->planes[0].swizzle)) {
+       swizzle[0] = PIPE_SWIZZLE_W;
+       swizzle[1] = PIPE_SWIZZLE_X;
+       swizzle[2] = PIPE_SWIZZLE_Y;
+       swizzle[3] = PIPE_SWIZZLE_Z;
++   }
++   /* In v3d 7.x we no longer have a reverse flag for the border color. Instead
++    * we have to use the new reverse and swap_r/b flags in the texture shader
++    * state which will apply the format swizzle automatically when sampling
++    * the border color too and we should not apply it manually here.
++    */
++   else if (v3d_has_reverse_swap_rb_bits &&
++            (v3dv_format_swizzle_needs_rb_swap(format->planes[0].swizzle) ||
++             v3dv_format_swizzle_needs_reverse(format->planes[0].swizzle))) {
++      swizzle[0] = PIPE_SWIZZLE_X;
++      swizzle[1] = PIPE_SWIZZLE_Y;
++      swizzle[2] = PIPE_SWIZZLE_Z;
++      swizzle[3] = PIPE_SWIZZLE_W;
+    } else {
+       memcpy(swizzle, format->planes[0].swizzle, sizeof (swizzle));
+    }
+@@ -179,7 +196,8 @@ static union pipe_color_union encode_border_color(
+ }
+ 
+ void
+-v3dX(pack_sampler_state)(struct v3dv_sampler *sampler,
++v3dX(pack_sampler_state)(const struct v3dv_device *device,
++                         struct v3dv_sampler *sampler,
+                          const VkSamplerCreateInfo *pCreateInfo,
+                          const VkSamplerCustomBorderColorCreateInfoEXT *bc_info)
+ {
+@@ -221,7 +239,7 @@ v3dX(pack_sampler_state)(struct v3dv_sampler *sampler,
+       s.border_color_mode = border_color_mode;
+ 
+       if (s.border_color_mode == V3D_BORDER_COLOR_FOLLOWS) {
+-         union pipe_color_union border = encode_border_color(bc_info);
++         union pipe_color_union border = encode_border_color(device, bc_info);
+ 
+          s.border_color_word_0 = border.ui[0];
+          s.border_color_word_1 = border.ui[1];
+diff --git a/src/broadcom/vulkan/v3dvx_image.c b/src/broadcom/vulkan/v3dvx_image.c
+index ae6eaa88d0c..de984e81220 100644
+--- a/src/broadcom/vulkan/v3dvx_image.c
++++ b/src/broadcom/vulkan/v3dvx_image.c
+@@ -108,25 +108,6 @@ pack_texture_shader_state_helper(struct v3dv_device *device,
+ 
+          tex.array_stride_64_byte_aligned = image->planes[iplane].cube_map_stride / 64;
+ 
+-         bool is_srgb = vk_format_is_srgb(image_view->vk.format);
+-#if V3D_VERSION == 42
+-         tex.reverse_standard_border_color = image_view->planes[plane].channel_reverse;
+-#endif
+-
+-#if V3D_VERSION == 42
+-         tex.srgb = is_srgb;
+-#endif
+-#if V3D_VERSION >= 71
+-         tex.transfer_func = is_srgb ? TRANSFER_FUNC_SRGB : TRANSFER_FUNC_NONE;
+-
+-         /* V3D 7.1.5 has array stride starting one bit later than previous
+-          * V3D versions to make room for the new RB swap bit, but we don't
+-          * handle that in the CLE parser.
+-          */
+-         if (device->devinfo.rev >= 5)
+-            tex.array_stride_64_byte_aligned <<= 1;
+-#endif
+-
+          /* At this point we don't have the job. That's the reason the first
+           * parameter is NULL, to avoid a crash when cl_pack_emit_reloc tries to
+           * add the bo to the job. This also means that we need to add manually
+@@ -138,7 +119,44 @@ pack_texture_shader_state_helper(struct v3dv_device *device,
+                               iplane);
+          tex.texture_base_pointer = v3dv_cl_address(NULL, base_offset);
+ 
++         bool is_srgb = vk_format_is_srgb(image_view->vk.format);
++
++         /* V3D 4.x doesn't have the reverse and swap_r/b bits, so we compose
++          * the reverse and/or swap_r/b swizzle from the format table with the
++          * image view swizzle. This, however, doesn't work for border colors,
++          * for that there is the reverse_standard_border_color.
++          *
++          * In v3d 7.x, however, there is no reverse_standard_border_color bit,
++          * since the reverse and swap_r/b bits also affect border colors. It is
++          * because of this that we absolutely need to use these bits with
++          * reversed and swpaped formats, since that's the only way to ensure
++          * correct border colors. In that case we don't want to program the
++          * swizzle to the composition of the format swizzle and the view
++          * swizzle like we do in v3d 4.x, since the format swizzle is applied
++          * via the reverse and swap_r/b bits.
++          */
++#if V3D_VERSION == 42
++         tex.srgb = is_srgb;
++         tex.reverse_standard_border_color =
++            image_view->planes[plane].channel_reverse;
++#endif
+ #if V3D_VERSION >= 71
++         tex.transfer_func = is_srgb ? TRANSFER_FUNC_SRGB : TRANSFER_FUNC_NONE;
++
++         tex.reverse = image_view->planes[plane].channel_reverse;
++         tex.r_b_swap = image_view->planes[plane].swap_rb;
++
++         if (tex.reverse || tex.r_b_swap) {
++            tex.swizzle_r =
++               v3d_translate_pipe_swizzle(image_view->view_swizzle[0]);
++            tex.swizzle_g =
++               v3d_translate_pipe_swizzle(image_view->view_swizzle[1]);
++            tex.swizzle_b =
++               v3d_translate_pipe_swizzle(image_view->view_swizzle[2]);
++            tex.swizzle_a =
++               v3d_translate_pipe_swizzle(image_view->view_swizzle[3]);
++         }
++
+          tex.chroma_offset_x = 1;
+          tex.chroma_offset_y = 1;
+          /* See comment in XML field definition for rationale of the shifts */
+diff --git a/src/broadcom/vulkan/v3dvx_private.h b/src/broadcom/vulkan/v3dvx_private.h
+index 1ce4789c5ac..27d6736c0e3 100644
+--- a/src/broadcom/vulkan/v3dvx_private.h
++++ b/src/broadcom/vulkan/v3dvx_private.h
+@@ -131,7 +131,8 @@ v3dX(get_hw_clear_color)(const VkClearColorValue *color,
+ /* Used at v3dv_device */
+ 
+ void
+-v3dX(pack_sampler_state)(struct v3dv_sampler *sampler,
++v3dX(pack_sampler_state)(const struct v3dv_device *device,
++                         struct v3dv_sampler *sampler,
+                          const VkSamplerCreateInfo *pCreateInfo,
+                          const VkSamplerCustomBorderColorCreateInfoEXT *bc_info);
+ 
+diff --git a/src/gallium/drivers/v3d/v3dx_state.c b/src/gallium/drivers/v3d/v3dx_state.c
+index 970a082aa85..8cca1a5030b 100644
+--- a/src/gallium/drivers/v3d/v3dx_state.c
++++ b/src/gallium/drivers/v3d/v3dx_state.c
+@@ -960,12 +960,6 @@ v3d_setup_texture_shader_state(const struct v3d_device_info *devinfo,
+         /* See comment in XML field definition for rationale of the shifts */
+         tex->texture_base_pointer_cb = base_offset >> 6;
+         tex->texture_base_pointer_cr = base_offset >> 6;
+-
+-        /* V3D 7.1.5 has array stride start at bit 33 instead of bit 32 to
+-         * make room for the RB swap bit.
+-         */
+-        if (devinfo->rev >= 5)
+-                tex->array_stride_64_byte_aligned <<= 1;
+ #endif
+ 
+         /* Since other platform devices may produce UIF images even
+-- 
+2.39.2
+

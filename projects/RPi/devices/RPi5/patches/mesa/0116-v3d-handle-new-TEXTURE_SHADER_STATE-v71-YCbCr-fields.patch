@@ -1,0 +1,62 @@
+From aefc98b6aefc38caa6f6efd421db6d02c42596a7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Fri, 22 Oct 2021 10:54:24 +0200
+Subject: [PATCH 116/142] v3d: handle new TEXTURE_SHADER_STATE v71 YCbCr fields
+
+There are some new fields for YCbCr with pointers for the various
+planes in multi-planar formats. These need to match the base address
+pointer in the texture state, or the hardware will assume this is a
+multi-planar texture.
+
+Notice we don't use an address type for these fields in the XML
+description. This is because the addresses are 64-bit aligned (even
+though the PRM doesn't say it) which means the 6 LSB bits are
+implicitly 0, but the fields are encoded before the 6th bit of their
+starting byte, so we can't use the usual trick we do with address
+types where the first 6 bits in the byte are implicitly overwritten by
+other fields and we have to encode this manually as a uint field. This
+would mean that if we had an actual BO we would also need to add it
+manually to the job's list, but since we don't have one, we don't have
+to do anything about it.
+---
+ src/gallium/drivers/v3d/v3dx_state.c | 17 +++++++++++++----
+ 1 file changed, 13 insertions(+), 4 deletions(-)
+
+diff --git a/src/gallium/drivers/v3d/v3dx_state.c b/src/gallium/drivers/v3d/v3dx_state.c
+index b5e572b13c5..c08a072157b 100644
+--- a/src/gallium/drivers/v3d/v3dx_state.c
++++ b/src/gallium/drivers/v3d/v3dx_state.c
+@@ -936,17 +936,26 @@ v3d_setup_texture_shader_state(struct V3DX(TEXTURE_SHADER_STATE) *tex,
+         }
+ 
+         tex->base_level = base_level;
++
+ #if V3D_VERSION >= 40
+         tex->max_level = last_level;
+         /* Note that we don't have a job to reference the texture's sBO
+          * at state create time, so any time this sampler view is used
+          * we need to add the texture to the job.
+          */
+-        tex->texture_base_pointer =
+-                cl_address(NULL,
+-                           rsc->bo->offset +
+-                           v3d_layer_offset(prsc, 0, first_layer));
++        const uint32_t base_offset = rsc->bo->offset +
++                v3d_layer_offset(prsc, 0, first_layer);
++
++        tex->texture_base_pointer = cl_address(NULL, base_offset);
+ #endif
++#if V3D_VERSION >= 71
++        tex->chroma_offset_x = 1;
++        tex->chroma_offset_y = 1;
++        /* See comment in XML field definition for rationale of the shifts */
++        tex->texture_base_pointer_cb = base_offset >> 6;
++        tex->texture_base_pointer_cr = base_offset >> 6;
++#endif
++
+         tex->array_stride_64_byte_aligned = rsc->cube_map_stride / 64;
+ 
+         /* Since other platform devices may produce UIF images even
+-- 
+2.39.2
+

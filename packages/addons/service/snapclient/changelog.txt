@@ -1,1 +1,8 @@
-initial release
+2
+- asio: update to 1.28.0
+- nqptp: update to 1.2.1
+- shairport-sync: update to 4.2
+
+1
+- asio: update to 1.27.0
+- snapcast: update to 0.27.0

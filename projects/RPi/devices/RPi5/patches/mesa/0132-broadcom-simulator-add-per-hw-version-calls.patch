@@ -1,0 +1,239 @@
+From f7d5b57bca07eb9ba6fb292852e3b5057c0a8b8f Mon Sep 17 00:00:00 2001
+From: "Juan A. Suarez Romero" <jasuarez@igalia.com>
+Date: Mon, 20 Mar 2023 16:48:51 +0100
+Subject: [PATCH 132/142] broadcom/simulator: add per-hw version calls
+
+Add a wrapper to allow calling the right simulator function based on the
+hardware under simulation.
+
+Signed-off-by: Juan A. Suarez Romero <jasuarez@igalia.com>
+---
+ src/broadcom/simulator/v3d_simulator.c  | 86 ++++---------------------
+ src/broadcom/simulator/v3d_simulator.h  | 21 ++++++
+ src/broadcom/simulator/v3dx_simulator.c |  9 ++-
+ 3 files changed, 41 insertions(+), 75 deletions(-)
+
+diff --git a/src/broadcom/simulator/v3d_simulator.c b/src/broadcom/simulator/v3d_simulator.c
+index 36e719296f4..c4bbd61abc2 100644
+--- a/src/broadcom/simulator/v3d_simulator.c
++++ b/src/broadcom/simulator/v3d_simulator.c
+@@ -439,15 +439,15 @@ v3d_simulator_perfmon_switch(int fd, uint32_t perfid)
+ 
+         perfmon = v3d_get_simulator_perfmon(fd, file->active_perfid);
+         if (perfmon)
+-                v3d41_simulator_perfmon_stop(sim_state.v3d,
+-                                             perfmon->ncounters,
+-                                             perfmon->values);
++                v3d_X_simulator(perfmon_stop)(sim_state.v3d,
++                                              perfmon->ncounters,
++                                              perfmon->values);
+ 
+         perfmon = v3d_get_simulator_perfmon(fd, perfid);
+         if (perfmon)
+-                v3d41_simulator_perfmon_start(sim_state.v3d,
+-                                              perfmon->ncounters,
+-                                              perfmon->counters);
++                v3d_X_simulator(perfmon_start)(sim_state.v3d,
++                                               perfmon->ncounters,
++                                               perfmon->counters);
+ 
+         file->active_perfid = perfid;
+ }
+@@ -492,21 +492,7 @@ v3d_simulator_submit_cl_ioctl(int fd, struct drm_v3d_submit_cl *submit)
+         bin_fd = fd;
+ 
+         v3d_simulator_perfmon_switch(fd, submit->perfmon_id);
+-
+-        switch(sim_state.ver) {
+-        case 33:
+-           v3d33_simulator_submit_cl_ioctl(sim_state.v3d, submit, file->gmp->ofs);
+-           break;
+-        case 41:
+-        case 42:
+-           v3d41_simulator_submit_cl_ioctl(sim_state.v3d, submit, file->gmp->ofs);
+-           break;
+-        case 71:
+-           v3d71_simulator_submit_cl_ioctl(sim_state.v3d, submit, file->gmp->ofs);
+-           break;
+-        default:
+-           unreachable("Unsupported V3D version\n");
+-        }
++        v3d_X_simulator(submit_cl_ioctl)(sim_state.v3d, submit, file->gmp->ofs);
+ 
+         util_dynarray_foreach(&sim_state.bin_oom, struct v3d_simulator_bo *,
+                               sim_bo) {
+@@ -645,22 +631,6 @@ v3d_simulator_gem_close_ioctl(int fd, struct drm_gem_close *args)
+         return drmIoctl(fd, DRM_IOCTL_GEM_CLOSE, args);
+ }
+ 
+-static int
+-v3d_simulator_get_param_ioctl(int fd, struct drm_v3d_get_param *args)
+-{
+-        switch(sim_state.ver) {
+-        case 33:
+-                return v3d33_simulator_get_param_ioctl(sim_state.v3d, args);
+-        case 41:
+-        case 42:
+-                return v3d41_simulator_get_param_ioctl(sim_state.v3d, args);
+-        case 71:
+-                return v3d71_simulator_get_param_ioctl(sim_state.v3d, args);
+-        default:
+-                unreachable("Unsupported V3D version\n");
+-        }
+-}
+-
+ static int
+ v3d_simulator_submit_tfu_ioctl(int fd, struct drm_v3d_submit_tfu *args)
+ {
+@@ -672,20 +642,7 @@ v3d_simulator_submit_tfu_ioctl(int fd, struct drm_v3d_submit_tfu *args)
+         v3d_simulator_copy_in_handle(file, args->bo_handles[2]);
+         v3d_simulator_copy_in_handle(file, args->bo_handles[3]);
+ 
+-        switch(sim_state.ver) {
+-        case 33:
+-                ret = v3d33_simulator_submit_tfu_ioctl(sim_state.v3d, args);
+-                break;
+-        case 41:
+-        case 42:
+-                ret = v3d41_simulator_submit_tfu_ioctl(sim_state.v3d, args);
+-                break;
+-        case 71:
+-                ret = v3d71_simulator_submit_tfu_ioctl(sim_state.v3d, args);
+-                break;
+-        default:
+-                unreachable("Unsupported V3D version\n");
+-        }
++        ret = v3d_X_simulator(submit_tfu_ioctl)(sim_state.v3d, args);
+ 
+         v3d_simulator_copy_out_handle(file, args->bo_handles[0]);
+ 
+@@ -712,19 +669,8 @@ v3d_simulator_submit_csd_ioctl(int fd, struct drm_v3d_submit_csd *args)
+ 
+         v3d_simulator_perfmon_switch(fd, args->perfmon_id);
+ 
+-        switch(sim_state.ver) {
+-        case 41:
+-        case 42:
+-           ret = v3d41_simulator_submit_csd_ioctl(sim_state.v3d, args,
+-                                                  file->gmp->ofs);
+-           break;
+-        case 71:
+-           ret = v3d71_simulator_submit_csd_ioctl(sim_state.v3d, args,
+-                                                  file->gmp->ofs);
+-           break;
+-        default:
+-           ret = -1;
+-        }
++        ret = v3d_X_simulator(submit_csd_ioctl)(sim_state.v3d, args,
++                                                file->gmp->ofs);
+ 
+         for (int i = 0; i < args->bo_handle_count; i++)
+                 v3d_simulator_copy_out_handle(file, bo_handles[i]);
+@@ -835,7 +781,7 @@ v3d_simulator_ioctl(int fd, unsigned long request, void *args)
+                 return 0;
+ 
+         case DRM_IOCTL_V3D_GET_PARAM:
+-                return v3d_simulator_get_param_ioctl(fd, args);
++                return v3d_X_simulator(get_param_ioctl)(sim_state.v3d, args);
+ 
+         case DRM_IOCTL_GEM_CLOSE:
+                 return v3d_simulator_gem_close_ioctl(fd, args);
+@@ -918,22 +864,18 @@ v3d_simulator_init_global()
+ 
+         util_dynarray_init(&sim_state.bin_oom, NULL);
+ 
++        v3d_X_simulator(init_regs)(sim_state.v3d);
++
+         switch(sim_state.ver) {
+-        case 33:
+-                v3d33_simulator_init_regs(sim_state.v3d);
+-                sim_state.perfcnt_total = 0;
+-                break;
+         case 41:
+         case 42:
+-                v3d41_simulator_init_regs(sim_state.v3d);
+                 sim_state.perfcnt_total = 87;
+                 break;
+         case 71:
+-                v3d71_simulator_init_regs(sim_state.v3d);
+                 sim_state.perfcnt_total = 93;
+                 break;
+         default:
+-                unreachable("Not supported V3D version\n");
++                sim_state.perfcnt_total = 0;
+         }
+ }
+ 
+diff --git a/src/broadcom/simulator/v3d_simulator.h b/src/broadcom/simulator/v3d_simulator.h
+index 1472c313a03..92305634468 100644
+--- a/src/broadcom/simulator/v3d_simulator.h
++++ b/src/broadcom/simulator/v3d_simulator.h
+@@ -59,4 +59,25 @@ uint32_t v3d_simulator_get_mem_free(void);
+ 
+ #endif
+ 
++/* Helper to call simulator ver specific functions */
++#define v3d_X_simulator(thing) ({                     \
++   __typeof(&v3d33_simulator_##thing) v3d_X_sim_thing;\
++   switch (sim_state.ver) {                           \
++   case 33:                                           \
++   case 40:                                           \
++      v3d_X_sim_thing = &v3d33_simulator_##thing;     \
++      break;                                          \
++   case 41:                                           \
++   case 42:                                           \
++      v3d_X_sim_thing = &v3d41_simulator_##thing;     \
++      break;                                          \
++   case 71:                                           \
++      v3d_X_sim_thing = &v3d71_simulator_##thing;     \
++      break;                                          \
++   default:                                           \
++      unreachable("Unsupported hardware generation"); \
++   }                                                  \
++   v3d_X_sim_thing;                                   \
++})
++
+ #endif
+diff --git a/src/broadcom/simulator/v3dx_simulator.c b/src/broadcom/simulator/v3dx_simulator.c
+index 4520fe75719..01cf6b22663 100644
+--- a/src/broadcom/simulator/v3dx_simulator.c
++++ b/src/broadcom/simulator/v3dx_simulator.c
+@@ -218,12 +218,12 @@ v3dX(simulator_submit_tfu_ioctl)(struct v3d_hw *v3d,
+         return 0;
+ }
+ 
+-#if V3D_VERSION >= 41
+ int
+ v3dX(simulator_submit_csd_ioctl)(struct v3d_hw *v3d,
+                                  struct drm_v3d_submit_csd *args,
+                                  uint32_t gmp_ofs)
+ {
++#if V3D_VERSION >= 41
+         int last_completed_jobs = (V3D_READ(V3D_CSD_0_STATUS) &
+                                    V3D_CSD_0_STATUS_NUM_COMPLETED_JOBS_SET);
+         g_gmp_ofs = gmp_ofs;
+@@ -256,8 +256,10 @@ v3dX(simulator_submit_csd_ioctl)(struct v3d_hw *v3d,
+         v3d_flush_caches(v3d);
+ 
+         return 0;
+-}
++#else
++        return -1;
+ #endif
++}
+ 
+ int
+ v3dX(simulator_get_param_ioctl)(struct v3d_hw *v3d,
+@@ -545,7 +547,8 @@ v3dX(simulator_submit_cl_ioctl)(struct v3d_hw *v3d,
+ #define V3D_PCTR_0_SRC_N(x) (V3D_PCTR_0_SRC_0_3 + 4 * (x))
+ #define V3D_PCTR_0_SRC_N_SHIFT(x) ((x) * 8)
+ #define V3D_PCTR_0_SRC_N_MASK(x) (BITFIELD_RANGE(V3D_PCTR_0_SRC_N_SHIFT(x), \
+-                                                 V3D_PCTR_0_SRC_N_SHIFT(x) + 6))
++                                                 V3D_PCTR_0_SRC_N_SHIFT(x) + \
++                                                 V3D_PCTR_0_SRC_0_3_PCTRS0_MSB))
+ #endif
+ 
+ void
+-- 
+2.39.2
+

@@ -1,0 +1,241 @@
+From 210338b6b1b030d36acaebad504ed2bec4a2cd74 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Fri, 19 Nov 2021 10:51:37 +0100
+Subject: [PATCH 125/142] v3dv: implement depthBounds support for v71
+
+Just for for v71, as that feature is not supported by older hw.
+---
+ src/broadcom/vulkan/v3dv_cmd_buffer.c  | 19 ++++++++++++---
+ src/broadcom/vulkan/v3dv_device.c      |  2 +-
+ src/broadcom/vulkan/v3dv_pipeline.c    | 17 ++++++++------
+ src/broadcom/vulkan/v3dv_private.h     | 12 +++++++++-
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c | 32 ++++++++++++++++++++++++++
+ src/broadcom/vulkan/v3dvx_pipeline.c   |  3 +++
+ src/broadcom/vulkan/v3dvx_private.h    |  3 +++
+ 7 files changed, 76 insertions(+), 12 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_cmd_buffer.c b/src/broadcom/vulkan/v3dv_cmd_buffer.c
+index f65388c10ec..36bd7960985 100644
+--- a/src/broadcom/vulkan/v3dv_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dv_cmd_buffer.c
+@@ -2070,6 +2070,14 @@ cmd_buffer_bind_pipeline_static_state(struct v3dv_cmd_buffer *cmd_buffer,
+       }
+    }
+ 
++   if (!(dynamic_mask & V3DV_DYNAMIC_DEPTH_BOUNDS)) {
++      if (memcmp(&dest->depth_bounds, &src->depth_bounds,
++                 sizeof(src->depth_bounds))) {
++         memcpy(&dest->depth_bounds, &src->depth_bounds, sizeof(src->depth_bounds));
++         dirty |= V3DV_CMD_DIRTY_DEPTH_BOUNDS;
++      }
++   }
++
+    if (!(dynamic_mask & V3DV_DYNAMIC_LINE_WIDTH)) {
+       if (dest->line_width != src->line_width) {
+          dest->line_width = src->line_width;
+@@ -2940,6 +2948,9 @@ v3dv_cmd_buffer_emit_pre_draw(struct v3dv_cmd_buffer *cmd_buffer,
+    if (*dirty & (V3DV_CMD_DIRTY_PIPELINE | V3DV_CMD_DIRTY_DEPTH_BIAS))
+       v3dv_X(device, cmd_buffer_emit_depth_bias)(cmd_buffer);
+ 
++   if (*dirty & V3DV_CMD_DIRTY_DEPTH_BOUNDS)
++      v3dv_X(device, cmd_buffer_emit_depth_bounds)(cmd_buffer);
++
+    if (*dirty & (V3DV_CMD_DIRTY_PIPELINE | V3DV_CMD_DIRTY_BLEND_CONSTANTS))
+       v3dv_X(device, cmd_buffer_emit_blend)(cmd_buffer);
+ 
+@@ -3369,9 +3380,11 @@ v3dv_CmdSetDepthBounds(VkCommandBuffer commandBuffer,
+                        float minDepthBounds,
+                        float maxDepthBounds)
+ {
+-   /* We do not support depth bounds testing so we just ignore this. We are
+-    * already asserting that pipelines don't enable the feature anyway.
+-    */
++   V3DV_FROM_HANDLE(v3dv_cmd_buffer, cmd_buffer, commandBuffer);
++
++   cmd_buffer->state.dynamic.depth_bounds.min = minDepthBounds;
++   cmd_buffer->state.dynamic.depth_bounds.max = maxDepthBounds;
++   cmd_buffer->state.dirty |= V3DV_CMD_DIRTY_DEPTH_BOUNDS;
+ }
+ 
+ VKAPI_ATTR void VKAPI_CALL
+diff --git a/src/broadcom/vulkan/v3dv_device.c b/src/broadcom/vulkan/v3dv_device.c
+index 19e58542414..1de9b5ce683 100644
+--- a/src/broadcom/vulkan/v3dv_device.c
++++ b/src/broadcom/vulkan/v3dv_device.c
+@@ -227,7 +227,7 @@ get_features(const struct v3dv_physical_device *physical_device,
+       .depthClamp = false, /* Only available since V3D 4.5.1.1 */
+       .depthBiasClamp = true,
+       .fillModeNonSolid = true,
+-      .depthBounds = false, /* Only available since V3D 4.3.16.2 */
++      .depthBounds = physical_device->devinfo.ver >= 71,
+       .wideLines = true,
+       .largePoints = true,
+       .alphaToOne = true,
+diff --git a/src/broadcom/vulkan/v3dv_pipeline.c b/src/broadcom/vulkan/v3dv_pipeline.c
+index 3bcdcc9a853..ba782b8268a 100644
+--- a/src/broadcom/vulkan/v3dv_pipeline.c
++++ b/src/broadcom/vulkan/v3dv_pipeline.c
+@@ -2608,13 +2608,8 @@ v3dv_dynamic_state_mask(VkDynamicState state)
+       return V3DV_DYNAMIC_LINE_WIDTH;
+    case VK_DYNAMIC_STATE_COLOR_WRITE_ENABLE_EXT:
+       return V3DV_DYNAMIC_COLOR_WRITE_ENABLE;
+-
+-   /* Depth bounds testing is not available in in V3D 4.2 so here we are just
+-    * ignoring this dynamic state. We are already asserting at pipeline creation
+-    * time that depth bounds testing is not enabled.
+-    */
+    case VK_DYNAMIC_STATE_DEPTH_BOUNDS:
+-      return 0;
++      return V3DV_DYNAMIC_DEPTH_BOUNDS;
+ 
+    default:
+       unreachable("Unhandled dynamic state");
+@@ -2642,6 +2637,7 @@ pipeline_init_dynamic_state(
+    dynamic->line_width = 1.0f;
+    dynamic->color_write_enable =
+       (1ull << (4 * V3D_MAX_RENDER_TARGETS(devinfo->ver))) - 1;
++   dynamic->depth_bounds.max = 1.0f;
+ 
+    /* Create a mask of enabled dynamic states */
+    uint32_t dynamic_states = 0;
+@@ -2694,6 +2690,11 @@ pipeline_init_dynamic_state(
+          dynamic->stencil_reference.front = pDepthStencilState->front.reference;
+          dynamic->stencil_reference.back = pDepthStencilState->back.reference;
+       }
++
++      if (!(dynamic_states & V3DV_DYNAMIC_DEPTH_BOUNDS)) {
++         dynamic->depth_bounds.min = pDepthStencilState->minDepthBounds;
++         dynamic->depth_bounds.max = pDepthStencilState->maxDepthBounds;
++      }
+    }
+ 
+    if (pColorBlendState && !(dynamic_states & V3DV_DYNAMIC_BLEND_CONSTANTS)) {
+@@ -2907,7 +2908,9 @@ pipeline_init(struct v3dv_pipeline *pipeline,
+    /* V3D 4.2 doesn't support depth bounds testing so we don't advertise that
+     * feature and it shouldn't be used by any pipeline.
+     */
+-   assert(!ds_info || !ds_info->depthBoundsTestEnable);
++   assert(device->devinfo.ver >= 71 ||
++          !ds_info || !ds_info->depthBoundsTestEnable);
++   pipeline->depth_bounds_test_enabled = ds_info && ds_info->depthBoundsTestEnable;
+ 
+    enable_depth_bias(pipeline, rs_info);
+ 
+diff --git a/src/broadcom/vulkan/v3dv_private.h b/src/broadcom/vulkan/v3dv_private.h
+index 9375cdd58c0..a074e0a981c 100644
+--- a/src/broadcom/vulkan/v3dv_private.h
++++ b/src/broadcom/vulkan/v3dv_private.h
+@@ -1045,7 +1045,8 @@ enum v3dv_dynamic_state_bits {
+    V3DV_DYNAMIC_DEPTH_BIAS                = 1 << 6,
+    V3DV_DYNAMIC_LINE_WIDTH                = 1 << 7,
+    V3DV_DYNAMIC_COLOR_WRITE_ENABLE        = 1 << 8,
+-   V3DV_DYNAMIC_ALL                       = (1 << 9) - 1,
++   V3DV_DYNAMIC_DEPTH_BOUNDS              = 1 << 9,
++   V3DV_DYNAMIC_ALL                       = (1 << 10) - 1,
+ };
+ 
+ /* Flags for dirty pipeline state.
+@@ -1070,6 +1071,7 @@ enum v3dv_cmd_dirty_bits {
+    V3DV_CMD_DIRTY_LINE_WIDTH                = 1 << 16,
+    V3DV_CMD_DIRTY_VIEW_INDEX                = 1 << 17,
+    V3DV_CMD_DIRTY_COLOR_WRITE_ENABLE        = 1 << 18,
++   V3DV_CMD_DIRTY_DEPTH_BOUNDS              = 1 << 19,
+ };
+ 
+ struct v3dv_dynamic_state {
+@@ -1106,6 +1108,11 @@ struct v3dv_dynamic_state {
+       float slope_factor;
+    } depth_bias;
+ 
++   struct {
++      float                                     min;
++      float                                     max;
++   } depth_bounds;
++
+    float line_width;
+ 
+    uint32_t color_write_enable;
+@@ -2333,6 +2340,9 @@ struct v3dv_pipeline {
+       bool is_z16;
+    } depth_bias;
+ 
++   /* Depth bounds */
++   bool depth_bounds_test_enabled;
++
+    struct {
+       void *mem_ctx;
+       struct util_dynarray data; /* Array of v3dv_pipeline_executable_data */
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index bf5e47018e8..9307a6e9d93 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -1507,6 +1507,38 @@ v3dX(cmd_buffer_emit_depth_bias)(struct v3dv_cmd_buffer *cmd_buffer)
+    cmd_buffer->state.dirty &= ~V3DV_CMD_DIRTY_DEPTH_BIAS;
+ }
+ 
++void
++v3dX(cmd_buffer_emit_depth_bounds)(struct v3dv_cmd_buffer *cmd_buffer)
++{
++   /* No depthBounds support for v42, so this method is empty on that case.
++    *
++    * Note that this method is being called as v3dv_job_init flag all state as
++    * dirty. See FIXME note at v3dv_job_init.
++    */
++
++#if V3D_VERSION >= 71
++   struct v3dv_pipeline *pipeline = cmd_buffer->state.gfx.pipeline;
++   assert(pipeline);
++
++   if (!pipeline->depth_bounds_test_enabled)
++      return;
++
++   struct v3dv_job *job = cmd_buffer->state.job;
++   assert(job);
++
++   v3dv_cl_ensure_space_with_branch(&job->bcl, cl_packet_length(DEPTH_BOUNDS_TEST_LIMITS));
++   v3dv_return_if_oom(cmd_buffer, NULL);
++
++   struct v3dv_dynamic_state *dynamic = &cmd_buffer->state.dynamic;
++   cl_emit(&job->bcl, DEPTH_BOUNDS_TEST_LIMITS, bounds) {
++      bounds.lower_test_limit = dynamic->depth_bounds.min;
++      bounds.upper_test_limit = dynamic->depth_bounds.max;
++   }
++
++   cmd_buffer->state.dirty &= ~V3DV_CMD_DIRTY_DEPTH_BOUNDS;
++#endif
++}
++
+ void
+ v3dX(cmd_buffer_emit_line_width)(struct v3dv_cmd_buffer *cmd_buffer)
+ {
+diff --git a/src/broadcom/vulkan/v3dvx_pipeline.c b/src/broadcom/vulkan/v3dvx_pipeline.c
+index 7b1133f8173..83ab2f19e4f 100644
+--- a/src/broadcom/vulkan/v3dvx_pipeline.c
++++ b/src/broadcom/vulkan/v3dvx_pipeline.c
+@@ -259,6 +259,9 @@ pack_cfg_bits(struct v3dv_pipeline *pipeline,
+       } else {
+          config.z_clipping_mode = V3D_Z_CLIP_MODE_NONE;
+       }
++
++      config.depth_bounds_test_enable =
++              ds_info && ds_info->depthBoundsTestEnable && has_ds_attachment;
+ #endif
+    };
+ }
+diff --git a/src/broadcom/vulkan/v3dvx_private.h b/src/broadcom/vulkan/v3dvx_private.h
+index 709b129926f..1ce4789c5ac 100644
+--- a/src/broadcom/vulkan/v3dvx_private.h
++++ b/src/broadcom/vulkan/v3dvx_private.h
+@@ -54,6 +54,9 @@ v3dX(cmd_buffer_emit_stencil)(struct v3dv_cmd_buffer *cmd_buffer);
+ void
+ v3dX(cmd_buffer_emit_depth_bias)(struct v3dv_cmd_buffer *cmd_buffer);
+ 
++void
++v3dX(cmd_buffer_emit_depth_bounds)(struct v3dv_cmd_buffer *cmd_buffer);
++
+ void
+ v3dX(cmd_buffer_emit_line_width)(struct v3dv_cmd_buffer *cmd_buffer);
+ 
+-- 
+2.39.2
+

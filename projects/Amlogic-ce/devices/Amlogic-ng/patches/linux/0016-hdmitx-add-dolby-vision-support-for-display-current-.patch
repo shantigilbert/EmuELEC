@@ -1,0 +1,51 @@
+From 7f07487547b2e4aa69b09bb0d36849cf2a954b31 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Fri, 19 May 2023 10:58:52 +0200
+Subject: [PATCH 16/18] hdmitx: add dolby vision support for display current
+ hdmi config
+
+---
+ .../media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c    | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+index 9792c4fa3632..675564ef3005 100644
+--- a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
++++ b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+@@ -2590,7 +2590,10 @@ static ssize_t show_config(struct device *dev,
+ 	struct hdmitx_dev *hdev = &hdmitx_device;
+ 	int colour_depths[] = { 8, 10, 12, 16 };
+ 	char* pix_fmt[] = {"RGB","YUV422","YUV444","YUV420"};
+-	char* eotf[] = {"SDR","HDR","HDR10","HLG"};
++	char* eotf_hdr[] = {"unknown", "HDR10","HLG","HDR","SDR"};
++	char* eotf_DV[] = {"unknown", "DV-Std","DV-LL"};
++	char* eotf_hdr10p[] = {"unknown", "HDR10+"};
++	char* eotf = eotf_hdr[4];
+ 	char* range[] = {"default","limited","full"};
+ 	char* colourimetry[] = {"default", "BT.601", "BT.709", "xvYCC601","xvYCC709",
+ 	"sYCC601","Adobe_YCC601","Adobe_RGB","BT.2020c","BT.2020nc","P3 D65","P3 DCI"};
+@@ -2612,13 +2615,20 @@ static ssize_t show_config(struct device *dev,
+ 		if (cs == COLORSPACE_YUV422)
+ 			cd = (~cd & 0x3);
+ 
++		if (hdmitx_hdr10p_en())
++			eotf = eotf_hdr10p[hdmitx_get_cur_hdr10p_st() & ~HDMI_HDR10P_TYPE];
++		else if (hdmitx_dv_en())
++			eotf = eotf_DV[hdmitx_get_cur_dv_st() & ~HDMI_DV_TYPE];
++		else if (hdmitx_hdr_en())
++			eotf = eotf_hdr[hdmitx_get_cur_hdr_st() & ~HDMI_HDR_TYPE];
++
+ 		pos += snprintf(buf+pos, PAGE_SIZE, "VIC: %d %s\n",
+ 				hdmitx_device.cur_VIC, para->name);
+ 		pos += snprintf(buf + pos, PAGE_SIZE, "Colour depth: %d-bit\nColourspace: %s\nColour range: %s\nEOTF: %s\nYCC colour range: %s\n",
+ 				colour_depths[cd],
+ 				pix_fmt[cs],
+ 				range[(hdmitx_rd_reg(HDMITX_DWC_FC_AVICONF2) & 0xc) >> 2],
+-				eotf[(hdmitx_rd_reg(HDMITX_DWC_FC_DRM_PB00) & 7)],
++				eotf,
+ 				range[((hdmitx_rd_reg(HDMITX_DWC_FC_AVICONF3) & 0xc) >> 2) + 1]);
+         if (((hdmitx_rd_reg(HDMITX_DWC_FC_AVICONF1) & 0xc0) >> 6) < 0x3)
+ 			pos += snprintf(buf + pos, PAGE_SIZE, "Colourimetry: %s\n",
+-- 
+2.25.1
+

@@ -1,7 +1,7 @@
 From 0b9b204c6560f3aff39697f92616b48102840dfe Mon Sep 17 00:00:00 2001
 From: Lukas Rusak <lorusak@gmail.com>
 Date: Mon, 29 Apr 2019 18:48:45 -0700
-Subject: [PATCH 3/4] CVideoLayerBridgeDRMPRIME add colourspace connector
+Subject: [PATCH 3/7] CVideoLayerBridgeDRMPRIME add colourspace connector
  property
 
 ---
@@ -83,5 +83,5 @@ index bd6623e8d1..a1342595c6 100644
  
  void CVideoLayerBridgeDRMPRIME::SetVideoPlane(CVideoBufferDRMPRIME* buffer, const CRect& destRect)
 -- 
-2.39.0
+2.39.2
 

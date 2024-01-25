@@ -1,0 +1,63 @@
+From e4d478490bdefd7977285e1a5b807525791621c7 Mon Sep 17 00:00:00 2001
+From: quietvoid <39477805+quietvoid@users.noreply.github.com>
+Date: Sat, 11 Mar 2023 08:40:00 -0500
+Subject: [PATCH 06/21] Add libdovi as optional build dependency
+
+---
+ cmake/modules/FindLibDovi.cmake      | 32 ++++++++++++++++++++++++++++
+ cmake/platform/android/android.cmake |  1 +
+ 2 files changed, 33 insertions(+)
+ create mode 100644 cmake/modules/FindLibDovi.cmake
+
+diff --git a/cmake/modules/FindLibDovi.cmake b/cmake/modules/FindLibDovi.cmake
+new file mode 100644
+index 0000000000..8646ba368a
+--- /dev/null
++++ b/cmake/modules/FindLibDovi.cmake
+@@ -0,0 +1,32 @@
++# FindDovi
++# -------
++# Finds the libdovi library
++#
++# This will define the following variables::
++#
++# LIBDOVI_FOUND - system has libdovi
++# LIBDOVI_INCLUDE_DIRS - the libdovi include directories
++# LIBDOVI_LIBRARIES - the libdovi libraries
++# LIBDOVI_DEFINITIONS - the libdovi compile definitions
++
++if(PKG_CONFIG_FOUND)
++  pkg_check_modules(PC_LIBDOVI libdovi QUIET)
++endif()
++
++find_library(LIBDOVI_LIBRARY NAMES dovi libdovi
++                             PATHS ${PC_LIBDOVI_LIBDIR}
++)
++find_path(LIBDOVI_INCLUDE_DIR NAMES libdovi/rpu_parser.h
++                              PATHS ${PC_LIBDOVI_INCLUDEDIR})
++
++include(FindPackageHandleStandardArgs)
++find_package_handle_standard_args(LibDovi
++                                  REQUIRED_VARS LIBDOVI_LIBRARY LIBDOVI_INCLUDE_DIR)
++
++if(LIBDOVI_FOUND)
++  set(LIBDOVI_INCLUDE_DIRS ${LIBDOVI_INCLUDE_DIR})
++  set(LIBDOVI_LIBRARIES ${LIBDOVI_LIBRARY})
++  set(LIBDOVI_DEFINITIONS -DHAVE_LIBDOVI=1)
++endif()
++
++mark_as_advanced(LIBDOVI_INCLUDE_DIR LIBDOVI_LIBRARY)
+diff --git a/cmake/platform/android/android.cmake b/cmake/platform/android/android.cmake
+index 2c4fbb48f2..ca3fad9dce 100644
+--- a/cmake/platform/android/android.cmake
++++ b/cmake/platform/android/android.cmake
+@@ -1,5 +1,6 @@
+ set(PLATFORM_REQUIRED_DEPS LibAndroidJNI OpenGLES EGL LibZip)
+ set(APP_RENDER_SYSTEM gles)
++list(APPEND PLATFORM_OPTIONAL_DEPS LibDovi)
+ 
+ # Store SDK compile version
+ set(TARGET_SDK 33)
+-- 
+2.43.0
+

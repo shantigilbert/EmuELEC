@@ -1,0 +1,100 @@
+From 8e3a2a35df5789687993d05436602821186e1cf2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 21 Oct 2021 13:46:11 +0200
+Subject: [PATCH 114/142] v3d/uniforms: update VIEWPORT_X/Y_SCALE uniforms for
+ v71
+
+As the packet CLIPPER_XY scaling, this needs to be computed on 1/64ths
+of pixel, instead of 1/256ths of pixels.
+
+As this is the usual values that we get from macros, we add manually a
+v42 and v71 macro, and define a new helper to get those.
+
+Those granularity values are the same for Vulkan and OpenGL, so
+perhaps we should move them to a common place.
+
+As with v3dv, V3D_X macro name is somewhat confusing. It is
+specifically created to ask for define values that depends on the
+version. But I also felt that V3D_DEFINE_X was too long.
+---
+ src/gallium/drivers/v3d/v3d_context.h  | 28 ++++++++++++++++++++++++++
+ src/gallium/drivers/v3d/v3d_uniforms.c |  8 ++++++--
+ 2 files changed, 34 insertions(+), 2 deletions(-)
+
+diff --git a/src/gallium/drivers/v3d/v3d_context.h b/src/gallium/drivers/v3d/v3d_context.h
+index c0aac741fdc..21ee10a90cc 100644
+--- a/src/gallium/drivers/v3d/v3d_context.h
++++ b/src/gallium/drivers/v3d/v3d_context.h
+@@ -837,6 +837,34 @@ void v3d_disk_cache_store(struct v3d_context *v3d,
+         v3d_X_thing;                                            \
+ })
+ 
++/* FIXME: The same for vulkan/opengl. Common place? define it at the
++ * v3d_packet files?
++ */
++#define V3D33_CLIPPER_XY_GRANULARITY 256.0f
++#define V3D42_CLIPPER_XY_GRANULARITY 256.0f
++#define V3D71_CLIPPER_XY_GRANULARITY 64.0f
++
++/* Helper to get hw-specific macro values */
++#define V3DV_X(devinfo, thing) ({                               \
++   __typeof(V3D33_##thing) V3D_X_THING;                         \
++   switch (devinfo->ver) {                                      \
++   case 33:                                                     \
++   case 40:                                                     \
++      V3D_X_THING = V3D33_##thing;                              \
++      break;                                                    \
++      case 41:                                                  \
++   case 42:                                                     \
++      V3D_X_THING = V3D42_##thing;                              \
++      break;                                                    \
++   case 71:                                                     \
++      V3D_X_THING = V3D71_##thing;                              \
++      break;                                                    \
++   default:                                                     \
++      unreachable("Unsupported hardware generation");           \
++   }                                                            \
++   V3D_X_THING;                                                 \
++})
++
+ #ifdef v3dX
+ #  include "v3dx_context.h"
+ #else
+diff --git a/src/gallium/drivers/v3d/v3d_uniforms.c b/src/gallium/drivers/v3d/v3d_uniforms.c
+index 95eb838954f..1b8758bae7d 100644
+--- a/src/gallium/drivers/v3d/v3d_uniforms.c
++++ b/src/gallium/drivers/v3d/v3d_uniforms.c
+@@ -261,6 +261,7 @@ v3d_write_uniforms(struct v3d_context *v3d, struct v3d_job *job,
+                    struct v3d_compiled_shader *shader,
+                    enum pipe_shader_type stage)
+ {
++        struct v3d_device_info *devinfo = &v3d->screen->devinfo;
+         struct v3d_constbuf_stateobj *cb = &v3d->constbuf[stage];
+         struct v3d_texture_stateobj *texstate = &v3d->tex[stage];
+         struct v3d_uniform_list *uinfo = &shader->prog_data.base->uniforms;
+@@ -282,6 +283,9 @@ v3d_write_uniforms(struct v3d_context *v3d, struct v3d_job *job,
+         struct v3d_cl_out *uniforms =
+                 cl_start(&job->indirect);
+ 
++        float clipper_xy_granularity =
++                V3DV_X(devinfo, CLIPPER_XY_GRANULARITY);
++
+         for (int i = 0; i < uinfo->count; i++) {
+                 uint32_t data = uinfo->data[i];
+ 
+@@ -293,10 +297,10 @@ v3d_write_uniforms(struct v3d_context *v3d, struct v3d_job *job,
+                         cl_aligned_u32(&uniforms, gallium_uniforms[data]);
+                         break;
+                 case QUNIFORM_VIEWPORT_X_SCALE:
+-                        cl_aligned_f(&uniforms, v3d->viewport.scale[0] * 256.0f);
++                        cl_aligned_f(&uniforms, v3d->viewport.scale[0] * clipper_xy_granularity);
+                         break;
+                 case QUNIFORM_VIEWPORT_Y_SCALE:
+-                        cl_aligned_f(&uniforms, v3d->viewport.scale[1] * 256.0f);
++                        cl_aligned_f(&uniforms, v3d->viewport.scale[1] * clipper_xy_granularity);
+                         break;
+ 
+                 case QUNIFORM_VIEWPORT_Z_OFFSET:
+-- 
+2.39.2
+

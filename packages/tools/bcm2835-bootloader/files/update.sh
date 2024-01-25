@@ -17,9 +17,11 @@ mount -o remount,rw $BOOT_ROOT
 
 # update bootloader files
 cp -p $SYSTEM_ROOT/usr/share/bootloader/LICENCE* $BOOT_ROOT
-cp -p $SYSTEM_ROOT/usr/share/bootloader/bootcode.bin $BOOT_ROOT
-cp -p $SYSTEM_ROOT/usr/share/bootloader/fixup.dat $BOOT_ROOT
-cp -p $SYSTEM_ROOT/usr/share/bootloader/start.elf $BOOT_ROOT
+for f in bootcode.bin fixup.dat start.elf ; do
+  if [ -f "${SYSTEM_ROOT}/usr/share/bootloader/$f" ]; then
+    cp -p "${SYSTEM_ROOT}/usr/share/bootloader/$f" "${BOOT_ROOT}"
+  fi
+done
 
 rm -f $BOOT_ROOT/bcm283*.dtb # cleanup excess dtb's used by upstream kernels (ie. not LE)
 cp -p $SYSTEM_ROOT/usr/share/bootloader/*.dtb $BOOT_ROOT

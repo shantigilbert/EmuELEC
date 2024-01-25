@@ -1,0 +1,30 @@
+From ca4063d627cd31c589a8e8688f2876dd8211d1bc Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Thu, 25 Nov 2021 08:31:02 +0100
+Subject: [PATCH 060/142] broadcom/compiler: lift restriction for branch +
+ msfign after setmsf for v7.x
+
+---
+ src/broadcom/compiler/qpu_schedule.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 32f651851cf..476eae691ab 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -2373,10 +2373,11 @@ emit_branch(struct v3d_compile *c,
+         assert(scoreboard->last_branch_tick + 3 < branch_tick);
+         assert(scoreboard->last_unifa_write_tick + 3 < branch_tick);
+ 
+-        /* Can't place a branch with msfign != 0 and cond != 0,2,3 after
++        /* V3D 4.x can't place a branch with msfign != 0 and cond != 0,2,3 after
+          * setmsf.
+          */
+         bool is_safe_msf_branch =
++                c->devinfo->ver >= 71 ||
+                 inst->qpu.branch.msfign == V3D_QPU_MSFIGN_NONE ||
+                 inst->qpu.branch.cond == V3D_QPU_BRANCH_COND_ALWAYS ||
+                 inst->qpu.branch.cond == V3D_QPU_BRANCH_COND_A0 ||
+-- 
+2.39.2
+

@@ -1,0 +1,53 @@
+From 0e87405fe73694c173b7ce14c3d60611f241922c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 5 Aug 2021 00:50:12 +0200
+Subject: [PATCH 009/142] broadcom/compiler: add small_imm a/c/d on v3d_qpu_sig
+
+small_imm_a, small_imm_c and small_imm_d added on top of the already
+existing small_imm_b, as V3D 7.1 defines 4 small immediates, tied to
+the 4 raddr. Note that this is only the definition, and just a inst
+validation rule to check that are not used before v71. Any real use is
+still pending.
+---
+ src/broadcom/compiler/qpu_validate.c | 5 +++++
+ src/broadcom/qpu/qpu_instr.h         | 5 ++++-
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/src/broadcom/compiler/qpu_validate.c b/src/broadcom/compiler/qpu_validate.c
+index 2cc7a0eb0ae..12788692432 100644
+--- a/src/broadcom/compiler/qpu_validate.c
++++ b/src/broadcom/compiler/qpu_validate.c
+@@ -115,6 +115,11 @@ qpu_validate_inst(struct v3d_qpu_validate_state *state, struct qinst *qinst)
+         if (inst->type != V3D_QPU_INSTR_TYPE_ALU)
+                 return;
+ 
++        if (devinfo->ver < 71) {
++           if (inst->sig.small_imm_a || inst->sig.small_imm_c || inst->sig.small_imm_d)
++              fail_instr(state, "small imm a/c/d added after V3D 7.1");
++        }
++
+         /* LDVARY writes r5 two instructions later and LDUNIF writes
+          * r5 one instruction later, which is illegal to have
+          * together.
+diff --git a/src/broadcom/qpu/qpu_instr.h b/src/broadcom/qpu/qpu_instr.h
+index 9cd831863b4..13b3f37d43f 100644
+--- a/src/broadcom/qpu/qpu_instr.h
++++ b/src/broadcom/qpu/qpu_instr.h
+@@ -50,10 +50,13 @@ struct v3d_qpu_sig {
+         bool ldvpm:1;
+         bool ldtlb:1;
+         bool ldtlbu:1;
+-        bool small_imm_b:1;
+         bool ucb:1;
+         bool rotate:1;
+         bool wrtmuc:1;
++        bool small_imm_a:1; /* raddr_a (add a), since V3D 7.x */
++        bool small_imm_b:1; /* raddr_b (add b) */
++        bool small_imm_c:1; /* raddr_c (mul a), since V3D 7.x */
++        bool small_imm_d:1; /* raddr_d (mul b), since V3D 7.x */
+ };
+ 
+ enum v3d_qpu_cond {
+-- 
+2.39.2
+

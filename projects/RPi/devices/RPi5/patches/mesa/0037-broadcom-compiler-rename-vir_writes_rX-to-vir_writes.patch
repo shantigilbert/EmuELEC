@@ -1,0 +1,77 @@
+From 3d16229743e26b58735ed049ee982073f6034342 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 29 Sep 2021 12:03:50 +0200
+Subject: [PATCH 037/142] broadcom/compiler: rename vir_writes_rX to
+ vir_writes_rX_implicitly
+
+Since that represents more accurately what they check..
+---
+ src/broadcom/compiler/v3d_compiler.h          | 4 ++--
+ src/broadcom/compiler/vir.c                   | 6 ++++--
+ src/broadcom/compiler/vir_register_allocate.c | 4 ++--
+ 3 files changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/src/broadcom/compiler/v3d_compiler.h b/src/broadcom/compiler/v3d_compiler.h
+index eb4e692464b..7e8f3bfc1a7 100644
+--- a/src/broadcom/compiler/v3d_compiler.h
++++ b/src/broadcom/compiler/v3d_compiler.h
+@@ -1149,8 +1149,8 @@ bool vir_is_raw_mov(struct qinst *inst);
+ bool vir_is_tex(const struct v3d_device_info *devinfo, struct qinst *inst);
+ bool vir_is_add(struct qinst *inst);
+ bool vir_is_mul(struct qinst *inst);
+-bool vir_writes_r3(const struct v3d_device_info *devinfo, struct qinst *inst);
+-bool vir_writes_r4(const struct v3d_device_info *devinfo, struct qinst *inst);
++bool vir_writes_r3_implicitly(const struct v3d_device_info *devinfo, struct qinst *inst);
++bool vir_writes_r4_implicitly(const struct v3d_device_info *devinfo, struct qinst *inst);
+ struct qreg vir_follow_movs(struct v3d_compile *c, struct qreg reg);
+ uint8_t vir_channels_written(struct qinst *inst);
+ struct qreg ntq_get_src(struct v3d_compile *c, nir_src src, int i);
+diff --git a/src/broadcom/compiler/vir.c b/src/broadcom/compiler/vir.c
+index d75cd777b6d..aea113f050e 100644
+--- a/src/broadcom/compiler/vir.c
++++ b/src/broadcom/compiler/vir.c
+@@ -156,7 +156,8 @@ vir_is_tex(const struct v3d_device_info *devinfo, struct qinst *inst)
+ }
+ 
+ bool
+-vir_writes_r3(const struct v3d_device_info *devinfo, struct qinst *inst)
++vir_writes_r3_implicitly(const struct v3d_device_info *devinfo,
++                         struct qinst *inst)
+ {
+         if (!devinfo->has_accumulators)
+                 return false;
+@@ -181,7 +182,8 @@ vir_writes_r3(const struct v3d_device_info *devinfo, struct qinst *inst)
+ }
+ 
+ bool
+-vir_writes_r4(const struct v3d_device_info *devinfo, struct qinst *inst)
++vir_writes_r4_implicitly(const struct v3d_device_info *devinfo,
++                         struct qinst *inst)
+ {
+         if (!devinfo->has_accumulators)
+                 return false;
+diff --git a/src/broadcom/compiler/vir_register_allocate.c b/src/broadcom/compiler/vir_register_allocate.c
+index 7b3f6c41934..f2df35cd458 100644
+--- a/src/broadcom/compiler/vir_register_allocate.c
++++ b/src/broadcom/compiler/vir_register_allocate.c
+@@ -988,7 +988,7 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+          * result to a temp), nothing else can be stored in r3/r4 across
+          * it.
+          */
+-        if (vir_writes_r3(c->devinfo, inst)) {
++        if (vir_writes_r3_implicitly(c->devinfo, inst)) {
+                 for (int i = 0; i < c->num_temps; i++) {
+                         if (c->temp_start[i] < ip && c->temp_end[i] > ip) {
+                                 ra_add_node_interference(c->g,
+@@ -998,7 +998,7 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+                 }
+         }
+ 
+-        if (vir_writes_r4(c->devinfo, inst)) {
++        if (vir_writes_r4_implicitly(c->devinfo, inst)) {
+                 for (int i = 0; i < c->num_temps; i++) {
+                         if (c->temp_start[i] < ip && c->temp_end[i] > ip) {
+                                 ra_add_node_interference(c->g,
+-- 
+2.39.2
+

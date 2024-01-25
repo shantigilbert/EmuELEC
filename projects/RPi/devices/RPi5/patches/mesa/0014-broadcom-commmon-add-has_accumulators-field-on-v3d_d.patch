@@ -1,0 +1,46 @@
+From 81febf14fe05ad26e992275b911e8bc1e1416ebc Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Fri, 17 Sep 2021 01:04:31 +0200
+Subject: [PATCH 014/142] broadcom/commmon: add has_accumulators field on
+ v3d_device_info
+
+Even if we can just check for the version on the code, checking for
+this field makes several places more readable. So for example, on the
+register allocate code we doesn't assign an accumulator because we
+don't have accumulators on that hw, instead of because hw version is a
+given one.
+---
+ src/broadcom/common/v3d_device_info.c | 2 ++
+ src/broadcom/common/v3d_device_info.h | 3 +++
+ 2 files changed, 5 insertions(+)
+
+diff --git a/src/broadcom/common/v3d_device_info.c b/src/broadcom/common/v3d_device_info.c
+index 7512fe3a06b..7bc2b662cfc 100644
+--- a/src/broadcom/common/v3d_device_info.c
++++ b/src/broadcom/common/v3d_device_info.c
+@@ -65,6 +65,8 @@ v3d_get_device_info(int fd, struct v3d_device_info* devinfo, v3d_ioctl_fun drm_i
+     int qups = (ident1.value >> 8) & 0xf;
+     devinfo->qpu_count = nslc * qups;
+ 
++    devinfo->has_accumulators = devinfo->ver < 71;
++
+     switch (devinfo->ver) {
+         case 33:
+         case 41:
+diff --git a/src/broadcom/common/v3d_device_info.h b/src/broadcom/common/v3d_device_info.h
+index 32cb65cf81f..8dfc7858727 100644
+--- a/src/broadcom/common/v3d_device_info.h
++++ b/src/broadcom/common/v3d_device_info.h
+@@ -42,6 +42,9 @@ struct v3d_device_info {
+ 
+         /* NSLC * QUPS from the core's IDENT registers. */
+         int qpu_count;
++
++        /* If the hw has accumulator registers */
++        bool has_accumulators;
+ };
+ 
+ typedef int (*v3d_ioctl_fun)(int fd, unsigned long request, void *arg);
+-- 
+2.39.2
+

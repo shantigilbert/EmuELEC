@@ -30,10 +30,33 @@ evdev:input:b0005v045Ep0041e0300*
 evdev:input:b0005v2B54p1600e0000*
  KEYBOARD_KEY_c0041=enter
 
+# homatics b21
+evdev:input:b0005v0957p0006*
+# homatics b21 variant (sold with dongle g 4k)
+evdev:input:b0005v0957p0019*
+# dune b25
+evdev:input:b0005v0957p000A*
+ KEYBOARD_KEY_c0041=enter
+ KEYBOARD_KEY_c009c=up
+ KEYBOARD_KEY_c009d=down
+ KEYBOARD_KEY_c0030=s
+ KEYBOARD_KEY_c008d=e
+ KEYBOARD_KEY_c0221=o
+ KEYBOARD_KEY_c0077=a
+ KEYBOARD_KEY_c0078=l
+ KEYBOARD_KEY_c0079=n
+ KEYBOARD_KEY_c007a=q
+ KEYBOARD_KEY_c0096=v
+ KEYBOARD_KEY_c01bb=z
+
 # justboom smart remote
 evdev:input:b0003v2252p0120*
  KEYBOARD_KEY_c0041=enter
  KEYBOARD_KEY_c0040=c
+
+# nokia 8010 remotes
+evdev:input:b0005v1D5A*
+ KEYBOARD_KEY_c0041=enter
 
 # nvidia shield remotes
 evdev:input:b0005v0955p7213*

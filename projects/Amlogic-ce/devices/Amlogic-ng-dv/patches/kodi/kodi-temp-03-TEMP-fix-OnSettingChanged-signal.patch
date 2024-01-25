@@ -1,0 +1,24 @@
+From 1090b59aa68165e67a39895d7d648c7ff286ed8d Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Wed, 17 Feb 2021 07:59:09 +0100
+Subject: [PATCH] TEMP: fix OnSettingChanged signal
+
+---
+ xbmc/peripherals/dialogs/GUIDialogPeripheralSettings.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/xbmc/peripherals/dialogs/GUIDialogPeripheralSettings.cpp b/xbmc/peripherals/dialogs/GUIDialogPeripheralSettings.cpp
+index 73816df648..fbd1f54680 100644
+--- a/xbmc/peripherals/dialogs/GUIDialogPeripheralSettings.cpp
++++ b/xbmc/peripherals/dialogs/GUIDialogPeripheralSettings.cpp
+@@ -104,6 +104,8 @@ void CGUIDialogPeripheralSettings::OnSettingChanged(const std::shared_ptr<const
+   if (!peripheral)
+     return;
+
++  peripheral->OnSettingChanged(setting->GetId());
++
+   if (settingId == SETTING_APPEARANCE)
+   {
+     // Get the controller profile of the new appearance
+--
+2.30.0

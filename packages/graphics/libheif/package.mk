@@ -12,7 +12,9 @@ PKG_LONGDESC="A HEIF file format decoder and encoder."
 PKG_BUILD_FLAGS="+pic"
 
 PKG_CMAKE_OPTS_TARGET="-DBUILD_SHARED_LIBS=OFF \
-                       -DWITH_EXAMPLES=OFF"
+                       -DWITH_EXAMPLES=OFF \
+                       -DWITH_AOM_DECODER=OFF \
+                       -DWITH_AOM_ENCODER=OFF"
 
 pre_configure_target() {
   export CXXFLAGS="${CXXFLAGS} -Wno-unused-variable"

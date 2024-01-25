@@ -1,0 +1,44 @@
+From 0e7d63502f6ea68b5c56036c493e72e83b3f145d Mon Sep 17 00:00:00 2001
+From: Rod Smith <rodsmith@rodsbooks.com>
+Date: Mon, 6 Mar 2023 17:28:18 -0500
+Subject: [PATCH 11/12] Document previous merge
+
+---
+ NEWS      | 7 +++++++
+ support.h | 2 +-
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/NEWS b/NEWS
+index dc1660e..5c6dfa1 100644
+--- a/NEWS
++++ b/NEWS
+@@ -18,6 +18,13 @@
+ - Make explicit casts in gptcurses.cc to eliminate compiler warnings about
+   mis-matched types in printw() statements.
+ 
++- In previous versions, rEFInd accepted only integer values for partition
++  start points, end points, and sizes, and it interpreted decimal values
++  incorrectly. That is, if you typed "+9.5G" as the partition end point,
++  you'd end up with something just 9 sectors in size. This version now
++  truncates decimal numbers to their integral values, so you'd get a 9 GiB
++  partition instead.
++
+ 1.0.9 (4/14/2022):
+ ------------------
+ 
+diff --git a/support.h b/support.h
+index f91f1bc..4a9f414 100644
+--- a/support.h
++++ b/support.h
+@@ -8,7 +8,7 @@
+ #include <stdlib.h>
+ #include <string>
+ 
+-#define GPTFDISK_VERSION "1.0.9.1"
++#define GPTFDISK_VERSION "1.0.9.2"
+ 
+ #if defined (__FreeBSD__) || defined (__FreeBSD_kernel__) || defined (__APPLE__)
+ // Darwin (Mac OS) & FreeBSD: disk IOCTLs are different, and there is no lseek64
+-- 
+2.31.1
+

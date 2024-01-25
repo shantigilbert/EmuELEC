@@ -1,0 +1,85 @@
+From 019abbd34d2d904d6bb33f9fa4433cb53ca7899c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Fri, 1 Oct 2021 15:18:38 +0200
+Subject: [PATCH 096/142] v3dv: no specific separate_segments flag for V3D 7.1
+
+On V3D 7.1 there is not a flag on the Shader State Record to specify
+if we are using shared or separate segments. This is done by setting
+the vpm input size to 0 (so we need to ensure that the output would be
+the max needed for input/output).
+
+We were already doing the latter on the prog_data_vs, so we just need
+to use those values, instead of assigning default values.
+
+As we are here, we also add some comments on the compiler part.
+---
+ src/broadcom/compiler/qpu_schedule.c |  4 ++++
+ src/broadcom/compiler/vir.c          |  4 ++++
+ src/broadcom/vulkan/v3dvx_pipeline.c | 15 +++++++++++++--
+ 3 files changed, 21 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 77fb6a794e6..4f767296860 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -297,6 +297,10 @@ calculate_deps(struct schedule_state *state, struct schedule_node *n)
+         /* If the input and output segments are shared, then all VPM reads to
+          * a location need to happen before all writes.  We handle this by
+          * serializing all VPM operations for now.
++         *
++         * FIXME: we are assuming that the segments are shared. That is
++         * correct right now as we are only using shared, but technically you
++         * can choose.
+          */
+         bool separate_vpm_segment = false;
+ 
+diff --git a/src/broadcom/compiler/vir.c b/src/broadcom/compiler/vir.c
+index 7612eed7130..dd0aa761c43 100644
+--- a/src/broadcom/compiler/vir.c
++++ b/src/broadcom/compiler/vir.c
+@@ -745,6 +745,10 @@ v3d_vs_set_prog_data(struct v3d_compile *c,
+ 
+         /* Set us up for shared input/output segments.  This is apparently
+          * necessary for our VCM setup to avoid varying corruption.
++         *
++         * FIXME: initially testing on V3D 7.1 seems to work fine when using
++         * separate segments. So we could try to reevaluate in the future, if
++         * there is any advantage of using separate segments.
+          */
+         prog_data->separate_segments = false;
+         prog_data->vpm_output_size = MAX2(prog_data->vpm_output_size,
+diff --git a/src/broadcom/vulkan/v3dvx_pipeline.c b/src/broadcom/vulkan/v3dvx_pipeline.c
+index a640c1d084a..a72ca3c241b 100644
+--- a/src/broadcom/vulkan/v3dvx_pipeline.c
++++ b/src/broadcom/vulkan/v3dvx_pipeline.c
+@@ -452,14 +452,25 @@ pack_shader_state_record(struct v3dv_pipeline *pipeline)
+          prog_data_vs_bin->separate_segments;
+       shader.vertex_shader_has_separate_input_and_output_vpm_blocks =
+          prog_data_vs->separate_segments;
+-#endif
+-
+       shader.coordinate_shader_input_vpm_segment_size =
+          prog_data_vs_bin->separate_segments ?
+          prog_data_vs_bin->vpm_input_size : 1;
+       shader.vertex_shader_input_vpm_segment_size =
+          prog_data_vs->separate_segments ?
+          prog_data_vs->vpm_input_size : 1;
++#endif
++
++      /* On V3D 7.1 there isn't a specific flag to set if we are using
++       * shared/separate segments or not. We just set the value of
++       * vpm_input_size to 0, and set output to the max needed. That should be
++       * already properly set on prog_data_vs_bin
++       */
++#if V3D_VERSION == 71
++      shader.coordinate_shader_input_vpm_segment_size =
++         prog_data_vs_bin->vpm_input_size;
++      shader.vertex_shader_input_vpm_segment_size =
++         prog_data_vs->vpm_input_size;
++#endif
+ 
+       shader.coordinate_shader_output_vpm_segment_size =
+          prog_data_vs_bin->vpm_output_size;
+-- 
+2.39.2
+

@@ -1,0 +1,49 @@
+From 1e9d7d69849fa646b331f7661c74ee138badc4bb Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Mon, 25 Oct 2021 01:37:12 +0200
+Subject: [PATCH 088/142] v3dv: fix up texture shader state for v71
+
+There are some new fields for YCbCr with pointers for the various
+planes in multi-planar formats. These need to match the base address
+pointer in the texture state, or the hardware will assume this is a
+multi-planar texture.
+---
+ src/broadcom/vulkan/v3dvx_image.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/src/broadcom/vulkan/v3dvx_image.c b/src/broadcom/vulkan/v3dvx_image.c
+index dac6ff2741f..848290c2a47 100644
+--- a/src/broadcom/vulkan/v3dvx_image.c
++++ b/src/broadcom/vulkan/v3dvx_image.c
+@@ -129,6 +129,14 @@ pack_texture_shader_state_helper(struct v3dv_device *device,
+             v3dv_layer_offset(image, 0, image_view->vk.base_array_layer,
+                               iplane);
+          tex.texture_base_pointer = v3dv_cl_address(NULL, base_offset);
++
++#if V3D_VERSION >= 71
++         tex.chroma_offset_x = 1;
++         tex.chroma_offset_y = 1;
++         /* See comment in XML field definition for rationale of the shifts */
++         tex.texture_base_pointer_cb = base_offset >> 6;
++         tex.texture_base_pointer_cr = base_offset >> 6;
++#endif
+       }
+    }
+ }
+@@ -191,5 +199,13 @@ v3dX(pack_texture_shader_state_from_buffer_view)(struct v3dv_device *device,
+          buffer_view->offset;
+ 
+       tex.texture_base_pointer = v3dv_cl_address(NULL, base_offset);
++
++#if V3D_VERSION >= 71
++      tex.chroma_offset_x = 1;
++      tex.chroma_offset_y = 1;
++      /* See comment in XML field definition for rationale of the shifts */
++      tex.texture_base_pointer_cb = base_offset >> 6;
++      tex.texture_base_pointer_cr = base_offset >> 6;
++#endif
+    }
+ }
+-- 
+2.39.2
+

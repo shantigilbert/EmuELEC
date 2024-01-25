@@ -1,0 +1,26 @@
+From 40c1254a2601d4e39656285f5180429e6bb4572a Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Tue, 18 Apr 2023 21:56:59 +0200
+Subject: [PATCH 13/18] hdmitx: force YUV444 on Dolby Vision RGB on modes witch
+ Otherwise the TV remain black. Reason need to be identified.
+
+---
+ drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+index f7d5612727da..a0e1b9050182 100644
+--- a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
++++ b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+@@ -690,7 +690,7 @@ static int set_disp_mode_auto(void)
+ 					switch (hdev->hdmi_current_tunnel_mode) {
+ 						case RGB_8BIT:
+ 						case RGB_10_12BIT:
+-							para->cs = COLORSPACE_RGB444;
++							para->cs = COLORSPACE_YUV444;
+ 							break;
+ 						case YUV422_BIT12:
+ 							para->cs = COLORSPACE_YUV422;
+-- 
+2.25.1
+

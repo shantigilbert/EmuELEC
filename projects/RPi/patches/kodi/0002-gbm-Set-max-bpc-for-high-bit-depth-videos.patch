@@ -1,7 +1,7 @@
 From 42b30508bfe5451d4dc2884acfde9e0ec2d58c92 Mon Sep 17 00:00:00 2001
 From: Dom Cobley <popcornmix@gmail.com>
 Date: Fri, 3 Dec 2021 16:00:50 +0000
-Subject: [PATCH 2/4] gbm: Set max bpc for high bit depth videos
+Subject: [PATCH 2/7] gbm: Set max bpc for high bit depth videos
 
 ---
  .../HwDecRender/VideoLayerBridgeDRMPRIME.cpp     | 16 ++++++++++++++++
@@ -42,5 +42,5 @@ index 4b8ee5afbb..bd6623e8d1 100644
  
  void CVideoLayerBridgeDRMPRIME::SetVideoPlane(CVideoBufferDRMPRIME* buffer, const CRect& destRect)
 -- 
-2.39.0
+2.39.2
 

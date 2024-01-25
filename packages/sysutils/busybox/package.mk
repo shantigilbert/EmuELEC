@@ -24,7 +24,7 @@ if [ "${NFS_SUPPORT}" = yes ]; then
   PKG_DEPENDS_TARGET+=" rpcbind"
 fi
 
-if [ "${TARGET_ARCH}" = "x86_64" ]; then
+if [ "${DEVICE}" = "Amlogic-ne" ]; then
   PKG_DEPENDS_TARGET+=" pciutils"
 fi
 

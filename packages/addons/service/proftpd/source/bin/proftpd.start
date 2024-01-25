@@ -24,7 +24,7 @@ fi
 [ -z "$Debuglevel" ] && Debuglevel=0
 
 if [ ! -f "$ADDON_HOME/proftpd.cert.pem" -o ! -f "$ADDON_HOME/proftpd.key.pem" ]; then
-  openssl req -newkey rsa:1024 -config $ADDON_HOME/openssl.cnf -new -x509 -days "$CertTTL" -nodes -out "$ADDON_HOME/proftpd.cert.pem" -keyout "$ADDON_HOME/proftpd.key.pem"
+  openssl req -newkey rsa:${CertBitStrength} -config $ADDON_HOME/openssl.cnf -new -x509 -days "$CertTTL" -nodes -out "$ADDON_HOME/proftpd.cert.pem" -keyout "$ADDON_HOME/proftpd.key.pem"
 fi
 
 # Edit proftpd.conf with user settings
@@ -98,7 +98,6 @@ touch /var/config/proftpd.passwd
 chmod 700 /var/config/proftpd.passwd
 
 for NUM in $(seq 1 100); do
-
   USERNAME=$(eval echo \$Username${NUM})
   USERPASS=$(eval echo \$Userpass${NUM})
   USERPATH=$(eval echo \$Userpath${NUM})

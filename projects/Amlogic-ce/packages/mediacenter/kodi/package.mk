@@ -4,8 +4,8 @@
 # Copyright (C) 2020-present Team CoreELEC (https://coreelec.tv)
 
 PKG_NAME="kodi"
-PKG_VERSION="4373de6ad55d7e33d82868ede8f20a3cc7b6c2cd"
-PKG_SHA256="f8697f6b7c4b611438ebd70b32b08c99b9a3a6c8d3cc3eb681a092f04e7af57f"
+PKG_VERSION="513bcee15b79c4b75dabaf054f89f1aacd256248"
+PKG_SHA256="343f3b132903ed1c4057380592029639ac556f20a576a91b06b7a654d54e7a28"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"
 PKG_URL="https://github.com/CoreELEC/xbmc/archive/${PKG_VERSION}.tar.gz"
@@ -53,11 +53,12 @@ configure_package() {
 
   get_graphicdrivers
 
-  if [ "${TARGET_ARCH}" = "x86_64" ]; then
-    PKG_DEPENDS_TARGET+=" pciutils"
-  fi
-
   PKG_DEPENDS_TARGET+=" dbus"
+
+  if [ "${DEVICE}" = "Amlogic-ng-dv" ]; then
+    PKG_DEPENDS_TARGET+=" libdovi"
+    PKG_CMAKE_OPTS_TARGET+=" -DENABLE_LIBDOVI=ON"
+  fi
 
   if [ "${DISPLAYSERVER}" = "x11" ]; then
     PKG_DEPENDS_TARGET+=" libX11 libXext libdrm libXrandr"

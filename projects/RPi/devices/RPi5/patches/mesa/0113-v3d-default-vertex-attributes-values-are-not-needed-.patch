@@ -1,0 +1,113 @@
+From 3a790ddd27c8406c59426599fb9cadb5de5c024d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 21 Oct 2021 13:37:46 +0200
+Subject: [PATCH 113/142] v3d: default vertex attributes values are not needed
+ for v71
+
+---
+ src/gallium/drivers/v3d/v3d_context.h |  1 +
+ src/gallium/drivers/v3d/v3dx_draw.c   |  3 --
+ src/gallium/drivers/v3d/v3dx_state.c  | 53 ++++++++++++++++++---------
+ 3 files changed, 37 insertions(+), 20 deletions(-)
+
+diff --git a/src/gallium/drivers/v3d/v3d_context.h b/src/gallium/drivers/v3d/v3d_context.h
+index ad267d5033c..c0aac741fdc 100644
+--- a/src/gallium/drivers/v3d/v3d_context.h
++++ b/src/gallium/drivers/v3d/v3d_context.h
+@@ -265,6 +265,7 @@ struct v3d_vertex_stateobj {
+         unsigned num_elements;
+ 
+         uint8_t attrs[16 * (V3D_MAX_VS_INPUTS / 4)];
++        /* defaults can be NULL for some hw generation */
+         struct pipe_resource *defaults;
+         uint32_t defaults_offset;
+ };
+diff --git a/src/gallium/drivers/v3d/v3dx_draw.c b/src/gallium/drivers/v3d/v3dx_draw.c
+index dd13e5177fe..4bff2ea6478 100644
+--- a/src/gallium/drivers/v3d/v3dx_draw.c
++++ b/src/gallium/drivers/v3d/v3dx_draw.c
+@@ -759,9 +759,6 @@ v3d_emit_gl_shader_state(struct v3d_context *v3d,
+                 shader.address_of_default_attribute_values =
+                         cl_address(v3d_resource(vtx->defaults)->bo,
+                                    vtx->defaults_offset);
+-#endif
+-#if V3D_VERSION >= 71
+-                unreachable("HW generation 71 not supported yet.");
+ #endif
+         }
+ 
+diff --git a/src/gallium/drivers/v3d/v3dx_state.c b/src/gallium/drivers/v3d/v3dx_state.c
+index a93d5be091e..3d3c4fb0f47 100644
+--- a/src/gallium/drivers/v3d/v3dx_state.c
++++ b/src/gallium/drivers/v3d/v3dx_state.c
+@@ -337,6 +337,20 @@ v3d_zsa_state_bind(struct pipe_context *pctx, void *hwcso)
+         v3d->dirty |= V3D_DIRTY_ZSA;
+ }
+ 
++
++static bool
++needs_default_attribute_values(void)
++{
++#if V3D_VERSION <= 42
++        /* FIXME: on vulkan we are able to refine even further, as we know in
++         * advance when we create the pipeline if we have a integer vertex
++         * attrib. Pending to check if we could do something similar here.
++         */
++        return true;
++#endif
++        return false;
++}
++
+ static void *
+ v3d_vertex_state_create(struct pipe_context *pctx, unsigned num_elements,
+                         const struct pipe_vertex_element *elements)
+@@ -414,24 +428,29 @@ v3d_vertex_state_create(struct pipe_context *pctx, unsigned num_elements,
+                 }
+         }
+ 
+-        /* Set up the default attribute values in case any of the vertex
+-         * elements use them.
+-         */
+-        uint32_t *attrs;
+-        u_upload_alloc(v3d->state_uploader, 0,
+-                       V3D_MAX_VS_INPUTS * sizeof(float), 16,
+-                       &so->defaults_offset, &so->defaults, (void **)&attrs);
+-
+-        for (int i = 0; i < V3D_MAX_VS_INPUTS / 4; i++) {
+-                attrs[i * 4 + 0] = 0;
+-                attrs[i * 4 + 1] = 0;
+-                attrs[i * 4 + 2] = 0;
+-                if (i < so->num_elements &&
+-                    util_format_is_pure_integer(so->pipe[i].src_format)) {
+-                        attrs[i * 4 + 3] = 1;
+-                } else {
+-                        attrs[i * 4 + 3] = fui(1.0);
++        if (needs_default_attribute_values()) {
++                /* Set up the default attribute values in case any of the vertex
++                 * elements use them.
++                 */
++                uint32_t *attrs;
++                u_upload_alloc(v3d->state_uploader, 0,
++                               V3D_MAX_VS_INPUTS * sizeof(float), 16,
++                               &so->defaults_offset, &so->defaults, (void **)&attrs);
++
++                for (int i = 0; i < V3D_MAX_VS_INPUTS / 4; i++) {
++                        attrs[i * 4 + 0] = 0;
++                        attrs[i * 4 + 1] = 0;
++                        attrs[i * 4 + 2] = 0;
++                        if (i < so->num_elements &&
++                            util_format_is_pure_integer(so->pipe[i].src_format)) {
++                                attrs[i * 4 + 3] = 1;
++                        } else {
++                                attrs[i * 4 + 3] = fui(1.0);
++                        }
+                 }
++        } else {
++                so->defaults = NULL;
++                so->defaults_offset = 0;
+         }
+ 
+         u_upload_unmap(v3d->state_uploader);
+-- 
+2.39.2
+

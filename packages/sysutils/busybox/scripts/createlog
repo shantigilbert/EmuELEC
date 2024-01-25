@@ -136,7 +136,7 @@ mkdir -p $BASEDIR/$LOGDIR
 
 # varlog.log
   LOGFILE="06_varlog.log"
-  for i in `find /var/log -type f`; do
+  for i in `find /var/log -name journal -prune -o -type f -print`; do
     getlog_cmd cat $i
   done
 

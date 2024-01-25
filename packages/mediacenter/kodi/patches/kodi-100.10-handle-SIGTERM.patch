@@ -52,7 +52,7 @@ so, when shutdown/reboot is requested:
      Stop(EXITCODE_RESTARTAPP);
  #endif
      break;
-@@ -2083,7 +2084,7 @@ bool CApplication::Stop(int exitCode)
+@@ -2094,7 +2095,7 @@ bool CApplication::Stop(int exitCode)
      m_frameMoveGuard.unlock();
  
      CVariant vExitCode(CVariant::VariantTypeObject);
@@ -61,7 +61,7 @@ so, when shutdown/reboot is requested:
      CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::System, "OnQuit", vExitCode);
  
      // Abort any active screensaver
-@@ -2115,7 +2116,6 @@ bool CApplication::Stop(int exitCode)
+@@ -2126,7 +2127,6 @@ bool CApplication::Stop(int exitCode)
      // Needs cleaning up
      CServiceBroker::GetAppMessenger()->Stop();
      m_AppFocused = false;
@@ -69,7 +69,7 @@ so, when shutdown/reboot is requested:
      CLog::Log(LOGINFO, "Stopping all");
  
      // cancel any jobs from the jobmanager
-@@ -2658,6 +2658,18 @@ void CApplication::StopPlaying()
+@@ -2669,6 +2669,18 @@ void CApplication::StopPlaying()
    }
  }
  
@@ -88,7 +88,7 @@ so, when shutdown/reboot is requested:
  bool CApplication::OnMessage(CGUIMessage& message)
  {
    switch (message.GetMessage())
-@@ -3178,7 +3190,7 @@ void CApplication::ProcessSlow()
+@@ -3189,7 +3201,7 @@ void CApplication::ProcessSlow()
    if (CPlatformPosix::TestQuitFlag())
    {
      CLog::Log(LOGINFO, "Quitting due to POSIX signal");

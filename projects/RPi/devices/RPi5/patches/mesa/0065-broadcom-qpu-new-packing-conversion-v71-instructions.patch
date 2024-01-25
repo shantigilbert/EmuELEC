@@ -1,0 +1,150 @@
+From c340f7f1eb4a1e5c0fafe1ea2f801f2ebaf82d8d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Fri, 26 Nov 2021 01:24:12 +0100
+Subject: [PATCH 065/142] broadcom/qpu: new packing/conversion v71 instructions
+
+This commits adds the qpu definitions for several new v71
+instructions.
+
+Packing:
+  * vpack does a 2x32 to 2x16 bit integer pack
+  * v8pack: Pack 2 x 2x16 bit integers into 4x8 bits
+  * v10pack packs parts of 2 2x16 bit integer into r10g10b10a2.
+  * v11fpack packs parts of 2 2x16 bit float into r11g11b10 rounding
+    to nearest
+
+Conversion to unorm/snorm:
+  * vftounorm8/vftosnorm8: converts from 2x16-bit floating point
+    to 2x8 bit unorm/snorm.
+  * ftounorm16/ftosnorm16: converts floating point to 16-bit
+    unorm/snorm
+  * vftounorm10lo: Convert 2x16-bit floating point to 2x10-bit unorm
+  * vftounorm10hi: Convert 2x16-bit floating point to one 2-bit and one 10-bit unorm
+---
+ src/broadcom/qpu/qpu_instr.c | 20 ++++++++++++++++++++
+ src/broadcom/qpu/qpu_instr.h | 12 ++++++++++++
+ src/broadcom/qpu/qpu_pack.c  | 12 ++++++++++++
+ 3 files changed, 44 insertions(+)
+
+diff --git a/src/broadcom/qpu/qpu_instr.c b/src/broadcom/qpu/qpu_instr.c
+index c30f4bbbccf..44f20618a5a 100644
+--- a/src/broadcom/qpu/qpu_instr.c
++++ b/src/broadcom/qpu/qpu_instr.c
+@@ -179,6 +179,10 @@ v3d_qpu_add_op_name(enum v3d_qpu_add_op op)
+                 [V3D_QPU_A_UTOF] = "utof",
+                 [V3D_QPU_A_MOV] = "mov",
+                 [V3D_QPU_A_FMOV] = "fmov",
++                [V3D_QPU_A_VPACK] = "vpack",
++                [V3D_QPU_A_V8PACK] = "v8pack",
++                [V3D_QPU_A_V10PACK] = "v10pack",
++                [V3D_QPU_A_V11FPACK] = "v11fpack",
+         };
+ 
+         if (op >= ARRAY_SIZE(op_names))
+@@ -201,6 +205,12 @@ v3d_qpu_mul_op_name(enum v3d_qpu_mul_op op)
+                 [V3D_QPU_M_MOV] = "mov",
+                 [V3D_QPU_M_NOP] = "nop",
+                 [V3D_QPU_M_FMUL] = "fmul",
++                [V3D_QPU_M_FTOUNORM16] = "ftounorm16",
++                [V3D_QPU_M_FTOSNORM16] = "ftosnorm16",
++                [V3D_QPU_M_VFTOUNORM8] = "vftounorm8",
++                [V3D_QPU_M_VFTOSNORM8] = "vftosnorm8",
++                [V3D_QPU_M_VFTOUNORM10LO] = "vftounorm10lo",
++                [V3D_QPU_M_VFTOUNORM10HI] = "vftounorm10hi",
+         };
+ 
+         if (op >= ARRAY_SIZE(op_names))
+@@ -463,6 +473,10 @@ static const uint8_t add_op_args[] = {
+ 
+         [V3D_QPU_A_MOV] = D | A,
+         [V3D_QPU_A_FMOV] = D | A,
++        [V3D_QPU_A_VPACK] = D | A | B,
++        [V3D_QPU_A_V8PACK] = D | A | B,
++        [V3D_QPU_A_V10PACK] = D | A | B,
++        [V3D_QPU_A_V11FPACK] = D | A | B,
+ };
+ 
+ static const uint8_t mul_op_args[] = {
+@@ -476,6 +490,12 @@ static const uint8_t mul_op_args[] = {
+         [V3D_QPU_M_NOP] = 0,
+         [V3D_QPU_M_MOV] = D | A,
+         [V3D_QPU_M_FMUL] = D | A | B,
++        [V3D_QPU_M_FTOUNORM16] = D | A,
++        [V3D_QPU_M_FTOSNORM16] = D | A,
++        [V3D_QPU_M_VFTOUNORM8] = D | A,
++        [V3D_QPU_M_VFTOSNORM8] = D | A,
++        [V3D_QPU_M_VFTOUNORM10LO] = D | A,
++        [V3D_QPU_M_VFTOUNORM10HI] = D | A,
+ };
+ 
+ bool
+diff --git a/src/broadcom/qpu/qpu_instr.h b/src/broadcom/qpu/qpu_instr.h
+index d408fb426fa..56eee9f9cac 100644
+--- a/src/broadcom/qpu/qpu_instr.h
++++ b/src/broadcom/qpu/qpu_instr.h
+@@ -231,6 +231,10 @@ enum v3d_qpu_add_op {
+         /* V3D 7.x */
+         V3D_QPU_A_FMOV,
+         V3D_QPU_A_MOV,
++        V3D_QPU_A_VPACK,
++        V3D_QPU_A_V8PACK,
++        V3D_QPU_A_V10PACK,
++        V3D_QPU_A_V11FPACK,
+ };
+ 
+ enum v3d_qpu_mul_op {
+@@ -244,6 +248,14 @@ enum v3d_qpu_mul_op {
+         V3D_QPU_M_MOV,
+         V3D_QPU_M_NOP,
+         V3D_QPU_M_FMUL,
++
++        /* V3D 7.x */
++        V3D_QPU_M_FTOUNORM16,
++        V3D_QPU_M_FTOSNORM16,
++        V3D_QPU_M_VFTOUNORM8,
++        V3D_QPU_M_VFTOSNORM8,
++        V3D_QPU_M_VFTOUNORM10LO,
++        V3D_QPU_M_VFTOUNORM10HI,
+ };
+ 
+ enum v3d_qpu_output_pack {
+diff --git a/src/broadcom/qpu/qpu_pack.c b/src/broadcom/qpu/qpu_pack.c
+index 7984712d527..6cd75adac6d 100644
+--- a/src/broadcom/qpu/qpu_pack.c
++++ b/src/broadcom/qpu/qpu_pack.c
+@@ -783,6 +783,9 @@ static const struct opcode_desc add_ops_v71[] = {
+         { 246, 246, .raddr_mask = OP_RANGE(32, 34), V3D_QPU_A_ITOF, 71 },
+         { 246, 246, .raddr_mask = OP_RANGE(36, 38), V3D_QPU_A_UTOF, 71 },
+ 
++        { 247, 247, .raddr_mask = ANYOPMASK, V3D_QPU_A_VPACK, 71 },
++        { 248, 248, .raddr_mask = ANYOPMASK, V3D_QPU_A_V8PACK, 71 },
++
+         { 249, 249, .raddr_mask = OP_RANGE(0, 2),   V3D_QPU_A_FMOV, 71 },
+         { 249, 249, .raddr_mask = OP_RANGE(4, 6),   V3D_QPU_A_FMOV, 71 },
+         { 249, 249, .raddr_mask = OP_RANGE(8, 10),  V3D_QPU_A_FMOV, 71 },
+@@ -797,6 +800,8 @@ static const struct opcode_desc add_ops_v71[] = {
+         { 249, 249, .raddr_mask = OP_MASK(15), V3D_QPU_A_MOV, 71 },
+         { 249, 249, .raddr_mask = OP_MASK(19), V3D_QPU_A_MOV, 71 },
+ 
++        { 250, 250, .raddr_mask = ANYOPMASK, V3D_QPU_A_V10PACK, 71 },
++        { 251, 251, .raddr_mask = ANYOPMASK, V3D_QPU_A_V11FPACK, 71 },
+ };
+ 
+ static const struct opcode_desc mul_ops_v71[] = {
+@@ -822,6 +827,13 @@ static const struct opcode_desc mul_ops_v71[] = {
+         { 14, 14, .raddr_mask = OP_MASK(15), V3D_QPU_M_MOV, 71 },
+         { 14, 14, .raddr_mask = OP_MASK(19), V3D_QPU_M_MOV, 71 },
+ 
++        { 14, 14, .raddr_mask = OP_MASK(32), V3D_QPU_M_FTOUNORM16, 71 },
++        { 14, 14, .raddr_mask = OP_MASK(33), V3D_QPU_M_FTOSNORM16, 71 },
++        { 14, 14, .raddr_mask = OP_MASK(34), V3D_QPU_M_VFTOUNORM8, 71 },
++        { 14, 14, .raddr_mask = OP_MASK(35), V3D_QPU_M_VFTOSNORM8, 71 },
++        { 14, 14, .raddr_mask = OP_MASK(48), V3D_QPU_M_VFTOUNORM10LO, 71 },
++        { 14, 14, .raddr_mask = OP_MASK(49), V3D_QPU_M_VFTOUNORM10HI, 71 },
++
+         { 14, 14, .raddr_mask = OP_MASK(63), V3D_QPU_M_NOP, 71 },
+ 
+         { 16, 63, .raddr_mask = ANYOPMASK, V3D_QPU_M_FMUL },
+-- 
+2.39.2
+

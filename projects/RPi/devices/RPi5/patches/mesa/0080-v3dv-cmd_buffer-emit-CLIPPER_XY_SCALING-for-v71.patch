@@ -1,0 +1,38 @@
+From 2eb29b57fde2acda76e12953b3a1050f3056b39d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Sun, 19 Sep 2021 23:37:32 +0200
+Subject: [PATCH 080/142] v3dv/cmd_buffer: emit CLIPPER_XY_SCALING for v71
+
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index ae1c21ae00b..2e525a11619 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -1246,9 +1246,7 @@ v3dX(cmd_buffer_emit_viewport)(struct v3dv_cmd_buffer *cmd_buffer)
+     * now, would need to change if we allow multiple viewports
+     */
+    float *vptranslate = dynamic->viewport.translate[0];
+-#if V3D_VERSION == 42
+    float *vpscale = dynamic->viewport.scale[0];
+-#endif
+ 
+    struct v3dv_job *job = cmd_buffer->state.job;
+    assert(job);
+@@ -1268,7 +1266,10 @@ v3dX(cmd_buffer_emit_viewport)(struct v3dv_cmd_buffer *cmd_buffer)
+    }
+ #endif
+ #if V3D_VERSION >= 71
+-   unreachable("HW generation 71 not supported yet.");
++   cl_emit(&job->bcl, CLIPPER_XY_SCALING, clip) {
++      clip.viewport_half_width_in_1_64th_of_pixel = vpscale[0] * 64.0f;
++      clip.viewport_half_height_in_1_64th_of_pixel = vpscale[1] * 64.0f;
++   }
+ #endif
+ 
+    float translate_z, scale_z;
+-- 
+2.39.2
+

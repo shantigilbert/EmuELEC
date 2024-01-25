@@ -1,0 +1,34 @@
+From 73a8feac65bcae4e0c55855482cc485edf1630f2 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Tue, 16 Jan 2024 15:38:56 +0100
+Subject: [PATCH 21/21] AMLCodec: marginal increase frame buffer levels
+
+---
+ xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+index 7d702cd1c4..dae7e39ea6 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+@@ -2638,7 +2638,7 @@ CDVDVideoCodec::VCReturn CAMLCodec::GetPicture(VideoPicture *pVideoPicture)
+   if (!m_opened)
+     return CDVDVideoCodec::VC_ERROR;
+ 
+-  if ((!m_drain && buffer_level > 1.0f) && (ret = DequeueBuffer()) == 0)
++  if ((!m_drain && buffer_level > 5.0f) && (ret = DequeueBuffer()) == 0)
+   {
+     pVideoPicture->iFlags = 0;
+     m_tp_last_frame = std::chrono::system_clock::now();
+@@ -2679,7 +2679,7 @@ CDVDVideoCodec::VCReturn CAMLCodec::GetPicture(VideoPicture *pVideoPicture)
+   }
+   else if (m_drain)
+     return CDVDVideoCodec::VC_EOF;
+-  else if (buffer_level > 2.0f)
++  else if (buffer_level > 10.0f)
+     return CDVDVideoCodec::VC_NONE;
+   else if (ret != EAGAIN || elapsed_since_last_frame > std::chrono::seconds(m_decoder_timeout))
+   {
+-- 
+2.43.0
+

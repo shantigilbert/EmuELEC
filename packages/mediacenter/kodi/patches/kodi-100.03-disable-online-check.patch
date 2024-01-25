@@ -3,7 +3,7 @@ Subject: disable online check
 ---
 --- a/xbmc/GUIInfoManager.cpp
 +++ b/xbmc/GUIInfoManager.cpp
-@@ -1919,7 +1919,6 @@ const infomap system_labels[] = {
+@@ -1921,7 +1921,6 @@ const infomap system_labels[] = {
      {"currentcontrol", SYSTEM_CURRENT_CONTROL},
      {"currentcontrolid", SYSTEM_CURRENT_CONTROL_ID},
      {"dvdlabel", SYSTEM_DVD_LABEL},

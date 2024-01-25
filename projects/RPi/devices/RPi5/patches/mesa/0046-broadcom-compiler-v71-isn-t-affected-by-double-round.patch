@@ -1,0 +1,34 @@
+From e1a0fa2c2010ef29b8cec798cd0fc99cf44f3a2d Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Thu, 14 Oct 2021 14:16:40 +0200
+Subject: [PATCH 046/142] broadcom/compiler: v71 isn't affected by
+ double-rounding of viewport X,Y coords
+
+---
+ src/broadcom/compiler/v3d_nir_lower_io.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/src/broadcom/compiler/v3d_nir_lower_io.c b/src/broadcom/compiler/v3d_nir_lower_io.c
+index 3ef0e398228..4cdba3748a1 100644
+--- a/src/broadcom/compiler/v3d_nir_lower_io.c
++++ b/src/broadcom/compiler/v3d_nir_lower_io.c
+@@ -600,9 +600,13 @@ v3d_nir_emit_ff_vpm_outputs(struct v3d_compile *c, nir_builder *b,
+                          * The correct fix for this as recommended by Broadcom
+                          * is to convert to .8 fixed-point with ffloor().
+                          */
+-                        pos = nir_f2i32(b, nir_ffloor(b, pos));
+-                        v3d_nir_store_output(b, state->vp_vpm_offset + i,
+-                                             offset_reg, pos);
++                        if (c->devinfo->ver <= 42)
++                                 pos = nir_f2i32(b, nir_ffloor(b, pos));
++                        else
++                                 pos = nir_f2i32(b, nir_fround_even(b, pos));
++
++                       v3d_nir_store_output(b, state->vp_vpm_offset + i,
++                                            offset_reg, pos);
+                 }
+         }
+ 
+-- 
+2.39.2
+

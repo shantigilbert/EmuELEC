@@ -1,0 +1,61 @@
+From 3af87d2672da7c928ecf8a0a1cd1bef8a6729364 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Mon, 22 Nov 2021 12:56:03 +0100
+Subject: [PATCH 058/142] broadcom/compiler: update thread end restrictions for
+ v7.x
+
+In 4.x it is not allowed to write to the register file in the last
+3 instructions, but in 7.x we only have this restriction in the
+thread end instruction itself, and only if the write comes from
+the ALU ports.
+---
+ src/broadcom/compiler/qpu_schedule.c | 31 ++++++++++++++++++++--------
+ 1 file changed, 22 insertions(+), 9 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index bd1c920848a..cba16c77d67 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -1938,17 +1938,30 @@ qpu_inst_valid_in_thrend_slot(struct v3d_compile *c,
+                         return false;
+                 }
+ 
+-                /* No writing physical registers at the end. */
+-                bool add_is_nop = inst->alu.add.op == V3D_QPU_A_NOP;
+-                bool mul_is_nop = inst->alu.mul.op == V3D_QPU_M_NOP;
+-                if ((!add_is_nop && !inst->alu.add.magic_write) ||
+-                    (!mul_is_nop && !inst->alu.mul.magic_write)) {
+-                        return false;
++                if (c->devinfo->ver <= 42) {
++                        /* No writing physical registers at the end. */
++                        bool add_is_nop = inst->alu.add.op == V3D_QPU_A_NOP;
++                        bool mul_is_nop = inst->alu.mul.op == V3D_QPU_M_NOP;
++                        if ((!add_is_nop && !inst->alu.add.magic_write) ||
++                            (!mul_is_nop && !inst->alu.mul.magic_write)) {
++                                return false;
++                        }
++
++                        if (v3d_qpu_sig_writes_address(c->devinfo, &inst->sig) &&
++                            !inst->sig_magic) {
++                                return false;
++                        }
+                 }
+ 
+-                if (v3d_qpu_sig_writes_address(c->devinfo, &inst->sig) &&
+-                    !inst->sig_magic) {
+-                        return false;
++                if (c->devinfo->ver >= 71) {
++                        /* The thread end instruction must not write to the
++                         * register file via the add/mul ALUs.
++                         */
++                        if (slot == 0 &&
++                            (!inst->alu.add.magic_write ||
++                             !inst->alu.mul.magic_write)) {
++                                return false;
++                        }
+                 }
+ 
+                 if (c->devinfo->ver < 40 && inst->alu.add.op == V3D_QPU_A_SETMSF)
+-- 
+2.39.2
+

@@ -1,0 +1,117 @@
+From fc1fe85f01a67ef6e5758f1022950ad79b1b305a Mon Sep 17 00:00:00 2001
+From: Neil Roberts <nroberts@igalia.com>
+Date: Mon, 5 Jul 2021 20:19:06 +0200
+Subject: [PATCH 139/142] Add a hack to avoid the shadow tex update for
+ imported linear texs
+
+This adds a hacky interface so that an application can override the
+mechanism used to detect when to update the shadow texture which is used
+when importing a linear texture. The application can enable this by
+calling:
+
+glTexParameteri(GL_TEXTURE_2D, GL_SYNC_CONDITION, 1);
+
+And then whenever it determines that the shadow texture should be
+updated it can call:
+
+glTexParameteri(GL_TEXTURE_2D, GL_SYNC_STATUS, 1);
+
+(cherry picked from commit 1269e2cfbfa876fdc85037b9435085174d76ad57)
+---
+ src/gallium/drivers/v3d/v3d_resource.c |  5 ++++-
+ src/gallium/include/pipe/p_state.h     |  4 ++++
+ src/mesa/main/mtypes.h                 |  3 +++
+ src/mesa/main/texparam.c               | 18 ++++++++++++++++++
+ 4 files changed, 29 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/v3d/v3d_resource.c b/src/gallium/drivers/v3d/v3d_resource.c
+index 46de1b16ae0..8e31acb0ff0 100644
+--- a/src/gallium/drivers/v3d/v3d_resource.c
++++ b/src/gallium/drivers/v3d/v3d_resource.c
+@@ -1048,7 +1048,9 @@ v3d_update_shadow_texture(struct pipe_context *pctx,
+ 
+         assert(view->texture != pview->texture);
+ 
+-        if (shadow->writes == orig->writes && orig->bo->private)
++        if (shadow->writes == orig->writes &&
++            orig->base.sync_status == 0 &&
++            (orig->bo->private || orig->base.sync_condition))
+                 return;
+ 
+         perf_debug("Updating %dx%d@%d shadow for linear texture\n",
+@@ -1091,6 +1093,7 @@ v3d_update_shadow_texture(struct pipe_context *pctx,
+         }
+ 
+         shadow->writes = orig->writes;
++        orig->base.sync_status = 0;
+ }
+ 
+ static struct pipe_surface *
+diff --git a/src/gallium/include/pipe/p_state.h b/src/gallium/include/pipe/p_state.h
+index 549e4d21c05..abc58552544 100644
+--- a/src/gallium/include/pipe/p_state.h
++++ b/src/gallium/include/pipe/p_state.h
+@@ -610,6 +610,10 @@ struct pipe_resource
+    unsigned bind;            /**< bitmask of PIPE_BIND_x */
+    unsigned flags;           /**< bitmask of PIPE_RESOURCE_FLAG_x */
+ 
++   /* Hack for avoiding sync on v3d */
++   unsigned sync_condition;
++   unsigned sync_status;
++
+    /**
+     * For planar images, ie. YUV EGLImage external, etc, pointer to the
+     * next plane.
+diff --git a/src/mesa/main/mtypes.h b/src/mesa/main/mtypes.h
+index 77c38bf48d5..1eb2dac8018 100644
+--- a/src/mesa/main/mtypes.h
++++ b/src/mesa/main/mtypes.h
+@@ -1058,6 +1058,9 @@ struct gl_texture_object
+      * the pipe_resource *pt above.
+      */
+     bool needs_validation;
++
++    /* Hack for avoiding sync on v3d */
++    GLboolean SyncCondition;
+ };
+ 
+ 
+diff --git a/src/mesa/main/texparam.c b/src/mesa/main/texparam.c
+index 001cc185722..139db3ce3e2 100644
+--- a/src/mesa/main/texparam.c
++++ b/src/mesa/main/texparam.c
+@@ -274,6 +274,13 @@ set_tex_parameteri(struct gl_context *ctx,
+    }
+ 
+    switch (pname) {
++   case GL_SYNC_CONDITION:
++      if (!!texObj->SyncCondition == !!params[0])
++         return GL_FALSE;
++      texObj->SyncCondition = !!params[0];
++      return GL_TRUE;
++   case GL_SYNC_STATUS:
++      return GL_TRUE;
+    case GL_TEXTURE_MIN_FILTER:
+       if (!_mesa_target_allows_setting_sampler_parameters(texObj->Target))
+          goto invalid_dsa;
+@@ -931,6 +938,17 @@ _mesa_texture_parameter_invalidate(struct gl_context *ctx,
+ {
+    if (texparam_invalidates_sampler_views(pname))
+       st_texture_release_all_sampler_views(st_context(ctx), texObj);
++
++   switch (pname) {
++   case GL_SYNC_CONDITION:
++      texObj->pt->sync_condition = texObj->SyncCondition;
++      break;
++   case GL_SYNC_STATUS:
++      texObj->pt->sync_status = 1;
++      break;
++   default:
++      ; /* nothing */
++   }
+ }
+ 
+ void
+-- 
+2.39.2
+

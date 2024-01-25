@@ -1,0 +1,115 @@
+From 913f7b48647bdbd23fdc4abccf2168b061273aa4 Mon Sep 17 00:00:00 2001
+From: Rod Smith <rodsmith@rodsbooks.com>
+Date: Tue, 26 Apr 2022 15:46:49 -0400
+Subject: [PATCH 03/12] Updated URLs in man pages to HTTPS rather than HTTP
+
+---
+ cgdisk.8   | 8 ++++----
+ fixparts.8 | 4 ++--
+ gdisk.8    | 8 ++++----
+ sgdisk.8   | 8 ++++----
+ 4 files changed, 14 insertions(+), 14 deletions(-)
+
+diff --git a/cgdisk.8 b/cgdisk.8
+index e3b5cb4..bc83d4b 100644
+--- a/cgdisk.8
++++ b/cgdisk.8
+@@ -25,7 +25,7 @@ disks.
+ 
+ For information on MBR vs. GPT, as well as GPT terminology and structure,
+ see the extended GPT fdisk documentation at
+-\fIhttp://www.rodsbooks.com/gdisk/\fR or consult Wikipedia.
++\fIhttps://www.rodsbooks.com/gdisk/\fR or consult Wikipedia.
+ 
+ The \fBcgdisk\fR program employs a user interface similar to that of Linux's
+ \fBcfdisk\fR, but \fBcgdisk\fR modifies GPT partitions. It also has the
+@@ -389,11 +389,11 @@ Contributors:
+ .BR sgdisk (8),
+ .BR fixparts (8).
+ 
+-\fIhttp://en.wikipedia.org/wiki/GUID_Partition_Table\fR
++\fIhttps://en.wikipedia.org/wiki/GUID_Partition_Table\fR
+ 
+-\fIhttp://developer.apple.com/technotes/tn2006/tn2166.html\fR
++\fIhttps://developer.apple.com/technotes/tn2006/tn2166.html\fR
+ 
+-\fIhttp://www.rodsbooks.com/gdisk/\fR
++\fIhttps://www.rodsbooks.com/gdisk/\fR
+ 
+ .SH "AVAILABILITY"
+ The \fBcgdisk\fR command is part of the \fIGPT fdisk\fR package and is
+diff --git a/fixparts.8 b/fixparts.8
+index da7462a..25d05ad 100644
+--- a/fixparts.8
++++ b/fixparts.8
+@@ -273,9 +273,9 @@ Contributors:
+ .BR gdisk (8),
+ .BR sgdisk (8).
+ 
+-\fIhttp://en.wikipedia.org/wiki/Master_boot_record\fR
++\fIhttps://en.wikipedia.org/wiki/Master_boot_record\fR
+ 
+-\fIhttp://www.rodsbooks.com/fixparts/\fR
++\fIhttps://www.rodsbooks.com/fixparts/\fR
+ 
+ .SH "AVAILABILITY"
+ The \fBfixparts\fR command is part of the \fIGPT fdisk\fR package and is
+diff --git a/gdisk.8 b/gdisk.8
+index b826b89..8c9929b 100644
+--- a/gdisk.8
++++ b/gdisk.8
+@@ -27,7 +27,7 @@ recovery options require you to understand the distinctions between the
+ main and backup data, as well as between the GPT headers and the partition
+ tables. For information on MBR vs. GPT, as well as GPT terminology and
+ structure, see the extended \fBgdisk\fR documentation at
+-\fIhttp://www.rodsbooks.com/gdisk/\fR or consult Wikipedia.
++\fIhttps://www.rodsbooks.com/gdisk/\fR or consult Wikipedia.
+ 
+ The \fBgdisk\fR program employs a user interface similar to that of Linux's
+ \fBfdisk\fR, but \fBgdisk\fR modifies GPT partitions. It also has the
+@@ -702,11 +702,11 @@ Contributors:
+ .BR sgdisk (8),
+ .BR fixparts (8).
+ 
+-\fIhttp://en.wikipedia.org/wiki/GUID_Partition_Table\fR
++\fIhttps://en.wikipedia.org/wiki/GUID_Partition_Table\fR
+ 
+-\fIhttp://developer.apple.com/technotes/tn2006/tn2166.html\fR
++\fIhttps://developer.apple.com/technotes/tn2006/tn2166.html\fR
+ 
+-\fIhttp://www.rodsbooks.com/gdisk/\fR
++\fIhttps://www.rodsbooks.com/gdisk/\fR
+ 
+ .SH "AVAILABILITY"
+ The \fBgdisk\fR command is part of the \fIGPT fdisk\fR package and is
+diff --git a/sgdisk.8 b/sgdisk.8
+index b966a13..4e5a15a 100644
+--- a/sgdisk.8
++++ b/sgdisk.8
+@@ -23,7 +23,7 @@ recovery options require you to understand the distinctions between the
+ main and backup data, as well as between the GPT headers and the partition
+ tables. For information on MBR vs. GPT, as well as GPT terminology and
+ structure, see the extended \fBgdisk\fR documentation at
+-\fIhttp://www.rodsbooks.com/gdisk/\fR or consult Wikipedia.
++\fIhttps://www.rodsbooks.com/gdisk/\fR or consult Wikipedia.
+ 
+ The \fBsgdisk\fR program employs a user interface that's based entirely on
+ the command line, making it suitable for use in scripts or by experts who
+@@ -632,11 +632,11 @@ Contributors:
+ .BR sfdisk (8),
+ .BR fixparts (8).
+ 
+-\fIhttp://en.wikipedia.org/wiki/GUID_Partition_Table\fR
++\fIhttps://en.wikipedia.org/wiki/GUID_Partition_Table\fR
+ 
+-\fIhttp://developer.apple.com/technotes/tn2006/tn2166.html\fR
++\fIhttps://developer.apple.com/technotes/tn2006/tn2166.html\fR
+ 
+-\fIhttp://www.rodsbooks.com/gdisk/\fR
++\fIhttps://www.rodsbooks.com/gdisk/\fR
+ 
+ .SH "AVAILABILITY"
+ The \fBsgdisk\fR command is part of the \fIGPT fdisk\fR package and is
+-- 
+2.31.1
+

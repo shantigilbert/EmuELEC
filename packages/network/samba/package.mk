@@ -3,8 +3,8 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="samba"
-PKG_VERSION="4.17.5"
-PKG_SHA256="ebb7880d474ffc09d73b5fc77bcbd657f6235910337331a9c24d7f69ca11442b"
+PKG_VERSION="4.17.12"
+PKG_SHA256="6129a7f967b822b308c57152326e7302711c2d0b9830a82d0c21832b648741f4"
 PKG_LICENSE="GPLv3+"
 PKG_SITE="https://www.samba.org"
 PKG_URL="https://download.samba.org/pub/samba/stable/${PKG_NAME}-${PKG_VERSION}.tar.gz"
@@ -176,7 +176,6 @@ post_makeinstall_target() {
 
   mkdir -p ${INSTALL}/usr/lib/samba
     cp ${PKG_DIR}/scripts/samba-config ${INSTALL}/usr/lib/samba
-    cp ${PKG_DIR}/scripts/smbd-config ${INSTALL}/usr/lib/samba
     cp ${PKG_DIR}/scripts/samba-autoshare ${INSTALL}/usr/lib/samba
 
   if find_file_path config/smb.conf; then

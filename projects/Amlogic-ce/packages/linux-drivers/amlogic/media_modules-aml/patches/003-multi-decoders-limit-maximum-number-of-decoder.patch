@@ -21,7 +21,7 @@ index 18d7cd1..56f044a 100644
  void vdec_module_exit(void);
  
 -#define MAX_INSTANCE_MUN  9
-+#define MAX_INSTANCE_MUN  1
++#define MAX_INSTANCE_MUN  2
  
  #define VDEC_DEBUG_SUPPORT
  

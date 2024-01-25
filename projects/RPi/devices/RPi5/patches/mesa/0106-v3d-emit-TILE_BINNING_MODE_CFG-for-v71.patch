@@ -1,0 +1,39 @@
+From 1ef6241854666a00d43401039809f2470d3a2cc0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Wed, 20 Oct 2021 14:31:10 +0200
+Subject: [PATCH 106/142] v3d: emit TILE_BINNING_MODE_CFG for v71
+
+---
+ src/gallium/drivers/v3d/v3dx_draw.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/v3d/v3dx_draw.c b/src/gallium/drivers/v3d/v3dx_draw.c
+index 2c74c5973c9..9f38baa0bbf 100644
+--- a/src/gallium/drivers/v3d/v3dx_draw.c
++++ b/src/gallium/drivers/v3d/v3dx_draw.c
+@@ -96,7 +96,21 @@ v3dX(start_binning)(struct v3d_context *v3d, struct v3d_job *job)
+ 
+         assert(!job->msaa || !job->double_buffer);
+ #if V3D_VERSION >= 71
+-        unreachable("HW generation 71 not supported yet.");
++        cl_emit(&job->bcl, TILE_BINNING_MODE_CFG, config) {
++                config.width_in_pixels = job->draw_width;
++                config.height_in_pixels = job->draw_height;
++
++                config.log2_tile_width = log2_tile_size(job->tile_width);
++                config.log2_tile_height = log2_tile_size(job->tile_height);
++
++                /* FIXME: ideallly we would like next assert on the packet header (as is
++                 * general, so also applies to GL). We would need to expand
++                 * gen_pack_header for that.
++                 */
++                assert(config.log2_tile_width == config.log2_tile_height ||
++                       config.log2_tile_width == config.log2_tile_height + 1);
++        }
++
+ #endif
+ 
+ #if V3D_VERSION >= 40 && V3D_VERSION <= 42
+-- 
+2.39.2
+

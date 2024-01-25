@@ -1,0 +1,40 @@
+From da0a3deadf86a46c8323267d3f6a49e442835608 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Fri, 17 Sep 2021 01:07:06 +0200
+Subject: [PATCH 019/142] broadcom/compiler: don't favor/select accum registers
+ for hw not supporting it
+
+Note that what we do is to just return false on the favor/select accum
+methods. We could just avoid to call them, but as the select is called
+more than once, it is just easier this way.
+---
+ src/broadcom/compiler/vir_register_allocate.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/broadcom/compiler/vir_register_allocate.c b/src/broadcom/compiler/vir_register_allocate.c
+index a358b616e13..1f495180784 100644
+--- a/src/broadcom/compiler/vir_register_allocate.c
++++ b/src/broadcom/compiler/vir_register_allocate.c
+@@ -797,6 +797,9 @@ v3d_ra_favor_accum(struct v3d_ra_select_callback_data *v3d_ra,
+                    BITSET_WORD *regs,
+                    int priority)
+ {
++        if (!v3d_ra->devinfo->has_accumulators)
++                return false;
++
+         /* Favor accumulators if we have less that this number of physical
+          * registers. Accumulators have more restrictions (like being
+          * invalidated through thrsw), so running out of physical registers
+@@ -832,6 +835,9 @@ v3d_ra_select_accum(struct v3d_ra_select_callback_data *v3d_ra,
+                     BITSET_WORD *regs,
+                     unsigned int *out)
+ {
++        if (!v3d_ra->devinfo->has_accumulators)
++                return false;
++
+         /* Choose r5 for our ldunifs if possible (nobody else can load to that
+          * reg, and it keeps the QPU cond field free from being occupied by
+          * ldunifrf).
+-- 
+2.39.2
+

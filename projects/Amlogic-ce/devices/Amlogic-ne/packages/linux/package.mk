@@ -4,12 +4,12 @@
 # Copyright (C) 2022-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="linux"
-PKG_VERSION="afcb43a21a7173d8c893186a1af800eb384c6dea"
-PKG_SHA256="1518d91ba7e5d38ce8b856befab0aed2249cc2a9db9004a2a973716ac4f8c14e"
+PKG_VERSION="7b4c2e2d3d2b7152bac7d9634d2aee235971765d"
+PKG_SHA256="224abd62c8e45ee31d61d46ff9b2ceb7bca4ab8641d7050c13dee48575307d4a"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kernel.org"
 PKG_URL="https://github.com/CoreELEC/linux-amlogic/archive/${PKG_VERSION}.tar.gz"
-PKG_GIT_BRANCH="amlogic-5.4.125"
+PKG_GIT_BRANCH="amlogic-5.4.210"
 PKG_BUILD_PERF="no"
 PKG_DEPENDS_HOST="ccache:host rsync:host openssl:host"
 PKG_DEPENDS_TARGET="toolchain linux:host kmod:host xz:host keyutils aml-dtbtools:host aml-dtbtools ${KERNEL_EXTRA_DEPENDS_TARGET}"
@@ -35,7 +35,7 @@ if [ "${PKG_BUILD_PERF}" != "no" ] && grep -q ^CONFIG_PERF_EVENTS= ${PKG_KERNEL_
 fi
 
 if [ "${TARGET_ARCH}" = "x86_64" ]; then
-  PKG_DEPENDS_TARGET="${PKG_DEPENDS_TARGET} elfutils:host pciutils"
+  PKG_DEPENDS_TARGET="${PKG_DEPENDS_TARGET} elfutils:host"
   PKG_DEPENDS_UNPACK+=" intel-ucode kernel-firmware"
 fi
 
@@ -107,10 +107,8 @@ post_patch() {
 
     # 5.4.125 kernel compile errors
     sed -e 's|^KBUILD_CFLAGS += $(call cc-option,-Wimplicit-fallthrough,).*||' \
-        -e 's|^KBUILD_CFLAGS   := \(.*\)|KBUILD_CFLAGS   := -Wno-format -Wno-unused-function -Wno-misleading-indentation \1|' \
-        -e 's|^KBUILD_LDFLAGS :=|KBUILD_LDFLAGS := $(call ld-option,--no-warn-rwx-segments)|' \
+        -e 's|^\(KBUILD_CFLAGS\t+= -Werror\)|# \1|' \
         -i ${PKG_BUILD}/Makefile
-    sed -i 's|-z norelro||' ${PKG_BUILD}/arch/arm64/Makefile
   fi
 }
 
@@ -140,7 +138,7 @@ makeinstall_host() {
 }
 
 build_gpio_data() {
-	cat << EOF > drivers/bootloader/gpio_data.h
+  cat << EOF > drivers/bootloader/gpio_data.h
 typedef struct bl30_gpio {
     char name[16];
     uint32_t number;
@@ -202,15 +200,18 @@ make_target() {
     KERNEL_TARGET="${KERNEL_TARGET/uImage/Image}"
   fi
 
-  kernel_make modules
-  kernel_make INSTALL_MOD_PATH=${INSTALL}/$(get_kernel_overlay_dir) modules_install
-  rm -f ${INSTALL}/$(get_kernel_overlay_dir)/lib/modules/*/build
-  rm -f ${INSTALL}/$(get_kernel_overlay_dir)/lib/modules/*/source
-
   rm -rf ${BUILD}/initramfs
   rm -f ${STAMPS_INSTALL}/initramfs/install_target ${STAMPS_INSTALL}/*/install_init
 
   if [ -n "${INITRAMFS_MODULES}" ]; then
+    # build and install modules because some of them are needed in initramfs
+
+    kernel_make modules
+    kernel_make INSTALL_MOD_PATH=${INSTALL}/$(get_kernel_overlay_dir) modules_install
+
+    rm -f ${INSTALL}/$(get_kernel_overlay_dir)/lib/modules/*/build
+    rm -f ${INSTALL}/$(get_kernel_overlay_dir)/lib/modules/*/source
+
     mkdir -p ${BUILD}/initramfs/etc
     mkdir -p ${BUILD}/initramfs/usr/lib/modules
 
@@ -233,6 +234,14 @@ make_target() {
   # file with symbols from built-in and external modules.
   # Without that it'll contain only the symbols from the kernel
   kernel_make ${KERNEL_TARGET} ${KERNEL_MAKE_EXTRACMD} modules
+
+  if [ -z "${INITRAMFS_MODULES}" ]; then
+    # need to install modules here
+    kernel_make INSTALL_MOD_PATH=${INSTALL}/$(get_kernel_overlay_dir) modules_install
+
+    rm -f ${INSTALL}/$(get_kernel_overlay_dir)/lib/modules/*/build
+    rm -f ${INSTALL}/$(get_kernel_overlay_dir)/lib/modules/*/source
+  fi
 
   # collect all device tree in 'coreelec' subfolders
   DTB_PATH="arch/${TARGET_KERNEL_ARCH}/boot/dts/amlogic"

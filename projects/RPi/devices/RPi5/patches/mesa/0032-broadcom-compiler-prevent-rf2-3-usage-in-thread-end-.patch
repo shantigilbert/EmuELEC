@@ -1,0 +1,67 @@
+From 92e91a9b22ae61dc9f39880e8fdaa7714789efdb Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Mon, 27 Sep 2021 11:49:24 +0200
+Subject: [PATCH 032/142] broadcom/compiler: prevent rf2-3 usage in thread end
+ delay slots for v71
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Iago Toral Quiroga <itoral@igalia.com>
+Signed-off-by: Alejandro Piñeiro <apinheiro@igalia.com>
+---
+ src/broadcom/compiler/qpu_schedule.c | 37 +++++++++++++++++++++-------
+ 1 file changed, 28 insertions(+), 9 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index b78abe003e9..839c0c62315 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -1691,16 +1691,35 @@ qpu_inst_valid_in_thrend_slot(struct v3d_compile *c,
+                 if (c->devinfo->ver < 40 && inst->alu.add.op == V3D_QPU_A_SETMSF)
+                         return false;
+ 
+-                /* RF0-2 might be overwritten during the delay slots by
+-                 * fragment shader setup.
+-                 */
+-                if (inst->raddr_a < 3 && v3d_qpu_uses_mux(inst, V3D_QPU_MUX_A))
+-                        return false;
++                if (c->devinfo->ver <= 42) {
++                        /* RF0-2 might be overwritten during the delay slots by
++                         * fragment shader setup.
++                         */
++                        if (inst->raddr_a < 3 && v3d_qpu_uses_mux(inst, V3D_QPU_MUX_A))
++                                return false;
+ 
+-                if (inst->raddr_b < 3 &&
+-                    !inst->sig.small_imm_b &&
+-                    v3d_qpu_uses_mux(inst, V3D_QPU_MUX_B)) {
+-                        return false;
++                        if (inst->raddr_b < 3 &&
++                            !inst->sig.small_imm_b &&
++                            v3d_qpu_uses_mux(inst, V3D_QPU_MUX_B)) {
++                                return false;
++                        }
++                }
++
++                if (c->devinfo->ver >= 71) {
++                        /* RF2-3 might be overwritten during the delay slots by
++                         * fragment shader setup.
++                         *
++                         * FIXME: handle small immediate cases
++                         */
++                        if (v3d71_qpu_reads_raddr(inst, 2) ||
++                            v3d71_qpu_reads_raddr(inst, 3)) {
++                                return false;
++                        }
++
++                        if (v3d71_qpu_writes_waddr_explicitly(c->devinfo, inst, 2) ||
++                            v3d71_qpu_writes_waddr_explicitly(c->devinfo, inst, 3)) {
++                                return false;
++                        }
+                 }
+         }
+ 
+-- 
+2.39.2
+

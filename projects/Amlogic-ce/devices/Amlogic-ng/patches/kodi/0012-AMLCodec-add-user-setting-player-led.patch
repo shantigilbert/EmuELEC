@@ -1,0 +1,172 @@
+From d1dc56abe3fff3da1a075e6023aa86265339ef37 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Fri, 14 Apr 2023 11:19:44 +0200
+Subject: [PATCH 12/21] AMLCodec: add user setting player led Added the option
+ when display led and player led mode is supported by the display.
+
+---
+ .../resource.language.en_gb/resources/strings.po | 12 +++++++++++-
+ system/settings/settings.xml                     |  6 ++++++
+ .../VideoPlayer/DVDCodecs/Video/AMLCodec.cpp     | 12 ++++++++++++
+ xbmc/settings/Settings.h                         |  1 +
+ xbmc/utils/AMLUtils.cpp                          | 16 ++++++++++++++++
+ xbmc/utils/AMLUtils.h                            |  1 +
+ xbmc/windowing/amlogic/WinSystemAmlogic.cpp      | 14 ++++++++++++++
+ 7 files changed, 61 insertions(+), 1 deletion(-)
+
+diff --git a/addons/resource.language.en_gb/resources/strings.po b/addons/resource.language.en_gb/resources/strings.po
+index 3b05260f01..4c52795d32 100644
+--- a/addons/resource.language.en_gb/resources/strings.po
++++ b/addons/resource.language.en_gb/resources/strings.po
+@@ -8679,7 +8679,17 @@ msgctxt "#14297"
+ msgid "Use this option to disable Dolby Vision support if available."
+ msgstr ""
+ 
+-#empty strings from id 14296 to 14300
++#: system/settings/settings.xml
++msgctxt "#14298"
++msgid "Use Player Led"
++msgstr ""
++
++#: system/settings/settings.xml
++msgctxt "#14299"
++msgid "Use Player Led mode (YCbCr 4:2:2) instead Display Led (RGB tunneling) for Dolby Vision."
++msgstr ""
++
++#empty strings from id 14300 to 14300
+ 
+ #. pvr "channels" settings group label
+ #: system/settings/settings.xml
+diff --git a/system/settings/settings.xml b/system/settings/settings.xml
+index 7ede7a22bb..d656de67d1 100755
+--- a/system/settings/settings.xml
++++ b/system/settings/settings.xml
+@@ -3696,6 +3696,12 @@
+           <default>false</default>
+           <control type="toggle" />
+         </setting>
++        <setting id="coreelec.amlogic.useplayerled" type="boolean" label="14298" help="14299">
++          <requirement>HAVE_AMCODEC</requirement>
++          <visible>false</visible>
++          <default>false</default>
++          <control type="toggle" />
++        </setting>
+       </group>
+     </category>
+     <category id="cache" label="439" help="36399">
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+index 8a7344d805..1609177451 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+@@ -291,6 +291,8 @@ typedef struct hdr_buf {
+     int size;
+ } hdr_buf_t;
+ 
++#define FLAG_FORCE_DV_LL        (unsigned int)(0x4000)
++
+ typedef struct am_packet {
+     AVPacket      avpkt;
+     uint64_t      avpts;
+@@ -2007,6 +2009,16 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
+     // enable Dolby Vision
+     CSysfsPath("/sys/module/amdolby_vision/parameters/dolby_vision_enable", 1);
+ 
++    // force player led mode when enabled
++    CSysfsPath dolby_vision_flags{"/sys/module/amdolby_vision/parameters/dolby_vision_flags"};
++    if (dolby_vision_flags.Exists())
++    {
++      if (CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_COREELEC_AMLOGIC_USE_PLAYERLED))
++        dolby_vision_flags.Set(dolby_vision_flags.Get<unsigned int>().value() | FLAG_FORCE_DV_LL);
++      else
++        dolby_vision_flags.Set(dolby_vision_flags.Get<unsigned int>().value() & ~(FLAG_FORCE_DV_LL));
++    }
++
+     am_private->gcodec.dv_enable = 1;
+     if (hints.dovi.dv_profile == 7 && CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
+         CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI) == 0)
+diff --git a/xbmc/settings/Settings.h b/xbmc/settings/Settings.h
+index 8e5a31e1d7..f999b284e9 100644
+--- a/xbmc/settings/Settings.h
++++ b/xbmc/settings/Settings.h
+@@ -442,6 +442,7 @@ public:
+   static constexpr auto SETTING_COREELEC_AMLOGIC_FORCE_CS = "coreelec.amlogic.forcecs";
+   static constexpr auto SETTING_COREELEC_AMLOGIC_DISABLEGUISCALING = "coreelec.amlogic.disableguiscaling";
+   static constexpr auto SETTING_COREELEC_AMLOGIC_DV_DISABLE = "coreelec.amlogic.disabledolbyvision";
++  static constexpr auto SETTING_COREELEC_AMLOGIC_USE_PLAYERLED = "coreelec.amlogic.useplayerled";
+   static constexpr auto SETTING_CACHE_HARDDISK = "cache.harddisk";
+   static constexpr auto SETTING_CACHEVIDEO_DVDROM = "cachevideo.dvdrom";
+   static constexpr auto SETTING_CACHEVIDEO_LAN = "cachevideo.lan";
+diff --git a/xbmc/utils/AMLUtils.cpp b/xbmc/utils/AMLUtils.cpp
+index c9e60d5c5f..fd35427e93 100644
+--- a/xbmc/utils/AMLUtils.cpp
++++ b/xbmc/utils/AMLUtils.cpp
+@@ -56,6 +56,22 @@ int aml_get_cpufamily_id()
+   return aml_cpufamily_id;
+ }
+ 
++bool aml_dv_support_ll()
++{
++  int support_ll = 0;
++  CRegExp regexp;
++  regexp.RegComp("YCbCr_422_12BIT");
++  std::string valstr;
++  CSysfsPath dv_cap{"/sys/devices/virtual/amhdmitx/amhdmitx0/dv_cap"};
++  if (dv_cap.Exists())
++  {
++    valstr = dv_cap.Get<std::string>().value();
++    support_ll = (regexp.RegFind(valstr) >= 0) ? 1 : 0;
++  }
++
++  return support_ll;
++}
++
+ static bool aml_support_vcodec_profile(const char *regex)
+ {
+   int profile = 0;
+diff --git a/xbmc/utils/AMLUtils.h b/xbmc/utils/AMLUtils.h
+index 25e95d6961..16f32b2d0a 100644
+--- a/xbmc/utils/AMLUtils.h
++++ b/xbmc/utils/AMLUtils.h
+@@ -49,6 +49,7 @@ enum AML_SUPPORT_H264_4K2K
+ #define AML_SM1     0x2B
+ 
+ int  aml_get_cpufamily_id();
++bool aml_dv_support_ll();
+ bool aml_support_hevc();
+ bool aml_support_hevc_4k2k();
+ bool aml_support_hevc_8k4k();
+diff --git a/xbmc/windowing/amlogic/WinSystemAmlogic.cpp b/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
+index 6f57b7efcb..4c5424d136 100644
+--- a/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
++++ b/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
+@@ -99,6 +99,13 @@ bool CWinSystemAmlogic::InitWindowSystem()
+       settings->SetBool(CSettings::SETTING_COREELEC_AMLOGIC_DV_DISABLE, false);
+     }
+ 
++    setting = settings->GetSetting(CSettings::SETTING_COREELEC_AMLOGIC_USE_PLAYERLED);
++    if (setting)
++    {
++      setting->SetVisible(false);
++      settings->SetBool(CSettings::SETTING_COREELEC_AMLOGIC_USE_PLAYERLED, false);
++    }
++
+     setting = settings->GetSetting(CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI);
+     if (setting)
+     {
+@@ -106,6 +113,13 @@ bool CWinSystemAmlogic::InitWindowSystem()
+       settings->SetInt(CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI, 2);
+     }
+   }
++  else if (aml_dv_support_ll())
++  {
++    CLog::Log(LOGDEBUG, "CWinSystemAmlogic::InitWindowSystem -- display do support Dolby Vision Low Latency");
++    auto setting = settings->GetSetting(CSettings::SETTING_COREELEC_AMLOGIC_USE_PLAYERLED);
++    if (setting)
++      setting->SetVisible(true);
++  }
+ 
+   m_nativeDisplay = EGL_DEFAULT_DISPLAY;
+ 
+-- 
+2.43.0
+

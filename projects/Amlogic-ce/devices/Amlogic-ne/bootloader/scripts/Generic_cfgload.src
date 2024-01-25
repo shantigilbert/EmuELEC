@@ -25,7 +25,7 @@ if test "${keymap}" != ""; then setenv consoleopt "${consoleopt} keymap=${keymap
 if test "${wol}" != ""; then setenv wol "enable_wol=${wol}"; fi
 if test "${mac}" = "" && test "${ethaddr}" != ""; then setenv localmac "mac=${ethaddr}"; fi
 if test "${loadaddr_kernel}" != ""; then setenv loadaddr "${loadaddr_kernel}"; fi
-setenv displayopt "vout=${vout},dis logo=osd0,loaded,${fb_addr} frac_rate_policy=${frac_rate_policy} hdmitx=${hdmitx} hdr_policy=1"
+setenv displayopt "vout=${vout},dis logo=osd0,loaded,${fb_addr} frac_rate_policy=${frac_rate_policy} hdmitx=${hdmitx} hdr_policy=1 hdr_priority=0"
 setenv initargs "${rootopt} ${consoleopt} ${max_freq_a53} ${max_freq_a73} ${wol} ${localmac} ${cec} ${gpiopower} ${irsetup} ${usbpower} ${usbopts}"
 setenv bootargs "${bootargs} ${initargs} ${displayopt} ${coreelec}"
 

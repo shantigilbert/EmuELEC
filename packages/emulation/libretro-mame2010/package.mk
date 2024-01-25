@@ -28,7 +28,7 @@ pre_configure_target() {
       ;;
     *cortex-a53|cortex-a17)
       if [ "${TARGET_ARCH}" = "aarch64" ]; then
-        PKG_MAKE_OPTS_TARGET="platform=aarch64"
+        PKG_MAKE_OPTS_TARGET="platform=unix PTR64=1 ARM_ENABLED=1 LCPU=arm64"
       else
         PKG_MAKE_OPTS_TARGET="platform=armv7-neon-hardfloat-cortex-a9"
       fi

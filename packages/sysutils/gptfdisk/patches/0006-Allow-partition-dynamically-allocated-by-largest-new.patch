@@ -1,0 +1,38 @@
+From caf30c022c5f659bb7a5e52272c6aeca94098c70 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?David=20Joaqu=C3=ADn=20Shourabi=20Porcel?= <david@djsp.eu>
+Date: Sat, 28 Jan 2023 16:19:16 +0100
+Subject: [PATCH 06/12] Allow partition dynamically allocated by --largest-new
+ to be referenced by other options
+
+The documentation for the option --new explains that:
+
+> [a] partnum value of 0 causes the program to use the first available
+> partition number. Subsequent uses of the -A (--attributes), -c
+> (--change-name), -t (--typecode), and -u (--partition-guid) options
+> may also use 0 to refer to the same partition.
+
+Although the documentation for the option --largest-new does not mention
+such functionality, I expected it, and was puzzled when it didn't work.
+---
+ gptcl.cc | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/gptcl.cc b/gptcl.cc
+index 0d578eb..e8d394a 100644
+--- a/gptcl.cc
++++ b/gptcl.cc
+@@ -331,8 +331,10 @@ int GPTDataCL::DoOptions(int argc, char* argv[]) {
+                   startSector = FindFirstInLargest();
+                   Align(&startSector);
+                   endSector = FindLastInFree(startSector, alignEnd);
+-                  if (largestPartNum <= 0)
++                  if (largestPartNum <= 0) {
+                      largestPartNum = FindFirstFreePart() + 1;
++                     newPartNum = largestPartNum - 1;
++                  }
+                   if (CreatePartition(largestPartNum - 1, startSector, endSector)) {
+                      saveData = 1;
+                   } else {
+-- 
+2.31.1
+

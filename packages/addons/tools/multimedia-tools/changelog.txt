@@ -1,1 +1,9 @@
-initial release
+2
+- libmediainfo: update to 23.07
+- libzen: update to 0.4.41
+- mediainfo: update to 23.07
+- mpv-drmprime: update to 0.36.0
+
+1
+- mpg123: update to 1.31.3
+- mpv-drmprime: update to 0.35.1

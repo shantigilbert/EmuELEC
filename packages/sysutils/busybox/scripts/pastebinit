@@ -3,9 +3,6 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2023-present Team CoreELEC (https://coreelec.org)
 
-if [ -n "${PASTEUSR}" -a "${PASTEPWD}" ]; then
-  cat "$@" | curl -F 'f:1=<-' ${PASTEUSR}:${PASTEPWD}@ix.io
-else
-  cat "$@" | curl -F 'f:1=<-' http://ix.io
-fi
+cat "$@" | curl -F 'sprunge=<-' https://paste.coreelec.org

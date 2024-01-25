@@ -1,0 +1,187 @@
+From fd77cc3204e7c69927f97ce2a1d55d2a47d77a27 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 29 Sep 2021 12:14:04 +0200
+Subject: [PATCH 039/142] broadcom/compiler: don't assign rf0 to temps across
+ implicit rf0 writes
+
+In platforms that don't have accumulators and have implicit writes to
+the register file we need to be careful and avoid assigning a physical
+register to a temp that lives across an implicit write to that same
+physical register.
+
+For now, we have the case of implicit writes to rf0 from various
+signals, but it should be easy to extend this to include additional
+registers if needed.
+---
+ src/broadcom/compiler/vir_register_allocate.c | 69 +++++++++++++++----
+ 1 file changed, 57 insertions(+), 12 deletions(-)
+
+diff --git a/src/broadcom/compiler/vir_register_allocate.c b/src/broadcom/compiler/vir_register_allocate.c
+index e78ccb7c6aa..e0adc1de7a4 100644
+--- a/src/broadcom/compiler/vir_register_allocate.c
++++ b/src/broadcom/compiler/vir_register_allocate.c
+@@ -29,6 +29,9 @@
+ #define ACC_INDEX     0
+ #define ACC_COUNT     6
+ 
++/* RA nodes used to track RF registers with implicit writes */
++#define IMPLICIT_RF_COUNT 1
++
+ #define PHYS_COUNT 64
+ 
+ static uint8_t
+@@ -67,15 +70,17 @@ filter_class_bits(const struct v3d_device_info *devinfo, uint8_t class_bits)
+ static inline uint32_t
+ temp_to_node(struct v3d_compile *c, uint32_t temp)
+ {
+-        return temp + (c->devinfo->has_accumulators ? ACC_COUNT : 0);
++        return temp + (c->devinfo->has_accumulators ? ACC_COUNT :
++                                                      IMPLICIT_RF_COUNT);
+ }
+ 
+ static inline uint32_t
+ node_to_temp(struct v3d_compile *c, uint32_t node)
+ {
+         assert((c->devinfo->has_accumulators && node >= ACC_COUNT) ||
+-               (!c->devinfo->has_accumulators && node >= 0));
+-        return node - (c->devinfo->has_accumulators ? ACC_COUNT : 0);
++               (!c->devinfo->has_accumulators && node >= IMPLICIT_RF_COUNT));
++        return node - (c->devinfo->has_accumulators ? ACC_COUNT :
++                                                      IMPLICIT_RF_COUNT);
+ }
+ 
+ static inline uint8_t
+@@ -360,7 +365,8 @@ ensure_nodes(struct v3d_compile *c)
+         c->nodes.info = reralloc_array_size(c,
+                                             c->nodes.info,
+                                             sizeof(c->nodes.info[0]),
+-                                            c->nodes.alloc_count + ACC_COUNT);
++                                            c->nodes.alloc_count +
++                                            MAX2(ACC_COUNT, IMPLICIT_RF_COUNT));
+ }
+ 
+ /* Creates the interference node for a new temp. We use this to keep the node
+@@ -372,7 +378,8 @@ add_node(struct v3d_compile *c, uint32_t temp, uint8_t class_bits)
+         ensure_nodes(c);
+ 
+         int node = ra_add_node(c->g, choose_reg_class(c, class_bits));
+-        assert(node == temp + ACC_COUNT);
++        assert(c->devinfo->has_accumulators ? node == temp + ACC_COUNT :
++                                              node == temp + IMPLICIT_RF_COUNT);
+ 
+         /* We fill the node priority after we are done inserting spills */
+         c->nodes.info[node].class_bits = class_bits;
+@@ -995,7 +1002,9 @@ tmu_spilling_allowed(struct v3d_compile *c)
+ }
+ 
+ static void
+-update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
++update_graph_and_reg_classes_for_inst(struct v3d_compile *c,
++                                      int *acc_nodes,
++                                      int *implicit_rf_nodes,
+                                       struct qinst *inst)
+ {
+         int32_t ip = inst->ip;
+@@ -1025,6 +1034,19 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+                 }
+         }
+ 
++        /* If any instruction writes to a physical register implicitly
++         * nothing else can write the same register across it.
++         */
++        if (v3d_qpu_writes_rf0_implicitly(c->devinfo, &inst->qpu)) {
++                for (int i = 0; i < c->num_temps; i++) {
++                        if (c->temp_start[i] < ip && c->temp_end[i] > ip) {
++                                ra_add_node_interference(c->g,
++                                                         temp_to_node(c, i),
++                                                         implicit_rf_nodes[0]);
++                        }
++                }
++        }
++
+         if (inst->qpu.type == V3D_QPU_INSTR_TYPE_ALU) {
+                 switch (inst->qpu.alu.add.op) {
+                 case V3D_QPU_A_LDVPMV_IN:
+@@ -1116,6 +1138,16 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+                                                             CLASS_BITS_R5);
+                                 }
+                         }
++                } else {
++                        /* If the instruction has an implicit write
++                         * we can't allocate its dest to the same
++                         * register.
++                         */
++                        if (v3d_qpu_writes_rf0_implicitly(c->devinfo, &inst->qpu)) {
++                                ra_add_node_interference(c->g,
++                                                         temp_to_node(c, inst->dst.index),
++                                                         implicit_rf_nodes[0]);
++                        }
+                 }
+         }
+ 
+@@ -1139,10 +1171,18 @@ struct qpu_reg *
+ v3d_register_allocate(struct v3d_compile *c)
+ {
+         int acc_nodes[ACC_COUNT];
++        int implicit_rf_nodes[IMPLICIT_RF_COUNT];
++
++        unsigned num_ra_nodes = c->num_temps;
++        if (c->devinfo->has_accumulators)
++                num_ra_nodes += ARRAY_SIZE(acc_nodes);
++        else
++                num_ra_nodes += ARRAY_SIZE(implicit_rf_nodes);
++
+         c->nodes = (struct v3d_ra_node_info) {
+                 .alloc_count = c->num_temps,
+                 .info = ralloc_array_size(c, sizeof(c->nodes.info[0]),
+-                                          c->num_temps + ACC_COUNT),
++                                          num_ra_nodes),
+         };
+ 
+         uint32_t phys_index = get_phys_index(c->devinfo);
+@@ -1171,9 +1211,6 @@ v3d_register_allocate(struct v3d_compile *c)
+                         c->thread_index--;
+         }
+ 
+-        unsigned num_ra_nodes = c->num_temps;
+-        if (c->devinfo->has_accumulators)
+-                num_ra_nodes += ARRAY_SIZE(acc_nodes);
+         c->g = ra_alloc_interference_graph(c->compiler->regs, num_ra_nodes);
+         ra_set_select_reg_callback(c->g, v3d_ra_select_callback, &callback_data);
+ 
+@@ -1181,7 +1218,8 @@ v3d_register_allocate(struct v3d_compile *c)
+          * interfere with when ops have implied r3/r4 writes or for the thread
+          * switches.  We could represent these as classes for the nodes to
+          * live in, but the classes take up a lot of memory to set up, so we
+-         * don't want to make too many.
++         * don't want to make too many. We use the same mechanism on platforms
++         * without accumulators that can have implicit writes to phys regs.
+          */
+         for (uint32_t i = 0; i < num_ra_nodes; i++) {
+                 if (c->devinfo->has_accumulators && i < ACC_COUNT) {
+@@ -1189,6 +1227,12 @@ v3d_register_allocate(struct v3d_compile *c)
+                         ra_set_node_reg(c->g, acc_nodes[i], ACC_INDEX + i);
+                         c->nodes.info[i].priority = 0;
+                         c->nodes.info[i].class_bits = 0;
++                } else if (!c->devinfo->has_accumulators &&
++                           i < ARRAY_SIZE(implicit_rf_nodes)) {
++                        implicit_rf_nodes[i] = i;
++                        ra_set_node_reg(c->g, implicit_rf_nodes[i], phys_index + i);
++                        c->nodes.info[i].priority = 0;
++                        c->nodes.info[i].class_bits = 0;
+                 } else {
+                         uint32_t t = node_to_temp(c, i);
+                         c->nodes.info[i].priority =
+@@ -1204,7 +1248,8 @@ v3d_register_allocate(struct v3d_compile *c)
+         int ip = 0;
+         vir_for_each_inst_inorder(inst, c) {
+                 inst->ip = ip++;
+-                update_graph_and_reg_classes_for_inst(c, acc_nodes, inst);
++                update_graph_and_reg_classes_for_inst(c, acc_nodes,
++                                                      implicit_rf_nodes, inst);
+         }
+ 
+         /* Set the register classes for all our temporaries in the graph */
+-- 
+2.39.2
+

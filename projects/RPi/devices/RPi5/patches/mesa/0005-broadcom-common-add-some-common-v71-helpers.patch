@@ -1,0 +1,91 @@
+From c260843c882d25bd31e308566b45d4517fda0fa2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Wed, 17 Nov 2021 14:40:47 +0100
+Subject: [PATCH 005/142] broadcom/common: add some common v71 helpers
+
+---
+ src/broadcom/common/v3d_util.c | 27 +++++++++++++++++++++++++++
+ src/broadcom/common/v3d_util.h | 27 +++++++++++++++++++++++++++
+ 2 files changed, 54 insertions(+)
+
+diff --git a/src/broadcom/common/v3d_util.c b/src/broadcom/common/v3d_util.c
+index 57872a923d3..26f5c6b336f 100644
+--- a/src/broadcom/common/v3d_util.c
++++ b/src/broadcom/common/v3d_util.c
+@@ -170,3 +170,30 @@ v3d_hw_prim_type(enum mesa_prim prim_type)
+       unreachable("Unsupported primitive type");
+    }
+ }
++
++uint32_t
++v3d_internal_bpp_words(uint32_t internal_bpp)
++{
++        switch (internal_bpp) {
++        case 0 /* V3D_INTERNAL_BPP_32 */:
++                return 1;
++        case 1 /* V3D_INTERNAL_BPP_64 */:
++                return 2;
++        case 2 /* V3D_INTERNAL_BPP_128 */:
++                return 4;
++        default:
++                unreachable("Unsupported internal BPP");
++        }
++}
++
++uint32_t
++v3d_compute_rt_row_row_stride_128_bits(uint32_t tile_width,
++                                       uint32_t bpp)
++{
++        /* stride in multiples of 128 bits, and covers 2 rows. This is the
++         * reason we divide by 2 instead of 4, as we divide number of 32-bit
++         * words per row by 2.
++         */
++
++        return (tile_width * bpp) / 2;
++}
+diff --git a/src/broadcom/common/v3d_util.h b/src/broadcom/common/v3d_util.h
+index eb802b77f67..864fc949ffa 100644
+--- a/src/broadcom/common/v3d_util.h
++++ b/src/broadcom/common/v3d_util.h
+@@ -24,6 +24,7 @@
+ #ifndef V3D_UTIL_H
+ #define V3D_UTIL_H
+ 
++#include "util/macros.h"
+ #include "common/v3d_device_info.h"
+ #include "pipe/p_defines.h"
+ 
+@@ -46,4 +47,30 @@ v3d_translate_pipe_swizzle(enum pipe_swizzle swizzle);
+ uint32_t
+ v3d_hw_prim_type(enum mesa_prim prim_type);
+ 
++uint32_t
++v3d_internal_bpp_words(uint32_t internal_bpp);
++
++/* Some configuration packets want the size on log2, but starting at 0 for
++ * size 8.
++ */
++static inline uint8_t
++log2_tile_size(uint32_t size)
++{
++        switch(size) {
++        case 8:
++                return 0;
++        case 16:
++                return 1;
++        case 32:
++                return 2;
++        case 64:
++                return 3;
++        default:
++                unreachable("Unsupported tile width/height");
++        }
++}
++
++uint32_t
++v3d_compute_rt_row_row_stride_128_bits(uint32_t tile_width,
++                                       uint32_t bpp);
+ #endif
+-- 
+2.39.2
+

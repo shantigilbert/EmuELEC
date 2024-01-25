@@ -1,7 +1,7 @@
 From 518d8487d090af854fb72a7d0e5efc075d97228c Mon Sep 17 00:00:00 2001
 From: Dom Cobley <popcornmix@gmail.com>
 Date: Wed, 18 Jan 2023 16:41:00 +0000
-Subject: [PATCH 4/4] CDVDVideoCodecDRMPRIME: Adjust av formats to match recent
+Subject: [PATCH 4/7] CDVDVideoCodecDRMPRIME: Adjust av formats to match recent
  ffmpeg changes
 
 ---
@@ -45,5 +45,5 @@ index a36107c515..d5b3289680 100644
    if (ret < 0)
    {
 -- 
-2.39.0
+2.39.2
 

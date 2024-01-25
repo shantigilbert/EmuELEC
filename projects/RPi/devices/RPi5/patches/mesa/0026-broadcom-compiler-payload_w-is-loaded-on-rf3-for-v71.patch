@@ -1,0 +1,55 @@
+From 06af15a60f7a9c135893e5f8934b8030c1da95f9 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Wed, 15 Sep 2021 01:14:15 +0200
+Subject: [PATCH 026/142] broadcom/compiler: payload_w is loaded on rf3 for v71
+
+And in general rf0 is now used for other needs.
+---
+ src/broadcom/compiler/nir_to_vir.c            | 6 +++++-
+ src/broadcom/compiler/vir_register_allocate.c | 6 +++++-
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/compiler/nir_to_vir.c b/src/broadcom/compiler/nir_to_vir.c
+index 79a22c3bd08..1a05b279a2d 100644
+--- a/src/broadcom/compiler/nir_to_vir.c
++++ b/src/broadcom/compiler/nir_to_vir.c
+@@ -4325,7 +4325,11 @@ nir_to_vir(struct v3d_compile *c)
+ {
+         switch (c->s->info.stage) {
+         case MESA_SHADER_FRAGMENT:
+-                c->payload_w = vir_MOV(c, vir_reg(QFILE_REG, 0));
++                if (c->devinfo->ver < 71)
++                        c->payload_w = vir_MOV(c, vir_reg(QFILE_REG, 0));
++                else
++                        c->payload_w = vir_MOV(c, vir_reg(QFILE_REG, 3));
++
+                 c->payload_w_centroid = vir_MOV(c, vir_reg(QFILE_REG, 1));
+                 c->payload_z = vir_MOV(c, vir_reg(QFILE_REG, 2));
+ 
+diff --git a/src/broadcom/compiler/vir_register_allocate.c b/src/broadcom/compiler/vir_register_allocate.c
+index 1f495180784..eca9a6751a6 100644
+--- a/src/broadcom/compiler/vir_register_allocate.c
++++ b/src/broadcom/compiler/vir_register_allocate.c
+@@ -1034,6 +1034,11 @@ update_graph_and_reg_classes_for_inst(struct v3d_compile *c, int *acc_nodes,
+         if (inst->src[0].file == QFILE_REG) {
+                 switch (inst->src[0].index) {
+                 case 0:
++                        /* V3D 7.x doesn't use rf0 for thread payload */
++                        if (c->devinfo->ver >= 71)
++                                break;
++                        else
++                                FALLTHROUGH;
+                 case 1:
+                 case 2:
+                 case 3: {
+@@ -1163,7 +1168,6 @@ v3d_register_allocate(struct v3d_compile *c)
+         vir_for_each_inst_inorder(inst, c) {
+                 inst->ip = ip++;
+                 update_graph_and_reg_classes_for_inst(c, acc_nodes, inst);
+-
+         }
+ 
+         /* Set the register classes for all our temporaries in the graph */
+-- 
+2.39.2
+

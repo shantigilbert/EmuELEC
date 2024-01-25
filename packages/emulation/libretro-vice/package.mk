@@ -6,7 +6,7 @@ PKG_VERSION="3934cf8b507a14376d99971ef364fc6c7386ba5e"
 PKG_SHA256="377914aa2e0a78b1da5dd33513cc038733b331d33cbfb974e068d36c4cba640f"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/vice-libretro"
-PKG_URL="https://github.com/kodi-game/vice-libretro/archive/${PKG_VERSION}.tar.gz"
+PKG_URL="https://github.com/libretro/vice-libretro/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="VICE C64 libretro"
 

@@ -1,0 +1,105 @@
+From 645fe451bcecbe3345a144222306d06fb39f6b9f Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 2 May 2023 10:17:47 +0200
+Subject: [PATCH 070/142] broadcom/compiler: don't assign registers to unused
+ nodes/temps
+
+In programs with a lot of unused temps, if we don't do this, we may
+end up recycling previously used rfs more often, which can be
+detrimental to instruction pairing.
+
+total instructions in shared programs: 11464335 -> 11444136 (-0.18%)
+instructions in affected programs: 8976743 -> 8956544 (-0.23%)
+helped: 33196
+HURT: 33778
+Inconclusive result
+
+total max-temps in shared programs: 2230150 -> 2229445 (-0.03%)
+max-temps in affected programs: 86413 -> 85708 (-0.82%)
+helped: 2217
+HURT: 1523
+Max-temps are helped.
+
+total sfu-stalls in shared programs: 18077 -> 17104 (-5.38%)
+sfu-stalls in affected programs: 8669 -> 7696 (-11.22%)
+helped: 2657
+HURT: 2182
+Sfu-stalls are helped.
+
+total inst-and-stalls in shared programs: 11482412 -> 11461240 (-0.18%)
+inst-and-stalls in affected programs: 8995697 -> 8974525 (-0.24%)
+helped: 33319
+HURT: 33708
+Inconclusive result
+
+total nops in shared programs: 298140 -> 296185 (-0.66%)
+nops in affected programs: 52805 -> 50850 (-3.70%)
+helped: 3797
+HURT: 2662
+Inconclusive result
+---
+ src/broadcom/compiler/v3d_compiler.h          |  1 +
+ src/broadcom/compiler/vir_register_allocate.c | 14 ++++++++++++++
+ 2 files changed, 15 insertions(+)
+
+diff --git a/src/broadcom/compiler/v3d_compiler.h b/src/broadcom/compiler/v3d_compiler.h
+index 2642d23b629..f1a807e38fd 100644
+--- a/src/broadcom/compiler/v3d_compiler.h
++++ b/src/broadcom/compiler/v3d_compiler.h
+@@ -614,6 +614,7 @@ struct v3d_ra_node_info {
+                 uint32_t priority;
+                 uint8_t class_bits;
+                 bool is_program_end;
++                bool unused;
+ 
+                 /* V3D 7.x */
+                 bool is_ldunif_dst;
+diff --git a/src/broadcom/compiler/vir_register_allocate.c b/src/broadcom/compiler/vir_register_allocate.c
+index 495644bb557..0ab0474424f 100644
+--- a/src/broadcom/compiler/vir_register_allocate.c
++++ b/src/broadcom/compiler/vir_register_allocate.c
+@@ -386,6 +386,7 @@ add_node(struct v3d_compile *c, uint32_t temp, uint8_t class_bits)
+         c->nodes.info[node].priority = 0;
+         c->nodes.info[node].is_ldunif_dst = false;
+         c->nodes.info[node].is_program_end = false;
++        c->nodes.info[node].unused = false;
+ }
+ 
+ /* The spill offset for this thread takes a bit of setup, so do it once at
+@@ -918,6 +919,12 @@ v3d_ra_select_rf(struct v3d_ra_select_callback_data *v3d_ra,
+                  BITSET_WORD *regs,
+                  unsigned int *out)
+ {
++        /* If this node is for an unused temp, ignore. */
++        if (v3d_ra->nodes->info[node].unused) {
++                *out = 0;
++                return true;
++        }
++
+         /* In V3D 7.x, try to assign rf0 to temps used as ldunif's dst
+          * so we can avoid turning them into ldunifrf (which uses the
+          * cond field to encode the dst and would prevent merge with
+@@ -1331,6 +1338,7 @@ v3d_register_allocate(struct v3d_compile *c)
+         for (uint32_t i = 0; i < num_ra_nodes; i++) {
+                 c->nodes.info[i].is_ldunif_dst = false;
+                 c->nodes.info[i].is_program_end = false;
++                c->nodes.info[i].unused = false;
+                 c->nodes.info[i].priority = 0;
+                 c->nodes.info[i].class_bits = 0;
+                 if (c->devinfo->has_accumulators && i < ACC_COUNT) {
+@@ -1396,6 +1404,12 @@ v3d_register_allocate(struct v3d_compile *c)
+ 
+         /* Add register interferences based on liveness data */
+         for (uint32_t i = 0; i < c->num_temps; i++) {
++                /* And while we are here, let's also flag nodes for
++                 * unused temps.
++                 */
++                if (c->temp_start[i] > c->temp_end[i])
++                        c->nodes.info[temp_to_node(c, i)].unused = true;
++
+                 for (uint32_t j = i + 1; j < c->num_temps; j++) {
+                         if (interferes(c->temp_start[i], c->temp_end[i],
+                                        c->temp_start[j], c->temp_end[j])) {
+-- 
+2.39.2
+

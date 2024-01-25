@@ -102,13 +102,13 @@
     KODIPLAYER_DRIVER="libamcodec"
 
   # Modules to install in initramfs for early boot
-    INITRAMFS_MODULES="font softcursor bitblit fbcon"
+    INITRAMFS_MODULES=""
 
   # additional drivers to install:
   # for a list of additinoal drivers see packages/linux-drivers
   # Space separated list is supported,
   # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
-  # ADDITIONAL_DRIVERS+=""
+  ADDITIONAL_DRIVERS+=" RTL8852BE-aml"
 
   # additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware)
   # Space separated list is supported,
@@ -139,7 +139,7 @@
   # additional packages to install:
   # Space separated list is supported,
   # e.g. ADDITIONAL_PACKAGES="PACKAGE1 PACKAGE2"
-    ADDITIONAL_PACKAGES+=" tmate"
+    ADDITIONAL_PACKAGES+=" tmate parse-android-dynparts"
 
   # add OOTB support for IR remote
   # IR_REMOTE_KEYMAPS+=""
@@ -150,3 +150,6 @@
 
   # CoreELEC Subdevices
     SUBDEVICES="Khadas_VIM4 Khadas_VIM1S"
+
+  # TEE supported SoC
+    TEE_SOC="A311D2 S905W2 S905X4 S905Y4"

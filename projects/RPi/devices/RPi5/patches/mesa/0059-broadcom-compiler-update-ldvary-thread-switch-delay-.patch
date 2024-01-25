@@ -1,0 +1,112 @@
+From 7cfd5b808bb2f1cb17f57435cb5d411c4ac3aa6c Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 23 Nov 2021 10:04:49 +0100
+Subject: [PATCH 059/142] broadcom/compiler: update ldvary thread switch delay
+ slot restriction for v7.x
+
+In V3D 7.x we don't have accumulators which would not survive a thread
+switch, so the only restriction is that ldvary can't be placed in the second
+delay slot of a thread switch.
+
+shader-db results for UnrealEngine4 shaders:
+
+total instructions in shared programs: 446458 -> 446401 (-0.01%)
+instructions in affected programs: 13492 -> 13435 (-0.42%)
+helped: 58
+HURT: 3
+Instructions are helped.
+
+total nops in shared programs: 19571 -> 19541 (-0.15%)
+nops in affected programs: 161 -> 131 (-18.63%)
+helped: 30
+HURT: 0
+Nops are helped.
+---
+ src/broadcom/compiler/qpu_schedule.c | 33 +++++++++++++++++++++-------
+ src/broadcom/compiler/qpu_validate.c | 10 +++++++--
+ 2 files changed, 33 insertions(+), 10 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index cba16c77d67..32f651851cf 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -1491,11 +1491,20 @@ retry:
+                          * ldvary now if the follow-up fixup would place
+                          * it in the delay slots of a thrsw, which is not
+                          * allowed and would prevent the fixup from being
+-                         * successful.
++                         * successful. In V3D 7.x we can allow this to happen
++                         * as long as it is not the last delay slot.
+                          */
+-                        if (inst->sig.ldvary &&
+-                            scoreboard->last_thrsw_tick + 2 >= scoreboard->tick - 1) {
+-                                continue;
++                        if (inst->sig.ldvary) {
++                                if (c->devinfo->ver <= 42 &&
++                                    scoreboard->last_thrsw_tick + 2 >=
++                                    scoreboard->tick - 1) {
++                                        continue;
++                                }
++                                if (c->devinfo->ver >= 71 &&
++                                    scoreboard->last_thrsw_tick + 2 ==
++                                    scoreboard->tick - 1) {
++                                        continue;
++                                }
+                         }
+ 
+                         /* We can emit a new tmu lookup with a previous ldtmu
+@@ -2020,8 +2029,12 @@ qpu_inst_before_thrsw_valid_in_delay_slot(struct v3d_compile *c,
+         if (slot > 0 && v3d_qpu_instr_is_legacy_sfu(&qinst->qpu))
+                 return false;
+ 
+-        if (slot > 0 && qinst->qpu.sig.ldvary)
+-                return false;
++        if (qinst->qpu.sig.ldvary) {
++                if (c->devinfo->ver <= 42 && slot > 0)
++                        return false;
++                if (c->devinfo->ver >= 71 && slot == 2)
++                        return false;
++        }
+ 
+         /* unifa and the following 3 instructions can't overlap a
+          * thread switch/end. The docs further clarify that this means
+@@ -2618,9 +2631,13 @@ fixup_pipelined_ldvary(struct v3d_compile *c,
+ 
+         /* We can't put an ldvary in the delay slots of a thrsw. We should've
+          * prevented this when pairing up the ldvary with another instruction
+-         * and flagging it for a fixup.
++         * and flagging it for a fixup. In V3D 7.x this is limited only to the
++         * second delay slot.
+          */
+-        assert(scoreboard->last_thrsw_tick + 2 < scoreboard->tick - 1);
++        assert((devinfo->ver <= 42 &&
++                scoreboard->last_thrsw_tick + 2 < scoreboard->tick - 1) ||
++               (devinfo->ver >= 71 &&
++                scoreboard->last_thrsw_tick + 2 != scoreboard->tick - 1));
+ 
+         /* Move the ldvary to the previous instruction and remove it from the
+          * current one.
+diff --git a/src/broadcom/compiler/qpu_validate.c b/src/broadcom/compiler/qpu_validate.c
+index 41070484286..4f09aa8aef4 100644
+--- a/src/broadcom/compiler/qpu_validate.c
++++ b/src/broadcom/compiler/qpu_validate.c
+@@ -215,8 +215,14 @@ qpu_validate_inst(struct v3d_qpu_validate_state *state, struct qinst *qinst)
+                                    "SFU write started during THRSW delay slots ");
+                 }
+ 
+-                if (inst->sig.ldvary)
+-                        fail_instr(state, "LDVARY during THRSW delay slots");
++                if (inst->sig.ldvary) {
++                        if (devinfo->ver <= 42)
++                                fail_instr(state, "LDVARY during THRSW delay slots");
++                        if (devinfo->ver >= 71 &&
++                            state->ip - state->last_thrsw_ip == 2) {
++                                fail_instr(state, "LDVARY in 2nd THRSW delay slot");
++                        }
++                }
+         }
+ 
+         (void)qpu_magic_waddr_matches; /* XXX */
+-- 
+2.39.2
+

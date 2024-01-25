@@ -1,0 +1,315 @@
+From f0f9eea3cad83ed8824c6a7686150327407a5286 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 22 Jul 2021 14:26:13 +0200
+Subject: [PATCH 078/142] v3dv/cmd_buffer: emit
+ TILE_RENDERING_MODE_CFG_RENDER_TARGET_PART1 for v71
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Alejandro Piñeiro <apinheiro@igalia.com>
+Signed-off-by: Iago Toral Quiroga <itoral@igalia.com>
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c  | 186 +++++++++++++++++-------
+ src/broadcom/vulkan/v3dvx_meta_common.c |  12 +-
+ src/broadcom/vulkan/v3dvx_private.h     |  11 +-
+ 3 files changed, 147 insertions(+), 62 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index 7837b460051..c6307890da5 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -800,6 +800,103 @@ set_rcl_early_z_config(struct v3dv_job *job,
+    }
+ }
+ 
++/* Note that for v71, render target cfg packets has just one field that
++ * combined the internal type and clamp mode. For simplicity we keep just one
++ * helper.
++ *
++ * Note: rt_type is in fact a "enum V3DX(Internal_Type)".
++ *
++ * FIXME: for v71 we are not returning all the possible combinations for
++ * render target internal type and clamp. For example for int types we are
++ * always using clamp int, and for 16f we are using clamp none or pos (that
++ * seem the equivalent for no-clamp on 4.2), but not pq or hlg. In summary
++ * right now we are just porting what we were doing on 4.2
++ */
++uint32_t
++v3dX(clamp_for_format_and_type)(uint32_t rt_type,
++                                VkFormat vk_format)
++{
++#if V3D_VERSION == 42
++   if (vk_format_is_int(vk_format))
++      return V3D_RENDER_TARGET_CLAMP_INT;
++   else if (vk_format_is_srgb(vk_format))
++      return V3D_RENDER_TARGET_CLAMP_NORM;
++   else
++      return V3D_RENDER_TARGET_CLAMP_NONE;
++#endif
++#if V3D_VERSION >= 71
++   switch (rt_type) {
++   case V3D_INTERNAL_TYPE_8I:
++      return V3D_RENDER_TARGET_TYPE_CLAMP_8I_CLAMPED;
++   case V3D_INTERNAL_TYPE_8UI:
++      return V3D_RENDER_TARGET_TYPE_CLAMP_8UI_CLAMPED;
++   case V3D_INTERNAL_TYPE_8:
++      return V3D_RENDER_TARGET_TYPE_CLAMP_8;
++   case V3D_INTERNAL_TYPE_16I:
++      return V3D_RENDER_TARGET_TYPE_CLAMP_16I_CLAMPED;
++   case V3D_INTERNAL_TYPE_16UI:
++      return V3D_RENDER_TARGET_TYPE_CLAMP_16UI_CLAMPED;
++   case V3D_INTERNAL_TYPE_16F:
++      return vk_format_is_srgb(vk_format) ?
++         V3D_RENDER_TARGET_TYPE_CLAMP_16F_CLAMP_NORM :
++         V3D_RENDER_TARGET_TYPE_CLAMP_16F;
++   case V3D_INTERNAL_TYPE_32I:
++      return V3D_RENDER_TARGET_TYPE_CLAMP_32I_CLAMPED;
++   case V3D_INTERNAL_TYPE_32UI:
++      return V3D_RENDER_TARGET_TYPE_CLAMP_32UI_CLAMPED;
++   case V3D_INTERNAL_TYPE_32F:
++      return V3D_RENDER_TARGET_TYPE_CLAMP_32F;
++   default:
++      unreachable("Unknown internal render target type");
++   }
++
++   return V3D_RENDER_TARGET_TYPE_CLAMP_INVALID;
++#endif
++}
++
++static void
++cmd_buffer_render_pass_setup_render_target(struct v3dv_cmd_buffer *cmd_buffer,
++                                           int rt,
++                                           uint32_t *rt_bpp,
++#if V3D_VERSION == 42
++                                           uint32_t *rt_type,
++                                           uint32_t *rt_clamp)
++#else
++                                           uint32_t *rt_type_clamp)
++#endif
++{
++   const struct v3dv_cmd_buffer_state *state = &cmd_buffer->state;
++
++   assert(state->subpass_idx < state->pass->subpass_count);
++   const struct v3dv_subpass *subpass =
++      &state->pass->subpasses[state->subpass_idx];
++
++   if (rt >= subpass->color_count)
++      return;
++
++   struct v3dv_subpass_attachment *attachment = &subpass->color_attachments[rt];
++   const uint32_t attachment_idx = attachment->attachment;
++   if (attachment_idx == VK_ATTACHMENT_UNUSED)
++      return;
++
++   assert(attachment_idx < state->framebuffer->attachment_count &&
++          attachment_idx < state->attachment_alloc_count);
++   struct v3dv_image_view *iview = state->attachments[attachment_idx].image_view;
++   assert(vk_format_is_color(iview->vk.format));
++
++   assert(iview->plane_count == 1);
++   *rt_bpp = iview->planes[0].internal_bpp;
++#if V3D_VERSION == 42
++   *rt_type = iview->planes[0].internal_type;
++   *rt_clamp = v3dX(clamp_for_format_and_type)(iview->planes[0].internal_type,
++                                               iview->vk.format);
++#endif
++#if V3D_VERSION >= 71
++   *rt_type_clamp = v3dX(clamp_for_format_and_type)(iview->planes[0].internal_type,
++                                                    iview->vk.format);
++#endif
++}
++
+ void
+ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+ {
+@@ -939,10 +1036,20 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+     */
+    job->early_zs_clear = do_early_zs_clear;
+ 
++#if V3D_VERSION >= 71
++   uint32_t base_addr = 0;
++#endif
+    for (uint32_t i = 0; i < subpass->color_count; i++) {
+       uint32_t attachment_idx = subpass->color_attachments[i].attachment;
+-      if (attachment_idx == VK_ATTACHMENT_UNUSED)
++      if (attachment_idx == VK_ATTACHMENT_UNUSED) {
++#if V3D_VERSION >= 71
++         cl_emit(rcl, TILE_RENDERING_MODE_CFG_RENDER_TARGET_PART1, rt) {
++            rt.render_target_number = i;
++            rt.stride = 1; /* Unused */
++         }
++#endif
+          continue;
++      }
+ 
+       struct v3dv_image_view *iview =
+          state->attachments[attachment_idx].image_view;
+@@ -978,9 +1085,6 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+          clear.render_target_number = i;
+       };
+ #endif
+-#if V3D_VERSION >= 71
+-         unreachable("HW generation 71 not supported yet.");
+-#endif
+ 
+       if (iview->planes[0].internal_bpp >= V3D_INTERNAL_BPP_64) {
+ #if V3D_VERSION == 42
+@@ -1010,27 +1114,44 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+          unreachable("HW generation 71 not supported yet.");
+ #endif
+       }
++
++#if V3D_VERSION >= 71
++      cl_emit(rcl, TILE_RENDERING_MODE_CFG_RENDER_TARGET_PART1, rt) {
++         rt.clear_color_low_bits = clear_color[0];
++         cmd_buffer_render_pass_setup_render_target(cmd_buffer, i, &rt.internal_bpp,
++                                                    &rt.internal_type_and_clamping);
++         rt.stride =
++            v3d_compute_rt_row_row_stride_128_bits(tiling->tile_width,
++                                                   v3d_internal_bpp_words(rt.internal_bpp));
++         rt.base_address = base_addr;
++         rt.render_target_number = i;
++
++         /* base_addr in multiples of 512 bits. We divide by 8 because stride
++          * is in 128-bit units, but it is packing 2 rows worth of data, so we
++          * need to divide it by 2 so it is only 1 row, and then again by 4 so
++          * it is in 512-bit units.
++          */
++         base_addr += (tiling->tile_height * rt.stride) / 8;
++      }
++#endif
+    }
+ 
+ #if V3D_VERSION == 42
+    cl_emit(rcl, TILE_RENDERING_MODE_CFG_COLOR, rt) {
+-      v3dX(cmd_buffer_render_pass_setup_render_target)
++      cmd_buffer_render_pass_setup_render_target
+          (cmd_buffer, 0, &rt.render_target_0_internal_bpp,
+           &rt.render_target_0_internal_type, &rt.render_target_0_clamp);
+-      v3dX(cmd_buffer_render_pass_setup_render_target)
++      cmd_buffer_render_pass_setup_render_target
+          (cmd_buffer, 1, &rt.render_target_1_internal_bpp,
+           &rt.render_target_1_internal_type, &rt.render_target_1_clamp);
+-      v3dX(cmd_buffer_render_pass_setup_render_target)
++      cmd_buffer_render_pass_setup_render_target
+          (cmd_buffer, 2, &rt.render_target_2_internal_bpp,
+           &rt.render_target_2_internal_type, &rt.render_target_2_clamp);
+-      v3dX(cmd_buffer_render_pass_setup_render_target)
++      cmd_buffer_render_pass_setup_render_target
+          (cmd_buffer, 3, &rt.render_target_3_internal_bpp,
+           &rt.render_target_3_internal_type, &rt.render_target_3_clamp);
+    }
+ #endif
+-#if V3D_VERSION >= 71
+-   unreachable("Hardware generation 71 not supported yet.");
+-#endif
+ 
+    /* Ends rendering mode config. */
+    if (ds_attachment_idx != VK_ATTACHMENT_UNUSED) {
+@@ -2445,46 +2566,3 @@ v3dX(cmd_buffer_emit_indexed_indirect)(struct v3dv_cmd_buffer *cmd_buffer,
+                                      buffer->mem_offset + offset);
+    }
+ }
+-
+-void
+-v3dX(cmd_buffer_render_pass_setup_render_target)(struct v3dv_cmd_buffer *cmd_buffer,
+-                                                 int rt,
+-                                                 uint32_t *rt_bpp,
+-                                                 uint32_t *rt_type,
+-                                                 uint32_t *rt_clamp)
+-{
+-   const struct v3dv_cmd_buffer_state *state = &cmd_buffer->state;
+-
+-   assert(state->subpass_idx < state->pass->subpass_count);
+-   const struct v3dv_subpass *subpass =
+-      &state->pass->subpasses[state->subpass_idx];
+-
+-   if (rt >= subpass->color_count)
+-      return;
+-
+-   struct v3dv_subpass_attachment *attachment = &subpass->color_attachments[rt];
+-   const uint32_t attachment_idx = attachment->attachment;
+-   if (attachment_idx == VK_ATTACHMENT_UNUSED)
+-      return;
+-
+-   assert(attachment_idx < state->framebuffer->attachment_count &&
+-          attachment_idx < state->attachment_alloc_count);
+-   struct v3dv_image_view *iview = state->attachments[attachment_idx].image_view;
+-   assert(vk_format_is_color(iview->vk.format));
+-
+-   assert(iview->plane_count == 1);
+-   *rt_bpp = iview->planes[0].internal_bpp;
+-   if (vk_format_is_int(iview->vk.view_format))
+-#if V3D_VERSION == 42
+-   *rt_type = iview->planes[0].internal_type;
+-   if (vk_format_is_int(iview->vk.format))
+-      *rt_clamp = V3D_RENDER_TARGET_CLAMP_INT;
+-   else if (vk_format_is_srgb(iview->vk.view_format))
+-      *rt_clamp = V3D_RENDER_TARGET_CLAMP_NORM;
+-   else
+-      *rt_clamp = V3D_RENDER_TARGET_CLAMP_NONE;
+-#endif
+-#if V3D_VERSION >= 71
+-   unreachable("HW generation 71 not supported yet.");
+-#endif
+-}
+diff --git a/src/broadcom/vulkan/v3dvx_meta_common.c b/src/broadcom/vulkan/v3dvx_meta_common.c
+index e4084d851fc..c6391bc6d83 100644
+--- a/src/broadcom/vulkan/v3dvx_meta_common.c
++++ b/src/broadcom/vulkan/v3dvx_meta_common.c
+@@ -26,6 +26,7 @@
+ 
+ #include "broadcom/common/v3d_macros.h"
+ #include "broadcom/common/v3d_tfu.h"
++#include "broadcom/common/v3d_util.h"
+ #include "broadcom/cle/v3dx_pack.h"
+ #include "broadcom/compiler/v3d_compiler.h"
+ 
+@@ -150,7 +151,16 @@ emit_rcl_prologue(struct v3dv_job *job,
+    }
+ #endif
+ #if V3D_VERSION >= 71
+-   unreachable("Hardware generation 71 not supported yet.");
++   cl_emit(rcl, TILE_RENDERING_MODE_CFG_RENDER_TARGET_PART1, rt) {
++      rt.internal_bpp = tiling->internal_bpp;
++      rt.internal_type_and_clamping = v3dX(clamp_for_format_and_type)(fb->internal_type,
++                                                                      fb->vk_format);
++      rt.stride =
++         v3d_compute_rt_row_row_stride_128_bits(tiling->tile_width,
++                                                v3d_internal_bpp_words(rt.internal_bpp));
++      rt.base_address = 0;
++      rt.render_target_number = 0;
++   }
+ #endif
+ 
+    cl_emit(rcl, TILE_RENDERING_MODE_CFG_ZS_CLEAR_VALUES, clear) {
+diff --git a/src/broadcom/vulkan/v3dvx_private.h b/src/broadcom/vulkan/v3dvx_private.h
+index ad8ddfa5731..a4157d11c7c 100644
+--- a/src/broadcom/vulkan/v3dvx_private.h
++++ b/src/broadcom/vulkan/v3dvx_private.h
+@@ -125,13 +125,6 @@ v3dX(get_hw_clear_color)(const VkClearColorValue *color,
+                          uint32_t internal_size,
+                          uint32_t *hw_color);
+ 
+-void
+-v3dX(cmd_buffer_render_pass_setup_render_target)(struct v3dv_cmd_buffer *cmd_buffer,
+-                                                 int rt,
+-                                                 uint32_t *rt_bpp,
+-                                                 uint32_t *rt_type,
+-                                                 uint32_t *rt_clamp);
+-
+ /* Used at v3dv_device */
+ 
+ void
+@@ -325,3 +318,7 @@ uint32_t v3dX(max_descriptor_bo_size)(void);
+ uint32_t v3dX(combined_image_sampler_texture_state_offset)(uint8_t plane);
+ 
+ uint32_t v3dX(combined_image_sampler_sampler_state_offset)(uint8_t plane);
++
++uint32_t
++v3dX(clamp_for_format_and_type)(uint32_t rt_type,
++                                VkFormat vk_format);
+-- 
+2.39.2
+

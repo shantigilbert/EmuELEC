@@ -1,0 +1,21 @@
+From 5604be6a6701e0bd68cb36fadb05cecba57f7887 Mon Sep 17 00:00:00 2001
+From: Matthias Reichl <hias@horus.com>
+Date: Fri, 22 Sep 2023 23:41:51 +0200
+Subject: [PATCH] keymaps: change remote poweroff action to show shutdown menu
+
+Signed-off-by: Matthias Reichl <hias@horus.com>
+---
+ system/keymaps/remote.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/system/keymaps/remote.xml
++++ b/system/keymaps/remote.xml
+@@ -50,7 +50,7 @@
+       <volumeplus>VolumeUp</volumeplus>
+       <volumeminus>VolumeDown</volumeminus>
+       <mute>Mute</mute>
+-      <power>ShutDown()</power>
++      <power>ActivateWindow(ShutdownMenu)</power>
+       <myvideo>ActivateWindow(Videos)</myvideo>
+       <mymusic>ActivateWindow(Music)</mymusic>
+       <mypictures>ActivateWindow(Pictures)</mypictures>

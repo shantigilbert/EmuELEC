@@ -1,0 +1,230 @@
+From 75e4138e9b05ba26a2573b930bda53a6e44ccc5e Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Wed, 29 Mar 2023 16:36:49 +0200
+Subject: [PATCH 10/21] AMLCodec: add support of Dolby Vision If 'dovi.ko' is
+ available enable the DV option.
+
+---
+ .../resources/strings.po                      | 10 +++++
+ system/settings/settings.xml                  |  5 +++
+ .../VideoPlayer/DVDCodecs/Video/AMLCodec.cpp  | 45 +++++++++++++++++++
+ xbmc/settings/Settings.h                      |  1 +
+ xbmc/utils/AMLUtils.cpp                       | 20 +++++++++
+ xbmc/utils/AMLUtils.h                         |  1 +
+ xbmc/windowing/amlogic/WinSystemAmlogic.cpp   | 17 +++++++
+ 7 files changed, 99 insertions(+)
+
+diff --git a/addons/resource.language.en_gb/resources/strings.po b/addons/resource.language.en_gb/resources/strings.po
+index 2b2237e431..285d5d07b2 100644
+--- a/addons/resource.language.en_gb/resources/strings.po
++++ b/addons/resource.language.en_gb/resources/strings.po
+@@ -8669,6 +8669,16 @@ msgctxt "#14295"
+ msgid "4:4:4"
+ msgstr ""
+ 
++#: system/settings/settings.xml
++msgctxt "#14296"
++msgid "Disable Dolby Vision support"
++msgstr ""
++
++#: system/settings/settings.xml
++msgctxt "#14297"
++msgid "Use this option to disable Dolby Vision support if available."
++msgstr ""
++
+ #empty strings from id 14296 to 14300
+ 
+ #. pvr "channels" settings group label
+diff --git a/system/settings/settings.xml b/system/settings/settings.xml
+index 5268475ca7..1b95376834 100755
+--- a/system/settings/settings.xml
++++ b/system/settings/settings.xml
+@@ -3681,6 +3681,11 @@
+             <dependency type="enable" setting="coreelec.amlogic.sdr2hdr" operator="is">false</dependency>
+           </dependencies>
+         </setting>
++        <setting id="coreelec.amlogic.disabledolbyvision" type="boolean" label="14296" help="14297">
++          <requirement>HAVE_AMCODEC</requirement>
++          <default>false</default>
++          <control type="toggle" />
++        </setting>
+       </group>
+     </category>
+     <category id="cache" label="439" help="36399">
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+index 7ae850d048..59777ee196 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+@@ -22,6 +22,7 @@
+ #include "settings/SettingsComponent.h"
+ #include "utils/AMLUtils.h"
+ #include "utils/log.h"
++#include "utils/StreamDetails.h"
+ #include "utils/StringUtils.h"
+ #include "utils/TimeUtils.h"
+ #include "ServiceBroker.h"
+@@ -110,6 +111,7 @@ typedef struct {
+   void          *param;
+   dec_mode_t    dec_mode;
+   enum FRAME_BASE_VIDEO_PATH video_path;
++  unsigned int  dv_enable;
+ } aml_generic_param;
+ 
+ class DllLibamCodecInterface
+@@ -218,6 +220,7 @@ public:
+     p_out->am_sysinfo.param   = p_in->param;
+     p_out->dec_mode           = p_in->dec_mode;
+     p_out->video_path         = p_in->video_path;
++    p_out->dv_enable          = p_in->dv_enable;
+   }
+ };
+ 
+@@ -1965,6 +1968,15 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
+     hints.aspect, video_ratio.num, video_ratio.den);
+   CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder hints.orientation({:d}), hints.forced_aspect({:d}), hints.extrasize({:d})",
+     hints.orientation, hints.forced_aspect, hints.extrasize);
++
++  std::string hdrType = CStreamDetails::HdrTypeToString(hints.hdrType);
++  if (hdrType.size())
++    CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder hdr type: {}", hdrType);
++
++  if (hints.hdrType == StreamHdrType::HDR_TYPE_DOLBYVISION)
++    CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder DOVI: version {:d}.{:d}, profile {:d}",
++      hints.dovi.dv_version_major, hints.dovi.dv_version_minor, hints.dovi.dv_profile);
++
+   m_processInfo.SetVideoDAR(hints.aspect);
+   CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder decoder timeout: {:d}s",
+     m_decoder_timeout);
+@@ -1984,6 +1996,33 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
+   am_private->gcodec.dec_mode    = STREAM_TYPE_FRAME;
+   am_private->gcodec.video_path  = FRAME_BASE_PATH_AMLVIDEO_AMVIDEO;
+ 
++  // enable Dolby Vision driver when 'dovi.ko' is available
++  bool device_support_dv(aml_support_dolby_vision());
++  bool user_dv_disable(CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_COREELEC_AMLOGIC_DV_DISABLE));
++  bool dv_enable(device_support_dv && !user_dv_disable && hints.hdrType == StreamHdrType::HDR_TYPE_DOLBYVISION);
++  CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder {}DV support, {}, DV system is {}", device_support_dv ? "" : "no ",
++    user_dv_disable ? "disabled" : "enabled", dv_enable ? "enabled" : "disabled");
++  if (dv_enable)
++  {
++    // enable Dolby Vision
++    CSysfsPath("/sys/module/amdolby_vision/parameters/dolby_vision_enable", 1);
++
++    am_private->gcodec.dv_enable = 1;
++    if (hints.dovi.dv_profile == 7 && !CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(
++        CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI))
++    {
++      CSysfsPath amdolby_vision_debug{"/sys/class/amdolby_vision/debug"};
++      if (amdolby_vision_debug.Exists())
++        amdolby_vision_debug.Set("enable_fel 1");
++      am_private->gcodec.dec_mode  = STREAM_TYPE_STREAM;
++    }
++  }
++  else if (device_support_dv)
++  {
++    // disable Dolby Vision
++    CSysfsPath("/sys/module/amdolby_vision/parameters/dolby_vision_enable", 0);
++  }
++
+   // DEC_CONTROL_FLAG_DISABLE_FAST_POC
+   CSysfsPath("/sys/module/amvdec_h264/parameters/dec_control", 4);
+ 
+@@ -2241,6 +2280,12 @@ void CAMLCodec::CloseDecoder()
+     free(am_private->vcodec.config);
+   // return tsync to default so external apps work
+   CSysfsPath("/sys/class/tsync/enable", 1);
++  // disable Dolby Vision driver
++  //CSysfsPath("/sys/module/amdolby_vision/parameters/dolby_vision_enable", 0);
++  // don't disable it as it would not switch back to non DV mode anymore
++  CSysfsPath amdolby_vision_debug{"/sys/class/amdolby_vision/debug"};
++  if (amdolby_vision_debug.Exists())
++    amdolby_vision_debug.Set("enable_fel 0");
+ 
+   ShowMainVideo(false);
+ 
+diff --git a/xbmc/settings/Settings.h b/xbmc/settings/Settings.h
+index 28e6c9d98d..8e5a31e1d7 100644
+--- a/xbmc/settings/Settings.h
++++ b/xbmc/settings/Settings.h
+@@ -441,6 +441,7 @@ public:
+   static constexpr auto SETTING_COREELEC_AMLOGIC_LIMIT_CD = "coreelec.amlogic.limitcd";
+   static constexpr auto SETTING_COREELEC_AMLOGIC_FORCE_CS = "coreelec.amlogic.forcecs";
+   static constexpr auto SETTING_COREELEC_AMLOGIC_DISABLEGUISCALING = "coreelec.amlogic.disableguiscaling";
++  static constexpr auto SETTING_COREELEC_AMLOGIC_DV_DISABLE = "coreelec.amlogic.disabledolbyvision";
+   static constexpr auto SETTING_CACHE_HARDDISK = "cache.harddisk";
+   static constexpr auto SETTING_CACHEVIDEO_DVDROM = "cachevideo.dvdrom";
+   static constexpr auto SETTING_CACHEVIDEO_LAN = "cachevideo.lan";
+diff --git a/xbmc/utils/AMLUtils.cpp b/xbmc/utils/AMLUtils.cpp
+index 81f74448a8..c9e60d5c5f 100644
+--- a/xbmc/utils/AMLUtils.cpp
++++ b/xbmc/utils/AMLUtils.cpp
+@@ -148,6 +148,26 @@ bool aml_support_av1()
+   return (has_av1 == 1);
+ }
+ 
++bool aml_support_dolby_vision()
++{
++  static int support_dv = -1;
++
++  if (support_dv == -1)
++  {
++    CSysfsPath support_info{"/sys/class/amdolby_vision/support_info"};
++    support_dv = 0;
++    if (support_info.Exists())
++    {
++      support_dv = (int)((support_info.Get<int>().value() & 7) == 7);
++      CSysfsPath ko_info{"/sys/class/amdolby_vision/ko_info"};
++      if (ko_info.Exists())
++        CLog::Log(LOGDEBUG, "Amlogic Dolby Vision info: {}", ko_info.Get<std::string>().value().c_str());
++    }
++  }
++
++  return (support_dv == 1);
++}
++
+ bool aml_has_frac_rate_policy()
+ {
+   static int has_frac_rate_policy = -1;
+diff --git a/xbmc/utils/AMLUtils.h b/xbmc/utils/AMLUtils.h
+index bfb06194bc..25e95d6961 100644
+--- a/xbmc/utils/AMLUtils.h
++++ b/xbmc/utils/AMLUtils.h
+@@ -56,6 +56,7 @@ bool aml_support_hevc_10bit();
+ AML_SUPPORT_H264_4K2K aml_support_h264_4k2k();
+ bool aml_support_vp9();
+ bool aml_support_av1();
++bool aml_support_dolby_vision();
+ bool aml_has_frac_rate_policy();
+ void aml_set_audio_passthrough(bool passthrough);
+ bool aml_mode_to_resolution(const char *mode, RESOLUTION_INFO *res);
+diff --git a/xbmc/windowing/amlogic/WinSystemAmlogic.cpp b/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
+index 0a52b95144..616c205e6f 100644
+--- a/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
++++ b/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
+@@ -90,6 +90,23 @@ bool CWinSystemAmlogic::InitWindowSystem()
+     CSysfsPath("/sys/module/am_vecm/parameters/hdr_mode", 1);
+   }
+ 
++  if (!aml_support_dolby_vision())
++  {
++    auto setting = settings->GetSetting(CSettings::SETTING_COREELEC_AMLOGIC_DV_DISABLE);
++    if (setting)
++    {
++      setting->SetVisible(false);
++      settings->SetBool(CSettings::SETTING_COREELEC_AMLOGIC_DV_DISABLE, false);
++    }
++
++    setting = settings->GetSetting(CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI);
++    if (setting)
++    {
++      setting->SetVisible(false);
++      settings->SetBool(CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI, true);
++    }
++  }
++
+   m_nativeDisplay = EGL_DEFAULT_DISPLAY;
+ 
+   CDVDVideoCodecAmlogic::Register();
+-- 
+2.43.0
+

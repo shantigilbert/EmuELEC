@@ -1,0 +1,25 @@
+From a5c9df98141bf2c4181e4eca69c22cde1deaaf6b Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Thu, 11 May 2023 15:53:08 +0200
+Subject: [PATCH 06/18] arm: config item AMLOGIC_DVB_COMPAT is needed for
+ compile
+
+---
+ drivers/amlogic/dvb/Kconfig | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/amlogic/dvb/Kconfig b/drivers/amlogic/dvb/Kconfig
+index 9214af6708bc..f5eeb5da09d1 100644
+--- a/drivers/amlogic/dvb/Kconfig
++++ b/drivers/amlogic/dvb/Kconfig
+@@ -30,7 +30,6 @@ endmenu
+ menu "DVB COMPAT support"
+ config AMLOGIC_DVB_COMPAT
+        bool "Amlogic DVB drivers"
+-       depends on COMPAT
+        help
+                select it to support amlogic dvb driver
+ endmenu
+-- 
+2.25.1
+
