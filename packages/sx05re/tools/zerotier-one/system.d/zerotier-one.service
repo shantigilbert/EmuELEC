@@ -1,0 +1,15 @@
+[Unit]
+Description=zerotier-one
+Wants=network-pre.target
+After=network-pre.target
+
+[Service]
+ExecStart=/usr/sbin/zerotier-one /storage/.config/zerotier/
+ExecStartPost=/usr/sbin/zerotier-join.sh
+Restart=always
+KillMode=process
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

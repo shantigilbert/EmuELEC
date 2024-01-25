@@ -1,0 +1,3 @@
+STATE=$(get_setting zerotier.up)
+SVC="zerotier-one"
+DAEMONS=("zerotier-one")
