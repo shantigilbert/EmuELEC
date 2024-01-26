@@ -19,10 +19,6 @@ if [ "${DEVICE}" == "OdroidGoAdvance" ] || [ "${DEVICE}" == "GameForce" ]; then
 	PKG_CMAKE_OPTS_TARGET+=" -DDEFAULT_SCREENBPP=16"
 fi
 
-pre_configure_target() {
-  git submodule update --init --recursive
-}
-
 makeinstall_target() {
 mkdir -p $INSTALL/usr/bin
 cp hurrican $INSTALL/usr/bin

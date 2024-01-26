@@ -14,10 +14,6 @@ PKG_CMAKE_OPTS_TARGET="-DCMAKE_BUILD_TYPE=Release -DUSE_GL_ES=ON -DWARNINGS_AS_E
 GET_HANDLER_SUPPORT="git"
 PKG_TOOLCHAIN="cmake"
 
-pre_configure_target() {
-  git submodule update --init --recursive
-}
-
 makeinstall_target() {
   mkdir -p $INSTALL/usr/bin
   cp ./src/RigelEngine $INSTALL/usr/bin

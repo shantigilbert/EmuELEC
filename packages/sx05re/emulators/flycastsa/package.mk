@@ -16,10 +16,6 @@ if [ "${ARCH}" == "arm" ]; then
 	PKG_PATCH_DIRS="arm"
 fi
 
-pre_make_target() {
-  git submodule update --init
-}
-
 pre_configure_target() {
 export CXXFLAGS="${CXXFLAGS} -Wno-error=array-bounds"
 PKG_CMAKE_OPTS_TARGET+="-DUSE_GLES=ON -DUSE_VULKAN=OFF -DUSE_HOST_SDL=ON"

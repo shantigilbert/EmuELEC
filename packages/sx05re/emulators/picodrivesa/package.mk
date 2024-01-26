@@ -15,14 +15,7 @@ GET_HANDLER_SUPPORT="git"
 pre_configure_target() { 
 TARGET_CONFIGURE_OPTS=" --platform=generic"
 cd $PKG_BUILD
-git submodule update --init
 }
-
-#make_target() {
-#cd $PKG_BUILD
-#mv $PKG_BUILD/.${TARGET_NAME}/* $PKG_BUILD
-#make 
-#}
 
 makeinstall_target() {
 mkdir -p $INSTALL/usr/bin/skin
