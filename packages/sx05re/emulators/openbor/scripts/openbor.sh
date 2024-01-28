@@ -23,13 +23,14 @@ SAVES="${CONFIGDIR}/Saves"
     ln -sf "$1" "${PAKS}"
 
 # only create symlink to master.cfg if its the first time running the pak
-	if [ ! -f "${SAVES}/${pakname}.cfg" ]; then
-        if [ ${OB} = "OpenBORff" ]; then
-            ln -sf "${CONFIGDIR}/masterff.cfg" "${SAVES}/${pakname}.cfg"
-        else
-            ln -sf "${CONFIGDIR}/master.cfg" "${SAVES}/${pakname}.cfg"
-        fi
-	fi
+#	if [ ! -f "${SAVES}/${pakname}.cfg" ]; then
+rm "${SAVES}/${pakname}.cfg"
+if [ ${OB} = "OpenBORff" ]; then
+    ln -sf "${CONFIGDIR}/masterff.cfg" "${SAVES}/${pakname}.cfg"
+else
+    ln -sf "${CONFIGDIR}/master.cfg" "${SAVES}/${pakname}.cfg"
+fi
+#	fi
 
 # We start the fake keyboard
 gptokeyb -c /emuelec/configs/gptokeyb/${OB}.gptk openbor &
