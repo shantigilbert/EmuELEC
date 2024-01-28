@@ -48,7 +48,7 @@ esac
 PLATFORM=${PLATFORM,,}
 
 # bezelmap.cfg in ${BEZELDIR}/ is to share bezels between arcade clones and parent. 
-BEZELMAP="/emuelec/bezels/arcademap.cfg"
+BEZELMAP="/emuelec/configs/bezels/arcademap.cfg"
 BZLNAME=$(sed -n "/"${PLATFORM}"_"${ROMNAME}" = /p" "${BEZELMAP}" 2>/dev/null)
 BZLNAME="${BZLNAME#*\"}"
 BZLNAME="${BZLNAME%\"*}"

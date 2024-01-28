@@ -55,7 +55,7 @@ elif [ "$ACTION_TYPE" == "gameloading" ]; then
   fi
 
 	ROMNAME=$(basename "${3%.*}")
-	SPLMAP="/emuelec/bezels/arcademap.cfg"
+	SPLMAP="/emuelec/configs/bezels/arcademap.cfg"
 	SPLNAME=$(sed -n "/`echo ""$PLATFORM"_"${ROMNAME}" = "`/p" "$SPLMAP")
 	REALSPL="${SPLNAME#*\"}"
 	REALSPL="${REALSPL%\"*}"
