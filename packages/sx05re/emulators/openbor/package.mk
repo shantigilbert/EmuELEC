@@ -44,4 +44,7 @@ makeinstall_target() {
     chmod +x $INSTALL/usr/bin/*
     mkdir -p $INSTALL/usr/config/emuelec/configs/openbor
 	cp $PKG_DIR/config/master.cfg $INSTALL/usr/config/emuelec/configs/openbor/master.cfg
+
+	mkdir -p $INSTALL/usr/config/emuelec/configs/gptokeyb
+	cp -rf ${PKG_DIR}/config/gptokeyb/* $INSTALL/usr/config/emuelec/configs/gptokeyb
    } 
