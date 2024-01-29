@@ -33,7 +33,7 @@ fi
 #	fi
 
 # We start the fake keyboard
-gptokeyb -c /emuelec/configs/gptokeyb/${OB}.gptk openbor &
+gptokeyb -c /emuelec/configs/gptokeyb/OpenBOR.gptk openbor &
 
 # Run OpenBOR in the config folder
     cd "${CONFIGDIR}"

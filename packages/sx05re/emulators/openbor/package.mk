@@ -45,7 +45,6 @@ makeinstall_target() {
 
     mkdir -p $INSTALL/usr/config/emuelec/configs/openbor
 		cp $PKG_DIR/config/master.cfg $INSTALL/usr/config/emuelec/configs/openbor/master.cfg
-		cp $PKG_DIR/config/masterff.cfg $INSTALL/usr/config/emuelec/configs/openbor/masterff.cfg
 
 		mkdir -p $INSTALL/usr/config/emuelec/configs/gptokeyb
 		cp -rf ${PKG_DIR}/config/gptokeyb/* $INSTALL/usr/config/emuelec/configs/gptokeyb
