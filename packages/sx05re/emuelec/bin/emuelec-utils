@@ -6,6 +6,12 @@
 # Source predefined functions and variables
 . /etc/profile
 
+function get_filenames_no_ext() {
+	local FN=($( ls -1 $1 | sed -e 's/\.[^.]*$//' ))
+	IFS=","
+	echo "${FN[*]}"
+}
+
 function test() {
     echo "success"
     exit 1
