@@ -269,7 +269,7 @@ function resolutions() {
 	fi
 
 	if [[ -f "$FILEPATH" ]]; then
-	  SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat '$FILEPATH'`
+	  SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat "$FILEPATH"`
 	  for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
 	  do
 	    RESOLUTIONS+=($SSR)
