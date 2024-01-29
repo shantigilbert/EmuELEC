@@ -151,6 +151,10 @@ echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
+GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
+# [[ -z "$GPTOKEYB" ]] && GPTOKEYB="${ROMNAME}"
+VIRTUAL_KB=
+
 # Read the first argument in order to set the right emulator
 case ${PLATFORM} in
 	"atari2600")
@@ -166,6 +170,8 @@ case ${PLATFORM} in
 		fi
 		;;
 	"openbor")
+	 	# this does not work as the example you provided as you cant have 2 defaults.
+		VIRTUAL_KB=$(emuelec-utils set_gptokeyb "${PLATFORM}" "${GPTOKEYB}")
 		set_kill_keys "${EMU}"
 		RUNTHIS='${TBASH} openbor.sh "${ROMNAME}" "${EMU}"'
 		;;
@@ -238,6 +244,7 @@ case ${PLATFORM} in
 		fi
 		;;
 	"solarus")
+		VIRTUAL_KB=$(emuelec-utils set_gptokeyb "${PLATFORM}" "${GPTOKEYB}")
 		set_kill_keys "solarus-run"
 		RUNTHIS='${TBASH} solarus.sh "${ROMNAME}"'
 			;;
@@ -444,7 +451,7 @@ if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do al
     eval echo ${RUNTHIS} >> $EMUELECLOG
 fi
 
-gptokeyb 1 ${KILLTHIS} -killsignal ${KILLSIGNAL} &
+gptokeyb 1 ${KILLTHIS} ${VIRTUAL_KB} -killsignal ${KILLSIGNAL} &
 
 [[ "$CLOUD_SYNC" == "1" ]] && wait $CLOUD_PID
 
