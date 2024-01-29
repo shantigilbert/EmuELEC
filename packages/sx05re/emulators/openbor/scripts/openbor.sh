@@ -22,13 +22,12 @@ SAVES="${CONFIGDIR}/Saves"
 # make a symlink to the pak
     ln -sf "$1" "${PAKS}"
 
-# only create symlink to master.cfg if its the first time running the pak
-if [ ! -f "${SAVES}/${pakname}.cfg" ]; then
-  if [ ${OB} = "OpenBORff" ]; then
-      ln -sf "${CONFIGDIR}/masterff.cfg" "${SAVES}/${pakname}.cfg"
-  else
-      ln -sf "${CONFIGDIR}/master.cfg" "${SAVES}/${pakname}.cfg"
-  fi
+# create symlink to master.cfg
+rm "${SAVES}/${pakname}.cfg"
+if [ ${OB} = "OpenBORff" ]; then
+     ln -sf "${CONFIGDIR}/masterff.cfg" "${SAVES}/${pakname}.cfg"
+else
+     ln -sf "${CONFIGDIR}/master.cfg" "${SAVES}/${pakname}.cfg"
 fi
 
 # We start the fake keyboard
