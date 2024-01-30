@@ -98,6 +98,8 @@ GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${PORTNAME}")
 VIRTUAL_KB=
 
 RUNTHIS="$PORTNAME"
+RUNFILE="/emuelec/bin/${PORTNAME}.sh"
+[[ -f "$RUNFILE" ]] && RUNTHIS="$RUNFILE"
 RUNFILE="/usr/bin/${PORTNAME}.sh"
 [[ -f "$RUNFILE" ]] && RUNTHIS="$RUNFILE"
 

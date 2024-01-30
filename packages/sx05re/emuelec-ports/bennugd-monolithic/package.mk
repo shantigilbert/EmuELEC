@@ -30,8 +30,13 @@ make
 }
 
 makeinstall_target() {
-mkdir -p $INSTALL/usr/bin
-cp -rf $PKG_DIR/scripts/* $INSTALL/usr/bin
-cp $PKG_BUILD/projects/cmake/bgdi/bgdi $INSTALL/usr/bin
-cp $PKG_BUILD/projects/cmake/bgdc/bgdc $INSTALL/usr/bin
-} 
+	mkdir -p $INSTALL/usr/bin
+
+	cp $PKG_BUILD/projects/cmake/bgdi/bgdi $INSTALL/usr/bin
+	cp $PKG_BUILD/projects/cmake/bgdc/bgdc $INSTALL/usr/bin
+}
+
+post_makeinstall_target() {
+	cp -rf $PKG_DIR/scripts/* $INSTALL/usr/bin
+}
+
