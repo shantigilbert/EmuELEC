@@ -97,18 +97,18 @@ echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${PORTNAME}")
 VIRTUAL_KB=
 
+RUNTHIS="$PORTNAME"
+RUNFILE="/usr/bin/${PORTNAME}.sh"
+[[ -f "$RUNFILE" ]] && RUNTHIS="$RUNFILE"
+
 case ${PORTNAME} in
 	"abuse")
 		VIRTUAL_KB=$(emuelec-utils set_gptokeyb "abuse" "${GPTOKEYB}")
 		set_kill_keys "abuse"
-		RUNTHIS="abuse"
 		;;
-	"sorr")
+	"bgdi")
 		VIRTUAL_KB=$(emuelec-utils set_gptokeyb "sorr" "${GPTOKEYB}")
 		set_kill_keys "bgdi"
-		cd /storage/roms/ports/sorr
-    [[ ! -e "/storage/roms/ports/sorr/SorR.dat" ]] && exit 21
-		RUNTHIS="bgdi \"/storage/roms/ports/sorr/SorR.dat\""
 		;;
 esac
 

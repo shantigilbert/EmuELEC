@@ -477,7 +477,7 @@ Sorr:
   port_exe: "bgdi"
   audio: "alsa"
   commands:
-    - emuelecRunPort.sh "sorr" -Pports
+    - emuelecRunPort.sh "bgdi" -Pports
 
 Heroes of Might and Magic II:
   description: 'Heroes of Might and Magic II: The Succession Wars is a turn-based strategy video game developed by Jon Van Caneghem through New World Computing and published in 1996 by the 3DO Company.'
