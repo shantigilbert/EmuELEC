@@ -6,12 +6,6 @@
 # Source predefined functions and variables
 . /etc/profile
 
-function get_filenames_no_ext() {
-	local FN=($( ls -1 $1 | sed -e 's/\.[^.]*$//' ))
-	IFS=","
-	echo "${FN[*]}"
-}
-
 function test() {
     echo "success"
     exit 1
@@ -269,7 +263,7 @@ function resolutions() {
 	fi
 
 	if [[ -f "$FILEPATH" ]]; then
-	  SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat "$FILEPATH"`
+	  SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat '$FILEPATH'`
 	  for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
 	  do
 	    RESOLUTIONS+=($SSR)
