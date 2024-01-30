@@ -464,7 +464,7 @@ Abuse:
   port_exe: "abuse"
   audio: "alsa"
   commands:
-    - emuelecRunPort.sh "abuse" -Pports "${2}" "-SCabuse"
+    - emuelecRunPort.sh "abuse" -Pports "${2}" --runcmd=[abuse]
 
 Sorr:
   description: Streets of Rage Remake is a remastered version of the MegaDrive classic. There are more than 60 different enemies, you can choose among 16 characters, choose your favourite one and kick asses out there. It's even better than the original one. More characters, more levels, more actions, more finals,... Amazing.

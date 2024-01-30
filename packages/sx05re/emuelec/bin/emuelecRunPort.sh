@@ -67,16 +67,14 @@ CORE="${CORE%% *}"  # until a space is found
 EMULATOR="${arguments##*--emulator=}"  # read from --emulator= onwards
 EMULATOR="${EMULATOR%% *}"  # until a space is found
 
-ROMNAME="$1"
-BASEROMNAME=${ROMNAME##*/}
-GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
+PORTNAME="$1"
 
-SC="${arguments##*-SC}"
-SC="${SC%%\"*}"
+RUNCMD="${arguments##*--runcmd=[}"
+RUNCMD="${RUNCMD%%]*}"
 
 SET_DISPLAY_SH="setres.sh"
 VIDEO="$(cat /sys/class/display/mode)"
-VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
+VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${PORTNAME}")
 [[ -z "$VIDEO_EMU" ]] && VIDEO_EMU=$VIDEO
 
 KILLTHIS="none"
@@ -90,7 +88,7 @@ fi
 
 # Show splash screen if enabled
 SPL=$(get_ee_setting ee_splash.enabled)
-[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh gameloading "$PLATFORM" "${ROMNAME}"
+[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh gameloading "$PLATFORM" "${PORTNAME}"
 
 # Set the display video to that of the emulator setting.
 [ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU $PLATFORM # set display
@@ -99,15 +97,15 @@ SPL=$(get_ee_setting ee_splash.enabled)
 CONTROLLERCONFIG="${arguments#*--controllers=*}"
 echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 
-GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
+GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${PORTNAME}")
 VIRTUAL_KB=
 
-RUNTHIS="$SC"
+RUNTHIS="$RUNCMD"
 
-case ${ROMNAME} in
+case ${PORTNAME} in
 	"abuse")
 		VIRTUAL_KB=$(emuelec-utils set_gptokeyb "abuse" "${GPTOKEYB}")
-		set_kill_keys "abuse"		
+		set_kill_keys "abuse"
 		;;
 esac
 
@@ -118,14 +116,13 @@ if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do al
 
     # Write the command to the log file.
     echo "PLATFORM: $PLATFORM" >> $EMUELECLOG
-    echo "ROM NAME: ${ROMNAME}" >> $EMUELECLOG
-    echo "BASE ROM NAME: ${ROMNAME##*/}" >> $EMUELECLOG
-    echo "1st Argument: $1" >> $EMUELECLOG 
+		echo "PORT NAME: ${PORTNAME}" >> $EMUELECLOG
+    echo "1st Argument: $1" >> $EMUELECLOG
     echo "2nd Argument: $2" >> $EMUELECLOG
-    echo "3rd Argument: $3" >> $EMUELECLOG 
-    echo "4th Argument: $4" >> $EMUELECLOG 
-    echo "Full arguments: $arguments" >> $EMUELECLOG 
-    echo "Run Command is:" >> $EMUELECLOG 
+    echo "3rd Argument: $3" >> $EMUELECLOG
+    echo "4th Argument: $4" >> $EMUELECLOG
+    echo "Full arguments: $arguments" >> $EMUELECLOG
+    echo "Run Command is:" >> $EMUELECLOG
     eval echo ${RUNTHIS} >> $EMUELECLOG
 fi
 
