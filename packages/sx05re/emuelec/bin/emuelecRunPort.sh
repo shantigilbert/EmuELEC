@@ -79,17 +79,6 @@ VIDEO="$(cat /sys/class/display/mode)"
 VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
 [[ -z "$VIDEO_EMU" ]] && VIDEO_EMU=$VIDEO
 
-# freej2me needs the JDK to be downloaded on the first run
-if [ ${EMU} == "freej2me_libretro" ]; then
-freej2me.sh
-
-JAVA_HOME='/storage/roms/bios/jdk'
-export JAVA_HOME
-PATH="$JAVA_HOME/bin:$PATH"
-export PATH
-
-fi
-
 KILLTHIS="none"
 KILLSIGNAL="15"
 
@@ -113,7 +102,7 @@ echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
 VIRTUAL_KB=
 
-RUNTHIS='${SC}'
+RUNTHIS="$SC"
 
 case ${ROMNAME} in
 	"abuse")
