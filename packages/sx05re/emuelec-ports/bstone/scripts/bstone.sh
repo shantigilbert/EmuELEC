@@ -23,7 +23,7 @@ gptokeyb -c "${GPTOKEYB_CONFIG}" &
 mkdir -p "${CONFIGFOLDER}"
 cd "${CONFIGFOLDER}"
 
-if [ "$EE_DEVICE" == "Amlogic-ng" ]; then 
+if [ "${EE_DEVICE}" == "Amlogic-ng" ]; then 
     fbfix > /dev/null 2>&1
     params="--vid_renderer software --vid_width 1920 --vid_height 1080 --vid_is_widescreen 1"
 else

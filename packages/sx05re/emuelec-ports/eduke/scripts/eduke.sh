@@ -14,7 +14,7 @@ if [ ! -f "${DUKECFG}" ]; then
 # We only do these changes if the cfg file does not already exists, if it exists we asume the user has created it outside this script
 # Only for handheld devices, SBCs already handle this gratefully
                
-    if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
+    if [ "${EE_DEVICE}" == "OdroidGoAdvance" ] || [ "${EE_DEVICE}" == "GameForce" ]; then
         touch "${DUKECFG}"
     
         case "$(oga_ver)" in
@@ -43,14 +43,14 @@ if [ ! -f "${DUKECFG}" ]; then
     fi
 fi
 
-if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
+if [ "${EE_DEVICE}" == "OdroidGoAdvance" ] || [ "${EE_DEVICE}" == "GameForce" ]; then
     # Eduke does not run if there is less that x ammount of memory so we need to enable swap on devices with 1GB of RAM
     SWAP_FILE="/storage/.config/swap.conf"
     if [ ! -f "${SWAP_FILE}" ]; then
         cp /etc/swap.conf "${SWAP_FILE}"
     fi
 
-    # We could potentially use /tmp/swap as the swap file by changing this: SWAPFILE="$HOME/.cache/swapfile" in "${SWAP_FILE}" but not sure of the consequences
+    # We could potentially use /tmp/swap as the swap file by changing this: SWAPFILE="${HOME}/.cache/swapfile" in "${SWAP_FILE}" but not sure of the consequences
     # It needs at LEAST 300mb of swap, pretty greedy
     sed -i 's/SWAPFILESIZE=.*/SWAPFILESIZE="300"/' "${SWAP_FILE}"
     sed -i 's/SWAP_ENABLED=.*/SWAP_ENABLED="yes"/' "${SWAP_FILE}"
@@ -61,8 +61,8 @@ fi
 cd /storage/roms/ports/eduke
 eduke32 -j /storage/roms/ports/eduke > /emuelec/logs/emuelec.log 2>&1
 
-if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
+if [ "${EE_DEVICE}" == "OdroidGoAdvance" ] || [ "${EE_DEVICE}" == "GameForce" ]; then
     /usr/lib/coreelec/mount-swap unmount
-    rm -rf $HOME/.cache/swapfile
+    rm -rf ${HOME}/.cache/swapfile
     sed -i 's/SWAP_ENABLED=.*/SWAP_ENABLED="no"/' "${SWAP_FILE}"
 fi

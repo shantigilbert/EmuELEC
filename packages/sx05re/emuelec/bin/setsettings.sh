@@ -136,7 +136,7 @@ case ${1} in
         echo 'aspect_ratio_index = "22"' >> ${RACONF}
     else    
     for i in "${!INDEXRATIOS[@]}"; do
-        if [[ "${INDEXRATIOS[$i]}" = "${2}" ]]; then
+        if [[ "${INDEXRATIOS[${i}]}" = "${2}" ]]; then
             break
         fi
     done
@@ -149,7 +149,7 @@ case ${1} in
     ;;
     "rewind")
         (for e in "${NOREWIND[@]}"; do [[ "${e}" == "${PLATFORM}" ]] && exit 0; done) && RE=0 || RE=1
-            if [ $RE == 1 ] && [ "${2}" == "1" ]; then
+            if [ ${RE} == 1 ] && [ "${2}" == "1" ]; then
                 echo 'rewind_enable = "true"' >> ${RACONF}
             else
                 echo 'rewind_enable = "false"' >> ${RACONF} 
@@ -208,7 +208,7 @@ else
     ;;
     "runahead")
     (for e in "${NORUNAHEAD[@]}"; do [[ "${e}" == "${PLATFORM}" ]] && exit 0; done) && RA=0 || RA=1    
-    if [ $RA == 1 ]; then
+    if [ ${RA} == 1 ]; then
         if [ "${2}" == "false" ] || [ "${2}" == "none" ] || [ "${2}" == "0" ]; then 
             echo 'run_ahead_enabled = "false"' >> ${RACONF}
             echo 'run_ahead_frames = "1"' >> ${RACONF}
@@ -220,7 +220,7 @@ else
     ;;
     "secondinstance")
     (for e in "${NORUNAHEAD[@]}"; do [[ "${e}" == "${PLATFORM}" ]] && exit 0; done) && RA=0 || RA=1    
-    if [ $RA == 1 ]; then
+    if [ ${RA} == 1 ]; then
         [ "${2}" == "1" ] && echo 'run_ahead_secondary_instance = "true"' >> ${RACONF} || echo 'run_ahead_secondary_instance = "false"' >> ${RACONF} 
     fi
     ;;
@@ -234,7 +234,7 @@ else
             echo 'ai_service_enable = "true"' >> ${RACONF}
             get_setting "ai_target_lang"
             AI_LANG=${EES}
-            [[ "$AI_LANG" == "false" ]] && $AI_LANG="0"
+            [[ "${AI_LANG}" == "false" ]] && ${AI_LANG}="0"
             get_setting "ai_service_url"
             AI_URL=${EES}
             echo "ai_service_source_lang = \"${AI_LANG}\"" >> ${RACONF}
@@ -247,7 +247,7 @@ else
     ;;
     "retroachievements")
         for i in "${!RETROARCHIVEMENTS[@]}"; do
-            if [[ "${RETROARCHIVEMENTS[$i]}" = "${PLATFORM}" ]]; then
+            if [[ "${RETROARCHIVEMENTS[${i}]}" = "${PLATFORM}" ]]; then
                 if [ "${2}" == "1" ]; then
                     echo 'cheevos_enable = "true"' >> ${RACONF}
                     get_setting "retroachievements.username"
@@ -456,7 +456,7 @@ if [ -z "${EES}" ]; then
 fi
 
 # Sanity check in case there there are 2 variables set, only use the first line
-EES=$(echo $EES | head -1)
+EES=$(echo ${EES} | head -1)
 
 [ -z "${EES}" ] && EES="false"
 set_setting ${1} ${EES}
@@ -465,11 +465,11 @@ set_setting ${1} ${EES}
 clean_settings
 
 for s in ratio smooth shaderset rewind autosave integerscale integerscaleoverscale runahead secondinstance video_frame_delay_auto retroachievements ai_service_enabled netplay fps vertical rgascale snapshot; do
-get_setting $s
+get_setting ${s}
 [ -z "${EES}" ] || SETF=1
 done
 
-if [ $SETF == 0 ]; then
+if [ ${SETF} == 0 ]; then
 # If no setting was changed, set all options to default on the configuration files
 default_settings
 fi
@@ -477,7 +477,7 @@ fi
 if [ "${CORE}" == "atari800" ]; then
 ATARICONF="/storage/.config/emuelec/configs/atari800.cfg"
 ATARI800CONF="/storage/.config/retroarch/config/Atari800/Atari800.opt"
-[[ ! -f "$ATARI800CONF" ]] && touch "$ATARI800CONF"
+[[ ! -f "${ATARI800CONF}" ]] && touch "${ATARI800CONF}"
 
 sed -i "/atari800_system =/d" ${RACORECONF}
 sed -i "/RAM_SIZE=/d" ${ATARICONF}
@@ -510,7 +510,7 @@ fi
 
 if [ "${CORE}" == "gambatte" ]; then
 GAMBATTECONF="/storage/.config/retroarch/config/Gambatte/Gambatte.opt"
-[[ ! -f "$GAMBATTECONF" ]] && touch "$GAMBATTECONF"
+[[ ! -f "${GAMBATTECONF}" ]] && touch "${GAMBATTECONF}"
 
 sed -i "/gambatte_gb_colorization =/d" ${RACORECONF}
 sed -i "/gambatte_gb_internal_palette =/d" ${RACORECONF}
@@ -552,7 +552,7 @@ CONTROLLERS="${CONTROLLERS#*--controllers=*}"
 CONTROLLERS="${CONTROLLERS%% -state*}"  # until -state is found
 
 for i in 1 2 3 4 5; do 
-if [[ "$CONTROLLERS" == *p${i}* ]]; then
+if [[ "${CONTROLLERS}" == *p${i}* ]]; then
 PINDEX="${CONTROLLERS#*-p${i}index }"
 PINDEX="${PINDEX%% -p${i}guid*}"
 sed -i "/input_player${i}_joypad_index =/d" ${RACONF}
@@ -570,7 +570,7 @@ EE_DEVICE=$(cat /ee_arch)
 get_setting "retroarch.menu_driver"
 
 if [ "${EES}" == "false" ] || [ "${EES}" == "auto" ] || [ "${EES}" == "none" ] || [ "${EES}" == "0" ]; then 
-    if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
+    if [ "${EE_DEVICE}" == "OdroidGoAdvance" ] || [ "${EE_DEVICE}" == "GameForce" ]; then
         EES="xmb"
     else
         EES="ozone"

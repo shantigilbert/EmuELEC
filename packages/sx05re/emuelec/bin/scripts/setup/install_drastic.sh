@@ -28,22 +28,22 @@ else
 fi
 
 ES_FOLDER="/storage/.emulationstation"
-LINKDEST="$ES_FOLDER/scripts/drastic.tar.gz"
-CFG="$ES_FOLDER/es_systems.cfg"
+LINKDEST="${ES_FOLDER}/scripts/drastic.tar.gz"
+CFG="${ES_FOLDER}/es_systems.cfg"
 
-mkdir -p "$ES_FOLDER/scripts/"
+mkdir -p "${ES_FOLDER}/scripts/"
 
-wget -O $LINKDEST $LINK
+wget -O ${LINKDEST} ${LINK}
 
-[[ ! -f $LINKDEST ]] && return 1
-tar xvf $LINKDEST -C "$ES_FOLDER/scripts"
-rm $LINKDEST
+[[ ! -f ${LINKDEST} ]] && return 1
+tar xvf ${LINKDEST} -C "${ES_FOLDER}/scripts"
+rm ${LINKDEST}
 
-if grep -q '<name>nds</name>' "$CFG"
+if grep -q '<name>nds</name>' "${CFG}"
 then
 	echo 'Drastic is already setup in your es_systems.cfg file'
 	echo 'deleting...nd from es_system.cfg'
-	xmlstarlet ed -L -P -d "/systemList/system[name='nds']" $CFG
+	xmlstarlet ed -L -P -d "/systemList/system[name='nds']" ${CFG}
 fi
 
 	echo 'Adding Drastic to systems list'
@@ -59,7 +59,7 @@ fi
 		-s '//systemList/system[last()]' -t elem -n 'command' -v "emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers=\"%CONTROLLERSCONFIG%\""\
 		-s '//systemList/system[last()]' -t elem -n 'platform' -v 'nds'\
 		-s '//systemList/system[last()]' -t elem -n 'theme' -v 'nds'\
-		$CFG
+		${CFG}
 
 read -d '' content <<EOF
 #!/bin/bash
@@ -70,13 +70,13 @@ if [ -f "/storage/.emulationstation/scripts/pixel.sh" ]; then
 fi
 
 cd /storage/.emulationstation/scripts/drastic/
-./drastic "\$1" > /dev/null 2>&1
+./drastic "\${1}" > /dev/null 2>&1
 
 EOF
-echo "$content" > $ES_FOLDER/scripts/drastic.sh
-chmod +x $ES_FOLDER/scripts/drastic.sh
+echo "${content}" > ${ES_FOLDER}/scripts/drastic.sh
+chmod +x ${ES_FOLDER}/scripts/drastic.sh
 
-if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
+if [ "${EE_DEVICE}" == "OdroidGoAdvance" ] || [ "${EE_DEVICE}" == "GameForce" ]; then
 # copy the correct config file depending on what OGA
 
 DEVICE=$(oga_ver)

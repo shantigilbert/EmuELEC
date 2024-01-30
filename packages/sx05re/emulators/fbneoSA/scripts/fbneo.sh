@@ -8,7 +8,7 @@
 
 add_player_hat() 
 {
-    local pl=$1
+    local pl=${1}
     local pf="/storage/.local/share/fbneo/config/p${pl}defaults.ini"
 
     if [ ! -f "${pf}" ]; then

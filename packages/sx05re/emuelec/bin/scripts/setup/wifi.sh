@@ -22,7 +22,7 @@ joy2keyStart
 
 CONNMAN=/usr/bin/connmanctl
 
-script=$(basename "$0")
+script=$(basename "${0}")
 configpath=/storage/.cache/connman # connman config directory
 ssid="" 	# ssid of wifi network to reach
 passphrase="" 	# passphrase of wifi network to reach
@@ -33,24 +33,24 @@ function error() {
 	echo ERROR: "$@" >&2
 	cat << EOF >&2
 Usage:
-	$script connect <ssid> [passphrase]
-	$script disconnect [ssid]
-	$script scan
-	$script status
+	${script} connect <ssid> [passphrase]
+	${script} disconnect [ssid]
+	${script} scan
+	${script} status
 EOF
 	exit 1
 }
 
 function wifi_enable() {
-	command=$($CONNMAN technologies | grep -A 4 wifi | sed -n '4p')
+	command=$(${CONNMAN} technologies | grep -A 4 wifi | sed -n '4p')
 
-	if [[ $command == *True ]]; then
+	if [[ ${command} == *True ]]; then
 		echo ">>> Wifi is already enabled ... Ok"
 	else
 		echo ">>> Enabling wifi ..."
-		command=$($CONNMAN enable wifi)
-		if [[ $command == Enabled* ]]; then
-			echo $command
+		command=$(${CONNMAN} enable wifi)
+		if [[ ${command} == Enabled* ]]; then
+			echo ${command}
 		else
 			echo ">>> Cannot enable wifi !"
 			exit 1
@@ -59,18 +59,18 @@ function wifi_enable() {
 }
 
 function wifi_disable() {
-	$CONNMAN disable wifi
+	${CONNMAN} disable wifi
 }
 
 function wifi_scan() {
 	echo -e "\n>>> Scanning for available wifi networks..."
-	$CONNMAN scan wifi
+	${CONNMAN} scan wifi
 }
 
 function wifi_connected() {
-	command=$($CONNMAN technologies | grep -A 4 wifi | sed -n '5p')
+	command=$(${CONNMAN} technologies | grep -A 4 wifi | sed -n '5p')
 
-	if [[ $command == *True ]];then
+	if [[ ${command} == *True ]];then
 		echo -e "\n>>> Already connected to a wifi network"
 		return 0
 	fi
@@ -79,9 +79,9 @@ function wifi_connected() {
 
 function wifi_status() {
 	echo -e "\n>>> Wifi status:"
-	$CONNMAN technologies | grep -A 4 wifi
+	${CONNMAN} technologies | grep -A 4 wifi
 	echo -e "\n>>> Available SSIDs:"
-	$CONNMAN services | grep wifi_
+	${CONNMAN} services | grep wifi_
 }
 
 function wifi_config() {
@@ -90,18 +90,18 @@ function wifi_config() {
 	retries=5
 
 	while [ 1 ]; do
-		$CONNMAN scan wifi
+		${CONNMAN} scan wifi
 		echo -e "\n>>> Available SSIDs:"
-		$CONNMAN services | grep wifi_
+		${CONNMAN} services | grep wifi_
 
-		fullservice=$($CONNMAN services | cut -c 5- | sed 's/ \+ /:/g' | grep "$ssid:")
-		if [[ -n $fullservice ]]; then
+		fullservice=$(${CONNMAN} services | cut -c 5- | sed 's/ \+ /:/g' | grep "${ssid}:")
+		if [[ -n ${fullservice} ]]; then
 			break
 		fi
 
 		retries=$(( retries - 1 ))
-		if [[ $retries -gt 0 ]]; then
-			echo "waiting for $ssid to appear..."
+		if [[ ${retries} -gt 0 ]]; then
+			echo "waiting for ${ssid} to appear..."
 			sleep 5
 			continue
 		fi
@@ -109,33 +109,33 @@ function wifi_config() {
 		exit 1
 	done
 
-	ssid=$(echo "$fullservice" | awk -F: '{print $1}')
-	service=$(echo "$fullservice" | awk -F: '{print $2}')
+	ssid=$(echo "${fullservice}" | awk -F: '{print ${1}}')
+	service=$(echo "${fullservice}" | awk -F: '{print ${2}}')
 
 	echo "Target ssid found - config is :"
-	echo "SSID       : $ssid"
-	echo "Service Id : $service"
-	echo "Passphrase : $passphrase"
+	echo "SSID       : ${ssid}"
+	echo "Service Id : ${service}"
+	echo "Passphrase : ${passphrase}"
 
-	cat <<EOF >"$configpath/$ssid.config"
-[service_$service]
-Name = $ssid
+	cat <<EOF >"${configpath}/${ssid}.config"
+[service_${service}]
+Name = ${ssid}
 Type = wifi
-Passphrase = $passphrase
+Passphrase = ${passphrase}
 EOF
 	echo "Configuration written"
 }
 
 function wifi_connect() {
 	echo -e "\n>>> Performing connection ..."
-	output=$($CONNMAN connect $service)
+	output=$(${CONNMAN} connect ${service})
 
-	if [[ $output == Connected* ]];then
+	if [[ ${output} == Connected* ]];then
 		echo "...Ok."
-		echo $output
+		echo ${output}
 	else
 		echo "...connection failed !"
-		echo $output
+		echo ${output}
 
 		wifi_disconnect 
 		echo "Check your SSID or your passphrase"
@@ -146,35 +146,35 @@ function wifi_connect() {
 
 function wifi_disconnect() {
 
-	if [[ -z "$ssid" ]]; then
-		$CONNMAN services | cut -c5- | sed 's/ \+ /:/g' | ( while read line; do
-			ssid=$(cut -f1 -d':' <<<$line)
-			serv=$(cut -f2 -d':' <<<$line)
-			if [[ "$serv" =~ ^wifi_  && -f "$configpath/$ssid.config" ]]; then
-				echo "Disconnecting $serv"
-				$CONNMAN disconnect $serv
-				echo "Cleaning config $ssid.config"
-				rm -rf "$configpath/$ssid.config"
+	if [[ -z "${ssid}" ]]; then
+		${CONNMAN} services | cut -c5- | sed 's/ \+ /:/g' | ( while read line; do
+			ssid=$(cut -f1 -d':' <<<${line})
+			serv=$(cut -f2 -d':' <<<${line})
+			if [[ "${serv}" =~ ^wifi_  && -f "${configpath}/${ssid}.config" ]]; then
+				echo "Disconnecting ${serv}"
+				${CONNMAN} disconnect ${serv}
+				echo "Cleaning config ${ssid}.config"
+				rm -rf "${configpath}/${ssid}.config"
 			fi
 		done )
 		return 0
 	fi
 
-	service=$($CONNMAN services | cut -c 5- | sed 's/ \+ /:/g' | grep "^$ssid:" | awk -F: '{print $2}')
-	if [[ -z "$service" ]]; then
+	service=$(${CONNMAN} services | cut -c 5- | sed 's/ \+ /:/g' | grep "^${ssid}:" | awk -F: '{print ${2}}')
+	if [[ -z "${service}" ]]; then
 		echo "... unknown service"
-		rm -rf "$configpath/$ssid.config" # clear config in all cases
+		rm -rf "${configpath}/${ssid}.config" # clear config in all cases
 		return 1
 	fi
 
-	output=$($CONNMAN disconnect $service)
-	rm -rf "$configpath/$ssid.config" # clear config in all cases
-	if [[ $output == Disconnected* ]];then
+	output=$(${CONNMAN} disconnect ${service})
+	rm -rf "${configpath}/${ssid}.config" # clear config in all cases
+	if [[ ${output} == Disconnected* ]];then
 		echo "...Ok."
-		echo $output
+		echo ${output}
 	else
 		echo "...disconnection failed !"
-		echo $output
+		echo ${output}
 		return 1
 	fi
 }
@@ -182,9 +182,9 @@ function wifi_disconnect() {
 
 # changes made by emuELEC 
 
-COPTION=$1
-CSSID=$2
-CPASS=$3
+COPTION=${1}
+CSSID=${2}
+CPASS=${3}
 
 # check for a file named wifi.txt on /storage/.config or /flash
 # read the content ssid:password and pass it as parameters to the script
@@ -199,25 +199,25 @@ else
  fi
 
 IFS=':' # space is set as delimiter
-read -ra WIFI <<< "$str" # str is read into an array as tokens separated by IFS
+read -ra WIFI <<< "${str}" # str is read into an array as tokens separated by IFS
 
-[ -z "$COPTION" ] && COPTION="connect"
-[ -z "$CSSID" ] && CSSID=${WIFI[0]}
-[ -z "$CPASS" ] && CPASS=${WIFI[1]}
+[ -z "${COPTION}" ] && COPTION="connect"
+[ -z "${CSSID}" ] && CSSID=${WIFI[0]}
+[ -z "${CPASS}" ] && CPASS=${WIFI[1]}
 
 if wifi_connected; then
-    ssid=$CSSID
+    ssid=${CSSID}
 	wifi_disconnect
 	echo "WiFi disconnected"
 	read -n 1 -s -r -p "Press any key to continue"
 	exit 0
 fi 
 
-case $COPTION in
+case ${COPTION} in
 	connect)
-		ssid=$CSSID
-		passphrase=$CPASS
-		[ -z "$ssid" ] && error "No ssid defined !"
+		ssid=${CSSID}
+		passphrase=${CPASS}
+		[ -z "${ssid}" ] && error "No ssid defined !"
 	    wifi_disconnect
 		wifi_enable
 		wifi_connected && exit 0
@@ -225,7 +225,7 @@ case $COPTION in
 		wifi_connect
 		;;
 	disconnect)
-		ssid=$CSSID
+		ssid=${CSSID}
 		wifi_disconnect
 		wifi_disable
 		;;

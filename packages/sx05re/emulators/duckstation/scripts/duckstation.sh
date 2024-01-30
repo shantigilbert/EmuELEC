@@ -34,7 +34,7 @@ fi
 #Setting Cheevos if enabled on emulationstation. First check if token entry is not present
 ztoken=$(grep "Token =" /storage/.config/emuelec/configs/duckstation/settings.ini)
 
-if ([ -z "$ztoken" ]) 
+if ([ -z "${ztoken}" ]) 
 then
     duckstationcheevos.sh
 fi
