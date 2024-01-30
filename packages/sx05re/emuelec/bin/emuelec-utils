@@ -12,6 +12,7 @@ function test() {
 }
 
 function error() {
+# Displays emuelec.log if there was an error.
     text_viewer /emuelec/logs/emuelec.log -w -t "Error! ${2}" -f 24
 	show_splash.sh exit
 }
@@ -38,6 +39,7 @@ function audio() {
 }
 
 function clearconfig() {
+# This function resets configurations based on argument 1
 	case "${1}" in
 	"EMUS")
         unmount_all
@@ -66,6 +68,7 @@ function clearconfig() {
 }
 
 function ee_backup() {
+# Creates a backup of current configurations
     BACKUPDIR="/storage/roms/backup"
     BACKUPTAR="ee_backup_config.tar.gz"
     BACKUPFILE="${BACKUPDIR}/${BACKUPTAR}"
@@ -112,6 +115,7 @@ function ee_backup() {
 }
 
 function ee_cloud_backup() {
+# Creates a cloud backup of current configurations using rclone
     RCLONECONF="/emuelec/configs/rclone/rclone.conf"
     EESYNCCFG="/emuelec/configs/rclone/ee_cloud_sync.cfg"
     
@@ -166,10 +170,12 @@ function ee_cloud_backup() {
 }
 
 function filemanager() {
+# runs the file manager script, might be outdated. 
 	/usr/bin/scripts/setup/file_manager.sh
 }
 
 function getshaders() {
+# Returns a list of available shaders, mostly used in Emulationstation.
 	find /tmp/shaders -name '*.glslp' -print0 |
 		while IFS= read -r -d '' line; do
 		echo ${line#/tmp/shaders/},
@@ -177,6 +183,7 @@ function getshaders() {
 }
 
 function getip() {
+# returns current IP Address
 IP="$(ifconfig wlan0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')"
 
   if [ -z "$IP" ]; then
@@ -187,7 +194,7 @@ IP="$(ifconfig wlan0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')"
 	echo "No Internet"
  else
 	echo "${IP}"
-	echo "${IP}" > /storage/ip.txt
+	echo "${IP}" > /emuelec/ip.txt
  fi
 }
 
@@ -213,7 +220,7 @@ function dimensions() {
 }
 
 function resolutions() {
-
+# Returns a list of supported resolutions depending on device
 	RESOLUTIONS=()
 
   if [ -f "/storage/LEGACY_RESOLUTIONS" ]; then
@@ -277,14 +284,17 @@ function resolutions() {
 }
 
 function current_timezone() {
+# Returns the current timezone
 	readlink -f /etc/localtime | sed 's;/usr/share/zoneinfo/;;'
 }
 
 function timezones() {
+# Returns a list of timezones, used in ES
 	cat /usr/share/zoneinfo/zone1970.tab | grep -v "^#" | awk '{ print $3"," }' | sort -u
 }
 
 function small-cores() {
+# Switch the small cores on the N2 on and off, we mostly have them off as the small cores are slower.
     if grep -q "g12b" /proc/device-tree/compatible; then
         case "$1" in
         "enable")
@@ -310,6 +320,7 @@ function unmount_all () {
 }
 
 function createMultidisc() {
+# Creates a multidisc m3u file, used in ES. 
   local ROMNAME="$1"
 
   local BASEROMNAME="${ROMNAME##*/}"
