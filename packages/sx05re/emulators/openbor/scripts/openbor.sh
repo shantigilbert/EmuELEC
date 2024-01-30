@@ -5,10 +5,16 @@
 
 # OpenBOR only works with Pak files, if you have an extracted game you will need to create a pak first.
 
+# Source predefined functions and variables
+. /etc/profile
+
+PLATFORM=${1}
+
 OB=${2}
 [[ -z ${OB} ]] && OB=OpenBOR
 
-pakname=$(basename "$1")
+ROMNAME="$3"
+pakname=$(basename "$3")
 pakname="${pakname%.*}"
 
 CONFIGDIR="/emuelec/configs/openbor"
@@ -20,7 +26,7 @@ SAVES="${CONFIGDIR}/Saves"
 	mkdir -p "${SAVES}"
 
 # make a symlink to the pak
-    ln -sf "$1" "${PAKS}"
+    ln -sf "$3" "${PAKS}"
 
 # create symlink to master.cfg
 rm "${SAVES}/${pakname}.cfg"
@@ -31,7 +37,9 @@ else
 fi
 
 # We start the fake keyboard
-gptokeyb -c /emuelec/configs/gptokeyb/OpenBOR.gptk openbor &
+GPTOKEY=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
+[[ -z "$GPTOKEY" ]] && GPTOKEY="OpenBOR"
+gptokeyb -c /emuelec/configs/gptokeyb/${GPTOKEY}.gptk openbor &
 
 # Run OpenBOR in the config folder
     cd "${CONFIGDIR}"

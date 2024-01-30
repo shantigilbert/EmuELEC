@@ -167,7 +167,7 @@ case ${PLATFORM} in
 		;;
 	"openbor")
 		set_kill_keys "${EMU}"
-		RUNTHIS='${TBASH} openbor.sh "${ROMNAME}" "${EMU}"'
+		RUNTHIS='${TBASH} openbor.sh "${PLATFORM}" "${EMU}" "${ROMNAME}"'
 		;;
 	"setup")
         if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then 
