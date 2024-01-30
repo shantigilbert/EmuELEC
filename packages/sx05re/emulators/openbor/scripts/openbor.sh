@@ -8,13 +8,12 @@
 # Source predefined functions and variables
 . /etc/profile
 
-PLATFORM=${1}
 
-OB=${2}
+OB=${1}
 [[ -z ${OB} ]] && OB=OpenBOR
 
-ROMNAME="$3"
-pakname=$(basename "$3")
+ROMNAME="$2"
+pakname=$(basename "$2")
 pakname="${pakname%.*}"
 
 CONFIGDIR="/emuelec/configs/openbor"
@@ -26,7 +25,7 @@ SAVES="${CONFIGDIR}/Saves"
 	mkdir -p "${SAVES}"
 
 # make a symlink to the pak
-    ln -sf "$3" "${PAKS}"
+    ln -sf "$2" "${PAKS}"
 
 # create symlink to master.cfg
 rm "${SAVES}/${pakname}.cfg"
@@ -36,16 +35,9 @@ else
      ln -sf "${CONFIGDIR}/master.cfg" "${SAVES}/${pakname}.cfg"
 fi
 
-# We start the fake keyboard
-GPTOKEY=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
-[[ -z "$GPTOKEY" ]] && GPTOKEY="OpenBOR"
-gptokeyb -c /emuelec/configs/gptokeyb/${GPTOKEY}.gptk openbor &
-
 # Run OpenBOR in the config folder
     cd "${CONFIGDIR}"
 	SDL_AUDIODRIVER=alsa ${OB}
 
 # Clear PAKS folder to avoid getting the launcher on nex run
 rm -rf ${PAKS}/*
-
-killall gptokeyb &

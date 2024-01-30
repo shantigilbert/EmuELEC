@@ -151,6 +151,9 @@ echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
+GPTOKEY=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
+VIRTUAL_KB=
+
 # Read the first argument in order to set the right emulator
 case ${PLATFORM} in
 	"atari2600")
@@ -166,8 +169,10 @@ case ${PLATFORM} in
 		fi
 		;;
 	"openbor")
+		[[ -z "$GPTOKEY" ]] && GPTOKEY="OpenBOR"
+		VIRTUAL_KB="-c /emuelec/configs/gptokeyb/${GPTOKEY}.gptk"
 		set_kill_keys "${EMU}"
-		RUNTHIS='${TBASH} openbor.sh "${PLATFORM}" "${EMU}" "${ROMNAME}"'
+		RUNTHIS='${TBASH} openbor.sh "${EMU}" "${ROMNAME}"'
 		;;
 	"setup")
         if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then 
@@ -444,7 +449,7 @@ if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do al
     eval echo ${RUNTHIS} >> $EMUELECLOG
 fi
 
-gptokeyb 1 ${KILLTHIS} -killsignal ${KILLSIGNAL} &
+gptokeyb 1 ${KILLTHIS} ${VIRTUAL_KB} -killsignal ${KILLSIGNAL} &
 
 [[ "$CLOUD_SYNC" == "1" ]] && wait $CLOUD_PID
 
