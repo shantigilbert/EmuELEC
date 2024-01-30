@@ -172,7 +172,7 @@ case ${PLATFORM} in
 		[[ -z "$GPTOKEY" ]] && GPTOKEY="OpenBOR"
 		VIRTUAL_KB="-c /emuelec/configs/gptokeyb/${GPTOKEY}.gptk"
 		set_kill_keys "${EMU}"
-		RUNTHIS='${TBASH} openbor.sh "${EMU}" "${ROMNAME}"'
+		RUNTHIS='${TBASH} openbor.sh "${ROMNAME}" "${EMU}"'
 		;;
 	"setup")
         if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then 
