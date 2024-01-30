@@ -38,8 +38,7 @@ PKG_MAKE_OPTS_TARGET="REGENIE=1 \
 		      PLATFORM=arm64 \
 		      ARCH= \
 		      TARGET=mame \
-		      SUBTARGET=fmtowns \
-		      SOURCES=fujitsu/fmtowns.cpp,apple/apple2.cpp,apple/apple2e.cpp,apple/apple2gs.cpp \
+		      SUBTARGET=mame \
 		      OSD=retro \
 		      USE_SYSTEM_LIB_EXPAT=1 \
 		      USE_SYSTEM_LIB_ZLIB=1 \
