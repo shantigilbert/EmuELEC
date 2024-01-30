@@ -65,4 +65,6 @@ makeinstall_target() {
   cp *.so $INSTALL/usr/lib/libretro/
   mkdir -p $INSTALL/usr/config/retroarch/savefiles/mame/hi
   cp plugins/hiscore/hiscore.dat $INSTALL/usr/config/retroarch/savefiles/mame/hi
+  mkdir -p ${INSTALL}/usr/config/emuelec/configs/mame
+  cp -rf ${PKG_DIR}/config/* ${INSTALL}/usr/config/emuelec/configs/mame
 }
