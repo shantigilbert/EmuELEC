@@ -5,13 +5,9 @@
 
 # OpenBOR only works with Pak files, if you have an extracted game you will need to create a pak first.
 
-# Source predefined functions and variables
-. /etc/profile
-
 OB=${2}
 [[ -z ${OB} ]] && OB=OpenBOR
 
-ROMNAME="$1"
 pakname=$(basename "$1")
 pakname="${pakname%.*}"
 
