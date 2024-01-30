@@ -353,6 +353,21 @@ function createMultidisc() {
   echo -e "\n"
 }
 
+function set_gptokeyb() {
+	local default=$1
+	local gptokeyb=$2
+
+	[[ -z "${gptokeyb}" ]] && gptokeyb=$default
+
+	local kbfile="/emuelec/configs/gptokeyb/${gptokeyb}.gptk"
+
+	if [[ ! -f "$kbfile" ]]; then
+		echo -e "\n" && return
+	fi
+
+	echo "-c ${kbfile}"
+}
+
 cmd=${1}
 shift
 $cmd "$@"

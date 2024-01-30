@@ -151,7 +151,8 @@ echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
-GPTOKEY=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
+GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
+[[ -z "$GPTOKEYB" ]] && GPTOKEYB="${ROMNAME}"
 VIRTUAL_KB=
 
 # Read the first argument in order to set the right emulator
@@ -169,8 +170,7 @@ case ${PLATFORM} in
 		fi
 		;;
 	"openbor")
-		[[ -z "$GPTOKEY" ]] && GPTOKEY="OpenBOR"
-		VIRTUAL_KB="-c /emuelec/configs/gptokeyb/${GPTOKEY}.gptk"
+		VIRTUAL_KB=$(emuelec-utils set_gptokeyb "${PLATFORM}" "${GPTOKEYB}")
 		set_kill_keys "${EMU}"
 		RUNTHIS='${TBASH} openbor.sh "${ROMNAME}" "${EMU}"'
 		;;
