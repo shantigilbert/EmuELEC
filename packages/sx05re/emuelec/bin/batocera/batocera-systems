@@ -53,6 +53,30 @@ systems = {
                                                     { "md5": "9bdedde6a4f33555b4a270c8ca53297d", "file": "bios/kick40068.A4000"                  },
                                                     { "md5": "bb72565701b1b6faece07d68ea5da639", "file": "bios/CD32 Extended-ROM r40.60 (1993)(Commodore)(CD32).rom"         } ] },
     
+
+    # ---------- Fujistu FM-Towns ---------- #
+    # https://github.com/captainys/TOWNSEMU
+    "fmtowns":  { "name": "Fujistu FM-Towns", "biosFiles": [  { "md5": "8fa4e553f28cfc0c30a0a1e589799942", "file": "bios/fmtowns/FMT_DIC.ROM" },
+                                  { "md5": "0585b19930d4a7f4c71bcc8a33746588", "file": "bios/fmtowns/FMT_DOS.ROM" },
+                                  { "md5": "ac0c7021e9bf48ca84b51ab651169a88", "file": "bios/fmtowns/FMT_F20.ROM" },
+                                  { "md5": "b91300e55b70227ce98b59c5f02fa8dd", "file": "bios/fmtowns/FMT_FNT.ROM" },
+                                  { "md5": "86fb6f7280689259f0ca839dd3dd6cde", "file": "bios/fmtowns/FMT_SYS.ROM" },
+                                  { "md5": "", "file": "bios/fmtmarty.zip" },
+                                  { "md5": "6618519b2c104cf9b7e71a48381b44a9", "zippedFile": "mrom.m36", "file": "bios/fmtmarty.zip"},
+                                  { "md5": "75a5c7afb4bc8221bab8cf24db417950", "zippedFile": "mrom.m37", "file": "bios/fmtmarty.zip"},
+                                  { "md5": "", "file": "bios/fmtowns.zip" },
+                                  { "md5": "34847786d7de94b5d1133c956ab1d75d", "zippedFile": "fmt_dic.rom", "file": "bios/fmtowns.zip"},
+                                  { "md5": "0585b19930d4a7f4c71bcc8a33746588", "zippedFile": "fmt_dos.rom", "file": "bios/fmtowns.zip"},
+                                  { "md5": "eb44f2093f51eb7159f03e170b13af76", "zippedFile": "fmt_fnt.rom", "file": "bios/fmtowns.zip"},
+                                  { "md5": "feaf8c5675151e00cfe3ad27673bff29", "zippedFile": "fmt_sys.rom", "file": "bios/fmtowns.zip"},
+                                  { "md5": "", "file": "bios/fmtownsux.zip" },
+                                  { "md5": "8fa4e553f28cfc0c30a0a1e589799942", "zippedFile": "fmt_dic.rom", "file": "bios/fmtownsux.zip"},
+                                  { "md5": "03c8fac9a5f5f5f35fb5de5a5d0d018f", "zippedFile": "fmt_dos_a.rom", "file": "bios/fmtownsux.zip"},
+                                  { "md5": "b91300e55b70227ce98b59c5f02fa8dd", "zippedFile": "fmt_fnt.rom", "file": "bios/fmtownsux.zip"},
+                                  { "md5": "90b5e01d42aaa93e8f4503a5e94e120b", "zippedFile": "fmt_sys_a.rom", "file": "bios/fmtownsux.zip"},
+                                  { "md5": "1a15f6c1b58ec7e5f850118610a787a7", "zippedFile": "mytownsux.rom", "file": "bios/fmtownsux.zip"} ] },
+
+
     # Magnavox and Philips
 	"o2em": { "name": "Odyssey 2", "biosFiles": [ { "md5": "562d5ebf9e030a40d6fabfc2f33139fd", "file": "bios/o2rom.bin" },
 												  { "md5": "f1071cdb0b6b10dde94d3bc8a6146387", "file": "bios/c52.bin"   },
