@@ -123,11 +123,12 @@ echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
 VIRTUAL_KB=
 
+RUNTHIS='${SC}'
+
 case ${ROMNAME} in
 	"abuse")
 		VIRTUAL_KB=$(emuelec-utils set_gptokeyb "abuse" "${GPTOKEYB}")
-		set_kill_keys "abuse"
-		RUNTHIS='${SC}'
+		set_kill_keys "abuse"		
 		;;
 esac
 
