@@ -69,9 +69,6 @@ EMULATOR="${EMULATOR%% *}"  # until a space is found
 
 PORTNAME="$1"
 
-RUNCMD="${arguments##*--runcmd=[}"
-RUNCMD="${RUNCMD%%]*}"
-
 SET_DISPLAY_SH="setres.sh"
 VIDEO="$(cat /sys/class/display/mode)"
 VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${PORTNAME}")
@@ -100,12 +97,18 @@ echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${PORTNAME}")
 VIRTUAL_KB=
 
-RUNTHIS="$RUNCMD"
-
 case ${PORTNAME} in
 	"abuse")
 		VIRTUAL_KB=$(emuelec-utils set_gptokeyb "abuse" "${GPTOKEYB}")
 		set_kill_keys "abuse"
+		RUNTHIS="abuse"
+		;;
+	"sorr")
+		VIRTUAL_KB=$(emuelec-utils set_gptokeyb "sorr" "${GPTOKEYB}")
+		set_kill_keys "bgdi"
+		cd /storage/roms/ports/sorr
+    [[ ! -e "/storage/roms/ports/sorr/SorR.dat" ]] && exit 21
+		RUNTHIS="bgdi \"/storage/roms/ports/sorr/SorR.dat\""
 		;;
 esac
 
