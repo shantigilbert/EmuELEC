@@ -10,13 +10,6 @@
 
 blank_buffer
 
-if [ -f "/usr/bin/odroidgoa_utils.sh" ]; then
-    DEFBRIGHT=$(get_ee_setting brightness.level)
-    RACONF=/storage/.config/retroarch/retroarch.cfg
-    sed -i "/screen_brightness/d" ${RACONF}
-    echo "screen_brightness = \"${DEFBRIGHT}\"" >> ${RACONF}
-fi
-
 BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 
 if [[ "$BTENABLED" == "1" ]]; then
@@ -43,9 +36,6 @@ LOGEMU="No"
 VERBOSE=""
 LOGSDIR="/emuelec/logs"
 TBASH="/usr/bin/bash"
-RACONF="/storage/.config/retroarch/retroarch.cfg"
-NETPLAY="No"
-RABIN="retroarch"
 
 # Make sure the /emuelec/logs directory exists
 if [[ ! -d "$LOGSDIR" ]]; then
@@ -139,8 +129,8 @@ if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do al
 
     # Write the command to the log file.
     echo "PLATFORM: $PLATFORM" >> $EMUELECLOG
-    echo "PORT NAME: ${PORT}" >> $EMUELECLOG
-    echo "USING CONFIG: ${RACONF}" >> $EMUELECLOG
+    echo "ROM NAME: ${ROMNAME}" >> $EMUELECLOG
+    echo "BASE ROM NAME: ${ROMNAME##*/}" >> $EMUELECLOG
     echo "1st Argument: $1" >> $EMUELECLOG 
     echo "2nd Argument: $2" >> $EMUELECLOG
     echo "3rd Argument: $3" >> $EMUELECLOG 
@@ -189,12 +179,6 @@ if [[ "$BTENABLED" == "1" ]]; then
 	# Restart the bluetooth agent
     systemctl start bluetooth-agent
 fi
-
-# Chocolate Doom does not like to be killed?
-[[ "$EMU" = "Chocolate-Doom" ]] && ret_error="0"
-
-# YabasanshiroSA does not like to be killed?
-[[ "$EMU" = "yabasanshiroSA" ]] && ret_error="0"
 
 if [[ "$ret_error" != "0" ]]; then
     echo "exit $ret_error" >> $EMUELECLOG
