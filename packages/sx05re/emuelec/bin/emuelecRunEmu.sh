@@ -152,7 +152,6 @@ echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
 GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
-# [[ -z "$GPTOKEYB" ]] && GPTOKEYB="${ROMNAME}"
 VIRTUAL_KB=
 
 # Read the first argument in order to set the right emulator
