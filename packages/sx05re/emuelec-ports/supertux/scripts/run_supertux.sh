@@ -13,7 +13,7 @@ DATA="https://github.com/SuperTux/supertux/archive/refs/tags/v${VERSION}.zip"
 DATAFOLDER="/storage/roms/ports/supertux"
 CONFIGFOLDER="/emuelec/configs/supertux2"
 
-if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
+if [ "${EE_DEVICE}" == "OdroidGoAdvance" ] || [ "${EE_DEVICE}" == "GameForce" ]; then
 OGAVER=$(oga_ver)
 case "${OGAVER}" in
     "OGA")
@@ -43,7 +43,7 @@ fi
 mkdir -p "${DATAFOLDER}"
 cd "${DATAFOLDER}"
 
-if [ "$EE_DEVICE" == "Amlogic-ng" ]; then 
+if [ "${EE_DEVICE}" == "Amlogic-ng" ]; then 
 fbfix
 fi
 

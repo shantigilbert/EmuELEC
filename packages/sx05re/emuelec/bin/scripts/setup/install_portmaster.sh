@@ -25,7 +25,7 @@ LINK="https://github.com/PortsMaster/PortMaster-GUI/releases/latest/download/Por
 LINKTMP=$(mktemp -d);
 LINKDEST="${LINKTMP}/PortMaster.zip"
 
-wget -O ${LINKDEST} $LINK
+wget -O ${LINKDEST} ${LINK}
 
 [[ ! -f ${LINKDEST} ]] && return 1
 unzip -o "${LINKDEST}" -d "/storage/roms/ports"

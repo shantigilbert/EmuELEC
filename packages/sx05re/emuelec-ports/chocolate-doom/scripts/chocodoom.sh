@@ -28,7 +28,7 @@ EXT=${1#*.}
 # If its not a simple wad (extension .doom) read the file and parse the data
 if [ ${EXT} == "doom" ]; then
     while IFS== read -r key value; do
-	if [ "$key" == "GAMETYPE" ]; then
+	if [ "${key}" == "GAMETYPE" ]; then
 	    case ${value} in
 		"doom"|"DOOM")
 		    PROGRAM="chocolate-doom"
@@ -48,12 +48,12 @@ if [ ${EXT} == "doom" ]; then
 	    esac
 	fi
 
-        if [ "$key" == "SUBDIR" ]; then
-	    RUN_DIR="/storage/roms/ports/doom/$value"
+        if [ "${key}" == "SUBDIR" ]; then
+	    RUN_DIR="/storage/roms/ports/doom/${value}"
         fi
 
-        if [ "$key" == "PARAMS" ]; then
-            params+=" $value"
+        if [ "${key}" == "PARAMS" ]; then
+            params+=" ${value}"
         fi
     done < <(<"${1}" tr -d '\r'; echo;)
 else

@@ -8,12 +8,12 @@
 CONFIG_DIR="/storage/.local/share/dolphin-emu"
 
 if [ -d "${CONFIG_DIR}" ]; then
-	rm -rf "$CONFIG_DIR"
+	rm -rf "${CONFIG_DIR}"
 fi
 
 mkdir -p /storage/.local/share/
 
-if [ ! -L "$CONFIG_DIR" ]; then
+if [ ! -L "${CONFIG_DIR}" ]; then
  ln -sf "/emuelec/configs/dolphin-emu" "${CONFIG_DIR}"
 fi
 

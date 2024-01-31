@@ -14,7 +14,7 @@ mkdir -p "${DATAFOLDER}"
 mkdir -p "${CONFIGFOLDER}"
 cd "${DATAFOLDER}"
 
-if [ "$EE_DEVICE" == "Amlogic-ng" ]; then 
+if [ "${EE_DEVICE}" == "Amlogic-ng" ]; then 
 fbfix
 fi
 

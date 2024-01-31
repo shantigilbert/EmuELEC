@@ -33,17 +33,17 @@ DATA=${1#*.}
 # If its a mod (extension .ecwolf) read the file and parse the data
 if [ ${DATA} == "ecwolf" ]; then
     while IFS== read -r key value; do
-        if [ "$key" == "SUBDIR" ]; then
-	    RUN_DIR="/storage/roms/ports/ecwolf/$value"
+        if [ "${key}" == "SUBDIR" ]; then
+	    RUN_DIR="/storage/roms/ports/ecwolf/${value}"
 	    # ecwolf does not work without ecwolf.pk3 in the current directory
 	    # so we have to copy it there if it not already exists
-	    if [ ! -f $RUN_DIR/ecwolf.pk3 ]; then
-		cp $CONFIG_DIR/ecwolf.pk3 $RUN_DIR
+	    if [ ! -f ${RUN_DIR}/ecwolf.pk3 ]; then
+		cp ${CONFIG_DIR}/ecwolf.pk3 ${RUN_DIR}
 	    fi
         fi
 
-        if [ "$key" == "PARAMS" ]; then
-            params+=" $value"
+        if [ "${key}" == "PARAMS" ]; then
+            params+=" ${value}"
         fi
     done < <(<"${1}" tr -d '\r'; echo;)
 else

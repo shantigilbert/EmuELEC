@@ -7,19 +7,19 @@
 
 DATE=`date -u +%Y-%m-%d-%H.%M.%S`
 BASEDIR="/tmp"
-LOGDIR="log-$DATE"
+LOGDIR="log-${DATE}"
 RELEASE="`cat /etc/release`"
 GIT="`cat /etc/issue | grep git`"
 
 getlog_cmd() {
-  if command -v $1 >/dev/null; then
-    echo "################################################################################" >> $BASEDIR/$LOGDIR/$LOGFILE
-    echo "# ... output of $@" >> $BASEDIR/$LOGDIR/$LOGFILE
-    echo "# EmuELEC release: $RELEASE" >> $BASEDIR/$LOGDIR/$LOGFILE
-    echo "# $GIT" >> $BASEDIR/$LOGDIR/$LOGFILE
-    echo "################################################################################" >> $BASEDIR/$LOGDIR/$LOGFILE
-    "$@" >> $BASEDIR/$LOGDIR/$LOGFILE 2>/dev/null
-    echo "" >> $BASEDIR/$LOGDIR/$LOGFILE
+  if command -v ${1} >/dev/null; then
+    echo "################################################################################" >> ${BASEDIR}/${LOGDIR}/${LOGFILE}
+    echo "# ... output of $@" >> ${BASEDIR}/${LOGDIR}/${LOGFILE}
+    echo "# EmuELEC release: ${RELEASE}" >> ${BASEDIR}/${LOGDIR}/${LOGFILE}
+    echo "# ${GIT}" >> ${BASEDIR}/${LOGDIR}/${LOGFILE}
+    echo "################################################################################" >> ${BASEDIR}/${LOGDIR}/${LOGFILE}
+    "$@" >> ${BASEDIR}/${LOGDIR}/${LOGFILE} 2>/dev/null
+    echo "" >> ${BASEDIR}/${LOGDIR}/${LOGFILE}
   fi
 }
 
@@ -34,7 +34,7 @@ get_governor_details() {
 }
 
 cat_all_files() {
-  local adir=$1
+  local adir=${1}
   local afile var
 
   [ -d ${adir} ] || return 0
@@ -55,8 +55,8 @@ cat_all_files() {
   done
 }
 
-rm -rf $BASEDIR/$LOGDIR
-mkdir -p $BASEDIR/$LOGDIR
+rm -rf ${BASEDIR}/${LOGDIR}
+mkdir -p ${BASEDIR}/${LOGDIR}
 
 # emuelec.conf
 EE_LOG_DIR=/emuelec/configs
@@ -106,9 +106,9 @@ EE_LOG_DIR=/storage/
 
 # System.log
   LOGFILE="06_System.log"
-  echo "****** dmseg ******" >> $BASEDIR/$LOGDIR/$LOGFILE 2>/dev/null
-  dmesg | grep -v cectx >> $BASEDIR/$LOGDIR/$LOGFILE 2>/dev/null
-  echo "****** end dmseg ******" >> $BASEDIR/$LOGDIR/$LOGFILE 2>/dev/null
+  echo "****** dmseg ******" >> ${BASEDIR}/${LOGDIR}/${LOGFILE} 2>/dev/null
+  dmesg | grep -v cectx >> ${BASEDIR}/${LOGDIR}/${LOGFILE} 2>/dev/null
+  echo "****** end dmseg ******" >> ${BASEDIR}/${LOGDIR}/${LOGFILE} 2>/dev/null
   getlog_cmd lsmod
   getlog_cmd ps xa
   for i in /storage/.config/hwdb.d/*.hwdb \
@@ -118,8 +118,8 @@ EE_LOG_DIR=/storage/
       /storage/.config/sysctl.d/*.conf \
       /storage/.config/udev.rules.d/.rules \
   ; do
-    if [ -f "$i" ] ; then
-      getlog_cmd cat $i
+    if [ -f "${i}" ] ; then
+      getlog_cmd cat ${i}
     fi
   done
   if [ -f "/storage/.config/autostart.sh" ] ; then
@@ -132,8 +132,8 @@ EE_LOG_DIR=/storage/
   # note: we dont add .mount units here as they may contan
   # login credentials
   for i in /storage/.config/system.d/*.service ; do
-    if [ -f "$i" -a ! -L "$i" ] ; then
-      getlog_cmd cat $i
+    if [ -f "${i}" -a ! -L "${i}" ] ; then
+      getlog_cmd cat ${i}
     fi
   done
 
@@ -163,7 +163,7 @@ EE_LOG_DIR=/storage/
 # varlog.log
   LOGFILE="10_varlog.log"
   for i in `find /var/log -type f`; do
-    getlog_cmd cat $i
+    getlog_cmd cat ${i}
   done
 
 # Input.log
@@ -182,9 +182,9 @@ EE_LOG_DIR=/storage/
 
 # Journal (current)
   LOGFILE="13_Journal-cur.log"
-  echo "****** journalctl --no-pager -b -0 ******" >> $BASEDIR/$LOGDIR/$LOGFILE 2>/dev/null
-  journalctl --no-pager -b -0 | grep -v "cectx" >> $BASEDIR/$LOGDIR/$LOGFILE 2>/dev/null
-  echo "****** end journalctl --no-pager -b -0 ******" >> $BASEDIR/$LOGDIR/$LOGFILE 2>/dev/null
+  echo "****** journalctl --no-pager -b -0 ******" >> ${BASEDIR}/${LOGDIR}/${LOGFILE} 2>/dev/null
+  journalctl --no-pager -b -0 | grep -v "cectx" >> ${BASEDIR}/${LOGDIR}/${LOGFILE} 2>/dev/null
+  echo "****** end journalctl --no-pager -b -0 ******" >> ${BASEDIR}/${LOGDIR}/${LOGFILE} 2>/dev/null
   
 # Journal (prev)
   LOGFILE="14_Journal-prev.log"
@@ -192,15 +192,15 @@ EE_LOG_DIR=/storage/
 
 # pack logfiles
   mkdir -p /emuelec/logs
-  find $BASEDIR/$LOGDIR -type f -exec sed -i "s|.*password.*||g" {} \;
-  find $BASEDIR/$LOGDIR -type f -exec sed -i "s|.*username.*||g" {} \;
-  find $BASEDIR/$LOGDIR -type f -exec sed -i "s|.*ssid=.*||g" {} \;
-  find $BASEDIR/$LOGDIR -type f -exec sed -i "s|.*ukey=.*||g" {} \;
-  find $BASEDIR/$LOGDIR -type f -exec sed -i "s|.*Attempting to login.*||g" {} \;
-  find $BASEDIR/$LOGDIR -type f -exec sed -i "s|.*logged in successfully.*||g" {} \;
-  zip -jq /emuelec/logs/log-$DATE.zip $BASEDIR/$LOGDIR/*
-  cat $BASEDIR/$LOGDIR/* > /emuelec/logs/FULL_EMUELEC.LOG
+  find ${BASEDIR}/${LOGDIR} -type f -exec sed -i "s|.*password.*||g" {} \;
+  find ${BASEDIR}/${LOGDIR} -type f -exec sed -i "s|.*username.*||g" {} \;
+  find ${BASEDIR}/${LOGDIR} -type f -exec sed -i "s|.*ssid=.*||g" {} \;
+  find ${BASEDIR}/${LOGDIR} -type f -exec sed -i "s|.*ukey=.*||g" {} \;
+  find ${BASEDIR}/${LOGDIR} -type f -exec sed -i "s|.*Attempting to login.*||g" {} \;
+  find ${BASEDIR}/${LOGDIR} -type f -exec sed -i "s|.*logged in successfully.*||g" {} \;
+  zip -jq /emuelec/logs/log-${DATE}.zip ${BASEDIR}/${LOGDIR}/*
+  cat ${BASEDIR}/${LOGDIR}/* > /emuelec/logs/FULL_EMUELEC.LOG
   pastebinit /emuelec/logs/FULL_EMUELEC.LOG
 
 # remove logdir
-  rm -rf $BASEDIR/$LOGDIR
+  rm -rf ${BASEDIR}/${LOGDIR}

@@ -16,7 +16,7 @@ DATAFOLDER="/storage/roms/ports/supertuxkart"
 mkdir -p "${DATAFOLDER}"
 cd "${DATAFOLDER}"
 
-if [ "$EE_DEVICE" == "Amlogic-ng" ]; then 
+if [ "${EE_DEVICE}" == "Amlogic-ng" ]; then 
 fbfix
 fi
 
