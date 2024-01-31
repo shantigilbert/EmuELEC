@@ -81,11 +81,6 @@ ROMNAME="$1"
 BASEROMNAME=${ROMNAME##*/}
 GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
-SET_DISPLAY_SH="setres.sh"
-VIDEO="$(cat /sys/class/display/mode)"
-VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
-[[ -z "$VIDEO_EMU" ]] && VIDEO_EMU=$VIDEO
-
 if [[ "${CORE}" == *"_32b"* ]]; then
     BIT32="yes"
     #LD_LIBRARY_PATH="/emuelec/lib32:$LD_LIBRARY_PATH"
@@ -138,13 +133,7 @@ CLOUD_SYNC=$(get_ee_setting "${PLATFORM}.cloudsave")
 [[ "$CLOUD_SYNC" == "1" ]] && ra_rclone.sh get "${PLATFORM}" "${ROMNAME}" &
 CLOUD_PID=$!
 
-# Show splash screen if enabled
-SPL=$(get_ee_setting ee_splash.enabled)
-[ "$SPL" -eq "1" ] && ${TBASH} show_splash.sh gameloading "$PLATFORM" "${ROMNAME}"
-
-# Set the display video to that of the emulator setting.
-[ ! -z "$VIDEO_EMU" ] && $TBASH $SET_DISPLAY_SH $VIDEO_EMU $PLATFORM # set display
-
+emuelec-utils init_app_video "${PLATFORM}" "${ROMNAME}"
 
 CONTROLLERCONFIG="${arguments#*--controllers=*}"
 echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
@@ -459,9 +448,9 @@ else
    ret_error=$?
 fi
 
-blank_buffer
+#blank_buffer
 
-[[ "$CLOUD_SYNC" == "1" ]] && ra_rclone.sh set "${PLATFORM}" "${ROMNAME}" &
+
 
 # clear terminal window
 	reset > /dev/tty < /dev/null 2>&1
@@ -469,11 +458,9 @@ blank_buffer
 	reset > /dev/tty1 < /dev/null 2>&1
 	reset > /dev/console < /dev/null 2>&1
 
-# Return to default mode
-$TBASH $SET_DISPLAY_SH $VIDEO
+emuelec-utils end_app_video
 
-# Show exit splash
-${TBASH} show_splash.sh exit
+[[ "$CLOUD_SYNC" == "1" ]] && ra_rclone.sh set "${PLATFORM}" "${ROMNAME}" &
 
 # Just in case
 kill_video_controls

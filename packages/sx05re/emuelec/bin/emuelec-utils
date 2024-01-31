@@ -347,6 +347,35 @@ function createMultidisc() {
   echo -e "\n"
 }
 
+function init_app_video() {
+	local PLATFORM=$1
+	local ROMNAME=$2
+	local BASEROMNAME=${ROMNAME##*/}
+
+	blank_buffer
+
+	echo "$(cat /sys/class/display/mode)" > /tmp/EE_LASTVIDEO
+	local VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
+	[[ -z "$VIDEO_EMU" ]] && VIDEO_EMU=$LAST_VIDEO
+	
+	# Show splash screen if enabled
+	local SPL=$(get_ee_setting ee_splash.enabled)
+	[ "${SPL}" -eq "1" ] && ${TBASH} show_splash.sh gameloading "${PLATFORM}" "${ROMNAME}"
+
+	# Set the display video to that of the emulator setting.
+	[ ! -z "${VIDEO_EMU}" ] && ${TBASH} setres.sh ${VIDEO_EMU} ${PLATFORM} # set display
+}
+
+function end_app_video() {
+	local LAST_VIDEO="$(cat /tmp/EE_LASTVIDEO)"
+
+	# Return to default mode
+	${TBASH} setres.sh ${LAST_VIDEO}
+
+	# Show exit splash
+	${TBASH} show_splash.sh exit
+}
+
 cmd=${1}
 shift
 $cmd "$@"
