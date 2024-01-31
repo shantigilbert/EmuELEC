@@ -481,7 +481,7 @@ Sorr:
     - /usr/bin/show_splash.sh gameloading "ports" "sorr"
     - '[[ "${EE_DEVICE}" != "Amlogic"* ]] && gptokeyb -c /emuelec/configs/gptokeyb/sorr.gptk &'
     - cd /storage/roms/ports/sorr
-    - '[[ ! -e "/storage/roms/ports/sorr/SorR.dat" ]] && exit 21'
+    - '[[ ! -e "/storage/roms/ports/sorr/SorR.dat" ]] && end_port && exit 21'
     - bgdi "/storage/roms/ports/sorr/SorR.dat" >> $EE_LOG 2>&1
 
 Heroes of Might and Magic II:
