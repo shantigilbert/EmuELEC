@@ -9,10 +9,10 @@ username=$(grep "global.retroachievements.username" /storage/.config/emuelec/con
 password=$(grep "global.retroachievements.password" /storage/.config/emuelec/configs/emuelec.conf|sed s/"global.retroachievements.password="//)
 
 #Parse token from reply retroachievements
-token=$(curl -s "http://retroachievements.org/dorequest.php?r=login&u=$username&p=$password"|sed -E 's/.*"Token":"?([^,"]*)"?.*/\1/')
+token=$(curl -s "http://retroachievements.org/dorequest.php?r=login&u=${username}&p=${password}"|sed -E 's/.*"Token":"?([^,"]*)"?.*/\1/')
 
 #Test the token if empty exit 1.
-if [ -z "$token" ]
+if [ -z "${token}" ]
 then
       echo "Token is empty you must log in retroachievement first in retroarch achievements"
       exit 1
@@ -30,22 +30,22 @@ ztoken=$(grep "Token =" /storage/.config/emuelec/configs/duckstation/settings.in
 zdts=$(grep "LoginTimestamp =" /storage/.config/emuelec/configs/duckstation/settings.ini)
 
 
-if ([ -z "$zcheevos" ] && [ -z "$zenabledtrue" ] && [ -z "$zenabledfalse" ])
+if ([ -z "${zcheevos}" ] && [ -z "${zenabledtrue}" ] && [ -z "${zenabledfalse}" ])
 then
-     sed -i "$ a [Cheevos]\nEnabled = true\nUsername = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
-elif ([ -z "$zenabledtrue" ] && [ -z "$zenabledfalse" ])
+     sed -i "${ a} [Cheevos]\nEnabled = true\nUsername = ${username}\nToken = ${token}\nLoginTimestamp = ${datets}" /storage/.config/emuelec/configs/duckstation/settings.ini
+elif ([ -z "${zenabledtrue}" ] && [ -z "${zenabledfalse}" ])
 then
-     sed -i "/^\[Cheevos\].*/a Enabled = true\nUsername = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
-elif [ -n "$zenabledtrue" ]
+     sed -i "/^\[Cheevos\].*/a Enabled = true\nUsername = ${username}\nToken = ${token}\nLoginTimestamp = ${datets}" /storage/.config/emuelec/configs/duckstation/settings.ini
+elif [ -n "${zenabledtrue}" ]
 then 
-     if ([ -z "$zusername" ] && [ -z "$ztoken" ] && [ -z "$zdts" ])
+     if ([ -z "${zusername}" ] && [ -z "${ztoken}" ] && [ -z "${zdts}" ])
      then
-          sed -i "/^Enabled = true.*/a Username = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
+          sed -i "/^Enabled = true.*/a Username = ${username}\nToken = ${token}\nLoginTimestamp = ${datets}" /storage/.config/emuelec/configs/duckstation/settings.ini
      fi
-elif [ -n "$zenabledfalse" ]
+elif [ -n "${zenabledfalse}" ]
 then
-     if ([ -z "$zusername" ] && [ -z "$ztoken" ] && [ -z "$zdts" ])
+     if ([ -z "${zusername}" ] && [ -z "${ztoken}" ] && [ -z "${zdts}" ])
      then
-          sed -i "/^Enabled = false.*/a Username = $username\nToken = $token\nLoginTimestamp = $datets" /storage/.config/emuelec/configs/duckstation/settings.ini
+          sed -i "/^Enabled = false.*/a Username = ${username}\nToken = ${token}\nLoginTimestamp = ${datets}" /storage/.config/emuelec/configs/duckstation/settings.ini
      fi
 fi

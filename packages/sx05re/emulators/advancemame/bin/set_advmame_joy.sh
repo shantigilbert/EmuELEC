@@ -16,8 +16,8 @@ ES_FEATURES="/storage/.config/emulationstation/es_features.cfg"
 
 source joy_common.sh "advmame"
 
-PLATFORM=$1
-ROMNAME=$2
+PLATFORM=${1}
+ROMNAME=${2}
 
 
 BTN_CFG="0 1 2 3 4 5 6 7"
@@ -72,12 +72,12 @@ declare -A GC_NAMES=()
 
 get_button_cfg() {
 	local BTN_INDEX=$(get_ee_setting "joy_btn_index" "${PLATFORM}" "${ROMNAME}")
-  if [[ ! -z $BTN_INDEX ]]; then
-		local BTN_SETTING="AdvanceMame.joy_btn_order.$BTN_INDEX"
-    local BTN_CFG_TMP="$(get_ee_setting $BTN_SETTING)"
-		[[ ! -z $BTN_CFG_TMP ]] && BTN_CFG="${BTN_CFG_TMP}"
+  if [[ ! -z ${BTN_INDEX} ]]; then
+		local BTN_SETTING="AdvanceMame.joy_btn_order.${BTN_INDEX}"
+    local BTN_CFG_TMP="$(get_ee_setting ${BTN_SETTING})"
+		[[ ! -z ${BTN_CFG_TMP} ]] && BTN_CFG="${BTN_CFG_TMP}"
 	fi
-	echo "$BTN_CFG"
+	echo "${BTN_CFG}"
 }
 
 
@@ -94,24 +94,24 @@ clean_pad() {
 }
 
 
-# Sets pad depending on parameters $GAMEPAD = name $1 = player
+# Sets pad depending on parameters ${GAMEPAD} = name ${1} = player
 set_pad(){
-  local P_INDEX=$(( $1 - 1 ))
-  local DEVICE_GUID=$3
-  local JOY_NAME="$4"
+  local P_INDEX=$(( ${1} - 1 ))
+  local DEVICE_GUID=${3}
+  local JOY_NAME="${4}"
 
-  local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep "platform:Linux" | head -1)
-  echo "GC_CONFIG=$GC_CONFIG"
-  [[ -z $GC_CONFIG ]] && return
+  local GC_CONFIG=$(cat "${GCDB}" | grep "${DEVICE_GUID}" | grep "platform:Linux" | head -1)
+  echo "GC_CONFIG=${GC_CONFIG}"
+  [[ -z ${GC_CONFIG} ]] && return
 
-  [[ -z "$JOY_NAME" ]] && JOY_NAME=$(echo $GC_CONFIG | cut -d',' -f2)
-  [[ -z "$JOY_NAME" ]] && return
+  [[ -z "${JOY_NAME}" ]] && JOY_NAME=$(echo ${GC_CONFIG} | cut -d',' -f2)
+  [[ -z "${JOY_NAME}" ]] && return
 
   local GAMEPAD="$(cat "/tmp/JOYPAD_NAMES/JOYPAD${1}.txt" | sed "s|,||g" | sed "s|_||g" | cut -d'"' -f 2 \
-    | sed "s|(||" | sed "s|)||" | sed -e 's/[^A-Za-z0-9._-]/ /g' | sed 's/[[:blank:]]*$//' \
+    | sed "s|(||" | sed "s|)||" | sed -e 's/[^A-Za-z0-9._-]/ /g' | sed 's/[[:blank:]]*${/}/' \
     | sed 's/-//' | sed -e 's/[^A-Za-z0-9._-]/_/g' |tr '[:upper:]' '[:lower:]' | tr -d '.')"
 
-  BTN_H0=$(advj | grep -B 1 -E "^joy [0-9] '$GAMEPAD' .*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
+  BTN_H0=$(advj | grep -B 1 -E "^joy [0-9] '${GAMEPAD}' .*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
   ADVMAME_VALUES["h0.1"]="stick${BTN_H0},y,up"
   ADVMAME_VALUES["h0.4"]="stick${BTN_H0},y,down"
   ADVMAME_VALUES["h0.8"]="stick${BTN_H0},x,left"
@@ -130,16 +130,16 @@ local INVERT_AXIS=$(get_ee_setting "advmame_invert_axis")
       ADVMAME_VALUES["a0,2"]="stick,x,right"
     fi
 
-  local NAME_NUM="${GC_NAMES[$GAMEPAD]}"
+  local NAME_NUM="${GC_NAMES[${GAMEPAD}]}"
   if [[ -z "NAME_NUM" ]]; then
-    GC_NAMES[$GAMEPAD]=1
+    GC_NAMES[${GAMEPAD}]=1
   else
-    GC_NAMES[$GAMEPAD]=$(( NAME_NUM+1 ))
+    GC_NAMES[${GAMEPAD}]=$(( NAME_NUM+1 ))
   fi
-	[[ "${GC_NAMES[$GAMEPAD]}" -gt "1" ]] && GAMEPAD="${GAMEPAD}_${GC_NAMES[$GAMEPAD]}"
+	[[ "${GC_NAMES[${GAMEPAD}]}" -gt "1" ]] && GAMEPAD="${GAMEPAD}_${GC_NAMES[${GAMEPAD}]}"
 #  GAMEPAD=0
 
-  local GC_MAP=$(echo $GC_CONFIG | cut -d',' -f3-)
+  local GC_MAP=$(echo ${GC_CONFIG} | cut -d',' -f3-)
 
   declare DIRS=()
   declare -A DIR_INDEX=(
@@ -157,27 +157,27 @@ local INVERT_AXIS=$(get_ee_setting "advmame_invert_axis")
   declare -A GC_ASSOC=()
   for index in "${!GC_ARRAY[@]}"
   do
-      local REC=${GC_ARRAY[$index]}
-      local GC_INDEX=$(echo $REC | cut -d ":" -f 1)
-      [[ $GC_INDEX == "" || $GC_INDEX == "platform" ]] && continue
+      local REC=${GC_ARRAY[${index}]}
+      local GC_INDEX=$(echo ${REC} | cut -d ":" -f 1)
+      [[ ${GC_INDEX} == "" || ${GC_INDEX} == "platform" ]] && continue
 
-      local TVAL=$(echo $REC | cut -d ":" -f 2)
-      GC_ASSOC["$GC_INDEX"]=$TVAL
+      local TVAL=$(echo ${REC} | cut -d ":" -f 2)
+      GC_ASSOC["${GC_INDEX}"]=${TVAL}
 
       [[ " ${GC_ORDER[*]} " == *" ${GC_INDEX} "* ]] && continue
       local BUTTON_VAL=${TVAL:1}
       local BTN_TYPE=${TVAL:0:1}
       local VAL="${ADVMAME_VALUES[${TVAL}]}"
-      local I="${DIR_INDEX[$GC_INDEX]}"
-      local DIR="${DIRS[$I]}"
+      local I="${DIR_INDEX[${GC_INDEX}]}"
+      local DIR="${DIRS[${I}]}"
 
       # Create Axis Maps
-      case $GC_INDEX in
+      case ${GC_INDEX} in
         dpup|dpdown|dpleft|dpright)
-          [[ ! -z "$DIR" ]] && DIR+=" or "
-    		  if [[ "$BTN_TYPE" == "a" ]]; then
+          [[ ! -z "${DIR}" ]] && DIR+=" or "
+    		  if [[ "${BTN_TYPE}" == "a" ]]; then
       			local direction
-      			case $GC_INDEX in
+      			case ${GC_INDEX} in
       				dpleft|dpup)
       					direction=1
       					;;
@@ -187,21 +187,21 @@ local INVERT_AXIS=$(get_ee_setting "advmame_invert_axis")
       			esac
       			VAL="${ADVMAME_VALUES[${TVAL},${direction}]}"
       			DIR+="joystick_digital[${GAMEPAD},${VAL}]"
-      			DIRS["$I"]="$DIR"
+      			DIRS["${I}"]="${DIR}"
     		  else
-      			[[ "$BTN_TYPE" == "b" ]] && DIR+="joystick_button[${GAMEPAD},${VAL}]"
-      			[[ "$BTN_TYPE" == "h" ]] && DIR+="joystick_digital[${GAMEPAD},${VAL}]"
-      			DIRS["$I"]="$DIR"
+      			[[ "${BTN_TYPE}" == "b" ]] && DIR+="joystick_button[${GAMEPAD},${VAL}]"
+      			[[ "${BTN_TYPE}" == "h" ]] && DIR+="joystick_digital[${GAMEPAD},${VAL}]"
+      			DIRS["${I}"]="${DIR}"
     		  fi
           ;;
         leftx|lefty)
           for i in {1..2}; do
-            I=$(echo "${DIR_INDEX[$GC_INDEX]}" | cut -d, -f "$i")
-            DIR="${DIRS[$I]}"
-            [[ ! -z "$DIR" ]] && DIR+=" or "
+            I=$(echo "${DIR_INDEX[${GC_INDEX}]}" | cut -d, -f "${i}")
+            DIR="${DIRS[${I}]}"
+            [[ ! -z "${DIR}" ]] && DIR+=" or "
             VAL="${ADVMAME_VALUES[${TVAL},${i}]}"
             DIR+="joystick_digital[${GAMEPAD},${VAL}]"
-            DIRS["$I"]=$DIR
+            DIRS["${I}"]=${DIR}
           done
           ;;
         start)
@@ -215,20 +215,20 @@ local INVERT_AXIS=$(get_ee_setting "advmame_invert_axis")
 
   declare -i i=1
   for bi in ${BTN_CFG}; do
-    local button="${GC_ORDER[$bi]}"
-    [[ -z "$button" ]] && continue
-    button="${GC_ASSOC[$button]}"
+    local button="${GC_ORDER[${bi}]}"
+    [[ -z "${button}" ]] && continue
+    button="${GC_ASSOC[${button}]}"
 
     local BTN_TYPE="${button:0:1}"
-    if [[ "$BTN_TYPE" == "a" ]]; then
+    if [[ "${BTN_TYPE}" == "a" ]]; then
       local STR="input_map[p${1}_button${i}]"
       for j in {1..2}; do
         local VAL="${ADVMAME_VALUES[${button},${j}]}"
         STR+=" joystick_digital[${GAMEPAD},${VAL}]"
       done
       echo "${STR}" >> ${CONFIG}
-    elif [[ "$BTN_TYPE" == "b" ]]; then
-      local VAL="${ADVMAME_VALUES[$button]}"
+    elif [[ "${BTN_TYPE}" == "b" ]]; then
+      local VAL="${ADVMAME_VALUES[${button}]}"
       echo "input_map[p${1}_button${i}] joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
     fi
     (( i++ ))
@@ -248,16 +248,16 @@ local INVERT_AXIS=$(get_ee_setting "advmame_invert_axis")
     echo "input_map[ui_right] keyboard[0,right] or keyboard[1,right] or ${DIRS[3]}" >> ${CONFIG}
 
     local button="${GC_ASSOC[b]}"
-    local VAL="${ADVMAME_VALUES[$button]}"
-    if [ ! -z "$VAL" ]; then
+    local VAL="${ADVMAME_VALUES[${button}]}"
+    if [ ! -z "${VAL}" ]; then
       echo "input_map[ui_select] keyboard[0,enter] or keyboard[1,enter] or joystick_button[${GAMEPAD},${VAL}]" >> ${CONFIG}
     fi
 
     local record="input_map[ui_cancel] keyboard[0,backspace] or keyboard[1,backspace]"
     button="${GC_ASSOC[leftstick]}"
-    if [[ ! -z "$button" ]]; then
-      VAL="${ADVMAME_VALUES[$button]}"
-      if [ ! -z "$VAL" ]; then
+    if [[ ! -z "${button}" ]]; then
+      VAL="${ADVMAME_VALUES[${button}]}"
+      if [ ! -z "${VAL}" ]; then
         record="${record} or joystick_button[${GAMEPAD},${VAL}]"
       fi
     fi
@@ -265,15 +265,15 @@ local INVERT_AXIS=$(get_ee_setting "advmame_invert_axis")
 
     VAL=""
     button="${GC_ASSOC[rightstick]}"
-    if [[ ! -z "$button" ]]; then
-      VAL="${ADVMAME_VALUES[$button]}"
+    if [[ ! -z "${button}" ]]; then
+      VAL="${ADVMAME_VALUES[${button}]}"
     elif [[ "${GC_ASSOC[guide]}" != "${GC_ASSOC[back]}" ]]; then
       button="${GC_ASSOC[guide]}"
-      VAL="${ADVMAME_VALUES[$button]}"
+      VAL="${ADVMAME_VALUES[${button}]}"
     fi
 
     record="input_map[ui_configure] keyboard[1,tab] or keyboard[0,tab]"
-    if [ ! -z "$VAL" ]; then
+    if [ ! -z "${VAL}" ]; then
       record="${record} or joystick_button[${GAMEPAD},${VAL}]"
     fi
     echo "${record}" >> ${CONFIG}
@@ -281,8 +281,8 @@ local INVERT_AXIS=$(get_ee_setting "advmame_invert_axis")
 }
 
 ADVMAME_REGEX="<emulator.*name\=\"AdvanceMame\" +features\=.*[ ,\"]joybtnremap[ ,\"].*/>"
-ADVMAME_REMAP=$(cat "${ES_FEATURES}" | grep -E "$ADVMAME_REGEX")
-[[ ! -z "$ADVMAME_REMAP" ]] && BTN_CFG=$(get_button_cfg)
-echo "BTN_CFG=$BTN_CFG"
+ADVMAME_REMAP=$(cat "${ES_FEATURES}" | grep -E "${ADVMAME_REGEX}")
+[[ ! -z "${ADVMAME_REMAP}" ]] && BTN_CFG=$(get_button_cfg)
+echo "BTN_CFG=${BTN_CFG}"
 
 jc_get_players

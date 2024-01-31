@@ -7,8 +7,8 @@
 # Set common paths and defaults
 export PULSE_RUNTIME_PATH=/run/pulse
 	RR_AUDIO_DEVICE="hw:$(get_ee_setting ee_audio_device)"
-	[ $RR_AUDIO_DEVICE = "hw:" ] && RR_AUDIO_DEVICE="hw:0"
-	echo "Set-Audio: Using audio device $RR_AUDIO_DEVICE"
+	[ ${RR_AUDIO_DEVICE} = "hw:" ] && RR_AUDIO_DEVICE="hw:0"
+	echo "Set-Audio: Using audio device ${RR_AUDIO_DEVICE}"
 	RR_PA_UDEV="false"
     RR_PA_TSCHED="true"
     RR_AUDIO_VOLUME="100"
@@ -29,7 +29,7 @@ pulseaudio_sink_load() {
 
     if [ ! -z "$(pactl list modules short | grep module-null-sink)" ];then
       if [ "${RR_PA_UDEV}" = "true" ]; then
-        pactl load-module module-udev-detect $TSCHED > /dev/null
+        pactl load-module module-udev-detect ${TSCHED} > /dev/null
         pactl set-sink-volume "$(pactl info | grep 'Default Sink:' | cut -d ' ' -f 3)" ${RR_AUDIO_VOLUME}%
         if [ ! -z "$(pactl list modules short | grep module-alsa-card)" ];then
           echo "Set-Audio: PulseAudio module-udev-detect loaded, setting a volume of "${RR_AUDIO_VOLUME}"%"
@@ -62,7 +62,7 @@ pulseaudio_sink_unload() {
       echo "Set-Audio: PulseAudio module-udev-detect unloaded"
     elif [ "${RR_PA_UDEV}" = "false" ] && [ ! -z "$(pactl list modules short | grep module-alsa-sink)" ]; then
       pactl set-sink-volume alsa_output.temp_sink 100%
-      NUMBER="$(pactl list modules short | grep "name=temp_sink" | awk '{print $1;}')"
+      NUMBER="$(pactl list modules short | grep "name=temp_sink" | awk '{print ${1};}')"
       if [ -n "${NUMBER}" ]; then
         pactl unload-module "${NUMBER}"
       fi
@@ -72,7 +72,7 @@ pulseaudio_sink_unload() {
     fi
 
     # Restore ALSA Master volume to 100%
-    if [ ! -z "$(amixer | grep "'Master',0")" ] && [ ! $(amixer get Master | awk '$0~/%/{print $4}' | tr -d '[]%') = "100" ]; then
+    if [ ! -z "$(amixer | grep "'Master',0")" ] && [ ! $(amixer get Master | awk '${0}~/%/{print ${4}}' | tr -d '[]%') = "100" ]; then
       amixer -q set Master,0 100% unmute
       echo "Set-Audio: ALSA mixer restore volume to 100%"
     fi
@@ -139,7 +139,7 @@ set_RA_audiodriver() {
   fi
 }
 
-case "$1" in
+case "${1}" in
 	"pulseaudio")
 		pulseaudio_sink_unload
 		fluidsynth_service_stop

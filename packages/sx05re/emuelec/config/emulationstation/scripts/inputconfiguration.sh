@@ -43,7 +43,7 @@
 ## is run for each of the inputs - with the following arguments
 ##
 ## Arguments:
-## * $1 - input name is one of the following
+## * ${1} - input name is one of the following
 ##  * up, down, left, right
 ##  * a, b, x, y
 ##  * leftshoulder, rightshoulder, lefttrigger, righttrigger
@@ -51,9 +51,9 @@
 ##  * start, select
 ##  * leftanalogup, leftanalogdown, leftanalogleft, leftanalogright
 ##  * rightanalogup, rightanalogdown, rightanalogleft, rightanalogright
-## * $2 - input type is button, axis or hat for joysticks, key for keyboard and button for cec.
-## * $3 - button id of the input for a joystick, SDL2 keycode for a keyboard, or button id for cec.
-## * $4 - value of the joystick input or 1 for keyboard and cec.
+## * ${2} - input type is button, axis or hat for joysticks, key for keyboard and button for cec.
+## * ${3} - button id of the input for a joystick, SDL2 keycode for a keyboard, or button id for cec.
+## * ${4} - value of the joystick input or 1 for keyboard and cec.
 ##
 ## Returns:
 ##   None
@@ -61,80 +61,80 @@
 
 function inputconfiguration() {
 
-    local es_conf="$home/.emulationstation/es_temporaryinput.cfg"
+    local es_conf="${home}/.emulationstation/es_temporaryinput.cfg"
     declare -A mapping
 
     # check if we have the temporary input file
-    [[ ! -f "$es_conf" ]] && return
+    [[ ! -f "${es_conf}" ]] && return
 
 # EmuELEC: ES is doing something weird to es_temp so we try to clean it up
-if cat "$es_conf" | grep "<></>"; then
-	sed -i '3d;4d;5d' "$es_conf"
+if cat "${es_conf}" | grep "<></>"; then
+	sed -i '3d;4d;5d' "${es_conf}"
 fi 
 # EmuELEC
 
     local line
     while read line; do
-        if [[ -n "$line" ]]; then
-            local input=($line)
+        if [[ -n "${line}" ]]; then
+            local input=(${line})
             mapping["${input[0]}"]=${input[@]:1}
         fi
-    done < <(xmlstarlet sel --text -t -m "/inputList/inputConfig/input"  -v "concat(@name,' ',@type,' ',@id,' ',@value)" -n "$es_conf")
+    done < <(xmlstarlet sel --text -t -m "/inputList/inputConfig/input"  -v "concat(@name,' ',@type,' ',@id,' ',@value)" -n "${es_conf}")
 
-    local inputscriptdir=$(dirname "$0")
-    local inputscriptdir=$(cd "$inputscriptdir" && pwd)
+    local inputscriptdir=$(dirname "${0}")
+    local inputscriptdir=$(cd "${inputscriptdir}" && pwd)
 
-    DEVICE_TYPE=$(xmlstarlet sel --text -t -v "/inputList/inputConfig/@type" "$es_conf")
-    DEVICE_NAME=$(xmlstarlet sel --text -t -v "/inputList/inputConfig/@deviceName" "$es_conf")
-    DEVICE_GUID=$(xmlstarlet sel --text -t -v "/inputList/inputConfig/@deviceGUID" "$es_conf")
+    DEVICE_TYPE=$(xmlstarlet sel --text -t -v "/inputList/inputConfig/@type" "${es_conf}")
+    DEVICE_NAME=$(xmlstarlet sel --text -t -v "/inputList/inputConfig/@deviceName" "${es_conf}")
+    DEVICE_GUID=$(xmlstarlet sel --text -t -v "/inputList/inputConfig/@deviceGUID" "${es_conf}")
 
-    echo "Input type is '$DEVICE_TYPE'."
+    echo "Input type is '${DEVICE_TYPE}'."
 
     local module
     # call all configuration modules with the
-    for module in $(find "$inputscriptdir/configscripts/" -maxdepth 1 -name "*.sh" | sort); do
+    for module in $(find "${inputscriptdir}/configscripts/" -maxdepth 1 -name "*.sh" | sort); do
 
-        source "$module"  # register functions from emulatorconfigs folder
+        source "${module}"  # register functions from emulatorconfigs folder
         local module_id=${module##*/}
         local module_id=${module_id%.sh}
 
         local funcname="check_${module_id}"
         # call check_module to check if we should run it
-        if fn_exists "$funcname"; then
-            "$funcname" || continue
+        if fn_exists "${funcname}"; then
+            "${funcname}" || continue
         fi
 
-        echo "Configuring '$module_id'"
+        echo "Configuring '${module_id}'"
 
         # at the start, the onstart_module function is called.
         funcname="onstart_${module_id}_${DEVICE_TYPE}"
-        fn_exists "$funcname" && "$funcname"
+        fn_exists "${funcname}" && "${funcname}"
 
         local input_name
         # loop through all buttons and use corresponding config function if it exists
         for input_name in "${!mapping[@]}"; do
             funcname="map_${module_id}_${DEVICE_TYPE}"
 
-            if fn_exists "$funcname"; then
-                local params=(${mapping[$input_name]})
+            if fn_exists "${funcname}"; then
+                local params=(${mapping[${input_name}]})
                 local input_type=${params[0]}
                 local input_id=${params[1]}
                 local input_value=${params[2]}
 
-                "$funcname" "$input_name" "$input_type" "$input_id" "$input_value"
+                "${funcname}" "${input_name}" "${input_type}" "${input_id}" "${input_value}"
             fi
         done
 
         # at the end, the onend_module function is called
         funcname="onend_${module_id}_${DEVICE_TYPE}"
-        fn_exists "$funcname" && "$funcname"
+        fn_exists "${funcname}" && "${funcname}"
 
     done
 
 }
 
 function fn_exists() {
-    declare -f "$1" > /dev/null
+    declare -f "${1}" > /dev/null
     return $?
 }
 
@@ -146,7 +146,7 @@ function sdl1_map() {
     declare -Ag sdl1_map
     local i
     for i in {0..127}; do
-        sdl1_map["$i"]="$i"
+        sdl1_map["${i}"]="${i}"
     done
 
     sdl1_map["1073741881"]="301" # SDLK SDLK_CAPSLOCK
@@ -215,7 +215,7 @@ function sdl1_map() {
 home="/storage"
 
 rootdir="/storage"
-configdir="$rootdir/.config"
+configdir="${rootdir}/.config"
 
 source "/usr/bin/scripts/scriptmodules/inifuncs.sh"
 

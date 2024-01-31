@@ -102,36 +102,36 @@ declare -A GC_BUTTONS=(
   [lefty1]="analogr"
 )
 
-# Cleans all the inputs for the gamepad with name $GAMEPAD and player $1
+# Cleans all the inputs for the gamepad with name ${GAMEPAD} and player ${1}
 clean_pad() {
   [[ -f "${CONFIG_TMP}" ]] && rm "${CONFIG_TMP}"
 }
 
 # Sets pad depending on parameters.
-# $1 = Player Number
-# $2 = js[0-7]
-# $3 = Device GUID
-# $4 = Device Name
+# ${1} = Player Number
+# ${2} = js[0-7]
+# ${3} = Device GUID
+# ${4} = Device Name
 
 set_pad() {
-  local DEVICE_GUID=$3
-  local JOY_NAME="$4"
+  local DEVICE_GUID=${3}
+  local JOY_NAME="${4}"
 
-  echo "DEVICE_GUID=$DEVICE_GUID"
+  echo "DEVICE_GUID=${DEVICE_GUID}"
 
-  local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep "platform:Linux" | head -1)
-  echo "GC_CONFIG=$GC_CONFIG"
-  [[ -z $GC_CONFIG ]] && return
+  local GC_CONFIG=$(cat "${GCDB}" | grep "${DEVICE_GUID}" | grep "platform:Linux" | head -1)
+  echo "GC_CONFIG=${GC_CONFIG}"
+  [[ -z ${GC_CONFIG} ]] && return
 
   touch "${CONFIG_TMP}"
 
-  JOY_NAME="$(echo $GC_CONFIG | cut -d',' -f2)"
+  JOY_NAME="$(echo ${GC_CONFIG} | cut -d',' -f2)"
 
-  local GC_MAP=$(echo $GC_CONFIG | cut -d',' -f3-)
+  local GC_MAP=$(echo ${GC_CONFIG} | cut -d',' -f3-)
 
-  [[ "$1" != "1" ]] && echo "," >> ${CONFIG_TMP}
+  [[ "${1}" != "1" ]] && echo "," >> ${CONFIG_TMP}
 
-  declare -i JOY_INDEX=$(( $1 - 1 ))
+  declare -i JOY_INDEX=$(( ${1} - 1 ))
   echo -e "\t\"${JOY_INDEX}_${JOY_NAME}_${DEVICE_GUID}\": {" >> ${CONFIG_TMP}
 
   local ADD_ANALOG=0
@@ -141,34 +141,34 @@ set_pad() {
   local GC_ARRAY=(${GC_MAP//,/ })
   for index in "${!GC_ARRAY[@]}"
   do
-      local REC=${GC_ARRAY[$index]}
-      local BUTTON_INDEX=$(echo $REC | cut -d ":" -f 1)
-      local TVAL=$(echo $REC | cut -d ":" -f 2)
+      local REC=${GC_ARRAY[${index}]}
+      local BUTTON_INDEX=$(echo ${REC} | cut -d ":" -f 1)
+      local TVAL=$(echo ${REC} | cut -d ":" -f 2)
       local BUTTON_VAL=${TVAL:1}
-      local GC_INDEX="${GC_BUTTONS[$BUTTON_INDEX]}"
+      local GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}]}"
       local BTN_TYPE=${TVAL:0:1}
-      local VAL="${GC_VALUES[$TVAL]}"
-      local TYPE="${GC_TYPES[$TVAL]}"
+      local VAL="${GC_VALUES[${TVAL}]}"
+      local TYPE="${GC_TYPES[${TVAL}]}"
 
       # CREATE BUTTON MAPS (inlcuding hats).
-      if [[ ! -z "$GC_INDEX" ]]; then
-        if [[ "$BTN_TYPE" == "b" ]]; then
-          [[ ! -z "$VAL" ]] && echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": 1 }," >> ${CONFIG_TMP}
+      if [[ ! -z "${GC_INDEX}" ]]; then
+        if [[ "${BTN_TYPE}" == "b" ]]; then
+          [[ ! -z "${VAL}" ]] && echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": 1 }," >> ${CONFIG_TMP}
         fi
-        if [[ "$BTN_TYPE" == "h" ]]; then
-          [[ ! -z "$VAL" ]] && echo -e "\t\t\"${GC_INDEX}\": { \"id\": 0, \"type\": \"${TYPE}\", \"value\": ${VAL} }," >> ${CONFIG_TMP}
+        if [[ "${BTN_TYPE}" == "h" ]]; then
+          [[ ! -z "${VAL}" ]] && echo -e "\t\t\"${GC_INDEX}\": { \"id\": 0, \"type\": \"${TYPE}\", \"value\": ${VAL} }," >> ${CONFIG_TMP}
         fi
-        if [[ "$BTN_TYPE" == "a" ]]; then
-          case $BUTTON_INDEX in
+        if [[ "${BTN_TYPE}" == "a" ]]; then
+          case ${BUTTON_INDEX} in
             leftx|rightx|lefty|righty)
               continue
               ;;
           esac
-          [[ ! -z "$VAL" ]] && echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": 1 }," >> ${CONFIG_TMP}
+          [[ ! -z "${VAL}" ]] && echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": 1 }," >> ${CONFIG_TMP}
         fi
       fi
-      if [[ "$BTN_TYPE" == "a" ]]; then
-        case $BUTTON_INDEX in
+      if [[ "${BTN_TYPE}" == "a" ]]; then
+        case ${BUTTON_INDEX} in
           leftx|lefty)
             #ADD_ANALOG=1
             GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}0]}"
@@ -181,7 +181,7 @@ set_pad() {
   done
 
   local AXIS="$( cat /tmp/sdljoytest.txt | grep "Joystick ${JOY_INDEX} Axes" | cut -d' ' -f4 | sed 's/^0*//' )"
-  if [[ ! -z "$AXIS" ]]; then
+  if [[ ! -z "${AXIS}" ]]; then
     local AXIS_LEFT=$(( AXIS - 2 ))
     local AXIS_RIGHT=$(( AXIS - 1 ))
     echo -e "\t\t\"analogleft\": { \"id\": ${AXIS_LEFT}, \"type\": \"axis\", \"value\": 0 }," >> ${CONFIG_TMP}
@@ -189,7 +189,7 @@ set_pad() {
   fi
 
   # remove last character
-  sed -i '$ s/.$//' ${CONFIG_TMP}
+  sed -i '${ s}/.${/}/' ${CONFIG_TMP}
 
   echo -e "\t}," >> ${CONFIG_TMP}
   echo -e "\t\"player${1}\": {" >> ${CONFIG_TMP}

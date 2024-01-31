@@ -69,7 +69,7 @@ declare -A GC_BUTTONS=(
 declare -A GC_STICKS=(
 )
 
-# Cleans all the inputs for the gamepad with name $GAMEPAD and player $1
+# Cleans all the inputs for the gamepad with name ${GAMEPAD} and player ${1}
 clean_pad() {
   [[ -f "${CONFIG_TMP}" ]] && rm "${CONFIG_TMP}"
 
@@ -78,43 +78,43 @@ clean_pad() {
   local LN=1
   [[ ! -f "${CONFIG}" ]] && return
   while read -r line; do
-    if [[ "$line" =~ \[.+\] ]]; then
+    if [[ "${line}" =~ \[.+\] ]]; then
       START_DELETING=0
     fi
-    local header=$(echo "$line" | grep -E "$GC_REGEX" )
-    if [[ ! -z "$header" ]]; then
+    local header=$(echo "${line}" | grep -E "${GC_REGEX}" )
+    if [[ ! -z "${header}" ]]; then
       START_DELETING=1
     fi    
-    if [[ "$START_DELETING" == "1" ]]; then
-      sed -i "$LN d" "$CONFIG"
+    if [[ "${START_DELETING}" == "1" ]]; then
+      sed -i "${LN} d" "${CONFIG}"
     else
-      LN=$(( $LN + 1 ))  
+      LN=$(( ${LN} + 1 ))  
     fi
   done < ${CONFIG}
 }
 
 # Sets pad depending on parameters.
-# $1 = Player Number
-# $2 = js[0-7]
-# $3 = Device GUID
-# $4 = Device Name
+# ${1} = Player Number
+# ${2} = js[0-7]
+# ${3} = Device GUID
+# ${4} = Device Name
 
 set_pad() {
-  local DEVICE_GUID=$3
-  local JOY_NAME="$4"
+  local DEVICE_GUID=${3}
+  local JOY_NAME="${4}"
 
-  echo "DEVICE_GUID=$DEVICE_GUID"
+  echo "DEVICE_GUID=${DEVICE_GUID}"
 
-  local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep "platform:Linux" | head -1)
-  echo "GC_CONFIG=$GC_CONFIG"
-  [[ -z $GC_CONFIG ]] && return
+  local GC_CONFIG=$(cat "${GCDB}" | grep "${DEVICE_GUID}" | grep "platform:Linux" | head -1)
+  echo "GC_CONFIG=${GC_CONFIG}"
+  [[ -z ${GC_CONFIG} ]] && return
 
   touch "${CONFIG_TMP}"
 
-  local GC_MAP=$(echo $GC_CONFIG | cut -d',' -f3-)
+  local GC_MAP=$(echo ${GC_CONFIG} | cut -d',' -f3-)
 
   echo -en "\n[Controller${1}]\n" >> ${CONFIG}
-  declare -i JOY_INDEX=$(( $1 - 1 ))
+  declare -i JOY_INDEX=$(( ${1} - 1 ))
   echo "Type = AnalogController" >> ${CONFIG}
 
   local LINE_INSERT=
@@ -122,24 +122,24 @@ set_pad() {
   local GC_ARRAY=(${GC_MAP//,/ })
   for index in "${!GC_ARRAY[@]}"
   do
-      local REC=${GC_ARRAY[$index]}
-      local BUTTON_INDEX=$(echo $REC | cut -d ":" -f 1)
-      local TVAL=$(echo $REC | cut -d ":" -f 2)
+      local REC=${GC_ARRAY[${index}]}
+      local BUTTON_INDEX=$(echo ${REC} | cut -d ":" -f 1)
+      local TVAL=$(echo ${REC} | cut -d ":" -f 2)
       local BUTTON_VAL=${TVAL:1}
-      local GC_INDEX="${GC_BUTTONS[$BUTTON_INDEX]}"
+      local GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}]}"
       local BTN_TYPE=${TVAL:0:1}
-      local VAL="${GC_VALUES[$TVAL]}"
+      local VAL="${GC_VALUES[${TVAL}]}"
 
       # CREATE BUTTON MAPS (inlcuding hats).
-      if [[ ! -z "$GC_INDEX" ]]; then
-        if [[ "$BUTTON_INDEX" == "guide" ]]; then
+      if [[ ! -z "${GC_INDEX}" ]]; then
+        if [[ "${BUTTON_INDEX}" == "guide" ]]; then
           LINE_INSERT="${GC_INDEX} = Controller${JOY_INDEX}/${VAL}"
         else
-          if [[ "$BTN_TYPE" == "b"  || "$BTN_TYPE" == "h" ]]; then
-            [[ ! -z "$VAL" ]] && echo "${GC_INDEX} = Controller${JOY_INDEX}/${VAL}" >> ${CONFIG_TMP}
+          if [[ "${BTN_TYPE}" == "b"  || "${BTN_TYPE}" == "h" ]]; then
+            [[ ! -z "${VAL}" ]] && echo "${GC_INDEX} = Controller${JOY_INDEX}/${VAL}" >> ${CONFIG_TMP}
           fi
-          if [[ "$BTN_TYPE" == "a" ]]; then
-            [[ ! -z "$VAL" ]] && echo "${GC_INDEX} = Controller${JOY_INDEX}/${VAL}" >> ${CONFIG_TMP}
+          if [[ "${BTN_TYPE}" == "a" ]]; then
+            [[ ! -z "${VAL}" ]] && echo "${GC_INDEX} = Controller${JOY_INDEX}/${VAL}" >> ${CONFIG_TMP}
           fi
         fi
       fi
