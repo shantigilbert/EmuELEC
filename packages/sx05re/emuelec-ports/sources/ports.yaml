@@ -128,6 +128,7 @@ Fallout:
 
   init_port: true
   port_exe: "fallout-ce"
+  vkb: "fallout"
   audio: "alsa"
   commands:
     - cd /storage/roms/ports/falloutce1
@@ -142,6 +143,7 @@ Fallout 2:
 
   init_port: true
   port_exe: "fallout2-ce"
+  vkb: "fallout"
   audio: "alsa"
   commands:
     - cd /storage/roms/ports/falloutce2
@@ -427,6 +429,7 @@ Hurrican:
 
   init_port: true
   port_exe: "hurrican"
+  vkb: "hurrican"
   audio: "alsa"
   commands:
     - hurrican.sh >> $EE_LOG 2>&1
