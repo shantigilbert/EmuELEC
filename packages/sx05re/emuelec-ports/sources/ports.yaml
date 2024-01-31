@@ -467,9 +467,9 @@ Sorr:
 
   init_port: true
   port_exe: "bgdi"
+  vkb: "sorr"
   audio: "alsa"
   commands:
-    - '[[ "${EE_DEVICE}" != "Amlogic"* ]] && gptokeyb -c /emuelec/configs/gptokeyb/sorr.gptk &'
     - cd /storage/roms/ports/sorr
     - '[[ ! -e "/storage/roms/ports/sorr/SorR.dat" ]] && end_port && exit 21'
     - bgdi "/storage/roms/ports/sorr/SorR.dat" >> $EE_LOG 2>&1
