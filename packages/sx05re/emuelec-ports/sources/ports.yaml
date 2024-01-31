@@ -462,10 +462,10 @@ Abuse:
 
   init_port: true
   port_exe: "abuse"
+  vkb: "abuse"
   audio: "alsa"
   commands:
-    - /usr/bin/show_splash.sh gameloading "ports" "abuse"
-    - abuse.sh >> $EE_LOG 2>&1
+    - abuse >> $EE_LOG 2>&1
 
 Sorr:
   description: Streets of Rage Remake is a remastered version of the MegaDrive classic. There are more than 60 different enemies, you can choose among 16 characters, choose your favourite one and kick asses out there. It's even better than the original one. More characters, more levels, more actions, more finals,... Amazing.
