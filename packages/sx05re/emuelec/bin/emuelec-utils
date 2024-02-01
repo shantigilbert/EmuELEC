@@ -6,6 +6,12 @@
 # Source predefined functions and variables
 . /etc/profile
 
+function get_filenames_no_ext() {
+	local FN=($( ls -1 $1 | sed -e 's/\.[^.]*$//' ))
+	IFS=","
+	echo "${FN[*]}"
+}
+
 function test() {
     echo "success"
     exit 1
@@ -270,7 +276,7 @@ function resolutions() {
 	fi
 
 	if [[ -f "$FILEPATH" ]]; then
-	  SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat '$FILEPATH'`
+	  SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat "$FILEPATH"`
 	  for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
 	  do
 	    RESOLUTIONS+=($SSR)
@@ -356,6 +362,50 @@ function createMultidisc() {
       fi
   fi
   echo -e "\n"
+}
+
+function init_app_video() {
+	local PLATFORM=$1
+	local ROMNAME=$2
+	local BASEROMNAME=${ROMNAME##*/}
+
+	blank_buffer
+
+	echo "$(cat /sys/class/display/mode)" > /tmp/EE_LASTVIDEO
+	local VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
+	[[ -z "$VIDEO_EMU" ]] && VIDEO_EMU=$LAST_VIDEO
+	
+	# Show splash screen if enabled
+	local SPL=$(get_ee_setting ee_splash.enabled)
+	[ "${SPL}" -eq "1" ] && ${TBASH} show_splash.sh gameloading "${PLATFORM}" "${ROMNAME}"
+
+	# Set the display video to that of the emulator setting.
+	[ ! -z "${VIDEO_EMU}" ] && ${TBASH} setres.sh ${VIDEO_EMU} ${PLATFORM} # set display
+}
+
+function end_app_video() {
+	local LAST_VIDEO="$(cat /tmp/EE_LASTVIDEO)"
+
+	# Return to default mode
+	${TBASH} setres.sh ${LAST_VIDEO}
+
+	# Show exit splash
+	${TBASH} show_splash.sh exit
+}
+
+function set_gptokeyb() {
+	local default=$1
+	local gptokeyb=$2
+
+	[[ -z "${gptokeyb}" ]] && gptokeyb=$default
+
+	local kbfile="/emuelec/configs/gptokeyb/${gptokeyb}.gptk"
+
+	if [[ ! -f "$kbfile" ]]; then
+		echo -e "\n" && return
+	fi
+
+	echo "-c ${kbfile}"
 }
 
 cmd=${1}

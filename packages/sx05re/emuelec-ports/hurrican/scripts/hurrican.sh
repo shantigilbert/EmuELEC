@@ -50,4 +50,3 @@ else
     hurrican ${FLAGS} > /emuelec/logs/emuelec.log 2>&1
 fi
 
-killall gptokeyb &

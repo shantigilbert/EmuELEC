@@ -81,11 +81,6 @@ ROMNAME="${1}"
 BASEROMNAME=${ROMNAME##*/}
 GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
-SET_DISPLAY_SH="setres.sh"
-VIDEO="$(cat /sys/class/display/mode)"
-VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
-[[ -z "${VIDEO_EMU}" ]] && VIDEO_EMU=${VIDEO}
-
 if [[ "${CORE}" == *"_32b"* ]]; then
     BIT32="yes"
     #LD_LIBRARY_PATH="/emuelec/lib32:${LD_LIBRARY_PATH}"
@@ -138,18 +133,15 @@ CLOUD_SYNC=$(get_ee_setting "${PLATFORM}.cloudsave")
 [[ "${CLOUD_SYNC}" == "1" ]] && ra_rclone.sh get "${PLATFORM}" "${ROMNAME}" &
 CLOUD_PID=$!
 
-# Show splash screen if enabled
-SPL=$(get_ee_setting ee_splash.enabled)
-[ "${SPL}" -eq "1" ] && ${TBASH} show_splash.sh gameloading "${PLATFORM}" "${ROMNAME}"
-
-# Set the display video to that of the emulator setting.
-[ ! -z "${VIDEO_EMU}" ] && ${TBASH} ${SET_DISPLAY_SH} ${VIDEO_EMU} ${PLATFORM} # set display
-
+emuelec-utils init_app_video "${PLATFORM}" "${ROMNAME}"
 
 CONTROLLERCONFIG="${arguments#*--controllers=*}"
 echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
+
+GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
+VIRTUAL_KB=
 
 # Read the first argument in order to set the right emulator
 case ${PLATFORM} in
@@ -166,6 +158,7 @@ case ${PLATFORM} in
 		fi
 		;;
 	"openbor")
+		VIRTUAL_KB=$(emuelec-utils set_gptokeyb "${PLATFORM}" "${GPTOKEYB}")
 		set_kill_keys "${EMU}"
 		RUNTHIS='${TBASH} openbor.sh "${ROMNAME}" "${EMU}"'
 		;;
@@ -444,7 +437,7 @@ if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do al
     eval echo ${RUNTHIS} >> ${EMUELECLOG}
 fi
 
-gptokeyb 1 ${KILLTHIS} -killsignal ${KILLSIGNAL} &
+gptokeyb 1 ${KILLTHIS} ${VIRTUAL_KB} -killsignal ${KILLSIGNAL} &
 
 [[ "${CLOUD_SYNC}" == "1" ]] && wait ${CLOUD_PID}
 
@@ -459,9 +452,7 @@ else
    ret_error=${?}
 fi
 
-blank_buffer
-
-[[ "${CLOUD_SYNC}" == "1" ]] && ra_rclone.sh set "${PLATFORM}" "${ROMNAME}" &
+#blank_buffer
 
 # clear terminal window
 	reset > /dev/tty < /dev/null 2>&1
@@ -469,11 +460,9 @@ blank_buffer
 	reset > /dev/tty1 < /dev/null 2>&1
 	reset > /dev/console < /dev/null 2>&1
 
-# Return to default mode
-${TBASH} ${SET_DISPLAY_SH} ${VIDEO}
+emuelec-utils end_app_video
 
-# Show exit splash
-${TBASH} show_splash.sh exit
+[[ "${CLOUD_SYNC}" == "1" ]] && ra_rclone.sh set "${PLATFORM}" "${ROMNAME}" &
 
 # Just in case
 kill_video_controls
