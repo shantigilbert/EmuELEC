@@ -63,8 +63,6 @@ make_target() {
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro
   cp *.so $INSTALL/usr/lib/libretro/
-  mkdir -p $INSTALL/usr/config/retroarch/savefiles/fmtowns/hi
-  cp plugins/hiscore/hiscore.dat $INSTALL/usr/config/retroarch/savefiles/fmtowns/hi
   mkdir -p ${INSTALL}/usr/config/emuelec/configs/fmtowns
   cp -rf ${PKG_DIR}/config/* ${INSTALL}/usr/config/emuelec/configs/fmtowns
   mkdir -p ${INSTALL}/usr/bin
