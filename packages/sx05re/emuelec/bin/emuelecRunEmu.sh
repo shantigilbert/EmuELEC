@@ -437,7 +437,7 @@ if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do al
     eval echo ${RUNTHIS} >> ${EMUELECLOG}
 fi
 
-gptokeyb 1 ${KILLTHIS} -killsignal ${KILLSIGNAL} &
+gptokeyb 1 ${KILLTHIS} ${VIRTUAL_KB} -killsignal ${KILLSIGNAL} &
 
 [[ "${CLOUD_SYNC}" == "1" ]] && wait ${CLOUD_PID}
 
