@@ -140,6 +140,9 @@ echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
+GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
+VIRTUAL_KB=
+
 # Read the first argument in order to set the right emulator
 case ${PLATFORM} in
 	"atari2600")
@@ -155,6 +158,7 @@ case ${PLATFORM} in
 		fi
 		;;
 	"openbor")
+		VIRTUAL_KB=$(emuelec-utils set_gptokeyb "${PLATFORM}" "${GPTOKEYB}")
 		set_kill_keys "${EMU}"
 		RUNTHIS='${TBASH} openbor.sh "${ROMNAME}" "${EMU}"'
 		;;

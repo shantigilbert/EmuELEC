@@ -30,14 +30,9 @@ else
      ln -sf "${CONFIGDIR}/master.cfg" "${SAVES}/${pakname}.cfg"
 fi
 
-# We start the fake keyboard
-gptokeyb -c /emuelec/configs/gptokeyb/OpenBOR.gptk openbor &
-
 # Run OpenBOR in the config folder
     cd "${CONFIGDIR}"
 	SDL_AUDIODRIVER=alsa ${OB}
 
 # Clear PAKS folder to avoid getting the launcher on nex run
 rm -rf ${PAKS}/*
-
-killall gptokeyb &
