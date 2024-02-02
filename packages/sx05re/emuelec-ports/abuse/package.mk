@@ -7,7 +7,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/Xenoveritas/abuse"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain SDL2 SDL2_mixer libepoxy"
 PKG_LONGDESC="Abuse SDL port originally from Crack-Dot-Com and released into the public domain"
 GET_HANDLER_SUPPORT="git"
@@ -28,6 +28,6 @@ pre_configure_target() {
 }
 
 post_makeinstall_target() {	
-	mkdir -p $INSTALL/usr/config/emuelec/configs/
-	cp -rf ${PKG_DIR}/config/* $INSTALL/usr/config/emuelec/configs/
+	mkdir -p ${INSTALL}/usr/config/emuelec/configs/
+	cp -rf ${PKG_DIR}/config/* ${INSTALL}/usr/config/emuelec/configs/
 }

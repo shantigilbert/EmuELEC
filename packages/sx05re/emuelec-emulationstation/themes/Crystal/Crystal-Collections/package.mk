@@ -7,7 +7,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/dm2912/Crystal-Collections"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_SECTION="emuelec"
 PKG_SHORTDESC="Crystal Dynamic Collections for use on the Crystal Theme"
@@ -19,6 +19,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/config/emulationstation/collections
-  cp -r *.xcc $INSTALL/usr/config/emulationstation/collections
+  mkdir -p ${INSTALL}/usr/config/emulationstation/collections
+  cp -r *.xcc ${INSTALL}/usr/config/emulationstation/collections
 }

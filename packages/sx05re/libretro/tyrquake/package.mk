@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/tyrquake"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,12 +37,12 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 pre_configure_target() {
-  if [ "$ARCH" == "arm" ]; then
-    CFLAGS="$CFLAGS -DARM -marm"
+  if [ "${ARCH}" == "arm" ]; then
+    CFLAGS="${CFLAGS} -DARM -marm"
   fi
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp tyrquake_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp tyrquake_libretro.so ${INSTALL}/usr/lib/libretro/
 }

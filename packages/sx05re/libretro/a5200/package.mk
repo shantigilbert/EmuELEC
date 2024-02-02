@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/a5200"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="Port of Atari 5200 emulator for GCW0 "
 PKG_TOOLCHAIN="auto"
@@ -33,6 +33,6 @@ PKG_TOOLCHAIN="auto"
 PKG_MAKE_OPTS_TARGET="platform=rpi4"
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp a5200_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp a5200_libretro.so ${INSTALL}/usr/lib/libretro/
 }

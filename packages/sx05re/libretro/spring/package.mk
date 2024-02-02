@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/shantigilbert/spring-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -38,22 +38,22 @@ PKG_AUTORECONF="no"
 PKG_USE_CMAKE="no"
 
 make_target() {
-  cd $PKG_BUILD
+  cd ${PKG_BUILD}
   make
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
+  mkdir -p ${INSTALL}/usr/lib/libretro
 
-  cp spring_libretro.so $INSTALL/usr/lib/libretro/spring_ppsspp_libretro.so
-  cp spring_ppsspp_libretro.info $INSTALL/usr/lib/libretro/
+  cp spring_libretro.so ${INSTALL}/usr/lib/libretro/spring_ppsspp_libretro.so
+  cp spring_ppsspp_libretro.info ${INSTALL}/usr/lib/libretro/
 
-  cp spring_libretro.so $INSTALL/usr/lib/libretro/spring_pcsx_rearmed32_libretro.so
-  cp spring_pcsx_rearmed32_libretro.info $INSTALL/usr/lib/libretro/
+  cp spring_libretro.so ${INSTALL}/usr/lib/libretro/spring_pcsx_rearmed32_libretro.so
+  cp spring_pcsx_rearmed32_libretro.info ${INSTALL}/usr/lib/libretro/
 
-  cp spring_libretro.so $INSTALL/usr/lib/libretro/spring_shell_libretro.so
-  cp spring_shell_libretro.info $INSTALL/usr/lib/libretro/
+  cp spring_libretro.so ${INSTALL}/usr/lib/libretro/spring_shell_libretro.so
+  cp spring_shell_libretro.info ${INSTALL}/usr/lib/libretro/
   
-  # mkdir -p $INSTALL/usr/bin
-  # cp retroarch32.sh $INSTALL/usr/bin
+  # mkdir -p ${INSTALL}/usr/bin
+  # cp retroarch32.sh ${INSTALL}/usr/bin
 }

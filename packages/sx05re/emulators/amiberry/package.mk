@@ -78,6 +78,6 @@ makeinstall_target() {
   ln -sf /usr/lib/libcapsimage.so.5.1 ${INSTALL}/usr/config/amiberry/capsimg.so
   
   UAE="${INSTALL}/usr/config/amiberry/conf/*.uae"
-  for i in $UAE; do echo -e "gfx_center_vertical=smart\ngfx_center_horizontal=smart" >> $i; done
+  for i in ${UAE}; do echo -e "gfx_center_vertical=smart\ngfx_center_horizontal=smart" >> ${i}; done
 
 }

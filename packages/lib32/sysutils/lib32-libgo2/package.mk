@@ -19,7 +19,7 @@ if [ "${DEVICE}" = "GameForce" ]; then
   PKG_PATCH_DIRS+=" ${PROJECT_DIR}/Rockchip/devices/GameForce/patches/libgo2"
 fi
 
-PKG_MAKE_OPTS_TARGET="config=release ARCH= INCLUDES=-I$LIB32_SYSROOT_PREFIX/usr/include/libdrm -I$LIB32_SYSROOT_PREFIX/usr/include"
+PKG_MAKE_OPTS_TARGET="config=release ARCH= INCLUDES=-I${LIB32_SYSROOT_PREFIX}/usr/include/libdrm -I${LIB32_SYSROOT_PREFIX}/usr/include"
 
 unpack() {
   ${SCRIPTS}/get libgo2

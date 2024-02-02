@@ -8,7 +8,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="http://fping.org/"
-PKG_URL="http://fping.org/dist/fping-$PKG_VERSION.tar.gz"
+PKG_URL="http://fping.org/dist/fping-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_TOOLCHAIN="auto"
 

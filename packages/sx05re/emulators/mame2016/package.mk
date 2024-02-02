@@ -7,7 +7,7 @@ PKG_SHA256="3faaf226279d0c08d2a945a208c43d3851d4b86981b5224231de80098a97ea27"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/mame2016-libretro"
-PKG_URL="https://github.com/libretro/mame2016-libretro/archive/$PKG_VERSION.tar.gz"
+PKG_URL="https://github.com/libretro/mame2016-libretro/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_SECTION="escalade"
 PKG_SHORTDESC="MAME (0.174-ish) for libretro"
@@ -17,17 +17,17 @@ PKG_BUILD_FLAGS="-lto"
 PTR64="0"
 NOASM="0"
 
-if [ "$ARCH" == "aarch64" ]; then
+if [ "${ARCH}" == "aarch64" ]; then
   NOASM="1"
   PLAT=arm64
-elif [ "$ARCH" == "arm" ]; then
+elif [ "${ARCH}" == "arm" ]; then
   NOASM="1"
-  PLAT=$ARCH
-elif [ "$ARCH" == "x86_64" ]; then
+  PLAT=${ARCH}
+elif [ "${ARCH}" == "x86_64" ]; then
   PTR64="1"
-  PLAT=$ARCH
+  PLAT=${ARCH}
 else
-  PLAT=$ARCH
+  PLAT=${ARCH}
 fi
 
 PKG_MAKE_OPTS_TARGET="REGENIE=1 \
@@ -37,13 +37,13 @@ PKG_MAKE_OPTS_TARGET="REGENIE=1 \
 		      CROSS_BUILD=1 \
 		      TOOLS=1 \
 		      RETRO=1 \
-		      PTR64=$PTR64 \
-		      NOASM=$NOASM \
+		      PTR64=${PTR64} \
+		      NOASM=${NOASM} \
 		      PYTHON_EXECUTABLE=python \
 		      CONFIG=libretro \
 		      LIBRETRO_OS=unix \
-		      LIBRETRO_CPU=$PLAT \
-		      PLATFORM=$PLAT \
+		      LIBRETRO_CPU=${PLAT} \
+		      PLATFORM=${PLAT} \
 		      ARCH= \
 		      TARGET=mame \
 		      SUBTARGET=arcade \
@@ -55,14 +55,14 @@ PKG_MAKE_OPTS_TARGET="REGENIE=1 \
 
 make_target() {
   unset DISTRO
-  make $PKG_MAKE_OPTS_TARGET OVERRIDE_CC=$CC OVERRIDE_CXX=$CXX OVERRIDE_LD=$LD AR=$AR $MAKEFLAGS
+  make ${PKG_MAKE_OPTS_TARGET} OVERRIDE_CC=${CC} OVERRIDE_CXX=${CXX} OVERRIDE_LD=${LD} AR=${AR} ${MAKEFLAGS}
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/bin
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp *.so $INSTALL/usr/lib/libretro/mame2016_libretro.so
-  mkdir -p $INSTALL/usr/config/retroarch/savefiles/mame2016/hi
-  cp metadata/hiscore.dat $INSTALL/usr/config/retroarch/savefiles/mame2016/hi
+  mkdir -p ${INSTALL}/usr/bin
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp *.so ${INSTALL}/usr/lib/libretro/mame2016_libretro.so
+  mkdir -p ${INSTALL}/usr/config/retroarch/savefiles/mame2016/hi
+  cp metadata/hiscore.dat ${INSTALL}/usr/config/retroarch/savefiles/mame2016/hi
 }
 

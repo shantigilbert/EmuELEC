@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Non-commercial"
 PKG_SITE="https://github.com/snes9xgit/snes9x"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,11 +37,11 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 make_target() {
-  if [ "$ARCH" == "arm" ]; then
-    CXXFLAGS="$CXXFLAGS -DARM"
+  if [ "${ARCH}" == "arm" ]; then
+    CXXFLAGS="${CXXFLAGS} -DARM"
   fi
   
-   if ([ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "OdroidGoAdvance" ]) && [ "$ARCH" == "arm" ]; then
+   if ([ "${DEVICE}" == "OdroidGoAdvance" ] || [ "${DEVICE}" == "OdroidGoAdvance" ]) && [ "${ARCH}" == "arm" ]; then
     make -C libretro platform=classic_armv8_a35
    else
    make -C libretro
@@ -49,6 +49,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp libretro/snes9x_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp libretro/snes9x_libretro.so ${INSTALL}/usr/lib/libretro/
 }

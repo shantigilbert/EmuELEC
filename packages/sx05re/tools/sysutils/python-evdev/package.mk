@@ -6,7 +6,7 @@ PKG_NAME="python-evdev"
 PKG_VERSION="2dd6ce6364bb67eedb209f6aa0bace0c18a3a40a"
 PKG_LICENSE="OSS"
 PKG_SITE="https://github.com/gvalkov/python-evdev"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain Python3:host Python3 distutilscross:host"
 PKG_LONGDESC="Userspace evdev events"
 PKG_TOOLCHAIN="manual"
@@ -32,7 +32,7 @@ makeinstall_target() {
 
 post_makeinstall_target() {
 
-if [[ "$ARCH" == "arm" ]]; then
+if [[ "${ARCH}" == "arm" ]]; then
 	libname="arm-linux-gnueabihf.so"
 else
 	libname="aarch64-linux-gnu.so"

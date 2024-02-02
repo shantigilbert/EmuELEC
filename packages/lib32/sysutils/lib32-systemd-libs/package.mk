@@ -154,8 +154,8 @@ makeinstall_target() {
       if [ "${i: -1}" = 'p' ]; then
         continue
       fi
-      cp -va "$i" "${INSTALL}/usr/lib32/"
-      cp -va "$i" "${SYSROOT_PREFIX}/usr/lib/"
+      cp -va "${i}" "${INSTALL}/usr/lib32/"
+      cp -va "${i}" "${SYSROOT_PREFIX}/usr/lib/"
     done
   mkdir -p "${SYSROOT_PREFIX}/usr/include/systemd"
     cp -va "../src/libudev/libudev.h" "${SYSROOT_PREFIX}/usr/include/"
@@ -172,7 +172,7 @@ makeinstall_target() {
              login \
              messages \
              path; do
-      cp -va "../src/systemd/sd-$i.h" "${SYSROOT_PREFIX}/usr/include/systemd/"
+      cp -va "../src/systemd/sd-${i}.h" "${SYSROOT_PREFIX}/usr/include/systemd/"
     done
   mkdir -p "${SYSROOT_PREFIX}/usr/lib/pkgconfig"
     cp -va "src/libudev/libudev.pc" "src/libsystemd/libsystemd.pc"  "${SYSROOT_PREFIX}/usr/lib/pkgconfig/"

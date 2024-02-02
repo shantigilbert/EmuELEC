@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Non-commercial"
 PKG_SITE="https://github.com/libretro/fbalpha"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,18 +37,18 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 make_target() {
-  if [ "$ARCH" == "arm" ]; then
-    if [[ "$TARGET_FPU" =~ "neon" ]]; then
-      make -f makefile.libretro CC=$CC CXX=$CXX HAVE_NEON=1 profile=performance
+  if [ "${ARCH}" == "arm" ]; then
+    if [[ "${TARGET_FPU}" =~ "neon" ]]; then
+      make -f makefile.libretro CC=${CC} CXX=${CXX} HAVE_NEON=1 profile=performance
     else
-      make -f makefile.libretro CC=$CC CXX=$CXX profile=performance
+      make -f makefile.libretro CC=${CC} CXX=${CXX} profile=performance
     fi
   else
-    make -f makefile.libretro CC=$CC CXX=$CXX profile=accuracy
+    make -f makefile.libretro CC=${CC} CXX=${CXX} profile=accuracy
   fi
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp fbalpha_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp fbalpha_libretro.so ${INSTALL}/usr/lib/libretro/
 }

@@ -16,10 +16,10 @@ PKG_MAKE_OPTS_TARGET="-C src/ -f Makefile GNU_READLINE=0 "
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/bin
-  cp bin/jzintv $INSTALL/usr/bin
-  cp ${PKG_DIR}/scripts/* $INSTALL/usr/bin
+  mkdir -p ${INSTALL}/usr/bin
+  cp bin/jzintv ${INSTALL}/usr/bin
+  cp ${PKG_DIR}/scripts/* ${INSTALL}/usr/bin
   
-  mkdir -p $INSTALL/usr/config/emuelec/configs
-  cp -rf $PKG_DIR/config/* $INSTALL/usr/config/emuelec/configs
+  mkdir -p ${INSTALL}/usr/config/emuelec/configs
+  cp -rf ${PKG_DIR}/config/* ${INSTALL}/usr/config/emuelec/configs
 }

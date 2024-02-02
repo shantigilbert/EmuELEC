@@ -19,9 +19,9 @@ make_target() {
   export HOST_CPU=aarch64
   export APIDIR=$(get_install_dir mupen64plussa-core)/usr/local/include/mupen64plus
   export USE_GLES=1
-  export SDL_CFLAGS="-I$SYSROOT_PREFIX/usr/include/SDL2 -D_REENTRANT"
+  export SDL_CFLAGS="-I${SYSROOT_PREFIX}/usr/include/SDL2 -D_REENTRANT"
   export SDL_LDLIBS="-lSDL2_net -lSDL2"
-  export CROSS_COMPILE="$TARGET_PREFIX"
+  export CROSS_COMPILE="${TARGET_PREFIX}"
   export V=1
   export VC=0
   BINUTILS="$(get_build_dir binutils)/.${TARGET_NAME}"
@@ -38,7 +38,7 @@ makeinstall_target() {
   UICONSDIR=${UPREFIX}/share/icons/hicolor
   mkdir -p ${UBINDIR}
   cp ${PKG_BUILD}/projects/unix/mupen64plus ${UBINDIR}
-  #$STRIP ${UBINDIR}/mupen64plus
+  #${STRIP} ${UBINDIR}/mupen64plus
   chmod 0755 ${UBINDIR}/mupen64plus
   mkdir -p ${UMANDIR}/man6
   cp ${PKG_BUILD}/doc/mupen64plus.6 ${UMANDIR}/man6

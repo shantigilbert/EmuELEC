@@ -7,7 +7,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/asakous/NestopiaCV"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -17,20 +17,20 @@ PKG_TOOLCHAIN="make"
 GET_HANDLER_SUPPORT="git"
 
 pre_configure_target() {
-cp -f $PKG_BUILD/NstCore.hpp $PKG_BUILD/source/core/NstCore.hpp
+cp -f ${PKG_BUILD}/NstCore.hpp ${PKG_BUILD}/source/core/NstCore.hpp
 }
 
 make_target() {
-  cd $PKG_BUILD
+  cd ${PKG_BUILD}
   make -C libretro
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  mkdir -p $INSTALL/etc/
-  cp $PKG_BUILD/skin.png $INSTALL/usr/lib/libretro/
-  cp $PKG_BUILD/skin.png $INSTALL/etc/
-  cp libretro/nestopiaCV_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  mkdir -p ${INSTALL}/etc/
+  cp ${PKG_BUILD}/skin.png ${INSTALL}/usr/lib/libretro/
+  cp ${PKG_BUILD}/skin.png ${INSTALL}/etc/
+  cp libretro/nestopiaCV_libretro.so ${INSTALL}/usr/lib/libretro/
 echo 'display_name = "Nintendo - NES / Famicom (Nestopia CV)"
 authors = "Martin Freij|R. Belmont|R. Danbrook"
 supported_extensions = "nes|fds|unf|unif"
@@ -51,6 +51,6 @@ firmware0_opt = "false"
 firmware1_desc = "disksys.rom (Family Computer Disk System BIOS)"
 firmware1_path = "disksys.rom"
 firmware1_opt = "false"
-notes = "Get NstDatabase.xml from https://github.com/0ldsk00l/nestopia|(!) disksys.rom (md5): ca30b50f880eb660a320674ed365ef7a|Press Retropad L1 to switch disk side."'>  $INSTALL/usr/lib/libretro/nestopiaCV_libretro.info
+notes = "Get NstDatabase.xml from https://github.com/0ldsk00l/nestopia|(!) disksys.rom (md5): ca30b50f880eb660a320674ed365ef7a|Press Retropad L1 to switch disk side."'>  ${INSTALL}/usr/lib/libretro/nestopiaCV_libretro.info
 
 }

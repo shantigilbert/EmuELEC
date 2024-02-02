@@ -23,7 +23,7 @@ PKG_VERSION="58b229a"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/xiph/opusfile"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain openssl opus libogg"
 PKG_PRIORITY="optional"
 PKG_SHORTDESC="Stand-alone decoder library for .opus streams"
@@ -31,5 +31,5 @@ GET_HANDLER_SUPPORT="git"
 PKG_TOOLCHAIN="configure"
 
 pre_configure_target() {
-  $PKG_BUILD/autogen.sh
+  ${PKG_BUILD}/autogen.sh
 }

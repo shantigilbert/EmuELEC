@@ -37,7 +37,7 @@ makeinstall_target() {
     local LIBDIR=${INSTALL}/usr/lib32/libmali
     mkdir -p ${INSTALL}/etc/profile.d
     # Add it after the existing LD_LIBRARY_PATH, to make sure /emuelec/libs are read before it
-    echo 'export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib32/libmali"' > ${INSTALL}/etc/profile.d/99-rk-mali-workaround.conf
+    echo 'export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib32/libmali"' > ${INSTALL}/etc/profile.d/99-rk-mali-workaround.conf
   fi
 
   mkdir -p ${LIBDIR} \
@@ -60,7 +60,7 @@ makeinstall_target() {
                    libGLES_CM.so.1 \
                    libmali.so.1"
   local LINK_NAME
-  for LINK_NAME in $LINK_LIST; do
+  for LINK_NAME in ${LINK_LIST}; do
     ln -sf libmali.so ${LIBDIR}/${LINK_NAME}
     ln -sf libmali.so ${SYSROOT_PREFIX}/usr/lib/${LINK_NAME}
   done

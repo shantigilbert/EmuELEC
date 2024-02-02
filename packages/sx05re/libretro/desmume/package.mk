@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/desmume"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain linux glibc libpcap"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -40,20 +40,20 @@ PKG_MAKE_OPTS_TARGET="-C desmume/src/frontend/libretro -f Makefile.libretro GIT_
 
 
 pre_configure_target() {
-  case $TARGET_CPU in
+  case ${TARGET_CPU} in
     arm1176jzf-s)
-      PKG_MAKE_OPTS_TARGET+=" platform=armv6-hardfloat-$TARGET_CPU"
+      PKG_MAKE_OPTS_TARGET+=" platform=armv6-hardfloat-${TARGET_CPU}"
       ;;
     cortex-a7|cortex-a9|cortex-a53|cortex-a35)
-      PKG_MAKE_OPTS_TARGET+=" platform=armv7-neon-hardfloat-$TARGET_CPU"
+      PKG_MAKE_OPTS_TARGET+=" platform=armv7-neon-hardfloat-${TARGET_CPU}"
       ;;
     *cortex-a53|cortex-a35)
-      PKG_MAKE_OPTS_TARGET+=" platform=armv8-neon-hardfloat-$TARGET_CPU"
+      PKG_MAKE_OPTS_TARGET+=" platform=armv8-neon-hardfloat-${TARGET_CPU}"
       ;;
   esac
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp desmume/src/frontend/libretro/desmume_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp desmume/src/frontend/libretro/desmume_libretro.so ${INSTALL}/usr/lib/libretro/
 }

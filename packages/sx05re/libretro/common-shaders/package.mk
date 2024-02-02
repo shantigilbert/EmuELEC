@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/RetroPie/common-shaders"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="emuelec"
@@ -44,9 +44,9 @@ make_target() {
 }
 
 makeinstall_target() {
-  #make install INSTALLDIR="$INSTALL/usr/share/common-shaders/pi"
+  #make install INSTALLDIR="${INSTALL}/usr/share/common-shaders/pi"
 
-mkdir -p $INSTALL/usr/share/common-shaders/rpi
-    cp -rf $PKG_BUILD/* $INSTALL/usr/share/common-shaders/rpi
+mkdir -p ${INSTALL}/usr/share/common-shaders/rpi
+    cp -rf ${PKG_BUILD}/* ${INSTALL}/usr/share/common-shaders/rpi
 }
 

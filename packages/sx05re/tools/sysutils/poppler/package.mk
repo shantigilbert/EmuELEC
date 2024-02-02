@@ -26,7 +26,7 @@ pre_configure_target() {
 }
 
 post_makeinstall_target() {
-    mkdir -p $INSTALL/usr/bin/batocera
-    ln -sf /usr/bin/pdftoppm $INSTALL/usr/bin/batocera/pdftoppm
-    ln -sf /usr/bin/pdfinfo $INSTALL/usr/bin/batocera/pdfinfo
+    mkdir -p ${INSTALL}/usr/bin/batocera
+    ln -sf /usr/bin/pdftoppm ${INSTALL}/usr/bin/batocera/pdftoppm
+    ln -sf /usr/bin/pdfinfo ${INSTALL}/usr/bin/batocera/pdfinfo
 }

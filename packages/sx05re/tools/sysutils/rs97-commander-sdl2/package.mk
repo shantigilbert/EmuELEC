@@ -8,7 +8,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/EmuELEC/rs97-commander-sdl2"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain SDL2 SDL2_image SDL2_gfx SDL2_ttf freetype"
 PKG_SECTION="tools"
 PKG_SHORTDESC="Two-pane commander for RetroFW and RG-350 (fork of Dingux Commander)"
@@ -19,17 +19,17 @@ sed -i "s|CC=g++|CC=${CXX}|" Makefile
 
 OGA=0
 
-if [[ "$DEVICE" == "OdroidGoAdvance" || "$DEVICE" == "GameForce" ]]; then
+if [[ "${DEVICE}" == "OdroidGoAdvance" || "${DEVICE}" == "GameForce" ]]; then
 	OGA=1
 fi
 
-PKG_MAKE_OPTS_TARGET=" ODROIDGO=${OGA} CC=$CXX"
+PKG_MAKE_OPTS_TARGET=" ODROIDGO=${OGA} CC=${CXX}"
 	
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/bin
-  mkdir -p $INSTALL/usr/config/emuelec/configs/fm
-  cp DinguxCommander $INSTALL/usr/bin/
-  cp -rf res $INSTALL/usr/config/emuelec/configs/fm/
+  mkdir -p ${INSTALL}/usr/bin
+  mkdir -p ${INSTALL}/usr/config/emuelec/configs/fm
+  cp DinguxCommander ${INSTALL}/usr/bin/
+  cp -rf res ${INSTALL}/usr/config/emuelec/configs/fm/
 }

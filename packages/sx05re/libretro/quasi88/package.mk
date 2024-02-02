@@ -7,7 +7,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="BSD3"
 PKG_SITE="https://github.com/libretro/quasi88-libretro"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -17,6 +17,6 @@ PKG_TOOLCHAIN="make"
 GET_HANDLER_SUPPORT="git"
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp quasi88_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp quasi88_libretro.so ${INSTALL}/usr/lib/libretro/
 }

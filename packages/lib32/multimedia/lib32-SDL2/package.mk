@@ -57,18 +57,18 @@ PKG_CMAKE_OPTS_TARGET="-DSDL_STATIC=OFF \
                        -DSDL_HIDAPI_JOYSTICK=OFF"
 
 SDL2_DIRECTORY="$(get_pkg_directory SDL2)"
-PKG_PATCH_DIRS+=" $SDL2_DIRECTORY/patches" 
+PKG_PATCH_DIRS+=" ${SDL2_DIRECTORY}/patches" 
 case "${DEVICE}" in
   'Amlogic-ng'|'Amlogic-old')  # We should've used PROJECT=Amlogic-ce logically, but using these two device names here saves a comparasion (only device needs to be compared)
-    PKG_PATCH_DIRS+=" $SDL2_DIRECTORY/patches/Amlogic"
+    PKG_PATCH_DIRS+=" ${SDL2_DIRECTORY}/patches/Amlogic"
     PKG_CMAKE_OPTS_TARGET+=" -DSDL_MALI=ON -DSDL_KMSDRM=OFF"
   ;;
   'OdroidGoAdvance'|'GameForce'|'RK356x'|'OdroidM1')
-    PKG_PATCH_DIRS+=" $SDL2_DIRECTORY/patches/Rockchip"
+    PKG_PATCH_DIRS+=" ${SDL2_DIRECTORY}/patches/Rockchip"
     PKG_CMAKE_OPTS_TARGET+=" -DSDL_KMSDRM=ON"
     PKG_DEPENDS_TARGET+=" lib32-libdrm lib32-mali-bifrost"
     if [ "${DEVICE}" = "OdroidGoAdvance" ]; then
-      PKG_PATCH_DIRS+=" $SDL2_DIRECTORY/patches/OdroidGoAdvance"
+      PKG_PATCH_DIRS+=" ${SDL2_DIRECTORY}/patches/OdroidGoAdvance"
       PKG_DEPENDS_TARGET+=" lib32-librga"
       # This is evil, but we save multiple comparasions
       pre_make_host() {
@@ -90,7 +90,7 @@ unpack() {
 }
 
 post_makeinstall_target() {
-  sed -e "s:\(['=LI]\)/usr:\\1${SYSROOT_PREFIX}/usr:g" -i $SYSROOT_PREFIX/usr/bin/sdl2-config
+  sed -e "s:\(['=LI]\)/usr:\\1${SYSROOT_PREFIX}/usr:g" -i ${SYSROOT_PREFIX}/usr/bin/sdl2-config
   safe_remove ${INSTALL}/usr/bin
   safe_remove ${INSTALL}/usr/include
   safe_remove ${INSTALL}/usr/share

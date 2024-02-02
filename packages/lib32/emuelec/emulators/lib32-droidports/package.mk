@@ -23,9 +23,9 @@ unpack() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/bin
-  cp ${PKG_BUILD}/.${TARGET_NAME}/gmloader $INSTALL/usr/bin
-  mkdir -p $INSTALL/usr/config/emuelec/configs/gmloader
-  cp $(get_pkg_directory droidports)/config/* $INSTALL/usr/config/emuelec/configs/gmloader
-  cp $(get_pkg_directory droidports)/scripts/* $INSTALL/usr/bin
+  mkdir -p ${INSTALL}/usr/bin
+  cp ${PKG_BUILD}/.${TARGET_NAME}/gmloader ${INSTALL}/usr/bin
+  mkdir -p ${INSTALL}/usr/config/emuelec/configs/gmloader
+  cp $(get_pkg_directory droidports)/config/* ${INSTALL}/usr/config/emuelec/configs/gmloader
+  cp $(get_pkg_directory droidports)/scripts/* ${INSTALL}/usr/bin
 }

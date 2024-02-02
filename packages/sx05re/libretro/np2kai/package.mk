@@ -24,7 +24,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/AZO234/NP2kai"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -32,11 +32,11 @@ PKG_SHORTDESC="Neko Project II kai"
 PKG_TOOLCHAIN="make"
 
 make_target() {
-cd $PKG_BUILD/sdl
+cd ${PKG_BUILD}/sdl
     make
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp $PKG_BUILD/sdl/np2kai_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp ${PKG_BUILD}/sdl/np2kai_libretro.so ${INSTALL}/usr/lib/libretro/
 }

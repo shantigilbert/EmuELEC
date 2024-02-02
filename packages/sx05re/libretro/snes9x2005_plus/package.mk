@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Non-commercial"
 PKG_SITE="https://github.com/libretro/snes9x2005"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -36,6 +36,6 @@ PKG_TOOLCHAIN="make"
 PKG_MAKE_OPTS_TARGET="USE_BLARGG_APU=1 platform=armv8-hardfloat-neon"
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp snes9x2005_plus_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp snes9x2005_plus_libretro.so ${INSTALL}/usr/lib/libretro/
 }

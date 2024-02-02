@@ -8,7 +8,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/EmuELEC/emuelec-emulationstation"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain SDL2 freetype curl freeimage vlc bash rapidjson ${OPENGLES} SDL2_mixer fping p7zip"
 PKG_SECTION="emuelec"
 PKG_NEED_UNPACK="$(get_pkg_directory busybox) $(get_pkg_directory bash)"
@@ -26,7 +26,7 @@ if [[ ${DEVICE} == "OdroidM1"  ]] || [[ ${DEVICE} == "RK356x"  ]]; then
 fi
 
 # themes for Emulationstation
-PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET Crystal"
+PKG_DEPENDS_TARGET="${PKG_DEPENDS_TARGET} Crystal"
 
 pre_configure_target() {
 PKG_CMAKE_OPTS_TARGET=" -DENABLE_EMUELEC=1 -DDISABLE_KODI=1 -DENABLE_FILEMANAGER=1 -DGLES2=1"
@@ -39,9 +39,9 @@ PKG_CMAKE_OPTS_TARGET=" -DENABLE_EMUELEC=1 -DDISABLE_KODI=1 -DENABLE_FILEMANAGER
 # and it should be placed next to this file
 
 if [ -f ${PKG_DIR}/api_keys.txt ]; then
-while IFS="" read -r p || [ -n "$p" ]
+while IFS="" read -r p || [ -n "${p}" ]
 do
-  PKG_CMAKE_OPTS_TARGET+=" $p"
+  PKG_CMAKE_OPTS_TARGET+=" ${p}"
 done < ${PKG_DIR}/api_keys.txt
 fi
 
@@ -57,19 +57,19 @@ fi
 
 makeinstall_target() {
 	mkdir -p ${INSTALL}/usr/config/emuelec/configs/locale/i18n/charmaps
-	cp -rf $PKG_BUILD/locale/lang/* ${INSTALL}/usr/config/emuelec/configs/locale/
+	cp -rf ${PKG_BUILD}/locale/lang/* ${INSTALL}/usr/config/emuelec/configs/locale/
 	cp -PR "$(get_build_dir glibc)/localedata/charmaps/UTF-8" ${INSTALL}/usr/config/emuelec/configs/locale/i18n/charmaps/UTF-8
 	
 	mkdir -p ${INSTALL}/usr/lib
 	ln -sf /storage/.config/emuelec/configs/locale ${INSTALL}/usr/lib/locale
 	
 	mkdir -p ${INSTALL}/usr/config/emulationstation/resources
-    cp -rf $PKG_BUILD/resources/* ${INSTALL}/usr/config/emulationstation/resources/
+    cp -rf ${PKG_BUILD}/resources/* ${INSTALL}/usr/config/emulationstation/resources/
     
     mkdir -p ${INSTALL}/usr/bin
     ln -sf /storage/.config/emulationstation/resources ${INSTALL}/usr/bin/resources
-    cp -rf $PKG_BUILD/emulationstation ${INSTALL}/usr/bin
-    cp -PR "$(get_build_dir glibc)/.$TARGET_NAME/locale/localedef" ${INSTALL}/usr/bin
+    cp -rf ${PKG_BUILD}/emulationstation ${INSTALL}/usr/bin
+    cp -PR "$(get_build_dir glibc)/.${TARGET_NAME}/locale/localedef" ${INSTALL}/usr/bin
 
 	mkdir -p ${INSTALL}/etc/emulationstation/
 	ln -sf /storage/.config/emulationstation/themes ${INSTALL}/etc/emulationstation/
@@ -107,7 +107,7 @@ makeinstall_target() {
 CORESFILE="${INSTALL}/usr/config/emulationstation/es_systems.cfg"
 
 if [ "${DEVICE}" != "Amlogic-ng" ]; then
-    if [[ ${DEVICE} == "OdroidGoAdvance" || "$DEVICE" == "GameForce" ]]; then
+    if [[ ${DEVICE} == "OdroidGoAdvance" || "${DEVICE}" == "GameForce" ]]; then
         remove_cores="mesen-s quicknes mame2016 mesen"
     elif [ "${DEVICE}" == "Amlogic-old" ]; then
         remove_cores="mesen-s quicknes mame2016 mesen yabasanshiroSA yabasanshiro"
@@ -117,8 +117,8 @@ if [ "${DEVICE}" != "Amlogic-ng" ]; then
     fi
     
     for discore in ${remove_cores}; do
-        sed -i "s|<core>$discore</core>||g" ${CORESFILE}
-        sed -i '/^[[:space:]]*$/d' ${CORESFILE}
+        sed -i "s|<core>${discore}</core>||g" ${CORESFILE}
+        sed -i '/^[[:space:]]*${/d}' ${CORESFILE}
     done
 fi
 

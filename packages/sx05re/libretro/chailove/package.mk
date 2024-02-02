@@ -34,9 +34,9 @@ PKG_TOOLCHAIN="make"
 GET_HANDLER_SUPPORT="git"
 
 configure_target() {
-  cd $PKG_BUILD
+  cd ${PKG_BUILD}
 }
 
 makeinstall_target() {
-  make install INSTALLDIR="$INSTALL/usr/lib/libretro"
+  make install INSTALLDIR="${INSTALL}/usr/lib/libretro"
 }

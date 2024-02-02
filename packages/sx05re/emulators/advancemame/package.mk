@@ -25,8 +25,8 @@ sed -i "s|#include <slang.h>|#include <${SYSROOT_PREFIX}/usr/include/slang.h>|" 
 }
 
 pre_make_target() {
-VERSION="EmuELEC-v$(cat $ROOT/packages/sx05re/emuelec/config/EE_VERSION)-${PKG_VERSION:0:7}"
-echo $VERSION > ${PKG_BUILD}/.version
+VERSION="EmuELEC-v$(cat ${ROOT}/packages/sx05re/emuelec/config/EE_VERSION)-${PKG_VERSION:0:7}"
+echo ${VERSION} > ${PKG_BUILD}/.version
 }
 
 make_target() {
@@ -43,7 +43,7 @@ mkdir -p ${INSTALL}/usr/bin
 
 if [ "${DEVICE}" == "OdroidGoAdvance" ]; then
    cp -r ${PKG_DIR}/config/advmame.rc_oga ${INSTALL}/usr/config/emuelec/configs/advmame/advmame.rc
-elif [ "$DEVICE" == "GameForce" ]; then
+elif [ "${DEVICE}" == "GameForce" ]; then
    cp -r ${PKG_DIR}/config/advmame.rc_gf ${INSTALL}/usr/config/emuelec/configs/advmame/advmame.rc
 else
    cp -r ${PKG_DIR}/config/advmame.rc ${INSTALL}/usr/config/emuelec/configs/advmame/advmame.rc

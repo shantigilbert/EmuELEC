@@ -6,7 +6,7 @@ PKG_VERSION="cc580fb399f720e241754ecc7817ce5d551d74d0"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://gitlab.com/solarus-games/solarus"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain luajit glm libmodplug physfs SDL2 SDL2_ttf" 
 PKG_SHORTDESC="Action-RPG/Adventure 2D game engine"
 PKG_TOOLCHAIN="cmake"
@@ -18,10 +18,10 @@ PKG_CMAKE_OPTS_TARGET="-DSOLARUS_GL_ES=ON -DSOLARUS_GUI=OFF -DSOLARUS_USE_LUAJIT
 }
 
 pre_makeinstall_target() {
-mkdir -p $INSTALL/usr/bin
-cp $PKG_DIR/scripts/* $INSTALL/usr/bin
+mkdir -p ${INSTALL}/usr/bin
+cp ${PKG_DIR}/scripts/* ${INSTALL}/usr/bin
 
-mkdir -p $INSTALL/usr/config/emuelec/configs/solarus
-cp $PKG_DIR/config/* $INSTALL/usr/config/emuelec/configs/solarus
+mkdir -p ${INSTALL}/usr/config/emuelec/configs/solarus
+cp ${PKG_DIR}/config/* ${INSTALL}/usr/config/emuelec/configs/solarus
 
 }

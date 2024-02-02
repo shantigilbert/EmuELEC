@@ -24,7 +24,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/Mesen-S"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -39,7 +39,7 @@ make_target() {
 
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp Libretro/mesen-s_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp Libretro/mesen-s_libretro.so ${INSTALL}/usr/lib/libretro/
 }
 

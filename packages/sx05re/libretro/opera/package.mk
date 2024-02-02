@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="LGPL with additional notes"
 PKG_SITE="https://github.com/libretro/opera-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -35,10 +35,10 @@ PKG_TOOLCHAIN="make"
 
 
 make_target() {
-  make CC=$CC CXX=$CXX AR=$AR
+  make CC=${CC} CXX=${CXX} AR=${AR}
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp opera_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp opera_libretro.so ${INSTALL}/usr/lib/libretro/
 }
