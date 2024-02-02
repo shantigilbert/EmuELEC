@@ -58,9 +58,7 @@ local ytthumbs
 }
 
 function playYTVideo {
-fbfix
-
-	clear
+clear
 selectedstream=$(dialog --ascii-lines --backtitle "YouTube Video for EmuElec" --ok-label "Play" --column-separator "|" --title "${ytResultsLabel}"  --menu "Select a video to play" 0 0 0 "${yttitles2[@]}" 3>&2 2>&1 1>&3 > ${TTY})
 return_value=$?
 

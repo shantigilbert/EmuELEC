@@ -203,9 +203,6 @@ if [[ "${CURRENT_MODE}" == "${MODE}" ]]; then
   blank_buffer
 fi
 
-# Resets the pointer of the current index of the frame buffer to the start.
-[[ "${EE_DEVICE}" == "Amlogic-ng" ]] && fbfix
-
 # Now that the primary buffer has been acquired we blank it again because the new
 # memory allocated, may contain garbage artifact data.
 

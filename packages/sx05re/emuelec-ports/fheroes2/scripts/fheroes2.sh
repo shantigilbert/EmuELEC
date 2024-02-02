@@ -15,10 +15,6 @@ FLAGS=""
 mkdir -p "${CONFIGFOLDER}"
 cd "${CONFIGFOLDER}"
 
-if [ "${EE_DEVICE}" == "Amlogic-ng" ]; then 
-    fbfix
-fi
-
 if [ ! -e "${CONFIGFOLDER}/data/HEROES2.AGG" ]; then
     text_viewer -y -w -f 24 -t "Data does not exists!" -m "It seems this is the first time you are launching ${PORTNAME} or the data folder does not exists\n\nDemo data is about 20 MB total, and you need to be connected to the internet\n\n\nDownload demo and continue?"
         if [[ $? == 21 ]]; then

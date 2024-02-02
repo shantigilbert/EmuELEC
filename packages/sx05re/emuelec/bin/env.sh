@@ -35,6 +35,3 @@ source "${scriptdir}/scriptmodules/packages.sh"
 
 cat /etc/motd
 echo "Loading...Please Wait!"
-	if [ -f "/usr/bin/fbfix" ]; then
-		/usr/bin/fbfix
-	fi

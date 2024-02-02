@@ -14,10 +14,6 @@ mkdir -p "${DATAFOLDER}"
 mkdir -p "${CONFIGFOLDER}"
 cd "${DATAFOLDER}"
 
-if [ "${EE_DEVICE}" == "Amlogic-ng" ]; then 
-fbfix
-fi
-
 if [ ! -f "${CONFIGFOLDER}/nofakekeyb" ]; then 
     gptokeyb &
     touch "${CONFIGFOLDER}/nofakekeyb"
