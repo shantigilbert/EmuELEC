@@ -6,7 +6,7 @@
 # Source predefined functions and variables
 . /etc/profile
 
-XHAS3D_LIBS="/usr/lib/xash3d/valve"
+XHAS3D_LIBS="/usr/lib/xash3d/usr/valve"
 
 # Exports for xash3d
 export XASH3D_BASEDIR=/storage/roms/ports/half-life
@@ -26,6 +26,6 @@ if [ ! -e ${XASH3D_VALVEDIR}/emuelec.config.done ]; then
 fi
 
 # Change to binary folder and run HL
-cd /usr/bin/xash3d
+cd /usr/bin/xash3d/usr
 ./xash3d -ref gles2 -console &> /emuelec/logs/xash3d.log
 killall gptokeyb
