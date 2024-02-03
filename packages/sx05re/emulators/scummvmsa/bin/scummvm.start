@@ -39,9 +39,6 @@ if [ -d "/storage/.config/scummvm/extra" ]; then
 EXTRA="--extrapath=/storage/.config/scummvm/extra"
 fi
 
-# Only run fbfix on Amlogic-ng (Mali g31 and g52 in Amlogic SOC)
-[[ "$EE_DEVICE" == "Amlogic-ng" ]] && fbfix
-
 case $1 in
 "sa") 
 set_audio "fluidsynth"

@@ -12,8 +12,8 @@
 CONFIG_DIR="/storage/.emulationstation"
 CONFIG_DIR2="/storage/.config/emulationstation"
 
-if [ ! -L "$CONFIG_DIR" ]; then
-ln -sf $CONFIG_DIR2 $CONFIG_DIR
+if [ ! -L "${CONFIG_DIR}" ]; then
+ln -sf ${CONFIG_DIR2} ${CONFIG_DIR}
 fi
 
 if [ "${EE_DEVICE}" == "Amlogic" ]; then
@@ -38,7 +38,7 @@ else
 fi
 cat /storage/.cache/hostname > /proc/sys/kernel/hostname
 
-if [[ "$EE_DEVICE" == "GameForce" ]]; then
+if [[ "${EE_DEVICE}" == "GameForce" ]]; then
 LED=$(get_ee_setting bl_rgb)
 [ -z "${LED}" ] && LED="Off"
 odroidgoa_utils.sh bl "${LED}"
@@ -51,7 +51,7 @@ odroidgoa_utils.sh pl "${LED}"
 rk_wifi_init /dev/ttyS1
 fi
 
-if [[ "$EE_DEVICE" == "GameForce" ]] || [[ "$EE_DEVICE" == "OdroidGoAdvance" ]]; then
+if [[ "${EE_DEVICE}" == "GameForce" ]] || [[ "${EE_DEVICE}" == "OdroidGoAdvance" ]]; then
     if [ -e "/flash/no_oc.oga" ]; then 
         set_ee_setting ee_oga_oc disable
         OGAOC=""
@@ -65,10 +65,10 @@ fi
 
 # Mounts /storage/roms
 MOUNT_HANDLER=$(get_ee_setting ee_mount.handler)
-if [ -z "$MOUNT_HANDLER" ]; then
+if [ -z "${MOUNT_HANDLER}" ]; then
   MOUNT_HANDLER="eemount"
 fi
-$MOUNT_HANDLER &> /emuelec/logs/eemount.log
+${MOUNT_HANDLER} &> /emuelec/logs/eemount.log
 
 # copy default bezel to /storage/roms/bezel if it doesn't exists
 if [ ! -f "/storage/roms/bezels/default.cfg" ]; then 
@@ -92,7 +92,7 @@ rm -rf /storage/.cache/cores/* &
 # handle SSH
 DEFE=$(get_ee_setting ee_ssh.enabled)
 
-case "$DEFE" in
+case "${DEFE}" in
 "0")
 	systemctl stop sshd
 	rm /storage/.cache/services/sshd.conf
@@ -119,18 +119,18 @@ wait
 # Start Scanning for Bluetooth Controllers
 BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 BTSCANTIME=$(get_ee_setting ee_bluetooth.scantime)
-if [[ "$BTENABLED" != "1" ]]; then
+if [[ "${BTENABLED}" != "1" ]]; then
 systemctl stop bluetooth
 rm /storage/.cache/services/bluez.conf & 
 else
 systemctl restart bluetooth
-emuelec-bluetooth $BTSCANTIME &
+emuelec-bluetooth ${BTSCANTIME} &
 fi
 
 # What to start at boot?
 DEFE=$(get_ee_setting ee_boot)
 
-case "$DEFE" in
+case "${DEFE}" in
 "Retroarch")
 	rm -rf /var/lock/start.retro
 	touch /var/lock/start.retro

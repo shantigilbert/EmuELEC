@@ -10,7 +10,7 @@ config="/storage/.config/emuelec/configs/hypseus"
 configfile="${config}/hypinput.ini"
 
 if [[ ! -f "${config}/ee_updated" ]]; then
-    cp "/usr/config/emuelec/configs/hypseus/hypinput_gamepad.ini" "$configfile"
+    cp "/usr/config/emuelec/configs/hypseus/hypinput_gamepad.ini" "${configfile}"
 fi
 touch "${config}/ee_updated"
 
@@ -24,7 +24,7 @@ sed -i 's|AXIS_TRIGGER_RIGHT|BUTTON_X AXIS_TRIGGER_RIGHT|' ${configfile}
 cd "${config}"
 
 if [[ -f "${dir}/${name}.singe" ]]; then
-    hypseus singe vldp -gamepad -framefile "${dir}/${name}.txt" -script "${dir}/${name}.singe" -fullscreen -useoverlaysb 2 $params
+    hypseus singe vldp -gamepad -framefile "${dir}/${name}.txt" -script "${dir}/${name}.singe" -fullscreen -useoverlaysb 2 ${params}
 else
-    hypseus "${name}" vldp -gamepad -framefile "${dir}/${name}.txt" -fullscreen -useoverlaysb 2 $params
+    hypseus "${name}" vldp -gamepad -framefile "${dir}/${name}.txt" -fullscreen -useoverlaysb 2 ${params}
 fi

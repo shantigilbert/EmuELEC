@@ -7,10 +7,9 @@
 . /etc/profile
 
 {% if data.init_port %}
-
 PORT="{{ data.port_exe }}"
 # init_port binary audio(alsa. pulseaudio, default)
-init_port ${PORT} {{ data.audio }}
+init_port "${PORT}" "{{ data.audio }}" "{{ data.killsignal }}" "{{ data.vkb }}"
 {% endif %}
 
 {% for command in data.commands %}

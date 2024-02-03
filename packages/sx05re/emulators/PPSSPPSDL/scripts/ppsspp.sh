@@ -10,4 +10,4 @@ fi
 
 ARG=${1//[\\]/}
 export SDL_AUDIODRIVER=alsa          
-PPSSPPSDL --fullscreen "$ARG"
+PPSSPPSDL --fullscreen "${ARG}"

@@ -6,12 +6,19 @@
 # Source predefined functions and variables
 . /etc/profile
 
+function get_filenames_no_ext() {
+	local FN=($( ls -1 $1 | sed -e 's/\.[^.]*$//' ))
+	IFS=","
+	echo "${FN[*]}"
+}
+
 function test() {
     echo "success"
     exit 1
 }
 
 function error() {
+# Displays emuelec.log if there was an error.
     text_viewer /emuelec/logs/emuelec.log -w -t "Error! ${2}" -f 24
 	show_splash.sh exit
 }
@@ -38,6 +45,7 @@ function audio() {
 }
 
 function clearconfig() {
+# This function resets configurations based on argument 1
 	case "${1}" in
 	"EMUS")
         unmount_all
@@ -66,6 +74,7 @@ function clearconfig() {
 }
 
 function ee_backup() {
+# Creates a backup of current configurations
     BACKUPDIR="/storage/roms/backup"
     BACKUPTAR="ee_backup_config.tar.gz"
     BACKUPFILE="${BACKUPDIR}/${BACKUPTAR}"
@@ -112,6 +121,7 @@ function ee_backup() {
 }
 
 function ee_cloud_backup() {
+# Creates a cloud backup of current configurations using rclone
     RCLONECONF="/emuelec/configs/rclone/rclone.conf"
     EESYNCCFG="/emuelec/configs/rclone/ee_cloud_sync.cfg"
     
@@ -166,10 +176,12 @@ function ee_cloud_backup() {
 }
 
 function filemanager() {
+# runs the file manager script, might be outdated. 
 	/usr/bin/scripts/setup/file_manager.sh
 }
 
 function getshaders() {
+# Returns a list of available shaders, mostly used in Emulationstation.
 	find /tmp/shaders -name '*.glslp' -print0 |
 		while IFS= read -r -d '' line; do
 		echo ${line#/tmp/shaders/},
@@ -177,6 +189,7 @@ function getshaders() {
 }
 
 function getip() {
+# returns current IP Address
 IP="$(ifconfig wlan0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')"
 
   if [ -z "$IP" ]; then
@@ -187,7 +200,7 @@ IP="$(ifconfig wlan0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}')"
 	echo "No Internet"
  else
 	echo "${IP}"
-	echo "${IP}" > /storage/ip.txt
+	echo "${IP}" > /emuelec/ip.txt
  fi
 }
 
@@ -213,7 +226,7 @@ function dimensions() {
 }
 
 function resolutions() {
-
+# Returns a list of supported resolutions depending on device
 	RESOLUTIONS=()
 
   if [ -f "/storage/LEGACY_RESOLUTIONS" ]; then
@@ -263,7 +276,7 @@ function resolutions() {
 	fi
 
 	if [[ -f "$FILEPATH" ]]; then
-	  SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat '$FILEPATH'`
+	  SCREEN_SUPPORTED_RESOLUTIONS=`/usr/bin/cat "$FILEPATH"`
 	  for SSR in $SCREEN_SUPPORTED_RESOLUTIONS
 	  do
 	    RESOLUTIONS+=($SSR)
@@ -277,14 +290,17 @@ function resolutions() {
 }
 
 function current_timezone() {
+# Returns the current timezone
 	readlink -f /etc/localtime | sed 's;/usr/share/zoneinfo/;;'
 }
 
 function timezones() {
+# Returns a list of timezones, used in ES
 	cat /usr/share/zoneinfo/zone1970.tab | grep -v "^#" | awk '{ print $3"," }' | sort -u
 }
 
 function small-cores() {
+# Switch the small cores on the N2 on and off, we mostly have them off as the small cores are slower.
     if grep -q "g12b" /proc/device-tree/compatible; then
         case "$1" in
         "enable")
@@ -310,6 +326,7 @@ function unmount_all () {
 }
 
 function createMultidisc() {
+# Creates a multidisc m3u file, used in ES. 
   local ROMNAME="$1"
 
   local BASEROMNAME="${ROMNAME##*/}"
@@ -345,6 +362,50 @@ function createMultidisc() {
       fi
   fi
   echo -e "\n"
+}
+
+function init_app_video() {
+	local PLATFORM=$1
+	local ROMNAME=$2
+	local BASEROMNAME=${ROMNAME##*/}
+
+	blank_buffer
+
+	echo "$(cat /sys/class/display/mode)" > /tmp/EE_LASTVIDEO
+	local VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
+	[[ -z "$VIDEO_EMU" ]] && VIDEO_EMU=$LAST_VIDEO
+	
+	# Show splash screen if enabled
+	local SPL=$(get_ee_setting ee_splash.enabled)
+	[ "${SPL}" -eq "1" ] && ${TBASH} show_splash.sh gameloading "${PLATFORM}" "${ROMNAME}"
+
+	# Set the display video to that of the emulator setting.
+	[ ! -z "${VIDEO_EMU}" ] && ${TBASH} setres.sh ${VIDEO_EMU} ${PLATFORM} # set display
+}
+
+function end_app_video() {
+	local LAST_VIDEO="$(cat /tmp/EE_LASTVIDEO)"
+
+	# Return to default mode
+	${TBASH} setres.sh ${LAST_VIDEO}
+
+	# Show exit splash
+	${TBASH} show_splash.sh exit
+}
+
+function set_gptokeyb() {
+	local default=$1
+	local gptokeyb=$2
+
+	[[ -z "${gptokeyb}" ]] && gptokeyb=$default
+
+	local kbfile="/emuelec/configs/gptokeyb/${gptokeyb}.gptk"
+
+	if [[ ! -f "$kbfile" ]]; then
+		echo -e "\n" && return
+	fi
+
+	echo "-c ${kbfile}"
 }
 
 cmd=${1}

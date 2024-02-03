@@ -27,10 +27,7 @@ pre_configure_target() {
 	rm -rf ${SOURCES}/${PKG_NAME}/abuse-0.8/
 }
 
-post_makeinstall_target() {
-	mkdir -p $INSTALL/usr/bin
-	cp -rf $PKG_DIR/scripts/* $INSTALL/usr/bin
-	
+post_makeinstall_target() {	
 	mkdir -p $INSTALL/usr/config/emuelec/configs/
 	cp -rf ${PKG_DIR}/config/* $INSTALL/usr/config/emuelec/configs/
 }

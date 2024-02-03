@@ -8,7 +8,7 @@
 OB=${2}
 [[ -z ${OB} ]] && OB=OpenBOR
 
-pakname=$(basename "$1")
+pakname=$(basename "${1}")
 pakname="${pakname%.*}"
 
 CONFIGDIR="/emuelec/configs/openbor"
@@ -20,7 +20,7 @@ SAVES="${CONFIGDIR}/Saves"
 	mkdir -p "${SAVES}"
 
 # make a symlink to the pak
-    ln -sf "$1" "${PAKS}"
+    ln -sf "${1}" "${PAKS}"
 
 # create symlink to master.cfg
 rm "${SAVES}/${pakname}.cfg"
@@ -30,14 +30,9 @@ else
      ln -sf "${CONFIGDIR}/master.cfg" "${SAVES}/${pakname}.cfg"
 fi
 
-# We start the fake keyboard
-gptokeyb -c /emuelec/configs/gptokeyb/OpenBOR.gptk openbor &
-
 # Run OpenBOR in the config folder
     cd "${CONFIGDIR}"
 	SDL_AUDIODRIVER=alsa ${OB}
 
 # Clear PAKS folder to avoid getting the launcher on nex run
 rm -rf ${PAKS}/*
-
-killall gptokeyb &

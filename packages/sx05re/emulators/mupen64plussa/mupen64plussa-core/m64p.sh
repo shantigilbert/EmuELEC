@@ -16,7 +16,7 @@ if [[ ! -f "${CONFIGDIR}/mupen64plus.cfg" ]]; then
 fi
 
 
-FILE="$1"
+FILE="${1}"
 if [[ "${FILE: -4}" == ".zip" ]]; then
 	mkdir -p /tmp/mupen64plus
 	rm -fr /tmp/mupen64plus/*.*
@@ -45,7 +45,7 @@ case "$(oga_ver)" in
   ;;
   *)
     RES=$(get_resolution)
-		declare -a RES=( $MODE )
+		declare -a RES=( ${MODE} )
 		RES_W=${RES[0]}
 		RES_H=${RES[1]}
   ;;

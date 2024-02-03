@@ -14,11 +14,7 @@ mkdir -p "${DATAFOLDER}"
 mkdir -p "${CONFIGFOLDER}/lang"
 cd "${CONFIGFOLDER}"
 
-if [ "$EE_DEVICE" == "Amlogic-ng" ]; then 
-    fbfix
-fi
-
-if [ "$EE_DEVICE" != "Amlogic-ng" ]; then 
+if [ "${EE_DEVICE}" != "Amlogic-ng" ]; then 
     gptokeyb -c /emuelec/configs/gptokeyb/hurrican.gptk &
     FLAGS=" --depth 16"
 fi
@@ -50,4 +46,3 @@ else
     hurrican ${FLAGS} > /emuelec/logs/emuelec.log 2>&1
 fi
 
-killall gptokeyb &

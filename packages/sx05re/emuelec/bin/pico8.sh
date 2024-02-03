@@ -20,7 +20,7 @@ if [ ! -L "/storage/.config/emuelec/configs/pico-8/bbs/carts" ]; then
     ln -sf /storage/roms/pico-8 /storage/.config/emuelec/configs/pico-8/bbs/carts
 fi
 
-if [[ "$EE_DEVICE" == "Amlogic-old" ]]; then
+if [[ "${EE_DEVICE}" == "Amlogic-old" ]]; then
 set_audio alsa
 mv /storage/.config/asound.conf /storage/.config/asound.conf2
 fi
@@ -32,7 +32,7 @@ if [[ ! -L "/emuelec/configs/pico-8/sdl_controllers.txt" ]]; then
     ln -sf /storage/.config/SDL-GameControllerDB/gamecontrollerdb.txt /emuelec/configs/pico-8/sdl_controllers.txt
 fi
 
-#LD_LIBRARY_PATH="/emuelec/lib32:$LD_LIBRARY_PATH"
+#LD_LIBRARY_PATH="/emuelec/lib32:${LD_LIBRARY_PATH}"
 
 CART="${1}"
 
@@ -42,7 +42,7 @@ else
     /emuelec/bin/pico-8/pico8_dyn -run ${CART} -home /emuelec/configs/pico-8 -root_path /storage/roms/pico-8 -joystick 0
 fi
 
-if [[ "$EE_DEVICE" == "Amlogic-old" ]]; then
+if [[ "${EE_DEVICE}" == "Amlogic-old" ]]; then
 set_audio default
 mv /storage/.config/asound.conf2 /storage/.config/asound.conf
 fi

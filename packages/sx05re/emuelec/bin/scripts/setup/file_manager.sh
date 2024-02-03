@@ -13,7 +13,7 @@ gptokeyb -c "/emuelec/configs/gptokeyb/${BIN}.gptk" &
 clear >/dev/console
 ee_console disable
 
-if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
+if [ "${EE_DEVICE}" == "OdroidGoAdvance" ] || [ "${EE_DEVICE}" == "GameForce" ]; then
     
     clear >/dev/console
     

@@ -201,9 +201,6 @@ if [[ "$KILLTHIS" != "none" ]]; then
 	fi
 fi
 
-# Only run fbfix on N2
-[[ ! -f "/ee_s905" ]] && /usr/bin/fbfix
-
 # Exceute the command and try to output the results to the log file if it was not dissabled.
 if [[ $LOGEMU == "Yes" ]]; then
    echo "Emulator Output is:" >> $EMUELECLOG
@@ -212,9 +209,6 @@ else
    echo "Emulator log was dissabled" >> $EMUELECLOG
    eval ${RUNTHIS}
 fi 
-
-# Only run fbfix on N2
-[[ ! -f "/ee_s905" ]] && /usr/bin/fbfix
 
 # Show exit splash
 ${TBASH} /usr/bin/show_splash.sh exit

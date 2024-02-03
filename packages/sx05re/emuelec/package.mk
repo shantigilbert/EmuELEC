@@ -14,7 +14,7 @@ PKG_SHORTDESC="EmuELEC Meta Package"
 PKG_LONGDESC="EmuELEC Meta Package"
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
-PKG_TOOLCHAIN="make"
+PKG_TOOLCHAIN="manual"
 PKG_NEED_UNPACK="$(get_pkg_directory busybox) $(get_pkg_directory wget) $(get_pkg_directory coreutils)"
 
 PKG_EXPERIMENTAL="munt nestopiaCV quasi88 xmil np2kai hypseus-singe yabasanshiroSA fbneoSA same_cdi"
@@ -74,23 +74,10 @@ if [ "$ARCH" == "aarch64" ]; then
   fi
 fi
 
-make_target() {
-  if [ "${DEVICE}" == "Amlogic-ng" ]; then
-    cp -r $PKG_DIR/fbfix* $PKG_BUILD/
-    cd $PKG_BUILD/fbfix
-    $CC -O2 fbfix.c -o fbfix
-  fi
-}
-
-
 makeinstall_target() {
 
 	mkdir -p ${INSTALL}/usr/bin
 	cp -rf $PKG_DIR/bin ${INSTALL}/usr
-
-  if [ "${DEVICE}" == "Amlogic-ng" ]; then
-    cp $PKG_BUILD/fbfix/fbfix ${INSTALL}/usr/bin
-  fi
 
 	mkdir -p ${INSTALL}/usr/config/
   cp -rf $PKG_DIR/config/* ${INSTALL}/usr/config/
