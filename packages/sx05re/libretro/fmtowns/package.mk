@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2019 Trond Haugland (trondah@gmail.com)
 
-PKG_NAME="mame"
+PKG_NAME="fmtowns"
 PKG_VERSION="68520cf9defd1c2762bca7f266f13ad593b7b3f3"
 PKG_SHA256="29418bb2b9564cfaacc895021a73cf048e032aac88fa76148681b643e3eb46fc"
 PKG_ARCH="any"
@@ -10,7 +10,7 @@ PKG_SITE="https://github.com/libretro/mame"
 PKG_URL="https://github.com/libretro/mame/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain zlib flac sqlite expat"
 PKG_SECTION="libretro"
-PKG_SHORTDESC="MAME - Multiple Arcade Machine Emulator"
+PKG_SHORTDESC="Fmtowns MAME -  Multiple Arcade Machine Emulator"
 PKG_TOOLCHAIN="make"
 
 pre_configure_target() {
@@ -38,7 +38,8 @@ PKG_MAKE_OPTS_TARGET="REGENIE=1 \
 		      PLATFORM=arm64 \
 		      ARCH= \
 		      TARGET=mame \
-		      SUBTARGET=mame \
+		      SUBTARGET=fmtowns \
+		      SOURCES=fujitsu/fmtowns.cpp \
 		      OSD=retro \
 		      USE_SYSTEM_LIB_EXPAT=1 \
 		      USE_SYSTEM_LIB_ZLIB=1 \
@@ -62,6 +63,9 @@ make_target() {
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro
   cp *.so $INSTALL/usr/lib/libretro/
-  mkdir -p $INSTALL/usr/config/retroarch/savefiles/mame/hi
-  cp plugins/hiscore/hiscore.dat $INSTALL/usr/config/retroarch/savefiles/mame/hi
+  mkdir -p ${INSTALL}/usr/config/emuelec/configs/fmtowns
+  cp -rf ${PKG_DIR}/config/* ${INSTALL}/usr/config/emuelec/configs/fmtowns
+  cp -rf $PKG_BUILD/hash/fmtowns_cd.xml ${INSTALL}/usr/config/emuelec/configs/fmtowns/hash
+  mkdir -p ${INSTALL}/usr/bin
+  cp -rf ${PKG_DIR}/scripts/* ${INSTALL}/usr/bin
 }

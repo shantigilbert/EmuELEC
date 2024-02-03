@@ -159,6 +159,12 @@ case ${PLATFORM} in
             RUNTHIS='${TBASH} stella.sh "${ROMNAME}"'
 		fi
 		;;
+	"fmtmarty")
+		if [ "$EMU" = "fmtowns" ]; then
+            set_kill_keys "fmtowns"
+            RUNTHIS='${TBASH} fmtowns.sh"'
+		fi
+		;;
 	"atarist")
 		if [ "$EMU" = "HATARISA" ]; then
             set_kill_keys "hatari"
@@ -337,6 +343,16 @@ fi
 
 RUNTHIS='${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
 CONTROLLERCONFIG="${arguments#*--controllers=*}"
+
+case ${PLATFORM} in
+"fmtmarty")
+		if [ "$EMU" = "fmtowns_libretro" ]; then
+            set_kill_keys "fmtowns_libretro"
+            RUNTHIS='${TBASH} fmtowns.sh && ${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
+		fi
+		;;
+esac
+
 
 if [[ "$arguments" == *"-state_slot"* ]] && [[ "$arguments" == *"-autosave"* ]]; then
     CONTROLLERCONFIG="${CONTROLLERCONFIG%% -state_slot*}"  # until -state is found
