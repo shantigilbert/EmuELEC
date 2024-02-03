@@ -10,7 +10,7 @@ PKG_SITE="https://github.com/libretro/mame"
 PKG_URL="https://github.com/libretro/mame/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain zlib flac sqlite expat"
 PKG_SECTION="libretro"
-PKG_SHORTDESC="Fmtowns MAME -  Multiple Arcade Machine Emulator"
+PKG_SHORTDESC="Fmtowns MAME - Multiple Arcade Machine Emulator"
 PKG_TOOLCHAIN="make"
 
 pre_configure_target() {
@@ -65,6 +65,7 @@ makeinstall_target() {
   cp *.so $INSTALL/usr/lib/libretro/
   mkdir -p ${INSTALL}/usr/config/emuelec/configs/fmtowns
   cp -rf ${PKG_DIR}/config/* ${INSTALL}/usr/config/emuelec/configs/fmtowns
-  mkdir -p ${INSTALL}/usr/bin
+  cp -rf $PKG_BUILD/hash/fmtowns_cd.xml ${INSTALL}/usr/config/emuelec/configs/fmtowns/hash
+mkdir -p ${INSTALL}/usr/bin
   cp -rf ${PKG_DIR}/scripts/* ${INSTALL}/usr/bin
 }
