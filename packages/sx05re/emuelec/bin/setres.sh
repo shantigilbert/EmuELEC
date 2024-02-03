@@ -15,6 +15,12 @@
 . /etc/profile
 
 FILE_MODE="/sys/class/display/mode"
+if [[ "${EE_DEVICE}" == "Rockchip" ]]; then
+	FILE_MODE="/sys/class/display/HDMI/mode"
+fi
+
+[[ ! -f "${FILE_MODE}" ]] && exit
+
 PLATFORM=""
 
 switch_resolution()
@@ -25,12 +31,13 @@ switch_resolution()
   # the secondary small buffers flag to stop copying across.
   blank_buffer >> /dev/null
 
-  case $MODE in
-    480cvbs|576cvbs|480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*|*x*)
+  case ${MODE} in
+    480cvbs|576cvbs|*p*|*i*|*x*i*|*x*p*)
       echo null > "${FILE_MODE}"
       sleep 1
-      echo $MODE > "${FILE_MODE}"
+      echo ${MODE} > "${FILE_MODE}"
   esac
+
 	NEW_MODE=$( cat ${FILE_MODE} )
 	[[ "$NEW_MODE" != "$MODE" ]] && exit 1
 }
@@ -62,7 +69,14 @@ get_resolution_size()
       [[ -z "$FBW" ]] && FBW=1024
       [[ -z "$FBH" ]] && FBH=768
       ;;
-    480p*|480i*|576p*|720p*|1080p*|1440p*|2160p*|576i*|720i*|1080i*|1440i*|2160i*)
+		*x*i*|*x*p*)
+      PSW=$(echo $MODE | cut -d'x' -f 1)
+      PSH=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
+      [ ! -n "$PSH" ] && PSH=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
+      [[ -z "$FBW" || $FBW == 0 ]] && FBW=$PSW
+      [[ -z "$FBH" || $FBH == 0 ]] && FBH=$PSH
+      ;;
+    *p*|*i*)
       # For resolution with 2 width and height resolution numbers extract the Height.
       # *p* stand for progressive and *i* stand for interlaced.
       case $MODE in
@@ -71,13 +85,6 @@ get_resolution_size()
       esac
       PSW=$(( $PSH*16/9 ))
       [[ "$MODE" == "480"* ]] && PSW=640
-      [[ -z "$FBW" || $FBW == 0 ]] && FBW=$PSW
-      [[ -z "$FBH" || $FBH == 0 ]] && FBH=$PSH
-      ;;
-    *x*)
-      PSW=$(echo $MODE | cut -d'x' -f 1)
-      PSH=$(echo $MODE | cut -d'x' -f 2 | cut -d'p' -f 1)
-      [ ! -n "$PSH" ] && PSH=$(echo $MODE | cut -d'x' -f 2 | cut -d'i' -f 1)
       [[ -z "$FBW" || $FBW == 0 ]] && FBW=$PSW
       [[ -z "$FBH" || $FBH == 0 ]] && FBH=$PSH
       ;;
