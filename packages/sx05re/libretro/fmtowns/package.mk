@@ -39,7 +39,7 @@ PKG_MAKE_OPTS_TARGET="REGENIE=1 \
 		      ARCH= \
 		      TARGET=mame \
 		      SUBTARGET=fmtowns \
-		      SOURCES=fujitsu/fmtowns.cpp \
+		      SOURCES=fujitsu/fmtowns.cpp,igs/pgm2.cpp,igs/pgm.cpp,igs/pgm3.cpp \
 		      OSD=retro \
 		      USE_SYSTEM_LIB_EXPAT=1 \
 		      USE_SYSTEM_LIB_ZLIB=1 \
