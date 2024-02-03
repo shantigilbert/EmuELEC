@@ -159,12 +159,6 @@ case ${PLATFORM} in
             RUNTHIS='${TBASH} stella.sh "${ROMNAME}"'
 		fi
 		;;
-	"fmtmarty")
-		if [ "$EMU" = "fmtowns" ]; then
-            set_kill_keys "fmtowns"
-            RUNTHIS='${TBASH} fmtowns.sh"'
-		fi
-		;;
 	"atarist")
 		if [ "$EMU" = "HATARISA" ]; then
             set_kill_keys "hatari"
