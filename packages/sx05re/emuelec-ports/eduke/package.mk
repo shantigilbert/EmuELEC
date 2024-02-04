@@ -16,13 +16,13 @@ export GIT_SSL_NO_VERIFY=1
 
 pre_configure_target() {
 export ARCH=${ARCH}
-sed -i "s|sdl2-config|$SYSROOT_PREFIX/usr/bin/sdl2-config|" Common.mak
+sed -i "s|sdl2-config|${SYSROOT_PREFIX}/usr/bin/sdl2-config|" Common.mak
 sed -i "s|-latomic|#|" Common.mak
 PKG_MAKE_OPTS_TARGET=" duke3d LTO=1 SDL_TARGET=2 NOASM=1 HAVE_GTK2=0 POLYMER=1 USE_OPENGL=0 RELEASE=1 OPTLEVEL=3"
 }
 
 makeinstall_target() {
-mkdir -p $INSTALL/usr/bin
-cp -rf eduke32 $INSTALL/usr/bin
-cp $PKG_DIR/scripts/eduke.sh $INSTALL/usr/bin
+mkdir -p ${INSTALL}/usr/bin
+cp -rf eduke32 ${INSTALL}/usr/bin
+cp ${PKG_DIR}/scripts/eduke.sh ${INSTALL}/usr/bin
 }

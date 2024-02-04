@@ -24,8 +24,8 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/yabause"
-PKG_URL="$PKG_SITE.git"
-PKG_DEPENDS_TARGET="toolchain $OPENGLES"
+PKG_URL="${PKG_SITE}.git"
+PKG_DEPENDS_TARGET="toolchain ${OPENGLES}"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
 PKG_SHORTDESC="Port of Yabause to libretro."
@@ -34,11 +34,11 @@ PKG_TOOLCHAIN="make"
 GET_HANDLER_SUPPORT="git"
 
 make_target() {
-cd $PKG_BUILD/yabause/src/libretro
+cd ${PKG_BUILD}/yabause/src/libretro
 make HAVE_SSE=0 platform=armvneonhardfloat
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp $PKG_BUILD/yabause/src/libretro/yabause_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp ${PKG_BUILD}/yabause/src/libretro/yabause_libretro.so ${INSTALL}/usr/lib/libretro/
 }

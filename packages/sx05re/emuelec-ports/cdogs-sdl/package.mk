@@ -5,7 +5,7 @@ PKG_NAME="cdogs-sdl"
 PKG_VERSION="d64c961d03f6c9bd6a4ee8c77f43ffd345e4dbd2"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/cxong/cdogs-sdl"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain SDL2 python3-protobuf:host"
 PKG_SHORTDESC="Classic overhead run-and-gun game"
 PKG_TOOLCHAIN="cmake-make"
@@ -16,7 +16,7 @@ PKG_CMAKE_OPTS_TARGET=" -DCDOGS_DATA_DIR=/storage/roms/ports/cdogs-sdl/ -DBUILD_
 }
 
 makeinstall_target() {
-mkdir -p $INSTALL/usr/bin
-cp -rf ${PKG_BUILD}/.${TARGET_NAME}/src/cdogs-sdl $INSTALL/usr/bin
-cp -rf ${PKG_DIR}/scripts/* $INSTALL/usr/bin
+mkdir -p ${INSTALL}/usr/bin
+cp -rf ${PKG_BUILD}/.${TARGET_NAME}/src/cdogs-sdl ${INSTALL}/usr/bin
+cp -rf ${PKG_DIR}/scripts/* ${INSTALL}/usr/bin
 } 

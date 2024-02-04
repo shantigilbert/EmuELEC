@@ -8,7 +8,7 @@
 
 add_player_hat() 
 {
-    local pl=$1
+    local pl=${1}
     local pf="/storage/.local/share/fbneo/config/p${pl}defaults.ini"
 
     if [ ! -f "${pf}" ]; then
@@ -55,5 +55,4 @@ sed -i "s|szAppRomPaths\[0\].*|szAppRomPaths\[0\] ${DIR}/|" /emuelec/configs/fbn
 
 export LIBGL_NOBANNER=1
 export LIBGL_SILENTSTUB=1
-[[ "${EE_DEVICE}" == "Amlogic-ng" ]] && fbfix
 fbneo -joy -fullscreen "${ROM}" ${EXTRAOPTS} >> /emuelec/logs/emuelec.log 2>&1

@@ -67,7 +67,7 @@ makeinstall_target() {
                    libGLESv3.so.3.0 \
                    libGLESv3.so.3.0.0"
   local LINK_NAME
-  for LINK_NAME in $LINK_LIST; do
+  for LINK_NAME in ${LINK_LIST}; do
     ln -sf libMali.so ${INSTALL}/usr/lib32/${LINK_NAME}
     ln -sf libMali.so ${SYSROOT_PREFIX}/usr/lib/${LINK_NAME}
   done

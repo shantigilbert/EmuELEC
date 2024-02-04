@@ -8,7 +8,7 @@ PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="http://empty.sourceforge.net/"
 PKG_DEPENDS_TARGET="toolchain linux"
-PKG_URL="http://downloads.sourceforge.net/sourceforge/$PKG_NAME/$PKG_NAME-$PKG_VERSION.tgz"
+PKG_URL="http://downloads.sourceforge.net/sourceforge/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.tgz"
 PKG_SECTION="sysutils"
 PKG_SHORTDESC="Run applications under pseudo-terminal sessions"
 PKG_LONGDESC="Run applications under pseudo-terminal sessions"
@@ -17,10 +17,10 @@ PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
 make_target() {
-  make CC=$CC
+  make CC=${CC}
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/bin
-  cp empty $INSTALL/usr/bin/
+  mkdir -p ${INSTALL}/usr/bin
+  cp empty ${INSTALL}/usr/bin/
 }

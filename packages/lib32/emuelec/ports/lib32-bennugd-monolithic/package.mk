@@ -23,19 +23,19 @@ unpack() {
 pre_configure_target() {
   chainfile="cmake-${TARGET_NAME}.conf"
 
-  PKG_CMAKE_SCRIPT="$PKG_BUILD/projects/cmake/bgdc/CMakeLists.txt"
-  cd $PKG_BUILD/projects/cmake/bgdc/
-  cmake -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN}/etc/${chainfile} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=MinSizeRel $PKG_CMAKE_SCRIPT
+  PKG_CMAKE_SCRIPT="${PKG_BUILD}/projects/cmake/bgdc/CMakeLists.txt"
+  cd ${PKG_BUILD}/projects/cmake/bgdc/
+  cmake -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN}/etc/${chainfile} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=MinSizeRel ${PKG_CMAKE_SCRIPT}
   make
 
-  PKG_CMAKE_SCRIPT="$PKG_BUILD/projects/cmake/bgdi/CMakeLists.txt"
-  cd $PKG_BUILD/projects/cmake/bgdi/
-  cmake -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN}/etc/${chainfile} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=MinSizeRel $PKG_CMAKE_SCRIPT
+  PKG_CMAKE_SCRIPT="${PKG_BUILD}/projects/cmake/bgdi/CMakeLists.txt"
+  cd ${PKG_BUILD}/projects/cmake/bgdi/
+  cmake -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN}/etc/${chainfile} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=MinSizeRel ${PKG_CMAKE_SCRIPT}
   make
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/bin
-    cp $PKG_BUILD/projects/cmake/bgdi/bgdi $INSTALL/usr/bin
-    cp $PKG_BUILD/projects/cmake/bgdc/bgdc $INSTALL/usr/bin
+  mkdir -p ${INSTALL}/usr/bin
+    cp ${PKG_BUILD}/projects/cmake/bgdi/bgdi ${INSTALL}/usr/bin
+    cp ${PKG_BUILD}/projects/cmake/bgdc/bgdc ${INSTALL}/usr/bin
 } 

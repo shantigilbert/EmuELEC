@@ -111,7 +111,7 @@ EOF
 }
 
 post_makeinstall_target() {
-  # Qt installs directly to $SYSROOT_PREFIX so don't rely on scripts/build fixing this up
+  # Qt installs directly to ${SYSROOT_PREFIX} so don't rely on scripts/build fixing this up
   # PKG_ORIG_SYSROOT_PREFIX will be undefined when performing a legacy build
   sed -e "s:\(['= ]\)/usr:\\1${PKG_ORIG_SYSROOT_PREFIX:-${SYSROOT_PREFIX}}/usr:g" -i "${PKG_ORIG_SYSROOT_PREFIX:-${SYSROOT_PREFIX}}/usr/lib"/libQt*.la
 }

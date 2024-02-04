@@ -7,7 +7,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="LGPLv3.0"
 PKG_SITE="https://github.com/libretro/neocd_libretro"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain flac libogg libvorbis"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -19,11 +19,11 @@ PKG_AUTORECONF="no"
 GET_HANDLER_SUPPORT="git"
 
 make_target() {
-cd $PKG_BUILD
-CFLAGS=$CFLAGS CXXFLAGS="$CXXFLAGS" CXX="$CXX" CC="$CC" LD="$LD" RANLIB="$RANLIB" AR="$AR" make
+cd ${PKG_BUILD}
+CFLAGS=${CFLAGS} CXXFLAGS="${CXXFLAGS}" CXX="${CXX}" CC="${CC}" LD="${LD}" RANLIB="${RANLIB}" AR="${AR}" make
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp $PKG_BUILD/neocd_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp ${PKG_BUILD}/neocd_libretro.so ${INSTALL}/usr/lib/libretro/
 }

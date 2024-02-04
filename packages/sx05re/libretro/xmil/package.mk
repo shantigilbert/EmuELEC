@@ -7,7 +7,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Unknown"
 PKG_SITE="https://github.com/r-type/xmil-libretro"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -17,12 +17,12 @@ PKG_TOOLCHAIN="make"
 GET_HANDLER_SUPPORT="git"
 
 make_target() {
-  cd $PKG_BUILD
+  cd ${PKG_BUILD}
     make -C libretro
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp $PKG_BUILD/libretro/x1_libretro.so $INSTALL/usr/lib/libretro/
-  cp x1_libretro.info $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp ${PKG_BUILD}/libretro/x1_libretro.so ${INSTALL}/usr/lib/libretro/
+  cp x1_libretro.info ${INSTALL}/usr/lib/libretro/
 }

@@ -19,7 +19,7 @@ PLAYER="${2}"
 case ${PLAYER} in
 	"ffplay")
 MODE=`get_resolution`;
-declare -a RES=( $MODE )
+declare -a RES=( ${MODE} )
 SIZE=" -x ${RES[0]} -y ${RES[1]}"
 
 	player="ffplay -fs -autoexit -loglevel warning -hide_banner ${SIZE}"

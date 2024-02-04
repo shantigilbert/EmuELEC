@@ -25,8 +25,8 @@ PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/mupen64plus-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain nasm:host $OPENGLES"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
+PKG_DEPENDS_TARGET="toolchain nasm:host ${OPENGLES}"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
 PKG_SHORTDESC="mupen64plus + RSP-HLE + GLideN64 + libretro"
@@ -36,22 +36,22 @@ PKG_BUILD_FLAGS="-lto"
 
 pre_configure_target() {
 
-  CFLAGS="$CFLAGS -DLINUX -DEGL_API_FB -fcommon"
-  CPPFLAGS="$CPPFLAGS -DLINUX -DEGL_API_FB"
+  CFLAGS="${CFLAGS} -DLINUX -DEGL_API_FB -fcommon"
+  CPPFLAGS="${CPPFLAGS} -DLINUX -DEGL_API_FB"
   
   sed -i "s|BOARD :=.*|BOARD = N2|g" Makefile
   sed -i "s|odroid64|emuelec64|g" Makefile
   
    case ${DEVICE} in
     Amlogic-ng|Amlogic-ogu)
-    if [ $ARCH == "arm" ]; then
+    if [ ${ARCH} == "arm" ]; then
 		PKG_MAKE_OPTS_TARGET="platform=odroid BOARD=c2"
       else
 		PKG_MAKE_OPTS_TARGET="platform=emuelec64 BOARD=N2"
       fi
     ;;
     Amlogic-old)
-    if [ $ARCH == "arm" ]; then
+    if [ ${ARCH} == "arm" ]; then
 		PKG_MAKE_OPTS_TARGET="platform=odroid BOARD=c2"
       else
 		PKG_MAKE_OPTS_TARGET="platform=odroid64 BOARD=c2 HAVE_NEON=0"
@@ -59,8 +59,8 @@ pre_configure_target() {
     ;;
   esac
  
- if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ] || [ "$DEVICE" == "RK356x" ]; then 
-	if [[ "$ARCH" == "arm" ]]; then
+ if [ "${DEVICE}" == "OdroidGoAdvance" ] || [ "${DEVICE}" == "GameForce" ] || [ "${DEVICE}" == "RK356x" ]; then 
+	if [[ "${ARCH}" == "arm" ]]; then
 		PKG_MAKE_OPTS_TARGET=" platform=unix GLES=1 FORCE_GLES=1 HAVE_NEON=1 WITH_DYNAREC=arm"
 	else 
 		PKG_MAKE_OPTS_TARGET=" platform=unix GLES=1 FORCE_GLES=1 HAVE_NEON=0 WITH_DYNAREC=aarch64"
@@ -70,6 +70,6 @@ pre_configure_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp mupen64plus_libretro.so $INSTALL/usr/lib/libretro/mupen64plus_32b_libretro.so
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp mupen64plus_libretro.so ${INSTALL}/usr/lib/libretro/mupen64plus_32b_libretro.so
 }

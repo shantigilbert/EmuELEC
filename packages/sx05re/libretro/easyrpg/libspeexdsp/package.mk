@@ -23,7 +23,7 @@ PKG_VERSION="64cbfa9"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/xiph/speexdsp"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SHORTDESC="Speex audio processing library"
@@ -34,5 +34,5 @@ PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
 pre_configure_target() {
-  $PKG_BUILD/autogen.sh
+  ${PKG_BUILD}/autogen.sh
 }

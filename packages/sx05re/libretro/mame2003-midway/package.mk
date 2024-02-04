@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MAME"
 PKG_SITE="https://github.com/libretro/mame2003_midway"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -38,10 +38,10 @@ PKG_AUTORECONF="no"
 PKG_BUILD_FLAGS="-lto"
 
 make_target() {
-  make ARCH="" CC="$CC" NATIVE_CC="$CC" LD="$CC" -j 1
+  make ARCH="" CC="${CC}" NATIVE_CC="${CC}" LD="${CC}" -j 1
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp mame2003_midway_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp mame2003_midway_libretro.so ${INSTALL}/usr/lib/libretro/
 }

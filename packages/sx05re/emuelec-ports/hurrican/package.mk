@@ -7,7 +7,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/drfiemost/Hurrican"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain SDL2 SDL2_mixer libepoxy"
 PKG_LONGDESC="A fork of Hurrican, freeware jump and shoot game created by Poke53280, with SDL2 enabled by default, support for libopenmpt and CRT simulation "
 GET_HANDLER_SUPPORT="git"
@@ -20,10 +20,10 @@ if [ "${DEVICE}" == "OdroidGoAdvance" ] || [ "${DEVICE}" == "GameForce" ]; then
 fi
 
 makeinstall_target() {
-mkdir -p $INSTALL/usr/bin
-cp hurrican $INSTALL/usr/bin
-cp "${PKG_DIR}/scripts/hurrican.sh" $INSTALL/usr/bin
+mkdir -p ${INSTALL}/usr/bin
+cp hurrican ${INSTALL}/usr/bin
+cp "${PKG_DIR}/scripts/hurrican.sh" ${INSTALL}/usr/bin
 
-mkdir -p $INSTALL/usr/config/emuelec/configs
-cp -rf ${PKG_DIR}/config/* $INSTALL/usr/config/emuelec/configs/
+mkdir -p ${INSTALL}/usr/config/emuelec/configs
+cp -rf ${PKG_DIR}/config/* ${INSTALL}/usr/config/emuelec/configs/
 }

@@ -34,21 +34,21 @@ configure_target() {
 
   export GOOS=linux
   export GOLANG=${TOOLCHAIN}/lib/golang/bin/go
-  export LDFLAGS="-w -extldflags -static -X main.gitCommit=${PKG_VERSION} -X main.versionStr=${PKG_VERSION:0:7} -extld $CC"
+  export LDFLAGS="-w -extldflags -static -X main.gitCommit=${PKG_VERSION} -X main.versionStr=${PKG_VERSION:0:7} -extld ${CC}"
 }
 
 make_target() {
   mkdir -p bin
   cd ${PKG_BUILD}
   ${GOLANG} get $(echo ${PKG_SITE} | sed s/'http[s]\?:\/\/'//)
-  ${GOLANG} build -ldflags "$LDFLAGS" $(echo ${PKG_SITE} | sed s/'http[s]\?:\/\/'//)
+  ${GOLANG} build -ldflags "${LDFLAGS}" $(echo ${PKG_SITE} | sed s/'http[s]\?:\/\/'//)
 }
 
 makeinstall_target() {
 	mkdir -p ${INSTALL}/usr/bin/
 	mkdir -p ${INSTALL}/usr/config/emuelec/configs/rclone
-	cp ${PKG_BUILD}/rclone $INSTALL/usr/bin/
-	cp ${PKG_DIR}/bin/ra_rclone.sh $INSTALL/usr/bin
+	cp ${PKG_BUILD}/rclone ${INSTALL}/usr/bin/
+	cp ${PKG_DIR}/bin/ra_rclone.sh ${INSTALL}/usr/bin
 	cp ${PKG_DIR}/config/emuelec-cloud-filter.cfg ${INSTALL}/usr/config/emuelec/configs/rclone/
 	ln -sf /emuelec/configs/rclone ${INSTALL}/usr/config/rclone
 }

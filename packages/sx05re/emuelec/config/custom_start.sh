@@ -31,8 +31,8 @@ case "${1}" in
 # echo "discoverable on" | bluetoothctl
 # echo "pairable on" | bluetoothctl
 # echo "scan on" | bluetoothctl
-# echo "trust $BTMAC" | bluetoothctl
-# echo "connect $BTMAC" | bluetoothctl
+# echo "trust ${BTMAC}" | bluetoothctl
+# echo "connect ${BTMAC}" | bluetoothctl
 # )&
 
 	exit 0

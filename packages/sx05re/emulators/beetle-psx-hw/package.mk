@@ -7,7 +7,7 @@ PKG_SHA256="a9a36839410c3024a289ea910fe859f1c2bc48c26dfe1d86d5a9acb0a6f148e1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/ZachCook/beetle-psx-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_SHORTDESC="Fork of Mednafen PSX"
 PKG_TOOLCHAIN="make"
@@ -18,6 +18,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp mednafen_lynx_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp mednafen_lynx_libretro.so ${INSTALL}/usr/lib/libretro/
 }

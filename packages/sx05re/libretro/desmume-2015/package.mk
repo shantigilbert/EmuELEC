@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/desmume2015"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,16 +37,16 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 make_target() {
-  if [ "$ARCH" == "arm" ]; then
-    make -C desmume platform=armv LDFLAGS="$LDFLAGS -lpthread" # DESMUME_JIT_ARM=1
-  elif [ "$ARCH" == "aarch64" ]; then
-    make -C desmume platform=arm64-unix LDFLAGS="$LDFLAGS -lpthread"
+  if [ "${ARCH}" == "arm" ]; then
+    make -C desmume platform=armv LDFLAGS="${LDFLAGS} -lpthread" # DESMUME_JIT_ARM=1
+  elif [ "${ARCH}" == "aarch64" ]; then
+    make -C desmume platform=arm64-unix LDFLAGS="${LDFLAGS} -lpthread"
   else
-    make -C desmume LDFLAGS="$LDFLAGS -lpthread"
+    make -C desmume LDFLAGS="${LDFLAGS} -lpthread"
   fi
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp desmume/desmume2015_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp desmume/desmume2015_libretro.so ${INSTALL}/usr/lib/libretro/
 }

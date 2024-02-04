@@ -15,6 +15,6 @@ pre_unpack() {
 }
 
 makeinstall_target() {
-	mkdir -p $INSTALL/usr/lib/libretro
-	cp $PKG_BUILD/duckstation_libretro.so $INSTALL/usr/lib/libretro
+	mkdir -p ${INSTALL}/usr/lib/libretro
+	cp ${PKG_BUILD}/duckstation_libretro.so ${INSTALL}/usr/lib/libretro
 }

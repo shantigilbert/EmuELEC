@@ -6,7 +6,7 @@ PKG_VERSION="5cbd54023df430446e283cb874cac36d71359d73"
 PKG_SHA256="553b018d9a45dc7fb7558583ddf7db12481c29b8ed00a56b22ef41df165ff65a"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/svofski/vector06sdl"
-PKG_URL="${PKG_SITE}/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain freetype slang alsa"
 PKG_LONGDESC="Opensource Vector-06C emulator in C++"
 

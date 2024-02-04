@@ -24,7 +24,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/bsnes"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 #PKG_GIT_CLONE_BRANCH="hd"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_SHORTDESC="Super Nintendo (Super Famicom) emulator"
@@ -39,6 +39,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp bsnes/out/bsnes_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp bsnes/out/bsnes_libretro.so ${INSTALL}/usr/lib/libretro/
 }

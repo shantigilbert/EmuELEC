@@ -11,5 +11,5 @@ PKG_SHORTDESC="Atari 8-bit computer and 5200 console emulator"
 PKG_TOOLCHAIN="configure"
 
 pre_configure_target() {
-  $PKG_BUILD/autogen.sh
+  ${PKG_BUILD}/autogen.sh
 }

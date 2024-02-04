@@ -8,8 +8,8 @@ PKG_EE_UPDATE="no"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/reicast/reicast-emulator"
-PKG_URL="https://github.com/reicast/reicast-emulator/archive/$PKG_VERSION.tar.gz"
-PKG_SOURCE_DIR="reicast-emulator-$PKG_VERSION*"
+PKG_URL="https://github.com/reicast/reicast-emulator/archive/${PKG_VERSION}.tar.gz"
+PKG_SOURCE_DIR="reicast-emulator-${PKG_VERSION}*"
 PKG_DEPENDS_TARGET="toolchain alsa libpng libevdev python-evdev"
 PKG_SHORTDESC="Reicast is a multi-platform Sega Dreamcast emulator"
 PKG_TOOLCHAIN="make"
@@ -18,15 +18,15 @@ PKG_BUILD_FLAGS="-gold"
 PKG_PATCH_DIRS="${PROJECT}"
 
 make_target() {
-  cd $PKG_BUILD/shell/linux
-  make CC=$CC CXX=$CXX AS=$CC STRIP=$STRIP EXTRAFLAGS="-I$PKG_BUILD/shell/linux-deps/include" platform=odroidc2 reicast.elf
+  cd ${PKG_BUILD}/shell/linux
+  make CC=${CC} CXX=${CXX} AS=${CC} STRIP=${STRIP} EXTRAFLAGS="-I${PKG_BUILD}/shell/linux-deps/include" platform=odroidc2 reicast.elf
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/bin
-  cp reicast.elf $INSTALL/usr/bin/reicast_old
+  mkdir -p ${INSTALL}/usr/bin
+  cp reicast.elf ${INSTALL}/usr/bin/reicast_old
   
-  mkdir -p $INSTALL/usr/config
-  cp -r $PKG_DIR/config/* $INSTALL/usr/config/
+  mkdir -p ${INSTALL}/usr/config
+  cp -r ${PKG_DIR}/config/* ${INSTALL}/usr/config/
  
 }

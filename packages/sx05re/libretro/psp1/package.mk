@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/PSP1"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -38,19 +38,19 @@ PKG_AUTORECONF="no"
 PKG_BUILD_FLAGS="-lto"
 
 make_target() {
-  cd $PKG_BUILD/libretro
-  if [ "$OPENGLES" == "gpu-viv-bin-mx6q" ]; then
-    CFLAGS="$CFLAGS -DLINUX -DEGL_API_FB"
-    CXXFLAGS="$CXXFLAGS -DLINUX -DEGL_API_FB"
+  cd ${PKG_BUILD}/libretro
+  if [ "${OPENGLES}" == "gpu-viv-bin-mx6q" ]; then
+    CFLAGS="${CFLAGS} -DLINUX -DEGL_API_FB"
+    CXXFLAGS="${CXXFLAGS} -DLINUX -DEGL_API_FB"
   fi
-  if [ "$ARCH" == "arm" ]; then
-    SYSROOT_PREFIX=$SYSROOT_PREFIX make platform=imx6
+  if [ "${ARCH}" == "arm" ]; then
+    SYSROOT_PREFIX=${SYSROOT_PREFIX} make platform=imx6
   else
     make
   fi
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp ../libretro/ppsspp_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp ../libretro/ppsspp_libretro.so ${INSTALL}/usr/lib/libretro/
 }
