@@ -118,7 +118,7 @@ if [ "${DEVICE}" != "Amlogic-ng" ]; then
     
     for discore in ${remove_cores}; do
         sed -i "s|<core>${discore}</core>||g" ${CORESFILE}
-        sed -i '/^[[:space:]]*${/d}' ${CORESFILE}
+        sed -i '/^[[:space:]]*$/d' ${CORESFILE}
     done
 fi
 
