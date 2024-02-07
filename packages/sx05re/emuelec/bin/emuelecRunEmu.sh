@@ -331,6 +331,21 @@ fi
 RUNTHIS='${RABIN} ${VERBOSE} -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
 CONTROLLERCONFIG="${arguments#*--controllers=*}"
 
+case ${PLATFORM} in
+"fmtmarty")
+		if [ "$EMU" = "multiemu_libretro" ]; then
+            set_kill_keys "multiemu_libretro"
+            RUNTHIS='${TBASH} fmtowns.sh && ${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
+		fi
+		;;
+"pgm2")
+		if [ "$EMU" = "multiemu_libretro" ]; then
+            set_kill_keys "multiemu_libretro"
+            RUNTHIS='${TBASH} pgm2.sh && ${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
+		fi
+		;;
+esac
+
 if [[ "${arguments}" == *"-state_slot"* ]] && [[ "${arguments}" == *"-autosave"* ]]; then
     CONTROLLERCONFIG="${CONTROLLERCONFIG%% -state_slot*}"  # until -state is found
     SNAPSHOT="${arguments#*-state_slot *}" # -state_slot x -autosave 1
