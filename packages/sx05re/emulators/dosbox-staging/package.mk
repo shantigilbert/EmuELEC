@@ -2,7 +2,7 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="dosbox-staging"
-PKG_VERSION="45decb47c6c3e71993b87868c676e18f62bae5a3"
+PKG_VERSION="3f67c91dd6a998cc091f24d2200e2b99cf37fb18"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/dosbox-staging/dosbox-staging"
 PKG_URL="${PKG_SITE}.git"
