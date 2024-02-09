@@ -2,7 +2,7 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="flycastsa"
-PKG_VERSION="c146a92f83ae2cba8df8970e21efc54301b9ade1"
+PKG_VERSION="7029e1615a215bc43e51f8eac605f31dd01ba8cd"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/flyinghead/flycast"
 PKG_URL="${PKG_SITE}.git"
