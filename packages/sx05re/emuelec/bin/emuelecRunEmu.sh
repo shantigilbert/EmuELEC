@@ -335,13 +335,13 @@ case ${PLATFORM} in
 "fmtmarty")
 		if [ "$EMU" = "multiemu_libretro" ]; then
             set_kill_keys "multiemu_libretro"
-            RUNTHIS='${TBASH} fmtowns.sh && ${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
+            RUNTHIS='${TBASH} multiemu.sh && ${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
 		fi
 		;;
 "pgm2")
 		if [ "$EMU" = "multiemu_libretro" ]; then
             set_kill_keys "multiemu_libretro"
-            RUNTHIS='${TBASH} pgm2.sh && ${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
+            RUNTHIS='${TBASH} multiemu.sh && ${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
 		fi
 		;;
 esac
