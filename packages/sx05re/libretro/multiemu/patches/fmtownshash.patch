@@ -1,0 +1,25 @@
+--- a/fmtowns/hash/fmtowns_cd.xml	2024-02-03 18:10:56.927394400 +0100
++++ ./hash/fmtowns_cd.xml	2024-02-03 18:13:01.893835080 +0100
+@@ -31537,4 +31537,22 @@
+ 		</part>
+ 	</software>
+ 
++	<software name="alltynex">
++		<!--
++		Origin: nfggames.org
++		-->
++		<description>alltynex</description>
++		<year>1996</year>
++		<publisher>Satoshi Yoshida</publisher>
++		<info name="serial" value="2TD-3010"/>
++		<info name="alt_title" value="アルティネクス" />
++		<info name="release" value="19960101" />
++		<info name="usage" value="Requires 4 MB RAM"/>
++		<part name="cdrom" interface="fmt_cdrom">
++			<diskarea name="cdrom">
++				<disk name="alltynex" sha1="4e7c7009aec6373e7d71fb6d7a38730a30c4d055" />
++			</diskarea>
++		</part>
++	</software>
++
+ </softwarelist>
