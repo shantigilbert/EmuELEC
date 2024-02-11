@@ -2,15 +2,17 @@
 # Copyright (C) 2022-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="grep"
-PKG_VERSION="3.7"
-PKG_SHA256="c22b0cf2d4f6bbe599c902387e8058990e1eee99aef333a203829e5fd3dbb342"
+PKG_VERSION="3.11"
+PKG_SHA256="1f31014953e71c3cddcedb97692ad7620cb9d6d04fbdc19e0d8dd836f87622bb"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://ftp.gnu.org/gnu/${PKG_NAME}"
 PKG_URL="${PKG_SITE}/${PKG_NAME}-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_SHORTDESC="Grep"
-PKG_TOOLCHAIN="auto"
+PKG_TOOLCHAIN="configure"
 PKG_NEED_UNPACK="$(get_pkg_directory busybox)"
 
-
+pre_configure_target() {
+PKG_CONFIGURE_OPTS_TARGET="--enable-perl-regexp=yes"
+}
