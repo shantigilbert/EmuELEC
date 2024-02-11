@@ -28,10 +28,10 @@ local ytthumbs
 	rm /tmp/ytresults
 	echo ${ytresults} > /tmp/ytresults
 
-	losid=$(grep -o '"webpage_url": *"[^"]*"' /tmp/ytresults | grep -o '"[^"]*"${'} | sed 's/"//g')
-	lostitulos=$(grep -o '"fulltitle": *"[^"]*"' /tmp/ytresults | grep -o '"[^"]*"${'} | sed 's/"//g'| cut -c 1-50 | sed 's/|/-/g')
-	duracionvideos=$(grep -o ', "duration": *[^,]*' /tmp/ytresults | grep -o '[^ ]*${'})
-	videopreview=$(grep -o '"thumbnail": *"[^"]*"' /tmp/ytresults | grep -o '"[^"]*"${'} | sed 's/"//g' | sed 's/maxresdefault/hqdefault/g')
+	losid=$(grep -o '"webpage_url": *"[^"]*"' /tmp/ytresults | grep -o '"[^"]*"$' | sed 's/"//g')
+	lostitulos=$(grep -o '"fulltitle": *"[^"]*"' /tmp/ytresults | grep -o '"[^"]*"$' | sed 's/"//g'| cut -c 1-50 | sed 's/|/-/g')
+	duracionvideos=$(grep -o ', "duration": *[^,]*' /tmp/ytresults | grep -o '[^ ]*$')
+	videopreview=$(grep -o '"thumbnail": *"[^"]*"' /tmp/ytresults | grep -o '"[^"]*"$' | sed 's/"//g' | sed 's/maxresdefault/hqdefault/g')
 
 	for f in ${losid}; do
 	ytstreams+=("${f}")

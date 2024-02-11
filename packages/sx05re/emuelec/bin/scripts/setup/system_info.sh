@@ -20,7 +20,7 @@
     echo ${cpuTempF} > /tmp/tempf
     sed 's/^/Cpu Temperature in Farenheit degree : /' /tmp/tempf > /tmp/tempF
     echo "                         Network Info" > /tmp/net
-    ip route get 8.8.8.8 2>/dev/null | awk '{print ${NF}; exit}' > /tmp/ip
+    ip route get 8.8.8.8 2>/dev/null | awk '{print $NF; exit}' > /tmp/ip
     sed 's/^/Local Ip address :           /' /tmp/ip > /tmp/IP
     wget -qO- http://ipecho.net/plain > /tmp/wan
     sed 's/^/Public Ip address :          /' /tmp/wan > /tmp/WAN

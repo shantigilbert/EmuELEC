@@ -158,7 +158,7 @@ while [[ -n "${1}" ]]; do
 done
 
 # Verify there is at least 1 file after all parameters
-if [ "${#}" -eq 0 ] && [ "${DO_ALL}" = false ]; then
+if [ "$#" -eq 0 ] && [ "${DO_ALL}" = false ]; then
     echo "ERROR: missing gamelist.xml parameter" >&2
     echo "${HELP}" >&2
     exit 1

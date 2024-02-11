@@ -33,12 +33,12 @@ if [[ "${ACTION}" == "get" || "${ACTION}" == "set" ]]; then
   if [[ "${SRM_CONTENT}" == "true" ]]; then
     RA_LSAVES="${ROMNAME%/*}"
   else
-    SAVEFILE_PATH=$(cat "${RA_CONFIG}" | grep savefile_directory | cut -d'"' -f2 | sed -e "s/\/${PLATFORM}${/}/g" | sed -e "s/^~/\/storage/g" )    
+    SAVEFILE_PATH=$(cat "${RA_CONFIG}" | grep savefile_directory | cut -d'"' -f2 | sed -e "s/\/${PLATFORM}$//g" | sed -e "s/^~/\/storage/g" )    
     [[ ${DEBUG} == 1 ]] && echo "SAVEFILE_PATH=${SAVEFILE_PATH}" >> "${RC_LOG}"
     RA_LSAVES="${SAVEFILE_PATH}"
   fi
   [[ ${DEBUG} == 1 ]] && echo "RA_LSAVES=${RA_LSAVES}" >> "${RC_LOG}"
-  SAVESTATE_PATH=$(cat "${RA_CONFIG}" | grep savestate_directory | cut -d'"' -f2 | sed -e "s/\/${PLATFORM}${/}/g" | sed -e "s/^~/\/storage/g" )
+  SAVESTATE_PATH=$(cat "${RA_CONFIG}" | grep savestate_directory | cut -d'"' -f2 | sed -e "s/\/${PLATFORM}$//g" | sed -e "s/^~/\/storage/g" )
   [[ ${DEBUG} == 1 ]] && echo "SAVESTATE_PATH=${SAVESTATE_PATH}" >> "${RC_LOG}"
 
   RA_LSTATES="${SAVESTATE_PATH}/${PLATFORM}/"

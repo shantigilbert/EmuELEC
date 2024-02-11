@@ -274,7 +274,7 @@ function map_retroarch_joystick() {
                 if [[ "${ini_value}" == "udev" ]]; then
                     case "${DEVICE_NAME}" in
                         "8Bitdo FC30"*|"8Bitdo NES30"*|"8Bitdo SFC30"*|"8Bitdo SNES30"*|"8Bitdo Zero"*)
-                            if [[ "${_atebitdo_hack}" -eq 1 ]]; then
+                            if [[ "$_atebitdo_hack" -eq 1 ]]; then
                                 value="$((input_id+11))"
                             fi
                             ;;
@@ -282,7 +282,7 @@ function map_retroarch_joystick() {
                 fi
                 ;;
         esac
-        if [[ "${input_name}" == "select" && "${_retroarch_select_hotkey}" -eq 1 ]]; then
+        if [[ "${input_name}" == "select" && "$_retroarch_select_hotkey" -eq 1 ]]; then
             _retroarch_select_type="${type}"
         fi
         key+="_${type}"
@@ -361,9 +361,9 @@ function map_retroarch_keyboard() {
 }
 
 function onend_retroarch_joystick() {
-    # if ${_retroarch_select_hotkey} is set here, then there was no hotkeyenable button
+    # if $_retroarch_select_hotkey is set here, then there was no hotkeyenable button
     # in the configuration, so we should use the select button as hotkey enable if set
-    if [[ "${_retroarch_select_hotkey}" -eq 1 ]]; then
+    if [[ "$_retroarch_select_hotkey" -eq 1 ]]; then
         iniGet "input_select_${_retroarch_select_type}"
         [[ -n "${ini_value}" ]] && iniSet "input_enable_hotkey_${_retroarch_select_type}" "${ini_value}"
     fi
@@ -390,12 +390,12 @@ function onend_retroarch_joystick() {
     if [[ -f "${dir}/${file}" ]]; then
         mv "${dir}/${file}" "${dir}/${file}.bak"
     fi
-    sed -i '/^[[:space:]]*${/d}' "/tmp/tempconfig.cfg"
+    sed -i '/^[[:space:]]*$/d' "/tmp/tempconfig.cfg"
     mv "/tmp/tempconfig.cfg" "${dir}/${file}"
 }
 
 function onend_retroarch_keyboard() {
-    if [[ "${_retroarch_select_hotkey}" -eq 1 ]]; then
+    if [[ "$_retroarch_select_hotkey" -eq 1 ]]; then
         iniGet "input_player1_select"
         iniSet "input_enable_hotkey" "${ini_value}"
     fi

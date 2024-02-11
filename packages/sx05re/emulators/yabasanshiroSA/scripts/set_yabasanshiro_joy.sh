@@ -189,7 +189,7 @@ set_pad() {
   fi
 
   # remove last character
-  sed -i '${ s}/.${/}/' ${CONFIG_TMP}
+  sed -i '$ s/.$//' ${CONFIG_TMP}
 
   echo -e "\t}," >> ${CONFIG_TMP}
   echo -e "\t\"player${1}\": {" >> ${CONFIG_TMP}

@@ -135,7 +135,7 @@ set_pad() {
   echo "axis_y_inverted = no" >> ${CONFIG_TMP_A}
 
   local GC_RECORD
-  [[ -f "${CONFIG}" ]] && GC_RECORD=$(cat "${CONFIG}" | grep -E "^dead_zone \= [0-9]*${"})
+  [[ -f "${CONFIG}" ]] && GC_RECORD=$(cat "${CONFIG}" | grep -E "^dead_zone \= [0-9]*$")
   [[ -z "${GC_RECORD}" ]] && GC_RECORD="dead_zone = 10"
   echo "${GC_RECORD}" >> ${CONFIG_TMP_E}
 

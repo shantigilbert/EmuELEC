@@ -35,7 +35,7 @@ else
 fi
 
 get_mount_list() {  # MOUNTPOINT should be set/gotten by outer functions
-  local IFS=${'}\n'
+  local IFS=$'\n'
   MOUNTLIST=($(printf "$(cat /proc/mounts | cut -d ' ' -f 2)")) # Use printf to convert \040, \134, etc back to ' ', '\', etc
 }
 
@@ -44,8 +44,8 @@ umount_recursively() { # ${1}: start point, e.g. /storage. This is a replica of 
   local TARGET="$(readlink -f "${1}")"
   [ -z "${TARGET}" ] && TARGET="$(pwd -P)/${1}"
   echo "WARNING: unmounting '${TARGET}', recursively"
-  local IFS=${'}\n'
-  UMOUNTLIST=($(printf "$(cat /proc/mounts | cut -d ' ' -f 2)" | grep ^"${TARGET}"'\(/\|${\})' | sort -r ))
+  local IFS=$'\n'
+  UMOUNTLIST=($(printf "$(cat /proc/mounts | cut -d ' ' -f 2)" | grep ^"${TARGET}"'\(/\|$\)' | sort -r ))
   unset IFS
   local MOUNTPOINT
   local TRY
@@ -340,7 +340,7 @@ if compgen -G /storage/.config/system.d/storage-roms*.mount &>/dev/null; then
     mount_eeroms "${ROMS_DIR_ACTUAL}"
   fi
   is_storage_roms_mounted || restore_roms # If for some wierd reasons rom can't be mounted from the systemd unit and can't be brought back, then at least restore backed up roms
-  IFS=${'}\n'
+  IFS=$'\n'
   SYSTEMD_UNIT_PATHS=($(ls -d /storage/.config/system.d/storage-roms-*.mount 2>/dev/null | sort))
   unset IFS
   if [ "${#SYSTEMD_UNIT_PATHS[@]}" -gt 0 ]; then

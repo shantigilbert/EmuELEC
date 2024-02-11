@@ -119,12 +119,12 @@ BPP=32
 
 ES_MODE=""
 
-if [[ ${#} == 1 ]]; then
+if [[ $# == 1 ]]; then
 	MODE=${1}
 	ES_MODE="ee_es."
 fi
 
-if [[ ${#} == 2 ]]; then
+if [[ $# == 2 ]]; then
 	MODE=${1}
 	PLATFORM=${2}
 fi
