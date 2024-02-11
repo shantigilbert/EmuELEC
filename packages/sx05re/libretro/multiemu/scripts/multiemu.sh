@@ -5,22 +5,16 @@
 
 
 if [ ! -f "/storage/roms/bios/mame/hash/fmtowns_cd.xml" ]; then
-    if [ ! -d "/storage/roms/bios/mame/hash" ]; then
-    mkdir /storage/roms/bios/mame/hash
-    fi
+    mkdir -p /storage/roms/bios/mame/hash
     cp -rf "/usr/config/emuelec/configs/multiemu/hash/"fm* "/storage/roms/bios/mame/hash"
 fi
 
 if [ ! -f "/storage/roms/bios/mame/ini/fmtownsux.ini" ]; then
-    if [ ! -d "/storage/roms/bios/mame/ini" ]; then
-    mkdir /storage/roms/bios/mame/ini
-    fi
+    mkdir -p /storage/roms/bios/mame/ini
     cp -rf "/usr/config/emuelec/configs/multiemu/ini/"fm* "/storage/roms/bios/mame/ini"
 fi
 
 if [ ! -f "/storage/roms/bios/mame/ini/mame.ini" ]; then
-    if [ ! -d "/storage/roms/bios/mame/ini" ]; then
-    mkdir /storage/roms/bios/mame/ini
-    fi
+    mkdir -p /storage/roms/bios/mame/ini
     cp -rf "/usr/config/emuelec/configs/multiemu/ini/"mame* "/storage/roms/bios/mame/ini"
 fi
