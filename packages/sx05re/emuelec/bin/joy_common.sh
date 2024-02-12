@@ -25,8 +25,8 @@ jc_get_players() {
 
 # Dump gamepad information
   cat /proc/bus/input/devices \
-    | grep -B 5 -A 3 -P "H\: Handlers=(?=.*?js[0-9])(?=.*?event[0-9]+).*$" \
-    | grep -Ew -B 8 "B: KEY\=[0-9a-f ]+" > /tmp/input_devices
+    | grep -B 5 -A 3 -P "H: Handlers=(?=.*?js[0-9])(?=.*?event[0-9]+).*$" \
+    | grep -Ew -B 8 "B: KEY=[0-9a-f ]+" > /tmp/input_devices
 
 # Determine how many gamepads/players are connected
   JOYS=$(ls -ltr /dev/input/js* | awk '{print $8"\t"$9"\t"$10}' | sort \
@@ -39,7 +39,7 @@ jc_get_players() {
 
   for dev in $(echo ${JOYS}); do
     local JSI=${dev}
-    local DETAILS=$(cat /tmp/input_devices | grep -P "H\: Handlers(?=.*?[= ]${JSI} )" -B 5)
+    local DETAILS=$(cat /tmp/input_devices | grep -P "H: Handlers(?=.*?[= ]${JSI} )" -B 5)
 
     local PROC_GUID=$(echo "${DETAILS}" | grep I: | sed "s|I:\ Bus=||" | sed "s|\ Vendor=||" | sed "s|\ Product=||" | sed "s|\ Version=||")
     local DEVICE_GUID=$(jc_generate_guid $((PLAYER-1)))
@@ -49,7 +49,7 @@ jc_get_players() {
     echo "GC_CONFIG=${GC_CONFIG}"
     [[ -z ${GC_CONFIG} ]] && continue
 
-    local JOY_NAME=$(echo "${DETAILS}" | grep -E "^N\: Name.*[\= ]?.*$" | cut -d "=" -f 2 | tr -d '"')
+    local JOY_NAME=$(echo "${DETAILS}" | grep -E "^N: Name.*[\= ]?.*$" | cut -d "=" -f 2 | tr -d '"')
     [[ -z "${JOY_NAME}" ]] && continue
 
     # Add the joy config to array if guid and joyname set.

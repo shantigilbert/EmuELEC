@@ -171,19 +171,19 @@ set_pad() {
 
   local JOYSTICK="Main Stick"
   local GC_RECORD
-  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^${JOYSTICK}\/Modifier *\= *(.*)$")
+  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^${JOYSTICK}\/Modifier *= *(.*)$")
   [[ -z "${GC_RECORD}" ]] && echo "${JOYSTICK}/Modifier = Shift_L" >> ${CONFIG_TMP}
-  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^${JOYSTICK}\/Modifier\/Range *\= *(.*)$")
+  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^${JOYSTICK}\/Modifier\/Range *= *(.*)$")
   [[ -z "${GC_RECORD}" ]] && echo "${JOYSTICK}/Modifier/Range = 50.000000000000000" >> ${CONFIG_TMP}
-  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^${JOYSTICK}\/Dead Zone *\= *(.*)$")
+  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^${JOYSTICK}\/Dead Zone *= *(.*)$")
   [[ -z "${GC_RECORD}" ]] && echo "${JOYSTICK}/Dead Zone = 25.000000000000000" >> ${CONFIG_TMP}
 
   JOYSTICK="C-Stick"
-  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^${JOYSTICK}\/Modifier *\= *(.*)$")
+  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^${JOYSTICK}\/Modifier *= *(.*)$")
   [[ -z "${GC_RECORD}" ]] && echo "${JOYSTICK}/Modifier = Control_L" >> ${CONFIG_TMP}
-  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^${JOYSTICK}\/Modifier\/Range *\= *(.*)$")
+  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^${JOYSTICK}\/Modifier\/Range *= *(.*)$")
   [[ -z "${GC_RECORD}" ]] && echo "${JOYSTICK}/Modifier/Range = 50.000000000000000" >> ${CONFIG_TMP}
-  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^${JOYSTICK}\/Dead Zone *\= *(.*)$")
+  GC_RECORD=$(cat ${CONFIG_TMP} | grep -E "^${JOYSTICK}\/Dead Zone *= *(.*)$")
   [[ -z "${GC_RECORD}" ]] && echo "${JOYSTICK}/Dead Zone = 25.000000000000000" >> ${CONFIG_TMP}
 
   cat "${CONFIG_TMP}" | sort >> ${CONFIG}
@@ -191,10 +191,10 @@ set_pad() {
 }
 
 init_config() {
-  local SIDevices=$( cat "${MAIN_CONFIG}" | grep -E "^SIDevice[0-9] *\= *[^6]$")
+  local SIDevices=$( cat "${MAIN_CONFIG}" | grep -E "^SIDevice[0-9] *= *[^6]$")
   [[ -z "${SIDevices}" ]] && return
 
-  declare -i LN=$( cat "${MAIN_CONFIG}" | grep -n -E "SIDevice[0-9] *\= *[0-9]" | cut -d: -f1 | head -1 )
+  declare -i LN=$( cat "${MAIN_CONFIG}" | grep -n -E "SIDevice[0-9] *= *[0-9]" | cut -d: -f1 | head -1 )
   [[ "${LN}" == "0" ]] && LN=$( cat "${MAIN_CONFIG}" | grep -n "\[Core\]" | cut -d: -f1 | head -1 )
   if [ ${LN} -ne 0 ]; then
     sed -i '/SIDevice[0-9] *\= *[0-9]/d' "${MAIN_CONFIG}"
