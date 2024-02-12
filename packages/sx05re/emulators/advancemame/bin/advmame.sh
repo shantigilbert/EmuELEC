@@ -23,7 +23,7 @@ if [ ! -L "/storage/.advance" ]; then
     ln -sf ${CONFIG_DIR} /storage/.advance
 fi
 
-if [[ "${1}" = *"roms/arcade"* ]]; then
+if [[ "${1}" = "arcade" ]]; then
 sed -i "s|/roms/mame|/roms/arcade|g" ${CONFIG_DIR}/advmame.rc
  else
 sed -i "s|/roms/arcade|/roms/mame|g" ${CONFIG_DIR}/advmame.rc
