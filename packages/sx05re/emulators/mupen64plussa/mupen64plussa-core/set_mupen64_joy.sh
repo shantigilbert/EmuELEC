@@ -183,9 +183,9 @@ set_pad() {
   echo "Mempak switch = \"\"" >> ${CONFIG}
   echo "Rumblepak switch = \"\"" >> ${CONFIG}
 
-  local RES=$(cat ${CONFIG_TMP} | grep -E "^AnalogPeak *\= *(.*)$")
+  local RES=$(cat ${CONFIG_TMP} | grep -E "^AnalogPeak *= *(.*)$")
   [[ -z "${RES}" ]] && echo "AnalogPeak = \"32768,32768\"" >> ${CONFIG_TMP}
-  RES=$(cat ${CONFIG_TMP} | grep -E "^AnalogDeadzone *\= *(.*)$")
+  RES=$(cat ${CONFIG_TMP} | grep -E "^AnalogDeadzone *= *(.*)$")
   [[ -z "${GC_RECORD}" ]] && echo "AnalogDeadzone = \"4096,4096\""  >> ${CONFIG_TMP}
 
   cat "${CONFIG_TMP}" | sort >> ${CONFIG}
