@@ -1,6 +1,15 @@
 <?xml version="1.0"?>
 <gameList>
 	<game>
+		<path>./create_rom_dirs.sh</path>
+		<name>Create ROM Dirs</name>
+		<desc>Small script to create all the dirs in /storage/roms based on es_systems.cfg</desc>
+		<developer>shantigilbert</developer>
+		<publisher>Emuelec</publisher>
+		<genre>script</genre>
+		<image>./setup_images/create_dirs.png</image>
+	</game>
+	<game>
 		<path>./install_portmaster.sh</path>
 		<name>Install PortMaster</name>
 		<desc>Install latest PortMaster</desc>
