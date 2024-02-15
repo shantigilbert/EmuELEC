@@ -2,29 +2,17 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="emuelec"
-PKG_VERSION=""
-PKG_REV="2"
-PKG_ARCH="any"
-PKG_LICENSE="GPLv3"
+PKG_LICENSE="GPLv2"
 PKG_SITE=""
 PKG_URL=""
-PKG_DEPENDS_TARGET="toolchain ${OPENGLES} emuelec-emulationstation retroarch busybox wget coreutils"
+PKG_DEPENDS_TARGET="toolchain ${OPENGLES} emuelec-emulationstation retroarch"
 PKG_SECTION="emuelec"
-PKG_SHORTDESC="EmuELEC Meta Package"
 PKG_LONGDESC="EmuELEC Meta Package"
-PKG_IS_ADDON="no"
-PKG_AUTORECONF="no"
 PKG_TOOLCHAIN="manual"
-PKG_NEED_UNPACK="$(get_pkg_directory busybox) $(get_pkg_directory wget) $(get_pkg_directory coreutils)"
 
 PKG_EXPERIMENTAL="munt nestopiaCV quasi88 xmil np2kai hypseus-singe yabasanshiroSA fbneoSA same_cdi"
 PKG_EMUS="${LIBRETRO_CORES} advancemame PPSSPPSDL amiberry hatarisa openbor dosbox-staging mupen64plus-nx mupen64plus-nx-alt scummvmsa stellasa solarus dosbox-pure pcsx_rearmed ecwolf potator freej2me duckstation flycastsa fmsx-libretro jzintv mupen64plussa"
-PKG_TOOLS="emuelec-tools"
-PKG_DEPENDS_TARGET+=" $PKG_TOOLS $PKG_EMUS $PKG_EXPERIMENTAL emuelec-ports"
-
-
-# Removed cores for space and/or performance
-# PKG_DEPENDS_TARGET="${PKG_DEPENDS_TARGET} mame2015 fba4arm mba.mini.plus ${LIBRETRO_EXTRA_CORES} xow"
+PKG_DEPENDS_TARGET+=" emuelec-tools ${PKG_EMUS} ${PKG_EXPERIMENTAL} emuelec-ports"
 
 # These packages are only meant for S922x, S905x2 and A311D devices as they run poorly on S905" 
 if [ "${DEVICE}" == "Amlogic-ng" ] || [ "${DEVICE}" == "RK356x" ] || [ "${DEVICE}" == "OdroidM1" ]; then
@@ -109,10 +97,6 @@ makeinstall_target() {
     
   mkdir -p ${INSTALL}/usr/share/libretro-database
   touch ${INSTALL}/usr/share/libretro-database/dummy
-   
-  # Make sure all scripts and binaries are executable  
-  find ${INSTALL}/usr/bin -type f -exec chmod +x {} \;
-
 }
 
 post_install() {
@@ -128,12 +112,7 @@ post_install() {
   enable_service emuelec-autostart.service
   enable_service emuelec-disable_small_cores.service
 
-  rm -f ${INSTALL}/usr/bin/{sort,wget,grep}
-  cp $(get_install_dir wget)/usr/bin/wget ${INSTALL}/usr/bin
-  cp $(get_install_dir coreutils)/usr/bin/sort ${INSTALL}/usr/bin
-  cp $(get_install_dir grep)/usr/bin/grep ${INSTALL}/usr/bin
-  find ${INSTALL}/usr/ -type f -iname "*.sh" -exec chmod +x {} \;
-  
+
   # Remove scripts from OdroidGoAdvance build
   if [[ ${DEVICE} == "OdroidGoAdvance" || "${DEVICE}" == "GameForce" ]]; then 
     for i in "wifi" "sselphs_scraper" "skyscraper" "system_info"; do 
@@ -142,8 +121,11 @@ post_install() {
     done
   fi 
 
-  #For automatic updates we use the buildate
+  # For automatic updates we use the buildate
 	date +"%m%d%Y" > ${INSTALL}/usr/buildate
 	
 	ln -sf /storage/roms ${INSTALL}/roms
+	
+  # We make sure all files in /usr/bin are executables
+	find ${INSTALL}/usr/bin -type f -exec chmod +x {} \;
 } 

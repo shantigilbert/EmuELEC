@@ -9,9 +9,8 @@ PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/EmuELEC/emuelec-emulationstation"
 PKG_URL="${PKG_SITE}.git"
-PKG_DEPENDS_TARGET="toolchain SDL2 freetype curl freeimage vlc bash rapidjson ${OPENGLES} SDL2_mixer fping p7zip espeak"
+PKG_DEPENDS_TARGET="toolchain SDL2 freetype freeimage vlc rapidjson ${OPENGLES} SDL2_mixer fping p7zip espeak"
 PKG_SECTION="emuelec"
-PKG_NEED_UNPACK="$(get_pkg_directory busybox) $(get_pkg_directory bash)"
 PKG_SHORTDESC="Emulationstation emulator frontend"
 PKG_BUILD_FLAGS="-gold"
 GET_HANDLER_SUPPORT="git"
@@ -142,5 +141,4 @@ post_install() {
 	ln -sf /storage/.config/emuelec/configs/locale ${INSTALL}/usr/share/locale
 	mkdir -p ${INSTALL}/usr/bin/batocera/
 	ln -sf /usr/bin/7zr ${INSTALL}/usr/bin/batocera/7zr
-	ln -sf /usr/bin/bash ${INSTALL}/usr/bin/sh
 }
