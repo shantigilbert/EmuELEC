@@ -46,7 +46,10 @@ event_quit(){
     echo "Rebooting!"
     ;;
     "shutdown")
-		event_quit_shutdown
+		echo "Shutting down!"
+    ;;
+		"emuelec")
+		event_quit_emuelec
     ;;
     *)
     echo "Just quitting!"
@@ -54,12 +57,11 @@ event_quit(){
 		esac
 }
 
-event_quit_shutdown () {
-	echo "Shutting down!"
-	touch /tmp/shutdown.please
-	systemctl stop emustation
-	systemctl stop retroarch
-	systemctl poweroff	
+event_quit_emuelec () {
+		echo "Shutting EmuELEC down!"
+		systemctl stop emustation
+		systemctl stop retroarch
+		systemctl poweroff
 }
 
 case "${EVENT}" in
