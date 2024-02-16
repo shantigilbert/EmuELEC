@@ -46,12 +46,20 @@ event_quit(){
     echo "Rebooting!"
     ;;
     "shutdown")
-    echo "Shutting down!"
+		event_quit_shutdown
     ;;
     *)
     echo "Just quitting!"
 		;;
 		esac
+}
+
+event_quit_shutdown () {
+	echo "Shutting down!"
+	touch /tmp/shutdown.please
+	systemctl stop emustation
+	systemctl stop retroarch
+	systemctl poweroff	
 }
 
 case "${EVENT}" in
