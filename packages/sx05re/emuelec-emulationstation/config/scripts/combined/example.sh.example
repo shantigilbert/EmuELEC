@@ -30,18 +30,15 @@ event_start() {
     }
 
 event_game_start() {
-    echo "Started game rom: ${1} basename ${2} name ${3}"
+    echo "Started game rom: ${2} basename ${3} name ${4}"
     }
 
 event_screensaver_start() {
-    echo "Starting Screen saver ${1}"
+    echo "Starting Screen saver ${2}"
     }
 
 event_quit(){
-    case "${1}" in
-		"restart")
-		systemctl restart emustation
-		;;	
+    case "${2}" in
     "reboot")
     echo "Rebooting!"
     ;;
@@ -50,22 +47,21 @@ event_quit(){
     ;;
     *)
     echo "Just quitting!"
-		;;
-		esac
-}
+    }
+
 
 case "${EVENT}" in
     "start")
 	event_start
 	;;
     "game-start")
-	event_game_start ${1} ${2} ${3}
+	event_game_start ${2} ${3} ${4}
 	;;
     "screensaver-start")
-    event_screensaver_start ${1}
+    event_screensaver_start ${2}
 	;;
     "quit")
-    event_quit ${1} ${2} ${3}
+    event_quit ${2} ${3} ${4}
 	;;
     # and so and and so fort
     *)
