@@ -2,8 +2,8 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="advancemame"
-PKG_VERSION="03c30ef95f85fa849add54f344d9bbef45e9b977"
-PKG_SHA256="73b7a676c85b76bea931d146dd9b55831c006e1b741adc0b85642eb4617d852a"
+PKG_VERSION="89699f86d658d78bc19083e8dd076e5c4bdfd317"
+PKG_SHA256="45a77fa33b84b00fae56587198afb9ee2d7a3bc86f48dd62bb6df5a1e30b3a28"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MAME"
