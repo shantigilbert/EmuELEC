@@ -6,6 +6,16 @@
 # Source predefined functions and variables
 . /etc/profile
 
+function ee_shutdown() {
+#	systemctl stop emustation
+#	systemctl stop retroarch
+	poweroff
+}
+
+function es_restart () {
+	systemctl restart emustation
+}
+
 function get_filenames_no_ext() {
 	local FN=($( ls -1 $1 | sed -e 's/\.[^.]*$//' ))
 	IFS=","

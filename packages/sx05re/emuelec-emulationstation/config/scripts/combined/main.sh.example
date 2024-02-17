@@ -40,28 +40,18 @@ event_screensaver_start() {
 event_quit(){
     case "${1}" in
 		"restart")
-		systemctl restart emustation
-		;;	
+		echo "Restarting!"
+		;;
     "reboot")
     echo "Rebooting!"
     ;;
     "shutdown")
 		echo "Shutting down!"
     ;;
-		"emuelec")
-		event_quit_emuelec
-    ;;
     *)
     echo "Just quitting!"
 		;;
 		esac
-}
-
-event_quit_emuelec () {
-		echo "Shutting EmuELEC down!"
-		systemctl stop emustation
-		systemctl stop retroarch
-		systemctl poweroff
 }
 
 case "${EVENT}" in
