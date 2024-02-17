@@ -426,8 +426,17 @@ else # Retrorun was selected
     if [ "${BIT32}" == "yes" ]; then 
         RUNTHIS+="32"
     fi
-    
-    RUNTHIS+=' --triggers -n -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
+
+		if [[ "$EE_DEVICE" == "GameForce" ]]; then
+			JOY_FILE="/dev/input/by-path/platform-odroidgo2-joypad-event-joystick"
+			[[ ! -f "${JOY_FILE}" ]] && JOY_FILE="/dev/input/by-path/platform-odroidgo3-joypad-event-joystick"
+			if [[ -f "${JOY_FILE}" ]]; then
+				ln -s /dev/input/event2 ${JOY_FILE}
+			fi
+			GPIO_JOYPAD="-g"
+		fi
+
+    RUNTHIS+=' --triggers -n ${GPIO_JOYPAD} -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
 
 fi # end Libretro/retrorun or standalone emu logic
 
