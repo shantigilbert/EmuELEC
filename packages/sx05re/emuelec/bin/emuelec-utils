@@ -6,10 +6,14 @@
 # Source predefined functions and variables
 . /etc/profile
 
+function is_shutting_down() {
+        pidof shutdown
+        pidof halt
+        pidof poweroff
+}
+
 function ee_shutdown() {
-#	systemctl stop emustation
-#	systemctl stop retroarch
-	systemctl poweroff
+        [[ -z "$( is_shutting_down )" ]] && shutdown -h now
 }
 
 function es_restart () {
