@@ -99,8 +99,9 @@ else
 fi
 
 if [[ "${EMULATOR}" = "retrorun" ]]; then
-		set_kill_keys "retrorun"
-		[[ "${BIT32}" == "yes" ]] && set_kill_keys "retrorun32"
+		RR_EXE="retrorun"
+		[[ "${BIT32}" == "yes" ]] && RR_EXE="retrorun32"
+		set_kill_keys "${RR_EXE}"
     EMU="${CORE}_libretro"
     RETRORUN="yes"
     LIBRETRO=""
