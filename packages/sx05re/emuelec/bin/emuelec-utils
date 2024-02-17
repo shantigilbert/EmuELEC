@@ -9,7 +9,7 @@
 function ee_shutdown() {
 #	systemctl stop emustation
 #	systemctl stop retroarch
-	poweroff
+	systemctl poweroff
 }
 
 function es_restart () {
