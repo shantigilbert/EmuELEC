@@ -428,8 +428,7 @@ else # Retrorun was selected
     fi
 
 		if [[ "$EE_DEVICE" == "GameForce" ]]; then
-			JOY_FILE="/dev/input/by-path/platform-odroidgo2-joypad-event-joystick"
-			[[ ! -f "${JOY_FILE}" ]] && JOY_FILE="/dev/input/by-path/platform-odroidgo3-joypad-event-joystick"
+			JOY_FILE="/dev/input/by-path/platform-gameforce-gamepad-event-joystick"
 			if [[ -f "${JOY_FILE}" ]]; then
 				ln -s /dev/input/event2 ${JOY_FILE}
 			fi
