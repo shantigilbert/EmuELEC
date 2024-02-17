@@ -81,6 +81,9 @@ ROMNAME="${1}"
 BASEROMNAME=${ROMNAME##*/}
 GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
+KILLTHIS="none"
+KILLSIGNAL="15"
+
 if [[ "${CORE}" == *"_32b"* ]]; then
     BIT32="yes"
     #LD_LIBRARY_PATH="/emuelec/lib32:${LD_LIBRARY_PATH}"
@@ -120,9 +123,6 @@ fi
 
 # Ports that use this file are all Libretro, so lets set it
 [[ ${PLATFORM} = "ports" ]] && LIBRETRO="yes"
-
-KILLTHIS="none"
-KILLSIGNAL="15"
 
 # if there wasn't a --NOLOG included in the arguments, enable the emulator log output. TODO: this should be handled in ES menu
 if [[ ${arguments} != *"--NOLOG"* ]]; then
