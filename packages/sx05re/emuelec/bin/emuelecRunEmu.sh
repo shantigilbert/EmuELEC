@@ -99,7 +99,8 @@ else
 fi
 
 if [[ "${EMULATOR}" = "retrorun" ]]; then
-    [[ -f "/storage/.config/RA_KILL_KEYS" ]] && set_kill_keys "retrorun"
+		set_kill_keys "retrorun"
+		[[ "${BIT32}" == "yes" ]] && set_kill_keys "retrorun32"
     EMU="${CORE}_libretro"
     RETRORUN="yes"
     LIBRETRO=""
