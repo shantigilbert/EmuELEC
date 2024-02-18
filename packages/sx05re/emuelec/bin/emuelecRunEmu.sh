@@ -81,6 +81,9 @@ ROMNAME="${1}"
 BASEROMNAME=${ROMNAME##*/}
 GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
+KILLTHIS="none"
+KILLSIGNAL="15"
+
 if [[ "${CORE}" == *"_32b"* ]]; then
     BIT32="yes"
     #LD_LIBRARY_PATH="/emuelec/lib32:${LD_LIBRARY_PATH}"
@@ -99,7 +102,9 @@ else
 fi
 
 if [[ "${EMULATOR}" = "retrorun" ]]; then
-    [[ -f "/storage/.config/RA_KILL_KEYS" ]] && set_kill_keys "retrorun"
+		RR_EXE="retrorun"
+		[[ "${BIT32}" == "yes" ]] && RR_EXE="retrorun32"
+		set_kill_keys "${RR_EXE}"
     EMU="${CORE}_libretro"
     RETRORUN="yes"
     LIBRETRO=""
@@ -118,9 +123,6 @@ fi
 
 # Ports that use this file are all Libretro, so lets set it
 [[ ${PLATFORM} = "ports" ]] && LIBRETRO="yes"
-
-KILLTHIS="none"
-KILLSIGNAL="15"
 
 # if there wasn't a --NOLOG included in the arguments, enable the emulator log output. TODO: this should be handled in ES menu
 if [[ ${arguments} != *"--NOLOG"* ]]; then
@@ -426,8 +428,16 @@ else # Retrorun was selected
     if [ "${BIT32}" == "yes" ]; then 
         RUNTHIS+="32"
     fi
-    
-    RUNTHIS+=' --triggers -n -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
+
+		if [[ "$EE_DEVICE" == "GameForce" ]]; then
+			JOY_FILE="/dev/input/by-path/platform-gameforce-gamepad-event-joystick"
+			if [[ -f "${JOY_FILE}" ]]; then
+				ln -s /dev/input/event2 ${JOY_FILE}
+			fi
+			GPIO_JOYPAD="-g"
+		fi
+
+    RUNTHIS+=' --triggers -n ${GPIO_JOYPAD} -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
 
 fi # end Libretro/retrorun or standalone emu logic
 
