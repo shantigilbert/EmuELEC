@@ -1,0 +1,14 @@
+[Unit]
+Description=Shutdown EmuELEC Clean
+DefaultDependencies=no
+Requires=emustation.service retroarch.service
+After=emustation.service retroarch.service
+
+[Service]
+ExecStart=
+ExecStop=/usr/bin/emuelec-utils ee_shutdown
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=emustation.service retroarch.service
