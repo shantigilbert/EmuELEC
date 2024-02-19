@@ -1,0 +1,61 @@
+From 3520cceb87fb2f9765ba7dbe2771fbd0cadca78d Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 26 Oct 2021 08:37:54 +0200
+Subject: [PATCH 051/142] broadcom/qpu: add packing for fmov on ADD alu
+
+---
+ src/broadcom/qpu/qpu_pack.c | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
+diff --git a/src/broadcom/qpu/qpu_pack.c b/src/broadcom/qpu/qpu_pack.c
+index 180d7ab08a3..ed5a8bc667d 100644
+--- a/src/broadcom/qpu/qpu_pack.c
++++ b/src/broadcom/qpu/qpu_pack.c
+@@ -1332,6 +1332,20 @@ v3d71_qpu_add_unpack(const struct v3d_device_info *devinfo, uint64_t packed_inst
+                 }
+                 break;
+ 
++        case V3D_QPU_A_FMOV:
++                instr->alu.add.output_pack = raddr_b & 0x3;
++
++                /* Mul alu FMOV has one additional variant */
++                int32_t unpack = (raddr_b >> 2) & 0x7;
++                if (unpack == 7)
++                        return false;
++
++                if (!v3d_qpu_float32_unpack_unpack(unpack,
++                                                   &instr->alu.add.a.unpack)) {
++                        return false;
++                }
++                break;
++
+         default:
+                 instr->alu.add.output_pack = V3D_QPU_PACK_NONE;
+                 instr->alu.add.a.unpack = V3D_QPU_UNPACK_NONE;
+@@ -1992,6 +2006,23 @@ v3d71_qpu_add_pack(const struct v3d_device_info *devinfo,
+                 break;
+         }
+ 
++        case V3D_QPU_A_FMOV: {
++                uint32_t packed;
++
++                if (!v3d_qpu_float32_pack_pack(instr->alu.add.output_pack,
++                                               &packed)) {
++                        return false;
++                }
++                raddr_b = packed;
++
++                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.a.unpack,
++                                                 &packed)) {
++                        return false;
++                }
++                raddr_b |= packed << 2;
++                break;
++        }
++
+         default:
+                 if (instr->alu.add.op != V3D_QPU_A_NOP &&
+                     (instr->alu.add.output_pack != V3D_QPU_PACK_NONE ||
+-- 
+2.39.2
+

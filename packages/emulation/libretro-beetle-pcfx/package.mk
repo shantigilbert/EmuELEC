@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libretro-beetle-pcfx"
-PKG_VERSION="6d2b11e17ad5a95907c983e7c8a70e75508c2d41"
-PKG_SHA256="b5a0d170aa1944aa47726e42c230550294d44ecd5565d460bc943a68dc781b5a"
+PKG_VERSION="06f7ff996051feaf9e0d928bd2bce3c4c35af45a"
+PKG_SHA256="12545b05a6ec0374de91b3467ee5ec0afae82a3ebccdd6dce0fa66f4f7496db6"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/beetle-pcfx-libretro"
 PKG_URL="https://github.com/libretro/beetle-pcfx-libretro/archive/${PKG_VERSION}.tar.gz"
@@ -24,7 +24,7 @@ make_target() {
       ;;
     cortex-a9|*cortex-a53|cortex-a17)
       if [ "${TARGET_ARCH}" = "aarch64" ]; then
-        make platform=aarch64
+        make platform=armv
       else
         make platform=armv7-cortexa9-neon-hardfloat
       fi

@@ -174,7 +174,7 @@ TARGET_MESON_OPTS="--prefix=/usr \
                    --libexecdir=/usr/lib \
                    --localstatedir=/var \
                    --buildtype=${MESON_BUILD_TYPE}"
-if [ ${BUILD_WITH_DEBUG} != yes ] && flag_enabled "strip" "yes"; then
+if [ "${BUILD_WITH_DEBUG}" != "yes" ] && flag_enabled "strip" "yes"; then
   TARGET_MESON_OPTS+=" -Dstrip=true"
 fi
 
@@ -245,6 +245,23 @@ if [ -f "${PKG_CONFIGURE_SCRIPT}" -o -f "${PKG_CMAKE_SCRIPT}" -o -f "${PKG_MESON
   MESON_CONF="${PKG_REAL_BUILD}/meson.conf"
 fi
 
+# create wrapper scripts in build dir and use them for CC/CXX when
+# building for host and local-cc build flag is set
+if [ "${TARGET}" = "host" ] && flag_enabled "local-cc" "no"; then
+  cat > libreelec-local-cc << EOF
+#!/bin/sh
+exec ${CC} "\$@"
+EOF
+  chmod +x libreelec-local-cc
+  export CC=$(pwd)/libreelec-local-cc
+  cat > libreelec-local-cxx << EOF
+#!/bin/sh
+exec ${CXX} "\$@"
+EOF
+  chmod +x libreelec-local-cxx
+  export CXX=$(pwd)/libreelec-local-cxx
+fi
+
 # configure
 if [ -n "${PKG_DEPENDS_CONFIG}" -a -n "${PKG_INSTALL}" ]; then
   for pkg in ${PKG_DEPENDS_CONFIG}; do
@@ -272,23 +289,23 @@ else
     # meson builds
     "meson:target")
       create_meson_conf_target ${TARGET} ${MESON_CONF}
-      echo "Executing (target): meson ${TARGET_MESON_OPTS} --cross-file=${MESON_CONF} ${PKG_MESON_OPTS_TARGET} ${PKG_MESON_SCRIPT%/*}" | tr -s " "
-      CC="${HOST_CC}" CXX="${HOST_CXX}" meson ${TARGET_MESON_OPTS} --cross-file=${MESON_CONF} ${PKG_MESON_OPTS_TARGET} ${PKG_MESON_SCRIPT%/*}
+      echo "Executing (target): meson setup ${TARGET_MESON_OPTS} --cross-file=${MESON_CONF} ${PKG_MESON_OPTS_TARGET} ${PKG_MESON_SCRIPT%/*}" | tr -s " "
+      CC="${HOST_CC}" CXX="${HOST_CXX}" meson setup ${TARGET_MESON_OPTS} --cross-file=${MESON_CONF} ${PKG_MESON_OPTS_TARGET} ${PKG_MESON_SCRIPT%/*}
       ;;
     "meson:host")
       create_meson_conf_host ${TARGET} ${MESON_CONF}
-      echo "Executing (host): meson ${HOST_MESON_OPTS} --native-file=${MESON_CONF} ${PKG_MESON_OPTS_HOST} ${PKG_MESON_SCRIPT%/*}" | tr -s " "
-      meson ${HOST_MESON_OPTS} --native-file=${MESON_CONF} ${PKG_MESON_OPTS_HOST} ${PKG_MESON_SCRIPT%/*}
+      echo "Executing (host): meson setup ${HOST_MESON_OPTS} --native-file=${MESON_CONF} ${PKG_MESON_OPTS_HOST} ${PKG_MESON_SCRIPT%/*}" | tr -s " "
+      meson setup ${HOST_MESON_OPTS} --native-file=${MESON_CONF} ${PKG_MESON_OPTS_HOST} ${PKG_MESON_SCRIPT%/*}
       ;;
     "meson:init")
       create_meson_conf_target ${TARGET} ${MESON_CONF}
-      echo "Executing (init): meson ${INIT_MESON_OPTS} --cross-file=${MESON_CONF} ${PKG_MESON_OPTS_INIT} ${PKG_MESON_SCRIPT%/*}" | tr -s " "
-      meson ${INIT_MESON_OPTS} --cross-file=${MESON_CONF} ${PKG_MESON_OPTS_INIT} ${PKG_MESON_SCRIPT%/*}
+      echo "Executing (init): meson setup ${INIT_MESON_OPTS} --cross-file=${MESON_CONF} ${PKG_MESON_OPTS_INIT} ${PKG_MESON_SCRIPT%/*}" | tr -s " "
+      meson setup ${INIT_MESON_OPTS} --cross-file=${MESON_CONF} ${PKG_MESON_OPTS_INIT} ${PKG_MESON_SCRIPT%/*}
       ;;
     "meson:bootstrap")
       create_meson_conf_host ${TARGET} ${MESON_CONF}
-      echo "Executing (bootstrap): meson ${BOOTSTRAP_MESON_OPTS} ----native-file=${MESON_CONF} ${PKG_MESON_OPTS_BOOTSTRAP} ${PKG_MESON_SCRIPT%/*}" | tr -s " "
-      meson ${BOOTSTRAP_MESON_OPTS} --native-file=${MESON_CONF} ${PKG_MESON_OPTS_BOOTSTRAP} ${PKG_MESON_SCRIPT%/*}
+      echo "Executing (bootstrap): meson setup ${BOOTSTRAP_MESON_OPTS} ----native-file=${MESON_CONF} ${PKG_MESON_OPTS_BOOTSTRAP} ${PKG_MESON_SCRIPT%/*}" | tr -s " "
+      meson setup ${BOOTSTRAP_MESON_OPTS} --native-file=${MESON_CONF} ${PKG_MESON_OPTS_BOOTSTRAP} ${PKG_MESON_SCRIPT%/*}
       ;;
 
     # cmake builds with ninja
@@ -514,7 +531,7 @@ if [ "${TARGET}" = "target" -o "${TARGET}" = "init" ]; then
 
     python_fix_abi "${INSTALL}"
 
-    if [ ! "${BUILD_WITH_DEBUG}" = "yes" ]; then
+    if [ "${BUILD_WITH_DEBUG}" != "yes" ] && flag_enabled "strip" "yes"; then
       ${STRIP} $(find ${INSTALL} \
         -type f -name "*.so*" \
         ! -name "ld-*.so" \
@@ -548,8 +565,8 @@ record_timestamp BUILD_END
 
 if [ -n "${TRACE_BUILD_TIMING}" ]; then
   (
-    echo "build timing details:"
-    show_timestamp_diff "total" BUILD_BEGIN BUILD_END
+    print_color "CLR_AUTOREMOVE" "\nBuild timing details:"
+    print_color "CLR_TARGET" "\n================================\n"  
     show_timestamp_diff "unpack" BUILD_BEGIN BUILD_START
     show_timestamp_diff "pre-build setup" BUILD_START BUILD_CONFIGURE
     show_timestamp_diff "configure" BUILD_CONFIGURE BUILD_MAKE
@@ -557,5 +574,8 @@ if [ -n "${TRACE_BUILD_TIMING}" ]; then
     show_timestamp_diff "make install" BUILD_MAKEINSTALL BUILD_COPY_SYSROOT
     show_timestamp_diff "copy sysroot" BUILD_COPY_SYSROOT BUILD_CLEANUP_INSTALL
     show_timestamp_diff "cleanup install" BUILD_CLEANUP_INSTALL BUILD_END
+    print_color "CLR_TARGET" "--------------------------------\n"  
+    show_timestamp_diff "total time" BUILD_BEGIN BUILD_END
+    echo -e
   ) >&${VERBOSE_OUT}
 fi

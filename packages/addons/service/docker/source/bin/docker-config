@@ -2,6 +2,7 @@
 
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Lukas Rusak (lrusak@libreelec.tv)
+# Copyright (C) 2022-present Team LibreELEC (https://libreelec.tv)
 
 ADDON_DIR="/storage/.kodi/addons/service.system.docker"
 ADDON_HOME_DIR="/storage/.kodi/userdata/addon_data/service.system.docker"
@@ -12,6 +13,10 @@ fi
 
 if [ ! -f "$ADDON_HOME_DIR/config/docker.conf" ]; then
   cp $ADDON_DIR/config/docker.conf $ADDON_HOME_DIR/config/docker.conf
+else
+  # previous deprecated options before v23.0.0 need to be updated
+  sed -i -e 's/--storage-opt overlay2.override_kernel_check=1//' \
+         -e 's/--graph=/--data-root=/' $ADDON_HOME_DIR/config/docker.conf
 fi
 
 if [ ! -d "$ADDON_HOME_DIR/docker" ]; then

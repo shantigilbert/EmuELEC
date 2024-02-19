@@ -43,6 +43,32 @@ dtb_file="$BOOT_ROOT/dtb.img"
 DT_ID=$(dtname)
 
 #########################################################
+# check_linux_version
+#########################################################
+# Return 1 if given kernel version is lower than current kernel version
+function check_linux_version() {
+    version_higher=$(uname -r | awk -F '.' \
+      -v ker_ver=$1 -v maj_ver=$2 -v min_ver=$3 '{
+        if ($1 > ker_ver) { print "Y"; }
+        else if ($1 < ker_ver) { print "N"; }
+        else {
+          if ($2 > maj_ver) { print "Y"; }
+          else if ($2 < maj_ver) { print "N"; }
+          else {
+            if ($3 >= min_ver) { print "Y"; }
+            else { print "N"; }
+          }
+        }
+      }')
+
+    if [ "$version_higher" = "Y" ]; then
+      return 0
+    else
+      return 1
+    fi
+}
+
+#########################################################
 # log
 #########################################################
 function log() {
@@ -187,19 +213,31 @@ function migrate_dtb_to_xml() {
       # if option is available set current status in BOOT_ROOT dtb.xml
       if [ "$node_status" != "$name_option" ]; then
         # special handling to migrate heartbeat setting from config.ini on Odroid devices
-        if [ "$node" == "sys_led" ]; then
-          case $DT_ID in
-            *odroid*)
-              log " detected Odroid device, migrate heartbeat led setting from config.ini"
-              heartbeat="$( cat /flash/config.ini | awk -F "=" '/^heartbeat=/{gsub(/"|\047/,"",$2); print $2}')"
-              if [ "$heartbeat" == "0" ]; then
-                name_option="off"
-                fdtput $amlogic_dt_id -t s $dtb_file /gpioleds/sys_led linux,default-trigger none
-                echo none > /sys/class/leds/sys_led/trigger
+        case $node in
+          sys_led)
+            case $DT_ID in
+              *odroid*)
+                log " detected Odroid device, migrate heartbeat led setting from config.ini"
+                heartbeat="$( cat /flash/config.ini | awk -F "=" '/^heartbeat=/{gsub(/"|\047/,"",$2); print $2}')"
+                if [ "$heartbeat" == "0" ]; then
+                  name_option="off"
+                  fdtput $amlogic_dt_id -t s $dtb_file /gpioleds/sys_led linux,default-trigger none
+                  echo none > /sys/class/leds/sys_led/trigger
+                fi
+                ;;
+            esac
+            ;;
+          wol)
+            if check_linux_version 5 4 210; then
+              wol="$( cat /flash/config.ini | awk -F "=" '/^wol=/{gsub(/"|\047/,"",$2); print $2}')"
+              log " migrate WOL setting ($wol) from config.ini"
+              if [ "$wol" == "1" ]; then
+                name_option="on"
+                fdtput $amlogic_dt_id -t i $dtb_file /soc/ethernet@fdc00000 wol 1
               fi
-              ;;
-          esac
-        fi
+            fi
+            ;;
+        esac
 
         log " migrate dtb.xml node '$node' to '$name_option'"
         xmlstarlet ed -L -u "//$node/@status" -v "$name_option" $xml_file

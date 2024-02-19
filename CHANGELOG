@@ -1,6 +1,183 @@
 EmuELEC CHANGELOG
 ==================
 
+# v4.7
+
+It has been a long time since we released a new version, and after many changes, many bug fixes and the help of many people, finally here it is v4.7!
+
+If you find any issues with this update, please first test with a clean installation!
+
+I apologize in advance, but the changelog is going to be automatically created from the GitHub commits and PRs since there are many and I will most likely miss some.
+
+But here is a short (incomplete) version:
+
+Added support for PortMaster! in addition we have added a few new ports.
+Added FMtowns emulator
+Updated most emulators to the latest version
+Fixed many Bluetoth gamepad issues, specially with fake PS3 Gamepads (tested with shanwan and guo hua)
+Added support for MT7668 BT chip
+Updated to the latest CoreELEC base (CE-20 branch)
+Autogamepad configs should now work much better and support more controllers
+Fixed some issues with resolution switching 
+Enabled TTS on Emulationstation
+... And many, many changes under the hood!
+
+## Thanks to the always supportive Patreons
+
+Scott O'Connell
+Libre Computer Project
+John Johnson
+victor manuel sanchez lopez
+Daniel Iruegas
+John Gamester
+Matthew S
+jmthill
+Russ Crandall
+Peter Shaw
+Tony Escobar
+Dennis W.
+Michael Brown
+AlienatedDiego2
+
+And all the others that helped in the past, from the bottom of my heart thank you all!
+
+## Special thanks
+
+And in no particular order, I would like to personally thank:
+
+Vpeter
+Langerz82
+7ji
+Miwasp
+Kelv
+JohnnyonFlame
+ebeem-sama
+Qbertaddict
+Dim (I still love the Crystal theme!)
+SamWilson (Happy BD!)
+AlienatedDiego
+tobetter
+portisch
+danielmx
+f.caruso
+Pro-me3us
+worstcase_scenario
+Hardkernel
+GameForce
+LibreComputer
+CoreELEC team
+...And you!
+
+Thanks! 
+
+
+Please note that due to lack of testing time, some devices have not been properly tested, if you find a bug or an issue, please don't hesitate to let us know via [Discord](https://discord.gg/cbgtJTul), or opening an issue in github.
+
+In other news...the EmuELEC forum is closing soon!.
+
+We regret to inform you that the EmuELEC forum will be shut down by the end of February 2024. We hope to preserve the forum in read-only mode, but we cannot guarantee it.
+The main reason for this decision is that we have outgrown the free package offered by discourse, and we do not have the resources to upgrade it.
+The second reason is that most of the forum activity is from users of unsupported devices and unofficial images, which we cannot and do not want to moderate or endorse.
+If you need support for our supported devices and official images, please join our [Discord](https://discord.gg/cbgtJTul) server.
+
+
+## Github Automatic Changelog:  
+
+* Updating Virtual Jaguar and enabling it by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1068
+* Added script for setting cheevos if entries are missing in settings.ini by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1074
+* Update flycast gles by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1112
+* ampart: remove package and installation script by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1119
+* fix broken packages by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1123
+* Add sharp x1 by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1117
+* Dev Retroarch setkillkey option by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1109
+* ES input PS3 GamePad Default Controller Assignment Fix. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1088
+* Dev advmame joy update by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1103
+* oga patch for scummvm is no longer needed by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1130
+* Make python-evdev for oga/gf compilable again by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1131
+* GF patch for scummvm is no longer needed. by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1133
+* Fix brightness reset on GF (issue #1136) by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1139
+* Revert ethtool to version 6.0 to make oga/gf compilable again by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1132
+* Dev flycast joy fixes by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1113
+* Updating version of emuelec-emulationstation by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1128
+* Match kernel versions identical to 64 bit version by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1142
+* Make glibc compilable for oga and gf by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1129
+* Dev - Amlogic Different Resolutions other than 1080p fix. (in seperate PR) by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1171
+* Enable CIFS on Odroid-M1 by @drizzt in https://github.com/EmuELEC/EmuELEC/pull/1175
+* RTL8821CU: switch source to 8821cu-20210916 by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1176
+* poppler: switch source to freedesktop's gitlab by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1177
+* dosbox-svn: bump to 53ca2f6 (2023.04.08) by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1178
+* scummvm: bump to b5ca1b3 (2023.04.09) by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1180
+* xash3d: remove configure option --disable-vgui by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1182
+* minor fix - advmame - joy assign - menu cancel button to left thumb by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1172
+* Dev ppssppsdl auto joypad by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1134
+* Dev auto gamepad yabasanshiro by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1126
+* Dev joy common update by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1060
+* inject_bl301: fix PKG_SHA256 and add PKG_ARCH by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1183
+* opengl-meson: fix for Amlogic-ne by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1184
+* amiberry: fix for Amlogic-ne and improve by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1185
+* lib32-opengl-meson: support Amlogic-ne by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1186
+* [EE - Emulator][FbNeoSA] Adds DPAD hats assignments by default. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1187
+* Amlogic-ne: fix cfgload by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1204
+* EE - Display Resolution - Configurable FrameBuffer, and some fixes. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1208
+* [EE 4.4+ Fix] Better Game Controller Bluetooth Support. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1201
+* Emulators update for next Emuelec version by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1205
+* Modified patches for SDL2.28.1 OGA by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1215
+* Modifed patch for RA version 1.15 OGA by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1216
+* Bump bstone by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1214
+* Added Vircon32 libretro core by @Chandler-Kluser in https://github.com/EmuELEC/EmuELEC/pull/1229
+* Fix apache-ant version, 1.10.13 by @yingw in https://github.com/EmuELEC/EmuELEC/pull/1226
+* New Emulators update for version 4.6.5 by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1218
+* Modified patch for Retroarch version 1.16 by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1219
+* test function added to emuelec-utils. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1234
+* New updates for EmuElec 4.6.5 by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1235
+* EE - set fb and resize - fixes. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1237
+* opengl-meson: fix lib32 mali symlinks for Amlogic-ne by @7Ji in https://github.com/EmuELEC/EmuELEC/pull/1203
+* EE - display - 480i support by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1206
+* Update es_systems.cfg by @yingw in https://github.com/EmuELEC/EmuELEC/pull/1253
+* System updates 4.7 by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1251
+* New emu update for 47 by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1252
+* Updated SDL2_mixer 32 bit and 64 by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1250
+* Fixes4.7 by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1258
+* Latest changes for Crystal theme by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1259
+* Update submodule in dosbox-svn by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1262
+* Update joy_common.sh GUID fix by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1271
+* Update retroarch fix audio amlogic old by @bennydiamond in https://github.com/EmuELEC/EmuELEC/pull/1260
+* Dev virtualjaguar clock experimental by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1236
+* EE - setres.sh - 480cvbs 576cvbs default fix by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1270
+* EE - hypseus gamepad config fix by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1199
+* EE - Advmame auto gamepad fixes 2. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1272
+* Add missing dependency by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1275
+* b2024 - Advmame Button Remap New Revision 2 by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1274
+* [Bug Fix] GameForce chi - Retrorun-go2 - Rotation Fix. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1267
+* [Bug Fix] Fix EE Audio Volume Adjustment on reset. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1266
+* Update emuelec-bluetooth - v2.1 revision by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1276
+* Update es_features.cfg by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1279
+* EE 4.7 - emuelec-bluetooth - RSSI fix for Bluez 5.72 by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1281
+* dev - OpenBOR - joypad fix by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1287
+* Bump bstone by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1288
+* Revert part of the latest changes in script image by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1293
+* EE - Port - Native Video support, and virtual keyboard fixes by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1291
+* Fixing Half Life and updating by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1296
+* xow package include in image. by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1298
+* Multiemu Emulator by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1300
+* Last emus update 4.7 by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1301
+* Generate correct advmame.rc by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1303
+* dev - auto gamepad - strip unneeded backslash in expressions by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1304
+* Fix supertuxkart by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1306
+* Fix segfault when exiting directly after startup by @miwasp in https://github.com/EmuELEC/EmuELEC/pull/1307
+* EE - ES Shutdown/Restart Fix by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1308
+* Bump some emulators by @Kelvfimer in https://github.com/EmuELEC/EmuELEC/pull/1311
+* EE - Device Gameforce - Retrorun - Rotation and controls Fix by @Langerz82 in https://github.com/EmuELEC/EmuELEC/pull/1310
+
+## New Contributors
+* @drizzt made their first contribution in https://github.com/EmuELEC/EmuELEC/pull/1175
+* @Chandler-Kluser made their first contribution in https://github.com/EmuELEC/EmuELEC/pull/1229
+* @yingw made their first contribution in https://github.com/EmuELEC/EmuELEC/pull/1226
+* @bennydiamond made their first contribution in https://github.com/EmuELEC/EmuELEC/pull/1260
+
+**Full Changelog**: https://github.com/EmuELEC/EmuELEC/compare/v4.6...v4,7
+
+
 # v4.6
 
 ## Please read the complete change-log before updating. A lot of the changes have been done to the base system. specially to the way the partitions are handled so you might need/want to do a clean install.

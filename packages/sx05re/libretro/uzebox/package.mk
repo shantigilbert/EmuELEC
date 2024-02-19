@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/t-paul/uzebox"
-PKG_URL="https://github.com/t-paul/uzebox/archive/$PKG_VERSION.tar.gz"
+PKG_URL="https://github.com/t-paul/uzebox/archive/${PKG_VERSION}.tar.gz"
 PKG_PATCH_DIRS="libretro"
 PKG_DEPENDS_TARGET="toolchain SDL2"
 PKG_PRIORITY="optional"
@@ -38,10 +38,10 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 make_target() {
-  make -C tools/uzem CPPFLAGS="$CFLAGS -I. $LDFLAGS -DNOGDB=1" CC="$CXX" LIBRETRO_BUILD=1
+  make -C tools/uzem CPPFLAGS="${CFLAGS} -I. ${LDFLAGS} -DNOGDB=1" CC="${CXX}" LIBRETRO_BUILD=1
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp tools/uzem/uzem_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp tools/uzem/uzem_libretro.so ${INSTALL}/usr/lib/libretro/
 }

@@ -2,8 +2,8 @@
 # Copyright (C) 2018-present Arthur Liberman (arthur_liberman@hotmail.com)
 
 PKG_NAME="openvfd-driver"
-PKG_VERSION="62135111742d5a5e531cb5c044b19a1866bf52b0"
-PKG_SHA256="c5f06ae3f25e1b3c8e6cb40ecac2a1d689aa83f482c232f5be181727bffe4cd6"
+PKG_VERSION="3118dda3aeb5b2f02b0ac0b5d30cbef58947a805"
+PKG_SHA256="fd0f38d059536e30000d3e2de3802ee97f8eeb7aac74143f0e588f803921a5ad"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/arthur-liberman/linux_openvfd"
 PKG_URL="https://github.com/arthur-liberman/linux_openvfd/archive/$PKG_VERSION.tar.gz"

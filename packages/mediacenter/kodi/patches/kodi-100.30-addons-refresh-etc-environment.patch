@@ -7,11 +7,9 @@ Subject: [PATCH] refresh /etc/environment on install and uninstall
  xbmc/addons/Addon.cpp | 6 ++++++
  1 file changed, 6 insertions(+)
 
-diff --git a/xbmc/addons/Addon.cpp b/xbmc/addons/Addon.cpp
-index 496e1fcfa0..da0a5955e0 100644
 --- a/xbmc/addons/Addon.cpp
 +++ b/xbmc/addons/Addon.cpp
-@@ -723,6 +723,9 @@ void OnPostInstall(const AddonPtr& addon, bool update, bool modal)
+@@ -723,6 +723,9 @@ void OnPostInstall(const AddonPtr& addon
    // OE
  
    addon->OnPostInstall(update, modal);
@@ -21,7 +19,7 @@ index 496e1fcfa0..da0a5955e0 100644
  }
  
  void OnPreUnInstall(const AddonPtr& addon)
-@@ -735,6 +738,9 @@ void OnPreUnInstall(const AddonPtr& addon)
+@@ -735,6 +738,9 @@ void OnPreUnInstall(const AddonPtr& addo
  void OnPostUnInstall(const AddonPtr& addon)
  {
    addon->OnPostUnInstall();
@@ -31,6 +29,3 @@ index 496e1fcfa0..da0a5955e0 100644
  }
  
  } // namespace ADDON
--- 
-2.34.1
-

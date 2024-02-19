@@ -5,7 +5,7 @@
 PKG_NAME="pvr.argustv"
 PKG_VERSION="20.5.0-Nexus"
 PKG_SHA256="c4b18a0abf4ba0a797509d79c4291c4e69589a6482c6ec85f5d9bdae63ea3f35"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.argustv"

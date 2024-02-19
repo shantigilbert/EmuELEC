@@ -1,0 +1,22 @@
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -40,19 +40,11 @@
+ const char* glsl_version_core_32 = "#version 150";
+ static int create_gl_context(int width, int height, bool is_es2)
+ {
+-    if (is_es2) {
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+         glsl_version = glsl_version_es_20;
+-    } else {
+-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG); // Always required on Mac
+-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+-        glsl_version = glsl_version_core_32;
+-    }
+ 
+     sdl_win = SDL_CreateWindow("Progress", 0, 0, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP);
+     if (!sdl_win) {

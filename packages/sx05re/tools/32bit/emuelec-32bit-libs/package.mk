@@ -9,13 +9,13 @@ PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/emuelec/emuelec-32bit-libs"
 PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain $OPENGLES"
+PKG_DEPENDS_TARGET="toolchain ${OPENGLES}"
 PKG_LONGDESC="EmuELEC 32-bit libraries, binaries and cores to use with EmuELEC aarch64"
 PKG_TOOLCHAIN="manual"
 
 makeinstall_target() {
   mkdir -p ${INSTALL}
-if [[ "$DEVICE" == "OdroidGoAdvance" ]] || [[ "$DEVICE" == "GameForce" ]]; then
+if [[ "${DEVICE}" == "OdroidGoAdvance" ]] || [[ "${DEVICE}" == "GameForce" ]]; then
 	cp -rf ${PKG_BUILD}/OdroidGoAdvance/* ${INSTALL}/
 	
 	if [[ "${DEVICE}" == "GameForce" ]]; then

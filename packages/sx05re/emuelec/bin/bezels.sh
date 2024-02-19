@@ -29,6 +29,7 @@ case ${PLATFORM} in
   if [ -f "/storage/.config/bezels_enabled" ]; then
   clear_bezel
   sed -i '/input_overlay = "/d' ${RACONFIG}
+  sed -i '/input_overlay_enable = "/d' ${RACONFIG}
   rm "/storage/.config/bezels_enabled"
   fi
    exit 0
@@ -47,7 +48,7 @@ esac
 PLATFORM=${PLATFORM,,}
 
 # bezelmap.cfg in ${BEZELDIR}/ is to share bezels between arcade clones and parent. 
-BEZELMAP="/emuelec/bezels/arcademap.cfg"
+BEZELMAP="/emuelec/configs/bezels/arcademap.cfg"
 BZLNAME=$(sed -n "/"${PLATFORM}"_"${ROMNAME}" = /p" "${BEZELMAP}" 2>/dev/null)
 BZLNAME="${BZLNAME#*\"}"
 BZLNAME="${BZLNAME%\"*}"
@@ -66,13 +67,14 @@ clear_bezel() {
 		sed -i '/custom_viewport_y = "/d' ${RACONFIG}
 		sed -i '/video_scale_integer = "/d' ${RACONFIG}
 		sed -i '/input_overlay_opacity = "/d' ${RACONFIG}
+        sed -i '/input_overlay_enable = "/d' ${RACONFIG}
 		echo "video_scale_integer = \"${DEFAULT_SCALE}\"" >> ${RACONFIG}
 		echo "aspect_ratio_index = \"${DEFAULT_RATIO}\"" >> ${RACONFIG}
 		echo 'input_overlay_opacity = "0.150000"' >> ${RACONFIG}
 }
 
 set_bezel() {
-# $OPACITY: input_overlay_opacity
+# ${OPACITY}: input_overlay_opacity
 # ${1}: custom_viewport_width 
 # ${2}: custom_viewport_height
 # ${3}: ustom_viewport_x
@@ -81,13 +83,14 @@ set_bezel() {
 # ${6}: aspect_ratio_index
         clear_bezel
         sed -i '/input_overlay_opacity = "/d' ${RACONFIG}
-        sed -i "1i input_overlay_opacity = \"$OPACITY\"" ${RACONFIG}
+        sed -i "1i input_overlay_opacity = \"${OPACITY}\"" ${RACONFIG}
 		sed -i "2i aspect_ratio_index = \"${6}\"" ${RACONFIG}
 		sed -i "3i custom_viewport_width = \"${1}\"" ${RACONFIG}
 		sed -i "4i custom_viewport_height = \"${2}\"" ${RACONFIG}
 		sed -i "5i custom_viewport_x = \"${3}\"" ${RACONFIG}
 		sed -i "6i custom_viewport_y = \"${4}\"" ${RACONFIG}
 		sed -i "7i video_scale_integer = \"${5}\"" ${RACONFIG}
+        sed -i "8i input_overlay_enable = \"true\"" ${RACONFIG}
 }
 
 check_overlay_dir() {
@@ -120,7 +123,7 @@ check_overlay_dir() {
 }
 
 # Only 720P and 1080P can use bezels. For 480p/i and 576p/i we just delete bezel config.
-hdmimode=$(cat /sys/class/display/mode)
+hdmimode=$(get_resolution)
 
 OGA_VER=$(oga_ver)
 
@@ -130,15 +133,15 @@ if [ "${OGA_VER}" == "OGS" ]; then
 fi
 
 case ${hdmimode} in
-  480*)
+  *480)
 	sed -i '/input_overlay = "/d' ${RACONFIG}
 	clear_bezel
   ;;
-  576*)
+  *576)
 	sed -i '/input_overlay = "/d' ${RACONFIG}
 	clear_bezel
   ;;
-  "OGS"|720*)
+  "OGS"|*720)
 	check_overlay_dir "${PLATFORM}"
         case "${PLATFORM}" in
             "gamegear")
@@ -166,7 +169,7 @@ case ${hdmimode} in
                 # delete aspect_ratio_index to make sure video is expanded fullscreen. Only certain handheld platforms need custom_viewport.
                 clear_bezel
                 sed -i '/input_overlay_opacity = "/d' ${RACONFIG}
-                sed -i "1i input_overlay_opacity = \"$OPACITY\"" ${RACONFIG}
+                sed -i "1i input_overlay_opacity = \"${OPACITY}\"" ${RACONFIG}
             ;;
         esac
     ;;
@@ -174,7 +177,7 @@ case ${hdmimode} in
         check_overlay_dir "${PLATFORM}"
         clear_bezel
         sed -i '/input_overlay_opacity = "/d' ${RACONFIG}
-        sed -i "1i input_overlay_opacity = \"$OPACITY\"" ${RACONFIG}
+        sed -i "1i input_overlay_opacity = \"${OPACITY}\"" ${RACONFIG}
     ;;
 esac
 

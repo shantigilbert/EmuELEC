@@ -1,8 +1,122 @@
-# o2.cz bluetooth remote
-evdev:input:b0005v0217p0000e0110*
- KEYBOARD_KEY_c0041=enter		# OK button
+# alfawise z1 remote
+evdev:input:b0005v2B54p1603e*
+ KEYBOARD_KEY_c0041=enter
 
-# osmcrf25 remote
+# auvipal g9f
+evdev:input:b0005v045Ep0041*
+ KEYBOARD_KEY_c0041=enter
+ KEYBOARD_KEY_70071=l
+ KEYBOARD_KEY_70070=g
+ KEYBOARD_KEY_7006f=x
+ KEYBOARD_KEY_7006e=i
+
+# buzztv bt-300/bt-400 smart remote
+evdev:input:b0005v0957p1001*
+ KEYBOARD_KEY_c0041=enter
+ KEYBOARD_KEY_c0040=c
+ KEYBOARD_KEY_70040=z
+ KEYBOARD_KEY_70041=esc
+ KEYBOARD_KEY_70042=t
+ KEYBOARD_KEY_70043=e
+ KEYBOARD_KEY_70044=o
+ KEYBOARD_KEY_70045=volumeup
+ KEYBOARD_KEY_70069=volumedown
+
+# g7bts remote
+evdev:input:b0005v045Ep0041e0300*
+ KEYBOARD_KEY_c0041=enter
+
+# g20bts remote
+evdev:input:b0005v2B54p1600e0000*
+ KEYBOARD_KEY_c0041=enter
+
+# homatics b21
+evdev:input:b0005v0957p0006*
+# homatics b21 variant (sold with dongle g 4k)
+evdev:input:b0005v0957p0019*
+# dune b25
+evdev:input:b0005v0957p000A*
+ KEYBOARD_KEY_c0041=enter
+ KEYBOARD_KEY_c009c=up
+ KEYBOARD_KEY_c009d=down
+ KEYBOARD_KEY_c0030=s
+ KEYBOARD_KEY_c008d=e
+ KEYBOARD_KEY_c0221=o
+ KEYBOARD_KEY_c0077=a
+ KEYBOARD_KEY_c0078=l
+ KEYBOARD_KEY_c0079=n
+ KEYBOARD_KEY_c007a=q
+ KEYBOARD_KEY_c0096=v
+ KEYBOARD_KEY_c01bb=z
+
+# justboom smart remote
+evdev:input:b0003v2252p0120*
+ KEYBOARD_KEY_c0041=enter
+ KEYBOARD_KEY_c0040=c
+
+# nokia 8010 remotes
+evdev:input:b0005v1D5A*
+ KEYBOARD_KEY_c0041=enter
+
+# nvidia shield remotes
+evdev:input:b0005v0955p7213*
+ KEYBOARD_KEY_c0041=enter
+
+evdev:input:b0005v0955p7217*
+ KEYBOARD_KEY_c0041=enter
+
+# o2.cz khamsin bluetooth remote
+evdev:input:b0005v0217p0000e0110*
+ KEYBOARD_KEY_c0041=enter
+ KEYBOARD_KEY_c0040=c
+
+# osmcrf25 remotes
+evdev:input:b0003v2252p1069*
+ KEYBOARD_KEY_7002e=volumeup
+ KEYBOARD_KEY_7002d=volumedown
+ KEYBOARD_KEY_7000c=kpleftparen
+ KEYBOARD_KEY_70006=kprightparen
+
+evdev:input:b0003v2017p1690*
+ KEYBOARD_KEY_7002e=volumeup
+ KEYBOARD_KEY_7002d=volumedown
+ KEYBOARD_KEY_7000c=kpleftparen
+ KEYBOARD_KEY_70006=kprightparen
+
 evdev:input:b0003v2017p1689*
- KEYBOARD_KEY_7002e=f10 # volume up
- KEYBOARD_KEY_7002d=f9 # volume down
+ KEYBOARD_KEY_7002e=volumeup
+ KEYBOARD_KEY_7002d=volumedown
+ KEYBOARD_KEY_7000c=kpleftparen
+ KEYBOARD_KEY_70006=kprightparen
+
+evdev:input:b0003v2017p1688*
+ KEYBOARD_KEY_7004a=esc
+ KEYBOARD_KEY_c0060=kpleftparen
+ KEYBOARD_KEY_10084=kprightparen
+ KEYBOARD_KEY_7002e=volumeup
+ KEYBOARD_KEY_7002d=volumedown
+
+evdev:input:b0003v2252p1037*
+ KEYBOARD_KEY_7004a=esc
+ KEYBOARD_KEY_c0060=kpleftparen
+ KEYBOARD_KEY_10084=kprightparen
+
+# ugoos ur01-ble remote
+evdev:input:b0005v005Dp0001*
+ KEYBOARD_KEY_c0041=enter
+
+# wechip g20 remote
+evdev:input:b0003v4842p0001*
+ KEYBOARD_KEY_c0041=enter
+
+# xaomi remote
+evdev:input:b0005v2717p32B9e4A4C*
+ KEYBOARD_KEY_c0041=enter
+
+# yyykq remote
+evdev:input:b0005v0416p0300*
+ KEYBOARD_KEY_c0041=enter
+
+# zidoo v10
+evdev:input:b0005v2B54p1600*
+ KEYBOARD_KEY_c0041=enter

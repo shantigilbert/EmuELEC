@@ -1,0 +1,312 @@
+From 76387530102fc7c9226e0f4df2561a769f5343aa Mon Sep 17 00:00:00 2001
+From: quietvoid <39477805+quietvoid@users.noreply.github.com>
+Date: Sat, 11 Mar 2023 08:39:55 -0500
+Subject: [PATCH 05/21] tools/depends: Add Rust toolchain, cargo-c and libdovi
+ dependencies
+
+---
+ docs/README.Android.md                       |  4 ++
+ tools/depends/Makefile.include.in            |  1 +
+ tools/depends/configure.ac                   |  7 +++
+ tools/depends/native/Makefile                |  8 +++-
+ tools/depends/native/cargo-c/CARGO-C-VERSION |  5 ++
+ tools/depends/native/cargo-c/Makefile        | 38 ++++++++++++++++
+ tools/depends/native/rustup/Makefile         | 48 ++++++++++++++++++++
+ tools/depends/native/rustup/RUSTUP-VERSION   |  5 ++
+ tools/depends/target/Makefile                |  4 ++
+ tools/depends/target/libdovi/LIBDOVI-VERSION |  6 +++
+ tools/depends/target/libdovi/Makefile        | 43 ++++++++++++++++++
+ 11 files changed, 168 insertions(+), 1 deletion(-)
+ create mode 100644 tools/depends/native/cargo-c/CARGO-C-VERSION
+ create mode 100644 tools/depends/native/cargo-c/Makefile
+ create mode 100644 tools/depends/native/rustup/Makefile
+ create mode 100644 tools/depends/native/rustup/RUSTUP-VERSION
+ create mode 100644 tools/depends/target/libdovi/LIBDOVI-VERSION
+ create mode 100644 tools/depends/target/libdovi/Makefile
+
+diff --git a/docs/README.Android.md b/docs/README.Android.md
+index ecc0dcbbd1..48c7881d4b 100644
+--- a/docs/README.Android.md
++++ b/docs/README.Android.md
+@@ -236,6 +236,10 @@ make -j$(getconf _NPROCESSORS_ONLN)
+ ```
+   FFmpeg configure options, e.g. --enable-vaapi (target)
+ 
++```
++--enable-libdovi=<yes:no>
++```
++  enable `libdovi`, for on-the-fly Dolby Vision conversion. Defaults to no.
+ 
+ **Android Specific:**
+ 
+diff --git a/tools/depends/Makefile.include.in b/tools/depends/Makefile.include.in
+index 3a36d20d68..03c27df67b 100644
+--- a/tools/depends/Makefile.include.in
++++ b/tools/depends/Makefile.include.in
+@@ -31,6 +31,7 @@ SHA512SUM=@SHA512SUM@
+ SHA256SUM=@SHA256SUM@
+ SHASUM=@SHASUM@
+ HASH_TOOL_FLAGS=-c --status
++ENABLE_LIBDOVI=@use_libdovi@
+ 
+ HAS_ZLIB=@has_zlib@
+ NEED_LIBICONV=@need_libiconv@
+diff --git a/tools/depends/configure.ac b/tools/depends/configure.ac
+index 79ab65900b..929300b31e 100644
+--- a/tools/depends/configure.ac
++++ b/tools/depends/configure.ac
+@@ -129,6 +129,11 @@ AC_ARG_WITH([ffmpeg-options],
+   [ffmpeg_options=$withval],
+   [ffmpeg_options=default])
+ 
++AC_ARG_ENABLE([libdovi],
++  [AS_HELP_STRING([--enable-libdovi],
++  [enable libdovi (optional for android). default is no])],
++  [use_libdovi=$enableval],
++  [use_libdovi=no])
+ 
+ if test "$use_ccache" = "yes"; then
+   AC_CHECK_PROG(HAVE_CCACHE,ccache,"yes","no",)
+@@ -717,6 +722,7 @@ AC_SUBST(host_cxxflags)
+ AC_SUBST(app_rendersystem)
+ AC_SUBST(app_winsystem)
+ AC_SUBST(ffmpeg_options)
++AC_SUBST(use_libdovi)
+ 
+ [
+ if test "x$CCACHE" = "x"
+@@ -853,4 +859,5 @@ echo -e "depends:\t\t $prefix/$deps_dir"
+ if test "$platform_os" = "android"; then
+   echo -e "ndk-api-level:\t $use_ndk_api"
+   echo -e "build-tools:\t $build_tools_path"
++  echo -e "libdovi:\t $use_libdovi"
+ fi
+diff --git a/tools/depends/native/Makefile b/tools/depends/native/Makefile
+index 800270f8a3..7a3db29391 100644
+--- a/tools/depends/native/Makefile
++++ b/tools/depends/native/Makefile
+@@ -50,6 +50,12 @@ ifeq ($(OS),linux)
+   endif
+ endif
+ 
++ifeq ($(OS),android)
++  ifeq ($(ENABLE_LIBDOVI),yes)
++    NATIVE += rustup cargo-c
++  endif
++endif
++
+ .PHONY: $(NATIVE) native
+ 
+ all: native
+@@ -59,6 +65,7 @@ all: native
+ autoconf-archive: autoconf
+ autoconf: m4
+ automake: autoconf
++cargo-c: pkg-config openssl rustup
+ dpkg: automake gettext libtool pkg-config tar
+ heimdal: libtool
+ JsonSchemaBuilder: automake
+@@ -102,4 +109,3 @@ test-dependencies:
+ 
+ distclean::
+ 	for d in $(NATIVE); do $(MAKE) -C $$d distclean; done
+-
+diff --git a/tools/depends/native/cargo-c/CARGO-C-VERSION b/tools/depends/native/cargo-c/CARGO-C-VERSION
+new file mode 100644
+index 0000000000..3d470c5729
+--- /dev/null
++++ b/tools/depends/native/cargo-c/CARGO-C-VERSION
+@@ -0,0 +1,5 @@
++APPNAME=cargo-c
++BASE_URL=https://github.com/lu-zero/cargo-c/archive
++VERSION=v0.9.17
++ARCHIVE=$(VERSION).tar.gz
++SHA512=529db1de509add6c3ad58932ee16326bf0a2e7d154797adbf2b3755ae98b4f59bf0d01250e75ad4fc63b7ea34579cded7d7c6c3c8b92db6d8e00994062ee136f
+diff --git a/tools/depends/native/cargo-c/Makefile b/tools/depends/native/cargo-c/Makefile
+new file mode 100644
+index 0000000000..3c12014999
+--- /dev/null
++++ b/tools/depends/native/cargo-c/Makefile
+@@ -0,0 +1,38 @@
++include ../../Makefile.include CARGO-C-VERSION ../../download-files.include
++DEPS = ../../Makefile.include Makefile CARGO-C-VERSION ../../download-files.include
++
++PREFIX=$(NATIVEPREFIX)
++PLATFORM=$(NATIVEPLATFORM)
++
++export PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig
++
++APP=$(PLATFORM)/target/release/$(APPNAME)
++
++CARGO_ENV_VARS = RUSTUP_HOME=$(PREFIX)/.rustup \
++	CARGO_HOME=$(PREFIX)/.cargo
++CARGO = $(CARGO_ENV_VARS) $(PREFIX)/bin/cargo
++
++CLEANUP_CMD = [ -e $(PREFIX)/bin/cargo ] \
++	&& $(CARGO) uninstall cargo-c || true
++
++all: .installed-$(PLATFORM)
++
++$(PLATFORM): $(DEPS) | $(TARBALLS_LOCATION)/$(ARCHIVE).$(HASH_TYPE)
++	rm -rf $(PLATFORM)/*; mkdir -p $(PLATFORM)
++	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
++
++$(APP): $(PLATFORM)
++	$(CARGO) build --release --manifest-path $(PLATFORM)/Cargo.toml
++
++.installed-$(PLATFORM): $(APP)
++	$(CARGO) install --profile release --path $(PLATFORM)
++
++	touch $@
++
++clean:
++	$(CLEANUP_CMD)
++	rm -f .installed-$(PLATFORM)
++
++distclean::
++	$(CLEANUP_CMD)
++	rm -rf $(PLATFORM) .installed-$(PLATFORM)
+diff --git a/tools/depends/native/rustup/Makefile b/tools/depends/native/rustup/Makefile
+new file mode 100644
+index 0000000000..67c014b97e
+--- /dev/null
++++ b/tools/depends/native/rustup/Makefile
+@@ -0,0 +1,48 @@
++include ../../Makefile.include RUSTUP-VERSION ../../download-files.include
++DEPS = ../../Makefile.include Makefile RUSTUP-VERSION ../../download-files.include
++
++PREFIX=$(NATIVEPREFIX)
++PLATFORM=$(NATIVEPLATFORM)
++
++export RUSTUP_HOME=$(PREFIX)/.rustup
++export CARGO_HOME=$(PREFIX)/.cargo
++
++APP=$(PLATFORM)/bin/$(APPNAME)
++
++RUSTUP_ENV_VARS = RUSTUP_HOME=$(PREFIX)/.rustup \
++	CARGO_HOME=$(PREFIX)/.cargo
++RUSTUP = $(RUSTUP_ENV_VARS) $(PREFIX)/bin/rustup
++
++CLEANUP_CMD=[ -e $(PREFIX)/bin/rustup ] \
++	&& $(RUSTUP) self uninstall -y \
++	&& rm -f $(PREFIX)/bin/rustup \
++	&& rm -f $(PREFIX)/bin/cargo || true
++
++all: .installed-$(PLATFORM)
++
++$(PLATFORM): $(DEPS) | $(TARBALLS_LOCATION)/$(ARCHIVE).$(HASH_TYPE)
++	rm -rf $(PLATFORM)/*; mkdir -p $(PLATFORM)
++	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
++
++$(APP): $(PLATFORM)
++	bash $(PLATFORM)/rustup-init.sh --no-modify-path -y
++
++.installed-$(PLATFORM): $(APP)
++	ln -sf $(CARGO_HOME)/bin/rustup $(PREFIX)/bin/rustup
++	ln -sf $(CARGO_HOME)/bin/cargo $(PREFIX)/bin/cargo
++
++	$(RUSTUP) default stable
++
++ifeq ($(CROSS_COMPILING),yes)
++	$(RUSTUP) target add $(HOST)
++endif
++
++	touch $@
++
++clean:
++	$(CLEANUP_CMD)
++	rm -f .installed-$(PLATFORM)
++
++distclean::
++	$(CLEANUP_CMD)
++	rm -rf $(PLATFORM) .installed-$(PLATFORM)
+diff --git a/tools/depends/native/rustup/RUSTUP-VERSION b/tools/depends/native/rustup/RUSTUP-VERSION
+new file mode 100644
+index 0000000000..74bd54c23a
+--- /dev/null
++++ b/tools/depends/native/rustup/RUSTUP-VERSION
+@@ -0,0 +1,5 @@
++APPNAME=rustup
++BASE_URL=https://github.com/rust-lang/rustup.rs/archive
++VERSION=1.25.1
++ARCHIVE=$(VERSION).tar.gz
++SHA512=a77cb34ba0c2e7577c8acbd474197aabaa84e3b64b3c42f1d0c328df55c6accbe412aba9a787f0ea2f0654f085475455c9c488b2b6de34ad8889a2716d1e8d0c
+diff --git a/tools/depends/target/Makefile b/tools/depends/target/Makefile
+index 28d122a602..4e18ed08ef 100644
+--- a/tools/depends/target/Makefile
++++ b/tools/depends/target/Makefile
+@@ -79,6 +79,10 @@ ifeq ($(OS),android)
+   DEPENDS += dummy-libxbmc libuuid
+   PYMODULE_DEPS = dummy-libxbmc
+   LIBUUID = libuuid
++
++  ifeq ($(ENABLE_LIBDOVI),yes)
++    DEPENDS += libdovi
++  endif
+ endif
+ 
+ DEPENDS := $(filter-out $(EXCLUDED_DEPENDS),$(DEPENDS))
+diff --git a/tools/depends/target/libdovi/LIBDOVI-VERSION b/tools/depends/target/libdovi/LIBDOVI-VERSION
+new file mode 100644
+index 0000000000..1fe73ed11f
+--- /dev/null
++++ b/tools/depends/target/libdovi/LIBDOVI-VERSION
+@@ -0,0 +1,6 @@
++LIBNAME=libdovi
++BASE_URL=https://github.com/quietvoid/dovi_tool/archive
++VERSION=libdovi-3.1.2
++ARCHIVE=$(VERSION).tar.gz
++SHA512=577d5a5916dedbf222150ddb76219325e0e9a7ae91c5978b1b1fd65048d1f548e29aa8ebbbdc836380ec399e2bc105a722515f783be70837dc6403cb34586bb2
++BYPRODUCT=libdovi.a
+diff --git a/tools/depends/target/libdovi/Makefile b/tools/depends/target/libdovi/Makefile
+new file mode 100644
+index 0000000000..2d868d2fde
+--- /dev/null
++++ b/tools/depends/target/libdovi/Makefile
+@@ -0,0 +1,43 @@
++include ../../Makefile.include LIBDOVI-VERSION ../../download-files.include
++DEPS = ../../Makefile.include Makefile LIBDOVI-VERSION ../../download-files.include
++
++LIBDYLIB=$(PLATFORM)/target/$(HOST)/release/$(BYPRODUCT)
++
++CARGO_ENV_VARS = RUSTUP_HOME=$(NATIVEPREFIX)/.rustup \
++	CARGO_HOME=$(NATIVEPREFIX)/.cargo
++CARGO = $(CARGO_ENV_VARS) $(NATIVEPREFIX)/bin/cargo
++
++CARGO_BASE_OPTS = --manifest-path $(PLATFORM)/dolby_vision/Cargo.toml
++ifeq ($(CROSS_COMPILING),yes)
++  CARGO_BASE_OPTS += --target $(HOST)
++endif
++
++CARGO_BUILD_OPTS = --offline \
++	--frozen \
++	--library-type staticlib \
++	--profile release \
++	--prefix $(PREFIX) \
++	$(CARGO_BASE_OPTS)
++
++all: .installed-$(PLATFORM)
++
++$(PLATFORM): $(DEPS) | $(TARBALLS_LOCATION)/$(ARCHIVE).$(HASH_TYPE)
++	rm -rf $(PLATFORM)/*; mkdir -p $(PLATFORM)
++	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
++	cd $(PLATFORM);
++	$(CARGO) fetch $(CARGO_BASE_OPTS)
++
++$(LIBDYLIB): $(PLATFORM)
++	$(CARGO) cbuild $(CARGO_BUILD_OPTS)
++
++.installed-$(PLATFORM): $(LIBDYLIB)
++	$(CARGO) cinstall $(CARGO_BUILD_OPTS)
++
++	touch $@
++
++clean:
++	cd $(PLATFORM); $(CARGO) clean
++	rm -f .installed-$(PLATFORM)
++
++distclean::
++	rm -rf $(PLATFORM) .installed-$(PLATFORM)
+-- 
+2.43.0
+

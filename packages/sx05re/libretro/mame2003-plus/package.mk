@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="mame2003-plus"
-PKG_VERSION="89c43d62c01a893b0dc1ef7634a5bb99d018cef8"
-PKG_SHA256="45a9427284ea36c2f756a4b7b7b016f19ca96abd9c4e8140842b96661366ac4a"
+PKG_VERSION="fc987f1913203a41bca7f6fd16e92c83729dd7fc"
+PKG_SHA256="8c0309e8b7b7c35ce4132f37cc3eb515864c73bb7b91165b932d8bef808c1f12"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MAME"
 PKG_SITE="https://github.com/libretro/mame2003-plus-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,10 +37,10 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 make_target() {
-  make ARCH="" CC="$CC" NATIVE_CC="$CC" LD="$CC"
+  make ARCH="" CC="${CC}" NATIVE_CC="${CC}" LD="${CC}"
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp mame2003_plus_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp mame2003_plus_libretro.so ${INSTALL}/usr/lib/libretro/
 }

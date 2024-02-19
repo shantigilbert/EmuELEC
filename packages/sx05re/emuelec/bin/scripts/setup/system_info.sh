@@ -15,9 +15,9 @@
     sed -i 's,'"/var"',,' /tmp/temp-disk > /tmp/tt
     echo "                     Temperature Monitoring" > /tmp/temph
     cpuTempC=$(($(cat /sys/class/thermal/thermal_zone0/temp)/1000)) && cpuTempF=$((cpuTempC*9/5+32))
-    echo $cpuTempC > /tmp/tempc
+    echo ${cpuTempC} > /tmp/tempc
     sed 's/^/Cpu Temperature in Celcius degree :   /' /tmp/tempc > /tmp/tempC
-    echo $cpuTempF > /tmp/tempf
+    echo ${cpuTempF} > /tmp/tempf
     sed 's/^/Cpu Temperature in Farenheit degree : /' /tmp/tempf > /tmp/tempF
     echo "                         Network Info" > /tmp/net
     ip route get 8.8.8.8 2>/dev/null | awk '{print $NF; exit}' > /tmp/ip

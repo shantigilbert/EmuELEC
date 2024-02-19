@@ -1,0 +1,539 @@
+From cc5afd808039f3e0b81fe0615745b74cbb31d0bf Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 16 Nov 2021 11:26:17 +0100
+Subject: [PATCH 124/142] v3d,v3dv: don't use max internal bpp for tile sizing
+ in V3D 7.x
+
+We can use the actual bpp of each color attachment to compute real
+tile memory requirements, which may allow us to choose a larger tile
+size configuration than in V3D 4.2 in certain scenarios.
+---
+ src/broadcom/common/v3d_util.c          | 112 +++++++++++++++---------
+ src/broadcom/common/v3d_util.h          |   7 +-
+ src/broadcom/vulkan/v3dv_cmd_buffer.c   |  20 +++--
+ src/broadcom/vulkan/v3dv_meta_clear.c   |   1 +
+ src/broadcom/vulkan/v3dv_meta_copy.c    |  19 ++--
+ src/broadcom/vulkan/v3dv_pass.c         |   9 +-
+ src/broadcom/vulkan/v3dv_private.h      |   2 +
+ src/broadcom/vulkan/v3dvx_device.c      |  21 +++--
+ src/broadcom/vulkan/v3dvx_meta_common.c |  10 ++-
+ src/broadcom/vulkan/v3dvx_private.h     |   4 +-
+ src/broadcom/vulkan/v3dvx_queue.c       |   3 +-
+ src/gallium/drivers/v3d/v3d_context.c   |   6 +-
+ 12 files changed, 140 insertions(+), 74 deletions(-)
+
+diff --git a/src/broadcom/common/v3d_util.c b/src/broadcom/common/v3d_util.c
+index 209a5eceaa1..8a50d279985 100644
+--- a/src/broadcom/common/v3d_util.c
++++ b/src/broadcom/common/v3d_util.c
+@@ -87,12 +87,37 @@ v3d_csd_choose_workgroups_per_supergroup(struct v3d_device_info *devinfo,
+    return best_wgs_per_sg;
+ }
+ 
++#define V3D71_TLB_COLOR_SIZE     (16 * 1024)
++#define V3D71_TLB_DETPH_SIZE     (16 * 1024)
++#define V3D71_TLB_AUX_DETPH_SIZE  (8 * 1024)
++
++static bool
++tile_size_valid(uint32_t pixel_count, uint32_t color_bpp, uint32_t depth_bpp)
++{
++   /* First, we check if we can fit this tile size allocating the depth
++    * TLB memory to color.
++    */
++   if (pixel_count * depth_bpp <= V3D71_TLB_AUX_DETPH_SIZE &&
++       pixel_count * color_bpp <= V3D71_TLB_COLOR_SIZE + V3D71_TLB_DETPH_SIZE) {
++      return true;
++   }
++
++   /* Otherwise the tile must fit in the main TLB buffers */
++   return pixel_count * depth_bpp <= V3D71_TLB_DETPH_SIZE &&
++          pixel_count * color_bpp <= V3D71_TLB_COLOR_SIZE;
++}
++
+ void
+ v3d_choose_tile_size(const struct v3d_device_info *devinfo,
+                      uint32_t color_attachment_count,
+-                     uint32_t max_color_bpp, bool msaa,
++                     /* V3D 4.x max internal bpp of all RTs */
++                     uint32_t max_internal_bpp,
++                     /* V3D 7.x accumulated bpp for all RTs (in bytes) */
++                     uint32_t total_color_bpp,
++                     bool msaa,
+                      bool double_buffer,
+-                     uint32_t *width, uint32_t *height)
++                     uint32_t *width,
++                     uint32_t *height)
+ {
+    static const uint8_t tile_sizes[] = {
+       64, 64,
+@@ -105,37 +130,19 @@ v3d_choose_tile_size(const struct v3d_device_info *devinfo,
+    };
+ 
+    uint32_t idx = 0;
+-   if (color_attachment_count > 4)
+-      idx += 3;
+-   else if (color_attachment_count > 2)
+-      idx += 2;
+-   else if (color_attachment_count > 1)
+-      idx += 1;
+-
+-   /* MSAA and double-buffer are mutually exclusive */
+-   assert(!msaa || !double_buffer);
+-   if (msaa)
+-      idx += 2;
+-   else if (double_buffer)
+-      idx += 1;
+-
+-   idx += max_color_bpp;
+-
+    if (devinfo->ver >= 71) {
+-      /* In V3D 7.x the TLB has an auxiliary buffer of 8KB that will be
+-       * automatically used for depth instead of the main 16KB depth TLB buffer
+-       * when the depth tile fits in the auxiliary buffer, allowing the hardware
+-       * to allocate the 16KB from the main depth TLB to the color TLB. If
+-       * we can do that, then we are effectively doubling the memory we have
+-       * for color and we can increase our tile dimensions by a factor of 2
+-       * (reduce idx by 1).
++      /* In V3D 7.x, we use the actual bpp used by color attachments to compute
++       * the tile size instead of the maximum bpp. This may allow us to choose a
++       * larger tile size than we would in 4.x in scenarios with multiple RTs
++       * with different bpps.
+        *
+-       * If we have computed a tile size that would be smaller than the minimum
+-       * of 8x8, then it is certain that depth will fit in the aux depth TLB
+-       * (even in MSAA mode).
+-       *
+-       * Otherwise, we need check if we can fit depth in the aux TLB buffer
+-       * using a larger tile size.
++       * Also, the TLB has an auxiliary buffer of 8KB that will be automatically
++       * used for depth instead of the main 16KB depth TLB buffer when the depth
++       * tile fits in the auxiliary buffer, allowing the hardware to allocate
++       * the 16KB from the main depth TLB to the color TLB. If we can do that,
++       * then we are effectively doubling the memory we have for color and we
++       * can also select a larger tile size. This is necessary to support
++       * the most expensive configuration: 8x128bpp RTs + MSAA.
+        *
+        * FIXME: the docs state that depth TLB memory can be used for color
+        * if depth testing is not used by setting the 'depth disable' bit in the
+@@ -147,17 +154,40 @@ v3d_choose_tile_size(const struct v3d_device_info *devinfo,
+        * configuration item) or active in the subpass for which we are enabling
+        * the bit (which we can't tell until later, when we record commands for
+        * the subpass). If it is the latter, then we cannot use this feature.
++       *
++       * FIXME: pending handling double_buffer.
+        */
+-      if (idx >= ARRAY_SIZE(tile_sizes) / 2) {
+-         idx--;
+-      } else if (idx > 0) {
+-         /* Depth is always 32bpp (4x32bpp for 4x MSAA) */
+-         uint32_t depth_bpp = !msaa ? 4 : 16;
+-         uint32_t tile_w = tile_sizes[(idx - 1) * 2];
+-         uint32_t tile_h = tile_sizes[(idx - 1) * 2 + 1];
+-         if (tile_w * tile_h * depth_bpp <= 8192)
+-            idx--;
+-      }
++      const uint32_t color_bpp = total_color_bpp * (msaa ? 4 : 1);
++      const uint32_t depth_bpp = 4 * (msaa ? 4 : 1);
++      do {
++         const uint32_t tile_w = tile_sizes[idx * 2];
++         const uint32_t tile_h = tile_sizes[idx * 2 + 1];
++         if (tile_size_valid(tile_w * tile_h, color_bpp, depth_bpp))
++            break;
++         idx++;
++      } while (idx < ARRAY_SIZE(tile_sizes) / 2);
++
++      /* FIXME: pending handling double_buffer */
++      assert(!double_buffer);
++   } else {
++      /* On V3D 4.x tile size is selected based on the number of RTs, the
++       * maximum bpp across all of them and whether 4x MSAA is used.
++       */
++      if (color_attachment_count > 4)
++         idx += 3;
++      else if (color_attachment_count > 2)
++         idx += 2;
++      else if (color_attachment_count > 1)
++         idx += 1;
++
++      /* MSAA and double-buffer are mutually exclusive */
++      assert(!msaa || !double_buffer);
++      if (msaa)
++         idx += 2;
++      else if (double_buffer)
++         idx += 1;
++
++      idx += max_internal_bpp;
+    }
+ 
+    assert(idx < ARRAY_SIZE(tile_sizes) / 2);
+diff --git a/src/broadcom/common/v3d_util.h b/src/broadcom/common/v3d_util.h
+index 5a7e244a0a5..d02d41dd089 100644
+--- a/src/broadcom/common/v3d_util.h
++++ b/src/broadcom/common/v3d_util.h
+@@ -39,9 +39,12 @@ v3d_csd_choose_workgroups_per_supergroup(struct v3d_device_info *devinfo,
+ void
+ v3d_choose_tile_size(const struct v3d_device_info *devinfo,
+                      uint32_t color_attachment_count,
+-                     uint32_t max_color_bpp, bool msaa,
++                     uint32_t max_internal_bpp,
++                     uint32_t total_color_bpp,
++                     bool msaa,
+                      bool double_buffer,
+-                     uint32_t *width, uint32_t *height);
++                     uint32_t *width,
++                     uint32_t *height);
+ 
+ uint32_t
+ v3d_translate_pipe_swizzle(enum pipe_swizzle swizzle);
+diff --git a/src/broadcom/vulkan/v3dv_cmd_buffer.c b/src/broadcom/vulkan/v3dv_cmd_buffer.c
+index 11d161b19b7..f65388c10ec 100644
+--- a/src/broadcom/vulkan/v3dv_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dv_cmd_buffer.c
+@@ -348,6 +348,7 @@ job_compute_frame_tiling(struct v3dv_job *job,
+                          uint32_t layers,
+                          uint32_t render_target_count,
+                          uint8_t max_internal_bpp,
++                         uint8_t total_color_bpp,
+                          bool msaa,
+                          bool double_buffer)
+ {
+@@ -360,14 +361,16 @@ job_compute_frame_tiling(struct v3dv_job *job,
+    tiling->render_target_count = render_target_count;
+    tiling->msaa = msaa;
+    tiling->internal_bpp = max_internal_bpp;
++   tiling->total_color_bpp = total_color_bpp;
+    tiling->double_buffer = double_buffer;
+ 
+    /* Double-buffer is incompatible with MSAA */
+    assert(!tiling->msaa || !tiling->double_buffer);
+ 
+    v3d_choose_tile_size(&job->device->devinfo,
+-                        render_target_count, max_internal_bpp,
+-                        tiling->msaa, tiling->double_buffer,
++                        render_target_count,
++                        max_internal_bpp, total_color_bpp, msaa,
++                        tiling->double_buffer,
+                         &tiling->tile_width, &tiling->tile_height);
+ 
+    tiling->draw_tiles_x = DIV_ROUND_UP(width, tiling->tile_width);
+@@ -458,6 +461,7 @@ v3dv_job_start_frame(struct v3dv_job *job,
+                      bool allocate_tile_state_now,
+                      uint32_t render_target_count,
+                      uint8_t max_internal_bpp,
++                     uint8_t total_color_bpp,
+                      bool msaa)
+ {
+    assert(job);
+@@ -468,7 +472,7 @@ v3dv_job_start_frame(struct v3dv_job *job,
+    const struct v3dv_frame_tiling *tiling =
+       job_compute_frame_tiling(job, width, height, layers,
+                                render_target_count, max_internal_bpp,
+-                               msaa, false);
++                               total_color_bpp, msaa, false);
+ 
+    v3dv_cl_ensure_space_with_branch(&job->bcl, 256);
+    v3dv_return_if_oom(NULL, job);
+@@ -529,6 +533,7 @@ cmd_buffer_end_render_pass_frame(struct v3dv_cmd_buffer *cmd_buffer)
+                                job->frame_tiling.layers,
+                                job->frame_tiling.render_target_count,
+                                job->frame_tiling.internal_bpp,
++                               job->frame_tiling.total_color_bpp,
+                                job->frame_tiling.msaa,
+                                true);
+ 
+@@ -1673,10 +1678,11 @@ cmd_buffer_subpass_create_job(struct v3dv_cmd_buffer *cmd_buffer,
+ 
+       const struct v3dv_framebuffer *framebuffer = state->framebuffer;
+ 
+-      uint8_t internal_bpp;
++      uint8_t max_internal_bpp, total_color_bpp;
+       bool msaa;
+       v3dv_X(job->device, framebuffer_compute_internal_bpp_msaa)
+-         (framebuffer, state->attachments, subpass, &internal_bpp, &msaa);
++         (framebuffer, state->attachments, subpass,
++          &max_internal_bpp, &total_color_bpp, &msaa);
+ 
+       /* From the Vulkan spec:
+        *
+@@ -1700,7 +1706,8 @@ cmd_buffer_subpass_create_job(struct v3dv_cmd_buffer *cmd_buffer,
+                            layers,
+                            true, false,
+                            subpass->color_count,
+-                           internal_bpp,
++                           max_internal_bpp,
++                           total_color_bpp,
+                            msaa);
+    }
+ 
+@@ -2668,6 +2675,7 @@ cmd_buffer_restart_job_for_msaa_if_needed(struct v3dv_cmd_buffer *cmd_buffer)
+                         true, false,
+                         old_job->frame_tiling.render_target_count,
+                         old_job->frame_tiling.internal_bpp,
++                        old_job->frame_tiling.total_color_bpp,
+                         true /* msaa */);
+ 
+    v3dv_job_destroy(old_job);
+diff --git a/src/broadcom/vulkan/v3dv_meta_clear.c b/src/broadcom/vulkan/v3dv_meta_clear.c
+index 0a7905b49d5..1c0d66c977c 100644
+--- a/src/broadcom/vulkan/v3dv_meta_clear.c
++++ b/src/broadcom/vulkan/v3dv_meta_clear.c
+@@ -127,6 +127,7 @@ clear_image_tlb(struct v3dv_cmd_buffer *cmd_buffer,
+ 
+       v3dv_job_start_frame(job, width, height, max_layer,
+                            false, true, 1, internal_bpp,
++                           4 * v3d_internal_bpp_words(internal_bpp),
+                            image->vk.samples > VK_SAMPLE_COUNT_1_BIT);
+ 
+       struct v3dv_meta_framebuffer framebuffer;
+diff --git a/src/broadcom/vulkan/v3dv_meta_copy.c b/src/broadcom/vulkan/v3dv_meta_copy.c
+index c0ec888b8c7..2d30c611e17 100644
+--- a/src/broadcom/vulkan/v3dv_meta_copy.c
++++ b/src/broadcom/vulkan/v3dv_meta_copy.c
+@@ -453,8 +453,9 @@ copy_image_to_buffer_tlb(struct v3dv_cmd_buffer *cmd_buffer,
+    const uint32_t width = DIV_ROUND_UP(region->imageExtent.width, block_w);
+    const uint32_t height = DIV_ROUND_UP(region->imageExtent.height, block_h);
+ 
+-   v3dv_job_start_frame(job, width, height, num_layers, false, true,
+-                        1, internal_bpp, false);
++   v3dv_job_start_frame(job, width, height, num_layers, false, true, 1,
++                        internal_bpp, 4 * v3d_internal_bpp_words(internal_bpp),
++                        false);
+ 
+    struct v3dv_meta_framebuffer framebuffer;
+    v3dv_X(job->device, meta_framebuffer_init)(&framebuffer, fb_format,
+@@ -1323,8 +1324,8 @@ copy_image_tlb(struct v3dv_cmd_buffer *cmd_buffer,
+    const uint32_t width = DIV_ROUND_UP(region->extent.width, block_w);
+    const uint32_t height = DIV_ROUND_UP(region->extent.height, block_h);
+ 
+-   v3dv_job_start_frame(job, width, height, num_layers,
+-                        false, true, 1, internal_bpp,
++   v3dv_job_start_frame(job, width, height, num_layers, false, true, 1,
++                        internal_bpp, 4 * v3d_internal_bpp_words(internal_bpp),
+                         src->vk.samples > VK_SAMPLE_COUNT_1_BIT);
+ 
+    struct v3dv_meta_framebuffer framebuffer;
+@@ -1978,8 +1979,9 @@ copy_buffer_to_image_tlb(struct v3dv_cmd_buffer *cmd_buffer,
+    const uint32_t width = DIV_ROUND_UP(region->imageExtent.width, block_w);
+    const uint32_t height = DIV_ROUND_UP(region->imageExtent.height, block_h);
+ 
+-   v3dv_job_start_frame(job, width, height, num_layers, false, true,
+-                        1, internal_bpp, false);
++   v3dv_job_start_frame(job, width, height, num_layers, false, true, 1,
++                        internal_bpp, 4 * v3d_internal_bpp_words(internal_bpp),
++                        false);
+ 
+    struct v3dv_meta_framebuffer framebuffer;
+    v3dv_X(job->device, meta_framebuffer_init)(&framebuffer, fb_format,
+@@ -4884,8 +4886,9 @@ resolve_image_tlb(struct v3dv_cmd_buffer *cmd_buffer,
+       (fb_format, region->srcSubresource.aspectMask,
+        &internal_type, &internal_bpp);
+ 
+-   v3dv_job_start_frame(job, width, height, num_layers, false, true,
+-                        1, internal_bpp, true);
++   v3dv_job_start_frame(job, width, height, num_layers, false, true, 1,
++                        internal_bpp, 4 * v3d_internal_bpp_words(internal_bpp),
++                        true);
+ 
+    struct v3dv_meta_framebuffer framebuffer;
+    v3dv_X(job->device, meta_framebuffer_init)(&framebuffer, fb_format,
+diff --git a/src/broadcom/vulkan/v3dv_pass.c b/src/broadcom/vulkan/v3dv_pass.c
+index 7f2e2bbc710..0583faf6f9a 100644
+--- a/src/broadcom/vulkan/v3dv_pass.c
++++ b/src/broadcom/vulkan/v3dv_pass.c
+@@ -325,7 +325,8 @@ subpass_get_granularity(struct v3dv_device *device,
+    const uint32_t color_count = subpass->color_count;
+ 
+    bool msaa = false;
+-   uint32_t max_bpp = 0;
++   uint32_t max_internal_bpp = 0;
++   uint32_t total_color_bpp = 0;
+    for (uint32_t i = 0; i < color_count; i++) {
+       uint32_t attachment_idx = subpass->color_attachments[i].attachment;
+       if (attachment_idx == VK_ATTACHMENT_UNUSED)
+@@ -339,7 +340,8 @@ subpass_get_granularity(struct v3dv_device *device,
+       v3dv_X(device, get_internal_type_bpp_for_output_format)
+          (format->planes[0].rt_type, &internal_type, &internal_bpp);
+ 
+-      max_bpp = MAX2(max_bpp, internal_bpp);
++      max_internal_bpp = MAX2(max_internal_bpp, internal_bpp);
++      total_color_bpp += 4 * v3d_internal_bpp_words(internal_bpp);
+ 
+       if (desc->samples > VK_SAMPLE_COUNT_1_BIT)
+          msaa = true;
+@@ -349,7 +351,8 @@ subpass_get_granularity(struct v3dv_device *device,
+     * heuristics so we choose a conservative granularity here, with it disabled.
+     */
+    uint32_t width, height;
+-   v3d_choose_tile_size(&device->devinfo, color_count, max_bpp, msaa,
++   v3d_choose_tile_size(&device->devinfo, color_count,
++                        max_internal_bpp, total_color_bpp, msaa,
+                         false /* double-buffer */, &width, &height);
+    *granularity = (VkExtent2D) {
+       .width = width,
+diff --git a/src/broadcom/vulkan/v3dv_private.h b/src/broadcom/vulkan/v3dv_private.h
+index 300a1ec8ae1..9375cdd58c0 100644
+--- a/src/broadcom/vulkan/v3dv_private.h
++++ b/src/broadcom/vulkan/v3dv_private.h
+@@ -950,6 +950,7 @@ struct v3dv_frame_tiling {
+    uint32_t layers;
+    uint32_t render_target_count;
+    uint32_t internal_bpp;
++   uint32_t total_color_bpp;
+    bool     msaa;
+    bool     double_buffer;
+    uint32_t tile_width;
+@@ -1373,6 +1374,7 @@ void v3dv_job_start_frame(struct v3dv_job *job,
+                           bool allocate_tile_state_now,
+                           uint32_t render_target_count,
+                           uint8_t max_internal_bpp,
++                          uint8_t total_color_bpp,
+                           bool msaa);
+ 
+ bool v3dv_job_type_is_gpu(struct v3dv_job *job);
+diff --git a/src/broadcom/vulkan/v3dvx_device.c b/src/broadcom/vulkan/v3dvx_device.c
+index 4d17a2691a5..61ad98c1217 100644
+--- a/src/broadcom/vulkan/v3dvx_device.c
++++ b/src/broadcom/vulkan/v3dvx_device.c
+@@ -257,11 +257,13 @@ v3dX(framebuffer_compute_internal_bpp_msaa)(
+    const struct v3dv_framebuffer *framebuffer,
+    const struct v3dv_cmd_buffer_attachment_state *attachments,
+    const struct v3dv_subpass *subpass,
+-   uint8_t *max_bpp,
++   uint8_t *max_internal_bpp,
++   uint8_t *total_color_bpp,
+    bool *msaa)
+ {
+    STATIC_ASSERT(V3D_INTERNAL_BPP_32 == 0);
+-   *max_bpp = V3D_INTERNAL_BPP_32;
++   *max_internal_bpp = V3D_INTERNAL_BPP_32;
++   *total_color_bpp = 0;
+    *msaa = false;
+ 
+    if (subpass) {
+@@ -274,8 +276,11 @@ v3dX(framebuffer_compute_internal_bpp_msaa)(
+          assert(att);
+          assert(att->plane_count == 1);
+ 
+-         if (att->vk.aspects & VK_IMAGE_ASPECT_COLOR_BIT)
+-            *max_bpp = MAX2(*max_bpp, att->planes[0].internal_bpp);
++         if (att->vk.aspects & VK_IMAGE_ASPECT_COLOR_BIT) {
++            const uint32_t internal_bpp = att->planes[0].internal_bpp;
++            *max_internal_bpp = MAX2(*max_internal_bpp, internal_bpp);
++            *total_color_bpp += 4 * v3d_internal_bpp_words(internal_bpp);
++         }
+ 
+          if (att->vk.image->samples > VK_SAMPLE_COUNT_1_BIT)
+             *msaa = true;
+@@ -289,7 +294,6 @@ v3dX(framebuffer_compute_internal_bpp_msaa)(
+          if (att->vk.image->samples > VK_SAMPLE_COUNT_1_BIT)
+             *msaa = true;
+       }
+-
+       return;
+    }
+ 
+@@ -299,8 +303,11 @@ v3dX(framebuffer_compute_internal_bpp_msaa)(
+       assert(att);
+       assert(att->plane_count == 1);
+ 
+-      if (att->vk.aspects & VK_IMAGE_ASPECT_COLOR_BIT)
+-         *max_bpp = MAX2(*max_bpp, att->planes[0].internal_bpp);
++      if (att->vk.aspects & VK_IMAGE_ASPECT_COLOR_BIT) {
++         const uint32_t internal_bpp = att->planes[0].internal_bpp;
++         *max_internal_bpp = MAX2(*max_internal_bpp, internal_bpp);
++         *total_color_bpp += 4 * v3d_internal_bpp_words(internal_bpp);
++      }
+ 
+       if (att->vk.image->samples > VK_SAMPLE_COUNT_1_BIT)
+          *msaa = true;
+diff --git a/src/broadcom/vulkan/v3dvx_meta_common.c b/src/broadcom/vulkan/v3dvx_meta_common.c
+index b8f3297bc94..858096f9e4b 100644
+--- a/src/broadcom/vulkan/v3dvx_meta_common.c
++++ b/src/broadcom/vulkan/v3dvx_meta_common.c
+@@ -1408,8 +1408,9 @@ v3dX(meta_copy_buffer)(struct v3dv_cmd_buffer *cmd_buffer,
+       uint32_t width, height;
+       framebuffer_size_for_pixel_count(num_items, &width, &height);
+ 
+-      v3dv_job_start_frame(job, width, height, 1, true, true,
+-                           1, internal_bpp, false);
++      v3dv_job_start_frame(job, width, height, 1, true, true, 1,
++                           internal_bpp, 4 * v3d_internal_bpp_words(internal_bpp),
++                           false);
+ 
+       struct v3dv_meta_framebuffer framebuffer;
+       v3dX(meta_framebuffer_init)(&framebuffer, vk_format, internal_type,
+@@ -1455,8 +1456,9 @@ v3dX(meta_fill_buffer)(struct v3dv_cmd_buffer *cmd_buffer,
+       uint32_t width, height;
+       framebuffer_size_for_pixel_count(num_items, &width, &height);
+ 
+-      v3dv_job_start_frame(job, width, height, 1, true, true,
+-                           1, internal_bpp, false);
++      v3dv_job_start_frame(job, width, height, 1, true, true, 1,
++                           internal_bpp, 4 * v3d_internal_bpp_words(internal_bpp),
++                           false);
+ 
+       struct v3dv_meta_framebuffer framebuffer;
+       v3dX(meta_framebuffer_init)(&framebuffer, VK_FORMAT_R8G8B8A8_UINT,
+diff --git a/src/broadcom/vulkan/v3dvx_private.h b/src/broadcom/vulkan/v3dvx_private.h
+index 81715520913..709b129926f 100644
+--- a/src/broadcom/vulkan/v3dvx_private.h
++++ b/src/broadcom/vulkan/v3dvx_private.h
+@@ -136,7 +136,9 @@ void
+ v3dX(framebuffer_compute_internal_bpp_msaa)(const struct v3dv_framebuffer *framebuffer,
+                                             const struct v3dv_cmd_buffer_attachment_state *attachments,
+                                             const struct v3dv_subpass *subpass,
+-                                            uint8_t *max_bpp, bool *msaa);
++                                            uint8_t *max_internal_bpp,
++                                            uint8_t *total_color_bpp,
++                                            bool *msaa);
+ 
+ #ifdef DEBUG
+ void
+diff --git a/src/broadcom/vulkan/v3dvx_queue.c b/src/broadcom/vulkan/v3dvx_queue.c
+index f8cee36e3bf..6eed2de9d54 100644
+--- a/src/broadcom/vulkan/v3dvx_queue.c
++++ b/src/broadcom/vulkan/v3dvx_queue.c
+@@ -29,7 +29,8 @@
+ void
+ v3dX(job_emit_noop)(struct v3dv_job *job)
+ {
+-   v3dv_job_start_frame(job, 1, 1, 1, true, true, 1, V3D_INTERNAL_BPP_32, false);
++   v3dv_job_start_frame(job, 1, 1, 1, true, true, 1,
++                        V3D_INTERNAL_BPP_32, 4, false);
+    v3dX(job_emit_binning_flush)(job);
+ 
+    struct v3dv_cl *rcl = &job->rcl;
+diff --git a/src/gallium/drivers/v3d/v3d_context.c b/src/gallium/drivers/v3d/v3d_context.c
+index def546e9ef5..1dc4bd017fe 100644
+--- a/src/gallium/drivers/v3d/v3d_context.c
++++ b/src/gallium/drivers/v3d/v3d_context.c
+@@ -233,11 +233,13 @@ v3d_get_tile_buffer_size(const struct v3d_device_info *devinfo,
+         assert(!is_msaa || !double_buffer);
+ 
+         uint32_t max_cbuf_idx = 0;
++        uint32_t total_bpp = 0;
+         *max_bpp = 0;
+         for (int i = 0; i < nr_cbufs; i++) {
+                 if (cbufs[i]) {
+                         struct v3d_surface *surf = v3d_surface(cbufs[i]);
+                         *max_bpp = MAX2(*max_bpp, surf->internal_bpp);
++                        total_bpp += 4 * v3d_internal_bpp_words(surf->internal_bpp);
+                         max_cbuf_idx = MAX2(i, max_cbuf_idx);
+                 }
+         }
+@@ -246,9 +248,11 @@ v3d_get_tile_buffer_size(const struct v3d_device_info *devinfo,
+                 struct v3d_surface *bsurf = v3d_surface(bbuf);
+                 assert(bbuf->texture->nr_samples <= 1 || is_msaa);
+                 *max_bpp = MAX2(*max_bpp, bsurf->internal_bpp);
++                total_bpp += 4 * v3d_internal_bpp_words(bsurf->internal_bpp);
+         }
+ 
+-        v3d_choose_tile_size(devinfo, max_cbuf_idx + 1, *max_bpp,
++        v3d_choose_tile_size(devinfo, max_cbuf_idx + 1,
++                             *max_bpp, total_bpp,
+                              is_msaa, double_buffer,
+                              tile_width, tile_height);
+ }
+-- 
+2.39.2
+

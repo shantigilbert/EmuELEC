@@ -1,0 +1,1176 @@
+From 862503c9dec4dd30c98552d88a2e0ed441be4e4c Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Thu, 25 May 2023 14:53:10 +0200
+Subject: [PATCH 04/18] DT: make a copy from arm64 to arm
+
+---
+ arch/arm/boot/dts/amlogic/Makefile            |  29 +-
+ .../arm/boot/dts/amlogic/coreelec_common.dtsi | 264 ++++++++++++++++++
+ .../boot/dts/amlogic/coreelec_g12_common.dtsi |  48 ++++
+ arch/arm/boot/dts/amlogic/coreelec_g12b.dtsi  |  64 +++++
+ .../arm/boot/dts/amlogic/coreelec_g12b_a.dtsi |  64 +++++
+ .../dts/amlogic/g12b_s922x_minix_u22xj.dts    | 119 ++++++++
+ .../amlogic/g12b_s922x_minix_u22xj_max.dts    | 130 +++++++++
+ .../g12b_s922x_minix_u22xj_max_rev_a.dts      |  25 ++
+ .../dts/amlogic/g12b_s922x_ugoos_am6_2g.dts   | 101 +++++++
+ .../dts/amlogic/g12b_s922x_ugoos_am6_4g.dts   |   9 +
+ .../amlogic/g12b_s922x_ugoos_am6_rev_a_2g.dts | 101 +++++++
+ .../amlogic/g12b_s922x_ugoos_am6_rev_a_4g.dts |   9 +
+ .../dts/amlogic/g12b_s922x_ugoos_am6b_2g.dts  |  29 ++
+ .../dts/amlogic/g12b_s922x_ugoos_am6b_4g.dts  |   9 +
+ .../g12b_s922x_ugoos_am6b_rev_a_2g.dts        |  29 ++
+ .../g12b_s922x_ugoos_am6b_rev_a_4g.dts        |   9 +
+ 16 files changed, 1025 insertions(+), 14 deletions(-)
+ create mode 100644 arch/arm/boot/dts/amlogic/coreelec_common.dtsi
+ create mode 100644 arch/arm/boot/dts/amlogic/coreelec_g12_common.dtsi
+ create mode 100644 arch/arm/boot/dts/amlogic/coreelec_g12b.dtsi
+ create mode 100644 arch/arm/boot/dts/amlogic/coreelec_g12b_a.dtsi
+ create mode 100644 arch/arm/boot/dts/amlogic/g12b_s922x_minix_u22xj.dts
+ create mode 100644 arch/arm/boot/dts/amlogic/g12b_s922x_minix_u22xj_max.dts
+ create mode 100644 arch/arm/boot/dts/amlogic/g12b_s922x_minix_u22xj_max_rev_a.dts
+ create mode 100644 arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_2g.dts
+ create mode 100644 arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_4g.dts
+ create mode 100644 arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_rev_a_2g.dts
+ create mode 100644 arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_rev_a_4g.dts
+ create mode 100644 arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_2g.dts
+ create mode 100644 arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_4g.dts
+ create mode 100644 arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_rev_a_2g.dts
+ create mode 100644 arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_rev_a_4g.dts
+
+diff --git a/arch/arm/boot/dts/amlogic/Makefile b/arch/arm/boot/dts/amlogic/Makefile
+index 1d819778d955..a481e8b54b2d 100644
+--- a/arch/arm/boot/dts/amlogic/Makefile
++++ b/arch/arm/boot/dts/amlogic/Makefile
+@@ -1,14 +1,15 @@
+-
+-targets += dtbs
+-
+-DTB_NAMES := $(subst $\",,$(CONFIG_BUILD_ARM64_APPENDED_DTB_IMAGE_NAMES))
+-ifneq ($(DTB_NAMES),)
+-DTB_LIST := $(addsuffix .dtb,$(DTB_NAMES))
+-else
+-DTB_LIST := $(dtb-y)
+-endif
+-targets += $(DTB_LIST)
+-
+-dtbs: $(addprefix $(obj)/, $(DTB_LIST))
+-
+-clean-files := *.dtb
++dtb-$(CONFIG_ARM64_A32) += g12b_s922x_minix_u22xj.dtb
++dtb-$(CONFIG_ARM64_A32) += g12b_s922x_minix_u22xj_max.dtb
++dtb-$(CONFIG_ARM64_A32) += g12b_s922x_minix_u22xj_max_rev_a.dtb
++dtb-$(CONFIG_ARM64_A32) += g12b_s922x_ugoos_am6_2g.dtb
++dtb-$(CONFIG_ARM64_A32) += g12b_s922x_ugoos_am6_4g.dtb
++dtb-$(CONFIG_ARM64_A32) += g12b_s922x_ugoos_am6_rev_a_2g.dtb
++dtb-$(CONFIG_ARM64_A32) += g12b_s922x_ugoos_am6_rev_a_4g.dtb
++dtb-$(CONFIG_ARM64_A32) += g12b_s922x_ugoos_am6b_2g.dtb
++dtb-$(CONFIG_ARM64_A32) += g12b_s922x_ugoos_am6b_4g.dtb
++dtb-$(CONFIG_ARM64_A32) += g12b_s922x_ugoos_am6b_rev_a_2g.dtb
++dtb-$(CONFIG_ARM64_A32) += g12b_s922x_ugoos_am6b_rev_a_4g.dtb
++
++always		:= $(dtb-y)
++subdir-y	:= $(dts-dirs)
++clean-files	:= *.dtb
+diff --git a/arch/arm/boot/dts/amlogic/coreelec_common.dtsi b/arch/arm/boot/dts/amlogic/coreelec_common.dtsi
+new file mode 100644
+index 000000000000..5e488953a9c0
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/coreelec_common.dtsi
+@@ -0,0 +1,264 @@
++#include <dt-bindings/media/rc-map.h>
++
++/{
++	coreelec;
++	/delete-property/ amlogic-dt-id;
++
++	chosen { };
++
++	reserved-memory {
++		linux,meson-fb {
++			alloc-ranges = <0x77800000 0x800000>;
++		};
++		linux,vdin0_cma {
++			status = "disabled";
++		};
++		linux,vdin1_cma {
++			status = "disabled";
++		};
++		linux,isp_cma {
++			status = "disabled";
++		};
++		linux,adapt_cma {
++			status = "disabled";
++		};
++	};
++
++	gpioleds {
++		status = "okay";
++		/delete-node/ net_red;
++		/delete-node/ net_green;
++		/delete-node/ remote_led;
++		sys_led {
++			/delete-property/ retain-state-suspended;
++			/delete-property/ default-state;
++			linux,default-trigger="default-on";
++		};
++	};
++
++	codec_mm {
++		clear-map;
++	};
++
++	vcodec_dec {
++		status = "disable";
++	};
++
++	gpio_keypad {
++		reg = <0xFF800000 0x400>;
++	};
++
++	/delete-node/ auge_sound;
++	auge_sound {
++		compatible = "amlogic, g12a-sound-card";
++		aml-audio-card,name = "AML-AUGESOUND";
++		avout_mute-gpios = <&gpio_ao GPIOAO_2 GPIO_ACTIVE_HIGH>;
++
++		aml-audio-card,dai-link@0 {
++			mclk-fs = <128>;
++			cpu {
++				system-clock-frequency = <6144000>;
++			};
++			codec {
++				sound-dai = <&dummy_codec>;
++			};
++		};
++
++		aml-audio-card,dai-link@1 {
++			format = "i2s";
++			mclk-fs = <256>;
++			cpu {
++				dai-tdm-slot-tx-mask = <1 1>;
++				dai-tdm-slot-rx-mask = <1 1>;
++				dai-tdm-slot-num = <2>;
++				dai-tdm-slot-width = <32>;
++				system-clock-frequency = <12288000>;
++			};
++			codec {
++				sound-dai = <&amlogic_codec>;
++			};
++		};
++
++		aml-audio-card,dai-link@2 {
++			mclk-fs = <128>;
++			cpu {
++				system-clock-frequency = <6144000>;
++			};
++			codec {
++				sound-dai = <&dummy_codec>;
++			};
++		};
++
++		aml-audio-card,dai-link@3 {
++			format = "i2s";
++			mclk-fs = <256>;
++			bitclock-master = <&aml_i2s2hdmi>;
++			frame-master = <&aml_i2s2hdmi>;
++			cpu {
++				sound-dai = <&aml_i2s2hdmi>;
++				dai-tdm-slot-tx-mask = <1 1>;
++				dai-tdm-slot-rx-mask = <1 1>;
++				dai-tdm-slot-num = <2>;
++				dai-tdm-slot-width = <32>;
++				system-clock-frequency = <12288000>;
++			};
++			codec {
++				sound-dai = <&dummy_codec>;
++			};
++		};
++	};
++
++	audiolocker: locker {
++		status = "okay";
++	};
++
++	/delete-node/ partitions;
++	/delete-node/ firmware;
++
++	/delete-node/ rc@0xff808040;
++	/delete-node/ custom_maps;
++	meson-ir {
++		compatible = "amlogic,meson6-ir";
++		/* Multi-format IR controller */
++		reg = <0xff808040 0x44>;
++		interrupts = <0 196 1>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&remote_pins>;
++		pulse-inverted;
++		wakeup_protocol = <NEC>; /* force default NEC by <dt-bindings/media/rc-map.h> */
++		status = "okay";
++	};
++	meson-remote {
++		compatible = "amlogic, aml_remote";
++		dev_name = "meson-remote";
++		reg = <0xff808040 0x44>, /*Multi-format IR controller*/
++			  <0xff808000 0x20>; /*Legacy IR controller*/
++		status = "okay";
++		protocol = <REMOTE_TYPE_NEC>;
++		led_blink = <1>;
++		led_blink_frq = <100>;
++		interrupts = <0 196 1>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&remote_pins>;
++		max_frame_time = <200>; /*set software decoder max frame time*/
++	};
++
++	amvideocap {
++		compatible = "amlogic, amvideocap";
++		dev_name = "amvideocap.0";
++		status = "okay";
++		max_size = <8>;//8M
++	};
++
++	openvfd {
++		compatible = "open,vfd";
++		dev_name = "openvfd";
++		status = "okay";
++	};
++
++	dummy_venc: dummy_venc {
++		status = "disabled";
++	};
++
++	/delete-node/ sensor;
++	/delete-node/ iq;
++	/delete-node/ demux;
++	/delete-node/ dvb;
++	/delete-node/ amvdec_656in;
++	/delete-node/ aml_cams;
++
++	/delete-node/ lcd;
++	/delete-node/ lcd_extern;
++	/delete-node/ backlight;
++	/delete-node/ bl_pwm_conf;
++	/delete-node/ bl_extern;
++};
++
++&meson_fb {
++	display_size_default = <1920 1080 1920 2160 32>;
++	mem_size = <0x00800000 0x4b80000 0x100000 0x100000 0x800000>;
++	mem_alloc = <1>;
++	4k2k_fb = <1>;
++};
++
++&i2c0 {
++	status = "disabled";
++	/delete-node/ gt9xx@5d;
++	/delete-node/ ftxx@38;
++	/delete-node/ touchscreen@5d;
++	/delete-node/ touchscreen@38;
++};
++
++&i2c2 {
++	status = "disabled";
++	/delete-node/ sensor-i2c@6c;
++};
++
++&i2c3 {
++	/delete-node/ ad82584f_62@62;
++	/delete-node/ tlv320adc3101_32@32;
++	/delete-node/ bl_extern_i2c;
++	/delete-node/ tas5707_36@36;
++};
++
++&audiobus {
++	aml_i2s2hdmi: i2s2hdmi {
++		#sound-dai-cells = <0>;
++		dai-tdm-lane-slot-mask-out = <1 1 1 1>;
++		dai-tdm-clk-sel = <2>;
++		clocks = <&clkaudio CLKID_AUDIO_MCLK_C
++				&clkc CLKID_MPLL2>;
++		clock-names = "mclk", "clk_srcpll";
++		i2s2hdmi = <1>;
++		status = "okay";
++	};
++
++	/delete-node/ tdma;
++	/delete-node/ tdm@0;
++	/delete-node/ tdmc;
++	/delete-node/ tdm@2;
++	/delete-node/ tdm@3;
++	/delete-node/ pdm;
++};
++
++&pinctrl_periphs {
++	/delete-node/ tdmout_a;
++	/delete-node/ tdmin_a;
++	/delete-node/ tdmc_mclk;
++	/delete-node/ tdmout_c;
++	/delete-node/ tdmin_c;
++	/delete-node/ spdifin;
++	/delete-node/ pdmin;
++	/delete-node/ bl_pwm_off_pin;
++	/delete-node/ clk12_24_z_pins;
++	/delete-node/ gen_clk_ee_z;
++	/delete-node/ cam_dvp_pins;
++};
++
++&pinctrl_aobus {
++	/delete-node/ dvb_s_ts0_pins;
++};
++
++&vdin0 {
++	status = "disabled";
++};
++
++&vdin1 {
++	status = "disabled";
++};
++
++/delete-node/ &nand;
++
++&pcie_A {
++	status = "disabled";
++};
++
++&aocec {
++	/delete-property/ arc_port_mask;
++};
++
++&sd_emmc_c {
++	emmc {
++		caps2 = "MMC_CAP2_HS200";
++	};
++};
+diff --git a/arch/arm/boot/dts/amlogic/coreelec_g12_common.dtsi b/arch/arm/boot/dts/amlogic/coreelec_g12_common.dtsi
+new file mode 100644
+index 000000000000..133405c8e6c3
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/coreelec_g12_common.dtsi
+@@ -0,0 +1,48 @@
++#include "coreelec_common.dtsi"
++
++/{
++	auge_sound {
++		aml-audio-card,effect = <&audio_effect>;
++
++		aml-audio-card,dai-link@0 {
++			continuous-clock;
++			cpu {
++				sound-dai = <&aml_spdif_b>;
++			};
++		};
++
++		aml-audio-card,dai-link@1 {
++			bitclock-master = <&aml_tdmb>;
++			frame-master = <&aml_tdmb>;
++			continuous-clock;
++			cpu {
++				sound-dai = <&aml_tdmb>;
++			};
++		};
++
++		aml-audio-card,dai-link@2 {
++			continuous-clock;
++			cpu {
++				sound-dai = <&aml_spdif>;
++			};
++		};
++
++		aml-audio-card,dai-link@3 {
++			continuous-clock;
++		};
++	};
++};
++
++&audiobus {
++	aml_i2s2hdmi: i2s2hdmi {
++		compatible = "amlogic, g12a-snd-tdmc";
++	};
++
++	aml_spdif: spdif {
++		pinctrl-0 = <&spdifout>;
++	};
++
++	aml_spdif_b: spdif_b {
++		status = "okay";
++	};
++};
+diff --git a/arch/arm/boot/dts/amlogic/coreelec_g12b.dtsi b/arch/arm/boot/dts/amlogic/coreelec_g12b.dtsi
+new file mode 100644
+index 000000000000..af33b74fa693
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/coreelec_g12b.dtsi
+@@ -0,0 +1,64 @@
++#include "g12b_a311d_w400.dts"
++#include "coreelec_g12_common.dtsi"
++
++/{
++	reserved-memory {
++		galcore_reserved:linux,galcore {
++			size = <0x1000000>;
++			alignment = <0x400000>;
++		};
++	};
++
++	cpu_opp_table0: cpu_opp_table0 {
++		opp08 {
++			opp-hz = /bits/ 64 <1800000000>;
++			opp-microvolt = <1020000>;
++		};
++	};
++
++	cpu_opp_table1: cpu_opp_table1 {
++		opp08 {
++			opp-hz = /bits/ 64 <1800000000>;
++			opp-microvolt = <830000>;
++		};
++		opp09 {
++			opp-hz = /bits/ 64 <1908000000>;
++			opp-microvolt = <860000>;
++		};
++		opp10 {
++			opp-hz = /bits/ 64 <2016000000>;
++			opp-microvolt = <910000>;
++		};
++		opp11 {
++			opp-hz = /bits/ 64 <2100000000>;
++			opp-microvolt = <960000>;
++		};
++		opp12 {
++			opp-hz = /bits/ 64 <2208000000>;
++			opp-microvolt = <1030000>;
++		};
++	};
++};
++
++&ethmac {
++	pinctrl-names = "external_eth_pins";
++	pinctrl-0 = <&external_eth_pins>;
++	internal_phy = <0>;
++	auto_cali_idx = <0>;
++	/delete-property/ cali_val;
++	/delete-property/ mc_val;
++};
++
++&pinctrl_periphs {
++	a_uart_pins:a_uart {
++		mux {
++			groups = "uart_tx_a",
++				"uart_rx_a",
++				"uart_cts_a",
++				"uart_rts_a";
++			function = "uart_a";
++		};
++
++		/delete-node/ mux1;
++	};
++};
+diff --git a/arch/arm/boot/dts/amlogic/coreelec_g12b_a.dtsi b/arch/arm/boot/dts/amlogic/coreelec_g12b_a.dtsi
+new file mode 100644
+index 000000000000..838b40df7243
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/coreelec_g12b_a.dtsi
+@@ -0,0 +1,64 @@
++#include "g12b_a311d_w400_a.dts"
++#include "coreelec_g12_common.dtsi"
++
++/{
++	reserved-memory {
++		di_cma_reserved:linux,di_cma {
++			size = <0x0>;
++		};
++
++		codec_mm_cma:linux,codec_mm_cma {
++			size = <0x1b000000>;
++		};
++
++		galcore_reserved:linux,galcore {
++			size = <0x1000000>;
++			alignment = <0x400000>;
++		};
++	};
++
++	cpu_opp_table0: cpu_opp_table0 {
++		opp08 {
++			opp-hz = /bits/ 64 <1800000000>;
++			opp-microvolt = <981000>;
++		};
++	};
++
++	multi-di {
++		compatible = "amlogic, dim-g12b";
++		status = "okay";
++		/* 0:use reserved; 1:use cma; 2:use cma as reserved */
++		flag_cma = <4>; //<1>
++		//memory-region = <&di_reserved>;
++		memory-region = <&di_cma_reserved>;
++		interrupts = <0 46 1
++				0 40 1>;
++		interrupt-names = "pre_irq", "post_irq";
++		clocks = <&clkc CLKID_VPU_CLKB_TMP_COMP>,
++			<&clkc CLKID_VPU_CLKB_COMP>;
++		clock-names = "vpu_clkb_tmp_composite",
++			"vpu_clkb_composite";
++		clock-range = <334 667>;
++		/* buffer-size = <3621952>;(yuv422 8bit) */
++		buffer-size = <4074560>;/*yuv422 fullpack*/
++		/* reserve-iomap = "true"; */
++		/* if enable nr10bit, set nr10bit-support to 1 */
++		post-wr-support = <1>;
++		nr10bit-support = <1>;
++		nrds-enable = <1>;
++		pps-enable = <1>;
++	};
++
++	deinterlace {
++		status = "disable";
++	};
++};
++
++&ethmac {
++	pinctrl-names = "external_eth_pins";
++	pinctrl-0 = <&external_eth_pins>;
++	internal_phy = <0>;
++	auto_cali_idx = <0>;
++	/delete-property/ cali_val;
++	/delete-property/ mc_val;
++};
+diff --git a/arch/arm/boot/dts/amlogic/g12b_s922x_minix_u22xj.dts b/arch/arm/boot/dts/amlogic/g12b_s922x_minix_u22xj.dts
+new file mode 100644
+index 000000000000..5186afc7baa7
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/g12b_s922x_minix_u22xj.dts
+@@ -0,0 +1,119 @@
++#include "coreelec_g12b_a.dtsi"
++
++/{
++	model = "Minix U22-XJ";
++	coreelec-dt-id = "g12b_s922x_minix_u22xj";
++
++	memory@00000000 {
++		linux,usable-memory = <0x0 0xf5000000>;
++	};
++
++	/delete-node/ t9015;
++	/delete-node/ rtc;
++
++	auge_sound {
++		aml-audio-card,dai-link@1 {
++			codec {
++				sound-dai = <&rt5651>;
++			};
++		};
++	};
++
++	/* Minix original gpio driver settings */
++	jw_io_init {
++		compatible = "amlogic, jw_io_control";
++		dev_name = "jw_io_control";
++		status = "okay";
++		hdmi_5v_gpio = <&gpio GPIOH_8 GPIO_ACTIVE_HIGH>;
++		usb_hub_reset = <&gpio GPIOH_4 GPIO_ACTIVE_HIGH>;
++		ethernet_reset = <&gpio GPIOZ_15 GPIO_ACTIVE_HIGH>;
++		ethernet_int = <&gpio GPIOZ_14 GPIO_ACTIVE_HIGH>;
++		otg_ctl_gpio = <&gpio GPIOC_7 GPIO_ACTIVE_HIGH>;
++		earphone_ctl_gpio = <&gpio_ao GPIOAO_7 GPIO_ACTIVE_HIGH>;
++	};
++
++	gpio-reset {
++		compatible = "linux,gpio-reset";
++		usb_hub_reset {
++			gpios = <&gpio GPIOH_4 GPIO_ACTIVE_LOW>;
++			asserted-state = <0>;
++			duration-ms = <1000>;
++		};
++	};
++};
++
++&pinctrl_periphs {
++	external_eth_pins {
++		mux {
++			groups = "eth_mdio",
++			"eth_mdc",
++			"eth_rgmii_rx_clk",
++			"eth_rx_dv",
++			"eth_rxd0",
++			"eth_rxd1",
++			"eth_rxd2_rgmii",
++			"eth_rxd3_rgmii",
++			"eth_rgmii_tx_clk",
++			"eth_txen",
++			"eth_txd0",
++			"eth_txd1",
++			"eth_txd2_rgmii",
++			"eth_txd3_rgmii";
++		};
++	};
++};
++
++&i2c1 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2c1_master_pins3>;
++	clock-frequency = <100000>;
++
++	/* Minix power control MCU */
++	jw_mcu: jw_mcu@15 {
++		compatible = "everest,jw_mcu";
++		reg = <0x15>;
++		mcu_watchdog_gpio = <&gpio_ao GPIOAO_8 GPIO_ACTIVE_HIGH>;
++		status = "okay";
++	};
++
++	/* Minix extra control MCU */
++	jw_mcu_isp: jw_mcu_isp@35 {
++		compatible = "everest,jw_mcu_isp";
++		reg = <0x35>;
++		status = "okay";
++	};
++
++	rtc_hym8563: rtc_hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		irq_gpio = <&gpio_ao GPIOAO_6 GPIO_ACTIVE_HIGH>;
++	};
++};
++
++&i2c3 {
++	rt5651: rt5651@1a {
++		compatible = "realtek,rt5651";
++		#sound-dai-cells = <0>;
++		reg = <0x1a>;
++		status = "okay";
++		realtek,dmic-en = "false";
++		realtek,in2-differential = "false";
++	};
++};
++
++&sd_emmc_b {
++	sd {
++		vol_switch = <&gpio_ao GPIOAO_2 GPIO_ACTIVE_HIGH>;
++		vol_switch_18 = <1>;
++	};
++};
++
++&ethmac {
++	auto_cali_idx = <1>;
++};
++
++&usb3_phy_v2 {
++	gpio-vbus-power = "GPIOH_5";
++	gpios = <&gpio GPIOH_5 GPIO_ACTIVE_HIGH>;
++};
+diff --git a/arch/arm/boot/dts/amlogic/g12b_s922x_minix_u22xj_max.dts b/arch/arm/boot/dts/amlogic/g12b_s922x_minix_u22xj_max.dts
+new file mode 100644
+index 000000000000..43ceda52dafc
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/g12b_s922x_minix_u22xj_max.dts
+@@ -0,0 +1,130 @@
++#include "coreelec_g12b.dtsi"
++
++/{
++	model = "Minix U22-XJ Max";
++	coreelec-dt-id = "g12b_s922x_minix_u22xj_max";
++
++	memory@00000000 {
++		linux,usable-memory = <0x0 0xf5000000>;
++	};
++
++	/delete-node/ t9015;
++	/delete-node/ rtc;
++
++	auge_sound {
++		aml-audio-card,dai-link@1 {
++			codec {
++				sound-dai = <&es8316>;
++			};
++		};
++	};
++
++	/* Minix original gpio driver settings */
++	jw_io_init {
++		compatible = "amlogic, jw_io_control";
++		dev_name = "jw_io_control";
++		status = "okay";
++		hdmi_5v_gpio = <&gpio GPIOH_8 GPIO_ACTIVE_HIGH>;
++		usb_hub_reset = <&gpio GPIOH_4 GPIO_ACTIVE_HIGH>;
++		ethernet_reset = <&gpio GPIOZ_15 GPIO_ACTIVE_HIGH>;
++		ethernet_int = <&gpio GPIOZ_14 GPIO_ACTIVE_HIGH>;
++		otg_ctl_gpio = <&gpio GPIOC_7 GPIO_ACTIVE_HIGH>;
++		earphone_ctl_gpio = <&gpio_ao GPIOAO_7 GPIO_ACTIVE_HIGH>;
++	};
++
++	gpio-reset {
++		compatible = "linux,gpio-reset";
++		usb_hub_reset {
++			gpios = <&gpio GPIOH_4 GPIO_ACTIVE_LOW>;
++			asserted-state = <0>;
++			duration-ms = <1000>;
++		};
++	};
++};
++
++&pinctrl_periphs {
++	external_eth_pins {
++		mux {
++			groups = "eth_mdio",
++			"eth_mdc",
++			"eth_rgmii_rx_clk",
++			"eth_rx_dv",
++			"eth_rxd0",
++			"eth_rxd1",
++			"eth_rxd2_rgmii",
++			"eth_rxd3_rgmii",
++			"eth_rgmii_tx_clk",
++			"eth_txen",
++			"eth_txd0",
++			"eth_txd1",
++			"eth_txd2_rgmii",
++			"eth_txd3_rgmii";
++		};
++	};
++};
++
++&i2c1 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2c1_master_pins3>;
++	clock-frequency = <100000>;
++
++	/* Minix power control MCU */
++	jw_mcu: jw_mcu@15 {
++		compatible = "everest,jw_mcu";
++		reg = <0x15>;
++		mcu_watchdog_gpio = <&gpio_ao GPIOAO_8 GPIO_ACTIVE_HIGH>;
++		status = "okay";
++	};
++
++	/* Minix extra control MCU */
++	jw_mcu_isp: jw_mcu_isp@35 {
++		compatible = "everest,jw_mcu_isp";
++		reg = <0x35>;
++		status = "okay";
++	};
++
++	rtc_hym8563: rtc_hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		irq_gpio = <&gpio_ao GPIOAO_6 GPIO_ACTIVE_HIGH>;
++	};
++};
++
++&i2c3 {
++	es8316: es8316@10 {
++		compatible = "everest,es8316";
++		#sound-dai-cells = <0>;
++		reg = <0x10>;
++		status = "okay";
++	};
++};
++
++&sd_emmc_b {
++	sd {
++		jtag_pin = <&gpio GPIOC_0 GPIO_ACTIVE_HIGH>;
++		vol_switch = <&gpio_ao GPIOAO_2 GPIO_ACTIVE_HIGH>;
++		vol_switch_18 = <1>;
++	};
++};
++
++&pinctrl_periphs {
++	a_uart_pins:a_uart {
++		mux {
++			groups = "uart_tx_a",
++				"uart_rx_a",
++				"uart_cts_a",
++				"uart_rts_a";
++		};
++		/delete-node/ mux1;
++	};
++};
++
++&ethmac {
++	auto_cali_idx = <1>;
++};
++
++&usb3_phy_v2 {
++	gpio-vbus-power = "GPIOH_5";
++	gpios = <&gpio GPIOH_5 GPIO_ACTIVE_HIGH>;
++};
+diff --git a/arch/arm/boot/dts/amlogic/g12b_s922x_minix_u22xj_max_rev_a.dts b/arch/arm/boot/dts/amlogic/g12b_s922x_minix_u22xj_max_rev_a.dts
+new file mode 100644
+index 000000000000..ead93fb7c127
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/g12b_s922x_minix_u22xj_max_rev_a.dts
+@@ -0,0 +1,25 @@
++#include "g12b_s922x_minix_u22xj.dts"
++
++/{
++	model = "Minix U22-XJ Max";
++	coreelec-dt-id = "g12b_s922x_minix_u22xj_max_rev_a";
++
++	auge_sound {
++		aml-audio-card,dai-link@1 {
++			codec {
++				sound-dai = <&es8316>;
++			};
++		};
++	};
++};
++
++&i2c3 {
++	/delete-node/ rt5651@1a;
++
++	es8316: es8316@10 {
++		compatible = "everest,es8316";
++		#sound-dai-cells = <0>;
++		reg = <0x10>;
++		status = "okay";
++	};
++};
+diff --git a/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_2g.dts b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_2g.dts
+new file mode 100644
+index 000000000000..06a21adb3309
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_2g.dts
+@@ -0,0 +1,101 @@
++#include "coreelec_g12b.dtsi"
++
++/{
++	model = "UGOOS AM6";
++	coreelec-dt-id = "g12b_s922x_ugoos_am6";
++	amlogic-dt-id = "g12b_AM6_b2g";
++
++	memory@00000000 {
++		linux,usable-memory = <0x000000 0x80000000>;
++	};
++
++	auge_sound {
++		aml-audio-card,dai-link@1 {
++			codec {
++				sound-dai = <&rt5651>;
++			};
++		};
++	};
++
++	gpioleds {
++		green_led {
++			label = "green_led";
++			gpios = <&gpio GPIOC_7 GPIO_ACTIVE_HIGH>;
++			linux,default-trigger = "default-on";
++		};
++	};
++
++	wifi{
++		power_on_pin = <&gpio_ao GPIOAO_10 GPIO_ACTIVE_HIGH>;
++	};
++
++	gpio_keypad {
++		key-gpios = <&gpio_ao  GPIOAO_6  GPIO_ACTIVE_HIGH>;
++	};
++};
++
++&usb2_phy_v2 {
++	gpio-vbus-power = "GPIOA_8";
++	gpios = <&gpio GPIOA_8 GPIO_ACTIVE_HIGH>;
++};
++
++&usb3_phy_v2 {
++	otg = <1>;
++	default-host; // or default-otg, or nothing for auto
++	gpio-vbus-power = "GPIOAO_7";
++	gpios = <&gpio_ao GPIOAO_7 GPIO_ACTIVE_HIGH>;
++};
++
++&i2c3 {
++	rt5651: rt5651@1a {
++		compatible = "realtek,rt5651";
++		#sound-dai-cells = <0>;
++		reg = <0x1a>;
++		status = "okay";
++		realtek,dmic-en = "false";
++		realtek,in2-differential = "false";
++	};
++
++	hym8563: hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		#clock-cells = <0>;
++		clock-frequency = <32768>;
++		clock-output-names = "xin32k";
++	};
++};
++
++&audiobus {
++	aml_tdmc: tdmc {
++		pinctrl-0 = </*&tdmc_mclk &tdmout_c &tdmin_c*/>;
++	};
++
++	tdm@3 {
++		status = "disabled";
++	};
++}; /* end of audiobus */
++
++&pinctrl_aobus {
++	/delete-node/ spdifout;
++	/delete-node/ spdifout_a_mute;
++};
++
++&pinctrl_periphs {
++	/delete-node/ tdmc_mclk;
++	/delete-node/ tdmout_c;
++	/delete-node/ tdmin_c;
++
++	spdifout: spdifout {
++		mux { /* GPIOA_11 */
++			groups = "spdif_out_a11";
++			function = "spdif_out";
++		};
++	};
++
++	spdifout_a_mute: spdifout_a_mute {
++		mux { /* GPIOA_11 */
++			groups = "GPIOA_11";
++			function = "gpio_periphs";
++		};
++	};
++}; /* end of pinctrl_periphs */
+diff --git a/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_4g.dts b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_4g.dts
+new file mode 100644
+index 000000000000..a0004d876792
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_4g.dts
+@@ -0,0 +1,9 @@
++#include "g12b_s922x_ugoos_am6_2g.dts"
++
++/{
++	amlogic-dt-id = "g12b_AM6_b4g";
++
++	memory@00000000 {
++		linux,usable-memory = <0x000000 0xF5000000>;
++	};
++};
+diff --git a/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_rev_a_2g.dts b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_rev_a_2g.dts
+new file mode 100644
+index 000000000000..5aa71fc3db78
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_rev_a_2g.dts
+@@ -0,0 +1,101 @@
++#include "coreelec_g12b_a.dtsi"
++
++/{
++	model = "UGOOS AM6";
++	coreelec-dt-id = "g12b_s922x_ugoos_am6_rev_a";
++	amlogic-dt-id = "g12b_AM6_a2g";
++
++	memory@00000000 {
++		linux,usable-memory = <0x000000 0x80000000>;
++	};
++
++	auge_sound {
++		aml-audio-card,dai-link@1 {
++			codec {
++				sound-dai = <&rt5651>;
++			};
++		};
++	};
++
++	gpioleds {
++		green_led {
++			label = "green_led";
++			gpios = <&gpio GPIOC_7 GPIO_ACTIVE_HIGH>;
++			linux,default-trigger = "default-on";
++		};
++	};
++
++	wifi{
++		power_on_pin = <&gpio_ao GPIOAO_10 GPIO_ACTIVE_HIGH>;
++	};
++
++	gpio_keypad {
++		key-gpios = <&gpio_ao  GPIOAO_6  GPIO_ACTIVE_HIGH>;
++	};
++};
++
++&usb2_phy_v2 {
++	gpio-vbus-power = "GPIOA_8";
++	gpios = <&gpio GPIOA_8 GPIO_ACTIVE_HIGH>;
++};
++
++&usb3_phy_v2 {
++	otg = <1>;
++	default-host; // or default-otg, or nothing for auto
++	gpio-vbus-power = "GPIOAO_7";
++	gpios = <&gpio_ao GPIOAO_7 GPIO_ACTIVE_HIGH>;
++};
++
++&i2c3 {
++	rt5651: rt5651@1a {
++		compatible = "realtek,rt5651";
++		#sound-dai-cells = <0>;
++		reg = <0x1a>;
++		status = "okay";
++		realtek,dmic-en = "false";
++		realtek,in2-differential = "false";
++	};
++
++	hym8563: hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		#clock-cells = <0>;
++		clock-frequency = <32768>;
++		clock-output-names = "xin32k";
++	};
++};
++
++&audiobus {
++	aml_tdmc: tdmc {
++		pinctrl-0 = </*&tdmc_mclk &tdmout_c &tdmin_c*/>;
++	};
++
++	tdm@3 {
++		status = "disabled";
++	};
++}; /* end of audiobus */
++
++&pinctrl_aobus {
++	/delete-node/ spdifout;
++	/delete-node/ spdifout_a_mute;
++};
++
++&pinctrl_periphs {
++	/delete-node/ tdmc_mclk;
++	/delete-node/ tdmout_c;
++	/delete-node/ tdmin_c;
++
++	spdifout: spdifout {
++		mux { /* GPIOA_11 */
++			groups = "spdif_out_a11";
++			function = "spdif_out";
++		};
++	};
++
++	spdifout_a_mute: spdifout_a_mute {
++		mux { /* GPIOA_11 */
++			groups = "GPIOA_11";
++			function = "gpio_periphs";
++		};
++	};
++}; /* end of pinctrl_periphs */
+diff --git a/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_rev_a_4g.dts b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_rev_a_4g.dts
+new file mode 100644
+index 000000000000..f1f1eacef83a
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6_rev_a_4g.dts
+@@ -0,0 +1,9 @@
++#include "g12b_s922x_ugoos_am6_rev_a_2g.dts"
++
++/{
++	amlogic-dt-id = "g12b_AM6_a4g";
++
++	memory@00000000 {
++		linux,usable-memory = <0x000000 0xF5000000>;
++	};
++};
+diff --git a/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_2g.dts b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_2g.dts
+new file mode 100644
+index 000000000000..a293658b53b3
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_2g.dts
+@@ -0,0 +1,29 @@
++#include "g12b_s922x_ugoos_am6_2g.dts"
++
++/{
++	model = "UGOOS AM6B";
++	coreelec-dt-id = "g12b_s922x_ugoos_am6b";
++	amlogic-dt-id = "g12b_AM6b_b2g";
++
++	auge_sound {
++		aml-audio-card,dai-link@1 {
++			codec {
++				sound-dai = <&es8388>;
++			};
++		};
++	};
++};
++
++&i2c3 {
++	/delete-node/ rt5651@1a;
++
++	es8388: es8388@10 {
++		status = "okay";
++		compatible = "everest,es8388";
++		#sound-dai-cells = <0>;
++		reg = <0x10>;
++		def-vol = <0x1d>;
++		def-dacvol = <0x0a>;
++		aux-det-gpio = <&gpio GPIOH_4 GPIO_ACTIVE_HIGH>;
++	};
++};
+diff --git a/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_4g.dts b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_4g.dts
+new file mode 100644
+index 000000000000..adb06b6cf89a
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_4g.dts
+@@ -0,0 +1,9 @@
++#include "g12b_s922x_ugoos_am6b_2g.dts"
++
++/{
++	amlogic-dt-id = "g12b_AM6b_b4g";
++
++	memory@00000000 {
++		linux,usable-memory = <0x000000 0xF5000000>;
++	};
++};
+diff --git a/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_rev_a_2g.dts b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_rev_a_2g.dts
+new file mode 100644
+index 000000000000..fe5937c28760
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_rev_a_2g.dts
+@@ -0,0 +1,29 @@
++#include "g12b_s922x_ugoos_am6_rev_a_2g.dts"
++
++/{
++	model = "UGOOS AM6B";
++	coreelec-dt-id = "g12b_s922x_ugoos_am6b_rev_a";
++	amlogic-dt-id = "g12b_AM6b_a2g";
++
++	auge_sound {
++		aml-audio-card,dai-link@1 {
++			codec {
++				sound-dai = <&es8388>;
++			};
++		};
++	};
++};
++
++&i2c3 {
++	/delete-node/ rt5651@1a;
++
++	es8388: es8388@10 {
++		status = "okay";
++		compatible = "everest,es8388";
++		#sound-dai-cells = <0>;
++		reg = <0x10>;
++		def-vol = <0x1d>;
++		def-dacvol = <0x0a>;
++		aux-det-gpio = <&gpio GPIOH_4 GPIO_ACTIVE_HIGH>;
++	};
++};
+diff --git a/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_rev_a_4g.dts b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_rev_a_4g.dts
+new file mode 100644
+index 000000000000..44d09b2e89d4
+--- /dev/null
++++ b/arch/arm/boot/dts/amlogic/g12b_s922x_ugoos_am6b_rev_a_4g.dts
+@@ -0,0 +1,9 @@
++#include "g12b_s922x_ugoos_am6b_rev_a_2g.dts"
++
++/{
++	amlogic-dt-id = "g12b_AM6b_a4g";
++
++	memory@00000000 {
++		linux,usable-memory = <0x000000 0xF5000000>;
++	};
++};
+-- 
+2.25.1
+

@@ -8,9 +8,17 @@ rtlwifi/rtl8192cufw_TMSC.bin
 rtlwifi/rtl8192cufw.bin
 rtlwifi/rtl8192eu_nic.bin
 rtlwifi/rtl8723bs_nic.bin
+rtw88/rtw8821c_fw.bin
+rtw88/rtw8822c_fw.bin
+rtw88/rtw8822c_wow_fw.bin
 rtl_bt/rtl8723bs_fw.bin
 rtl_bt/rtl8723bs_config-OBDA8723.bin
+rtl_bt/rtl8821c_config.bin
+rtl_bt/rtl8821c_fw.bin
 rtl_bt/rtl8822cs_config.bin
 rtl_bt/rtl8822cs_fw.bin
+rtl_bt/rtl8822cu_config.bin
+rtl_bt/rtl8822cu_fw.bin
 rtl_nic/rtl8153a-3.fw
+rtl_nic/rtl8168h-2.fw
 meson

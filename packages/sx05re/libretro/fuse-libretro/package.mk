@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="fuse-libretro"
-PKG_VERSION="3f9344ddf88dfd251d95cffdea615692479e8cc6"
-PKG_SHA256="5b4f1b5d2eaacca013a46ed9a7105162500d15ed9d25da3f88b212226cd999e2"
+PKG_VERSION="847dbbd6f787823ac9a5dfacdd68ab181063374e"
+PKG_SHA256="87ec7826021704e2aa6f35224f334201d4d6bf56cabd11e5c9ebc6e736360866"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/fuse-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -35,7 +35,7 @@ PKG_LONGDESC="A port of the Fuse Unix Spectrum Emulator to libretro "
 PKG_TOOLCHAIN="make"
 
 make_target() {
-if [ "${DEVICE}" == "Amlogic-ng" ]; then
+if [ "${DEVICE}" == "Amlogic-ng" ] || [ "${DEVICE}" == "Amlogic-ogu" ]; then
   make -f Makefile.libretro platform=rpi4_64
  else
   make -f Makefile.libretro platform=rpi3_64 
@@ -43,6 +43,6 @@ fi
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp fuse_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp fuse_libretro.so ${INSTALL}/usr/lib/libretro/
 }

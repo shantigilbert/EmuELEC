@@ -2,8 +2,8 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libidn2"
-PKG_VERSION="2.3.3"
-PKG_SHA256="f3ac987522c00d33d44b323cae424e2cffcb4c63c6aa6cd1376edacbf1c36eb0"
+PKG_VERSION="2.3.4"
+PKG_SHA256="93caba72b4e051d1f8d4f5a076ab63c99b77faee019b72b9783b267986dbb45f"
 PKG_LICENSE="LGPL3"
 PKG_SITE="https://www.gnu.org/software/libidn/"
 PKG_URL="https://ftpmirror.gnu.org/gnu/libidn/libidn2-${PKG_VERSION}.tar.gz"

@@ -1,0 +1,29 @@
+From 13e84821ee3868facaa116e593ddd6d8d0e09069 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Thu, 16 Nov 2023 10:48:44 +0100
+Subject: [PATCH] Enable RTW debug to get message if RFE type is not defined
+
+---
+ Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 9364b54..735c553 100644
+--- a/Makefile
++++ b/Makefile
+@@ -116,10 +116,10 @@ EXTRA_CFLAGS += -DCONFIG_RTW_ANDROID=$(CONFIG_RTW_ANDROID)
+ endif
+ 
+ ########################## Debug ###########################
+-CONFIG_RTW_DEBUG = y
++CONFIG_RTW_DEBUG = n
+ # default log level is _DRV_INFO_ = 4,
+ # please refer to "How_to_set_driver_debug_log_level.doc" to set the available level.
+-CONFIG_RTW_LOG_LEVEL = 1
++CONFIG_RTW_LOG_LEVEL = 4
+ 
+ # enable /proc/net/rtlxxxx/ debug interfaces
+ CONFIG_PROC_DEBUG = n
+-- 
+2.42.0
+

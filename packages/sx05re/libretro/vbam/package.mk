@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="vbam"
-PKG_VERSION="7e30b038893de63e674944f75581d57c7685ea3a"
-PKG_SHA256="589d4c4ff0764ea0f3b4829291bff773ef228926531fb35a1705f8770ea130a2"
+PKG_VERSION="a2378f05f600a5a9cf450c60a87976b80d6a895a"
+PKG_SHA256="c779acec7b5cc7f3d95b3489077ad372da738c0e02eb4bbaaa74c950ded5d68b"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/vbam-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -42,6 +42,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp ../src/libretro/vbam_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp ../src/libretro/vbam_libretro.so ${INSTALL}/usr/lib/libretro/
 }

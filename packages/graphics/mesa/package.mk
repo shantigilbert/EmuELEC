@@ -3,8 +3,13 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="mesa"
-PKG_VERSION="22.2.2"
-PKG_SHA256="2de11fb74fc5cc671b818e49fe203cea0cd1d8b69756e97cdb06a2f4e78948f9"
+if [ "${DEVICE}" = "RPi5" ]; then
+  PKG_VERSION="23.2.1"
+  PKG_SHA256="64de0616fc2d801f929ab1ac2a4f16b3e2783c4309a724c8a259b20df8bbc1cc"
+else
+  PKG_VERSION="22.3.7"
+  PKG_SHA256="894ce2f4a1c2e76177cdd2284620192d0da3066b243eec2fbb1d7cf37f13042c"
+fi
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.mesa3d.org/"
 PKG_URL="https://mesa.freedesktop.org/archive/mesa-${PKG_VERSION}.tar.xz"
@@ -13,10 +18,8 @@ PKG_LONGDESC="Mesa is a 3-D graphics library with an API."
 
 get_graphicdrivers
 
-PKG_MESON_OPTS_TARGET="-Ddri-drivers= \
-                       -Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
+PKG_MESON_OPTS_TARGET="-Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
                        -Dgallium-extra-hud=false \
-                       -Dgallium-xvmc=disabled \
                        -Dgallium-omx=disabled \
                        -Dgallium-nine=false \
                        -Dgallium-opencl=disabled \
@@ -32,15 +35,34 @@ PKG_MESON_OPTS_TARGET="-Ddri-drivers= \
                        -Dselinux=false \
                        -Dosmesa=false"
 
-if [ "${DISPLAYSERVER}" = "x11" ]; then
-  PKG_DEPENDS_TARGET+=" xorgproto libXext libXdamage libXfixes libXxf86vm libxcb libX11 libxshmfence libXrandr libglvnd"
-  export X11_INCLUDES=
-  PKG_MESON_OPTS_TARGET+=" -Dplatforms=x11 -Ddri3=enabled -Dglx=dri -Dglvnd=true"
-elif [ "${DISPLAYSERVER}" = "wl" ]; then
-  PKG_DEPENDS_TARGET+=" wayland wayland-protocols libglvnd"
-  PKG_MESON_OPTS_TARGET+=" -Dplatforms=wayland -Ddri3=disabled -Dglx=disabled -Dglvnd=true"
+if [ "${DEVICE}" = "RPi5" ]; then
+  PKG_MESON_OPTS_TARGET+=" -Ddraw-use-llvm=false"
 else
-  PKG_MESON_OPTS_TARGET+=" -Dplatforms="" -Ddri3=disabled -Dglx=disabled -Dglvnd=false"
+  PKG_MESON_OPTS_TARGET+=" -Ddri-drivers="
+fi
+
+if [ "${DISPLAYSERVER}" = "x11" ]; then
+  PKG_DEPENDS_TARGET+=" xorgproto libXext libXdamage libXfixes libXxf86vm libxcb libX11 libxshmfence libXrandr"
+  export X11_INCLUDES=
+  PKG_MESON_OPTS_TARGET+=" -Dplatforms=x11 \
+                           -Ddri3=enabled \
+                           -Dglx=dri"
+elif [ "${DISPLAYSERVER}" = "wl" ]; then
+  PKG_DEPENDS_TARGET+=" wayland wayland-protocols"
+  PKG_MESON_OPTS_TARGET+=" -Dplatforms=wayland \
+                           -Ddri3=disabled \
+                           -Dglx=disabled"
+else
+  PKG_MESON_OPTS_TARGET+=" -Dplatforms="" \
+                           -Ddri3=disabled \
+                           -Dglx=disabled"
+fi
+
+if listcontains "${GRAPHIC_DRIVERS}" "(nvidia|nvidia-ng)"; then
+  PKG_DEPENDS_TARGET+=" libglvnd"
+  PKG_MESON_OPTS_TARGET+=" -Dglvnd=true"
+else
+  PKG_MESON_OPTS_TARGET+=" -Dglvnd=false"
 fi
 
 if [ "${LLVM_SUPPORT}" = "yes" ]; then
@@ -59,7 +81,8 @@ fi
 
 if [ "${VAAPI_SUPPORT}" = "yes" ] && listcontains "${GRAPHIC_DRIVERS}" "(r600|radeonsi)"; then
   PKG_DEPENDS_TARGET+=" libva"
-  PKG_MESON_OPTS_TARGET+=" -Dgallium-va=enabled"
+  PKG_MESON_OPTS_TARGET+=" -Dgallium-va=enabled \
+                           -Dvideo-codecs=vc1dec,h264dec,h264enc,h265dec,h265enc"
 else
   PKG_MESON_OPTS_TARGET+=" -Dgallium-va=disabled"
 fi

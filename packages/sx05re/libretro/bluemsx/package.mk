@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="bluemsx"
-PKG_VERSION="acf358be18644a9df0ed9602d63c2f73d4fe605a"
-PKG_SHA256="2e4a7b5cc6b1eb90436d230591a23d775a3aec8fa26ce36d4443fce26bc05f40"
+PKG_VERSION="e8a4280bcbd149d1e020adcd9469ad9d8bd67412"
+PKG_SHA256="a9ee6d5922651e64d48e37e5a4a22bc08bc27d213adabaaa4283d92d8ab97fa5"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/blueMSX-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -41,6 +41,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp bluemsx_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp bluemsx_libretro.so ${INSTALL}/usr/lib/libretro/
 }

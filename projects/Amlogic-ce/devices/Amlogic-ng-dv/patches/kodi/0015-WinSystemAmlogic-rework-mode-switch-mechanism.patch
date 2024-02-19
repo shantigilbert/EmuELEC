@@ -1,0 +1,378 @@
+From 36a8072f7e006c4e34100e589a05b3e79f3c06af Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Thu, 20 Apr 2023 20:22:41 +0200
+Subject: [PATCH 15/21] WinSystemAmlogic: rework mode switch mechanism Because
+ of Dolby Vision it is possible resolution and frequency do not change. But if
+ colour subsampling or colour depth is changed a forced mode switch is
+ required. Force mode switch by set mode 'null' In special cases a hard mode
+ reset is needed like 4k420 to 4kDV.
+
+---
+ xbmc/utils/AMLUtils.cpp                       | 10 +-
+ xbmc/utils/AMLUtils.h                         |  4 +-
+ xbmc/windowing/amlogic/WinSystemAmlogic.cpp   | 46 +++------
+ xbmc/windowing/amlogic/WinSystemAmlogic.h     |  6 +-
+ .../amlogic/WinSystemAmlogicGLESContext.cpp   | 99 ++++++++++++++++++-
+ .../amlogic/WinSystemAmlogicGLESContext.h     |  5 +-
+ 6 files changed, 124 insertions(+), 46 deletions(-)
+
+diff --git a/xbmc/utils/AMLUtils.cpp b/xbmc/utils/AMLUtils.cpp
+index fd35427e93..33e449408d 100644
+--- a/xbmc/utils/AMLUtils.cpp
++++ b/xbmc/utils/AMLUtils.cpp
+@@ -412,12 +412,13 @@ bool aml_get_native_resolution(RESOLUTION_INFO *res)
+   return result;
+ }
+ 
+-bool aml_set_native_resolution(const RESOLUTION_INFO &res, std::string framebuffer_name, const int stereo_mode)
++bool aml_set_native_resolution(const RESOLUTION_INFO &res, std::string framebuffer_name,
++  const int stereo_mode, bool force_mode_switch)
+ {
+   bool result = false;
+ 
+   aml_handle_display_stereo_mode(RENDER_STEREO_MODE_OFF);
+-  result = aml_set_display_resolution(res, framebuffer_name);
++  result = aml_set_display_resolution(res, framebuffer_name, force_mode_switch);
+ 
+   aml_handle_scale(res);
+   aml_handle_display_stereo_mode(stereo_mode);
+@@ -498,7 +499,8 @@ bool aml_probe_resolutions(std::vector<RESOLUTION_INFO> &resolutions)
+   return resolutions.size() > 0;
+ }
+ 
+-bool aml_set_display_resolution(const RESOLUTION_INFO &res, std::string framebuffer_name)
++bool aml_set_display_resolution(const RESOLUTION_INFO &res, std::string framebuffer_name,
++  bool force_mode_switch)
+ {
+   std::string mode = res.strId.c_str();
+   std::string cur_mode;
+@@ -525,7 +527,7 @@ bool aml_set_display_resolution(const RESOLUTION_INFO &res, std::string framebuf
+     if (amhdmitx0_frac_rate_policy.Exists())
+       cur_fractional_rate = amhdmitx0_frac_rate_policy.Get<int>().value();
+ 
+-    if (cur_fractional_rate != fractional_rate)
++    if ((cur_fractional_rate != fractional_rate) || force_mode_switch)
+     {
+       cur_mode = "null";
+       if (display_mode.Exists())
+diff --git a/xbmc/utils/AMLUtils.h b/xbmc/utils/AMLUtils.h
+index 16f32b2d0a..a944814642 100644
+--- a/xbmc/utils/AMLUtils.h
++++ b/xbmc/utils/AMLUtils.h
+@@ -62,9 +62,9 @@ bool aml_has_frac_rate_policy();
+ void aml_set_audio_passthrough(bool passthrough);
+ bool aml_mode_to_resolution(const char *mode, RESOLUTION_INFO *res);
+ bool aml_get_native_resolution(RESOLUTION_INFO *res);
+-bool aml_set_native_resolution(const RESOLUTION_INFO &res, std::string framebuffer_name, const int stereo_mode);
++bool aml_set_native_resolution(const RESOLUTION_INFO &res, std::string framebuffer_name, const int stereo_mode, bool force_mode_switch);
+ bool aml_probe_resolutions(std::vector<RESOLUTION_INFO> &resolutions);
+-bool aml_set_display_resolution(const RESOLUTION_INFO &res, std::string framebuffer_name);
++bool aml_set_display_resolution(const RESOLUTION_INFO &res, std::string framebuffer_name, bool force_mode_switch);
+ void aml_handle_scale(const RESOLUTION_INFO &res);
+ void aml_handle_display_stereo_mode(const int stereo_mode);
+ void aml_enable_freeScale(const RESOLUTION_INFO &res);
+diff --git a/xbmc/windowing/amlogic/WinSystemAmlogic.cpp b/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
+index 4c5424d136..07447b5a55 100644
+--- a/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
++++ b/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
+@@ -41,6 +41,7 @@ using namespace KODI;
+ CWinSystemAmlogic::CWinSystemAmlogic()
+ :  m_nativeWindow(NULL)
+ ,  m_libinput(new CLibInputHandler)
++,  m_force_mode_switch(false)
+ {
+   const char *env_framebuffer = getenv("FRAMEBUFFER");
+ 
+@@ -55,9 +56,6 @@ CWinSystemAmlogic::CWinSystemAmlogic()
+ 
+   m_nativeDisplay = EGL_NO_DISPLAY;
+ 
+-  m_displayWidth = 0;
+-  m_displayHeight = 0;
+-
+   m_stereo_mode = RENDER_STEREO_MODE_OFF;
+   m_delayDispReset = false;
+ 
+@@ -159,32 +157,15 @@ bool CWinSystemAmlogic::CreateNewWindow(const std::string& name,
+                                     bool fullScreen,
+                                     RESOLUTION_INFO& res)
+ {
+-  RESOLUTION_INFO current_resolution;
+-  current_resolution.iWidth = current_resolution.iHeight = 0;
+-  RENDER_STEREO_MODE stereo_mode = CServiceBroker::GetWinSystem()->GetGfxContext().GetStereoMode();
+-
+   m_nWidth        = res.iWidth;
+   m_nHeight       = res.iHeight;
+-  m_displayWidth  = res.iScreenWidth;
+-  m_displayHeight = res.iScreenHeight;
+   m_fRefreshRate  = res.fRefreshRate;
+ 
+   if (m_nativeWindow == NULL)
+     m_nativeWindow = new fbdev_window;
+ 
+-  m_nativeWindow->width = m_nWidth;
+-  m_nativeWindow->height = m_nHeight;
+-
+-  if ((m_bWindowCreated && aml_get_native_resolution(&current_resolution)) &&
+-    current_resolution.iWidth == res.iWidth && current_resolution.iHeight == res.iHeight &&
+-    current_resolution.iScreenWidth == res.iScreenWidth && current_resolution.iScreenHeight == res.iScreenHeight &&
+-    m_bFullScreen == fullScreen && current_resolution.fRefreshRate == res.fRefreshRate &&
+-    (current_resolution.dwFlags & D3DPRESENTFLAG_MODEMASK) == (res.dwFlags & D3DPRESENTFLAG_MODEMASK) &&
+-    m_stereo_mode == stereo_mode)
+-  {
+-    CLog::Log(LOGDEBUG, "CWinSystemEGL::CreateNewWindow: No need to create a new window");
+-    return true;
+-  }
++  m_nativeWindow->width = res.iWidth;
++  m_nativeWindow->height = res.iHeight;
+ 
+   int delay = CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt("videoscreen.delayrefreshchange");
+   if (delay > 0)
+@@ -201,10 +182,9 @@ bool CWinSystemAmlogic::CreateNewWindow(const std::string& name,
+     }
+   }
+ 
+-  m_stereo_mode = stereo_mode;
+-  m_bFullScreen = fullScreen;
+-
+-  aml_set_native_resolution(res, m_framebuffer_name, stereo_mode);
++  aml_set_native_resolution(res, m_framebuffer_name, m_stereo_mode, m_force_mode_switch);
++  // reset force mode switch
++  m_force_mode_switch = false;
+ 
+   if (!m_delayDispReset)
+   {
+@@ -216,6 +196,7 @@ bool CWinSystemAmlogic::CreateNewWindow(const std::string& name,
+     }
+   }
+ 
++  m_bWindowCreated = true;
+   return true;
+ }
+ 
+@@ -227,6 +208,7 @@ bool CWinSystemAmlogic::DestroyWindow()
+     m_nativeWindow = NULL;
+   }
+ 
++  m_bWindowCreated = false;
+   return true;
+ }
+ 
+@@ -310,28 +292,28 @@ bool CWinSystemAmlogic::IsHDRDisplay()
+   {
+     valstr = hdr_cap.Get<std::string>().value();
+     if (valstr.find("Traditional HDR: 1") != std::string::npos)
+-      hdr_caps.SetHDR10();
++      m_hdr_caps.SetHDR10();
+ 
+     if (valstr.find("HDR10Plus Supported: 1") != std::string::npos)
+-      hdr_caps.SetHDR10Plus();
++      m_hdr_caps.SetHDR10Plus();
+ 
+     if (valstr.find("Hybrid Log-Gamma: 1") != std::string::npos)
+-      hdr_caps.SetHLG();
++      m_hdr_caps.SetHLG();
+   }
+ 
+   if (dv_cap.Exists())
+   {
+     valstr = dv_cap.Get<std::string>().value();
+     if (valstr.find("DolbyVision RX support list") != std::string::npos)
+-      hdr_caps.SetDolbyVision();
++      m_hdr_caps.SetDolbyVision();
+   }
+ 
+-  return (hdr_caps.SupportsHDR10() | hdr_caps.SupportsHDR10Plus() | hdr_caps.SupportsHLG());
++  return (m_hdr_caps.SupportsHDR10() | m_hdr_caps.SupportsHDR10Plus() | m_hdr_caps.SupportsHLG());
+ }
+ 
+ CHDRCapabilities CWinSystemAmlogic::GetDisplayHDRCapabilities() const
+ {
+-  return hdr_caps;
++  return m_hdr_caps;
+ }
+ 
+ bool CWinSystemAmlogic::Hide()
+diff --git a/xbmc/windowing/amlogic/WinSystemAmlogic.h b/xbmc/windowing/amlogic/WinSystemAmlogic.h
+index 2c70086caa..6bc5ae5046 100644
+--- a/xbmc/windowing/amlogic/WinSystemAmlogic.h
++++ b/xbmc/windowing/amlogic/WinSystemAmlogic.h
+@@ -44,9 +44,6 @@ protected:
+   EGLDisplay m_nativeDisplay;
+   fbdev_window *m_nativeWindow;
+ 
+-  int m_displayWidth;
+-  int m_displayHeight;
+-
+   RENDER_STEREO_MODE m_stereo_mode;
+ 
+   bool m_delayDispReset;
+@@ -55,5 +52,6 @@ protected:
+   CCriticalSection m_resourceSection;
+   std::vector<IDispResource*> m_resources;
+   std::unique_ptr<CLibInputHandler> m_libinput;
+-  CHDRCapabilities hdr_caps;
++  CHDRCapabilities m_hdr_caps;
++  bool m_force_mode_switch;
+ };
+diff --git a/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp b/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp
+index 39fbaf03a1..f9d94dc34f 100644
+--- a/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp
++++ b/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp
+@@ -8,13 +8,22 @@
+ 
+ #include "VideoSyncAML.h"
+ #include "WinSystemAmlogicGLESContext.h"
++#include "platform/linux/SysfsPath.h"
++#include "utils/AMLUtils.h"
+ #include "utils/log.h"
+ #include "threads/SingleLock.h"
++#include "windowing/GraphicContext.h"
+ #include "windowing/WindowSystemFactory.h"
+ 
+ using namespace KODI;
+ using namespace KODI::WINDOWING::AML;
+ 
++CWinSystemAmlogicGLESContext::CWinSystemAmlogicGLESContext()
++:  m_cs(-1)
++,  m_cd(-1)
++{
++}
++
+ void CWinSystemAmlogicGLESContext::Register()
+ {
+   KODI::WINDOWING::CWindowSystemFactory::RegisterWindowSystem(CreateWinSystem, "aml");
+@@ -69,7 +78,84 @@ bool CWinSystemAmlogicGLESContext::CreateNewWindow(const std::string& name,
+                                                bool fullScreen,
+                                                RESOLUTION_INFO& res)
+ {
+-  m_pGLContext.DestroySurface();
++  RESOLUTION_INFO current_resolution;
++  current_resolution.iWidth = current_resolution.iHeight = 0;
++  RENDER_STEREO_MODE stereo_mode = CServiceBroker::GetWinSystem()->GetGfxContext().GetStereoMode();
++
++  // check for frac_rate_policy change
++  int fractional_rate = (res.fRefreshRate == floor(res.fRefreshRate)) ? 0 : 1;
++  int cur_fractional_rate = fractional_rate;
++  if (aml_has_frac_rate_policy())
++  {
++    CSysfsPath amhdmitx0_frac_rate_policy{"/sys/class/amhdmitx/amhdmitx0/frac_rate_policy"};
++    cur_fractional_rate = amhdmitx0_frac_rate_policy.Get<int>().value();
++
++    if (cur_fractional_rate != fractional_rate)
++      amhdmitx0_frac_rate_policy.Set(fractional_rate);
++  }
++
++  // check for colour subsampling/depth change
++  CSysfsPath amhdmitx0_cs{"/sys/class/amhdmitx/amhdmitx0/cs"};
++  CSysfsPath amhdmitx0_cd{"/sys/class/amhdmitx/amhdmitx0/cd"};
++  int cs = 0;
++  int cd = 0;
++  if (amhdmitx0_cs.Exists() && amhdmitx0_cd.Exists())
++  {
++    cs = amhdmitx0_cs.Get<int>().value();
++    cd = amhdmitx0_cd.Get<int>().value();
++  }
++
++  // get current used resolution
++  if (!aml_get_native_resolution(&current_resolution))
++  {
++    CLog::Log(LOGERROR, "CWinSystemAmlogicGLESContext::{}: failed to receive current resolution", __FUNCTION__);
++    return false;
++  }
++
++  CLog::Log(LOGDEBUG, "CWinSystemAmlogicGLESContext::{}: "
++    "m_bWindowCreated: {}, "
++    "frac rate {:d}({:d}), "
++    "cs: {:d}({:d}), cd: {:d}({:d})",
++    __FUNCTION__,
++    m_bWindowCreated,
++    fractional_rate, cur_fractional_rate,
++    cs, m_cs, cd, m_cd);
++  CLog::Log(LOGDEBUG, "CWinSystemAmlogicGLESContext::{}: "
++    "cur: iWidth: {:04d}, iHeight: {:04d}, iScreenWidth: {:04d}, iScreenHeight: {:04d}, fRefreshRate: {:02.2f}, dwFlags: {:02x}",
++    __FUNCTION__,
++    current_resolution.iWidth, current_resolution.iHeight, current_resolution.iScreenWidth, current_resolution.iScreenHeight,
++    current_resolution.fRefreshRate, current_resolution.dwFlags);
++  CLog::Log(LOGDEBUG, "CWinSystemAmlogicGLESContext::{}: "
++    "res: iWidth: {:04d}, iHeight: {:04d}, iScreenWidth: {:04d}, iScreenHeight: {:04d}, fRefreshRate: {:02.2f}, dwFlags: {:02x}",
++    __FUNCTION__,
++    res.iWidth, res.iHeight, res.iScreenWidth, res.iScreenHeight, res.fRefreshRate, res.dwFlags);
++
++  // check if mode switch is needed
++  if (current_resolution.iWidth == res.iWidth && current_resolution.iHeight == res.iHeight &&
++      current_resolution.iScreenWidth == res.iScreenWidth && current_resolution.iScreenHeight == res.iScreenHeight &&
++      m_bFullScreen == fullScreen && current_resolution.fRefreshRate == res.fRefreshRate &&
++      (current_resolution.dwFlags & D3DPRESENTFLAG_MODEMASK) == (res.dwFlags & D3DPRESENTFLAG_MODEMASK) &&
++      m_stereo_mode == stereo_mode && m_bWindowCreated &&
++      ((m_cs != -1 && m_cd != -1) && (m_cs == cs && m_cd == cd)) &&
++      (fractional_rate == cur_fractional_rate))
++  {
++    CLog::Log(LOGDEBUG, "CWinSystemAmlogicGLESContext::{}: No need to create a new window", __FUNCTION__);
++    return true;
++  }
++
++  // destroy old window, then create a new one
++  DestroyWindow();
++
++  // check if a forced mode switch is required
++  if ((current_resolution.iWidth == res.iWidth && current_resolution.iHeight == res.iHeight &&
++       current_resolution.iScreenWidth == res.iScreenWidth && current_resolution.iScreenHeight == res.iScreenHeight &&
++       current_resolution.fRefreshRate == res.fRefreshRate) &&
++       (((m_cs != -1 && m_cd != -1) && (m_cs != cs || m_cd != cd)) ||
++       (fractional_rate != cur_fractional_rate)))
++  {
++    m_force_mode_switch = true;
++    CLog::Log(LOGDEBUG, "CWinSystemAmlogicGLESContext::{}: force mode switch", __FUNCTION__);
++  }
+ 
+   if (!CWinSystemAmlogic::CreateNewWindow(name, fullScreen, res))
+   {
+@@ -94,6 +180,16 @@ bool CWinSystemAmlogicGLESContext::CreateNewWindow(const std::string& name,
+       (*i)->OnResetDisplay();
+   }
+ 
++  // backup data after mode switch
++  if (amhdmitx0_cs.Exists() && amhdmitx0_cd.Exists())
++  {
++    m_cs = amhdmitx0_cs.Get<int>().value();
++    m_cd = amhdmitx0_cd.Get<int>().value();
++  }
++
++  m_stereo_mode = stereo_mode;
++  m_bFullScreen = fullScreen;
++
+   return true;
+ }
+ 
+@@ -167,4 +263,3 @@ std::unique_ptr<CVideoSync> CWinSystemAmlogicGLESContext::GetVideoSync(void *clo
+   std::unique_ptr<CVideoSync> pVSync(new CVideoSyncAML(clock));
+   return pVSync;
+ }
+-
+diff --git a/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.h b/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.h
+index 7d7467ee1a..ef6166692a 100644
+--- a/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.h
++++ b/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.h
+@@ -23,7 +23,7 @@ namespace AML
+ class CWinSystemAmlogicGLESContext : public CWinSystemAmlogic, public CRenderSystemGLES
+ {
+ public:
+-  CWinSystemAmlogicGLESContext() = default;
++  CWinSystemAmlogicGLESContext();
+   virtual ~CWinSystemAmlogicGLESContext() = default;
+ 
+   static void Register();
+@@ -53,7 +53,8 @@ protected:
+ 
+ private:
+   CEGLContextUtils m_pGLContext;
+-
++  int m_cs;
++  int m_cd;
+ };
+ 
+ }
+-- 
+2.43.0
+

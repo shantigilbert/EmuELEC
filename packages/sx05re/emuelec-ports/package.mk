@@ -40,7 +40,11 @@ PKG_DEPENDS_TARGET+=" commander-genius \
                 xash3d \
                 sonicmania \
                 shovelknight \
-                tmntsr"
+                tmntsr \
+                falloutce1 \
+                falloutce2 \
+                ccleste \
+                celeste"
 
 amlogicports=""
 hhports=" openjazz"
@@ -49,26 +53,26 @@ if [ "${DEVICE}" == "Amlogic"* ]; then
 	PKG_DEPENDS_TARGET+="${amlogicports}"
 fi
 
-if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
+if [ "${DEVICE}" == "OdroidGoAdvance" ] || [ "${DEVICE}" == "GameForce" ]; then
 	PKG_DEPENDS_TARGET+="${hhports}"
 fi
 
 
 make_target() {
-mkdir -p $PKG_BUILD/scripts
+mkdir -p ${PKG_BUILD}/scripts
 python3 port_builder.py ports.yaml scripts
 }
 
 makeinstall_target() {
-mkdir -p $INSTALL/usr/bin/ports
-cp -rf $PKG_BUILD/scripts/* $INSTALL/usr/bin/ports
+mkdir -p ${INSTALL}/usr/bin/ports
+cp -rf ${PKG_BUILD}/scripts/* ${INSTALL}/usr/bin/ports
 
 # Remove duplicate newlines just to be tidy
-for file in "$INSTALL/usr/bin/ports/*.sh"; do
-sed  -i '$!N; /^\(.*\)\n\1$/!P; D' $file
+for file in "${INSTALL}/usr/bin/ports/*.sh"; do
+sed  -i '$!N; /^\(.*\)\n\1$/!P; D' ${file}
 done
 
 # Remove empty lines from gamelist.xml
-sed -i '/^$/d' $INSTALL/usr/bin/ports/gamelist.xml
+sed -i '/^$/d' ${INSTALL}/usr/bin/ports/gamelist.xml
 
 }

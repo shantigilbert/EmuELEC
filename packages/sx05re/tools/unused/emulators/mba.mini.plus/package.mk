@@ -8,14 +8,14 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Non-commercial"
 PKG_SITE="https://github.com/shantigilbert/MBA.mini.Plus-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_SECTION="emuelec"
 PKG_SHORTDESC="M.B.A = MAME's skeleton + FBA's romsets"
 PKG_LONGDESC="M.B.A-mini from MAME2010-libretro (https://github.com/libretro/mame2010-libretro) after the codes is streamlined, only CPS 1/2, NEOGEO, IREM M92 machines && roms is supported."
 PKG_TOOLCHAIN="make"
 
-if [[ "$ARCH" == "aarch64" ]]; then
+if [[ "${ARCH}" == "aarch64" ]]; then
 PKG_PATCH_DIRS="emuelec-aarch64"
 fi
 
@@ -23,7 +23,7 @@ pre_configure_target() {
   
   
   
-if [[ "$ARCH" == "arm" ]]; then
+if [[ "${ARCH}" == "arm" ]]; then
   
    if [ "${DEVICE}" = "Amlogic-ng" ]; then
 	PKG_MAKE_OPTS_TARGET="platform=AMLG12B"
@@ -31,7 +31,7 @@ if [[ "$ARCH" == "arm" ]]; then
 	PKG_MAKE_OPTS_TARGET="platform=AMLGX"
   fi
   
-  PKG_MAKE_OPTS_TARGET+=" CC=$CC LD=$CC"
+  PKG_MAKE_OPTS_TARGET+=" CC=${CC} LD=${CC}"
   
   sed -i -e "s|uname -a|echo armv|" \
          -e "s|uname -m|echo armv|" \
@@ -47,7 +47,7 @@ else
 	PKG_MAKE_OPTS_TARGET="platform=emuelec"
   fi
   
-  PKG_MAKE_OPTS_TARGET+=" CC=$CC LD=$CC"
+  PKG_MAKE_OPTS_TARGET+=" CC=${CC} LD=${CC}"
   
   sed -i -e "s|uname -a|echo aarch64|" \
          -e "s|uname -m|echo aarch64|" \
@@ -58,6 +58,6 @@ fi
 }
 
 makeinstall_target() {
- mkdir -p $INSTALL/usr/lib/libretro
- cp mba_mini_libretro.so $INSTALL/usr/lib/libretro/mba_mini_libretro.so
+ mkdir -p ${INSTALL}/usr/lib/libretro
+ cp mba_mini_libretro.so ${INSTALL}/usr/lib/libretro/mba_mini_libretro.so
 }

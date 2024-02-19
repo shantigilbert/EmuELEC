@@ -493,8 +493,18 @@ setup_toolchain() {
     host:*|bootstrap:*)
       export DESTIMAGE="host"
       export AWK="gawk"
-      export CC="$TOOLCHAIN/bin/host-gcc"
-      export CXX="$TOOLCHAIN/bin/host-g++"
+      if [ "$1" = "host" ] && flag_enabled "local-cc" "no"; then
+        export CC="${LOCAL_CC}"
+        export CXX="${LOCAL_CXX}"
+        if [ -n "${LOCAL_CCACHE}" ]; then
+          export CCACHE_DIR="${LOCAL_CCACHE_DIR}"
+          export CC="${LOCAL_CCACHE} ${CC}";
+          export CXX="${LOCAL_CCACHE} ${CXX}";
+        fi
+      else
+        export CC="$TOOLCHAIN/bin/host-gcc"
+        export CXX="$TOOLCHAIN/bin/host-g++"
+      fi
       export CPP="cpp"
       export LD="ld"
       export AS="as"
@@ -735,7 +745,7 @@ build_with_debug() {
     [ "${PKG_IS_KERNEL_PKG}" = "yes" ] && listcontains "${_DEBUG_DEPENDS_LIST}" "linux\+" && return 0
 
     # Build this package with debug if it's a resolved dependency
-    listcontains "${_DEBUG_DEPENDS_LIST}" "${PKG_NAME}" && return 0
+    listcontains "${_DEBUG_DEPENDS_LIST}" "${PKG_NAME}[+]?" && return 0
   fi
 
   return 1
@@ -1639,7 +1649,7 @@ add_user() {
   if [ "$PASSWORD" = "x" ]; then
     PASSWORD="*"
   else
-    PASSWORD=$(python -c "import crypt; print(crypt.crypt('$PASSWORD', crypt.mksalt(crypt.METHOD_SHA512)))")
+    PASSWORD=$(openssl passwd -6 "${PASSWORD}")
   fi
   if ! grep -q "^$1:" ${INSTALL}/usr/cache/shadow; then
     echo "$1:$PASSWORD:::::::" >> ${INSTALL}/usr/cache/shadow

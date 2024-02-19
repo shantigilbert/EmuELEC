@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="vice"
-PKG_VERSION="db8476c7ca5a09e4e6dc9625b4c799a139437fcc"
-PKG_SHA256="ebb5bf72162f418eaf5514ade43a50ac8c28f59a58f812b638b9c3c4ee5b5ca2"
+PKG_VERSION="0046085610289777b5806495d8eef213e0a201aa"
+PKG_SHA256="fd271d2ec36b2dc9d5bb5f0f3548ace1ea88822ea57f4fc5e969a288e088fe94"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/vice-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -38,8 +38,8 @@ PKG_AUTORECONF="no"
 PKG_BUILD_FLAGS="-lto"
 
 make_target() {
-  if [ "$ARCH" == "arm" ]; then
-    CFLAGS="$CFLAGS -DARM -DALIGN_DWORD -mstructure-size-boundary=32 -mthumb-interwork -falign-functions=16 -marm"
+  if [ "${ARCH}" == "arm" ]; then
+    CFLAGS="${CFLAGS} -DARM -DALIGN_DWORD -mstructure-size-boundary=32 -mthumb-interwork -falign-functions=16 -marm"
   fi
   mkdir -p built
   for EMUTYPE in x128 x64sc x64dtv xscpu64 xplus4 xvic xcbm5x0 xcbm2 xpet x64
@@ -51,6 +51,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp built/vice_*_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp built/vice_*_libretro.so ${INSTALL}/usr/lib/libretro/
 }

@@ -2,13 +2,13 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="hyperion.ng"
-PKG_VERSION="2.0.13"
-PKG_SHA256="ed286d43a470c7263e189fdfd224d6594d85d5b5880001d4274a80e1dd8ea465"
-PKG_REV="110"
+PKG_VERSION="2.0.15"
+PKG_SHA256="2e47fe29b64e02a3438a3d142a737d28af3439e5cc4502d340a605017fda6013"
+PKG_REV="113"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/hyperion-project/hyperion.ng"
 PKG_URL="https://github.com/hyperion-project/hyperion.ng/archive/$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain Python3 avahi libusb qt-everywhere protobuf flatbuffers:host flatbuffers libcec libjpeg-turbo qmdnsengine"
+PKG_DEPENDS_TARGET="toolchain Python3 avahi libusb qt-everywhere pcre protobuf flatbuffers:host flatbuffers libcec libjpeg-turbo qmdnsengine mbedtls alsa-lib"
 PKG_SECTION="service"
 PKG_SHORTDESC="Hyperion.NG: an AmbiLight controller"
 PKG_LONGDESC="Hyperion.NG($PKG_VERSION) is an modern opensource AmbiLight implementation."
@@ -22,6 +22,7 @@ PKG_CMAKE_OPTS_TARGET="-DCMAKE_NO_SYSTEM_FROM_IMPORTED=ON \
                        -DUSE_SYSTEM_PROTO_LIBS=ON \
                        -DUSE_SYSTEM_FLATBUFFERS_LIBS=ON \
                        -DUSE_SYSTEM_QMDNS_LIBS=ON \
+                       -DUSE_SYSTEM_MBEDTLS_LIBS=ON \
                        -DPLATFORM=amlogic \
                        -DENABLE_AMLOGIC=ON \
                        -DENABLE_DISPMANX=OFF \

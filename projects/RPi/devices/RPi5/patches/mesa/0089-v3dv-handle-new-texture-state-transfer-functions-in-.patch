@@ -1,0 +1,52 @@
+From 1f150a3a92741f7654a13626bd5b27b5575f2b76 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Mon, 25 Oct 2021 01:38:31 +0200
+Subject: [PATCH 089/142] v3dv: handle new texture state transfer functions in
+ v71
+
+---
+ src/broadcom/vulkan/v3dvx_image.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_image.c b/src/broadcom/vulkan/v3dvx_image.c
+index 848290c2a47..437d4588c7e 100644
+--- a/src/broadcom/vulkan/v3dvx_image.c
++++ b/src/broadcom/vulkan/v3dvx_image.c
+@@ -108,15 +108,16 @@ pack_texture_shader_state_helper(struct v3dv_device *device,
+ 
+          tex.array_stride_64_byte_aligned = image->planes[iplane].cube_map_stride / 64;
+ 
++         bool is_srgb = vk_format_is_srgb(image_view->vk.format);
+ #if V3D_VERSION == 42
+          tex.reverse_standard_border_color = image_view->planes[plane].channel_reverse;
+ #endif
+ 
+ #if V3D_VERSION == 42
+-         tex.srgb = vk_format_is_srgb(image_view->vk.view_format);
++         tex.srgb = is_srgb;
+ #endif
+ #if V3D_VERSION >= 71
+-      unreachable("Hardware generation 71 not supported yet.");
++         tex.transfer_func = is_srgb ? TRANSFER_FUNC_SRGB : TRANSFER_FUNC_NONE;
+ #endif
+ 
+          /* At this point we don't have the job. That's the reason the first
+@@ -181,11 +182,13 @@ v3dX(pack_texture_shader_state_from_buffer_view)(struct v3dv_device *device,
+ 
+       assert(buffer_view->format->plane_count == 1);
+       tex.texture_type = buffer_view->format->planes[0].tex_type;
++
++      bool is_srgb = vk_format_is_srgb(buffer_view->vk_format);
+ #if V3D_VERSION == 42
+-      tex.srgb = vk_format_is_srgb(buffer_view->vk_format);
++      tex.srgb = is_srgb;
+ #endif
+ #if V3D_VERSION >= 71
+-      unreachable("Hardware generation 71 not supported yet.");
++      tex.transfer_func = is_srgb ? TRANSFER_FUNC_SRGB : TRANSFER_FUNC_NONE;
+ #endif
+ 
+       /* At this point we don't have the job. That's the reason the first
+-- 
+2.39.2
+

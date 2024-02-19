@@ -1,0 +1,49 @@
+From 518d8487d090af854fb72a7d0e5efc075d97228c Mon Sep 17 00:00:00 2001
+From: Dom Cobley <popcornmix@gmail.com>
+Date: Wed, 18 Jan 2023 16:41:00 +0000
+Subject: [PATCH 4/7] CDVDVideoCodecDRMPRIME: Adjust av formats to match recent
+ ffmpeg changes
+
+---
+ .../VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp   | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
+index a36107c515..d5b3289680 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp
+@@ -319,6 +319,7 @@ bool CDVDVideoCodecDRMPRIME::Open(CDVDStreamInfo& hints, CDVDCodecOptions& optio
+   m_pCodecContext->bits_per_coded_sample = hints.bitsperpixel;
+   m_pCodecContext->time_base.num = 1;
+   m_pCodecContext->time_base.den = DVD_TIME_BASE;
++  m_pCodecContext->thread_safe_callbacks = 1;
+   m_pCodecContext->thread_count = CServiceBroker::GetCPUInfo()->GetCPUCount();
+ 
+   if (hints.extradata && hints.extrasize > 0)
+@@ -660,13 +661,13 @@ bool CDVDVideoCodecDRMPRIME::FilterOpen(const std::string& filters, bool test)
+ 
+   const AVFilter* srcFilter = avfilter_get_by_name("buffer");
+   const AVFilter* outFilter = avfilter_get_by_name("buffersink");
+-  enum AVPixelFormat pix_fmts[] = { AV_PIX_FMT_DRM_PRIME, AV_PIX_FMT_YUV420P, AV_PIX_FMT_NONE };
++  enum AVPixelFormat pix_fmts[] = { AV_PIX_FMT_DRM_PRIME, AV_PIX_FMT_NONE };
+ 
+   std::string args = StringUtils::Format("video_size={}x{}:pix_fmt={}:time_base={}/{}:"
+                                          "pixel_aspect={}/{}",
+                                          m_pCodecContext->width,
+                                          m_pCodecContext->height,
+-                                         m_pCodecContext->pix_fmt,
++                                         AV_PIX_FMT_DRM_PRIME,
+                                          m_pCodecContext->time_base.num ?
+                                            m_pCodecContext->time_base.num : 1,
+                                          m_pCodecContext->time_base.num ?
+@@ -818,6 +819,7 @@ CDVDVideoCodec::VCReturn CDVDVideoCodecDRMPRIME::ProcessFilterIn()
+     m_pFrame->data[0] = reinterpret_cast<uint8_t*>(descriptor);
+   }
+ 
++  m_pFrame->format = AV_PIX_FMT_DRM_PRIME;
+   int ret = av_buffersrc_add_frame(m_pFilterIn, m_pFrame);
+   if (ret < 0)
+   {
+-- 
+2.39.2
+

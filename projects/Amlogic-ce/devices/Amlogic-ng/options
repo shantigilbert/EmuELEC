@@ -110,10 +110,10 @@
   # for a list of additinoal drivers see packages/linux-drivers
   # Space separated list is supported,
   # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
-    ADDITIONAL_DRIVERS+=" gpu-aml openvfd-driver wifi_dummy-aml media_modules-aml
-                        ap6xxx-aml ssv6xxx-aml mt7668-aml RTL8188FTV-aml RTL8189ES-aml RTL8189FS-aml
-                        RTL8723BS-aml RTL8814AU RTL8822BU-aml RTL8822BS-aml RTL8822CS-aml RTL8152-aml
-                        RTL8821CS-aml RTL8852BS-aml qca9377-aml qca6174-aml smartchip uwe5631-aml"
+    ADDITIONAL_DRIVERS+=" RTL8192CU RTL8192DU RTL8192EU RTL8188EU RTL8821CU
+                        ssv6xxx-aml mt7668-wifi-bt RTL8188FTV-aml RTL8189ES-aml RTL8189FS-aml
+                        RTL8723BS-aml RTL8822BS-aml RTL8821CS-aml qca9377-aml
+                        qca6174-aml smartchip"
 
   # additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware)
   # Space separated list is supported,
@@ -143,11 +143,10 @@
   # additional packages to install:
   # Space separated list is supported,
   # e.g. ADDITIONAL_PACKAGES="PACKAGE1 PACKAGE2"
-    ADDITIONAL_PACKAGES="u-boot-script dtc CoreELEC-Debug-Scripts inject_bl301 ampart
-                         nfs-utils dtb-xml megatools"
+  # ADDITIONAL_PACKAGES+=""
 
   # add OOTB support for IR remote
-    IR_REMOTE_KEYMAPS+=" odroid wetek_hub wetek_play_2 tanix"
+  # IR_REMOTE_KEYMAPS+=""
 
   # build with entware installer
     ENTWARE_SUPPORT="yes"
@@ -155,3 +154,6 @@
 
   # CoreELEC Subdevices
     SUBDEVICES="Odroid_N2 Odroid_N2L Odroid_C4 Odroid_HC4 LePotato LaFrite Radxa_Zero Radxa_Zero2"
+
+  # TEE supported SoC
+    TEE_SOC="S905X4"

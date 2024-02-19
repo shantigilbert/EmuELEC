@@ -1,8 +1,8 @@
-From 51e8f34da84d451de4bf5825fcd7a2be1340ce3c Mon Sep 17 00:00:00 2001
+From 6f81de193a1d33648341c8d3a702a070dc71c133 Mon Sep 17 00:00:00 2001
 From: Anssi Hannula <anssi.hannula@iki.fi>
 Date: Sun, 17 Apr 2022 04:37:48 +0000
-Subject: [PATCH 09/74] LOCAL: ALSA: Assign internal PCM chmap/ELD/IEC958 kctls
- to device 0
+Subject: [PATCH 009/120] LOCAL: ALSA: Assign internal PCM chmap/ELD/IEC958
+ kctls to device 0
 
 On SoC sound devices utilizing codec2codec DAI links with a HDMI codec
 the kctls for chmap, ELD, IEC958 are currently created using the
@@ -25,7 +25,7 @@ Signed-off-by: Anssi Hannula <anssi.hannula@iki.fi>
  2 files changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/sound/core/pcm_lib.c b/sound/core/pcm_lib.c
-index 40751e5aff09..1461463dc320 100644
+index 8b6aeb8a78f7..eee05d447dec 100644
 --- a/sound/core/pcm_lib.c
 +++ b/sound/core/pcm_lib.c
 @@ -2514,7 +2514,10 @@ int snd_pcm_add_chmap_ctls(struct snd_pcm *pcm, int stream,
@@ -41,10 +41,10 @@ index 40751e5aff09..1461463dc320 100644
  	knew.private_value = private_value;
  	info->kctl = snd_ctl_new1(&knew, info);
 diff --git a/sound/soc/codecs/hdmi-codec.c b/sound/soc/codecs/hdmi-codec.c
-index b773466619b2..47c83c27bebd 100644
+index 0b1cdb2d6049..bbc33161bcca 100644
 --- a/sound/soc/codecs/hdmi-codec.c
 +++ b/sound/soc/codecs/hdmi-codec.c
-@@ -797,7 +797,8 @@ static int hdmi_codec_pcm_new(struct snd_soc_pcm_runtime *rtd,
+@@ -793,7 +793,8 @@ static int hdmi_codec_pcm_new(struct snd_soc_pcm_runtime *rtd,
  		if (!kctl)
  			return -ENOMEM;
  
@@ -55,5 +55,5 @@ index b773466619b2..47c83c27bebd 100644
  		if (ret < 0)
  			return ret;
 -- 
-2.17.1
+2.34.1
 

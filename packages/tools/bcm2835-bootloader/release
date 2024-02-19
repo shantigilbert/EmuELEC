@@ -6,15 +6,19 @@
 
 mkdir -p $RELEASE_DIR/3rdparty/bootloader
   cp -PR $INSTALL/usr/share/bootloader/LICENCE* $RELEASE_DIR/3rdparty/bootloader/
-  cp -PR $INSTALL/usr/share/bootloader/bootcode.bin $RELEASE_DIR/3rdparty/bootloader/
-  cp -PR $INSTALL/usr/share/bootloader/fixup.dat $RELEASE_DIR/3rdparty/bootloader/
-  cp -PR $INSTALL/usr/share/bootloader/start.elf $RELEASE_DIR/3rdparty/bootloader/
+  for f in bootcode.bin fixup.dat start.elf ; do
+    if [ -f "${INSTALL}/usr/share/bootloader/$f" ]; then
+      cp -PR "${INSTALL}/usr/share/bootloader/$f" "${RELEASE_DIR}/3rdparty/bootloader/"
+    fi
+  done
   cp -PR $INSTALL/usr/share/bootloader/*.dtb $RELEASE_DIR/3rdparty/bootloader/
   cp -PR $INSTALL/usr/share/bootloader/overlays $RELEASE_DIR/3rdparty/bootloader/
 
   if [ -f $INSTALL/usr/share/bootloader/config.txt ]; then
     cp -PR $INSTALL/usr/share/bootloader/config.txt $RELEASE_DIR/3rdparty/bootloader/
   fi
-  if [ -f $INSTALL/usr/share/bootloader/distroconfig.txt ]; then
-    cp -PR $INSTALL/usr/share/bootloader/distroconfig.txt $RELEASE_DIR/3rdparty/bootloader/
-  fi
+  for distro in "$INSTALL/usr/share/bootloader/distroconfig"*.txt ; do
+    if [ -f "${distro}" ]; then
+      cp -PR "${distro}" $RELEASE_DIR/3rdparty/bootloader/
+    fi
+  done

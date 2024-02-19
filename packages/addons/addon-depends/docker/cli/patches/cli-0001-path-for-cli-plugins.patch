@@ -1,0 +1,11 @@
+--- a/cli-plugins/manager/manager_unix.go	2023-02-03 11:54:16.746399916 +0000
++++ b/cli-plugins/manager/manager_unix.go	2023-02-03 11:59:04.528175595 +0000
+@@ -4,6 +4,6 @@
+ package manager
+ 
+ var defaultSystemPluginDirs = []string{
+-	"/usr/local/lib/docker/cli-plugins", "/usr/local/libexec/docker/cli-plugins",
+-	"/usr/lib/docker/cli-plugins", "/usr/libexec/docker/cli-plugins",
++	"/storage/.kodi/addons/service.system.docker/cli-plugins",
++	"/storage/.kodi/userdata/addon_data/service.system.docker/docker/cli-plugins",
+ }

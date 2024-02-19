@@ -19,7 +19,7 @@ CONFIG_TMP_E="/tmp/jc/SDLflycastE.tmp"
 
 
 BTN_H0=$(get_ee_setting flycast_btn_h0)
-[[ -z "$BTN_H0" ]] && BTN_H0=255
+[[ -z "${BTN_H0}" ]] && BTN_H0=255
 
 declare -A FLYCAST_D_INDEXES=(
   [h0.1]=$(( BTN_H0+1 ))
@@ -73,48 +73,52 @@ declare -A FLYCAST_D_BUTTONS=(
 )
 
 BTN_SWAP_XY=$(get_ee_setting flycast_joy_swap_xy)
-if [[ "$BTN_SWAP_XY" == "1" ]]; then
+if [[ "${BTN_SWAP_XY}" == "1" ]]; then
   FLYCAST_D_BUTTONS[x]="btn_x"
   FLYCAST_D_BUTTONS[y]="btn_y"
 fi
 
 BTN_SWAP_AB=$(get_ee_setting flycast_joy_swap_ab)
-if [[ "$BTN_SWAP_AB" == "1" ]]; then
+if [[ "${BTN_SWAP_AB}" == "1" ]]; then
   FLYCAST_D_BUTTONS[a]="btn_a"
   FLYCAST_D_BUTTONS[b]="btn_b"
 fi
 
 
-# Cleans all the inputs for the gamepad with name $GAMEPAD and player $1
+# Cleans all the inputs for the gamepad with name ${GAMEPAD} and player ${1}
 clean_pad() {
-  #echo "Cleaning pad $1 $2" #debug
+  #echo "Cleaning pad ${1} ${2}" #debug
   [[ -f "${CONFIG_TMP_A}" ]] && rm "${CONFIG_TMP_A}"
   [[ -f "${CONFIG_TMP_D}" ]] && rm "${CONFIG_TMP_D}"
   [[ -f "${CONFIG_TMP_E}" ]] && rm "${CONFIG_TMP_E}"
+  sed -i "s/device${1}\.2.*/device${1}.2 = 10/g" "${EMU_FILE}"
+  sed -i "s/device${1}\.1.*/device${1}.1 = 10/g" "${EMU_FILE}"
+  sed -i "s/device${1} .*/device${1} = 10/g" "${EMU_FILE}"
+  local i=$(( ${1} - 1 ))
+  sed -i "s/maple_sdl_joystick_${i}.*/maple_sdl_joystick_${i} = -1/g" "${EMU_FILE}"  
 }
 
 # Sets pad depending on parameters.
-# $1 = Player Number
-# $2 = js[0-7]
-# $3 = Device GUID
-# $4 = Device Name
+# ${1} = Player Number
+# ${2} = js[0-7]
+# ${3} = Device GUID
+# ${4} = Device Name
 
 set_pad() {
-  echo "set_pad params: $1 $2 $3 $4"
-  local JSI="$2"
-  local DEVICE_GUID=$3
-  local JOY_NAME="$4"
+  echo "set_pad params: ${1} ${2} ${3} ${4}"
+  local JSI="${2}"
+  local DEVICE_GUID=${3}
+  local JOY_NAME="${4}"
 
   # Insert the correct configs into emu.cfg to enable sdl to work.
-  declare -i LN=$( cat "$EMU_FILE" | grep -n "\[input\]" | cut -d: -f1 | head -1 )
+  declare -i LN=$( cat "${EMU_FILE}" | grep -n "\[input\]" | cut -d: -f1 | head -1 )
 
-  declare -i index=$(( $1 - 1 ))
-  sed -i "/device${1}/d" "$EMU_FILE"
-  sed -i "/maple_sdl_joystick_${index}/d" "$EMU_FILE"
+  declare -i index=$(( ${1} - 1 ))
+  sed -i "/device${1}/d" "${EMU_FILE}"
+  sed -i "/maple_sdl_joystick_${index}/d" "${EMU_FILE}"
 
-  local DEVICE="maple_sdl_joystick_${index} = ${JSI:2}\ndevice${1} = 0\ndevice${1}.1 = 1\ndevice${1}.2 = 1\n"
-  [[ "$LN" -gt "0" ]] && LN=$(( LN+1 )) && sed -i "${LN} i ${DEVICE}" "$EMU_FILE"
-
+  local DEVICE="maple_sdl_joystick_${index} = ${index}\ndevice${1} = 0\ndevice${1}.1 = 1\ndevice${1}.2 = 1\n"
+  [[ "${LN}" -gt "0" ]] && LN=$(( LN+1 )) && sed -i "${LN} i ${DEVICE}" "${EMU_FILE}"
 
   local CONFIG="${MAPPING_DIR}/SDL_${JOY_NAME}.cfg"
   [[ -f "${CONFIG}" ]] && return
@@ -131,62 +135,62 @@ set_pad() {
   echo "axis_y_inverted = no" >> ${CONFIG_TMP_A}
 
   local GC_RECORD
-  [[ -f "${CONFIG}" ]] && GC_RECORD=$(cat "${CONFIG}" | grep -E "^dead_zone \= [0-9]*$")
-  [[ -z "$GC_RECORD" ]] && GC_RECORD="dead_zone = 10"
-  echo "$GC_RECORD" >> ${CONFIG_TMP_E}
+  [[ -f "${CONFIG}" ]] && GC_RECORD=$(cat "${CONFIG}" | grep -E "^dead_zone = [0-9]*$")
+  [[ -z "${GC_RECORD}" ]] && GC_RECORD="dead_zone = 10"
+  echo "${GC_RECORD}" >> ${CONFIG_TMP_E}
 
   [[ -f "${CONFIG}" ]] && rm "${CONFIG}"
 
-  echo "mapping_name = $JOY_NAME" >> ${CONFIG_TMP_E}
+  echo "mapping_name = ${JOY_NAME}" >> ${CONFIG_TMP_E}
   echo "version = 2" >> ${CONFIG_TMP_E}
 
-  local GC_CONFIG=$(cat "$GCDB" | grep "$DEVICE_GUID" | grep "platform:Linux" | head -1)
-  echo "GC_CONFIG=$GC_CONFIG"
-  [[ -z $GC_CONFIG ]] && return
+  local GC_CONFIG=$(cat "${GCDB}" | grep "${DEVICE_GUID}" | grep "platform:Linux" | head -1)
+  echo "GC_CONFIG=${GC_CONFIG}"
+  [[ -z ${GC_CONFIG} ]] && return
 
-  local GC_MAP=$(echo $GC_CONFIG | cut -d',' -f3-)
+  local GC_MAP=$(echo ${GC_CONFIG} | cut -d',' -f3-)
 
   set -f
   local GC_ARRAY=(${GC_MAP//,/ })
 
   for index in "${!GC_ARRAY[@]}"; do
-      local REC=${GC_ARRAY[$index]}
-      local BUTTON_INDEX=$(echo $REC | cut -d ":" -f 1)
-      local TVAL=$(echo $REC | cut -d ":" -f 2)
+      local REC=${GC_ARRAY[${index}]}
+      local BUTTON_INDEX=$(echo ${REC} | cut -d ":" -f 1)
+      local TVAL=$(echo ${REC} | cut -d ":" -f 2)
       local BTN_TYPE="${TVAL:1}"
-      local FC_INDEX_D=${FLYCAST_D_BUTTONS[$BUTTON_INDEX]}
+      local FC_INDEX_D=${FLYCAST_D_BUTTONS[${BUTTON_INDEX}]}
       local ABORT_ENTRY=0
       local BTN_TYPE=${TVAL:0:1}
       local NUM=${TVAL:1}
 
-      if [[ $BUTTON_INDEX == "leftx" || $BUTTON_INDEX == "lefty" ]]; then
-        FC_INDEX_D=${FLYCAST_D_BUTTONS[$BUTTON_INDEX,0]}
-        echo "${FC_INDEX_D} = $NUM" >> ${CONFIG_TMP_D} 
-        FC_INDEX_D=${FLYCAST_D_BUTTONS[$BUTTON_INDEX,1]}
-        echo "${FC_INDEX_D} = $NUM" >> ${CONFIG_TMP_A}
+      if [[ ${BUTTON_INDEX} == "leftx" || ${BUTTON_INDEX} == "lefty" ]]; then
+        FC_INDEX_D=${FLYCAST_D_BUTTONS[${BUTTON_INDEX},0]}
+        echo "${FC_INDEX_D} = ${NUM}" >> ${CONFIG_TMP_D} 
+        FC_INDEX_D=${FLYCAST_D_BUTTONS[${BUTTON_INDEX},1]}
+        echo "${FC_INDEX_D} = ${NUM}" >> ${CONFIG_TMP_A}
         continue
       fi
-      if [[ ! -z "$FC_INDEX_D" ]]; then
-          [[ $BUTTON_INDEX == "lefttrigger" ]] && ABORT_ENTRY=1
-          [[ $BUTTON_INDEX == "righttrigger" ]] && ABORT_ENTRY=1
-          [[ $BUTTON_INDEX == "back" ]]  && ABORT_ENTRY=1 && echo "${FC_INDEX_D} = $NUM" >> ${CONFIG_TMP_E}
-          [[ $BUTTON_INDEX == "guide" ]] && ABORT_ENTRY=1 && echo "${FC_INDEX_D} = $NUM" >> ${CONFIG_TMP_E}
+      if [[ ! -z "${FC_INDEX_D}" ]]; then
+          [[ ${BUTTON_INDEX} == "lefttrigger" ]] && ABORT_ENTRY=1
+          [[ ${BUTTON_INDEX} == "righttrigger" ]] && ABORT_ENTRY=1
+          [[ ${BUTTON_INDEX} == "back" ]]  && ABORT_ENTRY=1 && echo "${FC_INDEX_D} = ${NUM}" >> ${CONFIG_TMP_E}
+          [[ ${BUTTON_INDEX} == "guide" ]] && ABORT_ENTRY=1 && echo "${FC_INDEX_D} = ${NUM}" >> ${CONFIG_TMP_E}
 
-          if [[ $ABORT_ENTRY == 0 ]]; then
-            [[ $BTN_TYPE == "a" ]] && echo "${FC_INDEX_D} = $NUM" >> ${CONFIG_TMP_D}
-            [[ $BTN_TYPE == "b" ]] && echo "${FC_INDEX_D} = $NUM" >> ${CONFIG_TMP_D}
-            [[ $BTN_TYPE == "h" ]] && NUM=${FLYCAST_D_INDEXES[$TVAL]} && echo "${FC_INDEX_D} = ${NUM}" >> ${CONFIG_TMP_D}
+          if [[ ${ABORT_ENTRY} == 0 ]]; then
+            [[ ${BTN_TYPE} == "a" ]] && echo "${FC_INDEX_D} = ${NUM}" >> ${CONFIG_TMP_D}
+            [[ ${BTN_TYPE} == "b" ]] && echo "${FC_INDEX_D} = ${NUM}" >> ${CONFIG_TMP_D}
+            [[ ${BTN_TYPE} == "h" ]] && NUM=${FLYCAST_D_INDEXES[${TVAL}]} && echo "${FC_INDEX_D} = ${NUM}" >> ${CONFIG_TMP_D}
           fi
       fi
 
-      local FC_INDEX_A=${FLYCAST_D_BUTTONS[$BUTTON_INDEX]}
-      if [[ ! -z "$FC_INDEX_A" ]]; then
-        case $BUTTON_INDEX in
+      local FC_INDEX_A=${FLYCAST_D_BUTTONS[${BUTTON_INDEX}]}
+      if [[ ! -z "${FC_INDEX_A}" ]]; then
+        case ${BUTTON_INDEX} in
           "lefttrigger")
-            echo "${FC_INDEX_A} = $NUM" >> ${CONFIG_TMP_A}
+            echo "${FC_INDEX_A} = ${NUM}" >> ${CONFIG_TMP_A}
             ;;
           "righttrigger")
-            echo "${FC_INDEX_A} = $NUM" >> ${CONFIG_TMP_A}
+            echo "${FC_INDEX_A} = ${NUM}" >> ${CONFIG_TMP_A}
             ;;
         esac
       fi
@@ -219,10 +223,10 @@ init_config() {
   # Adjust the emulator config file to load sdl controller files.
   local SDL_JOYSTICK="maple_sdl_joystick_0 = 0\nmaple_sdl_joystick_1 = 1\n"
   local DEVICES="device1 = 0\ndevice1.1 = 1\ndevice1.2 = 1\ndevice2 = 0\ndevice2.1 = 1\ndevice2.2 = 1\n"
-  if [[ ! -f "$EMU_FILE" ]]; then
-    echo "[input]" >> "$EMU_FILE"
-    echo -e "$SDL_JOYSTICK" >> "$EMU_FILE"
-    echo -e "$DEVICES" >> "$EMU_FILE"
+  if [[ ! -f "${EMU_FILE}" ]]; then
+    echo "[input]" >> "${EMU_FILE}"
+    echo -e "${SDL_JOYSTICK}" >> "${EMU_FILE}"
+    echo -e "${DEVICES}" >> "${EMU_FILE}"
     return
   fi
 }

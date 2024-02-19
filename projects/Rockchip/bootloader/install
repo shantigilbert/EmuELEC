@@ -3,7 +3,6 @@
 
 PKG_RKBIN="$(get_build_dir rkbin)"
 PKG_SOC="${DEVICE/RK/rk}"
-UBOOT_CONFIG=$("${ROOT}"/"${SCRIPTS}"/uboot_helper "${PROJECT}" "${DEVICE}" "${UBOOT_SYSTEM}" config)
 
 if [ "${ROCKCHIP_LEGACY_BOOT}" = "1" ]; then
   echo "install: building Rockchip legacy boot chain ..."

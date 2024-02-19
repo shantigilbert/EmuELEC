@@ -2,8 +2,8 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="qt-everywhere"
-PKG_VERSION="5.13.0"
-PKG_SHA256="2cba31e410e169bd5cdae159f839640e672532a4687ea0f265f686421e0e86d6"
+PKG_VERSION="5.15.0"
+PKG_SHA256="22b63d7a7a45183865cc4141124f12b673e7a17b1fe2b91e433f6547c5d548c3"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="http://qt-project.org"
@@ -111,7 +111,7 @@ EOF
 }
 
 post_makeinstall_target() {
-  # Qt installs directly to $SYSROOT_PREFIX so don't rely on scripts/build fixing this up
+  # Qt installs directly to ${SYSROOT_PREFIX} so don't rely on scripts/build fixing this up
   # PKG_ORIG_SYSROOT_PREFIX will be undefined when performing a legacy build
   sed -e "s:\(['= ]\)/usr:\\1${PKG_ORIG_SYSROOT_PREFIX:-${SYSROOT_PREFIX}}/usr:g" -i "${PKG_ORIG_SYSROOT_PREFIX:-${SYSROOT_PREFIX}}/usr/lib"/libQt*.la
 }

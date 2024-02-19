@@ -1,0 +1,155 @@
+From 07cba940af2fe0c40641816bee280b57a40973fb Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 20 Oct 2021 11:22:11 +0200
+Subject: [PATCH 102/142] v3dv: make v3dv_viewport_compute_xform depend on the
+ V3D version
+
+For 4.x we have a workaround for too small Z scale values that is
+not required for V3D 7.x.
+---
+ src/broadcom/vulkan/v3dv_cmd_buffer.c  | 40 +++-----------------------
+ src/broadcom/vulkan/v3dv_pipeline.c    |  7 +++--
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c | 37 ++++++++++++++++++++++++
+ src/broadcom/vulkan/v3dvx_private.h    |  5 ++++
+ 4 files changed, 50 insertions(+), 39 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_cmd_buffer.c b/src/broadcom/vulkan/v3dv_cmd_buffer.c
+index 96360a96b44..bda0a614523 100644
+--- a/src/broadcom/vulkan/v3dv_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dv_cmd_buffer.c
+@@ -2131,39 +2131,6 @@ v3dv_CmdBindPipeline(VkCommandBuffer commandBuffer,
+    }
+ }
+ 
+-/* FIXME: C&P from radv. tu has similar code. Perhaps common place? */
+-void
+-v3dv_viewport_compute_xform(const VkViewport *viewport,
+-                            float scale[3],
+-                            float translate[3])
+-{
+-   float x = viewport->x;
+-   float y = viewport->y;
+-   float half_width = 0.5f * viewport->width;
+-   float half_height = 0.5f * viewport->height;
+-   double n = viewport->minDepth;
+-   double f = viewport->maxDepth;
+-
+-   scale[0] = half_width;
+-   translate[0] = half_width + x;
+-   scale[1] = half_height;
+-   translate[1] = half_height + y;
+-
+-   scale[2] = (f - n);
+-   translate[2] = n;
+-
+-   /* It seems that if the scale is small enough the hardware won't clip
+-    * correctly so we work around this my choosing the smallest scale that
+-    * seems to work.
+-    *
+-    * This case is exercised by CTS:
+-    * dEQP-VK.draw.inverted_depth_ranges.nodepthclamp_deltazero
+-    */
+-   const float min_abs_scale = 0.000009f;
+-   if (fabs(scale[2]) < min_abs_scale)
+-      scale[2] = scale[2] < 0 ? -min_abs_scale : min_abs_scale;
+-}
+-
+ /* Considers the pipeline's negative_one_to_one state and applies it to the
+  * current viewport transform if needed to produce the resulting Z translate
+  * and scale parameters.
+@@ -2216,9 +2183,10 @@ v3dv_CmdSetViewport(VkCommandBuffer commandBuffer,
+           viewportCount * sizeof(*pViewports));
+ 
+    for (uint32_t i = firstViewport; i < total_count; i++) {
+-      v3dv_viewport_compute_xform(&state->dynamic.viewport.viewports[i],
+-                                  state->dynamic.viewport.scale[i],
+-                                  state->dynamic.viewport.translate[i]);
++      v3dv_X(cmd_buffer->device, viewport_compute_xform)
++         (&state->dynamic.viewport.viewports[i],
++          state->dynamic.viewport.scale[i],
++          state->dynamic.viewport.translate[i]);
+    }
+ 
+    cmd_buffer->state.dirty |= V3DV_CMD_DIRTY_VIEWPORT;
+diff --git a/src/broadcom/vulkan/v3dv_pipeline.c b/src/broadcom/vulkan/v3dv_pipeline.c
+index d012ff8f948..2156176d4cc 100644
+--- a/src/broadcom/vulkan/v3dv_pipeline.c
++++ b/src/broadcom/vulkan/v3dv_pipeline.c
+@@ -2661,9 +2661,10 @@ pipeline_init_dynamic_state(
+                       pViewportState->viewportCount);
+ 
+          for (uint32_t i = 0; i < dynamic->viewport.count; i++) {
+-            v3dv_viewport_compute_xform(&dynamic->viewport.viewports[i],
+-                                        dynamic->viewport.scale[i],
+-                                        dynamic->viewport.translate[i]);
++            v3dv_X(pipeline->device, viewport_compute_xform)
++               (&dynamic->viewport.viewports[i],
++                dynamic->viewport.scale[i],
++                dynamic->viewport.translate[i]);
+          }
+       }
+ 
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index 750486a6ccf..f7c13a22423 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -1285,6 +1285,43 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+    cl_emit(rcl, END_OF_RENDERING, end);
+ }
+ 
++void
++v3dX(viewport_compute_xform)(const VkViewport *viewport,
++                            float scale[3],
++                            float translate[3])
++{
++   float x = viewport->x;
++   float y = viewport->y;
++   float half_width = 0.5f * viewport->width;
++   float half_height = 0.5f * viewport->height;
++   double n = viewport->minDepth;
++   double f = viewport->maxDepth;
++
++   scale[0] = half_width;
++   translate[0] = half_width + x;
++   scale[1] = half_height;
++   translate[1] = half_height + y;
++
++   scale[2] = (f - n);
++   translate[2] = n;
++
++   /* It seems that if the scale is small enough the hardware won't clip
++    * correctly so we work around this my choosing the smallest scale that
++    * seems to work.
++    *
++    * This case is exercised by CTS:
++    * dEQP-VK.draw.renderpass.inverted_depth_ranges.nodepthclamp_deltazero
++    *
++    * V3D 7.x fixes this by using the new
++    * CLIPPER_Z_SCALE_AND_OFFSET_NO_GUARDBAND.
++    */
++#if V3D_VERSION <= 42
++   const float min_abs_scale = 0.0005f;
++   if (fabs(scale[2]) < min_abs_scale)
++      scale[2] = scale[2] < 0 ? -min_abs_scale : min_abs_scale;
++#endif
++}
++
+ void
+ v3dX(cmd_buffer_emit_viewport)(struct v3dv_cmd_buffer *cmd_buffer)
+ {
+diff --git a/src/broadcom/vulkan/v3dvx_private.h b/src/broadcom/vulkan/v3dvx_private.h
+index 036ce11b455..81715520913 100644
+--- a/src/broadcom/vulkan/v3dvx_private.h
++++ b/src/broadcom/vulkan/v3dvx_private.h
+@@ -339,3 +339,8 @@ v3dX(clamp_for_format_and_type)(uint32_t rt_type,
+ uint32_t
+ v3dX(clamp_for_format_and_type)(uint32_t rt_type,
+                                 VkFormat vk_format);
++
++void
++v3dX(viewport_compute_xform)(const VkViewport *viewport,
++                             float scale[3],
++                             float translate[3]);
+-- 
+2.39.2
+

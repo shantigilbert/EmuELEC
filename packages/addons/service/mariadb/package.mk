@@ -2,9 +2,9 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="mariadb"
-PKG_VERSION="10.9.4"
-PKG_REV="108"
-PKG_SHA256="1dff08a0f37ea5cf8f00cbd12d40e80759fae7d73184ccf56b5b51acfdcfc054"
+PKG_VERSION="10.11.5"
+PKG_REV="2"
+PKG_SHA256="4c9484048d4d0c71dd076ab33fc2a9ce8510bdf762886de0d63fe52496f3dbbb"
 PKG_LICENSE="GPL2"
 PKG_SITE="https://mariadb.org"
 PKG_URL="https://downloads.mariadb.com/MariaDB/${PKG_NAME}-${PKG_VERSION}/source/${PKG_NAME}-${PKG_VERSION}.tar.gz"
@@ -20,16 +20,6 @@ PKG_SECTION="service"
 PKG_ADDON_NAME="MariaDB SQL database server"
 PKG_ADDON_TYPE="xbmc.service"
 
-pre_configure_target() {
-  # mariadb does not need / nor build successfully with _FILE_OFFSET_BITS or _TIME_BITS set
-  if [ "${TARGET_ARCH}" = "arm" ]; then
-    export CFLAGS=$(echo ${CFLAGS} | sed -e "s|-D_FILE_OFFSET_BITS=64||g")
-    export CFLAGS=$(echo ${CFLAGS} | sed -e "s|-D_TIME_BITS=64||g")
-    export CXXFLAGS=$(echo ${CXXFLAGS} | sed -e "s|-D_FILE_OFFSET_BITS=64||g")
-    export CXXFLAGS=$(echo ${CXXFLAGS} | sed -e "s|-D_TIME_BITS=64||g")
-  fi
-}
- 
 configure_package() {
   PKG_CMAKE_OPTS_HOST=" \
     -DCMAKE_INSTALL_MESSAGE=NEVER \
@@ -84,7 +74,7 @@ make_host() {
 }
 
 makeinstall_host() {
-  :
+  cp -a strings/uca-dump ${TOOLCHAIN}/bin
 }
 
 post_makeinstall_target() {
@@ -99,13 +89,15 @@ addon() {
   mkdir -p ${ADDON}/config
 
   cp ${MARIADB}/bin/mariadbd \
-     ${MARIADB}/bin/mysql \
-     ${MARIADB}/bin/mysqladmin \
-     ${MARIADB}/bin/mysqldump \
-     ${MARIADB}/bin/mysql_secure_installation \
+     ${MARIADB}/bin/mariadb \
+     ${MARIADB}/bin/mariadb-admin \
+     ${MARIADB}/bin/mariadb-check \
+     ${MARIADB}/bin/mariadb-dump \
+     ${MARIADB}/bin/mariadb-secure-installation \
+     ${MARIADB}/bin/mariadb-upgrade \
      ${MARIADB}/bin/my_print_defaults \
      ${MARIADB}/bin/resolveip \
-     ${MARIADB}/scripts/mysql_install_db \
+     ${MARIADB}/scripts/mariadb-install-db \
      ${ADDON}/bin
 
   cp -PR ${MARIADB}/share ${ADDON}

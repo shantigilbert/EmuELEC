@@ -1,76 +1,9 @@
-117
-- mediainfo: update to 22.09
-- libmediainfo: update to 22.09
-- mpg123: update to 1.30.2 and https
-- squeezelite: update to 2022-04-10 (1.9.9.1403)
+2
+- libmediainfo: update to 23.07
+- libzen: update to 0.4.41
+- mediainfo: update to 23.07
+- mpv-drmprime: update to 0.36.0
 
-116
-- libmediainfo: update to 21.09
-- mediainfo: update to 21.09
-- mpg123: update to 1.29.3
-- mpv-drmprime: update to 0.34.1
-- squeezelite: update to 2022-01-06 (1.9.9.1395)
-
-115
-- libmediainfo: update to 21.03
-- libzen: update to 0.4.39
-- mediainfo: update to 21.03
-- mpg123: update to 1.27.2
-- mpv-drmprime: update to 0.33.1
-- squeezelite: update to 2021-05-13 (1.9.9.1386)
-
-114
-- squeezelite: update to 2021-01-03 (1.9.8.1315)
-
-113
-- libmediainfo: update to 20.09
-- libzen: update to 0.4.38
-- mediainfo: update to 20.09
-- mpg123: update to 1.26.4
-- mpv-drmprime: update to 0.33.0
-
-112
-- Update sqeezelite 2020-11-16
-
-111
-- drop mesa-demos and mpv
-
-110
-- Add mpv
-
-109
-- Update squeezelite to b2ed99e and support all possible media formats
-
-108
-- Update alsamixer to 1.1.6
-- Update mediainfo to 18.05
-- Update mpg123 to 1.25.10
-- Update squeezelite to b2ed99e
-- Update tstools to db1f79f
-
-107
-- squeezelite: support all possible media formats
-
-106
-- Update squeezelite to 33cca7e
-- Update Mediainfo to 17.10
-
-105
-- rebuild
-
-104
-- squeezelite: update to a3d95ec and link audio libraries
-
-103
-- Add alsamixer
-- Update mpg123 to 1.23.6
-- Update squeezelite to 33cca7e
-
-102
-- Remove IR support from squeezelite
-
-101
-- Add mpg123 and squeezelite
-
-100
-- Initial Release
+1
+- mpg123: update to 1.31.3
+- mpv-drmprime: update to 0.35.1

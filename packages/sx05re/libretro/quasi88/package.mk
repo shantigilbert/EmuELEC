@@ -2,12 +2,12 @@
 # Copyright (C) 2019-present asakous (https://github.com/asakous)
 
 PKG_NAME="quasi88"
-PKG_VERSION="2548625ba2bc3b5a9ecae7db24fdd5d42570e578"
+PKG_VERSION="e3d06c4f34c3643d3ea9248a47cdc6cf60c1e0b1"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="BSD3"
 PKG_SITE="https://github.com/libretro/quasi88-libretro"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -17,6 +17,6 @@ PKG_TOOLCHAIN="make"
 GET_HANDLER_SUPPORT="git"
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp quasi88_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp quasi88_libretro.so ${INSTALL}/usr/lib/libretro/
 }

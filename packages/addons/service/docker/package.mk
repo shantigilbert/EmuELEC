@@ -3,11 +3,11 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="docker"
-PKG_REV="138"
+PKG_REV="4"
 PKG_ARCH="any"
 PKG_LICENSE="ASL"
 PKG_SITE="http://www.docker.com/"
-PKG_DEPENDS_TARGET="cli containerd moby runc tini"
+PKG_DEPENDS_TARGET="cli containerd ctop moby runc tini"
 PKG_SECTION="service/system"
 PKG_SHORTDESC="Docker is an open-source engine that automates the deployment of any application as a lightweight, portable, self-sufficient container that will run virtually anywhere."
 PKG_LONGDESC="Docker containers can encapsulate any payload, and will run consistently on and between virtually any server. The same container that a developer builds and tests on a laptop will run at scale, in production*, on VMs, bare-metal servers, OpenStack clusters, public instances, or combinations of the above."
@@ -31,6 +31,9 @@ addon() {
     cp -P $(get_build_dir containerd)/bin/containerd ${ADDON_BUILD}/${PKG_ADDON_ID}/bin/containerd
     cp -P $(get_build_dir containerd)/bin/containerd-shim ${ADDON_BUILD}/${PKG_ADDON_ID}/bin/containerd-shim
     cp -P $(get_build_dir containerd)/bin/containerd-shim-runc-v2 ${ADDON_BUILD}/${PKG_ADDON_ID}/bin/containerd-shim-runc-v2
+
+    # ctop
+    cp -P $(get_build_dir ctop)/bin/ctop ${ADDON_BUILD}/${PKG_ADDON_ID}/bin/ctop
 
     # runc
     cp -P $(get_build_dir runc)/bin/runc ${ADDON_BUILD}/${PKG_ADDON_ID}/bin/runc

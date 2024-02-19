@@ -1,0 +1,13 @@
+[Unit]
+Description=LIRC sleep hook
+Before=sleep.target
+StopWhenUnneeded=yes
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=-/usr/bin/kodi-send --host=127.0.0.1 -a "LIRC.Stop"
+ExecStop=-/usr/bin/kodi-send --host=127.0.0.1 -a "LIRC.Start"
+
+[Install]
+WantedBy=sleep.target

@@ -2,10 +2,10 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="dosbox-staging"
-PKG_VERSION="6af2ef73386ed6c5d9f9eff64d751490d93e1b63"
+PKG_VERSION="3f67c91dd6a998cc091f24d2200e2b99cf37fb18"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/dosbox-staging/dosbox-staging"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain linux meson:host glibc glib systemd dbus alsa-lib SDL2 SDL2_net SDL_sound libpng zlib libvorbis flac libogg fluidsynth-git munt opusfile"
 PKG_LONGDESC="DOS/x86 emulator focusing on ease of use "
 PKG_BUILD_FLAGS="+lto"

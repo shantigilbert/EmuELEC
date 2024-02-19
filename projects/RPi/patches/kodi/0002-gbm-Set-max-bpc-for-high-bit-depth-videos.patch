@@ -1,14 +1,14 @@
-From 55303f4a214d80af24d75a93f102edbe02000423 Mon Sep 17 00:00:00 2001
+From 42b30508bfe5451d4dc2884acfde9e0ec2d58c92 Mon Sep 17 00:00:00 2001
 From: Dom Cobley <popcornmix@gmail.com>
 Date: Fri, 3 Dec 2021 16:00:50 +0000
-Subject: [PATCH 2/4] gbm: Set max bpc for high bit depth videos
+Subject: [PATCH 2/7] gbm: Set max bpc for high bit depth videos
 
 ---
  .../HwDecRender/VideoLayerBridgeDRMPRIME.cpp     | 16 ++++++++++++++++
  1 file changed, 16 insertions(+)
 
 diff --git a/xbmc/cores/VideoPlayer/VideoRenderers/HwDecRender/VideoLayerBridgeDRMPRIME.cpp b/xbmc/cores/VideoPlayer/VideoRenderers/HwDecRender/VideoLayerBridgeDRMPRIME.cpp
-index b91a1705ac..726a5b79b7 100644
+index 4b8ee5afbb..bd6623e8d1 100644
 --- a/xbmc/cores/VideoPlayer/VideoRenderers/HwDecRender/VideoLayerBridgeDRMPRIME.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoRenderers/HwDecRender/VideoLayerBridgeDRMPRIME.cpp
 @@ -34,6 +34,14 @@ void CVideoLayerBridgeDRMPRIME::Disable()
@@ -42,5 +42,5 @@ index b91a1705ac..726a5b79b7 100644
  
  void CVideoLayerBridgeDRMPRIME::SetVideoPlane(CVideoBufferDRMPRIME* buffer, const CRect& destRect)
 -- 
-2.34.1
+2.39.2
 

@@ -15,29 +15,28 @@ if [ ! -d "${CONFIG_DIR}" ]; then
 	cp -rf "/usr/config/emuelec/configs/duckstation/*" "${CONFIG_DIR}"
 fi
 
-#Check if textures directory exits, if it is not then create symlink to link textures folder in /storage/roms/psx/textures to enable texture replacement
-if [ ! -d "${CONFIG_DIR}/textures" ]; then
-    ln -s /storage/roms/psx/textures "${CONFIG_DIR}/textures"
-fi
-
-#if texture folder exists and not symlink, remove it and create symlink to link textures folder in /storage/roms/psx/textures to enable texture replacement
+# If texture folder exists and not symlink, remove it and create symlink to textures folder in /storage/roms/psx/textures to enable texture replacement
 if [ ! -L "${CONFIG_DIR}/textures" ]; then
     rm -r "${CONFIG_DIR}/textures"
     ln -s /storage/roms/psx/textures "${CONFIG_DIR}"
-
-fi
-
-if [ -d "${LOCAL_CONFIG}/duckstation" ]; then
-	rm -rf "${LOCAL_CONFIG}"
 fi
 
 if [ ! -L "${LOCAL_CONFIG}/duckstation" ]; then
-    ln -sf "${CONFIG_DIR}" "${LOCAL_CONFIG}/duckstation"
+	rm -rf "${LOCAL_CONFIG}/duckstation"
+    ln -sf "${CONFIG_DIR}" "${LOCAL_CONFIG}"
 fi
 
 AUTOGP=$(get_ee_setting duckstation_auto_gamepad)
 if [[ "${AUTOGP}" == "1" ]]; then
 	set_duckstation_joy.sh
+fi
+
+#Setting Cheevos if enabled on emulationstation. First check if token entry is not present
+ztoken=$(grep "Token =" /storage/.config/emuelec/configs/duckstation/settings.ini)
+
+if ([ -z "${ztoken}" ]) 
+then
+    duckstationcheevos.sh
 fi
 
 if [[ "${1}" == *"duckstation_gui.pbp"* ]]; then

@@ -52,7 +52,7 @@ else
   REMOTE_CONF_DIR=""
 
   if [ -d "/proc/device-tree/custom_maps" -a "$force_meson_ir" = "no" ]; then
-    MAP_NAME=$(cat /proc/device-tree/custom_maps/map_0/mapname 2>/dev/null)
+    MAP_NAME=$(tr -d '\0' 2>/dev/null < /proc/device-tree/custom_maps/map_0/mapname)
     echo "using meson-remote, with pre-defined map '$MAP_NAME' from dtb"
     modprobe meson-remote
     touch /run/use-meson-remote
@@ -64,7 +64,7 @@ if [ -d "$REMOTE_CONF_DIR" ]; then
   echo "using meson-remote, conf from $REMOTE_CONF_DIR"
 
   if [ -d "/proc/device-tree/custom_maps" ]; then
-    MAP_NAME=$(cat /proc/device-tree/custom_maps/map_0/mapname 2>/dev/null)
+    MAP_NAME=$(tr -d '\0' 2>/dev/null < /proc/device-tree/custom_maps/map_0/mapname)
     echo "also using pre-defined map '$MAP_NAME' from dtb"
   fi
 

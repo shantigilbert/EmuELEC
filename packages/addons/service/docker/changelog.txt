@@ -1,135 +1,17 @@
-138
-- libnetwork: drop package
-  docker-proxy is now included in moby
-- containerd: update to 1.6.8
-- runc: update to 1.1.4
+1
+- not released for LE11
 
-137
-- containerd: update to 1.6.6
-- runc: update to 1.1.3
+2
+- not released for LE11
 
-136
-- moby: update to 22.06.0-beta.0
-- cli: update to 22.06.0-beta.0
+3
+- fix ctop
+- update moby and cli to 23.0.4
+- containerd: update to 1.7.0
+- runc: build with seccomp
+- runc: update to 1.1.5
 
-135
-- containerd: update to 1.6.5
-- libnetwork: update to 2022-03-16
-- runc: update to 1.1.2
-
-134
-- containerd: update to 1.5.6
-- libnetwork: update to 2021-05-25
-- runc: update to 1.0.2
-
-133
-- Update to docker 19.03.15
-- runc: update to 1.0.0-rc93
-
-132
-- Fix python addon
-
-131
-- Update to docker 19.03.14
-
-130
-- Update to docker 19.03.13
-
-129
-- Fix "docker run --init"
-
-128
-- Update to docker 19.03.2
-
-127
-- Update to docker 18.09.8
-
-126
-- Update to docker 18.09.7
-
-125
-- Update to docker 18.09.5
-
-124
-- Update to docker 18.09.4
-
-123
-- Update to docker 18.09.3
-
-122
-- Update to docker 18.09.1
-
-121
-- Update to docker 18.09.1-rc1
-
-120
-- Update to docker 18.09.1-beta1
-
-119
-- Update to docker 18.09.0
-
-118
-- Update to docker 18.06.1-ce
-
-117
-- Update to docker 17.10
-
-116
-- change to new project structure
-
-114
-- Enable journald buildtag
-
-113
-- Update to docker 1.13.1
-- Update to golang 1.7.5
-
-112
-- Update to docker 1.13.0
-- Use journald log driver
-- Add docker-init (tini)
-
-111
-- Add temporary cleanup for old systemd service
-
-110
-- Update to docker 1.12.5
-- Adjust the systemd service file
-
-109
-- Update to docker 1.12.3
-- Include ctop utility
-
-108
-- Update to docker 1.12.2
-
-107
-- Update to docker 1.12.1
-
-106
-- Include missing docker-proxy
-
-105
-- Update to docker 1.12.0
-- Update to golang 1.6.3
-- Use overlay2 driver (new installs only)
-- Remove docker-containerd-ctr
-
-104
-- Update to docker 1.11.2
-
-103
-- Allow using kodi notifications based on Docker events API
-
-102
-- Update to docker 1.11.1
-
-101
-- Update to golang 1.6.2
-- Update to docker 1.11.0
-
-100
-- Update for LibreELEC 8.0
-
-100
-- Initial release
+4
+- update moby and cli to 23.0.6
+- containerd: update to 1.7.1
+- runc: update to 1.1.7

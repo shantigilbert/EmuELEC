@@ -1,0 +1,97 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
+
+if [ $# -ne 3 ] ; then
+  echo "${0} usage: context addon-id addon-path"
+  exit 1
+fi
+
+CONTEXT="${1}"
+ADDON_ID="${2}"
+ADDON_PATH="${3}"
+
+if [ ! -d /storage/.config/system.d ] ; then
+  mkdir -p /storage/.config/system.d
+fi
+
+SERVICE_FILE="${ADDON_PATH}/system.d/${ADDON_ID}.service"
+
+if [ -f "${SERVICE_FILE}" ] ; then
+  case "${CONTEXT}" in
+    enable)
+      systemctl enable "${SERVICE_FILE}"
+      chmod +x "${ADDON_PATH}/bin"/*
+      systemctl start "${ADDON_ID}.service"
+      ;;
+    disable | pre-uninstall)
+      systemctl stop "${ADDON_ID}.service"
+      systemctl disable "${ADDON_ID}.service"
+      ;;
+    post-update)
+      # post-update is triggered on update,
+      # make sure to stop and re-install service
+      systemctl stop "${ADDON_ID}.service"
+      systemctl disable "${ADDON_ID}.service"
+      systemctl enable "${SERVICE_FILE}"
+      chmod +x "${ADDON_PATH}/bin"/*
+      systemctl start "${ADDON_ID}.service"
+      ;;
+    restart)
+      systemctl restart "${ADDON_ID}.service"
+      ;;
+    reload)
+      systemctl reload "${ADDON_ID}.service"
+      ;;
+    *)
+      echo "${0}: unknown service context ${CONTEXT}"
+      exit 1
+      ;;
+  esac
+fi
+
+if [ ! -d /storage/.cache/kernel-overlays ] ; then
+  mkdir -p /storage/.cache/kernel-overlays
+fi
+
+# kernel-overlay addons built into the image have their
+# files installed in the default /usr/lib/kernel-overlays
+# location, not inside the kodi addon dir
+
+case "${ADDON_PATH}" in
+  /usr/share/kodi/addons/*)
+    OVERLAY_PATH="/usr/lib/kernel-overlays/${ADDON_ID}"
+    ;;
+  *)
+    OVERLAY_PATH="${ADDON_PATH}/kernel-overlay"
+    ;;
+esac
+
+create_overlay_conf() {
+  rm -f "${OVERLAY_CONF}"
+  echo "${OVERLAY_PATH}" > "${OVERLAY_CONF}"
+}
+
+if [ -d "${OVERLAY_PATH}" ] ; then
+  OVERLAY_CONF="/storage/.cache/kernel-overlays/50-${ADDON_ID}.conf"
+
+  case "${CONTEXT}" in
+    enable | post-update )
+      create_overlay_conf
+      ;;
+    disable | pre-uninstall )
+      rm -f "${OVERLAY_CONF}"
+      ;;
+    update )
+      if [ -e "${OVERLAY_CONF}" ] ; then
+        create_overlay_conf
+      fi
+      ;;
+    *)
+      echo "${0}: unknown overlay context ${CONTEXT}"
+      exit 1
+      ;;
+  esac
+
+fi

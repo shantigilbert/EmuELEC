@@ -5,7 +5,7 @@
 PKG_NAME="audiodecoder.wsr"
 PKG_VERSION="20.2.0-Nexus"
 PKG_SHA256="e8f8e06b61fbf612d59d689c38a6acade485aabae2382f3fbbedb0ce0c00048d"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/audiodecoder.wsr"

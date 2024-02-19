@@ -1,0 +1,57 @@
+From 5e4400b24fc1f8ad41bccb6a6bdb54b961526556 Mon Sep 17 00:00:00 2001
+From: Matthias Reichl <hias@horus.com>
+Date: Thu, 7 Sep 2023 20:33:25 +0200
+Subject: [PATCH] ASoC: hdmi-codec: Fix broken channel map reporting
+
+Commit 4e0871333661 ("ASoC: hdmi-codec: fix channel info for
+compressed formats") accidentally changed hcp->chmap_idx from
+ca_id, the CEA channel allocation ID, to idx, the index to
+the table of channel mappings ordered by preference.
+
+This resulted in wrong channel maps being reported to userspace,
+eg for 5.1 "FL,FR,LFE,FC" was reported instead of the expected
+"FL,FR,LFE,FC,RL,RR":
+
+~ # speaker-test -c 6 -t sine
+...
+ 0 - Front Left
+ 3 - Front Center
+ 1 - Front Right
+ 2 - LFE
+ 4 - Unknown
+ 5 - Unknown
+
+~ # amixer cget iface=PCM,name='Playback Channel Map' | grep ': values'
+  : values=3,4,8,7,0,0,0,0
+
+Switch this back to ca_id in case of PCM audio so the correct channel
+map is reported again and set it to HDMI_CODEC_CHMAP_IDX_UNKNOWN in
+case of non-PCM audio so the PCM channel map control returns "Unknown"
+channels (value 0).
+
+Fixes: 4e0871333661 ("ASoC: hdmi-codec: fix channel info for compressed formats")
+Cc: stable@vger.kernel.org
+Signed-off-by: Matthias Reichl <hias@horus.com>
+---
+ sound/soc/codecs/hdmi-codec.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/sound/soc/codecs/hdmi-codec.c b/sound/soc/codecs/hdmi-codec.c
+index 13689e718d36f..09eef6042aad6 100644
+--- a/sound/soc/codecs/hdmi-codec.c
++++ b/sound/soc/codecs/hdmi-codec.c
+@@ -531,7 +531,10 @@ static int hdmi_codec_fill_codec_params(struct snd_soc_dai *dai,
+ 	hp->sample_rate = sample_rate;
+ 	hp->channels = channels;
+ 
+-	hcp->chmap_idx = idx;
++	if (pcm_audio)
++		hcp->chmap_idx = ca_id;
++	else
++		hcp->chmap_idx = HDMI_CODEC_CHMAP_IDX_UNKNOWN;
+ 
+ 	return 0;
+ }
+-- 
+2.39.2
+

@@ -1,0 +1,31 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,7 +7,7 @@
+ message("CMAKE_SYSTEM_NAME is ${CMAKE_SYSTEM_NAME}")
+ 
+ add_definitions(-Wall)
+-add_definitions(-std=gnu++14)
++add_definitions(-std=gnu++17)
+ add_definitions(-fpermissive)
+ add_definitions(-O3)
+ #add_definitions(-Rpass=loop-vectorize)
+@@ -45,6 +45,9 @@
+         message("Assuming this is Linux on Raspberry Pi")
+         set(BFDNAME -O elf32-littlearm -B arm)
+         add_definitions(-mfpu=neon-vfpv4 -mfloat-abi=hard -mcpu=cortex-a53 -funsafe-math-optimizations -ftree-vectorize -ftree-vectorizer-verbose=2 -fopt-info-vec)
++    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64")
++        message("Assuming this is aarch64")
++        add_definitions(-mcpu=cortex-a53 -funsafe-math-optimizations -ftree-vectorize -ftree-vectorizer-verbose=2 -fopt-info-vec)
+     else()
+         message("Looks like it's a desktop Linux on amd64, will use xxd")
+         set(USE_XXD true) 
+@@ -158,7 +161,7 @@
+ 
+ target_link_libraries(v06x ${BOOT_O} ${EXTRA_LIBS})
+ 
+-set(TEST_SOURCE_FILES test/tests.cpp)
++#set(TEST_SOURCE_FILES test/tests.cpp)
+ include_directories(src)
+-add_executable(tests ${TEST_SOURCE_FILES} boots.o)
++#add_executable(tests ${TEST_SOURCE_FILES} boots.o)
+ 

@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2019-present Team CoreELEC (https://coreelec.org)
+
+BOOT_STATUS=${HOME}/.config/boot.status
+BOOT_HINT=${HOME}/.config/boot.hint
+
+BOOT_STATE="$(cat ${BOOT_STATUS} 2>/dev/null)"
+
+
+process_boot_hint()
+{
+
+  if [ "${BOOT_STATE}" = "OK" ]; then
+    echo "OK" > ${BOOT_HINT}
+  fi
+
+  return 0
+}
+
+process_boot_hint
+
+exit 0
+

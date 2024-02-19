@@ -3,7 +3,7 @@
 
 PKG_NAME="system-tools"
 PKG_VERSION="1.0"
-PKG_REV="132"
+PKG_REV="4"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://libreelec.tv"
@@ -11,17 +11,18 @@ PKG_URL=""
 PKG_DEPENDS_TARGET="toolchain"
 PKG_SECTION="virtual"
 PKG_SHORTDESC="A bundle of system tools and programs"
-PKG_LONGDESC="This bundle currently includes autossh, bottom, diffutils, dstat, dtach, efibootmgr, encfs, evtest, fdupes, file, getscancodes, hddtemp, hd-idle, hid_mapper, htop, i2c-tools, inotify-tools, jq, kmsxx, libgpiod, lm_sensors, lshw, mc, mmc-utils, mtpfs, nmon, p7zip, patch, pv, screen, smartmontools, stress-ng, unrar, usb-modeswitch and vim."
+PKG_LONGDESC="This bundle currently includes 7-zip, autossh, bottom, diffutils, dool, dtach, efibootmgr, encfs, evtest, fdupes, file, getscancodes, hddtemp, hd-idle, hid_mapper, htop, i2c-tools, inotify-tools, jq, libgpiod, lm_sensors, lshw, mc, mmc-utils, mtpfs, nmon, patch, pv, screen, smartmontools, stress-ng, unrar, usb-modeswitch and vim."
 
 PKG_IS_ADDON="yes"
 PKG_ADDON_NAME="System Tools"
 PKG_ADDON_TYPE="xbmc.python.script"
 
 PKG_DEPENDS_TARGET="toolchain \
+                    7-zip \
                     autossh \
                     bottom \
                     diffutils \
-                    dstat \
+                    dool \
                     dtach \
                     encfs \
                     evtest \
@@ -35,7 +36,6 @@ PKG_DEPENDS_TARGET="toolchain \
                     i2c-tools \
                     inotify-tools \
                     jq \
-                    kmsxx \
                     libgpiod \
                     lm_sensors \
                     lshw \
@@ -43,7 +43,6 @@ PKG_DEPENDS_TARGET="toolchain \
                     mmc-utils \
                     mtpfs \
                     nmon \
-                    p7zip \
                     patch \
                     pv \
                     screen \
@@ -61,6 +60,9 @@ fi
 addon() {
   mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/{bin,data,lib}
 
+    # 7-zip
+    cp -P $(get_install_dir 7-zip)/usr/bin/7zz ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+
     # autossh
     cp -P $(get_install_dir autossh)/usr/bin/autossh ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
 
@@ -70,8 +72,8 @@ addon() {
     # diffutils
     cp -P $(get_install_dir diffutils)/usr/bin/{cmp,diff,diff3,sdiff} ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
 
-    # dstat
-    cp -P $(get_install_dir dstat)/usr/bin/dstat ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+    # dool
+    cp -Pa $(get_install_dir dool)/usr/bin/* ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
 
     # dtach
     cp -P $(get_install_dir dtach)/usr/bin/dtach ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
@@ -91,6 +93,11 @@ addon() {
     # file
     cp -P $(get_install_dir file)/usr/bin/file ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
     cp -P $(get_install_dir file)/usr/share/misc/magic.mgc ${ADDON_BUILD}/${PKG_ADDON_ID}/data
+
+    # fuse
+    cp -P $(get_install_dir fuse)/usr/bin/{fusermount,ulockmgr_server} ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+    cp -P $(get_install_dir fuse)/usr/sbin/mount.fuse ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+    cp -P $(get_install_dir fuse)/usr/lib/{libfuse.so*,libulockmgr.so*} ${ADDON_BUILD}/${PKG_ADDON_ID}/lib
 
     # getscancodes
     cp -P $(get_install_dir getscancodes)/usr/bin/getscancodes ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
@@ -122,9 +129,6 @@ addon() {
     cp -P $(get_install_dir jq)/usr/bin/jq ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
     cp -P $(get_install_dir oniguruma)/usr/lib/{libonig.so,libonig.so.5,libonig.so.5.*.*} ${ADDON_BUILD}/${PKG_ADDON_ID}/lib
 
-    # kmsxx
-    cp -P $(get_install_dir kmsxx)/usr/bin/{kmsblank,kmsprint,kmstest} ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
-
     # libgpiod
     cp -P $(get_install_dir libgpiod)/usr/bin/{gpiodetect,gpiofind,gpioget,gpioinfo,gpiomon,gpioset} ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
 
@@ -146,11 +150,6 @@ addon() {
 
     # nmon
     cp -P $(get_install_dir nmon)/usr/bin/nmon ${ADDON_BUILD}/${PKG_ADDON_ID}/bin/
-
-    # p7zip
-    mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/lib/p7zip
-    cp -P $(get_install_dir p7zip)/usr/bin/{7z,7za,7z.so} ${ADDON_BUILD}/${PKG_ADDON_ID}/lib/p7zip
-    cp -PR $(get_install_dir p7zip)/usr/bin/Codecs ${ADDON_BUILD}/${PKG_ADDON_ID}/lib/p7zip
 
     # patch
     cp -P $(get_install_dir patch)/usr/bin/patch ${ADDON_BUILD}/${PKG_ADDON_ID}/bin

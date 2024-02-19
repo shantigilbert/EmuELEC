@@ -1,0 +1,60 @@
+From 0ccf3043e4a584e5592bb7fad737d5d98ed23db0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 5 Aug 2021 01:00:47 +0200
+Subject: [PATCH 007/142] broadcom/qpu: set V3D 7.x names for some waddr
+ aliasing
+
+V3D 7.x got rid of the accumulator, but still uses the values for
+WADDR_R5 and WADDR_R5REP, so let's return a proper name and add some
+aliases.
+---
+ src/broadcom/qpu/qpu_instr.c | 8 ++++++++
+ src/broadcom/qpu/qpu_instr.h | 6 ++++--
+ 2 files changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/qpu/qpu_instr.c b/src/broadcom/qpu/qpu_instr.c
+index 60dabf74e8e..7759fb0efdf 100644
+--- a/src/broadcom/qpu/qpu_instr.c
++++ b/src/broadcom/qpu/qpu_instr.c
+@@ -35,6 +35,14 @@ v3d_qpu_magic_waddr_name(const struct v3d_device_info *devinfo,
+         if (devinfo->ver < 40 && waddr == V3D_QPU_WADDR_TMU)
+                 return "tmu";
+ 
++        /* V3D 7.x QUAD and REP aliases R5 and R5REPT in the table below
++         */
++        if (devinfo->ver >= 71 && waddr == V3D_QPU_WADDR_QUAD)
++                return "quad";
++
++        if (devinfo->ver >= 71 && waddr == V3D_QPU_WADDR_REP)
++                return "rep";
++
+         static const char *waddr_magic[] = {
+                 [V3D_QPU_WADDR_R0] = "r0",
+                 [V3D_QPU_WADDR_R1] = "r1",
+diff --git a/src/broadcom/qpu/qpu_instr.h b/src/broadcom/qpu/qpu_instr.h
+index 45a0cad9760..19bf721dbe1 100644
+--- a/src/broadcom/qpu/qpu_instr.h
++++ b/src/broadcom/qpu/qpu_instr.h
+@@ -93,7 +93,8 @@ enum v3d_qpu_waddr {
+         V3D_QPU_WADDR_R2 = 2,    /* Reserved on V3D 7.x */
+         V3D_QPU_WADDR_R3 = 3,    /* Reserved on V3D 7.x */
+         V3D_QPU_WADDR_R4 = 4,    /* Reserved on V3D 7.x */
+-        V3D_QPU_WADDR_R5 = 5,
++        V3D_QPU_WADDR_R5 = 5,    /* V3D 4.x */
++        V3D_QPU_WADDR_QUAD = 5,  /* V3D 7.x */
+         V3D_QPU_WADDR_NOP = 6,
+         V3D_QPU_WADDR_TLB = 7,
+         V3D_QPU_WADDR_TLBU = 8,
+@@ -129,7 +130,8 @@ enum v3d_qpu_waddr {
+         V3D_QPU_WADDR_TMUHSCM = 44,
+         V3D_QPU_WADDR_TMUHSF = 45,
+         V3D_QPU_WADDR_TMUHSLOD = 46,
+-        V3D_QPU_WADDR_R5REP = 55,
++        V3D_QPU_WADDR_R5REP = 55, /* V3D 4.x */
++        V3D_QPU_WADDR_REP = 55,   /* V3D 7.x */
+ };
+ 
+ struct v3d_qpu_flags {
+-- 
+2.39.2
+

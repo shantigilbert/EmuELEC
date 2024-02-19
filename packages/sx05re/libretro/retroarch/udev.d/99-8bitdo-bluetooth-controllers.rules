@@ -41,3 +41,9 @@ SUBSYSTEM=="input", ATTRS{name}=="8Bitdo Joy", MODE="0666", ENV{ID_INPUT_JOYSTIC
 
 # 8Bitdo Zero GamePad Bluetooth mode(START) mode(START+R)
 SUBSYSTEM=="input", ATTRS{name}=="8Bitdo Zero GamePad", MODE="0666", ENV{ID_INPUT_JOYSTICK}="1"
+
+# 8Bitdo 2.4ghz ultimate
+ACTION=="add", ATTRS{idVendor}=="2dc8", ATTRS{idProduct}=="3106", RUN+="/sbin/modprobe xpad", RUN+="/bin/bash -c 'echo 2dc8 3106 > /sys/bus/usb/drivers/xpad/new_id'"
+
+# 8Bitdo M30
+ACTION=="add", ATTRS{idVendor}=="2dc8", ATTRS{idProduct}=="6002", RUN+="/sbin/modprobe xpad", RUN+="/bin/bash -c 'echo 2dc8 6002 > /sys/bus/usb/drivers/xpad/new_id'"

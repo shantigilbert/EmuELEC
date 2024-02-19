@@ -14,7 +14,7 @@ PKG_PATCH_DIRS+=" $(get_pkg_directory mpg123-compat)/patches"
 PKG_LONGDESC="A console based real time MPEG Audio Player for Layer 1, 2 and 3."
 PKG_BUILD_FLAGS="lib32 -fpic"
 
-if [ "$PULSEAUDIO_SUPPORT" = yes ]; then
+if [ "${PULSEAUDIO_SUPPORT}" = yes ]; then
   PKG_DEPENDS_TARGET+=" lib32-libpulse"
   PKG_CONFIGURE_OPTS_TARGET="--with-default-audio=pulse --with-audio=alsa,pulse"
 else

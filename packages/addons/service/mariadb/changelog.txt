@@ -1,35 +1,6 @@
-108
-- update MariaDB to 10.9.4
+2
+- mariadb: update to 10.11.5
 
-107
-- update MariaDB to 10.9.3
-- supports openssl
-- migrated to pcre2
-
-106
-- update MariaDB to 10.4.22
-- drop support for TokuDB, it is deprecated in 10.5.y and is not
-  supported when being cross_compiled
-
-105
-- update MariaDB to 10.4.21
-
-104
-- update MariaDB to 10.4.17
-
-103
-- update MariaDB to 10.3.14
-  include mysqldump program
-  add user kodi@localhost to allow localhost connections
-  
-102
-- do not change password on addon update
-
-101
-- update MariaDB to 10.3.12
-  removed optimizer_search_depth from config file to speed it up
-  moved some paths for logs to addon home
-  added alias for service name (mariadb == service.mariadb)
-
-100
-- initial version
+1
+- include mariadb-upgrade and mariadb-check
+  copy mariadb* binaries and make symbolic links to mysql*

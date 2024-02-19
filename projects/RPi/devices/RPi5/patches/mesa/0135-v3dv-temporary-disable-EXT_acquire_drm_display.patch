@@ -1,0 +1,29 @@
+From 6bd92fecf57b5b1ae3f1f665726c4a0c43d3d90e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Tue, 11 Apr 2023 13:11:39 +0200
+Subject: [PATCH 135/142] v3dv/temporary: disable EXT_acquire_drm_display
+
+So we could made a conformance run, without the need to include the
+CTS patch for this issue:
+
+https://gitlab.khronos.org/Tracker/vk-gl-cts/-/issues/4377
+---
+ src/broadcom/vulkan/v3dv_device.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_device.c b/src/broadcom/vulkan/v3dv_device.c
+index 30a9894789b..c0ffc05750f 100644
+--- a/src/broadcom/vulkan/v3dv_device.c
++++ b/src/broadcom/vulkan/v3dv_device.c
+@@ -91,7 +91,7 @@ static const struct vk_instance_extension_table instance_extensions = {
+    .KHR_display                         = true,
+    .KHR_get_display_properties2         = true,
+    .EXT_direct_mode_display             = true,
+-   .EXT_acquire_drm_display             = true,
++   .EXT_acquire_drm_display             = false,
+ #endif
+    .KHR_external_fence_capabilities     = true,
+    .KHR_external_memory_capabilities    = true,
+-- 
+2.39.2
+

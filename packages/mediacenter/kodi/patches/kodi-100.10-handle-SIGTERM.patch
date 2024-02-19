@@ -20,11 +20,9 @@ so, when shutdown/reboot is requested:
  .../powermanagement/LogindUPowerSyscall.cpp   |  2 --
  3 files changed, 20 insertions(+), 8 deletions(-)
 
-diff --git a/xbmc/application/Application.cpp b/xbmc/application/Application.cpp
-index bafb5de064..c5f39217cc 100644
 --- a/xbmc/application/Application.cpp
 +++ b/xbmc/application/Application.cpp
-@@ -1444,12 +1444,12 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
+@@ -1481,12 +1481,12 @@ void CApplication::OnApplicationMessage(
    switch (msg)
    {
    case TMSG_POWERDOWN:
@@ -39,7 +37,7 @@ index bafb5de064..c5f39217cc 100644
      break;
  
    case TMSG_SHUTDOWN:
-@@ -1470,12 +1470,13 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
+@@ -1507,12 +1507,13 @@ void CApplication::OnApplicationMessage(
  
    case TMSG_RESTART:
    case TMSG_RESET:
@@ -54,7 +52,7 @@ index bafb5de064..c5f39217cc 100644
      Stop(EXITCODE_RESTARTAPP);
  #endif
      break;
-@@ -2039,7 +2040,7 @@ bool CApplication::Stop(int exitCode)
+@@ -2094,7 +2095,7 @@ bool CApplication::Stop(int exitCode)
      m_frameMoveGuard.unlock();
  
      CVariant vExitCode(CVariant::VariantTypeObject);
@@ -63,7 +61,7 @@ index bafb5de064..c5f39217cc 100644
      CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::System, "OnQuit", vExitCode);
  
      // Abort any active screensaver
-@@ -2071,7 +2072,6 @@ bool CApplication::Stop(int exitCode)
+@@ -2126,7 +2127,6 @@ bool CApplication::Stop(int exitCode)
      // Needs cleaning up
      CServiceBroker::GetAppMessenger()->Stop();
      m_AppFocused = false;
@@ -71,7 +69,7 @@ index bafb5de064..c5f39217cc 100644
      CLog::Log(LOGINFO, "Stopping all");
  
      // cancel any jobs from the jobmanager
-@@ -2602,6 +2602,18 @@ void CApplication::StopPlaying()
+@@ -2669,6 +2669,18 @@ void CApplication::StopPlaying()
    }
  }
  
@@ -89,8 +87,8 @@ index bafb5de064..c5f39217cc 100644
 +
  bool CApplication::OnMessage(CGUIMessage& message)
  {
-   switch ( message.GetMessage() )
-@@ -3114,7 +3126,7 @@ void CApplication::ProcessSlow()
+   switch (message.GetMessage())
+@@ -3189,7 +3201,7 @@ void CApplication::ProcessSlow()
    if (CPlatformPosix::TestQuitFlag())
    {
      CLog::Log(LOGINFO, "Quitting due to POSIX signal");
@@ -99,31 +97,27 @@ index bafb5de064..c5f39217cc 100644
    }
  #endif
  
-diff --git a/xbmc/application/Application.h b/xbmc/application/Application.h
-index 710ea9923b..59763464ab 100644
 --- a/xbmc/application/Application.h
 +++ b/xbmc/application/Application.h
-@@ -120,6 +120,7 @@ public:
+@@ -113,6 +113,7 @@ public:
    bool CreateGUI();
    bool InitWindow(RESOLUTION res = RES_INVALID);
  
 +  bool SetExitCode(int exitCode);
    bool Stop(int exitCode);
-   void ReloadSkin(bool confirm = false);
    const std::string& CurrentFile();
-@@ -274,6 +275,7 @@ private:
-   CApplicationPlayer m_appPlayer;
-   CApplicationStackHelper m_stackHelper;
+   CFileItem& CurrentFileItem();
+@@ -251,6 +252,7 @@ private:
+   unsigned int m_ProcessedExternalCalls = 0;      /*!< counts calls which are processed during one "door open" cycle in FrameMove */
+   unsigned int m_ProcessedExternalDecay = 0;      /*!< counts to close door after a few frames of no python activity */
    int m_ExitCode{EXITCODE_QUIT};
 +  bool m_ExitCodeSet = false;
  };
  
  XBMC_GLOBAL_REF(CApplication,g_application);
-diff --git a/xbmc/platform/linux/powermanagement/LogindUPowerSyscall.cpp b/xbmc/platform/linux/powermanagement/LogindUPowerSyscall.cpp
-index 34eed6e41b..c374dbdbd3 100644
 --- a/xbmc/platform/linux/powermanagement/LogindUPowerSyscall.cpp
 +++ b/xbmc/platform/linux/powermanagement/LogindUPowerSyscall.cpp
-@@ -78,8 +78,6 @@ CLogindUPowerSyscall::~CLogindUPowerSyscall()
+@@ -79,8 +79,6 @@ CLogindUPowerSyscall::~CLogindUPowerSysc
  
  bool CLogindUPowerSyscall::Powerdown()
  {
@@ -132,6 +126,3 @@ index 34eed6e41b..c374dbdbd3 100644
    return LogindSetPowerState("PowerOff");
  }
  
--- 
-2.34.1
-

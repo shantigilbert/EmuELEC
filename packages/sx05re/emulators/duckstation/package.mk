@@ -3,6 +3,7 @@
 
 PKG_NAME="duckstation"
 PKG_VERSION="fd3507c16d098fb32806c281caaefb205946da8a"
+#PKG_VERSION="35f272b336667cffd35d149d9da6f85e958ddfa2"
 PKG_ARCH="aarch64"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/stenzek/duckstation"
@@ -20,10 +21,10 @@ fi
 
 pre_configure_target() {
 	PKG_CMAKE_OPTS_TARGET+=" -DANDROID=OFF \
-	                         -DBUILD_LIBRETRO_CORE=OFF \
 	                         -DENABLE_DISCORD_PRESENCE=OFF \
 	                         -DUSE_X11=OFF \
-	                         -DBUILD_GO2_FRONTEND=OFF \
+                                 -DBUILD_LIBRETRO_CORE=OFF \
+				 -DBUILD_GO2_FRONTEND=OFF \
 	                         -DBUILD_QT_FRONTEND=OFF \
 	                         -DBUILD_NOGUI_FRONTEND=ON \
 	                         -DCMAKE_BUILD_TYPE=Release \

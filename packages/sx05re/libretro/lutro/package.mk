@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="lutro"
-PKG_VERSION="bb24fcb89158ca1c72865af4735ca744b774ab64"
-PKG_SHA256="c66b03292a01cf62d7cb10cb8d69fec84bc72c93182cfaba52a5b24f63e83808"
+PKG_VERSION="09a134eccad87127ec757503f736d6e4f9d06d4c"
+PKG_SHA256="770cbc75eea59874d8a63a107cdc8651edd6bac69f1d542b3f1c0b4e4c475894"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/libretro/libretro-lutro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -38,13 +38,13 @@ PKG_AUTORECONF="no"
 
 make_target() {
   PTR_SIZE="-m32"
-  if [ "$ARCH" == "x86_64" ]; then
+  if [ "${ARCH}" == "x86_64" ]; then
     PTR_SIZE="-m64"
   fi  
-  make HOST_CC="$HOST_CC" PTR_SIZE="$PTR_SIZE" CROSS="$TARGET_PREFIX" HAVE_COMPOSITION=1
+  make HOST_CC="${HOST_CC}" PTR_SIZE="${PTR_SIZE}" CROSS="${TARGET_PREFIX}" HAVE_COMPOSITION=1
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp lutro_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp lutro_libretro.so ${INSTALL}/usr/lib/libretro/
 }

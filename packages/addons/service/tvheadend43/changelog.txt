@@ -1,12 +1,1 @@
-103
-- Update to 4.3-1986
-
-102
-- Update to 4.3-1979
-- include missing x254 library for Generic
-
-101
-- Update to 4.3-1967
-
-100
-- initial LibreELEC version
+initial release

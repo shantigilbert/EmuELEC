@@ -3,7 +3,7 @@
 
 PKG_NAME="game-tools"
 PKG_VERSION=""
-PKG_REV="104"
+PKG_REV="0"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE=""

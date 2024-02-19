@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="prboom"
-PKG_VERSION="4e671fa0a4b7b892e17ac4e1803c9d627653a4c1"
-PKG_SHA256="0172c6937cc1eca77727381be19eeaf6984566916d20c860e040d5ae698652b0"
+PKG_VERSION="6ec854969fd9dec33bb2cab350f05675d1158969"
+PKG_SHA256="1ea963565c7a50a991056b7b8bb1e577a0dcf6f341e718cda293995fa279ba52"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/libretro-prboom"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,6 +37,6 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp prboom_libretro.so $INSTALL/usr/lib/libretro/prboom_libretro.so
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp prboom_libretro.so ${INSTALL}/usr/lib/libretro/prboom_libretro.so
 }

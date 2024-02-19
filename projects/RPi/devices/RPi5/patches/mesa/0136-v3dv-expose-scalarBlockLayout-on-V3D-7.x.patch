@@ -1,0 +1,27 @@
+From 7960516490008ab42ab31e921369b1ffb8f67bde Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 21 Jun 2023 10:29:07 +0200
+Subject: [PATCH 136/142] v3dv: expose scalarBlockLayout on V3D 7.x
+
+This version of V3D doesn't have the restriction that vector accesses
+must not cross 16-byte boundaries.
+---
+ src/broadcom/vulkan/v3dv_device.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_device.c b/src/broadcom/vulkan/v3dv_device.c
+index c0ffc05750f..8f8102ae46e 100644
+--- a/src/broadcom/vulkan/v3dv_device.c
++++ b/src/broadcom/vulkan/v3dv_device.c
+@@ -304,7 +304,7 @@ get_features(const struct v3dv_physical_device *physical_device,
+        * problematic, we would always have to scalarize. Overall, this would
+        * not lead to best performance so let's just not support it.
+        */
+-      .scalarBlockLayout = false,
++      .scalarBlockLayout = physical_device->devinfo.ver >= 71,
+       /* This tells applications 2 things:
+        *
+        * 1. If they can select just one aspect for barriers. For us barriers
+-- 
+2.39.2
+

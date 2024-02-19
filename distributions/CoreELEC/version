@@ -2,7 +2,7 @@
   OS_MAJOR="20"
 
 # OS_MINOR: OS minor Version
-  OS_MINOR="0"
+  OS_MINOR="3"
 
 # OS_VERSION: OS Version
   OS_VERSION="${OS_MAJOR}.${OS_MINOR}"
@@ -11,10 +11,10 @@
   OS_CODENAME="Nexus"
 
 # OS_STAGE: OS Release Stage (alpha, beta, rc, build)
-  OS_STAGE="beta"
+  OS_STAGE=""
 
 # BUILD_NUM: Build number
-  BUILD_NUM="1"
+  BUILD_NUM=""
 
 # ADDON_VERSION: Addon version
   ADDON_VERSION=${OS_VERSION}

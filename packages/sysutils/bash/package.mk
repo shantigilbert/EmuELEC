@@ -2,8 +2,8 @@
 # Copyright (C) 2022-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="bash"
-PKG_VERSION="5.1.16"
-PKG_SHA256="5bac17218d3911834520dad13cd1f85ab944e1c09ae1aba55906be1f8192f558"
+PKG_VERSION="5.2.15"
+PKG_SHA256="13720965b5f4fc3a0d4b61dd37e7565c741da9a5be24edc2ae00182fc1b3588c"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.gnu.org/software/bash/"
 PKG_URL="https://ftp.gnu.org/gnu/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.tar.gz"

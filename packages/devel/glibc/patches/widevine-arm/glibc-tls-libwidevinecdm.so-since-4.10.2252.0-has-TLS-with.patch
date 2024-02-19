@@ -1,0 +1,28 @@
+From 61b3b546450ae0a70cb4a57fbb0e0fc47b331370 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Sat, 5 Jun 2021 19:41:25 +0200
+Subject: [PATCH] tls: libwidevinecdm.so: since 4.10.2252.0 has TLS with
+ 64-byte alignment Change the max_align to 64U instead 16 to make it possible
+ to use dlopen again. Tests by changing TLS_TCB_ALIGN directly showed up some
+ random crashes. Reverence: https://lkml.org/lkml/2020/7/3/754
+
+Without this patch, a SEGV is encountered when dlopen(libwidevinecdm.so),
+inside dl-init.c call_init()
+---
+ elf/dl-tls.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+--- a/elf/dl-tls.c
++++ b/elf/dl-tls.c
+@@ -220,6 +220,11 @@ void
+ _dl_determine_tlsoffset (void)
+ {
+   size_t max_align = TCB_ALIGNMENT;
++  /* libwidevinecdm.so: since 4.10.2252.0 has TLS with 64-byte alignment.
++     Since TLS is initialized before audit modules are loaded and slotinfo
++     information is available, this is not taken into account below in
++     the audit case.  */
++  max_align = MAX (max_align, 64U);
+   size_t freetop = 0;
+   size_t freebottom = 0;
+ 

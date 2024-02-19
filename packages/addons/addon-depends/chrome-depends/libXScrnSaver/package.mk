@@ -3,12 +3,12 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libXScrnSaver"
-PKG_VERSION="1.2.3"
-PKG_SHA256="f917075a1b7b5a38d67a8b0238eaab14acd2557679835b154cf2bca576e89bf8"
+PKG_VERSION="1.2.4"
+PKG_SHA256="75cd2859f38e207a090cac980d76bc71e9da99d48d09703584e00585abc920fe"
 PKG_LICENSE="GPL"
-PKG_SITE="http://xorg.freedesktop.org/"
-PKG_URL="https://xorg.freedesktop.org/releases/individual/lib/libXScrnSaver-${PKG_VERSION}.tar.bz2"
-PKG_DEPENDS_TARGET="toolchain scrnsaverproto"
+PKG_SITE="https://xorg.freedesktop.org/"
+PKG_URL="https://xorg.freedesktop.org/releases/individual/lib/libXScrnSaver-${PKG_VERSION}.tar.xz"
+PKG_DEPENDS_TARGET="toolchain libXext scrnsaverproto"
 PKG_LONGDESC="X11 Screen Saver extension client library."
 PKG_BUILD_FLAGS="-sysroot"
 

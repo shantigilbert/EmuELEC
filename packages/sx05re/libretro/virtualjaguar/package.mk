@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="virtualjaguar"
-PKG_VERSION="263c979be4ca757c43fb525bd6f0887998e57041"
-PKG_SHA256="488717293e737a602be6f5550df21064314fee422e144c62b3f92e63a6222b30"
+PKG_VERSION="8126e5c504ac7217a638f38e4cd9190822c8abdd"
+PKG_SHA256="365baa5ee4212e524fc2e40b1c6f29f3c9d4078486e35962db57e7e5da679e73"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/virtualjaguar-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,6 +37,6 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp virtualjaguar_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp virtualjaguar_libretro.so ${INSTALL}/usr/lib/libretro/
 }

@@ -1,0 +1,107 @@
+From 63d0059ebef288afb0e2e746dadda8c2238bdfcb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Tue, 28 Sep 2021 01:17:08 +0200
+Subject: [PATCH 035/142] broadcom/qpu: implement switch rules for fmin/fmax
+ fadd/faddnf for v71
+
+They use the same opcodes, and switch between one and the other based
+on raddr.
+
+Note that the rule rule includes also if small_imm_a/b are used. That
+is still not in place so that part is hardcode. Would be updated later
+when small immediates support for v71 gets implemented.
+---
+ src/broadcom/qpu/qpu_pack.c | 48 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 48 insertions(+)
+
+diff --git a/src/broadcom/qpu/qpu_pack.c b/src/broadcom/qpu/qpu_pack.c
+index 0eb820b3f10..7a262f18ac3 100644
+--- a/src/broadcom/qpu/qpu_pack.c
++++ b/src/broadcom/qpu/qpu_pack.c
+@@ -651,7 +651,9 @@ static const struct opcode_desc mul_ops_v33[] = {
+  * opcodes that changed on v71
+  */
+ static const struct opcode_desc add_ops_v71[] = {
++        /* FADD is FADDNF depending on the order of the raddr_a/raddr_b. */
+         { 0,   47,  .raddr_mask = ANYOPMASK, V3D_QPU_A_FADD },
++        { 0,   47,  .raddr_mask = ANYOPMASK, V3D_QPU_A_FADDNF },
+         { 53,  55,  .raddr_mask = ANYOPMASK, V3D_QPU_A_VFPACK },
+         { 56,  56,  .raddr_mask = ANYOPMASK, V3D_QPU_A_ADD },
+         { 57,  59,  .raddr_mask = ANYOPMASK, V3D_QPU_A_VFPACK },
+@@ -666,6 +668,10 @@ static const struct opcode_desc add_ops_v71[] = {
+         { 125, 125, .raddr_mask = ANYOPMASK, V3D_QPU_A_SHR },
+         { 126, 126, .raddr_mask = ANYOPMASK, V3D_QPU_A_ASR },
+         { 127, 127, .raddr_mask = ANYOPMASK, V3D_QPU_A_ROR },
++        /* FMIN is instead FMAX depending on the raddr_a/b order. */
++        { 128, 175, .raddr_mask = ANYOPMASK, V3D_QPU_A_FMIN },
++        { 128, 175, .raddr_mask = ANYOPMASK, V3D_QPU_A_FMAX },
++        { 176, 180, .raddr_mask = ANYOPMASK, V3D_QPU_A_VFMIN },
+ 
+         { 181, 181, .raddr_mask = ANYOPMASK, V3D_QPU_A_AND },
+         { 182, 182, .raddr_mask = ANYOPMASK, V3D_QPU_A_OR },
+@@ -1162,6 +1168,22 @@ v3d71_qpu_add_unpack(const struct v3d_device_info *devinfo, uint64_t packed_inst
+ 
+         instr->alu.add.op = desc->op;
+ 
++        /* FADD/FADDNF and FMIN/FMAX are determined by the orders of the
++         * operands.
++         */
++        /* FIXME: for now hardcoded values, until we got the small_imm support
++         * in place
++         */
++        uint32_t small_imm_a = 0;
++        uint32_t small_imm_b = 0;
++        if (small_imm_a * 256 + ((op >> 2) & 3) * 64 + raddr_a >
++            small_imm_b *256 + (op & 3) * 64 + raddr_b) {
++                if (instr->alu.add.op == V3D_QPU_A_FMIN)
++                        instr->alu.add.op = V3D_QPU_A_FMAX;
++                if (instr->alu.add.op == V3D_QPU_A_FADD)
++                        instr->alu.add.op = V3D_QPU_A_FADDNF;
++        }
++
+         /* Some QPU ops require a bit more than just basic opcode and mux a/b
+          * comparisons to distinguish them.
+          */
+@@ -1754,6 +1776,11 @@ v3d71_qpu_add_pack(const struct v3d_device_info *devinfo,
+                 uint32_t output_pack;
+                 uint32_t a_unpack;
+                 uint32_t b_unpack;
++                /* FIXME: for now hardcoded values, until we got the small_imm
++                 * support in place
++                 */
++                uint32_t small_imm_a = 0;
++                uint32_t small_imm_b = 0;
+ 
+                 if (instr->alu.add.op != V3D_QPU_A_FCMP) {
+                         if (!v3d_qpu_float32_pack_pack(instr->alu.add.output_pack,
+@@ -1773,6 +1800,27 @@ v3d71_qpu_add_pack(const struct v3d_device_info *devinfo,
+                         return false;
+                 }
+ 
++                /* These operations with commutative operands are
++                 * distinguished by which order their operands come in.
++                 */
++                bool ordering =
++                        small_imm_a * 256 + a_unpack * 64 + raddr_a >
++                        small_imm_b * 256 + b_unpack * 64 + raddr_b;
++                if (((instr->alu.add.op == V3D_QPU_A_FMIN ||
++                      instr->alu.add.op == V3D_QPU_A_FADD) && ordering) ||
++                    ((instr->alu.add.op == V3D_QPU_A_FMAX ||
++                      instr->alu.add.op == V3D_QPU_A_FADDNF) && !ordering)) {
++                        uint32_t temp;
++
++                        temp = a_unpack;
++                        a_unpack = b_unpack;
++                        b_unpack = temp;
++
++                        temp = raddr_a;
++                        raddr_a = raddr_b;
++                        raddr_b = temp;
++                }
++
+                 opcode |= a_unpack << 2;
+                 opcode |= b_unpack << 0;
+ 
+-- 
+2.39.2
+

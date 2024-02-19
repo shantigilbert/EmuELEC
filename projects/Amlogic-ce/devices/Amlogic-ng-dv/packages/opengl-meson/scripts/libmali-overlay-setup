@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
+
+if grep -q "g12b" /proc/device-tree/compatible; then
+    ln -sf /usr/lib/libMali.gondul.so /var/lib/libMali.so
+fi

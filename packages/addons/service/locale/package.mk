@@ -2,7 +2,7 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="locale"
-PKG_REV="103"
+PKG_REV="0"
 PKG_ARCH="any"
 PKG_DEPENDS_TARGET="toolchain glibc"
 PKG_SECTION="service"

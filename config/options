@@ -27,7 +27,7 @@ DISTRO="${DISTRO:-EmuELEC}"
 export PROJECT="${PROJECT:-Amlogic-ce}"
 
 # determines DEVICE, if not forced by user
-export DEVICE="${DEVICE:-Amlogic-ng}"
+export DEVICE="${DEVICE:-Amlogic-ne}"
 
 # default to Generic device if building Generic project without device set
 if [ "${PROJECT}" = "Generic" -a -z "${DEVICE}" ]; then
@@ -106,6 +106,15 @@ VERBOSE="${VERBOSE:-yes}"
 # directory.
 CCACHE_CACHE_SIZE="20G"
 
+# compression level for ccache
+# This option determines the level at which ccache will compress object files
+# using the real-time compression algorithm Zstandard. It only has effect if
+# compression is enabled (which it is by default). Zstandard is extremely fast
+# for decompression and very fast for compression for lower compression
+# levels. The default is 0. The value 0 means that ccache will choose a
+# suitable zstd level, currently 1.
+CCACHE_COMPRESSLEVEL="0"
+
 # set addon paths
 if [ -z "$ADDON_PATH" ]; then
   if [ -n "$ADDON_PROJECT" ]; then
@@ -126,6 +135,18 @@ fi
 # read global persistent options from $HOME if available
 if [ -f "${HOME}/.coreelec/options" ]; then
   . "${HOME}/.coreelec/options"
+fi
+
+if [ "${LOCAL_CCACHE_SUPPORT}" = "yes" ] && [ -z "${CCACHE_DISABLE}" ]; then
+  # like LOCAL_CC check for local ccache only on the very first
+  # call to config/options, before toolchain has been added to the path,
+  # otherwise we might pick up ccache from toolchain/bin here
+  if [ -z "${LOCAL_CCACHE}" ] && [ "${LOCAL_CCACHE_CHECKED}" != "yes" ]; then
+    export LOCAL_CCACHE="$(command -v ccache)"
+    export LOCAL_CCACHE_CHECKED="yes"
+  fi
+else
+  export LOCAL_CCACHE=""
 fi
 
 # overwrite OEM_SUPPORT via commandline

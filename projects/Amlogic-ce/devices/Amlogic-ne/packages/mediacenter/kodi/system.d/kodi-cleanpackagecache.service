@@ -1,0 +1,12 @@
+[Unit]
+Description=Kodi clean package cache
+ConditionPathExists=/storage/.kodi/addons/packages
+Before=kodi.service
+
+[Service]
+Type=oneshot
+ExecStart=-/bin/sh -c 'rm -rf /storage/.kodi/addons/packages'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=kodi.service

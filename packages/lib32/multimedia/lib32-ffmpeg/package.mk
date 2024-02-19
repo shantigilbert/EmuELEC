@@ -15,10 +15,10 @@ PKG_LONGDESC="FFmpeg is a complete, cross-platform solution to record, convert a
 PKG_BUILD_FLAGS="lib32 -gold"
 
 FF_DIRECTORY="$(get_pkg_directory ffmpeg)"
-PKG_PATCH_DIRS+=" $FF_DIRECTORY/patches \
-                  $FF_DIRECTORY/patches/libreelec \
-                  $FF_DIRECTORY/patches/v4l2-request \
-                  $FF_DIRECTORY/patches/v4l2-drmprime" 
+PKG_PATCH_DIRS+=" ${FF_DIRECTORY}/patches \
+                  ${FF_DIRECTORY}/patches/libreelec \
+                  ${FF_DIRECTORY}/patches/v4l2-request \
+                  ${FF_DIRECTORY}/patches/v4l2-drmprime" 
 
 # Dependencies
 get_graphicdrivers
@@ -50,7 +50,7 @@ fi
 unpack() {
   ${SCRIPTS}/get ffmpeg
   mkdir -p ${PKG_BUILD}
-  tar --strip-components=1 -xf ${SOURCES}/ffmpeg/ffmpeg-${PKG_VERSION}.tar.gz -C ${PKG_BUILD}
+  tar --strip-components=1 -xf ${SOURCES}/ffmpeg/ffmpeg-${PKG_VERSION}.tar.xz -C ${PKG_BUILD}
 }
 
 pre_configure_target() {

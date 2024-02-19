@@ -1,7 +1,7 @@
-From e93a6bc009e660db2746b529149bac8d2e3ae122 Mon Sep 17 00:00:00 2001
+From 0b9b204c6560f3aff39697f92616b48102840dfe Mon Sep 17 00:00:00 2001
 From: Lukas Rusak <lorusak@gmail.com>
 Date: Mon, 29 Apr 2019 18:48:45 -0700
-Subject: [PATCH 3/4] CVideoLayerBridgeDRMPRIME add colourspace connector
+Subject: [PATCH 3/7] CVideoLayerBridgeDRMPRIME add colourspace connector
  property
 
 ---
@@ -46,7 +46,7 @@ index e77f75b58b..4de9732308 100644
  std::string GetColorRange(const VideoPicture& picture);
  uint8_t GetEOTF(const VideoPicture& picture);
 diff --git a/xbmc/cores/VideoPlayer/VideoRenderers/HwDecRender/VideoLayerBridgeDRMPRIME.cpp b/xbmc/cores/VideoPlayer/VideoRenderers/HwDecRender/VideoLayerBridgeDRMPRIME.cpp
-index 726a5b79b7..09701cdbaa 100644
+index bd6623e8d1..a1342595c6 100644
 --- a/xbmc/cores/VideoPlayer/VideoRenderers/HwDecRender/VideoLayerBridgeDRMPRIME.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoRenderers/HwDecRender/VideoLayerBridgeDRMPRIME.cpp
 @@ -42,6 +42,16 @@ void CVideoLayerBridgeDRMPRIME::Disable()
@@ -83,5 +83,5 @@ index 726a5b79b7..09701cdbaa 100644
  
  void CVideoLayerBridgeDRMPRIME::SetVideoPlane(CVideoBufferDRMPRIME* buffer, const CRect& destRect)
 -- 
-2.34.1
+2.39.2
 

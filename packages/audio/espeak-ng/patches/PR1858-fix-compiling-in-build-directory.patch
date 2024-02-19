@@ -1,0 +1,23 @@
+From 9e6083c12a41334b2817b443d430637f01ee5fb9 Mon Sep 17 00:00:00 2001
+From: Rudi Heitbaum <rudi@heitbaum.com>
+Date: Sun, 14 Jan 2024 11:33:08 +1100
+Subject: [PATCH] fix compiling in build directory
+
+$(srcdir) was missing on includes for src/include/espeak-ng/espeak-ng.h
+---
+ Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 595546899..d8671efa3 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -16,7 +16,7 @@ SHARED_VERSION=2:51:1 # = *.so.1.1.51
+ MKDIR=mkdir -p
+ 
+ AM_CFLAGS = \
+-	-Isrc/include -Isrc/include/compat -I$(srcdir)/src/speechPlayer/include -I$(srcdir)/src/ucd-tools/src/include \
++	-I$(srcdir)/src/include -Isrc/include/compat -I$(srcdir)/src/speechPlayer/include -I$(srcdir)/src/ucd-tools/src/include \
+ 	-D_BSD_SOURCE -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200112L
+ AM_CXXFLAGS =
+ 

@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="pocketcdg"
-PKG_VERSION="afb88fb20b39e548b8a95791839f59b111892f21"
-PKG_SHA256="a6216754f3c82f9d6539695af2241619c5e1a215820ee54f4c579717fcc8af4a"
+PKG_VERSION="34913f755c92aa7c98668f291631c23e21d88bdc"
+PKG_SHA256="bd041934d03e96776f1d49401b43512173d8777f60cb07c3dd49d951ab813f47"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/libretro/libretro-pocketcdg"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,10 +37,10 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 make_target() {
-  make CC=$CC
+  make CC=${CC}
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp pocketcdg_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp pocketcdg_libretro.so ${INSTALL}/usr/lib/libretro/
 }

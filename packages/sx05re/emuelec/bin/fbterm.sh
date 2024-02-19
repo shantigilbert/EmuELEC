@@ -11,7 +11,7 @@ ee_console enable
 
 if [[ "${1}" == *"launch_terminal_(kb).sh"* ]]; then
         ee_console disable
-    if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
+    if [ "${EE_DEVICE}" == "OdroidGoAdvance" ] || [ "${EE_DEVICE}" == "GameForce" ]; then
         #kmscon
 		kmscon --font-size 8 --login /usr/bin/login -- -p -f root 
     else
@@ -22,7 +22,7 @@ if [[ "${1}" == *"launch_terminal_(kb).sh"* ]]; then
 		rm ${tmpsh}
     fi
 elif [[ "${1}" == *"file_manager.sh"* ]]; then
-        if [ "$EE_DEVICE" == "OdroidGoAdvance" ] || [ "$EE_DEVICE" == "GameForce" ]; then
+        if [ "${EE_DEVICE}" == "OdroidGoAdvance" ] || [ "${EE_DEVICE}" == "GameForce" ]; then
             bash "${1}"
         else
             fbterm "${1}" -s 24 < /dev/tty1

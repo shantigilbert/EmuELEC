@@ -1,0 +1,256 @@
+From 700f0c683013310d35d15db5c41fb17cd52138f7 Mon Sep 17 00:00:00 2001
+From: quietvoid <tcchlisop0@gmail.com>
+Date: Sat, 1 Jan 2022 17:51:50 +0100
+Subject: [PATCH 2/2] avformat/matroska{dec, enc}: Parse BlockAdditionMapping
+ elements
+
+Adds handling of dvcC/dvvC block addition mappings.
+
+The parsing creates AVDOVIDecoderConfigurationRecord side data.
+The configuration block is written when muxing into Matroska,
+if DOVI side data is present for the track.
+
+Most of the Matroska element parsing is based on Plex's FFmpeg source code.
+
+Signed-off-by: quietvoid <tcChlisop0@gmail.com>
+Signed-off-by: Andreas Rheinhardt <andreas.rheinhardt@outlook.com>
+---
+ libavformat/Makefile      |  4 +--
+ libavformat/matroska.h    |  9 ++++++
+ libavformat/matroskadec.c | 58 +++++++++++++++++++++++++++++++++++++--
+ libavformat/matroskaenc.c | 37 +++++++++++++++++++++++++
+ 4 files changed, 104 insertions(+), 4 deletions(-)
+
+diff --git a/libavformat/Makefile b/libavformat/Makefile
+index 0f340f74a0..e48f44766b 100644
+--- a/libavformat/Makefile
++++ b/libavformat/Makefile
+@@ -309,11 +309,11 @@ OBJS-$(CONFIG_M4V_MUXER)                 += rawenc.o
+ OBJS-$(CONFIG_MATROSKA_DEMUXER)          += matroskadec.o matroska.o  \
+                                             flac_picture.o isom_tags.o rmsipr.o \
+                                             oggparsevorbis.o vorbiscomment.o \
+-                                            qtpalette.o replaygain.o
++                                            qtpalette.o replaygain.o dovi_isom.o
+ OBJS-$(CONFIG_MATROSKA_MUXER)            += matroskaenc.o matroska.o \
+                                             av1.o avc.o hevc.o isom_tags.o \
+                                             flacenc_header.o avlanguage.o \
+-                                            vorbiscomment.o wv.o
++                                            vorbiscomment.o wv.o dovi_isom.o
+ OBJS-$(CONFIG_MCA_DEMUXER)               += mca.o
+ OBJS-$(CONFIG_MCC_DEMUXER)               += mccdec.o subtitles.o
+ OBJS-$(CONFIG_MD5_MUXER)                 += hashenc.o
+diff --git a/libavformat/matroska.h b/libavformat/matroska.h
+index 30cbe18a8b..01fdf5ae57 100644
+--- a/libavformat/matroska.h
++++ b/libavformat/matroska.h
+@@ -111,6 +111,7 @@
+ #define MATROSKA_ID_TRACKCONTENTENCODING 0x6240
+ #define MATROSKA_ID_TRACKTIMECODESCALE 0x23314F
+ #define MATROSKA_ID_TRACKMAXBLKADDID 0x55EE
++#define MATROSKA_ID_TRACKBLKADDMAPPING 0x41E4
+ 
+ /* IDs in the trackvideo master */
+ #define MATROSKA_ID_VIDEOFRAMERATE 0x2383E3
+@@ -189,6 +190,12 @@
+ #define MATROSKA_ID_ENCODINGSIGKEYID 0x47E4
+ #define MATROSKA_ID_ENCODINGSIGNATURE 0x47E3
+ 
++/* IDs in the block addition mapping master */
++#define MATROSKA_ID_BLKADDIDVALUE 0x41F0
++#define MATROSKA_ID_BLKADDIDNAME 0x41A4
++#define MATROSKA_ID_BLKADDIDTYPE 0x41E7
++#define MATROSKA_ID_BLKADDIDEXTRADATA 0x41ED
++
+ /* ID in the cues master */
+ #define MATROSKA_ID_POINTENTRY 0xBB
+ 
+@@ -385,4 +392,6 @@ extern const char * const ff_matroska_video_stereo_plane[MATROSKA_VIDEO_STEREO_P
+ 
+ int ff_mkv_stereo3d_conv(AVStream *st, MatroskaVideoStereoModeType stereo_mode);
+ 
++#define DVCC_DVVC_BLOCK_TYPE_NAME "Dolby Vision configuration"
++
+ #endif /* AVFORMAT_MATROSKA_H */
+diff --git a/libavformat/matroskadec.c b/libavformat/matroskadec.c
+index fb1849f9c3..8a0c82cbeb 100644
+--- a/libavformat/matroskadec.c
++++ b/libavformat/matroskadec.c
+@@ -52,6 +52,7 @@
+ 
+ #include "avformat.h"
+ #include "avio_internal.h"
++#include "dovi_isom.h"
+ #include "internal.h"
+ #include "isom.h"
+ #include "matroska.h"
+@@ -238,6 +239,13 @@ typedef struct MatroskaTrackOperation {
+     EbmlList combine_planes;
+ } MatroskaTrackOperation;
+ 
++typedef struct MatroskaBlockAdditionMapping {
++    uint64_t value;
++    char *name;
++    uint64_t type;
++    EbmlBin extradata;
++} MatroskaBlockAdditionMapping;
++
+ typedef struct MatroskaTrack {
+     uint64_t num;
+     uint64_t uid;
+@@ -268,6 +276,7 @@ typedef struct MatroskaTrack {
+     int ms_compat;
+     int needs_decoding;
+     uint64_t max_block_additional_id;
++    EbmlList block_addition_mappings;
+ 
+     uint32_t palette[AVPALETTE_COUNT];
+     int has_palette;
+@@ -416,8 +425,8 @@ typedef struct MatroskaDemuxContext {
+ // incomplete type (6.7.2 in C90, 6.9.2 in C99).
+ // Removing the sizes breaks MSVC.
+ static EbmlSyntax ebml_syntax[3], matroska_segment[9], matroska_track_video_color[15], matroska_track_video[19],
+-                  matroska_track[32], matroska_track_encoding[6], matroska_track_encodings[2],
+-                  matroska_track_combine_planes[2], matroska_track_operation[2], matroska_tracks[2],
++                  matroska_track[33], matroska_track_encoding[6], matroska_track_encodings[2],
++                  matroska_track_combine_planes[2], matroska_track_operation[2], matroska_block_addition_mapping[5], matroska_tracks[2],
+                   matroska_attachments[2], matroska_chapter_entry[9], matroska_chapter[6], matroska_chapters[2],
+                   matroska_index_entry[3], matroska_index[2], matroska_tag[3], matroska_tags[2], matroska_seekhead[2],
+                   matroska_blockadditions[2], matroska_blockgroup[8], matroska_cluster_parsing[8];
+@@ -567,6 +576,14 @@ static EbmlSyntax matroska_track_operation[] = {
+     CHILD_OF(matroska_track)
+ };
+ 
++static EbmlSyntax matroska_block_addition_mapping[] = {
++    { MATROSKA_ID_BLKADDIDVALUE,      EBML_UINT, 0, 0, offsetof(MatroskaBlockAdditionMapping, value) },
++    { MATROSKA_ID_BLKADDIDNAME,       EBML_STR,  0, 0, offsetof(MatroskaBlockAdditionMapping, name) },
++    { MATROSKA_ID_BLKADDIDTYPE,       EBML_UINT, 0, 0, offsetof(MatroskaBlockAdditionMapping, type) },
++    { MATROSKA_ID_BLKADDIDEXTRADATA,  EBML_BIN,  0, 0, offsetof(MatroskaBlockAdditionMapping, extradata) },
++    CHILD_OF(matroska_track)
++};
++
+ static EbmlSyntax matroska_track[] = {
+     { MATROSKA_ID_TRACKNUMBER,           EBML_UINT,  0, 0, offsetof(MatroskaTrack, num) },
+     { MATROSKA_ID_TRACKNAME,             EBML_UTF8,  0, 0, offsetof(MatroskaTrack, name) },
+@@ -590,6 +607,7 @@ static EbmlSyntax matroska_track[] = {
+     { MATROSKA_ID_TRACKOPERATION,        EBML_NEST,  0, 0, offsetof(MatroskaTrack, operation),    { .n = matroska_track_operation } },
+     { MATROSKA_ID_TRACKCONTENTENCODINGS, EBML_NEST,  0, 0, 0,                                     { .n = matroska_track_encodings } },
+     { MATROSKA_ID_TRACKMAXBLKADDID,      EBML_UINT,  0, 0, offsetof(MatroskaTrack, max_block_additional_id), { .u = 0 } },
++    { MATROSKA_ID_TRACKBLKADDMAPPING,    EBML_NEST,  0, sizeof(MatroskaBlockAdditionMapping), offsetof(MatroskaTrack, block_addition_mappings), { .n = matroska_block_addition_mapping } },
+     { MATROSKA_ID_SEEKPREROLL,           EBML_UINT,  0, 0, offsetof(MatroskaTrack, seek_preroll), { .u = 0 } },
+     { MATROSKA_ID_TRACKFLAGENABLED,      EBML_NONE },
+     { MATROSKA_ID_TRACKFLAGLACING,       EBML_NONE },
+@@ -2310,6 +2328,38 @@ static int mkv_parse_video_projection(AVStream *st, const MatroskaTrack *track,
+     return 0;
+ }
+ 
++static int mkv_parse_dvcc_dvvc(AVFormatContext *s, AVStream *st, const MatroskaTrack *track,
++                               EbmlBin *bin)
++{
++    return ff_isom_parse_dvcc_dvvc(s, st, bin->data, bin->size);
++}
++
++static int mkv_parse_block_addition_mappings(AVFormatContext *s, AVStream *st, const MatroskaTrack *track)
++{
++    const EbmlList *mappings_list = &track->block_addition_mappings;
++    MatroskaBlockAdditionMapping *mappings = mappings_list->elem;
++    int ret;
++
++    for (int i = 0; i < mappings_list->nb_elem; i++) {
++        MatroskaBlockAdditionMapping *mapping = &mappings[i];
++
++        switch (mapping->type) {
++        case MKBETAG('d','v','c','C'):
++        case MKBETAG('d','v','v','C'):
++            if ((ret = mkv_parse_dvcc_dvvc(s, st, track, &mapping->extradata)) < 0)
++                return ret;
++
++            break;
++        default:
++            av_log(s, AV_LOG_DEBUG,
++                   "Unknown block additional mapping type 0x%"PRIx64", value %"PRIu64", name \"%s\"\n",
++                   mapping->type, mapping->value, mapping->name ? mapping->name : "");
++        }
++    }
++
++    return 0;
++}
++
+ static int get_qt_codec(MatroskaTrack *track, uint32_t *fourcc, enum AVCodecID *codec_id)
+ {
+     const AVCodecTag *codec_tags;
+@@ -2898,6 +2948,10 @@ static int matroska_parse_tracks(AVFormatContext *s)
+             if (track->flag_textdescriptions)
+                 st->disposition |= AV_DISPOSITION_DESCRIPTIONS;
+         }
++
++        ret = mkv_parse_block_addition_mappings(s, st, track);
++        if (ret < 0)
++            return ret;
+     }
+ 
+     return 0;
+diff --git a/libavformat/matroskaenc.c b/libavformat/matroskaenc.c
+index b4284a8778..eb3d7207d0 100644
+--- a/libavformat/matroskaenc.c
++++ b/libavformat/matroskaenc.c
+@@ -27,6 +27,7 @@
+ #include "avformat.h"
+ #include "avio_internal.h"
+ #include "avlanguage.h"
++#include "dovi_isom.h"
+ #include "flacenc.h"
+ #include "internal.h"
+ #include "isom.h"
+@@ -1112,6 +1113,37 @@ static int mkv_write_stereo_mode(AVFormatContext *s, AVIOContext *pb,
+     return 0;
+ }
+ 
++static void mkv_write_dovi(AVFormatContext *s, AVIOContext *pb, AVStream *st)
++{
++    AVDOVIDecoderConfigurationRecord *dovi = (AVDOVIDecoderConfigurationRecord *)
++                                             av_stream_get_side_data(st, AV_PKT_DATA_DOVI_CONF, NULL);
++
++    if (dovi && dovi->dv_profile <= 10) {
++        ebml_master mapping;
++        uint8_t buf[ISOM_DVCC_DVVC_SIZE];
++        uint32_t type;
++
++        uint64_t expected_size = (2 + 1 + (sizeof(DVCC_DVVC_BLOCK_TYPE_NAME) - 1))
++                                + (2 + 1 + 4) + (2 + 1 + ISOM_DVCC_DVVC_SIZE);
++
++        if (dovi->dv_profile > 7) {
++            type = MKBETAG('d', 'v', 'v', 'C');
++        } else {
++            type = MKBETAG('d', 'v', 'c', 'C');
++        }
++
++        ff_isom_put_dvcc_dvvc(s, buf, dovi);
++
++        mapping = start_ebml_master(pb, MATROSKA_ID_TRACKBLKADDMAPPING, expected_size);
++
++        put_ebml_string(pb, MATROSKA_ID_BLKADDIDNAME, DVCC_DVVC_BLOCK_TYPE_NAME);
++        put_ebml_uint(pb, MATROSKA_ID_BLKADDIDTYPE, type);
++        put_ebml_binary(pb, MATROSKA_ID_BLKADDIDEXTRADATA, buf, sizeof(buf));
++
++        end_ebml_master(pb, mapping);
++    }
++}
++
+ static int mkv_write_track(AVFormatContext *s, MatroskaMuxContext *mkv,
+                            AVStream *st, mkv_track *track, AVIOContext *pb,
+                            int is_default)
+@@ -1311,6 +1343,11 @@ static int mkv_write_track(AVFormatContext *s, MatroskaMuxContext *mkv,
+         mkv_write_video_projection(s, pb, st);
+ 
+         end_ebml_master(pb, subinfo);
++
++        if (mkv->mode != MODE_WEBM) {
++            mkv_write_dovi(s, pb, st);
++        }
++
+         break;
+ 
+     case AVMEDIA_TYPE_AUDIO:
+-- 
+2.40.1
+

@@ -120,6 +120,11 @@ devices = \
         'config': 'orangepi_3_defconfig',
         'crust_config': 'orangepi_3_defconfig'
       },
+      'orangepi-3-lts': {
+        'dtb': 'sun50i-h6-orangepi-3-lts.dtb',
+        'config': 'orangepi_3_lts_defconfig',
+        'crust_config': 'pine_h64_defconfig'
+      },
       'orangepi-lite2': {
         'dtb': 'sun50i-h6-orangepi-lite2.dtb',
         'config': 'orangepi_lite2_defconfig',
@@ -158,6 +163,18 @@ devices = \
       'box': {
         'dtb': '',
         'config': 'p212_defconfig'
+      },
+      'bananapi-cm4io': {
+        'dtb': 'meson-g12b-bananapi-cm4-cm4io.dtb',
+        'config': 'bananapi-cm4io_defconfig'
+      },
+      'bananapi-m2s': {
+        'dtb': 'meson-g12b-a311d-bananapi-m2s.dtb',
+        'config': 'bananapi-m2s_defconfig'
+      },
+      'bananapi-m2-pro': {
+        'dtb': 'meson-sm1-bananapi-m2-pro.dtb',
+        'config': 'bananapi-m2-pro_defconfig'
       },
       'bananapi-m5': {
         'dtb': 'meson-sm1-bananapi-m5.dtb',
@@ -389,7 +406,9 @@ devices = \
   'Amlogic-ce': {
     'Amlogic-ng': {
     },
-    'Amlogic-old': {
+    'Amlogic-ng-dv': {
+    },
+    'Amlogic-ne': {
     },
   },
 }

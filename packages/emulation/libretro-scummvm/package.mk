@@ -2,26 +2,37 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libretro-scummvm"
-PKG_VERSION="80cb7269a33b233dcea27d8d01df084b0d35c80a"
-PKG_SHA256="d35e8bc65e98d530480b4ad13cfed4d0b9c41c32f5de06a360181d8b1c7bda7b"
+PKG_VERSION="0b219a46770776e10c954c6242870928113cacc0"
+PKG_SHA256="aff5f337ec9b6d5baa951610eec5f405c20f8840b53cac9a4fcaf061de9ac2cc"
 PKG_LICENSE="GPLv3"
-PKG_SITE="https://github.com/libretro/scummvm"
-PKG_URL="https://github.com/libretro/scummvm/archive/${PKG_VERSION}.tar.gz"
+PKG_SITE="https://github.com/libretro/scummvm-wrapper"
+PKG_URL="https://github.com/libretro/scummvm-wrapper/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain kodi-platform"
 PKG_LONGDESC="game.libretro.scummvm: scummvm for Kodi"
 PKG_TOOLCHAIN="make"
 
 PKG_LIBNAME="scummvm_libretro.so"
-PKG_LIBPATH="backends/platform/libretro/build/${PKG_LIBNAME}"
+PKG_LIBPATH="${PKG_LIBNAME}"
 PKG_LIBVAR="SCUMMVM_LIB"
 
-PKG_MAKE_OPTS_TARGET="-C backends/platform/libretro/build/"
+PKG_MAKE_OPTS_TARGET="platform=unix GIT_VERSION=${PKG_VERSION:0:7}"
 
-pre_make_target() {
+pre_configure_target() {
   cd ${PKG_BUILD}
-  CXXFLAGS+=" -DHAVE_POSIX_MEMALIGN=1"
-  export AR+=" cru"
-  export LD="${CC}"
+
+  if [ "${TARGET_ARCH}" = "arm" ]; then
+    PKG_MAKE_OPTS_TARGET+=" TARGET_64BIT=0"
+  else
+    PKG_MAKE_OPTS_TARGET+=" TARGET_64BIT=1"
+  fi
+
+  if target_has_feature neon; then
+    PKG_MAKE_OPTS_TARGET+=" HAVE_NEON=1"
+  fi
+
+  if [ "${BUILD_WITH_DEBUG}" = "yes" ]; then
+    PKG_MAKE_OPTS_TARGET+=" DEBUG=1"
+  fi
 }
 
 makeinstall_target() {

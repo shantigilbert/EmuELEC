@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="meowpc98"
-PKG_VERSION="cd389b3490d5048873c40edd949a1b0631e0606d"
-PKG_SHA256="6689487085533e6db9f95151ad202a7a04f0b6ddfcc9db87b32cbb34ed4ef4c0"
+PKG_VERSION="bee2e243b0c68f787d0d360c2d4c289e581620ef"
+PKG_SHA256="3f613bf23e918f4dec5a0133c376bcc7612262d3dc47f1c389a0fdf3301c76e3"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Unknown"
 PKG_SITE="https://github.com/libretro/libretro-meowPC98"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -41,6 +41,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp libretro/nekop2_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp libretro/nekop2_libretro.so ${INSTALL}/usr/lib/libretro/
 }

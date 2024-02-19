@@ -1,0 +1,72 @@
+From 840aae6cdcc1b1d3ef11da1c33a7ed6519a64cd6 Mon Sep 17 00:00:00 2001
+From: John Cox <jc@kynesim.co.uk>
+Date: Fri, 13 Jan 2023 17:56:55 +0000
+Subject: [PATCH] Be much more relaxed before long timeout
+
+---
+ libavcodec/v4l2_m2m.h     |  2 +-
+ libavcodec/v4l2_m2m_dec.c | 20 ++++++++++++--------
+ 2 files changed, 13 insertions(+), 9 deletions(-)
+
+diff --git a/libavcodec/v4l2_m2m.h b/libavcodec/v4l2_m2m.h
+index 87f81febd2..c109b21d08 100644
+--- a/libavcodec/v4l2_m2m.h
++++ b/libavcodec/v4l2_m2m.h
+@@ -66,7 +66,7 @@ typedef struct pts_stats_s
+ 
+ typedef struct xlat_track_s {
+     unsigned int track_no;
+-    int64_t last_pts;
++    int64_t last_pts;    // Last valid PTS decoded
+     int64_t last_opaque;
+     V4L2m2mTrackEl track_els[FF_V4L2_M2M_TRACK_SIZE];
+ } xlat_track_t;
+diff --git a/libavcodec/v4l2_m2m_dec.c b/libavcodec/v4l2_m2m_dec.c
+index 6078811404..2bd113facb 100644
+--- a/libavcodec/v4l2_m2m_dec.c
++++ b/libavcodec/v4l2_m2m_dec.c
+@@ -590,7 +590,7 @@ static int v4l2_receive_frame(AVCodecContext *avctx, AVFrame *frame)
+ 
+     do {
+         const int pending = xlat_pending(&s->xlat);
+-        const int prefer_dq = (pending > 3);
++        const int prefer_dq = (pending > 4);
+         const int last_src_rv = src_rv;
+ 
+         av_log(avctx, AV_LOG_TRACE, "Pending=%d, src_rv=%d, req_pkt=%d\n", pending, src_rv, s->req_pkt);
+@@ -619,10 +619,14 @@ static int v4l2_receive_frame(AVCodecContext *avctx, AVFrame *frame)
+         // (b) enqueue returned a status indicating that decode should be attempted
+         if (dst_rv != 0 && TRY_DQ(src_rv)) {
+             // Pick a timeout depending on state
++            // The pending count isn't completely reliable so it is good enough
++            // hint that we want a frame but not good enough to require it in
++            // all cases; however if it has got > 31 that exceeds its margin of
++            // error so require a frame to prevent ridiculous levels of latency
+             const int t =
+                 src_rv == NQ_Q_FULL ? -1 :
+                 src_rv == NQ_DRAINING ? 300 :
+-                prefer_dq ? (s->running ? 100 : 5) : 0;
++                prefer_dq ? (s->running && pending > 31 ? 100 : 5) : 0;
+ 
+             // Dequeue frame will unref any previous contents of frame
+             // if it returns success so we don't need an explicit unref
+@@ -639,13 +643,13 @@ static int v4l2_receive_frame(AVCodecContext *avctx, AVFrame *frame)
+                 }
+             }
+ 
+-            if (s->running != (dst_rv == 0) && prefer_dq) {
+-                s->running = (dst_rv == 0);
+-                av_log(avctx, AV_LOG_VERBOSE, "%s running\n", s->running ? "Start" : "Stop");
+-            }
+-
+-            if (dst_rv == 0)
++            if (dst_rv == 0) {
+                 set_best_effort_pts(avctx, &s->pts_stat, frame);
++                if (!s->running) {
++                    s->running = 1;
++                    av_log(avctx, AV_LOG_VERBOSE, "Decode running\n");
++                }
++            }
+ 
+             if (dst_rv == AVERROR(EAGAIN) && src_rv == NQ_DRAINING) {
+                 av_log(avctx, AV_LOG_WARNING, "Timeout in drain - assume EOF");

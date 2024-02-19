@@ -14,7 +14,7 @@ makeinstall_target() {
   mkdir -p ${INSTALL}/usr/lib/coreelec
   mkdir -p ${INSTALL}/usr/share/bootloader
     install -m 0755 ${PKG_DIR}/scripts/dtb-xml.sh ${INSTALL}/usr/lib/coreelec/dtb-xml
-    install -m 0644 ${PKG_DIR}/config/dtb.xml ${INSTALL}/usr/share/bootloader/dtb.xml
+    install -m 0644 ${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/bootloader/dtb.xml ${INSTALL}/usr/share/bootloader/dtb.xml
 }
 
 # ---------------------------------------

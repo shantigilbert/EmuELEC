@@ -1,0 +1,28 @@
+From 85892fbc0d6f64f564f0d4c9514a7183ad8eb985 Mon Sep 17 00:00:00 2001
+From: alex <knaerzche@gmail.com>
+Date: Sun, 17 Jul 2022 12:16:20 +0200
+Subject: [PATCH] HACK: Don't check GLIBC_ABI_DT_RELR support for ChromeOS
+ libwidevinecdm.so
+
+Required starting with glibc 2.36
+---
+ elf/dl-version.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/elf/dl-version.c b/elf/dl-version.c
+index cda0889209..058394f148 100644
+--- a/elf/dl-version.c
++++ b/elf/dl-version.c
+@@ -373,7 +373,8 @@ _dl_check_map_versions (struct link_map *map, int verbose, int trace_mode)
+ 	if (d->d_tag == DT_NEEDED)
+ 	  {
+ 	    const char *name = strtab + d->d_un.d_val;
+-	    if (strncmp (name, "libc.so.", 8) == 0)
++	    if (strncmp (name, "libc.so.", 8) == 0 &&
++	        strstr (map->l_name, "libwidevinecdm.so") == NULL)
+ 	      {
+ 		_dl_exception_create
+ 		  (&exception, DSO_FILENAME (map->l_name),
+-- 
+2.37.1
+

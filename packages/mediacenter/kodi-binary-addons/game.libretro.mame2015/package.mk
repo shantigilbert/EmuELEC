@@ -2,8 +2,8 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="game.libretro.mame2015"
-PKG_VERSION="0.160.0.15-Matrix"
-PKG_SHA256="871f5e9efdbf63779c18fa660e7817d9425cb6bd62be5a10b443ba42effdcea6"
+PKG_VERSION="0.160.0.20-Nexus"
+PKG_SHA256="9aa78c4e19acdc10d51658e11fd9d1adfa5ff77a5d3827a3c558f3eddb5d0c20"
 PKG_ARCH="arm x86_64"
 PKG_REV="1"
 PKG_LICENSE="GPL"

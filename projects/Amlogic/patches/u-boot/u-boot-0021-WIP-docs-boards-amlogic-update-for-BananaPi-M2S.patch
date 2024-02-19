@@ -1,0 +1,40 @@
+From e1484036ca5e032a9039ed2f361f2b123a8efd64 Mon Sep 17 00:00:00 2001
+From: Christian Hewitt <christianshewitt@gmail.com>
+Date: Sat, 18 Feb 2023 08:08:42 +0000
+Subject: [PATCH 21/25] WIP: docs: boards: amlogic: update for BananaPi M2S
+
+Signed-off-by: Christian Hewitt <christianshewitt@gmail.com>
+---
+ board/amlogic/w400/MAINTAINERS | 2 ++
+ doc/board/amlogic/index.rst    | 2 +-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/board/amlogic/w400/MAINTAINERS b/board/amlogic/w400/MAINTAINERS
+index 6e1ef9b8b8..d4b4d4f91d 100644
+--- a/board/amlogic/w400/MAINTAINERS
++++ b/board/amlogic/w400/MAINTAINERS
+@@ -3,6 +3,8 @@ M:	Neil Armstrong <neil.armstrong@linaro.org>
+ S:	Maintained
+ L:	u-boot-amlogic@groups.io
+ F:	board/amlogic/w400/
++F:	configs/bananapi-m2s_defconfig
+ F:	configs/radxa-zero2_defconfig
+ F:	doc/board/amlogic/w400.rst
++F:	doc/board/amlogic/bananapi-m2s.rst
+ F:	doc/board/amlogic/radxa-zero2.rst
+diff --git a/doc/board/amlogic/index.rst b/doc/board/amlogic/index.rst
+index 629284fca9..fd8d4185f8 100644
+--- a/doc/board/amlogic/index.rst
++++ b/doc/board/amlogic/index.rst
+@@ -20,7 +20,7 @@ This matrix concerns the actual source code version.
+ |                               | P200      | LibreTech-CC v1 | Libretech-PC |             | Radxa Zero | GT-King/Pro | Odroid-C4    |
+ |                               | P201      | LibreTech-AC v2 | WeTek Core2  |             |            | GSKing-X    | Odroid-HC4   |
+ |                               |           | JetHub J80      |              |             |            | Radxa Zero2 | BPi-M2-Pro   |
+-|                               |           |                 |              |             |            | Radxa Zero2 | BPi-M5       |
++|                               |           |                 |              |             |            | BPI-M2S     | BPi-M5       |
+ +-------------------------------+-----------+-----------------+--------------+-------------+------------+-------------+--------------+
+ | UART                          | **Yes**   | **Yes**         | **Yes**      | **Yes**     | **Yes**    | **Yes**     | **Yes**      |
+ +-------------------------------+-----------+-----------------+--------------+-------------+------------+-------------+--------------+
+-- 
+2.34.1
+

@@ -1,0 +1,40 @@
+From 3819efaf2bb6fd8bd9cd45d54fb7254377b2296a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Tue, 27 Jul 2021 14:02:30 +0200
+Subject: [PATCH 082/142] v3dv/cmd_buffer: just don't fill up early-z fields
+ for CFG_BITS for v71
+
+For v71 early_z_enable/early_z_updates_enable is configured with
+packet 121.
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index 2e525a11619..fe9f7e43596 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -1783,17 +1783,14 @@ v3dX(cmd_buffer_emit_configuration_bits)(struct v3dv_cmd_buffer *cmd_buffer)
+    v3dv_cl_ensure_space_with_branch(&job->bcl, cl_packet_length(CFG_BITS));
+    v3dv_return_if_oom(cmd_buffer, NULL);
+ 
+-#if V3D_VERSION == 42
+-   bool enable_ez = job_update_ez_state(job, pipeline, cmd_buffer);
+    cl_emit_with_prepacked(&job->bcl, CFG_BITS, pipeline->cfg_bits, config) {
++#if V3D_VERSION == 42
++      bool enable_ez = job_update_ez_state(job, pipeline, cmd_buffer);
+       config.early_z_enable = enable_ez;
+       config.early_z_updates_enable = config.early_z_enable &&
+          pipeline->z_updates_enable;
+-   }
+-#endif
+-#if V3D_VERSION >= 71
+-   unreachable("HW generation 71 not supported yet.");
+ #endif
++   }
+ }
+ 
+ void
+-- 
+2.39.2
+

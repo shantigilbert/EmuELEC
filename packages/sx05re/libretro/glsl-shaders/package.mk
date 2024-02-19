@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="glsl-shaders"
-PKG_VERSION="46a00f15e09ffbd4fba46ab41f0653aeea918fd1"
-PKG_SHA256="ae449b1f82d6398b544e8c7f62a3e085ec5a3dd84dd75ff47bb55963c468b28d"
+PKG_VERSION="bc8df92f013a128c3a735a57d3d98c6f087cc291"
+PKG_SHA256="40c2a46455a2c405f2e16fb8fec8cb6ce2bc8fd66a22219bc44cbdbf2616ec82"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/libretro/glsl-shaders"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,9 +37,9 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 configure_target() {
-  cd $PKG_BUILD
+  cd ${PKG_BUILD}
 }
 
 makeinstall_target() {
-  make install INSTALLDIR="$INSTALL/usr/share/common-shaders"
+  make install INSTALLDIR="${INSTALL}/usr/share/common-shaders"
 }

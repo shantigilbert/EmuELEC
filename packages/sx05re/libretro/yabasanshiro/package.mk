@@ -19,14 +19,14 @@
 ################################################################################
 
 PKG_NAME="yabasanshiro"
-PKG_VERSION="fd459968aae4a251d839174404a346b1f428912a"
+PKG_VERSION="7513c8459034a0fe415d3cae4d692a54d0f90296"
 PKG_GIT_CLONE_BRANCH="yabasanshiro"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/yabause"
-PKG_URL="$PKG_SITE.git"
-PKG_DEPENDS_TARGET="toolchain $OPENGLES"
+PKG_URL="${PKG_SITE}.git"
+PKG_DEPENDS_TARGET="toolchain ${OPENGLES}"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
 PKG_SHORTDESC="Port of YabaSanshiro to libretro."
@@ -35,30 +35,30 @@ PKG_TOOLCHAIN="make"
 GET_HANDLER_SUPPORT="git"
 
 pre_configure_target() { 
-if [[ "$ARCH" == "arm" ]]; then
-if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
+if [[ "${ARCH}" == "arm" ]]; then
+if [ "${DEVICE}" == "OdroidGoAdvance" ] || [ "${DEVICE}" == "GameForce" ]; then
 		PKG_MAKE_OPTS_TARGET+=" -C yabause/src/libretro platform=RK3399"
-		sed -i "s|-mtune=cortex-a72.cortex-a53|-mtune=cortex-a35|g" $PKG_BUILD/yabause/src/libretro/Makefile
+		sed -i "s|-mtune=cortex-a72.cortex-a53|-mtune=cortex-a35|g" ${PKG_BUILD}/yabause/src/libretro/Makefile
 	else
 		PKG_MAKE_OPTS_TARGET+=" -C yabause/src/libretro platform=AMLG12B"
 	fi
 else
-	if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
-		sed -i "s|-mtune=cortex-a73.cortex-a53|-mtune=cortex-a35|g" $PKG_BUILD/yabause/src/libretro/Makefile
+	if [ "${DEVICE}" == "OdroidGoAdvance" ] || [ "${DEVICE}" == "GameForce" ]; then
+		sed -i "s|-mtune=cortex-a73.cortex-a53|-mtune=cortex-a35|g" ${PKG_BUILD}/yabause/src/libretro/Makefile
 	fi
 	
 	if [[ "${DEVICE}" == "Amlogic-old" ]]; then
-		sed -i "s|-mtune=cortex-a73.cortex-a53|-mtune=cortex-a53|g" $PKG_BUILD/yabause/src/libretro/Makefile
+		sed -i "s|-mtune=cortex-a73.cortex-a53|-mtune=cortex-a53|g" ${PKG_BUILD}/yabause/src/libretro/Makefile
 	fi
 		PKG_MAKE_OPTS_TARGET+=" -C yabause/src/libretro platform=odroid-n2"
 
 # yabasanshiro seems to only work in debug mode, it is not recomended for use as it will be slow. But until a fix is found this will have to do
-sed -i "s|DEBUG = 0|DEBUG = 1|g" $PKG_BUILD/yabause/src/libretro/Makefile
+#sed -i "s|DEBUG = 0|DEBUG = 1|g" ${PKG_BUILD}/yabause/src/libretro/Makefile
 
 fi
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp yabause/src/libretro/yabasanshiro_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp yabause/src/libretro/yabasanshiro_libretro.so ${INSTALL}/usr/lib/libretro/
 }

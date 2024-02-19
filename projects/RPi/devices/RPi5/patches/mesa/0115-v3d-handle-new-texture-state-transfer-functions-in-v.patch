@@ -1,0 +1,43 @@
+From aa6f70116d9e7be56cdb52b55d75419bf7209185 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 21 Oct 2021 23:21:02 +0200
+Subject: [PATCH 115/142] v3d: handle new texture state transfer functions in
+ v71
+
+---
+ src/gallium/drivers/v3d/v3dx_state.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/src/gallium/drivers/v3d/v3dx_state.c b/src/gallium/drivers/v3d/v3dx_state.c
+index 3d3c4fb0f47..b5e572b13c5 100644
+--- a/src/gallium/drivers/v3d/v3dx_state.c
++++ b/src/gallium/drivers/v3d/v3dx_state.c
+@@ -1009,12 +1009,12 @@ v3dX(create_texture_shader_state_bo)(struct v3d_context *v3d,
+                                                                    cso->u.buf.size);
+                 }
+ 
++                bool is_srgb = util_format_is_srgb(cso->format);
+ #if V3D_VERSION <= 42
+-                tex.srgb = util_format_is_srgb(cso->format);
++                tex.srgb = is_srgb;
+ #endif
+-
+ #if V3D_VERSION >= 71
+-                unreachable("HW generation 71 not supported yet.");
++                tex.transfer_func = is_srgb ? TRANSFER_FUNC_SRGB : TRANSFER_FUNC_NONE;
+ #endif
+ 
+ #if V3D_VERSION >= 40
+@@ -1068,9 +1068,6 @@ v3dX(create_texture_shader_state_bo)(struct v3d_context *v3d,
+ #if V3D_VERSION <= 42
+                         tex.srgb = false;
+ #endif
+-#if V3D_VERSION >= 71
+-                        unreachable("HW generation 71 not supported yet.");
+-#endif
+ 
+                 } else {
+                         tex.texture_type = v3d_get_tex_format(&screen->devinfo,
+-- 
+2.39.2
+

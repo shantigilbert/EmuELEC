@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="mesen"
-PKG_VERSION="9b412c1533a6d7eec7b2904775cbd26c21f02119"
-PKG_SHA256="9a321c90c82c15158511b3df7a1b6ee8269b42083afa3de33f9947cceb925e7c"
+PKG_VERSION="d25d60fc190f3f7603a1113ef1e11d9da65b7583"
+PKG_SHA256="f94cf7195ed1937189442c2f0241bc682ce4bb6c3e5a17b611968023af1f65d2"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/Mesen"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -38,7 +38,7 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp Libretro/mesen_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp Libretro/mesen_libretro.so ${INSTALL}/usr/lib/libretro/
 }
 

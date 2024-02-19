@@ -2,8 +2,8 @@
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
 
 PKG_NAME="libbdplus"
-PKG_VERSION="0.1.2"
-PKG_SHA256="a631cae3cd34bf054db040b64edbfc8430936e762eb433b1789358ac3d3dc80a"
+PKG_VERSION="0.2.0"
+PKG_SHA256="b93eea3eaef33d6e9155d2c34b068c505493aa5a4936e63274f4342ab0f40a58"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.videolan.org/developers/libbdplus.html"
 PKG_URL="http://download.videolan.org/pub/videolan/${PKG_NAME}/${PKG_VERSION}/${PKG_NAME}-${PKG_VERSION}.tar.bz2"

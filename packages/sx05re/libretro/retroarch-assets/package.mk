@@ -19,31 +19,31 @@
 ################################################################################
 
 PKG_NAME="retroarch-assets"
-PKG_VERSION="4ec80faf1b5439d1654f407805bb66141b880826"
-PKG_SHA256="1a5dfb3acb864bacd3f3fd0121c4904438ae52703187fc61d46f0d43500562aa"
+PKG_VERSION="923b711dc6772a168d83dc8915e9260730fcf3a1"
+PKG_SHA256="50e2628a09fef042981ad0efc1be9c5ebcf1a3b61c209b78b3cf1ac78e2cdc10"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/libretro/retroarch-assets"
-PKG_URL="https://github.com/libretro/retroarch-assets/archive/$PKG_VERSION.tar.gz"
+PKG_URL="https://github.com/libretro/retroarch-assets/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="RetroArch assets. Background and icon themes for the menu drivers."
 PKG_TOOLCHAIN="manual"
 
 pre_configure_target() {
   cd ../
-  rm -rf .$TARGET_NAME
+  rm -rf .${TARGET_NAME}
 }
 
 makeinstall_target() {
-  make install INSTALLDIR="$INSTALL/usr/share/retroarch-assets"
+  make install INSTALLDIR="${INSTALL}/usr/share/retroarch-assets"
   
   
   # Remove unnecesary Retroarch Assets
   for i in Automatic branding cfg devtools FlatUX glui nxrgui pkg/wiiu scripts Systematic switch wallpapers COPYING; do
-    rm -rf "$INSTALL/usr/share/retroarch-assets/$i"
+    rm -rf "${INSTALL}/usr/share/retroarch-assets/${i}"
   done
   
   for i in automatic dot-art flatui neoactive pixel retroactive retrosystem systematic convert.sh NPMApng2PMApng.py; do
-  rm -rf "$INSTALL/usr/share/retroarch-assets/xmb/$i"
+  rm -rf "${INSTALL}/usr/share/retroarch-assets/xmb/${i}"
   done
   
   

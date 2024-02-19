@@ -1,0 +1,227 @@
+From 0fb60a17b2401ab655f5b2674e902545b144795a Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Tue, 11 Apr 2023 15:06:33 +0200
+Subject: [PATCH 11/21] libdovi: add option to change used mode Modes:  0:
+ Don't modify the RPU  1: Converts the RPU to be MEL compatible  2: Converts
+ the RPU to be profile 8.1 compatible.     Both luma and chroma mapping curves
+ are set to no-op.     This mode handles source profiles 5, 7 and 8.  3:
+ Converts to static profile 8.4  4: Converts to profile 8.1 preserving luma
+ and chroma mapping.     Old mode 2 behaviour. Reference:
+ https://github.com/quietvoid/dovi_tool/blob/main/dolby_vision/src/rpu/dovi_rpu.rs
+
+---
+ .../resources/strings.po                      | 32 ++++++++++++++++++-
+ system/settings/settings.xml                  | 16 ++++++++--
+ .../VideoPlayer/DVDCodecs/Video/AMLCodec.cpp  |  4 +--
+ .../DVDCodecs/Video/DVDVideoCodecAmlogic.cpp  |  7 ++--
+ .../Video/DVDVideoCodecAndroidMediaCodec.cpp  |  2 +-
+ xbmc/utils/BitstreamConverter.cpp             |  8 ++---
+ xbmc/utils/BitstreamConverter.h               |  4 +--
+ xbmc/windowing/amlogic/WinSystemAmlogic.cpp   |  2 +-
+ 8 files changed, 58 insertions(+), 17 deletions(-)
+
+diff --git a/addons/resource.language.en_gb/resources/strings.po b/addons/resource.language.en_gb/resources/strings.po
+index 285d5d07b2..3b05260f01 100644
+--- a/addons/resource.language.en_gb/resources/strings.po
++++ b/addons/resource.language.en_gb/resources/strings.po
+@@ -23633,5 +23633,35 @@ msgstr ""
+ #. Help text for setting "Convert Dolby Vision for compatibility" of label #39300
+ #: system/settings/settings.xml
+ msgctxt "#39301"
+-msgid "Converts Dolby Vision profile 7 to profile 8.1, ignores enhancement layer"
++msgid "Converts Dolby Vision profile 7 by chosen mode"
++msgstr ""
++
++#. Enum value for "Convert Dolby Vision for compatibility" of label #39300
++#: system/settings/settings.xml
++msgctxt "#39302"
++msgid "Lossless"
++msgstr ""
++
++#. Enum value for "Convert Dolby Vision for compatibility" of label #39300
++#: system/settings/settings.xml
++msgctxt "#39303"
++msgid "Minimal EL"
++msgstr ""
++
++#. Enum value for "Convert Dolby Vision for compatibility" of label #39300
++#: system/settings/settings.xml
++msgctxt "#39304"
++msgid "Profile 8.1"
++msgstr ""
++
++#. Enum value for "Convert Dolby Vision for compatibility" of label #39300
++#: system/settings/settings.xml
++msgctxt "#39305"
++msgid "Profile 8.4"
++msgstr ""
++
++#. Enum value for "Convert Dolby Vision for compatibility" of label #39300
++#: system/settings/settings.xml
++msgctxt "#39306"
++msgid "Profile 8.1 MP"
+ msgstr ""
+diff --git a/system/settings/settings.xml b/system/settings/settings.xml
+index 1b95376834..7ede7a22bb 100755
+--- a/system/settings/settings.xml
++++ b/system/settings/settings.xml
+@@ -228,7 +228,7 @@
+           <default>true</default>
+           <control type="toggle" />
+         </setting>
+-        <setting id="videoplayer.convertdovi" type="boolean" label="39300" help="39301">
++        <setting id="videoplayer.convertdovi" type="integer" label="39300" help="39301">
+           <requirement>
+             <or>
+               <condition>HAS_MEDIACODEC</condition>
+@@ -236,11 +236,21 @@
+             </or>
+           </requirement>
+           <level>2</level>
+-          <default>true</default>
++          <default>2</default>
+           <updates>
+             <update type="change" />
+           </updates>
+-          <control type="toggle" />
++          <constraints>
++            <options>
++              <option label="39302">0</option>  <!-- Lossless -->
++              <option label="39303">1</option>  <!-- ToMel -->
++              <option label="39304">2</option>  <!-- To81 -->
++              <option label="39305">3</option>  <!-- To84 -->
++              <option label="39306">4</option>  <!-- To81MappingPreserved -->
++            </options>
++          </constraints>
++          <control type="spinner" format="string" />
++          <control type="edit" format="integer" />
+         </setting>
+       </group>
+       <group id="4" label="14232">
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+index 59777ee196..8a7344d805 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+@@ -2008,8 +2008,8 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
+     CSysfsPath("/sys/module/amdolby_vision/parameters/dolby_vision_enable", 1);
+ 
+     am_private->gcodec.dv_enable = 1;
+-    if (hints.dovi.dv_profile == 7 && !CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(
+-        CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI))
++    if (hints.dovi.dv_profile == 7 && CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
++        CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI) == 0)
+     {
+       CSysfsPath amdolby_vision_debug{"/sys/class/amdolby_vision/debug"};
+       if (amdolby_vision_debug.Exists())
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp
+index 9d518f0051..12f81442d7 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp
+@@ -283,14 +283,15 @@ bool CDVDVideoCodecAmlogic::Open(CDVDStreamInfo &hints, CDVDCodecOptions &option
+       {
+         if (m_bitstream && aml_support_dolby_vision())
+         {
+-          bool convertDovi = CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(
++          int convertDovi = CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
+               CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI);
+           bool user_dv_disable = CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(
+               CSettings::SETTING_COREELEC_AMLOGIC_DV_DISABLE);
+           if (convertDovi && !user_dv_disable)
+           {
+-            CLog::Log(LOGDEBUG, "{}::{} - HEVC bitstream profile 7 will be converted to profile 8", __MODULE_NAME__, __FUNCTION__);
+-            m_bitstream->SetConvertDovi(convertDovi && !user_dv_disable);
++            CLog::Log(LOGDEBUG, "{}::{} - HEVC bitstream profile 7 will be converted by chosen mode {:d}",
++              __MODULE_NAME__, __FUNCTION__, convertDovi);
++            m_bitstream->SetConvertDovi(convertDovi);
+           }
+         }
+       }
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp
+index 2135e7d6f8..bba297770e 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp
+@@ -546,7 +546,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
+ 
+         if (m_bitstream)
+         {
+-          bool convertDovi = CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(
++          int convertDovi = CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
+               CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI);
+           m_bitstream->SetConvertDovi(convertDovi);
+         }
+diff --git a/xbmc/utils/BitstreamConverter.cpp b/xbmc/utils/BitstreamConverter.cpp
+index c51ac92138..53cab7c680 100644
+--- a/xbmc/utils/BitstreamConverter.cpp
++++ b/xbmc/utils/BitstreamConverter.cpp
+@@ -279,7 +279,7 @@ static bool has_sei_recovery_point(const uint8_t *p, const uint8_t *end)
+ #ifdef HAVE_LIBDOVI
+ // The returned data must be freed with `dovi_data_free`
+ // May be NULL if no conversion was done
+-static const DoviData* convert_dovi_rpu_nal(uint8_t* buf, uint32_t nal_size)
++static const DoviData* convert_dovi_rpu_nal(uint8_t* buf, uint32_t nal_size, int mode)
+ {
+   DoviRpuOpaque* rpu = dovi_parse_unspec62_nalu(buf, nal_size);
+   const DoviRpuDataHeader* header = dovi_rpu_get_header(rpu);
+@@ -287,7 +287,7 @@ static const DoviData* convert_dovi_rpu_nal(uint8_t* buf, uint32_t nal_size)
+ 
+   if (header && header->guessed_profile == 7)
+   {
+-    int ret = dovi_convert_rpu_with_mode(rpu, 2);
++    int ret = dovi_convert_rpu_with_mode(rpu, mode);
+     if (ret < 0)
+       goto done;
+ 
+@@ -369,7 +369,7 @@ CBitstreamConverter::CBitstreamConverter()
+   m_convert_bytestream = false;
+   m_sps_pps_context.sps_pps_data = NULL;
+   m_start_decode = true;
+-  m_convert_dovi = false;
++  m_convert_dovi = 0;
+ }
+ 
+ CBitstreamConverter::~CBitstreamConverter()
+@@ -1001,7 +1001,7 @@ bool CBitstreamConverter::BitstreamConvert(uint8_t* pData, int iSize, uint8_t **
+         {
+ #ifdef HAVE_LIBDOVI
+           // Convert the RPU itself
+-          rpu_data = convert_dovi_rpu_nal(buf, nal_size);
++          rpu_data = convert_dovi_rpu_nal(buf, nal_size, m_convert_dovi);
+           if (rpu_data)
+           {
+             buf_to_write = rpu_data->data;
+diff --git a/xbmc/utils/BitstreamConverter.h b/xbmc/utils/BitstreamConverter.h
+index 4381599b21..bbfa3ed361 100644
+--- a/xbmc/utils/BitstreamConverter.h
++++ b/xbmc/utils/BitstreamConverter.h
+@@ -104,7 +104,7 @@ public:
+   int               GetExtraSize() const;
+   void              ResetStartDecode(void);
+   bool              CanStartDecode() const;
+-  void SetConvertDovi(bool value) { m_convert_dovi = value; }
++  void SetConvertDovi(int value) { m_convert_dovi = value; }
+ 
+   static bool       mpeg2_sequence_header(const uint8_t *data, const uint32_t size, mpeg2_sequence *sequence);
+   static bool       h264_sequence_header(const uint8_t *data, const uint32_t size, h264_sequence *sequence);
+@@ -151,5 +151,5 @@ protected:
+   bool              m_convert_bytestream;
+   AVCodecID         m_codec;
+   bool              m_start_decode;
+-  bool m_convert_dovi;
++  int               m_convert_dovi;
+ };
+diff --git a/xbmc/windowing/amlogic/WinSystemAmlogic.cpp b/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
+index 616c205e6f..6f57b7efcb 100644
+--- a/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
++++ b/xbmc/windowing/amlogic/WinSystemAmlogic.cpp
+@@ -103,7 +103,7 @@ bool CWinSystemAmlogic::InitWindowSystem()
+     if (setting)
+     {
+       setting->SetVisible(false);
+-      settings->SetBool(CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI, true);
++      settings->SetInt(CSettings::SETTING_VIDEOPLAYER_CONVERTDOVI, 2);
+     }
+   }
+ 
+-- 
+2.43.0
+

@@ -29,7 +29,7 @@ install_addon_files "${ADDON_DIRECTORY}"
 debug_strip "${ADDON_DIRECTORY}"
 
 # pack_addon()
-ADDON_INSTALL_DIR="${TARGET_IMG}/${ADDONS}/${ADDON_VERSION}/${PROJECT}/${TARGET_ARCH}/${PKG_ADDON_ID}"
+ADDON_INSTALL_DIR="${TARGET_ADDONS}/${PKG_ADDON_ID}"
 ADDONVER="$(xmlstarlet sel -t -v "/addon/@version" ${ADDON_BUILD}/${PKG_ADDON_ID}/addon.xml)"
 
 if [ -f ${ADDON_INSTALL_DIR}/${PKG_ADDON_ID}-${ADDONVER}.zip ]; then
@@ -42,6 +42,27 @@ if [ -f ${ADDON_INSTALL_DIR}/${PKG_ADDON_ID}-${ADDONVER}.zip ]; then
   fi
 fi
 
+cd ${ADDON_BUILD}/${PKG_ADDON_ID}
+
+# move icon and fanart image into resources folder
+ADDON_ICON=$(xmlstarlet sel -t -v "//addon/extension/assets/icon" addon.xml || :)
+ADDON_FANART=$(xmlstarlet sel -t -v "//addon/extension/assets/fanart" addon.xml || :)
+
+if [ -n "${ADDON_ICON}" ] && [[ ${ADDON_ICON} != resources/* ]]; then
+  rm -f resources/icon.png
+  mv ${ADDON_ICON} resources
+  xmlstarlet ed -L -u "//addon/extension/assets/icon" -v "resources/${ADDON_ICON}" addon.xml
+fi
+
+if [ -n "${ADDON_FANART}" ] && [[ ${ADDON_FANART} != resources/* ]]; then
+  rm -f resources/fanart.png
+  mv ${ADDON_FANART} resources
+  xmlstarlet ed -L -u "//addon/extension/assets/fanart" -v "resources/${ADDON_FANART}" addon.xml
+fi
+
+# remove unused distro fanart in case addon has it's own in .jpg format
+[ -f resources/fanart.jpg -a -f resources/fanart.png ] && rm resources/fanart.png
+
 cd ${ADDON_BUILD}
 build_msg "CLR_INFO" "*** compressing addon ${PKG_ADDON_ID} ... ***"
 ${TOOLCHAIN}/bin/7za a -l -mx9 -bsp0 -bso0 -tzip ${PKG_ADDON_ID}-${ADDONVER}.zip ${PKG_ADDON_ID}
@@ -52,21 +73,8 @@ cp ${ADDON_BUILD}/${PKG_ADDON_ID}-${ADDONVER}.zip ${ADDON_INSTALL_DIR}
 if [ -f ${ADDON_BUILD}/${PKG_ADDON_ID}/changelog.txt ]; then
   cp ${ADDON_BUILD}/${PKG_ADDON_ID}/changelog.txt ${ADDON_INSTALL_DIR}/changelog-${ADDONVER}.txt
 fi
-if [ -f ${ADDON_BUILD}/${PKG_ADDON_ID}/resources/icon.png ]; then
-  mkdir -p ${ADDON_INSTALL_DIR}/resources
-  cp ${ADDON_BUILD}/${PKG_ADDON_ID}/resources/icon.png ${ADDON_INSTALL_DIR}/resources/icon.png
-fi
 
-# workaround for kodi pvr addons
-if [ -f ${ADDON_BUILD}/${PKG_ADDON_ID}/icon.png ]; then
-  cp ${ADDON_BUILD}/${PKG_ADDON_ID}/icon.png ${ADDON_INSTALL_DIR}/icon.png
-fi
-
-if [ -f ${ADDON_BUILD}/${PKG_ADDON_ID}/resources/fanart.png ]; then
-  mkdir -p ${ADDON_INSTALL_DIR}/resources
-  cp ${ADDON_BUILD}/${PKG_ADDON_ID}/resources/fanart.png ${ADDON_INSTALL_DIR}/resources/fanart.png
-fi
-for f in ${ADDON_BUILD}/${PKG_ADDON_ID}/resources/screenshot-*.{jpg,png}; do
+for f in ${ADDON_BUILD}/${PKG_ADDON_ID}/resources/{icon,fanart,screenshot-*}.{jpg,png}; do
   if [ -f "${f}" ]; then
     mkdir -p ${ADDON_INSTALL_DIR}/resources
     cp ${f} ${ADDON_INSTALL_DIR}/resources

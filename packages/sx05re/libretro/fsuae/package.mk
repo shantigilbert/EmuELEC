@@ -23,7 +23,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/libretro-fsuae"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain libmpeg2 openal-soft glib"
 PKG_SECTION="emulation"
 PKG_SHORTDESC="FS-UAE amiga emulator libretro core."
@@ -33,26 +33,26 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="yes"
 PKG_BUILD_FLAGS="-lto"
 
-case $PROJECT in
+case ${PROJECT} in
   RPi*)
     PKG_CONFIGURE_OPTS_TARGET="--disable-jit --enable-neon"
     ;;
 esac
 
 pre_configure_target() {
-  cd $BUILD/$PKG_NAME-$PKG_VERSION
-  rm -rf .$TARGET_NAME
+  cd ${BUILD}/${PKG_NAME}-${PKG_VERSION}
+  rm -rf .${TARGET_NAME}
   export ac_cv_func_realloc_0_nonnull=yes
 }
 
 make_target() {
-  make CC=$HOST_CC CFLAGS= gen
-  make CC=$CC
+  make CC=${HOST_CC} CFLAGS= gen
+  make CC=${CC}
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp fsuae_libretro.so $INSTALL/usr/lib/libretro/
-  mkdir -p $INSTALL/usr/share/fs-uae
-  cp fs-uae.dat $INSTALL/usr/share/fs-uae/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp fsuae_libretro.so ${INSTALL}/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/share/fs-uae
+  cp fs-uae.dat ${INSTALL}/usr/share/fs-uae/
 }

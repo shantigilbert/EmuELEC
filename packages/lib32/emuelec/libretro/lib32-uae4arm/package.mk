@@ -30,7 +30,7 @@ unpack() {
 }
 
 make_target() {
-  CFLAGS="$CFLAGS -DARM -marm"
+  CFLAGS="${CFLAGS} -DARM -marm"
   if [[ "${LIB32_TARGET_FPU}" =~ "neon" ]]; then
     CFLAGS="-D__NEON_OPT"
   fi
@@ -38,6 +38,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp uae4arm_libretro.so $INSTALL/usr/lib/libretro/uae4arm_32b_libretro.so
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp uae4arm_libretro.so ${INSTALL}/usr/lib/libretro/uae4arm_32b_libretro.so
 }

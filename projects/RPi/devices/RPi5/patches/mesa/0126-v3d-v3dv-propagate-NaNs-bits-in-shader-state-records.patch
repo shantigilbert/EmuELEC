@@ -1,0 +1,119 @@
+From be6508ffef8c0e9fbc47175739db80a3eeff2cdb Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Fri, 3 Dec 2021 13:20:22 +0100
+Subject: [PATCH 126/142] v3d,v3dv: propagate NaNs bits in shader state records
+ are reserved in v7.x
+
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c |  4 ++++
+ src/broadcom/vulkan/v3dvx_pipeline.c   | 10 +++++-----
+ src/gallium/drivers/v3d/v3dx_draw.c    | 14 +++++++++-----
+ 3 files changed, 18 insertions(+), 10 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index 9307a6e9d93..580aeb8ba2b 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -2175,7 +2175,9 @@ emit_gs_shader_state_record(struct v3dv_job *job,
+          gs_bin->prog_data.gs->base.threads == 4;
+       shader.geometry_bin_mode_shader_start_in_final_thread_section =
+          gs_bin->prog_data.gs->base.single_seg;
++#if V3D_VERSION <= 42
+       shader.geometry_bin_mode_shader_propagate_nans = true;
++#endif
+       shader.geometry_bin_mode_shader_uniforms_address =
+          gs_bin_uniforms;
+ 
+@@ -2185,7 +2187,9 @@ emit_gs_shader_state_record(struct v3dv_job *job,
+          gs->prog_data.gs->base.threads == 4;
+       shader.geometry_render_mode_shader_start_in_final_thread_section =
+          gs->prog_data.gs->base.single_seg;
++#if V3D_VERSION <= 42
+       shader.geometry_render_mode_shader_propagate_nans = true;
++#endif
+       shader.geometry_render_mode_shader_uniforms_address =
+          gs_render_uniforms;
+    }
+diff --git a/src/broadcom/vulkan/v3dvx_pipeline.c b/src/broadcom/vulkan/v3dvx_pipeline.c
+index 83ab2f19e4f..c9b537f4b32 100644
+--- a/src/broadcom/vulkan/v3dvx_pipeline.c
++++ b/src/broadcom/vulkan/v3dvx_pipeline.c
+@@ -471,19 +471,19 @@ pack_shader_state_record(struct v3dv_pipeline *pipeline)
+       shader.number_of_varyings_in_fragment_shader =
+          prog_data_fs->num_inputs;
+ 
+-      shader.coordinate_shader_propagate_nans = true;
+-      shader.vertex_shader_propagate_nans = true;
+-      shader.fragment_shader_propagate_nans = true;
+-
+       /* Note: see previous note about addresses */
+       /* shader.coordinate_shader_code_address */
+       /* shader.vertex_shader_code_address */
+       /* shader.fragment_shader_code_address */
+ 
++#if V3D_VERSION == 42
++      shader.coordinate_shader_propagate_nans = true;
++      shader.vertex_shader_propagate_nans = true;
++      shader.fragment_shader_propagate_nans = true;
++
+       /* FIXME: Use combined input/output size flag in the common case (also
+        * on v3d, see v3dx_draw).
+        */
+-#if V3D_VERSION == 42
+       shader.coordinate_shader_has_separate_input_and_output_vpm_blocks =
+          prog_data_vs_bin->separate_segments;
+       shader.vertex_shader_has_separate_input_and_output_vpm_blocks =
+diff --git a/src/gallium/drivers/v3d/v3dx_draw.c b/src/gallium/drivers/v3d/v3dx_draw.c
+index 04cc3bc3ae1..e4b414b0676 100644
+--- a/src/gallium/drivers/v3d/v3dx_draw.c
++++ b/src/gallium/drivers/v3d/v3dx_draw.c
+@@ -396,7 +396,9 @@ v3d_emit_gs_state_record(struct v3d_job *job,
+                         gs_bin->prog_data.gs->base.threads == 4;
+                 shader.geometry_bin_mode_shader_start_in_final_thread_section =
+                         gs_bin->prog_data.gs->base.single_seg;
++#if V3D_VERSION <= 42
+                 shader.geometry_bin_mode_shader_propagate_nans = true;
++#endif
+                 shader.geometry_bin_mode_shader_uniforms_address =
+                         gs_bin_uniforms;
+ 
+@@ -406,7 +408,9 @@ v3d_emit_gs_state_record(struct v3d_job *job,
+                         gs->prog_data.gs->base.threads == 4;
+                 shader.geometry_render_mode_shader_start_in_final_thread_section =
+                         gs->prog_data.gs->base.single_seg;
++#if V3D_VERSION <= 42
+                 shader.geometry_render_mode_shader_propagate_nans = true;
++#endif
+                 shader.geometry_render_mode_shader_uniforms_address =
+                         gs_render_uniforms;
+         }
+@@ -657,10 +661,6 @@ v3d_emit_gl_shader_state(struct v3d_context *v3d,
+                 shader.number_of_varyings_in_fragment_shader =
+                         v3d->prog.fs->prog_data.fs->num_inputs;
+ 
+-                shader.coordinate_shader_propagate_nans = true;
+-                shader.vertex_shader_propagate_nans = true;
+-                shader.fragment_shader_propagate_nans = true;
+-
+                 shader.coordinate_shader_code_address =
+                         cl_address(v3d_resource(v3d->prog.cs->resource)->bo,
+                                    v3d->prog.cs->offset);
+@@ -671,10 +671,14 @@ v3d_emit_gl_shader_state(struct v3d_context *v3d,
+                         cl_address(v3d_resource(v3d->prog.fs->resource)->bo,
+                                    v3d->prog.fs->offset);
+ 
++#if V3D_VERSION <= 42
++                shader.coordinate_shader_propagate_nans = true;
++                shader.vertex_shader_propagate_nans = true;
++                shader.fragment_shader_propagate_nans = true;
++
+                 /* XXX: Use combined input/output size flag in the common
+                  * case.
+                  */
+-#if V3D_VERSION <= 42
+                 shader.coordinate_shader_has_separate_input_and_output_vpm_blocks =
+                         v3d->prog.cs->prog_data.vs->separate_segments;
+                 shader.vertex_shader_has_separate_input_and_output_vpm_blocks =
+-- 
+2.39.2
+

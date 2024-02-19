@@ -1,0 +1,30 @@
+From 0d3fd30d67ffc0195b0783e30ab6afbbe403310a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Wed, 28 Apr 2021 14:31:38 +0200
+Subject: [PATCH 072/142] v3dv: recover non-conformant warning for not fully
+ supported hw
+
+---
+ src/broadcom/vulkan/v3dv_device.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/broadcom/vulkan/v3dv_device.c b/src/broadcom/vulkan/v3dv_device.c
+index d5de3517670..d29ffad3531 100644
+--- a/src/broadcom/vulkan/v3dv_device.c
++++ b/src/broadcom/vulkan/v3dv_device.c
+@@ -1212,6 +1212,12 @@ create_physical_device(struct v3dv_instance *instance,
+ 
+    list_addtail(&device->vk.link, &instance->vk.physical_devices.list);
+ 
++   if (device->devinfo.ver != 42) {
++      fprintf(stderr, "WARNING: v3dv support for hw version %i is neither "
++              "a complete nor a conformant Vulkan implementation. Testing "
++              "use only.\n", device->devinfo.ver);
++   }
++
+    return VK_SUCCESS;
+ 
+ fail:
+-- 
+2.39.2
+

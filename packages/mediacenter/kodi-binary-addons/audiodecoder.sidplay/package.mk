@@ -5,7 +5,7 @@
 PKG_NAME="audiodecoder.sidplay"
 PKG_VERSION="20.2.0-Nexus"
 PKG_SHA256="ab1f89237c91bc7157557f42dadcff50a7191eb7285ee668543defce9f1efcf2"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/audiodecoder.sidplay"

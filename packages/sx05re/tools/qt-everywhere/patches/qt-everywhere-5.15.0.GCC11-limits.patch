@@ -1,0 +1,23 @@
+--- a/qtbase/src/corelib/global/qfloat16.h
++++ b/qtbase/src/corelib/global/qfloat16.h
+@@ -44,6 +44,8 @@
+ #include <QtCore/qglobal.h>
+ #include <QtCore/qmetatype.h>
+ #include <string.h>
++#include <stdexcept>
++#include <limits>
+ 
+ #if defined(QT_COMPILER_SUPPORTS_F16C) && defined(__AVX2__) && !defined(__F16C__)
+ // All processors that support AVX2 do support F16C too. That doesn't mean
+
+--- a/qtbase/src/corelib/text/qbytearraymatcher.h
++++ b/qtbase/src/corelib/text/qbytearraymatcher.h
+@@ -41,7 +41,8 @@
+ #define QBYTEARRAYMATCHER_H
+ 
+ #include <QtCore/qbytearray.h>
+-
++#include <stdexcept>
++#include <limits>
+ QT_BEGIN_NAMESPACE
+ 

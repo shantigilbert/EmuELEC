@@ -1,7 +1,7 @@
-From 66833bc8221a9d5a5fbc625c3f0293a261bbd412 Mon Sep 17 00:00:00 2001
+From 7b98c8968c7dd3b5a56f76695515cb59654f8691 Mon Sep 17 00:00:00 2001
 From: popcornmix <popcornmix@gmail.com>
 Date: Fri, 17 Sep 2021 15:23:16 +0100
-Subject: [PATCH 4/6] DVDVideoCodecDRMPRIME: Leave deinterlace filter active on
+Subject: [PATCH 4/7] DVDVideoCodecDRMPRIME: Leave deinterlace filter active on
  a progressive frame
 
 Interlaced content often has strange mixtures of interlace and progressive frames (e.g. IIPPPPIIPPPP)
@@ -29,5 +29,5 @@ index 709311e75f..6ba0804904 100644
      filterChain += m_deintFilterName;
  
 -- 
-2.34.1
+2.39.2
 

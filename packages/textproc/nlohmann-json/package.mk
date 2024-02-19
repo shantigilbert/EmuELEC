@@ -9,3 +9,7 @@ PKG_SITE="https://nlohmann.github.io/json/"
 PKG_URL="https://github.com/nlohmann/json/archive/v${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="JSON for Modern C++"
+# Meson does not provide nlohmann_json*.cmake files which some projects rely on
+PKG_TOOLCHAIN="cmake"
+
+PKG_CMAKE_OPTS_TARGET="-DJSON_BuildTests=OFF"

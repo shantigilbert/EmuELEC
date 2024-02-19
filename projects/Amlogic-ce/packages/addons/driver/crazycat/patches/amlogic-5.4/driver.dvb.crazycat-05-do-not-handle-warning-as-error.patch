@@ -1,0 +1,13 @@
+diff --git a/v4l/Makefile b/v4l/Makefile
+index d6e4d69..c0cf389 100644
+--- a/v4l/Makefile
++++ b/v4l/Makefile
+@@ -146,6 +146,8 @@ EXTRA_CFLAGS += -include $(obj)/compat.h
+ # gives too much warnings (false positives) -> disable it
+ EXTRA_CFLAGS += -Wno-format-truncation
+ 
++EXTRA_CFLAGS += -Wno-error
++
+ #################################################
+ # Kernel 2.6/3.x specific rules
+ 

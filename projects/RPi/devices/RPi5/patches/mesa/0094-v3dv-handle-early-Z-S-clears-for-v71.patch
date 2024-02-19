@@ -1,0 +1,68 @@
+From a751dff57b6d769f5b031054cc65415cc3b44c08 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 29 Sep 2021 08:22:59 +0200
+Subject: [PATCH 094/142] v3dv: handle early Z/S clears for v71
+
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c | 30 ++++++++++++++++++++------
+ 1 file changed, 23 insertions(+), 7 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index 48b2e319e51..4580e2a4650 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -998,6 +998,10 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+           * Early-Z/S clearing is independent of Early Z/S testing, so it is
+           * possible to enable one but not the other so long as their
+           * respective requirements are met.
++          *
++          * From V3D 4.5.6, Z/S buffers are always cleared automatically
++          * between tiles, but we still want to enable early ZS clears
++          * when Z/S are not loaded or stored.
+           */
+          struct v3dv_render_pass_attachment *ds_attachment =
+             &pass->attachments[ds_attachment_idx];
+@@ -1005,21 +1009,33 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+          const VkImageAspectFlags ds_aspects =
+             vk_format_aspects(ds_attachment->desc.format);
+ 
+-         bool needs_depth_clear =
+-            check_needs_clear(state,
+-                              ds_aspects & VK_IMAGE_ASPECT_DEPTH_BIT,
+-                              ds_attachment->first_subpass,
+-                              ds_attachment->desc.loadOp,
+-                              subpass->do_depth_clear_with_draw);
+-
+          bool needs_depth_store =
+             v3dv_cmd_buffer_check_needs_store(state,
+                                               ds_aspects & VK_IMAGE_ASPECT_DEPTH_BIT,
+                                               ds_attachment->last_subpass,
+                                               ds_attachment->desc.storeOp) ||
+                                               subpass->resolve_depth;
++#if V3D_VERSION <= 42
++         bool needs_depth_clear =
++            check_needs_clear(state,
++                              ds_aspects & VK_IMAGE_ASPECT_DEPTH_BIT,
++                              ds_attachment->first_subpass,
++                              ds_attachment->desc.loadOp,
++                              subpass->do_depth_clear_with_draw);
+ 
+          do_early_zs_clear = needs_depth_clear && !needs_depth_store;
++#endif
++#if V3D_VERSION >= 71
++         bool needs_depth_load =
++            v3dv_cmd_buffer_check_needs_load(state,
++                                             ds_aspects & VK_IMAGE_ASPECT_DEPTH_BIT,
++                                             ds_attachment->first_subpass,
++                                             ds_attachment->desc.loadOp,
++                                             ds_attachment->last_subpass,
++                                             ds_attachment->desc.storeOp);
++         do_early_zs_clear = !needs_depth_load && !needs_depth_store;
++#endif
++
+          if (do_early_zs_clear &&
+              vk_format_has_stencil(ds_attachment->desc.format)) {
+             bool needs_stencil_load =
+-- 
+2.39.2
+

@@ -2,8 +2,8 @@
 # Copyright (C) 2020-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="st"
-PKG_VERSION="0.8.5"
-PKG_SHA256="ea6832203ed02ff74182bcb8adaa9ec454c8f989e79232cb859665e2f544ab37"
+PKG_VERSION="0.9"
+PKG_SHA256="f36359799734eae785becb374063f0be833cf22f88b4f169cd251b99324e08e7"
 PKG_ARCH="x86_64"
 PKG_LICENSE="GPL"
 PKG_SITE="https://st.suckless.org/"

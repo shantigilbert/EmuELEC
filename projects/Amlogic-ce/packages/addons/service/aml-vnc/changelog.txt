@@ -1,2 +1,36 @@
+20.3.5
+- replace package source git repository
+- creating a source directory with the necessary files and their modifications
+- modify the service start script to be compatible with the new binary
+- add Hungarian translation of the add-on
+- restart service on settings change
+
+20.3.4
+- performance fixes
+
+20.3.3
+- fix resolution issue when used other than native
+
+20.3.2
+- add option to set desktop name (hostname by default)
+
+20.3.1
+- make IPv6 listen port consistent with IPv4 port
+
+20.1.0
+- fix password authentication when building with openssl >=3.0.0
+
+20.0.104
+- update language strings file
+
+103
+- improvements
+
+102
+- libvncserver bump
+
+101
+- CoreELEC rebrand
+
 100
 - Initial release

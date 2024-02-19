@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="handy"
-PKG_VERSION="517bb2d02909271836604c01c8f09a79ad605297"
-PKG_SHA256="9cb28a26aee3b1ce503458ec3fb954a3464fdd41f1a1acb1e6c93426b2c2f9f0"
+PKG_VERSION="65d6b865544cd441ef2bd18cde7bd834c23d0e48"
+PKG_SHA256="d244180c5f427afbbab58409f2d2e5247ffb0624bf33cf45b2488576d9467625"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Zlib"
 PKG_SITE="https://github.com/libretro/libretro-handy"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -42,6 +42,6 @@ else
 fi
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp handy_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp handy_libretro.so ${INSTALL}/usr/lib/libretro/
 }

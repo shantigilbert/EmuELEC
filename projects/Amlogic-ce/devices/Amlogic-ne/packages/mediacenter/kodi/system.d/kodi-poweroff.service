@@ -1,0 +1,15 @@
+[Unit]
+Description=Kodi poweroff script
+After=kodi.service
+Before=systemd-poweroff.service
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+Environment=HOME=/storage
+ExecStartPre=-/usr/lib/kodi/kodi-after
+ExecStart=-/bin/sh -c ". /etc/profile; exec /bin/sh /storage/.config/shutdown.sh poweroff"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=poweroff.target

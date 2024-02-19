@@ -12,5 +12,6 @@ PKG_LONGDESC="A small tool to provide detailed information on the hardware confi
 PKG_BUILD_FLAGS="-sysroot"
 
 make_target() {
+  export VERSION="B.${PKG_VERSION}"
   make CXX=${CXX} -C src/
 }

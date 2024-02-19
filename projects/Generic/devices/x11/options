@@ -17,7 +17,7 @@
   KODIPLAYER_DRIVER="default"
 
 # set the addon project
-  ADDON_PROJECT="Generic"
+  ADDON_PROJECT="Generic-legacy"
 
 # Mesa 3D / Xorg Graphic drivers to use (all / crocus,i915,iris,r300,r600,radeonsi,nvidia,nvidia-legacy,vmware,virtio)
 # Space separated list is supported,

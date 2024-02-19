@@ -3,8 +3,8 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="kodi"
-PKG_VERSION="92a0283f169270dc205834b470c09c84e845dfc1"
-PKG_SHA256="51e2a51d98098662c138ffbcf8c08038e10f9b8b6b933b1a1180f3ec17950f96"
+PKG_VERSION="20.3-Nexus"
+PKG_SHA256="1dbf1d9f4d5eeeb6aa2593813703343a8a377e88a00c68226354e4d67467f64d"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"
 PKG_URL="https://github.com/xbmc/xbmc/archive/${PKG_VERSION}.tar.gz"
@@ -411,6 +411,12 @@ post_makeinstall_target() {
 
   mkdir -p ${INSTALL}/usr/cache/libreelec
     cp ${PKG_DIR}/config/network_wait ${INSTALL}/usr/cache/libreelec
+
+  # GBM: install udev rule to ignore the power button in libinput/kodi so logind can handle it
+  if [ "${DISPLAYSERVER}" = "no" ]; then
+    mkdir -p ${INSTALL}/usr/lib/udev/rules.d/
+    cp ${PKG_DIR}/config/70-libinput-ignore-power-button.rules ${INSTALL}/usr/lib/udev/rules.d/
+  fi
 
   # update addon manifest
   ADDON_MANIFEST=${INSTALL}/usr/share/kodi/system/addon-manifest.xml

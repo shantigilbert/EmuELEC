@@ -2,12 +2,12 @@
 # Copyright (C) 2020-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="Crystal"
-PKG_VERSION="943e77b1b7d3f43ce48a3fea169adabe83abdd29"
+PKG_VERSION="9e8873927b7b48e586bfc7da935e637bb3706f21"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/dm2912/Crystal"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain Crystal-Collections"
 PKG_SECTION="emuelec"
 PKG_SHORTDESC="Crystal theme for EMUELEC by Dim (dm2912)"
@@ -19,7 +19,7 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/config/emulationstation/themes/Crystal
-    cp -r * $INSTALL/usr/config/emulationstation/themes/Crystal
-    rm -rf $INSTALL/usr/config/emulationstation/themes/Crystal/screens.png
+  mkdir -p ${INSTALL}/usr/config/emulationstation/themes/Crystal
+    cp -r * ${INSTALL}/usr/config/emulationstation/themes/Crystal
+    rm -rf ${INSTALL}/usr/config/emulationstation/themes/Crystal/screens.png
 }

@@ -1,0 +1,175 @@
+From f843fbceb381f8c82074e8b68583fbfe57c48a6e Mon Sep 17 00:00:00 2001
+From: Jose Maria Casanova Crespo <jmcasanova@igalia.com>
+Date: Thu, 8 Jun 2023 00:57:15 +0200
+Subject: [PATCH 141/142] vc4: mark buffers as initialized at
+ vc4_texture_subdata
+
+This fixes several tests when the initially uploaded buffer
+from CPU was being ignored because vc4_texture_subdata was not
+marking the resource as written/initialized.
+
+The usage flags management available at vc4_resource_transfer_map
+is generalized into vc4_map_usage_prep and reused at
+vc4_resource_transfer_map. This makes vc4 implementation more similar
+to v3d.
+
+This fixes 7 text in the following subgroups:
+  -dEQP-GLES2.functional.fbo.render.texsubimage.*
+  -dEQP-GLES2.functional.texture.specification.basic_copytexsubimage2d.*
+  -spec@arb_clear_texture@arb_clear_texture-*
+
+Cc: mesa-stable
+Reviewed-by: Juan A. Suarez <jasuarez@igalia.com>
+Reviewed-by: Emma Anholt <emma@anholt.net>
+Part-of: <https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/25297>
+---
+ src/broadcom/ci/broadcom-rpi3-fails.txt | 11 ----
+ src/gallium/drivers/vc4/vc4_resource.c  | 71 +++++++++++++++----------
+ 2 files changed, 44 insertions(+), 38 deletions(-)
+
+diff --git a/src/broadcom/ci/broadcom-rpi3-fails.txt b/src/broadcom/ci/broadcom-rpi3-fails.txt
+index 5522310d91a..e49e77b1436 100644
+--- a/src/broadcom/ci/broadcom-rpi3-fails.txt
++++ b/src/broadcom/ci/broadcom-rpi3-fails.txt
+@@ -18,11 +18,6 @@ dEQP-GLES2.functional.clipping.line.wide_line_clip_viewport_corner,Fail
+ 
+ dEQP-GLES2.functional.depth_stencil_clear.depth_stencil_masked,Fail
+ 
+-# A glTexImage, glDraw, glTexSubImage sequence into a texture is missing what looks like the drawing.
+-dEQP-GLES2.functional.fbo.render.texsubimage.after_render_tex2d_rgba,Fail
+-# A glTexImage, glDraw, glTexSubImage, glDraw sequence into a texture is missing what looks like the first drawing.
+-dEQP-GLES2.functional.fbo.render.texsubimage.between_render_tex2d_rgba,Fail
+-
+ # Sampling grid slightly off in test 2?
+ dEQP-GLES2.functional.texture.filtering.2d.nearest_mipmap_linear_linear_mirror_rgba8888,Fail
+ dEQP-GLES2.functional.texture.filtering.2d.nearest_mipmap_linear_linear_repeat_rgba8888,Fail
+@@ -38,12 +33,6 @@ dEQP-GLES2.functional.texture.mipmap.2d.basic.nearest_linear_clamp_non_square,Fa
+ dEQP-GLES2.functional.texture.mipmap.2d.basic.nearest_linear_mirror_non_square,Fail
+ dEQP-GLES2.functional.texture.mipmap.2d.basic.nearest_linear_repeat_non_square,Fail
+ 
+-# Sequence of glTexImage, glDraw, glCopyTexSubImage.
+-# background red/green checkerboard on the left side is incorrectly white.
+-dEQP-GLES2.functional.texture.specification.basic_copytexsubimage2d.2d_rgba,Fail
+-# Maybe it was copied as RGB instead of RGBA?
+-dEQP-GLES2.functional.texture.specification.basic_copytexsubimage2d.cube_rgba,Fail
+-
+ # One of the pixels on the left edge near the bottom is wrong for both min and
+ # mag.  Also a line of pixels through the image in minification.
+ dEQP-GLES2.functional.texture.wrap.clamp_clamp_nearest_npot_etc1,Fail
+diff --git a/src/gallium/drivers/vc4/vc4_resource.c b/src/gallium/drivers/vc4/vc4_resource.c
+index ad2791aa972..0a3a435a46c 100644
+--- a/src/gallium/drivers/vc4/vc4_resource.c
++++ b/src/gallium/drivers/vc4/vc4_resource.c
+@@ -95,34 +95,13 @@ vc4_resource_transfer_unmap(struct pipe_context *pctx,
+         slab_free(&vc4->transfer_pool, ptrans);
+ }
+ 
+-static void *
+-vc4_resource_transfer_map(struct pipe_context *pctx,
+-                          struct pipe_resource *prsc,
+-                          unsigned level, unsigned usage,
+-                          const struct pipe_box *box,
+-                          struct pipe_transfer **pptrans)
++static void
++vc4_map_usage_prep(struct pipe_context *pctx,
++                   struct pipe_resource *prsc,
++                   unsigned usage)
+ {
+         struct vc4_context *vc4 = vc4_context(pctx);
+         struct vc4_resource *rsc = vc4_resource(prsc);
+-        struct vc4_transfer *trans;
+-        struct pipe_transfer *ptrans;
+-        enum pipe_format format = prsc->format;
+-        char *buf;
+-
+-        /* Upgrade DISCARD_RANGE to WHOLE_RESOURCE if the whole resource is
+-         * being mapped.
+-         */
+-        if ((usage & PIPE_MAP_DISCARD_RANGE) &&
+-            !(usage & PIPE_MAP_UNSYNCHRONIZED) &&
+-            !(prsc->flags & PIPE_RESOURCE_FLAG_MAP_PERSISTENT) &&
+-            prsc->last_level == 0 &&
+-            prsc->width0 == box->width &&
+-            prsc->height0 == box->height &&
+-            prsc->depth0 == box->depth &&
+-            prsc->array_size == 1 &&
+-            rsc->bo->private) {
+-                usage |= PIPE_MAP_DISCARD_WHOLE_RESOURCE;
+-        }
+ 
+         if (usage & PIPE_MAP_DISCARD_WHOLE_RESOURCE) {
+                 if (vc4_resource_bo_alloc(rsc)) {
+@@ -131,6 +110,8 @@ vc4_resource_transfer_map(struct pipe_context *pctx,
+                          */
+                         if (prsc->bind & PIPE_BIND_VERTEX_BUFFER)
+                                 vc4->dirty |= VC4_DIRTY_VTXBUF;
++                        if (prsc->bind & PIPE_BIND_CONSTANT_BUFFER)
++                                vc4->dirty |= VC4_DIRTY_CONSTBUF;
+                 } else {
+                         /* If we failed to reallocate, flush users so that we
+                          * don't violate any syncing requirements.
+@@ -139,7 +120,7 @@ vc4_resource_transfer_map(struct pipe_context *pctx,
+                 }
+         } else if (!(usage & PIPE_MAP_UNSYNCHRONIZED)) {
+                 /* If we're writing and the buffer is being used by the CL, we
+-                 * have to flush the CL first.  If we're only reading, we need
++                 * have to flush the CL first. If we're only reading, we need
+                  * to flush if the CL has written our buffer.
+                  */
+                 if (usage & PIPE_MAP_WRITE)
+@@ -152,6 +133,38 @@ vc4_resource_transfer_map(struct pipe_context *pctx,
+                 rsc->writes++;
+                 rsc->initialized_buffers = ~0;
+         }
++}
++
++static void *
++vc4_resource_transfer_map(struct pipe_context *pctx,
++                          struct pipe_resource *prsc,
++                          unsigned level, unsigned usage,
++                          const struct pipe_box *box,
++                          struct pipe_transfer **pptrans)
++{
++        struct vc4_context *vc4 = vc4_context(pctx);
++        struct vc4_resource *rsc = vc4_resource(prsc);
++        struct vc4_transfer *trans;
++        struct pipe_transfer *ptrans;
++        enum pipe_format format = prsc->format;
++        char *buf;
++
++        /* Upgrade DISCARD_RANGE to WHOLE_RESOURCE if the whole resource is
++         * being mapped.
++         */
++        if ((usage & PIPE_MAP_DISCARD_RANGE) &&
++            !(usage & PIPE_MAP_UNSYNCHRONIZED) &&
++            !(prsc->flags & PIPE_RESOURCE_FLAG_MAP_PERSISTENT) &&
++            prsc->last_level == 0 &&
++            prsc->width0 == box->width &&
++            prsc->height0 == box->height &&
++            prsc->depth0 == box->depth &&
++            prsc->array_size == 1 &&
++            rsc->bo->private) {
++                usage |= PIPE_MAP_DISCARD_WHOLE_RESOURCE;
++        }
++
++        vc4_map_usage_prep(pctx, prsc, usage);
+ 
+         trans = slab_zalloc(&vc4->transfer_pool);
+         if (!trans)
+@@ -240,8 +253,12 @@ vc4_texture_subdata(struct pipe_context *pctx,
+         }
+ 
+         /* Otherwise, map and store the texture data directly into the tiled
+-         * texture.
++         * texture.  Note that gallium's texture_subdata may be called with
++         * obvious usage flags missing!
+          */
++        vc4_map_usage_prep(pctx, prsc, usage | (PIPE_MAP_WRITE |
++                                                PIPE_MAP_DISCARD_RANGE));
++
+         void *buf;
+         if (usage & PIPE_MAP_UNSYNCHRONIZED)
+                 buf = vc4_bo_map_unsynchronized(rsc->bo);
+-- 
+2.39.2
+

@@ -3,8 +3,8 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="bluez"
-PKG_VERSION="5.65"
-PKG_SHA256="2565a4d48354b576e6ad92e25b54ed66808296581c8abb80587051f9993d96d4"
+PKG_VERSION="5.72"
+PKG_SHA256="499d7fa345a996c1bb650f5c6749e1d929111fa6ece0be0e98687fee6124536e"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.bluez.org/"
 PKG_URL="https://www.kernel.org/pub/linux/bluetooth/${PKG_NAME}-${PKG_VERSION}.tar.xz"
@@ -55,7 +55,6 @@ post_makeinstall_target() {
   safe_remove ${INSTALL}/usr/lib/systemd
   safe_remove ${INSTALL}/usr/bin/bluemoon
   safe_remove ${INSTALL}/usr/bin/ciptool
-  safe_remove ${INSTALL}/usr/share/dbus-1
 
   mkdir -p ${INSTALL}/etc/bluetooth
     cp src/main.conf ${INSTALL}/etc/bluetooth
@@ -63,6 +62,8 @@ post_makeinstall_target() {
         -e "s|^#\[Policy\]|\[Policy\]|g" \
         -e "s|^#AutoEnable.*|AutoEnable=true|g" \
         -e "s|^#JustWorksRepairing.*|JustWorksRepairing=always|g"
+    echo "[General]" > ${INSTALL}/etc/bluetooth/input.conf
+    echo "ClassicBondedOnly=false" >> ${INSTALL}/etc/bluetooth/input.conf
 
   mkdir -p ${INSTALL}/usr/share/services
     cp -P ${PKG_DIR}/default.d/*.conf ${INSTALL}/usr/share/services
@@ -73,6 +74,11 @@ post_makeinstall_target() {
   # pulseaudio checks for bluez via pkgconfig but lib is not actually needed
     sed -i 's/-lbluetooth//g' ${PKG_BUILD}/lib/bluez.pc
     cp -P ${PKG_BUILD}/lib/bluez.pc ${SYSROOT_PREFIX}/usr/lib/pkgconfig
+  
+  # copy bluezutils.py  
+    mkdir -p ${INSTALL}/usr/lib/${PKG_PYTHON_VERSION}
+	cp -rf ${INSTALL}/usr/lib/bluez/test/bluezutils.py ${INSTALL}/usr/lib/${PKG_PYTHON_VERSION}
+	rm -rf ${INSTALL}/usr/lib/bluez/test
 }
 
 post_install() {

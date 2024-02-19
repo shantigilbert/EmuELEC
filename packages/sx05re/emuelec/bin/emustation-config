@@ -95,7 +95,7 @@ systemctl start smbd
 [[ "$1" == "retroarch" ]] && set_audio alsa || set_audio default
 
 TZ=$(get_ee_setting system.timezone)
-echo "TIMEZONE=$TZ" > /storage/.cache/timezone
+echo "TIMEZONE=$TZ"|tr -d '\n' > /storage/.cache/timezone
 systemctl restart tz-data.service
 
 # create charmap used for translations
@@ -152,10 +152,13 @@ else
     # Use stored volume instead of system default, this is only for Amlogic devices using AV as output
     AUDIO_DEVICE="hw:$(get_ee_setting ee_audio_device)"
 
-    if [ "${AUDIO_DEVICE}" == "hw:0,1" ]; then
-        amixer set 'DAC Extra Digital Gain' 6dB
-        amixer set 'DAC Digital' "$(get_ee_setting audio.volume)%"
-    fi
+		VOLUME=98
+
+		STORED_VOLUME=$(get_ee_setting audio.volume)
+		[[ ! -z "$STORED_VOLUME" ]] && VOLUME=$STORED_VOLUME
+
+    amixer set 'DAC Extra Digital Gain' 0dB
+    amixer set 'DAC Digital' "$VOLUME%"
 fi
 
 # We need to always use the newest es_systems.cfg if there was a recent update, we also need to update the ports gamelist.xml and es_features.cfg
@@ -176,7 +179,7 @@ if [[ "${CVER}" != "${NVER}" ]]; then
     
     cp -f "${CFG}" "${OLDCFG}"
     cp -f "/usr/config/emulationstation/es_systems.cfg" "${CFG}"
-    
+
     echo "${NVER}" > /storage/.config/EE_VERSION
 (
     if grep -q '<name>nds</name>' "${OLDCFG}"; then
@@ -285,5 +288,11 @@ emuelec-utils setauddev
 
 # Checks and sets the resolution for starting ES.
 check_res.sh
+
+REMAP_VERSION="/emuelec/configs/JOY_REMAP_VERSION"
+if [[ ! -f "$REMAP_VERSION" ]]; then
+	grep -Ev "^.*\.joy_btn.*=.*$" /emuelec/configs/emuelec.conf > /tmp/emuelec.conf.bak && mv /tmp/emuelec.conf.bak /emuelec/configs/emuelec.conf
+	echo "2" > "${REMAP_VERSION}"
+fi
 
 exit 0

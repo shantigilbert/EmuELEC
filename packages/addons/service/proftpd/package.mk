@@ -3,14 +3,14 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="proftpd"
-PKG_VERSION="1.3.7e"
-PKG_SHA256="6e716a3b53ee069290399fce6dccf4c229fafe6ec2cb14db3778b7aa3f9a8c92"
-PKG_REV="106"
+PKG_VERSION="1.3.8b"
+PKG_SHA256="183ab7c6107de271a2959ff268f55c9b6c76b2cf0029e6584fccc019686601e0"
+PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.proftpd.org/"
 PKG_URL="https://github.com/proftpd/proftpd/archive/v${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain libcap openssl ncurses pcre"
+PKG_DEPENDS_TARGET="toolchain libcap openssl ncurses pcre2"
 PKG_SECTION="service"
 PKG_SHORTDESC="ProFTPD: a FTP server for linux"
 PKG_LONGDESC="ProFTPD (${PKG_VERSION}): is a secure and configurable FTP server with SSL/TLS support"
@@ -33,7 +33,7 @@ PKG_CONFIGURE_OPTS_TARGET="--enable-static \
                            --enable-ctrls \
                            --enable-ipv6 \
                            --enable-nls \
-                           --enable-pcre \
+                           --enable-pcre2 \
                            --enable-largefile \
                            install_user=$(id -u) \
                            install_group=$(id -g)"

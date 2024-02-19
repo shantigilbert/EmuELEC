@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="px68k"
-PKG_VERSION="0e5918123bad9d2ca1d06c8abe60af676a5fe0de"
-PKG_SHA256="4e504819bba2e504267630bf17e82e35e1ce0227361c2b9154815e85a0e475ef"
+PKG_VERSION="4c7542e34df71e3ebab77b5867901747d58dbb38"
+PKG_SHA256="03e375904bfb47499d53817996f0e6a1dd6c503865ed2af0f045ca35933ed9ec"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Unknown"
 PKG_SITE="https://github.com/libretro/px68k-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,6 +37,6 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp px68k_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp px68k_libretro.so ${INSTALL}/usr/lib/libretro/
 }

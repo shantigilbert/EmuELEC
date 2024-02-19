@@ -19,7 +19,9 @@ PKG_TOOLCHAIN="cmake"
 PKG_CMAKE_OPTS_TARGET="-DLIBRETRO=ON \
                         -DUSE_OPENMP=OFF \ 
                         -DCMAKE_BUILD_TYPE=Release \
-                        -DUSE_GLES2=ON"
+                        -DUSE_GLES2=OFF \
+                        -DUSE_GLES=ON \
+                        -DUSE_VULKAN=OFF"
 
 unpack() {
   ${SCRIPTS}/get flycast
@@ -28,11 +30,11 @@ unpack() {
 }
 
 pre_make_target() {
-  find $PKG_BUILD -name flags.make -exec sed -i "s:isystem :I:g" \{} \;
-  find $PKG_BUILD -name build.ninja -exec sed -i "s:isystem :I:g" \{} \;
+  find ${PKG_BUILD} -name flags.make -exec sed -i "s:isystem :I:g" \{} \;
+  find ${PKG_BUILD} -name build.ninja -exec sed -i "s:isystem :I:g" \{} \;
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp -va flycast_libretro.so $INSTALL/usr/lib/libretro/flycast_32b_libretro.so
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp -va flycast_libretro.so ${INSTALL}/usr/lib/libretro/flycast_32b_libretro.so
 }

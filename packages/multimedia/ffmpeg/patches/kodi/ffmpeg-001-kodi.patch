@@ -1,0 +1,880 @@
+From 5180cdc317139414eedcb49627d240519435b104 Mon Sep 17 00:00:00 2001
+From: marc <mhocking@ubuntu-desktop.(none)>
+Date: Mon, 18 Feb 2013 17:18:18 +0000
+Subject: [PATCH 01/15] dxva-h264: Fix an AMD driver issue with playback of
+ streams that don't start with an I-Frame
+
+---
+ libavcodec/dxva2_h264.c | 8 ++++++++
+ libavcodec/h264_slice.c | 1 +
+ libavcodec/h264dec.c    | 1 +
+ libavcodec/h264dec.h    | 2 ++
+ 4 files changed, 12 insertions(+)
+
+diff --git a/libavcodec/dxva2_h264.c b/libavcodec/dxva2_h264.c
+index 5b23b28f12..c0a8d80f3b 100644
+--- a/libavcodec/dxva2_h264.c
++++ b/libavcodec/dxva2_h264.c
+@@ -504,6 +504,14 @@ static int dxva2_h264_end_frame(AVCodecContext *avctx)
+ 
+     if (ctx_pic->slice_count <= 0 || ctx_pic->bitstream_size <= 0)
+         return -1;
++
++    // Wait for an I-frame before start decoding. Workaround for ATI UVD and UVD+ GPUs
++    if (!h->got_first_iframe) {
++        if (!(ctx_pic->pp.wBitFields & (1 << 15)))
++            return -1;
++        h->got_first_iframe = 1;
++    }
++
+     ret = ff_dxva2_common_end_frame(avctx, h->cur_pic_ptr->f,
+                                     &ctx_pic->pp, sizeof(ctx_pic->pp),
+                                     &ctx_pic->qm, sizeof(ctx_pic->qm),
+diff --git a/libavcodec/h264_slice.c b/libavcodec/h264_slice.c
+index 7c69016338..0b415ada6f 100644
+--- a/libavcodec/h264_slice.c
++++ b/libavcodec/h264_slice.c
+@@ -942,6 +942,7 @@ static int h264_slice_header_init(H264Context *h)
+ 
+     h->first_field           = 0;
+     h->prev_interlaced_frame = 1;
++    h->got_first_iframe = 0;
+ 
+     init_scan_tables(h);
+     ret = ff_h264_alloc_tables(h);
+diff --git a/libavcodec/h264dec.c b/libavcodec/h264dec.c
+index 485f47d36e..1705046e29 100644
+--- a/libavcodec/h264dec.c
++++ b/libavcodec/h264dec.c
+@@ -442,6 +442,7 @@ void ff_h264_flush_change(H264Context *h)
+ 
+     h->next_outputed_poc = INT_MIN;
+     h->prev_interlaced_frame = 1;
++    h->got_first_iframe = 0;
+     idr(h);
+ 
+     h->poc.prev_frame_num = -1;
+diff --git a/libavcodec/h264dec.h b/libavcodec/h264dec.h
+index b3677cdbb9..b7b19ba4f1 100644
+--- a/libavcodec/h264dec.h
++++ b/libavcodec/h264dec.h
+@@ -540,6 +540,8 @@ typedef struct H264Context {
+      * slices) anymore */
+     int setup_finished;
+ 
++    int got_first_iframe;
++
+     int cur_chroma_format_idc;
+     int cur_bit_depth_luma;
+     int16_t slice_row[MAX_SLICES]; ///< to detect when MAX_SLICES is too low
+
+From 02731d93b4c725f13bf3b3217b48db3be18e0bce Mon Sep 17 00:00:00 2001
+From: Rechi <Rechi@users.noreply.github.com>
+Date: Tue, 21 Nov 2017 08:16:53 +0100
+Subject: [PATCH 02/15] use Kodi as extra version
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 7e9d8b08c3..882a3cb31b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -130,7 +130,7 @@ GIT_LOG     = $(SRC_PATH)/.git/logs/HEAD
+ .version: M=@
+ 
+ libavutil/ffversion.h .version:
+-	$(M)$(VERSION_SH) $(SRC_PATH) libavutil/ffversion.h $(EXTRA_VERSION)
++	$(M)$(VERSION_SH) $(SRC_PATH) libavutil/ffversion.h Kodi
+ 	$(Q)touch .version
+ 
+ # force version.sh to run whenever version might have changed
+
+From 1ec811b6f330f60ec7a522cc60e98bd8ae30c766 Mon Sep 17 00:00:00 2001
+From: Rechi <Rechi@users.noreply.github.com>
+Date: Tue, 21 Nov 2017 08:16:53 +0100
+Subject: [PATCH 03/15] common.mak: never ignore an error if strip doesn't
+ succeed
+
+---
+ ffbuild/common.mak | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ffbuild/common.mak b/ffbuild/common.mak
+index 164a43932d..2ab5dd0dfd 100644
+--- a/ffbuild/common.mak
++++ b/ffbuild/common.mak
+@@ -87,7 +87,7 @@ COMPILE_MSA = $(call COMPILE,CC,MSAFLAGS)
+ 
+ %.o: %.asm
+ 	$(COMPILE_X86ASM)
+-	-$(if $(ASMSTRIPFLAGS), $(STRIP) $(ASMSTRIPFLAGS) $@)
++	$(if $(STRIP), $(if $(ASMSTRIPFLAGS), $(STRIP) $(ASMSTRIPFLAGS) $@))
+ 
+ %.o: %.rc
+ 	$(WINDRES) $(IFLAGS) $(foreach ARG,$(CC_DEPFLAGS),--preprocessor-arg "$(ARG)") -o $@ $<
+
+From 29b9dec3de00f69339e6a5fed79b2d8ce2b3c105 Mon Sep 17 00:00:00 2001
+From: wsnipex <wsnipex@a1.net>
+Date: Tue, 21 Nov 2017 08:16:53 +0100
+Subject: [PATCH 04/15] only check for a git rev if the src tree is in a git
+ repo
+
+fixes the version string when building from the kodi depends src tree
+---
+ ffbuild/version.sh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/ffbuild/version.sh b/ffbuild/version.sh
+index edc4dd33c5..239a138ca7 100755
+--- a/ffbuild/version.sh
++++ b/ffbuild/version.sh
+@@ -2,6 +2,7 @@
+ 
+ # Usage: version.sh <ffmpeg-root-dir> <output-version.h> <extra-version>
+ 
++if [ -d $1/.git ]; then  # only check for a git rev, if the src tree is in a git repo
+ # check for git short hash
+ if ! test "$revision"; then
+     if (cd "$1" && grep git RELEASE 2> /dev/null >/dev/null) ; then
+@@ -27,6 +28,7 @@ if [ -z "$revision" ]; then
+       git_hash="${srcdir##*-}";;
+   esac
+ fi
++fi
+ 
+ # no revision number found
+ test "$revision" || revision=$(cd "$1" && cat RELEASE 2> /dev/null)
+
+From d2e9030c8a0d55426e13d1007e163c48f2533819 Mon Sep 17 00:00:00 2001
+From: Anton Fedchin <afedchin at ruswizards.com>
+Date: Fri, 11 Jan 2019 10:47:43 +0100
+Subject: [PATCH 05/15] after 153b36f there is a possibility to crash when
+ trying to get index of a surface which points to nirvana.
+
+it may occurs when a stream starts with non i-frame.
+---
+ libavcodec/dxva2.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/libavcodec/dxva2.c b/libavcodec/dxva2.c
+index b57ea21941..542bc2f18d 100644
+--- a/libavcodec/dxva2.c
++++ b/libavcodec/dxva2.c
+@@ -777,16 +777,18 @@ unsigned ff_dxva2_get_surface_index(const AVCodecContext *avctx,
+ #if CONFIG_D3D11VA
+     if (avctx->pix_fmt == AV_PIX_FMT_D3D11)
+         return (intptr_t)frame->data[1];
+-    if (avctx->pix_fmt == AV_PIX_FMT_D3D11VA_VLD) {
++    if (avctx->pix_fmt == AV_PIX_FMT_D3D11VA_VLD && surface) {
+         D3D11_VIDEO_DECODER_OUTPUT_VIEW_DESC viewDesc;
+         ID3D11VideoDecoderOutputView_GetDesc((ID3D11VideoDecoderOutputView*) surface, &viewDesc);
+         return viewDesc.Texture2D.ArraySlice;
+     }
+ #endif
+ #if CONFIG_DXVA2
+-    for (i = 0; i < DXVA_CONTEXT_COUNT(avctx, ctx); i++) {
+-        if (avctx->pix_fmt == AV_PIX_FMT_DXVA2_VLD && ctx->dxva2.surface[i] == surface)
+-            return i;
++    if (avctx->pix_fmt == AV_PIX_FMT_DXVA2_VLD) {
++        for (i = 0; i < DXVA_CONTEXT_COUNT(avctx, ctx); i++) {
++            if (ctx->dxva2.surface[i] == surface)
++                return i;
++        }
+     }
+ #endif
+ 
+
+From 916223c0a47091272c9d0b6035f187310908ff37 Mon Sep 17 00:00:00 2001
+From: Rainer Hochecker <fernetmenta@online.de>
+Date: Sat, 26 Jan 2019 19:48:35 +0100
+Subject: [PATCH 06/15] avcodec/vaapi_h264: skip decode if pic has no slices
+
+This fixes / workarounds https://bugs.freedesktop.org/show_bug.cgi?id=105368.
+It was hit frequently when watching h264 channels received via DVB-X.
+Corresponding kodi bug: https://github.com/xbmc/xbmc/issues/15704
+---
+ libavcodec/vaapi_h264.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/libavcodec/vaapi_h264.c b/libavcodec/vaapi_h264.c
+index 9332aa6f31..d4494beebf 100644
+--- a/libavcodec/vaapi_h264.c
++++ b/libavcodec/vaapi_h264.c
+@@ -314,6 +314,11 @@ static int vaapi_h264_end_frame(AVCodecContext *avctx)
+     H264SliceContext *sl = &h->slice_ctx[0];
+     int ret;
+ 
++    if (pic->nb_slices == 0) {
++        ret = AVERROR_INVALIDDATA;
++        goto finish;
++    }
++
+     ret = ff_vaapi_decode_issue(avctx, pic);
+     if (ret < 0)
+         goto finish;
+
+From b211c09d17ef86d7b38d1bfe9814a01e9040bf03 Mon Sep 17 00:00:00 2001
+From: Fei Wang <fei.w.wang@intel.com>
+Date: Tue, 12 Oct 2021 16:23:56 +0800
+Subject: [PATCH 07/15] cbs_av1: fix incorrect data type
+
+Since order_hint_bits_minus_1 range is 0~7, cur_frame_hint can be
+most 128. And similar return value for cbs_av1_get_relative_dist.
+So if plus them and use int8_t for the result may lose its precision.
+
+Signed-off-by: Fei Wang <fei.w.wang@intel.com>
+(cherry picked from commit e7ff5722b1abae4284e79da707e71ff82b409699)
+(cherry picked from commit 8aab15a91d6e8ca726580e969ff71828ad63baaa)
+---
+ libavcodec/cbs_av1_syntax_template.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libavcodec/cbs_av1_syntax_template.c b/libavcodec/cbs_av1_syntax_template.c
+index 6fe6e9a4f3..d98d3d42de 100644
+--- a/libavcodec/cbs_av1_syntax_template.c
++++ b/libavcodec/cbs_av1_syntax_template.c
+@@ -355,7 +355,7 @@ static int FUNC(set_frame_refs)(CodedBitstreamContext *ctx, RWContext *rw,
+         AV1_REF_FRAME_ALTREF2, AV1_REF_FRAME_ALTREF
+     };
+     int8_t ref_frame_idx[AV1_REFS_PER_FRAME], used_frame[AV1_NUM_REF_FRAMES];
+-    int8_t shifted_order_hints[AV1_NUM_REF_FRAMES];
++    int16_t shifted_order_hints[AV1_NUM_REF_FRAMES];
+     int cur_frame_hint, latest_order_hint, earliest_order_hint, ref;
+     int i, j;
+ 
+
+From 2db5def80f1913a00410d6f16ae3730de567c3b8 Mon Sep 17 00:00:00 2001
+From: Fei Wang <fei.w.wang@intel.com>
+Date: Tue, 12 Oct 2021 16:23:57 +0800
+Subject: [PATCH 08/15] avcodec/av1: extend some definitions in spec section 3
+
+Signed-off-by: Fei Wang <fei.w.wang@intel.com>
+(cherry picked from commit 75de7fe26218cb37fff9d5afa7b5b2b8bee4a9a8)
+(cherry picked from commit 2f459697445df67cc61c9a6c2930fdf3f830e629)
+---
+ libavcodec/av1.h | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/libavcodec/av1.h b/libavcodec/av1.h
+index 0f99ae4829..951a18ecb2 100644
+--- a/libavcodec/av1.h
++++ b/libavcodec/av1.h
+@@ -114,6 +114,13 @@ enum {
+     AV1_WARP_MODEL_TRANSLATION = 1,
+     AV1_WARP_MODEL_ROTZOOM     = 2,
+     AV1_WARP_MODEL_AFFINE      = 3,
++    AV1_WARP_PARAM_REDUCE_BITS = 6,
++
++    AV1_DIV_LUT_BITS      = 8,
++    AV1_DIV_LUT_PREC_BITS = 14,
++    AV1_DIV_LUT_NUM       = 257,
++
++    AV1_MAX_LOOP_FILTER = 63,
+ };
+ 
+ 
+
+From ddc3058a3e7b7c44a3911fb356f932853565b3d0 Mon Sep 17 00:00:00 2001
+From: Fei Wang <fei.w.wang@intel.com>
+Date: Tue, 12 Oct 2021 16:23:58 +0800
+Subject: [PATCH 09/15] avcodec/av1dec: support setup shear process
+
+Defined in spec 7.11.3.6/7.11.3.7.
+
+Signed-off-by: Fei Wang <fei.w.wang@intel.com>
+(cherry picked from commit de7475b111679120b3b089fe543224f50882287c)
+(cherry picked from commit 481d3930d90d52587ad76d277cbd2f9cb3109079)
+---
+ libavcodec/av1dec.c | 98 +++++++++++++++++++++++++++++++++++++++++++++
+ libavcodec/av1dec.h |  1 +
+ 2 files changed, 99 insertions(+)
+
+diff --git a/libavcodec/av1dec.c b/libavcodec/av1dec.c
+index a75d6744d3..a3301f454f 100644
+--- a/libavcodec/av1dec.c
++++ b/libavcodec/av1dec.c
+@@ -28,6 +28,34 @@
+ #include "internal.h"
+ #include "profiles.h"
+ 
++/**< same with Div_Lut defined in spec 7.11.3.7 */
++static const uint16_t div_lut[AV1_DIV_LUT_NUM] = {
++  16384, 16320, 16257, 16194, 16132, 16070, 16009, 15948, 15888, 15828, 15768,
++  15709, 15650, 15592, 15534, 15477, 15420, 15364, 15308, 15252, 15197, 15142,
++  15087, 15033, 14980, 14926, 14873, 14821, 14769, 14717, 14665, 14614, 14564,
++  14513, 14463, 14413, 14364, 14315, 14266, 14218, 14170, 14122, 14075, 14028,
++  13981, 13935, 13888, 13843, 13797, 13752, 13707, 13662, 13618, 13574, 13530,
++  13487, 13443, 13400, 13358, 13315, 13273, 13231, 13190, 13148, 13107, 13066,
++  13026, 12985, 12945, 12906, 12866, 12827, 12788, 12749, 12710, 12672, 12633,
++  12596, 12558, 12520, 12483, 12446, 12409, 12373, 12336, 12300, 12264, 12228,
++  12193, 12157, 12122, 12087, 12053, 12018, 11984, 11950, 11916, 11882, 11848,
++  11815, 11782, 11749, 11716, 11683, 11651, 11619, 11586, 11555, 11523, 11491,
++  11460, 11429, 11398, 11367, 11336, 11305, 11275, 11245, 11215, 11185, 11155,
++  11125, 11096, 11067, 11038, 11009, 10980, 10951, 10923, 10894, 10866, 10838,
++  10810, 10782, 10755, 10727, 10700, 10673, 10645, 10618, 10592, 10565, 10538,
++  10512, 10486, 10460, 10434, 10408, 10382, 10356, 10331, 10305, 10280, 10255,
++  10230, 10205, 10180, 10156, 10131, 10107, 10082, 10058, 10034, 10010, 9986,
++  9963,  9939,  9916,  9892,  9869,  9846,  9823,  9800,  9777,  9754,  9732,
++  9709,  9687,  9664,  9642,  9620,  9598,  9576,  9554,  9533,  9511,  9489,
++  9468,  9447,  9425,  9404,  9383,  9362,  9341,  9321,  9300,  9279,  9259,
++  9239,  9218,  9198,  9178,  9158,  9138,  9118,  9098,  9079,  9059,  9039,
++  9020,  9001,  8981,  8962,  8943,  8924,  8905,  8886,  8867,  8849,  8830,
++  8812,  8793,  8775,  8756,  8738,  8720,  8702,  8684,  8666,  8648,  8630,
++  8613,  8595,  8577,  8560,  8542,  8525,  8508,  8490,  8473,  8456,  8439,
++  8422,  8405,  8389,  8372,  8355,  8339,  8322,  8306,  8289,  8273,  8257,
++  8240,  8224,  8208,  8192
++};
++
+ static uint32_t inverse_recenter(int r, uint32_t v)
+ {
+     if (v > 2 * r)
+@@ -97,6 +125,70 @@ static void read_global_param(AV1DecContext *s, int type, int ref, int idx)
+                                        -mx, mx + 1, r) << prec_diff) + round;
+ }
+ 
++static uint64_t round_two(uint64_t x, uint16_t n)
++{
++    if (n == 0)
++        return x;
++    return ((x + ((uint64_t)1 << (n - 1))) >> n);
++}
++
++static int64_t round_two_signed(int64_t x, uint16_t n)
++{
++    return ((x<0) ? -((int64_t)round_two(-x, n)) : (int64_t)round_two(x, n));
++}
++
++/**
++ * Resolve divisor process.
++ * see spec 7.11.3.7
++ */
++static int16_t resolve_divisor(uint32_t d, uint16_t *shift)
++{
++    int32_t e, f;
++
++    *shift = av_log2(d);
++    e = d - (1 << (*shift));
++    if (*shift > AV1_DIV_LUT_BITS)
++        f = round_two(e, *shift - AV1_DIV_LUT_BITS);
++    else
++        f = e << (AV1_DIV_LUT_BITS - (*shift));
++
++    *shift += AV1_DIV_LUT_PREC_BITS;
++
++    return div_lut[f];
++}
++
++/**
++ * check if global motion params is valid.
++ * see spec 7.11.3.6
++ */
++static uint8_t get_shear_params_valid(AV1DecContext *s, int idx)
++{
++    int16_t alpha, beta, gamma, delta, divf, divs;
++    int64_t v, w;
++    int32_t *param = &s->cur_frame.gm_params[idx][0];
++    if (param[2] < 0)
++        return 0;
++
++    alpha = av_clip_int16(param[2] - (1 << AV1_WARPEDMODEL_PREC_BITS));
++    beta  = av_clip_int16(param[3]);
++    divf  = resolve_divisor(abs(param[2]), &divs);
++    v     = (int64_t)param[4] * (1 << AV1_WARPEDMODEL_PREC_BITS);
++    w     = (int64_t)param[3] * param[4];
++    gamma = av_clip_int16((int)round_two_signed((v * divf), divs));
++    delta = av_clip_int16(param[5] - (int)round_two_signed((w * divf), divs) - (1 << AV1_WARPEDMODEL_PREC_BITS));
++
++    alpha = round_two_signed(alpha, AV1_WARP_PARAM_REDUCE_BITS) << AV1_WARP_PARAM_REDUCE_BITS;
++    beta  = round_two_signed(beta,  AV1_WARP_PARAM_REDUCE_BITS) << AV1_WARP_PARAM_REDUCE_BITS;
++    gamma = round_two_signed(gamma, AV1_WARP_PARAM_REDUCE_BITS) << AV1_WARP_PARAM_REDUCE_BITS;
++    delta = round_two_signed(delta, AV1_WARP_PARAM_REDUCE_BITS) << AV1_WARP_PARAM_REDUCE_BITS;
++
++    if ((4 * abs(alpha) + 7 * abs(beta)) >= (1 << AV1_WARPEDMODEL_PREC_BITS) ||
++        (4 * abs(gamma) + 4 * abs(delta)) >= (1 << AV1_WARPEDMODEL_PREC_BITS))
++        return 0;
++
++    return 1;
++}
++
+ /**
+ * update gm type/params, since cbs already implemented part of this funcation,
+ * so we don't need to full implement spec.
+@@ -144,6 +236,9 @@ static void global_motion_params(AV1DecContext *s)
+             read_global_param(s, type, ref, 0);
+             read_global_param(s, type, ref, 1);
+         }
++        if (type <= AV1_WARP_MODEL_AFFINE) {
++            s->cur_frame.gm_invalid[ref] = !get_shear_params_valid(s, ref);
++        }
+     }
+ }
+ 
+@@ -509,6 +604,9 @@ static int av1_frame_ref(AVCodecContext *avctx, AV1Frame *dst, const AV1Frame *s
+ 
+     dst->spatial_id = src->spatial_id;
+     dst->temporal_id = src->temporal_id;
++    memcpy(dst->gm_invalid,
++           src->gm_invalid,
++           AV1_NUM_REF_FRAMES * sizeof(uint8_t));
+     memcpy(dst->gm_type,
+            src->gm_type,
+            AV1_NUM_REF_FRAMES * sizeof(uint8_t));
+diff --git a/libavcodec/av1dec.h b/libavcodec/av1dec.h
+index 248a68750f..4e140588b9 100644
+--- a/libavcodec/av1dec.h
++++ b/libavcodec/av1dec.h
+@@ -42,6 +42,7 @@ typedef struct AV1Frame {
+     int temporal_id;
+     int spatial_id;
+ 
++    uint8_t gm_invalid[AV1_NUM_REF_FRAMES];
+     uint8_t gm_type[AV1_NUM_REF_FRAMES];
+     int32_t gm_params[AV1_NUM_REF_FRAMES][6];
+ 
+
+From ad58733c84c131216e04ceb39d0dff64bfac5a2c Mon Sep 17 00:00:00 2001
+From: Fei Wang <fei.w.wang@intel.com>
+Date: Tue, 12 Oct 2021 16:23:59 +0800
+Subject: [PATCH 10/15] avcodec/av1_vaapi: add gm params valid check
+
+Signed-off-by: Fei Wang <fei.w.wang@intel.com>
+(cherry picked from commit 0d0ea70e7bdd85def85d526480d728740a371744)
+(cherry picked from commit 8b9a48b7aa3c14103f975035bb18601b13ed1707)
+---
+ libavcodec/vaapi_av1.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/libavcodec/vaapi_av1.c b/libavcodec/vaapi_av1.c
+index 16b7e35747..f577447be4 100644
+--- a/libavcodec/vaapi_av1.c
++++ b/libavcodec/vaapi_av1.c
+@@ -213,7 +213,8 @@ static int vaapi_av1_start_frame(AVCodecContext *avctx,
+             frame_header->height_in_sbs_minus_1[i];
+     }
+     for (int i = AV1_REF_FRAME_LAST; i <= AV1_REF_FRAME_ALTREF; i++) {
+-        pic_param.wm[i - 1].wmtype = s->cur_frame.gm_type[i];
++        pic_param.wm[i - 1].invalid = s->cur_frame.gm_invalid[i];
++        pic_param.wm[i - 1].wmtype  = s->cur_frame.gm_type[i];
+         for (int j = 0; j < 6; j++)
+             pic_param.wm[i - 1].wmmat[j] = s->cur_frame.gm_params[i][j];
+     }
+
+From fd1acddbee3686c97c2c38cc4befea38794eb44d Mon Sep 17 00:00:00 2001
+From: Tong Wu <tong1.wu@intel.com>
+Date: Tue, 12 Oct 2021 16:24:00 +0800
+Subject: [PATCH 11/15] avcodec/dxva2_av1: fix global motion params
+
+Defined in spec 5.9.24/5.9.25. Since function void
+global_motion_params(AV1DecContext *s) already updates
+gm type/params, the wminvalid parameter only need to get
+the value from cur_frame.gm_invalid.
+
+Signed-off-by: Tong Wu <tong1.wu@intel.com>
+(cherry picked from commit 4e7a7d75e3c21a6af03c4cd52ffc50270664e58a)
+(cherry picked from commit 03f5a57b9364d7ce789589594450fdf714a23e70)
+---
+ libavcodec/dxva2_av1.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libavcodec/dxva2_av1.c b/libavcodec/dxva2_av1.c
+index c30b57799c..8a912bf6c1 100644
+--- a/libavcodec/dxva2_av1.c
++++ b/libavcodec/dxva2_av1.c
+@@ -139,7 +139,7 @@ static int fill_picture_parameters(const AVCodecContext *avctx, AVDXVAContext *c
+         pp->frame_refs[i].Index  = ref_frame->buf[0] ? ref_idx : 0xFF;
+ 
+         /* Global Motion */
+-        pp->frame_refs[i].wminvalid = (h->cur_frame.gm_type[AV1_REF_FRAME_LAST + i] == AV1_WARP_MODEL_IDENTITY);
++        pp->frame_refs[i].wminvalid = h->cur_frame.gm_invalid[AV1_REF_FRAME_LAST + i];
+         pp->frame_refs[i].wmtype    = h->cur_frame.gm_type[AV1_REF_FRAME_LAST + i];
+         for (j = 0; j < 6; ++j) {
+              pp->frame_refs[i].wmmat[j] = h->cur_frame.gm_params[AV1_REF_FRAME_LAST + i][j];
+
+From 06181d3fd98d040ad2e1cb297896b3ba9235a9b4 Mon Sep 17 00:00:00 2001
+From: Fei Wang <fei.w.wang@intel.com>
+Date: Tue, 12 Oct 2021 16:24:01 +0800
+Subject: [PATCH 12/15] avcodec/vaapi: increase av1 decode pool size
+
+For film grain clip, vaapi_av1 decoder will cache additional 8
+surfaces that will be used to store frames which apply film grain.
+So increase the pool size by plus 8 to avoid leak of surface.
+
+Signed-off-by: Fei Wang <fei.w.wang@intel.com>
+(cherry picked from commit 53403158cc19b9e5baeff6af9317f14d1a20d0cb)
+(cherry picked from commit 5774a0524c0851293a36acf3f3586e7c39a64b4a)
+---
+ libavcodec/vaapi_decode.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libavcodec/vaapi_decode.c b/libavcodec/vaapi_decode.c
+index 57a0eb4e6e..032e8531f2 100644
+--- a/libavcodec/vaapi_decode.c
++++ b/libavcodec/vaapi_decode.c
+@@ -577,10 +577,10 @@ static int vaapi_decode_make_config(AVCodecContext *avctx,
+         switch (avctx->codec_id) {
+         case AV_CODEC_ID_H264:
+         case AV_CODEC_ID_HEVC:
++        case AV_CODEC_ID_AV1:
+             frames->initial_pool_size += 16;
+             break;
+         case AV_CODEC_ID_VP9:
+-        case AV_CODEC_ID_AV1:
+             frames->initial_pool_size += 8;
+             break;
+         case AV_CODEC_ID_VP8:
+
+From 1d82fef4ddc4e5512219c8c0e2e93fe351d1f65a Mon Sep 17 00:00:00 2001
+From: Fei Wang <fei.w.wang@intel.com>
+Date: Tue, 12 Oct 2021 16:24:02 +0800
+Subject: [PATCH 13/15] avcodec/av1_vaapi: setting 2 output surface for film
+ grain
+
+VAAPI needs 2 output surface for film grain frame. One used for
+reference and the other used for applying film grain and pushing
+to downstream.
+
+Signed-off-by: Fei Wang <fei.w.wang@intel.com>
+(cherry picked from commit 7871144cf801bc8b9e3b00319dd7c3c3d91dd3fa)
+(cherry picked from commit 5962698d25f148d6b89dc4e526fffc5db2295f1e)
+---
+ libavcodec/vaapi_av1.c | 115 ++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 108 insertions(+), 7 deletions(-)
+
+diff --git a/libavcodec/vaapi_av1.c b/libavcodec/vaapi_av1.c
+index f577447be4..26476c7738 100644
+--- a/libavcodec/vaapi_av1.c
++++ b/libavcodec/vaapi_av1.c
+@@ -21,8 +21,28 @@
+ #include "libavutil/pixdesc.h"
+ #include "hwconfig.h"
+ #include "vaapi_decode.h"
++#include "internal.h"
+ #include "av1dec.h"
+ 
++typedef struct VAAPIAV1FrameRef {
++    ThreadFrame frame;
++    int valid;
++} VAAPIAV1FrameRef;
++
++typedef struct VAAPIAV1DecContext {
++    VAAPIDecodeContext base;
++
++    /**
++     * For film grain case, VAAPI generate 2 output for each frame,
++     * current_frame will not apply film grain, and will be used for
++     * references for next frames. Maintain the reference list without
++     * applying film grain here. And current_display_picture will be
++     * used to apply film grain and push to downstream.
++    */
++    VAAPIAV1FrameRef ref_tab[AV1_NUM_REF_FRAMES];
++    ThreadFrame tmp_frame;
++} VAAPIAV1DecContext;
++
+ static VASurfaceID vaapi_av1_surface_id(AV1Frame *vf)
+ {
+     if (vf)
+@@ -49,6 +69,48 @@ static int8_t vaapi_av1_get_bit_depth_idx(AVCodecContext *avctx)
+     return bit_depth == 8 ? 0 : bit_depth == 10 ? 1 : 2;
+ }
+ 
++static int vaapi_av1_decode_init(AVCodecContext *avctx)
++{
++    VAAPIAV1DecContext *ctx = avctx->internal->hwaccel_priv_data;
++
++    ctx->tmp_frame.f = av_frame_alloc();
++    if (!ctx->tmp_frame.f) {
++        av_log(avctx, AV_LOG_ERROR,
++               "Failed to allocate frame.\n");
++        return AVERROR(ENOMEM);
++    }
++
++    for (int i = 0; i < FF_ARRAY_ELEMS(ctx->ref_tab); i++) {
++        ctx->ref_tab[i].frame.f = av_frame_alloc();
++        if (!ctx->ref_tab[i].frame.f) {
++            av_log(avctx, AV_LOG_ERROR,
++                   "Failed to allocate reference table frame %d.\n", i);
++            return AVERROR(ENOMEM);
++        }
++        ctx->ref_tab[i].valid = 0;
++    }
++
++    return ff_vaapi_decode_init(avctx);
++}
++
++static int vaapi_av1_decode_uninit(AVCodecContext *avctx)
++{
++    VAAPIAV1DecContext *ctx = avctx->internal->hwaccel_priv_data;
++
++    if (ctx->tmp_frame.f->buf[0])
++        ff_thread_release_buffer(avctx, &ctx->tmp_frame);
++    av_frame_free(&ctx->tmp_frame.f);
++
++    for (int i = 0; i < FF_ARRAY_ELEMS(ctx->ref_tab); i++) {
++        if (ctx->ref_tab[i].frame.f->buf[0])
++            ff_thread_release_buffer(avctx, &ctx->ref_tab[i].frame);
++        av_frame_free(&ctx->ref_tab[i].frame.f);
++    }
++
++    return ff_vaapi_decode_uninit(avctx);
++}
++
++
+ static int vaapi_av1_start_frame(AVCodecContext *avctx,
+                                  av_unused const uint8_t *buffer,
+                                  av_unused uint32_t size)
+@@ -58,18 +120,28 @@ static int vaapi_av1_start_frame(AVCodecContext *avctx,
+     const AV1RawFrameHeader *frame_header = s->raw_frame_header;
+     const AV1RawFilmGrainParams *film_grain = &s->cur_frame.film_grain;
+     VAAPIDecodePicture *pic = s->cur_frame.hwaccel_picture_private;
++    VAAPIAV1DecContext *ctx = avctx->internal->hwaccel_priv_data;
+     VADecPictureParameterBufferAV1 pic_param;
+     int8_t bit_depth_idx;
+     int err = 0;
+     int apply_grain = !(avctx->export_side_data & AV_CODEC_EXPORT_DATA_FILM_GRAIN) && film_grain->apply_grain;
+     uint8_t remap_lr_type[4] = {AV1_RESTORE_NONE, AV1_RESTORE_SWITCHABLE, AV1_RESTORE_WIENER, AV1_RESTORE_SGRPROJ};
+ 
+-    pic->output_surface = vaapi_av1_surface_id(&s->cur_frame);
+-
+     bit_depth_idx = vaapi_av1_get_bit_depth_idx(avctx);
+     if (bit_depth_idx < 0)
+         goto fail;
+ 
++    if (apply_grain) {
++        if (ctx->tmp_frame.f->buf[0])
++            ff_thread_release_buffer(avctx, &ctx->tmp_frame);
++        err = ff_thread_get_buffer(avctx, &ctx->tmp_frame, AV_GET_BUFFER_FLAG_REF);
++        if (err < 0)
++            goto fail;
++        pic->output_surface = ff_vaapi_get_surface_id(ctx->tmp_frame.f);
++    } else {
++        pic->output_surface = vaapi_av1_surface_id(&s->cur_frame);
++    }
++
+     memset(&pic_param, 0, sizeof(VADecPictureParameterBufferAV1));
+     pic_param = (VADecPictureParameterBufferAV1) {
+         .profile                 = seq->seq_profile,
+@@ -77,6 +149,7 @@ static int vaapi_av1_start_frame(AVCodecContext *avctx,
+         .bit_depth_idx           = bit_depth_idx,
+         .current_frame           = pic->output_surface,
+         .current_display_picture = pic->output_surface,
++        .current_display_picture = vaapi_av1_surface_id(&s->cur_frame),
+         .frame_width_minus1      = frame_header->frame_width_minus_1,
+         .frame_height_minus1     = frame_header->frame_height_minus_1,
+         .primary_ref_frame       = frame_header->primary_ref_frame,
+@@ -185,7 +258,9 @@ static int vaapi_av1_start_frame(AVCodecContext *avctx,
+         if (pic_param.pic_info_fields.bits.frame_type == AV1_FRAME_KEY)
+             pic_param.ref_frame_map[i] = VA_INVALID_ID;
+         else
+-            pic_param.ref_frame_map[i] = vaapi_av1_surface_id(&s->ref[i]);
++            pic_param.ref_frame_map[i] = ctx->ref_tab[i].valid ?
++                                         ff_vaapi_get_surface_id(ctx->ref_tab[i].frame.f) :
++                                         vaapi_av1_surface_id(&s->ref[i]);
+     }
+     for (int i = 0; i < AV1_REFS_PER_FRAME; i++) {
+         pic_param.ref_frame_idx[i] = frame_header->ref_frame_idx[i];
+@@ -264,8 +339,34 @@ fail:
+ static int vaapi_av1_end_frame(AVCodecContext *avctx)
+ {
+     const AV1DecContext *s = avctx->priv_data;
++    const AV1RawFrameHeader *header = s->raw_frame_header;
++    const AV1RawFilmGrainParams *film_grain = &s->cur_frame.film_grain;
+     VAAPIDecodePicture *pic = s->cur_frame.hwaccel_picture_private;
+-    return ff_vaapi_decode_issue(avctx, pic);
++    VAAPIAV1DecContext *ctx = avctx->internal->hwaccel_priv_data;
++
++    int apply_grain = !(avctx->export_side_data & AV_CODEC_EXPORT_DATA_FILM_GRAIN) && film_grain->apply_grain;
++    int ret;
++    ret = ff_vaapi_decode_issue(avctx, pic);
++    if (ret < 0)
++        return ret;
++
++    for (int i = 0; i < AV1_NUM_REF_FRAMES; i++) {
++        if (header->refresh_frame_flags & (1 << i)) {
++            if (ctx->ref_tab[i].frame.f->buf[0])
++                ff_thread_release_buffer(avctx, &ctx->ref_tab[i].frame);
++
++            if (apply_grain) {
++                ret = ff_thread_ref_frame(&ctx->ref_tab[i].frame, &ctx->tmp_frame);
++                if (ret < 0)
++                    return ret;
++                ctx->ref_tab[i].valid = 1;
++            } else {
++                ctx->ref_tab[i].valid = 0;
++            }
++        }
++    }
++
++    return 0;
+ }
+ 
+ static int vaapi_av1_decode_slice(AVCodecContext *avctx,
+@@ -312,9 +413,9 @@ const AVHWAccel ff_av1_vaapi_hwaccel = {
+     .end_frame            = vaapi_av1_end_frame,
+     .decode_slice         = vaapi_av1_decode_slice,
+     .frame_priv_data_size = sizeof(VAAPIDecodePicture),
+-    .init                 = ff_vaapi_decode_init,
+-    .uninit               = ff_vaapi_decode_uninit,
++    .init                 = vaapi_av1_decode_init,
++    .uninit               = vaapi_av1_decode_uninit,
+     .frame_params         = ff_vaapi_common_frame_params,
+-    .priv_data_size       = sizeof(VAAPIDecodeContext),
++    .priv_data_size       = sizeof(VAAPIAV1DecContext),
+     .caps_internal        = HWACCEL_CAP_ASYNC_SAFE,
+ };
+
+From be18092cec1867b5e30525e023f49c5e7547931b Mon Sep 17 00:00:00 2001
+From: Fei Wang <fei.w.wang@intel.com>
+Date: Tue, 12 Oct 2021 16:24:03 +0800
+Subject: [PATCH 14/15] avcodec/av1_vaapi: enable segmentation features
+
+Signed-off-by: Fei Wang <fei.w.wang@intel.com>
+(cherry picked from commit dc94f2eaaf0ae623d7dc02e1273c829015c025a3)
+(cherry picked from commit 582fb329a483774f0345cbfebc3a12f0ad8f5bba)
+---
+ libavcodec/vaapi_av1.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/libavcodec/vaapi_av1.c b/libavcodec/vaapi_av1.c
+index 26476c7738..c57d1b898a 100644
+--- a/libavcodec/vaapi_av1.c
++++ b/libavcodec/vaapi_av1.c
+@@ -126,6 +126,9 @@ static int vaapi_av1_start_frame(AVCodecContext *avctx,
+     int err = 0;
+     int apply_grain = !(avctx->export_side_data & AV_CODEC_EXPORT_DATA_FILM_GRAIN) && film_grain->apply_grain;
+     uint8_t remap_lr_type[4] = {AV1_RESTORE_NONE, AV1_RESTORE_SWITCHABLE, AV1_RESTORE_WIENER, AV1_RESTORE_SGRPROJ};
++    uint8_t segmentation_feature_signed[AV1_SEG_LVL_MAX] = {1, 1, 1, 1, 1, 0, 0, 0};
++    uint8_t segmentation_feature_max[AV1_SEG_LVL_MAX] = {255, AV1_MAX_LOOP_FILTER,
++        AV1_MAX_LOOP_FILTER, AV1_MAX_LOOP_FILTER, AV1_MAX_LOOP_FILTER, 7 , 0 , 0 };
+ 
+     bit_depth_idx = vaapi_av1_get_bit_depth_idx(avctx);
+     if (bit_depth_idx < 0)
+@@ -293,6 +296,17 @@ static int vaapi_av1_start_frame(AVCodecContext *avctx,
+         for (int j = 0; j < 6; j++)
+             pic_param.wm[i - 1].wmmat[j] = s->cur_frame.gm_params[i][j];
+     }
++    for (int i = 0; i < AV1_MAX_SEGMENTS; i++) {
++        for (int j = 0; j < AV1_SEG_LVL_MAX; j++) {
++            pic_param.seg_info.feature_mask[i] |= (frame_header->feature_enabled[i][j] << j);
++            if (segmentation_feature_signed[j])
++                pic_param.seg_info.feature_data[i][j] = av_clip(frame_header->feature_value[i][j],
++                    -segmentation_feature_max[j], segmentation_feature_max[j]);
++            else
++                pic_param.seg_info.feature_data[i][j] = av_clip(frame_header->feature_value[i][j],
++                    0, segmentation_feature_max[j]);
++        }
++    }
+     if (apply_grain) {
+         for (int i = 0; i < film_grain->num_y_points; i++) {
+             pic_param.film_grain_info.point_y_value[i] =
+
+From 293e067b0c0f592628ee0de71769ed2e9c3d07f2 Mon Sep 17 00:00:00 2001
+From: Fei Wang <fei.w.wang@intel.com>
+Date: Tue, 12 Oct 2021 16:24:04 +0800
+Subject: [PATCH 15/15] avcodec/av1_vaapi: improve decode quality
+
+- quantizer delta and matrix level specific.
+- support loop filter delta.
+- support use superres.
+
+Signed-off-by: Fei Wang <fei.w.wang@intel.com>
+(cherry picked from commit 84c73102d933c9b7f64f504196c91edddad99618)
+(cherry picked from commit 2c887141b8318b7d4b198461bbb8d94ac662a96c)
+---
+ libavcodec/vaapi_av1.c | 68 +++++++++++++++++++++++++-----------------
+ 1 file changed, 41 insertions(+), 27 deletions(-)
+
+diff --git a/libavcodec/vaapi_av1.c b/libavcodec/vaapi_av1.c
+index c57d1b898a..5985493b8d 100644
+--- a/libavcodec/vaapi_av1.c
++++ b/libavcodec/vaapi_av1.c
+@@ -147,27 +147,35 @@ static int vaapi_av1_start_frame(AVCodecContext *avctx,
+ 
+     memset(&pic_param, 0, sizeof(VADecPictureParameterBufferAV1));
+     pic_param = (VADecPictureParameterBufferAV1) {
+-        .profile                 = seq->seq_profile,
+-        .order_hint_bits_minus_1 = seq->order_hint_bits_minus_1,
+-        .bit_depth_idx           = bit_depth_idx,
+-        .current_frame           = pic->output_surface,
+-        .current_display_picture = pic->output_surface,
+-        .current_display_picture = vaapi_av1_surface_id(&s->cur_frame),
+-        .frame_width_minus1      = frame_header->frame_width_minus_1,
+-        .frame_height_minus1     = frame_header->frame_height_minus_1,
+-        .primary_ref_frame       = frame_header->primary_ref_frame,
+-        .order_hint              = frame_header->order_hint,
+-        .tile_cols               = frame_header->tile_cols,
+-        .tile_rows               = frame_header->tile_rows,
+-        .context_update_tile_id  = frame_header->context_update_tile_id,
+-        .interp_filter           = frame_header->interpolation_filter,
+-        .filter_level[0]         = frame_header->loop_filter_level[0],
+-        .filter_level[1]         = frame_header->loop_filter_level[1],
+-        .filter_level_u          = frame_header->loop_filter_level[2],
+-        .filter_level_v          = frame_header->loop_filter_level[3],
+-        .base_qindex             = frame_header->base_q_idx,
+-        .cdef_damping_minus_3    = frame_header->cdef_damping_minus_3,
+-        .cdef_bits               = frame_header->cdef_bits,
++        .profile                    = seq->seq_profile,
++        .order_hint_bits_minus_1    = seq->order_hint_bits_minus_1,
++        .bit_depth_idx              = bit_depth_idx,
++        .matrix_coefficients        = seq->color_config.matrix_coefficients,
++        .current_frame              = pic->output_surface,
++        .current_display_picture    = vaapi_av1_surface_id(&s->cur_frame),
++        .frame_width_minus1         = frame_header->frame_width_minus_1,
++        .frame_height_minus1        = frame_header->frame_height_minus_1,
++        .primary_ref_frame          = frame_header->primary_ref_frame,
++        .order_hint                 = frame_header->order_hint,
++        .tile_cols                  = frame_header->tile_cols,
++        .tile_rows                  = frame_header->tile_rows,
++        .context_update_tile_id     = frame_header->context_update_tile_id,
++        .superres_scale_denominator = frame_header->use_superres ?
++                                        frame_header->coded_denom + AV1_SUPERRES_DENOM_MIN :
++                                        AV1_SUPERRES_NUM,
++        .interp_filter              = frame_header->interpolation_filter,
++        .filter_level[0]            = frame_header->loop_filter_level[0],
++        .filter_level[1]            = frame_header->loop_filter_level[1],
++        .filter_level_u             = frame_header->loop_filter_level[2],
++        .filter_level_v             = frame_header->loop_filter_level[3],
++        .base_qindex                = frame_header->base_q_idx,
++        .y_dc_delta_q               = frame_header->delta_q_y_dc,
++        .u_dc_delta_q               = frame_header->delta_q_u_dc,
++        .u_ac_delta_q               = frame_header->delta_q_u_ac,
++        .v_dc_delta_q               = frame_header->delta_q_v_dc,
++        .v_ac_delta_q               = frame_header->delta_q_v_ac,
++        .cdef_damping_minus_3       = frame_header->cdef_damping_minus_3,
++        .cdef_bits                  = frame_header->cdef_bits,
+         .seq_info_fields.fields = {
+             .still_picture              = seq->still_picture,
+             .use_128x128_superblock     = seq->use_128x128_superblock,
+@@ -238,12 +246,15 @@ static int vaapi_av1_start_frame(AVCodecContext *avctx,
+             .mode_ref_delta_update  = frame_header->loop_filter_delta_update,
+         },
+         .mode_control_fields.bits = {
+-            .delta_q_present_flag = frame_header->delta_q_present,
+-            .log2_delta_q_res     = frame_header->delta_q_res,
+-            .tx_mode              = frame_header->tx_mode,
+-            .reference_select     = frame_header->reference_select,
+-            .reduced_tx_set_used  = frame_header->reduced_tx_set,
+-            .skip_mode_present    = frame_header->skip_mode_present,
++            .delta_q_present_flag  = frame_header->delta_q_present,
++            .log2_delta_q_res      = frame_header->delta_q_res,
++            .delta_lf_present_flag = frame_header->delta_lf_present,
++            .log2_delta_lf_res     = frame_header->delta_lf_res,
++            .delta_lf_multi        = frame_header->delta_lf_multi,
++            .tx_mode               = frame_header->tx_mode,
++            .reference_select      = frame_header->reference_select,
++            .reduced_tx_set_used   = frame_header->reduced_tx_set,
++            .skip_mode_present     = frame_header->skip_mode_present,
+         },
+         .loop_restoration_fields.bits = {
+             .yframe_restoration_type  = remap_lr_type[frame_header->lr_type[0]],
+@@ -254,6 +265,9 @@ static int vaapi_av1_start_frame(AVCodecContext *avctx,
+         },
+         .qmatrix_fields.bits = {
+             .using_qmatrix = frame_header->using_qmatrix,
++            .qm_y          = frame_header->qm_y,
++            .qm_u          = frame_header->qm_u,
++            .qm_v          = frame_header->qm_v,
+         }
+     };
+ 

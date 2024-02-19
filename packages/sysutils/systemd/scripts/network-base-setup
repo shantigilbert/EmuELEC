@@ -1,4 +1,11 @@
 #!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
+
+check_hosts() {
+  grep -v "^#" /run/libreelec/hosts | grep "${1}"
+}
+
 
 # setup hostname
 if [ -f /storage/.cache/hostname ]; then
@@ -9,13 +16,27 @@ fi
 rm -f /run/libreelec/hosts
 if [ -f /storage/.config/hosts.conf ]; then
   cat /storage/.config/hosts.conf > /run/libreelec/hosts
+  # add localhost to hosts if not present
+  LOCALHOST_HOSTS=$(check_hosts "localhost")
+  if [ -z "${LOCALHOST_HOSTS}" ]; then
+    {
+      echo "127.0.0.1 localhost"
+      echo "::1 localhost ip6-localhost ip6-loopback"
+    } >> /run/libreelec/hosts
+  fi
+  # add HOSTNAME to hosts if not present
+  HOSTNAME=$(cat /proc/sys/kernel/hostname)
+  HOSTNAME_HOSTS=$(check_hosts "${HOSTNAME}")
+  if [ -z "${HOSTNAME_HOSTS}" ]; then
+    echo "127.0.1.1 ${HOSTNAME}" >> /run/libreelec/hosts
+  fi
 fi
 
 # setup /etc/resolv.conf
 rm -f /run/libreelec/resolv.conf
 if [ -f /storage/.config/resolv.conf ]; then
   cat /storage/.config/resolv.conf > /run/libreelec/resolv.conf
-elif [ -f /dev/.kernel_ipconfig -a -f /proc/net/pnp ]; then
+elif [ -f /dev/.kernel_ipconfig ] && [ -f /proc/net/pnp ]; then
   cat /proc/net/pnp > /run/libreelec/resolv.conf
 else
   cat << EOF > /run/libreelec/resolv.conf

@@ -1,7 +1,7 @@
 From e7babbfd6c66c20e81e9d728a6a4384a9a5885dd Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Sat, 15 Jan 2022 06:23:29 +0000
-Subject: [PATCH 11/15] WIP: boards: amlogic: add Radxa Zero2 defconfig
+Subject: [PATCH 11/25] WIP: boards: amlogic: add Radxa Zero2 defconfig
 
 Add a defconfig for the Radxa Zero2 SBC, using an Amlogic A311D chip.
 
@@ -106,5 +106,5 @@ index 0000000000..3ef3c9c143
 +CONFIG_BMP_32BPP=y
 +CONFIG_OF_LIBFDT_OVERLAY=y
 -- 
-2.17.1
+2.34.1
 

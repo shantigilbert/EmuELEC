@@ -1,10 +1,11 @@
+diff --git a/src/wl_play.cpp b/src/wl_play.cpp
+index 551f0fb..afd0d38 100644
 --- a/src/wl_play.cpp
 +++ b/src/wl_play.cpp
-@@ -101,6 +101,8 @@
- 	{ bt_zoom,				"Zoom",			-1,			-1,				-1, CS_AxisDigital, 0 },
+@@ -101,6 +101,7 @@ ControlScheme controlScheme[] =
  	{ bt_automap,			"Automap",		-1,			-1,				-1, CS_AxisDigital, 0 },
  	{ bt_showstatusbar,		"Show Status",	-1,			sc_Tab,			-1,	CS_AxisDigital, 0 },
-+	{ bt_pause,                     "Pause Game",           -1,                     sc_Enter,               -1, CS_AxisDigital, 0 },
+ 	{ bt_pause,				"Pause",		-1,			sc_Pause,		-1, CS_AxisDigital, 0 },
 +	{ bt_esc,                       "Escape Game",          -1,                     sc_Escape,              -1, CS_AxisDigital, 0 },
  
  	// End of List

@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="puae"
-PKG_VERSION="1618077ebde376de1638455c19b315de376d90b4"
-PKG_SHA256="81e6c97fb929384f68341bea353b5c6f21bcf47a02d9bbd3dbc4b6a6a1d6e8d9"
+PKG_VERSION="b7f0d707d4b3c40557c701ebea933872b828f57c"
+PKG_SHA256="e4c4d9c0a8f5eecd7c721726afd2be36c40ffe3617fd21585c6a15c2ff3e95d6"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/libretro/libretro-uae"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -34,14 +34,14 @@ PKG_LONGDESC="WIP libretro port of UAE (P-UAE and libco) Expect bugs"
 PKG_TOOLCHAIN="make"
 
 pre_configure_target() {
-  if [ "$ARCH" == "arm" ]; then
-    CFLAGS="$CFLAGS -DARM -marm"
-  elif  [ "$ARCH" == "aarch64" ]; then
-  CFLAGS="$CFLAGS -DARM"
+  if [ "${ARCH}" == "arm" ]; then
+    CFLAGS="${CFLAGS} -DARM -marm"
+  elif  [ "${ARCH}" == "aarch64" ]; then
+  CFLAGS="${CFLAGS} -DARM"
   fi
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp puae_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp puae_libretro.so ${INSTALL}/usr/lib/libretro/
 }

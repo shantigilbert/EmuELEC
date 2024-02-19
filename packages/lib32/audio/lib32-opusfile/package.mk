@@ -22,7 +22,7 @@ unpack() {
 }
 
 pre_configure_target() {
-  $PKG_BUILD/autogen.sh
+  ${PKG_BUILD}/autogen.sh
 }
 
 post_makeinstall_target() {

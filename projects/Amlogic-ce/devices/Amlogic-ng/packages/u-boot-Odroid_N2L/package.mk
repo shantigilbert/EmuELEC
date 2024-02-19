@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
+# Copyright (C) 2022-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="u-boot-Odroid_N2L"
-PKG_VERSION="43d26e1865333916d7889a586948e11b83b2c558"
-PKG_SHA256="7258b7443d4b8ea2e7d9543c076ecf3cf53c546cff6138cd5f770a536dcabf1f"
+PKG_VERSION="25aa59079acfc84fec943e18f2240581f6afb8ca"
+PKG_SHA256="cdc7f418655d45a22d278f568104950cac6970758f4537fbb251e076dc392455"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.denx.de/wiki/U-Boot"
 PKG_URL="https://github.com/CoreELEC/u-boot/archive/$PKG_VERSION.tar.gz"

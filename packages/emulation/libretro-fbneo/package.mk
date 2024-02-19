@@ -2,8 +2,8 @@
 # Copyright (C) 2021-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libretro-fbneo"
-PKG_VERSION="af50579270a610eda8ac580648d9c12acc7bb565"
-PKG_SHA256="904c09c9901ef12c63047465022b80c82787679ee3ea6198268e58f4d9c0647a"
+PKG_VERSION="afcd7234fc93b2824f6b8fe1aa80c142a61ad528"
+PKG_SHA256="94d5f9215a3231ee040a2841e3512e32cc21416e7eec5f6c3b42f1d6eca2a4ea"
 PKG_LICENSE="OSS"
 PKG_SITE="https://github.com/libretro/FBNeo"
 PKG_URL="https://github.com/libretro/FBNeo/archive/${PKG_VERSION}.tar.gz"
@@ -26,14 +26,6 @@ pre_configure_target() {
     if target_has_feature neon; then
       PKG_MAKE_OPTS_TARGET+="-neon"
     fi
-  fi
-
-  # libretro-fbneo does not need / nor build successfully with _FILE_OFFSET_BITS or _TIME_BITS set
-  if [ "${TARGET_ARCH}" = "arm" ]; then
-    export CFLAGS=$(echo ${CFLAGS} | sed -e "s|-D_FILE_OFFSET_BITS=64||g")
-    export CFLAGS=$(echo ${CFLAGS} | sed -e "s|-D_TIME_BITS=64||g")
-    export CXXFLAGS=$(echo ${CXXFLAGS} | sed -e "s|-D_FILE_OFFSET_BITS=64||g")
-    export CXXFLAGS=$(echo ${CXXFLAGS} | sed -e "s|-D_TIME_BITS=64||g")
   fi
 }
 

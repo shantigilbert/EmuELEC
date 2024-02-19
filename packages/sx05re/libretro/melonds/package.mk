@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="melonds"
-PKG_VERSION="5e52c245fb38cabe881fbfa6513280ee44fc5bd8"
-PKG_SHA256="a487a18d1a39b24d2f339816155054f24532bbaa25a6c39af5feb88fde5afb6a"
+PKG_VERSION="c6488c88cb4c7583dbcd61609e0eef441572fae8"
+PKG_SHA256="bd232af7f8b0f491891893096bec6b6a60dc1671cf12907e67f4d6dbf668e0ed"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/melonds"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -40,11 +40,11 @@ PKG_USE_CMAKE="no"
 
 
 configure_target() {
-  cd $PKG_BUILD
+  cd ${PKG_BUILD}
   PKG_MAKE_OPTS_TARGET+=" HAVE_OPENGL=0 HAVE_NEON=1"
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp melonds_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp melonds_libretro.so ${INSTALL}/usr/lib/libretro/
 }

@@ -5,7 +5,7 @@
 PKG_NAME="audiodecoder.upse"
 PKG_VERSION="20.2.0-Nexus"
 PKG_SHA256="d9f75e5cbab3ba5fc391cb40e0585bf22fad0eebfaf002d1d58bc896b6f2a5d6"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/audiodecoder.upse"

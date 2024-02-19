@@ -1,0 +1,33 @@
+From 9a08ae9f354a6da6d9d71b87800aca8b3df49e29 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 28 Sep 2021 13:37:28 +0200
+Subject: [PATCH 040/142] broadcom/compiler: CS payload registers have changed
+ in v71
+
+---
+ src/broadcom/compiler/nir_to_vir.c | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/compiler/nir_to_vir.c b/src/broadcom/compiler/nir_to_vir.c
+index 1a05b279a2d..220ff6bcd49 100644
+--- a/src/broadcom/compiler/nir_to_vir.c
++++ b/src/broadcom/compiler/nir_to_vir.c
+@@ -4362,8 +4362,13 @@ nir_to_vir(struct v3d_compile *c)
+                                                       V3D_QPU_WADDR_SYNC));
+                 }
+ 
+-                c->cs_payload[0] = vir_MOV(c, vir_reg(QFILE_REG, 0));
+-                c->cs_payload[1] = vir_MOV(c, vir_reg(QFILE_REG, 2));
++                if (c->devinfo->ver <= 42) {
++                        c->cs_payload[0] = vir_MOV(c, vir_reg(QFILE_REG, 0));
++                        c->cs_payload[1] = vir_MOV(c, vir_reg(QFILE_REG, 2));
++                } else if (c->devinfo->ver >= 71) {
++                        c->cs_payload[0] = vir_MOV(c, vir_reg(QFILE_REG, 3));
++                        c->cs_payload[1] = vir_MOV(c, vir_reg(QFILE_REG, 2));
++                }
+ 
+                 /* Set up the division between gl_LocalInvocationIndex and
+                  * wg_in_mem in the payload reg.
+-- 
+2.39.2
+

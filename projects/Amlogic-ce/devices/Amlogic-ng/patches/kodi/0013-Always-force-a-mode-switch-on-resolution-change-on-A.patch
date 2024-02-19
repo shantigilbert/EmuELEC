@@ -1,0 +1,28 @@
+From 077b90bdb547610c24d29da2215325bbae5f1181 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Thu, 20 Apr 2023 20:25:25 +0200
+Subject: [PATCH 13/21] Always force a mode switch on resolution change on
+ Amlogic platform If the mode switch is really required is checked afterwards
+ in WinSystemAmlogic system.
+
+---
+ xbmc/windowing/GraphicContext.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/xbmc/windowing/GraphicContext.cpp b/xbmc/windowing/GraphicContext.cpp
+index 2688fb999e..d9538ebf46 100644
+--- a/xbmc/windowing/GraphicContext.cpp
++++ b/xbmc/windowing/GraphicContext.cpp
+@@ -398,6 +398,9 @@ void CGraphicContext::SetVideoResolution(RESOLUTION res, bool forceUpdate)
+ void CGraphicContext::SetVideoResolutionInternal(RESOLUTION res, bool forceUpdate)
+ {
+   RESOLUTION lastRes = m_Resolution;
++#if defined(HAS_LIBAMCODEC)
++  forceUpdate = true;
++#endif
+ 
+   // If the user asked us to guess, go with desktop
+   if (!IsValidResolution(res))
+-- 
+2.43.0
+

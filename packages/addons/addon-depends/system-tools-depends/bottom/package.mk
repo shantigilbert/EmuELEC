@@ -2,8 +2,8 @@
 # Copyright (C) 2020-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="bottom"
-PKG_VERSION="0.6.8"
-PKG_SHA256="4e4eb251972a7af8c46dd36bcf1335fea334fb670569434fbfd594208905b2d9"
+PKG_VERSION="0.9.4"
+PKG_SHA256="199123ef354bcabaa8a2e3b7b477b324f5b647d503a2599d08296733846eea6e"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/ClementTsang/bottom"
 PKG_URL="https://github.com/ClementTsang/bottom/archive/${PKG_VERSION}.tar.gz"

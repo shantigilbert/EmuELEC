@@ -1,10 +1,13 @@
 #!/bin/bash
 
 # base ffmpeg version
+FFMPEG_REPO="git://source.ffmpeg.org/ffmpeg.git"
+FFMPEG_VERSION="n4.4.1"
+
 KODI_FFMPEG_REPO="https://github.com/xbmc/FFmpeg"
 KODI_FFMPEG_VERSION="4.4.1-Nexus-Alpha1"
 
-ALL_FEATURE_SETS="v4l2-drmprime v4l2-request libreelec rpi"
+ALL_FEATURE_SETS="v4l2-drmprime v4l2-request libreelec rpi kodi"
 
 if [ $# -eq 0 ]; then
   echo "usage: $0 all|featureset [githash]"
@@ -15,21 +18,27 @@ fi
 FFMPEG_ROOT="$(pwd)"
 LE_ROOT="$(cd $(dirname $0)/../.. ; pwd)"
 
-# get kodi's ffmpeg version
-git fetch "${KODI_FFMPEG_REPO}" "${KODI_FFMPEG_VERSION}"
-KODI_REV=$(git rev-parse FETCH_HEAD)
-
 create_patch() {
   FEATURE_SET="$1"
   REFTYPE="branch"
+
+  BASE_REPO="${FFMPEG_REPO}"
+  BASE_VERSION="${FFMPEG_VERSION}"
+
+  PATCH_CREATE_DIFF="no"
+
   case "${FEATURE_SET}" in
     v4l2-drmprime)
       REPO="https://github.com/jernejsk/FFmpeg"
       REFSPEC="v4l2-drmprime-v6-4.4.1-Nexus-Alpha1"
+      BASE_REPO="${KODI_FFMPEG_REPO}"
+      BASE_VERSION="${KODI_FFMPEG_VERSION}"
       ;;
     v4l2-request)
       REPO="https://github.com/jernejsk/FFmpeg"
       REFSPEC="v4l2-request-hwaccel-4.4.1-Nexus-Alpha1"
+      BASE_REPO="${KODI_FFMPEG_REPO}"
+      BASE_VERSION="${KODI_FFMPEG_VERSION}"
       ;;
     libreelec)
       REPO="https://github.com/LibreELEC/FFmpeg"
@@ -37,13 +46,23 @@ create_patch() {
       ;;
     rpi)
       REPO="https://github.com/jc-kynesim/rpi-ffmpeg"
-      REFSPEC="dev/4.4/rpi_import_1"
+      REFSPEC="test/4.4.1/main"
+      PATCH_CREATE_DIFF="yes"
+      ;;
+    kodi)
+      REPO="${KODI_FFMPEG_REPO}"
+      REFSPEC="${KODI_FFMPEG_VERSION}"
+      REFTYPE="tag"
       ;;
     *)
       echo "illegal feature set ${FEATURE_SET}"
       exit 1
       ;;
   esac
+
+  # get base ffmpeg version
+  git fetch "${BASE_REPO}" "${BASE_VERSION}"
+  BASE_REV=$(git rev-parse FETCH_HEAD)
 
   PATCH_DIR="packages/multimedia/ffmpeg/patches/${FEATURE_SET}"
   PATCH_FILE="${PATCH_DIR}/ffmpeg-001-${FEATURE_SET}.patch"
@@ -55,7 +74,7 @@ create_patch() {
   else
     REV=$(git rev-parse FETCH_HEAD)
   fi
-  BASE_REV=$(git merge-base "${KODI_REV}" "${REV}")
+  BASE_REV=$(git merge-base "${BASE_REV}" "${REV}")
 
   if [ -f "${LE_ROOT}/${PATCH_FILE}" ]; then
     ACTION="update"
@@ -63,8 +82,8 @@ create_patch() {
     ACTION="create"
   fi
 
-  if [ "${FEATURE_SET}" = "rpi" ]; then
-    # branch has non-linear history, format-patch doesn't work
+  if [ "${PATCH_CREATE_DIFF}" = "yes" ]; then
+    # create diff in case format-patch doesn't work, eg when we have non-linear history
     git diff "${BASE_REV}..${REV}" > "${LE_ROOT}/${PATCH_FILE}"
   else
     git format-patch --stdout --no-signature "${BASE_REV}..${REV}" > "${LE_ROOT}/${PATCH_FILE}"
@@ -93,6 +112,3 @@ if [ "$1" = "all" ]; then
 else
   create_patch "$@"
 fi
-
-
-

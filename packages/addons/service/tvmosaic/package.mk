@@ -3,7 +3,7 @@
 
 PKG_NAME="tvmosaic"
 PKG_VERSION="1.0"
-PKG_REV="100"
+PKG_REV="0"
 PKG_ARCH="arm"
 PKG_LICENSE="GPL"
 PKG_SITE=""

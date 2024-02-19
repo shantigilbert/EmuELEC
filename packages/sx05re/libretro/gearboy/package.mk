@@ -1,11 +1,11 @@
 PKG_NAME="gearboy"
-PKG_VERSION="2c5b8b426332b3da43905ce796b8f7e7abc07444"
-PKG_SHA256="bf45bed3013c588499a08ed5fb0f15de11a5743e550e72f5af5ec1f3fb5ba392"
+PKG_VERSION="d403f61a75e1c81a100846baa5c1fe73d588c1ef"
+PKG_SHA256="fd264ec2cb062b45320f3dc73ff1765f9a0ca79d15c5c52dea99649482134bf5"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/drhelius/Gearboy"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -21,6 +21,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp platforms/libretro/gearboy_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp platforms/libretro/gearboy_libretro.so ${INSTALL}/usr/lib/libretro/
 }

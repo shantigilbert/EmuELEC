@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="beetle-pcfx"
-PKG_VERSION="08632fcbc039f70dbd6da5810db9dcc304d7fbde"
-PKG_SHA256="3568660c2a276eabcd83a54128e557a3981b67d07784961823269cbd4a4b41a3"
+PKG_VERSION="47c355b6a515aef6dc57f57df1535570108a0e21"
+PKG_SHA256="15f5395778c9ce03e99c3a7cf0e0303dd58e5eba93f2b95c8ee6366fd8c25cba"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/beetle-pcfx-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,14 +37,14 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 make_target() {
-  if [ "$ARCH" == "i386" -o "$ARCH" == "x86_64" ]; then
-    make platform=unix CC=$CC CXX=$CXX AR=$AR
+  if [ "${ARCH}" == "i386" -o "${ARCH}" == "x86_64" ]; then
+    make platform=unix CC=${CC} CXX=${CXX} AR=${AR}
   else
-    make platform=armv CC=$CC CXX=$CXX AR=$AR
+    make platform=armv CC=${CC} CXX=${CXX} AR=${AR}
   fi
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp mednafen_pcfx_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp mednafen_pcfx_libretro.so ${INSTALL}/usr/lib/libretro/
 }

@@ -1,0 +1,49 @@
+From e7a566bd96573b3f71001d0215dab93dcdd120d9 Mon Sep 17 00:00:00 2001
+From: Rod Smith <rodsmith@rodsbooks.com>
+Date: Sun, 5 Mar 2023 11:26:49 -0500
+Subject: [PATCH 08/12] Document recent mergest
+
+---
+ NEWS     | 7 ++++++-
+ sgdisk.8 | 7 +++++--
+ 2 files changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/NEWS b/NEWS
+index f9f7f19..8d5b365 100644
+--- a/NEWS
++++ b/NEWS
+@@ -8,7 +8,12 @@
+ 
+ - Updated guid.cc to deal with minor change in libuuid.
+ 
+-- Fixed potential NULL derefernce bug in sgdisk.
++- Fixed potential NULL derefernce bug in sgdisk. Thanks to Damian Kurek
++  for this fix.
++
++- The partition number of "0" can now be used to reference newly-created
++  partitions when the --largest-new=0 option to sgdisk is used. Thanks to
++  David Joaquín Shourabi Porcel for this improvement.
+ 
+ 1.0.9 (4/14/2022):
+ ------------------
+diff --git a/sgdisk.8 b/sgdisk.8
+index 4e5a15a..fa53b29 100644
+--- a/sgdisk.8
++++ b/sgdisk.8
+@@ -370,8 +370,11 @@ to use the first available partition number. Subsequent uses of the
+ .B \-N, \-\-largest\-new=num
+ Create a new partition that fills the largest available block of space on
+ the disk. You can use the \fI\-a\fR (\fI\-\-set\-alignment\fR) option to
+-adjust the alignment, if desired. A num value of 0 causes the program to
+-use the first available partition number.
++adjust the alignment, if desired. A num value of 0 causes the program to use
++the first available partition number. Subsequent uses of the \fI\-A\fR
++(\fI\-\-attributes\fR), \fI\-c\fR (\fI\-\-change\-name\fR), \fI\-t\fR
++(\fI\-\-typecode\fR), and \fI\-u\fR (\fI\-\-partition\-guid\fR) options may
++also use \fI0\fR to refer to the same partition.
+ 
+ .TP 
+ .B \-o, \-\-clear
+-- 
+2.31.1
+

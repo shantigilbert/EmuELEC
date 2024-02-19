@@ -1,0 +1,10 @@
+[Unit]
+Description=Restoring Backup
+DefaultDependencies=no
+
+[Service]
+Type=idle
+ExecStart=/usr/lib/coreelec/backup-restore
+StandardInput=tty-force
+StandardOutput=inherit
+StandardError=inherit

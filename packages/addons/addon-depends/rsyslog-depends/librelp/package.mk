@@ -2,11 +2,11 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="librelp"
-PKG_VERSION="1.10.0"
-PKG_SHA256="148db4e4d1a23e8136e9ec08810929a55faf5d45e24c2e3186d5ab34355dab31"
+PKG_VERSION="1.11.0"
+PKG_SHA256="7719b5f31e07cbb9872289ad32b787c613b5355d407982a0a2c4d69938457fd6"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.rsyslog.com/category/librelp/"
-PKG_URL="http://download.rsyslog.com/librelp/${PKG_NAME}-${PKG_VERSION}.tar.gz"
+PKG_URL="https://download.rsyslog.com/librelp/${PKG_NAME}-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="Provides reliable event logging over the network."
 PKG_TOOLCHAIN="autotools"

@@ -17,15 +17,21 @@ gpu_mem=76
 # rebooting.
 hdmi_ignore_cec_init=1
 
-################################################################################
-# Include distribution specific config file if it exists.
-################################################################################
 [all]
+################################################################################
+# Use distroconfig-composite.txt instead of distroconfig.txt to enable
+# composite video output.
+# The composite video mode needs to be configured in cmdline.txt:
+# For PAL add: video=Composite-1:720x576@50ie
+# For NTSC add: video=Composite-1:720x480@60ie
+################################################################################
 include distroconfig.txt
-
-# uncomment to enable infrared remote recevier connected to GPIO 18
-#dtoverlay=gpio-ir,gpio_pin=18
+#include distroconfig-composite.txt
 
 # uncomment to enable analog audio output
 #dtparam=audio=on
 #audio_pwm_mode=1
+
+# uncomment to enable infrared remote receiver connected to GPIO 18
+#dtoverlay=gpio-ir,gpio_pin=18
+

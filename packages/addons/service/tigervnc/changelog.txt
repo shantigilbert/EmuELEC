@@ -1,14 +1,2 @@
-105
-- Update to 1.10.1
-
-103
-- Update to 1.9.0
-
-102
-- Update to 1.8.0
-
-101
-- update to 1.7.1
-
-100
-- Initial addon
+1
+- fix not working TigerVNC

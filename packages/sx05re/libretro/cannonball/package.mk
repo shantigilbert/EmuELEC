@@ -18,12 +18,12 @@
 ################################################################################
 
 PKG_NAME="cannonball"
-PKG_VERSION="8fb0d9561ee110f31f45610661649f0c1ff068ee"
-PKG_SHA256="04c4789fc4c8433db8649654ecc59d84a8a7422b3b2e53892b0ca7febbe2c05c"
+PKG_VERSION="c5487ee342ec2596f733a211b812e338cdba8ad8"
+PKG_SHA256="1204832c8eed713640fee84d90b4c39ffac7a2ecdfd881442dd0ed83c2113e94"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/cannonball"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -35,6 +35,6 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp cannonball_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp cannonball_libretro.so ${INSTALL}/usr/lib/libretro/
 }

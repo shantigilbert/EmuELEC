@@ -3,6 +3,10 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
+_create_bin_link() {
+  [ ! -L ${ADDON_DIR}/bin/${2} ] && ln -sfn ${1} ${ADDON_DIR}/bin/${2}
+}
+
 . /etc/profile
 oe_setup_addon service.mariadb
 
@@ -11,49 +15,57 @@ mkdir -p /run/mysqld
 
 # exit if already running
 PID=$(ps aux | awk '/\/bin\/mariadbd/ {print $1; exit 0}')
-if [ -n "$PID" ]; then
+if [ -n "${PID}" ]; then
   echo "MariaDB server is already running"
   exit 0
 fi
 
+# create symbolic links
+_create_bin_link mariadb                     mysql
+_create_bin_link mariadb-admin               mysqladmin
+_create_bin_link mariadb-dump                mysqldump
+_create_bin_link mariadb-secure-installation mysql_secure_installation
+_create_bin_link mariadb-upgrade             mysql_upgrade
+_create_bin_link mariadb-install-db          mysql_install_db
+
 # copy config file
-if [ ! -f $ADDON_HOME/my.cnf ]; then
-  cp $ADDON_DIR/config/my.cnf $ADDON_HOME
+if [ ! -f ${ADDON_HOME}/my.cnf ]; then
+  cp ${ADDON_DIR}/config/my.cnf ${ADDON_HOME}
 fi
 
 # install database
-if [ ! -d "$ADDON_HOME/data/mysql" ]; then
-  mkdir -p $ADDON_HOME/data
+if [ ! -d "${ADDON_HOME}/data/mysql" ]; then
+  mkdir -p ${ADDON_HOME}/data
   echo "Installing database"
-  $ADDON_DIR/bin/mysql_install_db --basedir=$ADDON_DIR --datadir=$ADDON_HOME/data
+  ${ADDON_DIR}/bin/mariadb-install-db --basedir=${ADDON_DIR} --datadir=${ADDON_HOME}/data
 fi
 
 # check for first run and generate passwords
-if grep -q "@MYSQL_ROOT_PASS@" $ADDON_HOME/settings.xml; then
+if grep -q "@MYSQL_ROOT_PASS@" ${ADDON_HOME}/settings.xml; then
   MYSQL_ROOT_PASS="$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8)"
   MYSQL_KODI_PASS="$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8)"
 
-  sed -e "s|@MYSQL_ROOT_PASS@|$MYSQL_ROOT_PASS|g" \
-      -e "s|@MYSQL_KODI_PASS@|$MYSQL_KODI_PASS|g" \
-      -i $ADDON_HOME/settings.xml
+  sed -e "s|@MYSQL_ROOT_PASS@|${MYSQL_ROOT_PASS}|g" \
+      -e "s|@MYSQL_KODI_PASS@|${MYSQL_KODI_PASS}|g" \
+      -i ${ADDON_HOME}/settings.xml
 fi
 
 # init script to create user kodi and change passwords
 init_file=""
-if [[ ! -f $ADDON_HOME/set_mysql_passwords.sql ]] || [[ $ADDON_HOME/settings.xml -nt $ADDON_HOME/set_mysql_passwords.sql ]]; then
-  cat << SQL_DATA > $ADDON_HOME/set_mysql_passwords.sql
-SET PASSWORD FOR 'root'@'localhost'=PASSWORD('$MYSQL_ROOT_PASS');
+if [[ ! -f ${ADDON_HOME}/set_mysql_passwords.sql ]] || [[ ${ADDON_HOME}/settings.xml -nt ${ADDON_HOME}/set_mysql_passwords.sql ]]; then
+  cat << SQL_DATA > ${ADDON_HOME}/set_mysql_passwords.sql
+SET PASSWORD FOR 'root'@'localhost'=PASSWORD('${MYSQL_ROOT_PASS}');
 CREATE USER IF NOT EXISTS 'kodi';
 CREATE USER IF NOT EXISTS 'kodi'@'localhost';
-SET PASSWORD FOR 'kodi'=PASSWORD('$MYSQL_KODI_PASS');
-SET PASSWORD FOR 'kodi'@'localhost'=PASSWORD('$MYSQL_KODI_PASS');
+SET PASSWORD FOR 'kodi'=PASSWORD('${MYSQL_KODI_PASS}');
+SET PASSWORD FOR 'kodi'@'localhost'=PASSWORD('${MYSQL_KODI_PASS}');
 GRANT ALL ON *.* TO 'kodi';
 GRANT ALL ON *.* TO 'kodi'@'localhost';
 flush privileges;
 SQL_DATA
 
-  init_file="--init-file=$ADDON_HOME/set_mysql_passwords.sql"
+  init_file="--init-file=${ADDON_HOME}/set_mysql_passwords.sql"
 fi
 
 echo "Starting mariadbd"
-MYSQL_HOME="$ADDON_HOME" exec $ADDON_DIR/bin/mariadbd $init_file &
+MYSQL_HOME="${ADDON_HOME}" exec ${ADDON_DIR}/bin/mariadbd ${init_file} &

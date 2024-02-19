@@ -11,10 +11,10 @@
 # Modified 2019 by Shanti Gilbert for EmuELEC/CoreELEC (https//www.coreelec.org)
 
 function onstart_retroarch_joystick() {
-    iniConfig " = " '"' "$configdir/retroarch/retroarch.cfg"
+    iniConfig " = " '"' "${configdir}/retroarch/retroarch.cfg"
     iniGet "input_joypad_driver"
-    local input_joypad_driver="$ini_value"
-    if [[ -z "$input_joypad_driver" ]]; then
+    local input_joypad_driver="${ini_value}"
+    if [[ -z "${input_joypad_driver}" ]]; then
         input_joypad_driver="udev"
     fi
 
@@ -24,8 +24,8 @@ function onstart_retroarch_joystick() {
     getAutoConf "8bitdo_hack" && _atebitdo_hack=1
 
     iniConfig " = " "\"" "/tmp/tempconfig.cfg"
-    iniSet "input_device" "$DEVICE_NAME"
-    iniSet "input_driver" "$input_joypad_driver"
+    iniSet "input_device" "${DEVICE_NAME}"
+    iniSet "input_driver" "${input_joypad_driver}"
 
     v=${DEVICE_GUID:8:8}
     part1=$(echo ${v:6:2}${v:4:2}${v:2:2}${v:0:2})
@@ -41,7 +41,7 @@ function onstart_retroarch_joystick() {
 }
 
 function onstart_retroarch_keyboard() {
-    iniConfig " = " '"' "$configdir/retroarch/retroarch.cfg"
+    iniConfig " = " '"' "${configdir}/retroarch/retroarch.cfg"
 
     _retroarch_select_hotkey=1
 
@@ -157,13 +157,13 @@ function onstart_retroarch_keyboard() {
 }
 
 function map_retroarch_joystick() {
-    local input_name="$1"
-    local input_type="$2"
-    local input_id="$3"
-    local input_value="$4"
+    local input_name="${1}"
+    local input_type="${2}"
+    local input_id="${3}"
+    local input_value="${4}"
 
     local keys
-    case "$input_name" in
+    case "${input_name}" in
         up)
             keys=("input_up" "input_volume_up")
             ;;
@@ -239,7 +239,7 @@ function map_retroarch_joystick() {
         hotkeyenable)
             keys=("input_enable_hotkey")
             _retroarch_select_hotkey=0
-            if [[ "$input_type" == "key" && "$input_id" == "0" ]]; then
+            if [[ "${input_type}" == "key" && "${input_id}" == "0" ]]; then
                 return
             fi
             ;;
@@ -252,27 +252,27 @@ function map_retroarch_joystick() {
     local value
     local type
     for key in "${keys[@]}"; do
-        case "$input_type" in
+        case "${input_type}" in
             hat)
                 type="btn"
-                value="h$input_id$input_name"
+                value="h${input_id}${input_name}"
                 ;;
             axis)
                 type="axis"
-                if [[ "$input_value" == "1" ]]; then
-                    value="+$input_id"
+                if [[ "${input_value}" == "1" ]]; then
+                    value="+${input_id}"
                 else
-                    value="-$input_id"
+                    value="-${input_id}"
                 fi
                 ;;
             *)
                 type="btn"
-                value="$input_id"
+                value="${input_id}"
 
                 # workaround for mismatched controller mappings
                 iniGet "input_driver"
-                if [[ "$ini_value" == "udev" ]]; then
-                    case "$DEVICE_NAME" in
+                if [[ "${ini_value}" == "udev" ]]; then
+                    case "${DEVICE_NAME}" in
                         "8Bitdo FC30"*|"8Bitdo NES30"*|"8Bitdo SFC30"*|"8Bitdo SNES30"*|"8Bitdo Zero"*)
                             if [[ "$_atebitdo_hack" -eq 1 ]]; then
                                 value="$((input_id+11))"
@@ -282,22 +282,22 @@ function map_retroarch_joystick() {
                 fi
                 ;;
         esac
-        if [[ "$input_name" == "select" && "$_retroarch_select_hotkey" -eq 1 ]]; then
-            _retroarch_select_type="$type"
+        if [[ "${input_name}" == "select" && "$_retroarch_select_hotkey" -eq 1 ]]; then
+            _retroarch_select_type="${type}"
         fi
-        key+="_$type"
-        iniSet "$key" "$value"
+        key+="_${type}"
+        iniSet "${key}" "${value}"
     done
 }
 
 function map_retroarch_keyboard() {
-    local input_name="$1"
-    local input_type="$2"
-    local input_id="$3"
-    local input_value="$4"
+    local input_name="${1}"
+    local input_type="${2}"
+    local input_id="${3}"
+    local input_value="${4}"
 
     local key
-    case "$input_name" in
+    case "${input_name}" in
         up)
             keys=("input_player1_up")
             ;;
@@ -356,7 +356,7 @@ function map_retroarch_keyboard() {
     esac
 
     for key in "${keys[@]}"; do
-        iniSet "$key" "${retroarchkeymap[$input_id]}"
+        iniSet "${key}" "${retroarchkeymap[${input_id}]}"
     done
 }
 
@@ -365,7 +365,7 @@ function onend_retroarch_joystick() {
     # in the configuration, so we should use the select button as hotkey enable if set
     if [[ "$_retroarch_select_hotkey" -eq 1 ]]; then
         iniGet "input_select_${_retroarch_select_type}"
-        [[ -n "$ini_value" ]] && iniSet "input_enable_hotkey_${_retroarch_select_type}" "$ini_value"
+        [[ -n "${ini_value}" ]] && iniSet "input_enable_hotkey_${_retroarch_select_type}" "${ini_value}"
     fi
 
     # hotkey sanity check
@@ -373,7 +373,7 @@ function onend_retroarch_joystick() {
     if ! grep -q "input_enable_hotkey" /tmp/tempconfig.cfg; then
         local key
         for key in input_toggle_fast_forward input_rewind input_fps_toggle input_volume_up input_volume_down input_state_slot_decrease input_state_slot_increase input_reset input_menu_toggle input_load_state input_save_state input_exit_emulator; do
-            sed -i "/$key/d" /tmp/tempconfig.cfg
+            sed -i "/${key}/d" /tmp/tempconfig.cfg
         done
     fi
 
@@ -381,29 +381,29 @@ function onend_retroarch_joystick() {
     local file
     local dir="/tmp/joypads"
     while read -r file; do
-        mv "$file" "$file.bak" > /dev/null 2>&1
-    done < <(grep -Fl "\"$DEVICE_NAME\"" "$dir/"*.cfg 2>/dev/null)
+        mv "${file}" "${file}.bak" > /dev/null 2>&1
+    done < <(grep -Fl "\"${DEVICE_NAME}\"" "${dir}/"*.cfg 2>/dev/null)
 
     # sanitise filename
     file="${DEVICE_NAME//[\?\<\>\\\/:\*\|]/}.cfg"
 
-    if [[ -f "$dir/$file" ]]; then
-        mv "$dir/$file" "$dir/$file.bak"
+    if [[ -f "${dir}/${file}" ]]; then
+        mv "${dir}/${file}" "${dir}/${file}.bak"
     fi
     sed -i '/^[[:space:]]*$/d' "/tmp/tempconfig.cfg"
-    mv "/tmp/tempconfig.cfg" "$dir/$file"
+    mv "/tmp/tempconfig.cfg" "${dir}/${file}"
 }
 
 function onend_retroarch_keyboard() {
     if [[ "$_retroarch_select_hotkey" -eq 1 ]]; then
         iniGet "input_player1_select"
-        iniSet "input_enable_hotkey" "$ini_value"
+        iniSet "input_enable_hotkey" "${ini_value}"
     fi
 
     # hotkey sanity check
     # remove hotkeys if there is no hotkey enable button
     iniGet "input_enable_hotkey"
-    if [[ -z "$ini_value" || "$ini_value" == "nul" ]]; then
+    if [[ -z "${ini_value}" || "${ini_value}" == "nul" ]]; then
         iniSet "input_state_slot_decrease" ""
         iniSet "input_state_slot_increase" ""
         iniSet "input_reset" ""

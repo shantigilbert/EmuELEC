@@ -1,0 +1,53 @@
+From 1d1aa5ce739644c72b44ffe547b7233ad19e26b5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 21 Oct 2021 13:19:49 +0200
+Subject: [PATCH 112/142] v3d: no specific separate_segments flag for V3D 7.1
+
+On V3D 7.1 there is not a flag on the Shader State Record to specify
+if we are using shared or separate segments. This is done by setting
+the vpm input size to 0 (so we need to ensure that the output would be
+the max needed for input/output).
+
+We were already doing the latter on the prog_data_vs, so we just need
+to use those values, instead of assigning default values.
+---
+ src/gallium/drivers/v3d/v3dx_draw.c | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/src/gallium/drivers/v3d/v3dx_draw.c b/src/gallium/drivers/v3d/v3dx_draw.c
+index 9f38baa0bbf..dd13e5177fe 100644
+--- a/src/gallium/drivers/v3d/v3dx_draw.c
++++ b/src/gallium/drivers/v3d/v3dx_draw.c
+@@ -679,17 +679,24 @@ v3d_emit_gl_shader_state(struct v3d_context *v3d,
+                         v3d->prog.cs->prog_data.vs->separate_segments;
+                 shader.vertex_shader_has_separate_input_and_output_vpm_blocks =
+                         v3d->prog.vs->prog_data.vs->separate_segments;
+-#endif
+-#if V3D_VERSION >= 71
+-                unreachable("HW generation 71 not supported yet.");
+-#endif
+-
+                 shader.coordinate_shader_input_vpm_segment_size =
+                         v3d->prog.cs->prog_data.vs->separate_segments ?
+                         v3d->prog.cs->prog_data.vs->vpm_input_size : 1;
+                 shader.vertex_shader_input_vpm_segment_size =
+                         v3d->prog.vs->prog_data.vs->separate_segments ?
+                         v3d->prog.vs->prog_data.vs->vpm_input_size : 1;
++#endif
++                /* On V3D 7.1 there isn't a specific flag to set if we are using
++                 * shared/separate segments or not. We just set the value of
++                 * vpm_input_size to 0, and set output to the max needed. That should be
++                 * already properly set on prog_data_vs_bin
++                 */
++#if V3D_VERSION == 71
++                shader.coordinate_shader_input_vpm_segment_size =
++                        v3d->prog.cs->prog_data.vs->vpm_input_size;
++                shader.vertex_shader_input_vpm_segment_size =
++                        v3d->prog.vs->prog_data.vs->vpm_input_size;
++#endif
+ 
+                 shader.coordinate_shader_output_vpm_segment_size =
+                         v3d->prog.cs->prog_data.vs->vpm_output_size;
+-- 
+2.39.2
+

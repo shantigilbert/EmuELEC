@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MAME"
 PKG_SITE="https://github.com/libretro/mame2010-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,19 +37,19 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 make_target() {
-  if [ "$ARCH" == "arm" ]; then
-    make CC="$CC" LD="$CC" PLATCFLAGS="$CFLAGS" PTR64=0 ARM_ENABLED=1 LCPU=arm
-  elif [ "$ARCH" == "i386" ]; then
-    make CC="$CC" LD="$CC" PLATCFLAGS="$CFLAGS" PTR64=0 ARM_ENABLED=0 LCPU=x86
-  elif [ "$ARCH" == "x86_64" ]; then
-    make CC="$CC" LD="$CC" PLATCFLAGS="$CFLAGS" PTR64=1 ARM_ENABLED=0 LCPU=x86_64
-  elif [ "$ARCH" == "aarch64" ]; then
-	make CC="$CC" LD="$CC" PLATCFLAGS="$CFLAGS" PTR64=1 ARM_ENABLED=1 LCPU=arm64 maketree
-    make CC="$CC" LD="$CC" PLATCFLAGS="$CFLAGS" PTR64=1 ARM_ENABLED=1 LCPU=arm64
+  if [ "${ARCH}" == "arm" ]; then
+    make CC="${CC}" LD="${CC}" PLATCFLAGS="${CFLAGS}" PTR64=0 ARM_ENABLED=1 LCPU=arm
+  elif [ "${ARCH}" == "i386" ]; then
+    make CC="${CC}" LD="${CC}" PLATCFLAGS="${CFLAGS}" PTR64=0 ARM_ENABLED=0 LCPU=x86
+  elif [ "${ARCH}" == "x86_64" ]; then
+    make CC="${CC}" LD="${CC}" PLATCFLAGS="${CFLAGS}" PTR64=1 ARM_ENABLED=0 LCPU=x86_64
+  elif [ "${ARCH}" == "aarch64" ]; then
+	make CC="${CC}" LD="${CC}" PLATCFLAGS="${CFLAGS}" PTR64=1 ARM_ENABLED=1 LCPU=arm64 maketree
+    make CC="${CC}" LD="${CC}" PLATCFLAGS="${CFLAGS}" PTR64=1 ARM_ENABLED=1 LCPU=arm64
   fi
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp mame2010_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp mame2010_libretro.so ${INSTALL}/usr/lib/libretro/
 }

@@ -3,7 +3,7 @@
 
 PKG_NAME="network-tools"
 PKG_VERSION="1.0"
-PKG_REV="117"
+PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://libreelec.tv"
@@ -35,9 +35,19 @@ PKG_DEPENDS_TARGET="toolchain \
                     wireless_tools"
 
 addon() {
-  mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+  mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/{bin,lib}
     # bwm-ng
     cp -P $(get_install_dir bwm-ng)/usr/bin/bwm-ng ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+
+    # fuse
+    cp -P $(get_install_dir fuse)/usr/bin/{fusermount,ulockmgr_server} ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+    cp -P $(get_install_dir fuse)/usr/sbin/mount.fuse ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+    cp -P $(get_install_dir fuse)/usr/lib/{libfuse.so*,libulockmgr.so*} ${ADDON_BUILD}/${PKG_ADDON_ID}/lib
+
+    # fuse3
+    cp -P $(get_install_dir fuse3)/usr/bin/fusermount3 ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+    cp -P $(get_install_dir fuse3)/usr/sbin/mount.fuse3  ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+    cp -P $(get_install_dir fuse3)/usr/lib/libfuse3.so* ${ADDON_BUILD}/${PKG_ADDON_ID}/lib
 
     # iftop
     cp -P $(get_install_dir iftop)/usr/sbin/iftop ${ADDON_BUILD}/${PKG_ADDON_ID}/bin

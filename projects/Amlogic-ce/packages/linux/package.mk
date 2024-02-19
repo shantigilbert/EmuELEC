@@ -25,13 +25,13 @@ case "$LINUX" in
     PKG_BUILD_PERF="no"
     ;;
   amlogic-4.9)
-    PKG_VERSION="09edb861ac1da48a8404e47bc7f210800805603e"
-    PKG_SHA256="31e6db16d3baaf3bb183a24c7b4fca8628475653619cae7ee4977b49a9b3d394"
+    PKG_VERSION="ab03043a776354e02be86d06007751f652680c00"
+    PKG_SHA256="c75bbd36d0dc92b21d75ce82dd8e0a4fefac9cf4b62f5d21c33eb7d12ca5bc2a"
     PKG_URL="https://github.com/CoreELEC/linux-amlogic/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
     PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET aml-dtbtools:host"
     PKG_BUILD_PERF="no"
-    PKG_GIT_BRANCH="amlogic-4.9-19"
+    PKG_GIT_BRANCH="amlogic-4.9-20"
     ;;
 esac
 
@@ -49,7 +49,7 @@ if [ "$PKG_BUILD_PERF" != "no" ] && grep -q ^CONFIG_PERF_EVENTS= $PKG_KERNEL_CFG
 fi
 
 if [ "$TARGET_ARCH" = "x86_64" ]; then
-  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET elfutils:host pciutils"
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET elfutils:host"
   PKG_DEPENDS_UNPACK+=" intel-ucode kernel-firmware"
 fi
 

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
+
+# copy amlogic autoscript files to part1 if needed
+for f in $RELEASE_DIR/3rdparty/bootloader/*autoscript; do
+  [ -e "$f" ] && mcopy "$f" ::
+done
+
+if [ -f $RELEASE_DIR/3rdparty/bootloader/${SUBDEVICE}_cfgload ]; then
+  mcopy -s $RELEASE_DIR/3rdparty/bootloader/${SUBDEVICE}_cfgload "::/cfgload"
+fi
+
+# copy device trees to part1
+for dtb in $RELEASE_DIR/3rdparty/bootloader/device_trees $RELEASE_DIR/3rdparty/bootloader/*.dtb $RELEASE_DIR/3rdparty/bootloader/dtb.img ; do
+  [ -e "$dtb" ] && mcopy -s "$dtb" ::
+done
+
+if [ -f "$RELEASE_DIR/3rdparty/bootloader/config.ini" ]; then
+  mcopy $RELEASE_DIR/3rdparty/bootloader/config.ini ::
+fi

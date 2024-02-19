@@ -19,42 +19,28 @@
 ################################################################################
 
 PKG_NAME="scummvm"
-PKG_VERSION="2fb2e4c551c9c1510c56f6e890ee0300b7b3fca3"
-PKG_SHA256="3f9aca170e80dbd167eab6e39f91042447a95d84c0345fd953fefcd1a562b327"
-PKG_REV="1"
+PKG_VERSION="6118a0d92907ae68c38d444a680aa4a1610099c8"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/scummvm"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
-PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
 PKG_SHORTDESC="ScummVM with libretro backend."
 PKG_LONGDESC="ScummVM is a program which allows you to run certain classic graphical point-and-click adventure games, provided you already have their data files."
-
-PKG_IS_ADDON="no"
-PKG_TOOLCHAIN="make"
-PKG_AUTORECONF="no"
+PKG_TOOLCHAIN="manual"
 PKG_BUILD_FLAGS="-lto"
 
-pre_configure_target() {
-  cd ..
-  rm -rf .$TARGET_NAME
-}
-
-configure_target() {
-  :
+post_unpack() {
+  sed -i "s|DEFINES  += -Wno-multichar|#DEFINES  += -Wno-multichar|" ${PKG_BUILD}/Makefile.common
 }
 
 make_target() {
-if ([ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "OdroidGoAdvance" ]) && [ "$ARCH" == "arm" ]; then
- make -C backends/platform/libretro/build platform=oga_a35_neon_hardfloat CXXFLAGS="`echo $CXXFLAGS | sed -e "s|-O.|-O2|g"` -DHAVE_POSIX_MEMALIGN=1"
-else
- make -C backends/platform/libretro/build CXXFLAGS="$CXXFLAGS -DHAVE_POSIX_MEMALIGN=1"
-fi
+  cd "${PKG_BUILD}/backends/platform/libretro"
+  make all platform=rpi4_64
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp backends/platform/libretro/build/scummvm_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp "${PKG_BUILD}/backends/platform/libretro/scummvm_libretro."{so,info} ${INSTALL}/usr/lib/libretro/
 }

@@ -5,7 +5,7 @@
 PKG_NAME="audiodecoder.gsf"
 PKG_VERSION="20.2.1-Nexus"
 PKG_SHA256="b09dcb379bdc536117a956b10b37cf50c8afaa65337993c44a6847d382d7e2a5"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/audiodecoder.gsf"

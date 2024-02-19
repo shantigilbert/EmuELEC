@@ -22,13 +22,10 @@ unpack() {
   tar cf - -C ${SOURCES}/droidports/droidports-${PKG_VERSION} ${PKG_TAR_COPY_OPTS} . | tar xf - -C ${PKG_BUILD}
 }
 
-pre_configure_target() {
-# Just a small workaround for GCC 11 until upstream is fixed
-  sed -i "s|usleep|usleep2|g" ${PKG_BUILD}/bridges/misc_bridges.c
-}
-
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/bin
-    cp ${PKG_BUILD}/.${TARGET_NAME}/gmloader $INSTALL/usr/bin
-  cp $(get_pkg_directory droidports)/scripts/* $INSTALL/usr/bin
+  mkdir -p ${INSTALL}/usr/bin
+  cp ${PKG_BUILD}/.${TARGET_NAME}/gmloader ${INSTALL}/usr/bin
+  mkdir -p ${INSTALL}/usr/config/emuelec/configs/gmloader
+  cp $(get_pkg_directory droidports)/config/* ${INSTALL}/usr/config/emuelec/configs/gmloader
+  cp $(get_pkg_directory droidports)/scripts/* ${INSTALL}/usr/bin
 }

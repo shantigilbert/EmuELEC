@@ -44,6 +44,9 @@
 # Default supported get handlers (archive, git, file etc.)
   GET_HANDLER_SUPPORT="archive"
 
+# use local ccache on build host, if available, for early package
+# builds before ccache has been built
+  LOCAL_CCACHE_SUPPORT="yes"
 
 ### OS CONFIGURATION ###
 
@@ -54,7 +57,9 @@
 # for a list of additional drivers see packages/linux-drivers
 # Space separated list is supported,
 # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
-  ADDITIONAL_DRIVERS="RTL8192CU RTL8192DU RTL8192EU RTL8188EU RTL8812AU RTL8821CU"
+  ADDITIONAL_DRIVERS="gpu-aml openvfd-driver media_modules-aml wifi_dummy-aml ap6xxx-aml
+                     uwe5631-aml RTL8812AU RTL8822BU-aml RTL8822CS-aml RTL8822CU-aml
+                     RTL8852BS-aml RTL8152-aml w1-aml"
 
 # Default size of system partition, in MB, eg. 512
   SYSTEM_SIZE=512
@@ -156,7 +161,7 @@
 ### KODI ADDONS ###
 
 # Distribution Specific source location
-  DISTRO_MIRROR="http://sources.libreelec.tv/mirror"
+  DISTRO_MIRROR="http://sources.coreelec.org http://sources.libreelec.tv/mirror"
   DISTRO_SRC="http://sources.libreelec.tv/$LIBREELEC_VERSION"
 
 # Addon Server Url
@@ -169,7 +174,7 @@
   ADDON_REPO_NAME="CoreELEC Add-ons"
 
 # set the addon dirs
-  ADDON_PATH="$ADDON_VERSION/$PROJECT/$TARGET_ARCH"
+  ADDON_PATH="$DEVICE/$ADDON_VERSION/$TARGET_ARCH"
 
 # Settings package name - blank if not required
   DISTRO_PKG_SETTINGS="CoreELEC-settings"
@@ -241,7 +246,7 @@
   REMOTE_SUPPORT="yes"
 
 # IR remote keymaps supported in default config
-  IR_REMOTE_KEYMAPS="rc6_mce xbox_360 xbox_one"
+  IR_REMOTE_KEYMAPS="rc6_mce xbox_360 xbox_one odroid wetek_hub wetek_play_2 tanix"
 
 # build and install Joystick support (yes / no)
   JOYSTICK_SUPPORT="yes"
@@ -261,4 +266,5 @@
 # additional packages to install:
 # Space separated list is supported,
 # e.g. ADDITIONAL_PACKAGES="PACKAGE1 PACKAGE2"
-  ADDITIONAL_PACKAGES=""
+  ADDITIONAL_PACKAGES="u-boot-script dtc CoreELEC-Debug-Scripts inject_bl301 ceemmc
+                       nfs-utils dtb-xml megatools"

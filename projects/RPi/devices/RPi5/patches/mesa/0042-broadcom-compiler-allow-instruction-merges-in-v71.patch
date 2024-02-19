@@ -1,0 +1,60 @@
+From 31623712c2f741d393767641f32d56c35150eda5 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Thu, 30 Sep 2021 13:22:48 +0200
+Subject: [PATCH 042/142] broadcom/compiler: allow instruction merges in v71
+
+In v3d 4.x there were restrictions based on the number of raddrs used
+by the combined instructions, but we don't have these restrictions in
+v3d 7.x.
+
+It should be noted that while there are no restrictions on the number
+of raddrs addressed, a QPU instruction can only address a single small
+immediate, so we should be careful about that when we add support for
+small immediates.
+---
+ src/broadcom/compiler/qpu_schedule.c | 21 +++++++++++++++++----
+ 1 file changed, 17 insertions(+), 4 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 870823fd2b1..ff544fb3c1c 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -906,8 +906,11 @@ qpu_raddrs_used(const struct v3d_qpu_instr *a,
+ static bool
+ qpu_merge_raddrs(struct v3d_qpu_instr *result,
+                  const struct v3d_qpu_instr *add_instr,
+-                 const struct v3d_qpu_instr *mul_instr)
++                 const struct v3d_qpu_instr *mul_instr,
++                 const struct v3d_device_info *devinfo)
+ {
++        assert(devinfo->ver <= 42);
++
+         uint64_t raddrs_used = qpu_raddrs_used(add_instr, mul_instr);
+         int naddrs = util_bitcount64(raddrs_used);
+ 
+@@ -1111,9 +1114,19 @@ qpu_merge_inst(const struct v3d_device_info *devinfo,
+                 add_instr = a;
+         }
+ 
+-        if (add_instr && mul_instr &&
+-            !qpu_merge_raddrs(&merge, add_instr, mul_instr)) {
+-                        return false;
++        /* V3D 4.x and earlier use muxes to select the inputs for the ALUs and
++         * they have restrictions on the number of raddrs that can be adressed
++         * in a single instruction.
++         *
++         * FIXME: for V3D 7.x we can't merge instructions if they address more
++         * than one small immediate. For now, we don't support small immediates,
++         * so it is not a problem.
++         */
++        if (devinfo->ver <= 42) {
++                if (add_instr && mul_instr &&
++                    !qpu_merge_raddrs(&merge, add_instr, mul_instr, devinfo)) {
++                                return false;
++                }
+         }
+ 
+         merge.sig.thrsw |= b->sig.thrsw;
+-- 
+2.39.2
+

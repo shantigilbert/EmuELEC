@@ -19,12 +19,12 @@
 ################################################################################
 
 PKG_NAME="mrboom"
-PKG_VERSION="1bc0933b71051411404cdc092b14ade17efb2027"
+PKG_VERSION="cde2ef61873e1b315af050ad8500f82beb5b014e"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/mrboom-libretro"
-PKG_URL="$PKG_SITE.git"
+PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -34,7 +34,7 @@ PKG_TOOLCHAIN="make"
 GET_HANDLER_SUPPORT="git"
 
 pre_configure_target() {
-if [ "$ARCH" == "arm" ]; then
+if [ "${ARCH}" == "arm" ]; then
 PKG_MAKE_OPTS_TARGET="platform=classic_armv7_a7"
 #else
 #PKG_MAKE_OPTS_TARGET="platform=classic_armv7_a7"
@@ -42,6 +42,6 @@ fi
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp mrboom_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp mrboom_libretro.so ${INSTALL}/usr/lib/libretro/
 }

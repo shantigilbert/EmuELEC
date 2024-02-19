@@ -1,0 +1,46 @@
+From 5477884196cb54a71f54fa6cad42c6d3326bde88 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Fri, 22 Oct 2021 13:39:48 +0200
+Subject: [PATCH 041/142] broadcom/compiler: don't schedule rf0 writes right
+ after ldvary
+
+ldvary writes rf0 implicitly on the next cycle so they would clash.
+This case is not handled correctly by our normal dependency tracking,
+which doesn't know anything about delayed writes from instructions
+and thinks the rf0 write happens on the same cycle ldvary is emitted.
+
+Fixes (v71):
+dEQP-VK.glsl.conversions.matrix_to_matrix.mat2x3_to_mat4x2_fragment
+---
+ src/broadcom/compiler/qpu_schedule.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 839c0c62315..870823fd2b1 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -652,6 +652,21 @@ writes_too_soon_after_write(const struct v3d_device_info *devinfo,
+             v3d_qpu_writes_r4(devinfo, inst))
+                 return true;
+ 
++        if (devinfo->ver <= 42)
++           return false;
++
++        /* Don't schedule anything that writes rf0 right after ldvary, since
++         * that would clash with the ldvary's delayed rf0 write (the exception
++         * is another ldvary, since its implicit rf0 write would also have
++         * one cycle of delay and would not clash).
++         */
++        if (scoreboard->last_ldvary_tick + 1 == scoreboard->tick &&
++            (v3d71_qpu_writes_waddr_explicitly(devinfo, inst, 0) ||
++             (v3d_qpu_writes_rf0_implicitly(devinfo, inst) &&
++              !inst->sig.ldvary))) {
++            return true;
++       }
++
+         return false;
+ }
+ 
+-- 
+2.39.2
+

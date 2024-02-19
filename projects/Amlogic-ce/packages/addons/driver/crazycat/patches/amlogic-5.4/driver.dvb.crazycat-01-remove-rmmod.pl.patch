@@ -1,0 +1,13 @@
+[Patch] without this patch you need to install libproc-processtable-perl at host system
+
+--- a/v4l/Makefile
++++ b/v4l/Makefile
+@@ -51,7 +51,7 @@ default:: prepare firmware
+ 	@echo Kernel build directory is $(OUTDIR)
+ 	$(MAKE) -C ../linux apply_patches
+ 	$(MAKE) -C $(OUTDIR) M=$(PWD) $(MYCFLAGS) modules
+-	./scripts/rmmod.pl check
++#	./scripts/rmmod.pl check
+ #	$(MAKE) checkpatch
+ 
+ mismatch:: prepare firmware

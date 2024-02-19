@@ -1,0 +1,158 @@
+From 9906ee56e075be59d290e79f20ef131fd6cc41f4 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Fri, 26 May 2023 10:11:56 +0200
+Subject: [PATCH 01/18] Revert "hdmitx: fix reading hdmitx register when uboot
+ is older"
+
+This reverts commit ed885563805e1fabaf09113ef33f9d3709ace217.
+---
+ .../media/vout/hdmitx/hdmi_tx_20/hw/reg_ops.c | 105 +-----------------
+ 1 file changed, 1 insertion(+), 104 deletions(-)
+
+diff --git a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hw/reg_ops.c b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hw/reg_ops.c
+index b4c5724917f4..cd425c29e72b 100644
+--- a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hw/reg_ops.c
++++ b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hw/reg_ops.c
+@@ -33,7 +33,6 @@
+ #include <linux/amlogic/media/vout/hdmi_tx/hdmi_tx_module.h>
+ #include <linux/arm-smccc.h>
+ #include "common.h"
+-#include "mach_reg.h"
+ #include "hdmi_tx_reg.h"
+ #include "reg_ops.h"
+ #include "mach_reg.h"
+@@ -470,74 +469,6 @@ unsigned int hdmitx_rd_reg_normal(unsigned int addr)
+ 	return data;
+ }
+ 
+-#define __asmeq(x, y)  ".ifnc " x "," y " ; .err ; .endif\n\t"
+-
+-void sec_reg_write(unsigned int *addr, unsigned int value)
+-{
+-	register long x0 asm("x0") = 0x82000019;
+-	register long x1 asm("x1") = (unsigned long)addr;
+-	register long x2 asm("x2") = value;
+-	asm volatile(
+-		__asmeq("%0", "x0")
+-		__asmeq("%1", "x1")
+-		__asmeq("%2", "x2")
+-		"smc #0\n"
+-		: : "r"(x0), "r"(x1), "r"(x2)
+-	);
+-}
+-
+-unsigned int sec_reg_read(unsigned int *addr)
+-{
+-	register long x0 asm("x0") = 0x82000018;
+-	register long x1 asm("x1") = (unsigned long)addr;
+-	asm volatile(
+-		__asmeq("%0", "x0")
+-		__asmeq("%1", "x1")
+-		"smc #0\n"
+-		: "+r"(x0) : "r"(x1)
+-	);
+-	return (unsigned int)(x0&0xffffffff);
+-}
+-
+-static DEFINE_SPINLOCK(reg_lock);
+-
+-unsigned int hdmitx_rd_reg_old(unsigned int addr)
+-{
+-	unsigned int data = 0;
+-	unsigned long offset = (addr & DWC_OFFSET_MASK) >> 24;
+-	unsigned long flags, fiq_flag;
+-	if (addr & SEC_OFFSET) {
+-		addr = addr & 0xffff;
+-		sec_reg_write((unsigned int *)(unsigned long)
+-			TO_PHY_ADDR(P_HDMITX_ADDR_PORT_SEC + offset), addr);
+-		sec_reg_write((unsigned int *)(unsigned long)
+-			TO_PHY_ADDR(P_HDMITX_ADDR_PORT_SEC + offset), addr);
+-		data = sec_reg_read((unsigned int *)(unsigned long)
+-			TO_PHY_ADDR(P_HDMITX_DATA_PORT_SEC + offset));
+-	} else {
+-		addr = addr & 0xffff;
+-		spin_lock_irqsave(&reg_lock, flags);
+-		raw_local_save_flags(fiq_flag);
+-		local_fiq_disable();
+-
+-/*
+- * If addr is located at 0x5020 ~ 0x667e in DWC,
+- * then should operate twice
+- */
+-		hd_write_reg(P_HDMITX_ADDR_PORT + offset, addr);
+-		hd_write_reg(P_HDMITX_ADDR_PORT + offset, addr);
+-		data = hd_read_reg(P_HDMITX_DATA_PORT + offset);
+-		data = hd_read_reg(P_HDMITX_DATA_PORT + offset);
+-
+-		raw_local_irq_restore(fiq_flag);
+-		spin_unlock_irqrestore(&reg_lock, flags);
+-	}
+-
+-	pr_debug(REG "%s rd[0x%x] 0x%x\n", offset ? "DWC" : "TOP",
+-			addr, data);
+-	return data;
+-}
+-
+ unsigned int hdmitx_rd_reg_g12a(unsigned int addr)
+ {
+ 	unsigned int large_offset = addr >> 24;
+@@ -578,8 +509,6 @@ unsigned int hdmitx_rd_reg(unsigned int addr)
+ 
+ 	if (hdev->chip_type >= MESON_CPU_ID_G12A)
+ 		data = hdmitx_rd_reg_g12a(addr);
+-	else if (hdev->chip_type == MESON_CPU_ID_GXL)
+-		data = hdmitx_rd_reg_old(addr);
+ 	else
+ 		data = hdmitx_rd_reg_normal(addr);
+ 	return data;
+@@ -605,36 +534,6 @@ void hdmitx_wr_reg_normal(unsigned int addr, unsigned int data)
+ 			addr, data);
+ }
+ 
+-void hdmitx_wr_reg_old(unsigned int addr, unsigned int data)
+-{
+-	unsigned long flags, fiq_flag;
+-	unsigned long offset = (addr & DWC_OFFSET_MASK) >> 24;
+-
+-	if (addr & SEC_OFFSET) {
+-		addr = addr & 0xffff;
+-		sec_reg_write((unsigned int *)(unsigned long)
+-			TO_PHY_ADDR(P_HDMITX_ADDR_PORT_SEC + offset), addr);
+-		sec_reg_write((unsigned int *)(unsigned long)
+-			TO_PHY_ADDR(P_HDMITX_ADDR_PORT_SEC + offset), addr);
+-		sec_reg_write((unsigned int *)(unsigned long)
+-			TO_PHY_ADDR(P_HDMITX_DATA_PORT_SEC + offset), data);
+-	} else {
+-		addr = addr & 0xffff;
+-		spin_lock_irqsave(&reg_lock, flags);
+-		raw_local_save_flags(fiq_flag);
+-		local_fiq_disable();
+-
+-		hd_write_reg(P_HDMITX_ADDR_PORT + offset, addr);
+-		hd_write_reg(P_HDMITX_ADDR_PORT + offset, addr);
+-		hd_write_reg(P_HDMITX_DATA_PORT + offset, data);
+-		raw_local_irq_restore(fiq_flag);
+-		spin_unlock_irqrestore(&reg_lock, flags);
+-	}
+-
+-	pr_debug("%s wr[0x%x] 0x%x\n", offset ? "DWC" : "TOP",
+-			addr, data);
+-}
+-
+ void hdmitx_wr_reg_g12a(unsigned int addr, unsigned int data)
+ {
+ 	unsigned int large_offset = addr >> 24;
+@@ -671,9 +570,7 @@ void hdmitx_wr_reg(unsigned int addr, unsigned int data)
+ 
+ 	if (hdev->chip_type >= MESON_CPU_ID_G12A)
+ 		hdmitx_wr_reg_g12a(addr, data);
+-	else if (hdev->chip_type == MESON_CPU_ID_GXL)
+-		hdmitx_wr_reg_old(addr, data);
+-    else
++	else
+ 		hdmitx_wr_reg_normal(addr, data);
+ }
+ EXPORT_SYMBOL(hdmitx_wr_reg);
+-- 
+2.25.1
+

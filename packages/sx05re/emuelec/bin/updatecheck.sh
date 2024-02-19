@@ -11,7 +11,7 @@ TEST_UPDURL="https://github.com/EmuELEC/EmuELEC-tests/releases/download/v"
 BUILDATE=$(cat /usr/buildate)
 arguments="$@"
 
-if [[ "$arguments" == *"forceupdate"* ]]; then
+if [[ "${arguments}" == *"forceupdate"* ]]; then
 systemctl stop emustation
 ee_console enable
 clear /dev/tty0
@@ -26,7 +26,7 @@ fi
 
 UPDTYPE=$(get_ee_setting updates.type)
 [[ -z "${UPDTYPE}" ]] && UPDTYPE="stable"
-[[ "$UPDTYPE" != "stable" ]] && UPDURL="${TEST_UPDURL}"
+[[ "${UPDTYPE}" != "stable" ]] && UPDURL="${TEST_UPDURL}"
 
 function do_cleanup() {
 	rm -rf /storage/.update/* > /dev/null 2>&1
@@ -35,7 +35,7 @@ function do_cleanup() {
 function no_update() {
 	echo "no"
 	do_cleanup
-if [[ "$arguments" == *"forceupdate"* ]]; then
+if [[ "${arguments}" == *"forceupdate"* ]]; then
     ee_console disable
     systemctl start emustation
 fi
@@ -84,13 +84,13 @@ done
 }
 
 function check_update() { 
-if [[ "$arguments" == *"canupdate"* ]]; then
-	echo "$UPDATEVERP"
-elif [[ "$arguments" == *"geturl"* ]]; then	
-	echo "$UPDURL"
-elif [[ "$arguments" == *"getsize"* ]]; then
+if [[ "${arguments}" == *"canupdate"* ]]; then
+	echo "${UPDATEVERP}"
+elif [[ "${arguments}" == *"geturl"* ]]; then	
+	echo "${UPDURL}"
+elif [[ "${arguments}" == *"getsize"* ]]; then
     USIZE=$(wget "${UPDURL}" --spider --server-response -O - 2>&1 | sed -ne '/Content-Length:/{s/.*: //;p}' | tail -1)	
-	echo "$USIZE"
+	echo "${USIZE}"
 fi
 }
 
@@ -100,13 +100,13 @@ do_cleanup
 # To avoid curl error "(23) Failed writing body", we download the full page to /tmp/eeupd and use cat to read it then delete it
 curl -s ${UPDINFO} -o /tmp/eeupd
 
-UPDDATA=$(cat /tmp/eeupd | grep "$UPDTYPE")
+UPDDATA=$(cat /tmp/eeupd | grep "${UPDTYPE}")
 rm /tmp/eeupd
-[ -z "$UPDDATA" ] && no_update
+[ -z "${UPDDATA}" ] && no_update
 
-OLDIFS=$IFS
-IFS=';' read -r -a updinfo <<< "$UPDDATA"
-IFS=$OLDIFS
+OLDIFS=${IFS}
+IFS=';' read -r -a updinfo <<< "${UPDDATA}"
+IFS=${OLDIFS}
 
 UVER="${updinfo[0]}"
 UFILE="EmuELEC-${EE_DEVICE}.aarch64-${UVER}"
@@ -125,7 +125,7 @@ UPDURL+="${UVER}/${UFILE}"
 
 #check if file exists
 if ! curl --head --fail --silent "${UPDURL}" >/dev/null; then
-if [[ "$arguments" == *"forceupdate"* ]]; then
+if [[ "${arguments}" == *"forceupdate"* ]]; then
 text_viewer -e -w -t "ERROR!" -f 24 -m "The update file either does not exists or you are not connected to the internet! FORCE UPDATE ABORTED!\n\nEmulationstation will now restart!"
 no_update
 fi
@@ -133,13 +133,13 @@ fi
 fi
 
 CVER=$(cat /usr/config/EE_VERSION)
-[[ -z "$CVER" ]] && no_update
+[[ -z "${CVER}" ]] && no_update
 if $(echo "${CVER}" | grep -q "TEST"); then
-    CVER=$(echo "$CVER" | sed "s|-TEST-||")
+    CVER=$(echo "${CVER}" | sed "s|-TEST-||")
 fi
 
-UVER=$(echo "$UVER" | sed "s|-TEST-||")
-[[ -z "$UVER" ]] && no_update
+UVER=$(echo "${UVER}" | sed "s|-TEST-||")
+[[ -z "${UVER}" ]] && no_update
 
 CURRENTVER="${CVER%%.*}${CVER#*.}"
 UPDATEVER="${UVER%%.*}${UVER#*.}"
@@ -151,7 +151,7 @@ UPDATEVERP="${UVER}"
 
 
 # if you use forceupdate as an argument you can forcibly download the latest STABLE release and call an update
-if [[ "$arguments" == *"forceupdate"* ]]; then
+if [[ "${arguments}" == *"forceupdate"* ]]; then
     text_viewer -y -w -t "Force update!" -f 24 -m "A forced update has been called, this will download the latest release depending on your type settings (stable or test/beta)\n\nThe system will reboot if the update file is downloaded succesfully.\n\nAre you sure you want to continue?"
     if [[ $? == 21 ]]; then
         forced_update
@@ -161,7 +161,7 @@ if [[ "$arguments" == *"forceupdate"* ]]; then
 	exit 1
     fi
 else
-    if [ "$UPDATEVER" -gt "$CURRENTVER" ] ; then 
+    if [ "${UPDATEVER}" -gt "${CURRENTVER}" ] ; then 
         check_update
     else 
         no_update

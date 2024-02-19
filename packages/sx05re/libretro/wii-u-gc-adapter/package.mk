@@ -25,7 +25,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Non-commercial"
 PKG_SITE="https://github.com/ToadKing/wii-u-gc-adapter"
-PKG_URL="https://github.com/ToadKing/wii-u-gc-adapter/archive/$PKG_VERSION.tar.gz"
+PKG_URL="https://github.com/ToadKing/wii-u-gc-adapter/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION=""
@@ -37,6 +37,6 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/bin
-  cp wii-u-gc-adapter $INSTALL/usr/bin/
+  mkdir -p ${INSTALL}/usr/bin
+  cp wii-u-gc-adapter ${INSTALL}/usr/bin/
 }

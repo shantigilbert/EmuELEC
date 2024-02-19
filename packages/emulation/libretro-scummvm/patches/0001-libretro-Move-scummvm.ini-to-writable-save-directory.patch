@@ -1,0 +1,25 @@
+From a7c2f414b2e5db27e896072cbb45abedcbfb61e1 Mon Sep 17 00:00:00 2001
+From: Garrett Brown <themagnificentmrb@gmail.com>
+Date: Thu, 28 Oct 2021 16:00:20 -0700
+Subject: [PATCH] libretro: Move scummvm.ini to writable save directory
+
+---
+ src/libretro_os.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/libretro_os.cpp b/src/libretro_os.cpp
+index eeb29baf5e..0630f1c565 100644
+--- a/src/libretro_os.cpp
++++ b/src/libretro_os.cpp
+@@ -681,7 +681,7 @@ public:
+ 
+   virtual Audio::Mixer *getMixer() { return _mixer; }
+ 
+-  virtual Common::String getDefaultConfigFileName() { return s_systemDir + "/scummvm.ini"; }
++  virtual Common::String getDefaultConfigFileName() { return s_saveDir + "/scummvm.ini"; }
+ 
+   virtual void logMessage(LogMessageType::Type type, const char *message) {
+     if (log_cb)
+-- 
+2.34.1
+

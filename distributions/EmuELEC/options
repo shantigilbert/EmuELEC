@@ -1,4 +1,4 @@
-### DISTRO INFORMATION ###
+## DISTRO INFORMATION ###
 
 # Name of the Distro to build (full name, without special characters)
   DISTRONAME="EmuELEC"
@@ -32,12 +32,21 @@
 # GOLD (Google Linker) support
   GOLD_SUPPORT="yes"
 
+# MOLD (Modern Linker) support
+  MOLD_SUPPORT="no"
+
+# default linker (bfd / gold / mold)
+  DEFAULT_LINKER="gold"
+
 # HARDENING (security relevant linker and compiler flags) support
   HARDENING_SUPPORT="no"
 
 # Default supported get handlers (archive, git, file etc.)
   GET_HANDLER_SUPPORT="archive git file"
 
+# use local ccache on build host, if available, for early package
+# builds before ccache has been built
+  LOCAL_CCACHE_SUPPORT="yes"
 
 ### OS CONFIGURATION ###
 
@@ -48,7 +57,9 @@
 # for a list of additional drivers see packages/linux-drivers
 # Space separated list is supported,
 # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
-  ADDITIONAL_DRIVERS="RTL8192CU RTL8192DU RTL8192EU RTL8188EU RTL8812AU RTL8821CU"
+  ADDITIONAL_DRIVERS="gpu-aml openvfd-driver media_modules-aml wifi_dummy-aml ap6xxx-aml
+                     uwe5631-aml RTL8812AU RTL8822BU-aml RTL8822CS-aml RTL8822CU-aml
+                     RTL8852BS-aml RTL8152-aml w1-aml"
 
 # Default size of system partition, in MB, eg. 512
   SYSTEM_SIZE=2048
@@ -86,6 +97,12 @@
 
 # build and install PulseAudio support (yes / no)
   PULSEAUDIO_SUPPORT="yes"
+
+# build and install pipewire support (yes / no)
+  PIPEWIRE_SUPPORT="no"
+
+# build and install eSpeak-NG support (yes / no)
+  ESPEAK_SUPPORT="no"
 
 # build and install with BluRay support (yes / no)
   KODI_BLURAY_SUPPORT="yes"
@@ -132,11 +149,19 @@
 # build with Samba Client support (mounting SAMBA shares with KODI) (yes / no)
   KODI_SAMBA_SUPPORT="yes"
 
+# build kodi with alsa support (yes/no)
+  KODI_ALSA_SUPPORT="yes"
+
+# build kodi with pulseaudio support (yes/no)
+  KODI_PULSEAUDIO_SUPPORT="yes"
+
+# build kodi with pipewire support (yes/no)
+  KODI_PIPEWIRE_SUPPORT="no"
 
 ### KODI ADDONS ###
 
 # Distribution Specific source location
-  DISTRO_MIRROR="http://sources.libreelec.tv/mirror"
+  DISTRO_MIRROR="http://sources.coreelec.org http://sources.libreelec.tv/mirror"
   DISTRO_SRC="http://sources.libreelec.tv/$LIBREELEC_VERSION"
 
 # Addon Server Url
@@ -149,7 +174,7 @@
   ADDON_REPO_NAME="CoreELEC Add-ons"
 
 # set the addon dirs
-  ADDON_PATH="$ADDON_VERSION/$PROJECT/$TARGET_ARCH"
+  ADDON_PATH="$DEVICE/$ADDON_VERSION/$TARGET_ARCH"
 
 # Settings package name - blank if not required
   DISTRO_PKG_SETTINGS=""
@@ -170,7 +195,7 @@
   WIRELESS_DAEMON="wpa_supplicant"
 
 # build and install iSCSI support - iscsistart (yes / no)
-  ISCSI_SUPPORT="yes"
+  ISCSI_SUPPORT="no"
 
 # build with NFS support (mounting nfs shares via the OS) (yes / no)
   NFS_SUPPORT="yes"
@@ -185,10 +210,10 @@
   SFTP_SERVER="yes"
 
 # build and install OpenVPN support (yes / no)
-  OPENVPN_SUPPORT="yes"
+  OPENVPN_SUPPORT="no"
 
 # build and install WireGuard support (yes / no)
-  WIREGUARD_SUPPORT="yes"
+  WIREGUARD_SUPPORT="no"
 
 # build and install diskmounter support (udevil)
 # this service provide auto mounting support for external drives in the
@@ -217,22 +242,11 @@
 # build with installer (yes / no)
   INSTALLER_SUPPORT="yes"
 
-# Windowmanager to use (fluxbox / none)
-  WINDOWMANAGER="fluxbox"
-
-# Xorg Graphic drivers to use (all / i915,i965,r200,r300,r600,nvidia)
-# Space separated list is supported,
-# e.g. GRAPHIC_DRIVERS="i915 i965 r300 r600 radeonsi nvidia"
-  GRAPHIC_DRIVERS="r300 r600 radeonsi iris i915 i965 nvidia nvidia-legacy vmware virtio"
-
 # build and install remote support (yes / no)
   REMOTE_SUPPORT="yes"
 
-# IR remote protocols supported in default config
-  IR_REMOTE_PROTOCOLS="RC6 NEC"
-
 # IR remote keymaps supported in default config
-  IR_REMOTE_KEYMAPS="rc6_mce xbox_360 xbox_one"
+  IR_REMOTE_KEYMAPS="rc6_mce xbox_360 xbox_one odroid wetek_hub wetek_play_2 tanix"
 
 # build and install Joystick support (yes / no)
   JOYSTICK_SUPPORT="yes"
@@ -246,20 +260,16 @@
 # OEM packages for OEM's (yes / no)
   OEM_SUPPORT="no"
 
+# build and install ALSA Audio support (yes / no)
+  ALSA_SUPPORT="yes"
+
 # additional packages to install:
 # Space separated list is supported,
 # e.g. ADDITIONAL_PACKAGES="PACKAGE1 PACKAGE2"
-  ADDITIONAL_PACKAGES=""
-
-# MOLD (Modern Linker) support
-  MOLD_SUPPORT="no"
-
-# default linker (bfd / gold)
-  DEFAULT_LINKER="gold"
+  ADDITIONAL_PACKAGES="u-boot-script dtc CoreELEC-Debug-Scripts inject_bl301
+                       nfs-utils dtb-xml megatools"
 
 # start SX05RE added options
-
-LAKKA_MIRROR="http://sources.lakka.tv"
 
 LIBRETRO_CORES="2048 \
 81 \
@@ -321,6 +331,7 @@ puae \
 px68k \
 reminiscence \
 sameboy \
+sameduck \
 scummvm \
 snes9x \
 snes9x2002 \
@@ -337,7 +348,8 @@ uzem \
 vba-next \
 vbam \
 vecx \
-vice"
+vice \
+yabasanshiro"
 
 LIBRETRO_EXTRA_CORES="chailove \
 crocods \
@@ -346,12 +358,13 @@ desmume-2015 \
 lutro \
 melonds \
 snes9x2005 \
-yabause \
-virtualjaguar"
+yabause"
 
 LIBRETRO_S922X_CORES="mesen \
+multiemu \
 mesen-s \
-quicknes"
+quicknes \
+virtualjaguar"
 
   RA_PLAYLIST_NAMES=""\
 "Atari - 2600.lpl;"\

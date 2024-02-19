@@ -7,7 +7,7 @@ PKG_SHA256="15400e78b918b15743b815c195be472899d4243143e405a7b50d5be1cd07ffd1"
 PKG_LICENSE="nonfree"
 PKG_SITE="http://openlinux.amlogic.com:8000/download/ARM/filesystem/"
 PKG_URL="https://github.com/CoreELEC/opengl-meson/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain tee_preload_fw"
+PKG_DEPENDS_TARGET="toolchain opentee_linuxdriver"
 PKG_LONGDESC="OpenGL ES pre-compiled libraries for Mali GPUs found in Amlogic Meson SoCs."
 PKG_TOOLCHAIN="manual"
 

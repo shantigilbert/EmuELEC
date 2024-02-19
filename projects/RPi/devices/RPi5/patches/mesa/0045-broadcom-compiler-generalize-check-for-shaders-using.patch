@@ -1,0 +1,30 @@
+From ed6bfa29d43b5a89ff070961454f1e82e23b4f45 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Fri, 8 Oct 2021 15:10:24 +0200
+Subject: [PATCH 045/142] broadcom/compiler: generalize check for shaders using
+ pixel center W
+
+V3D 4.x has pixel center W in rf0 and V3D 7.x has it in rf3. We already
+account for this when we setup the c->payload_w, so use that.
+---
+ src/broadcom/compiler/nir_to_vir.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/compiler/nir_to_vir.c b/src/broadcom/compiler/nir_to_vir.c
+index 220ff6bcd49..90fe1d1e7f0 100644
+--- a/src/broadcom/compiler/nir_to_vir.c
++++ b/src/broadcom/compiler/nir_to_vir.c
+@@ -4547,8 +4547,8 @@ vir_check_payload_w(struct v3d_compile *c)
+ 
+         vir_for_each_inst_inorder(inst, c) {
+                 for (int i = 0; i < vir_get_nsrc(inst); i++) {
+-                        if (inst->src[i].file == QFILE_REG &&
+-                            inst->src[i].index == 0) {
++                        if (inst->src[i].file == c->payload_w.file &&
++                            inst->src[i].index == c->payload_w.index) {
+                                 c->uses_center_w = true;
+                                 return;
+                         }
+-- 
+2.39.2
+

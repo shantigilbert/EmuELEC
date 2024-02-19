@@ -5,7 +5,7 @@
 PKG_NAME="pvr.filmon"
 PKG_VERSION="20.3.0-Nexus"
 PKG_SHA256="dfd2a7b64d2b647ba3f7bfba05676a593c3284e2298becfed68b82e441a69b33"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.filmon"

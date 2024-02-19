@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="imame4all"
-PKG_VERSION="0208517404e841fce0c094f1a2776a0e1c6c101d"
-PKG_SHA256="7981c04b3efb9a3c4d31cb05c56745b729da0aea01f0b2543ee9e25a2c53aced"
+PKG_VERSION="1472da3a39ab14fff8325b1f51a1dfdb8eabb5c8"
+PKG_SHA256="e70d596045b9753084329caee49767e0ca1fb2567657a6a1fbeb3b486c594df9"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MAME"
 PKG_SITE="https://github.com/libretro/imame4all-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -41,6 +41,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp libretro.so $INSTALL/usr/lib/libretro/imame4all_libretro.so
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp libretro.so ${INSTALL}/usr/lib/libretro/imame4all_libretro.so
 }

@@ -1,14 +1,13 @@
 --- a/Makefile.pre.in
 +++ b/Makefile.pre.in
-@@ -633,10 +633,12 @@ sharedmods: $(BUILDPYTHON) pybuilddir.tx
+@@ -633,9 +633,11 @@ sharedmods: $(BUILDPYTHON) pybuilddir.tx
+ 	    *) quiet="";; \
  	esac; \
  	echo "$(RUNSHARED) CC='$(CC)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)' \
- 		_TCLTK_INCLUDES='$(TCLTK_INCLUDES)' _TCLTK_LIBS='$(TCLTK_LIBS)' \
 +		PYTHONXCPREFIX='$(DESTDIR)$(prefix)' \
  		DISABLED_EXTENSIONS="$(DISABLED_EXTENSIONS)" \
  		$(PYTHON_FOR_BUILD) $(srcdir)/setup.py $$quiet build"; \
  	$(RUNSHARED) CC='$(CC)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)' \
- 		_TCLTK_INCLUDES='$(TCLTK_INCLUDES)' _TCLTK_LIBS='$(TCLTK_LIBS)' \
 +		PYTHONXCPREFIX='$(DESTDIR)$(prefix)' \
  		$(PYTHON_FOR_BUILD) $(srcdir)/setup.py $$quiet build
  
@@ -16,7 +15,7 @@
 @@ -1750,8 +1752,10 @@ libainstall:	@DEF_MAKE_RULE@ python-conf
  # Install the dynamically loadable modules
  # This goes into $(exec_prefix)
- sharedinstall: sharedmods
+ sharedinstall: all
 +	CC='$(CC)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)' \
  	$(RUNSHARED) DISABLED_EXTENSIONS="$(DISABLED_EXTENSIONS)" \
  		$(PYTHON_FOR_BUILD) $(srcdir)/setup.py install \

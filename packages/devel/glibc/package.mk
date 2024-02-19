@@ -14,16 +14,26 @@ PKG_LONGDESC="The Glibc package contains the main C library."
 PKG_BUILD_FLAGS="+bfd"
 
 case "${LINUX}" in
-  amlogic-4.9|rockchip-4.4|gameforce-4.4|odroid-go-a-4.4|rk356x-4.19|OdroidM1-4.19)
+  amlogic-4.9|rk356x-4.19|OdroidM1-4.19)
+    OPT_ENABLE_KERNEL=4.9.0
+    ;;
+  gameforce-4.4|rockchip-4.4|odroid-go-a-4.4)
     OPT_ENABLE_KERNEL=4.4.0
+    ;;
+  amlogic-5.4)
+    OPT_ENABLE_KERNEL=5.4.0
     ;;
   amlogic-3.14)
     OPT_ENABLE_KERNEL=3.0.0
     ;;
   *)
-    OPT_ENABLE_KERNEL=5.15.0
+    OPT_ENABLE_KERNEL=6.1.0
     ;;
 esac
+
+if [ "${TARGET_ARCH}" = "arm" ] || [ "${TARGET_ARCH}" = "aarch64" ]; then
+  PKG_PATCH_DIRS="widevine-arm"
+fi
 
 PKG_CONFIGURE_OPTS_TARGET="BASH_SHELL=/bin/sh \
                            ac_cv_path_PERL=no \
@@ -101,14 +111,6 @@ EOF
 
   # binaries to install into target
   GLIBC_INCLUDE_BIN="getent ldd locale localedef"
-
-  # glibc does not need / nor build successfully with _FILE_OFFSET_BITS or _TIME_BITS set
-  if [ "${TARGET_ARCH}" = "arm" ]; then
-    export CFLAGS=$(echo ${CFLAGS} | sed -e "s|-D_FILE_OFFSET_BITS=64||g")
-    export CFLAGS=$(echo ${CFLAGS} | sed -e "s|-D_TIME_BITS=64||g")
-    export CXXFLAGS=$(echo ${CXXFLAGS} | sed -e "s|-D_FILE_OFFSET_BITS=64||g")
-    export CXXFLAGS=$(echo ${CXXFLAGS} | sed -e "s|-D_TIME_BITS=64||g")
-  fi
 }
 
 post_makeinstall_target() {

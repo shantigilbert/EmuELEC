@@ -1,0 +1,139 @@
+From cbaa469c09974c1574b16f559173694904fe1bb0 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Mon, 25 Oct 2021 09:38:57 +0200
+Subject: [PATCH 056/142] broadcom/compiler: convert mul to add when needed to
+ allow merge
+
+V3D 7.x added 'mov' opcodes to the ADD alu, so now it is possible to
+move these to the ADD alu to facilitate merging them with other MUL
+instructions.
+---
+ src/broadcom/compiler/qpu_schedule.c | 102 ++++++++++++++++++++++++---
+ 1 file changed, 94 insertions(+), 8 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 334ffdc6d58..caa84254998 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -1086,6 +1086,57 @@ qpu_convert_add_to_mul(struct v3d_qpu_instr *inst)
+         inst->alu.add.b.unpack = V3D_QPU_UNPACK_NONE;
+ }
+ 
++static bool
++can_do_mul_as_add(const struct v3d_device_info *devinfo, enum v3d_qpu_mul_op op)
++{
++        switch (op) {
++        case V3D_QPU_M_MOV:
++        case V3D_QPU_M_FMOV:
++                return devinfo->ver >= 71;
++        default:
++                return false;
++        }
++}
++
++static enum v3d_qpu_mul_op
++mul_op_as_add_op(enum v3d_qpu_mul_op op)
++{
++        switch (op) {
++        case V3D_QPU_M_MOV:
++                return V3D_QPU_A_MOV;
++        case V3D_QPU_M_FMOV:
++                return V3D_QPU_A_FMOV;
++        default:
++                unreachable("unexpected mov opcode");
++        }
++}
++
++static void
++qpu_convert_mul_to_add(struct v3d_qpu_instr *inst)
++{
++        STATIC_ASSERT(sizeof(inst->alu.add) == sizeof(inst->alu.mul));
++        assert(inst->alu.mul.op != V3D_QPU_M_NOP);
++        assert(inst->alu.add.op == V3D_QPU_A_NOP);
++
++        memcpy(&inst->alu.add, &inst->alu.mul, sizeof(inst->alu.add));
++        inst->alu.add.op = mul_op_as_add_op(inst->alu.mul.op);
++        inst->alu.mul.op = V3D_QPU_M_NOP;
++
++        inst->flags.ac = inst->flags.mc;
++        inst->flags.apf = inst->flags.mpf;
++        inst->flags.auf = inst->flags.muf;
++        inst->flags.mc = V3D_QPU_COND_NONE;
++        inst->flags.mpf = V3D_QPU_PF_NONE;
++        inst->flags.muf = V3D_QPU_UF_NONE;
++
++        inst->alu.add.output_pack = inst->alu.mul.output_pack;
++        inst->alu.add.a.unpack = inst->alu.mul.a.unpack;
++        inst->alu.add.b.unpack = inst->alu.mul.b.unpack;
++        inst->alu.mul.output_pack = V3D_QPU_PACK_NONE;
++        inst->alu.mul.a.unpack = V3D_QPU_UNPACK_NONE;
++        inst->alu.mul.b.unpack = V3D_QPU_UNPACK_NONE;
++}
++
+ static bool
+ qpu_merge_inst(const struct v3d_device_info *devinfo,
+                struct v3d_qpu_instr *result,
+@@ -1151,17 +1202,52 @@ qpu_merge_inst(const struct v3d_device_info *devinfo,
+                 }
+         }
+ 
++        struct v3d_qpu_instr add_inst;
+         if (b->alu.mul.op != V3D_QPU_M_NOP) {
+-                if (a->alu.mul.op != V3D_QPU_M_NOP)
+-                        return false;
+-                merge.alu.mul = b->alu.mul;
++                if (a->alu.mul.op == V3D_QPU_M_NOP) {
++                        merge.alu.mul = b->alu.mul;
++
++                        merge.flags.mc = b->flags.mc;
++                        merge.flags.mpf = b->flags.mpf;
++                        merge.flags.muf = b->flags.muf;
++
++                        mul_instr = b;
++                        add_instr = a;
++                }
++                /* If a's mul op is used but its add op is not, then see if we
++                 * can convert either a's mul op or b's mul op to an add op
++                 * so we can merge.
++                 */
++                else if (a->alu.add.op == V3D_QPU_A_NOP &&
++                         can_do_mul_as_add(devinfo, b->alu.mul.op)) {
++                        add_inst = *b;
++                        qpu_convert_mul_to_add(&add_inst);
+ 
+-                merge.flags.mc = b->flags.mc;
+-                merge.flags.mpf = b->flags.mpf;
+-                merge.flags.muf = b->flags.muf;
++                        merge.alu.add = add_inst.alu.add;
+ 
+-                mul_instr = b;
+-                add_instr = a;
++                        merge.flags.ac = b->flags.mc;
++                        merge.flags.apf = b->flags.mpf;
++                        merge.flags.auf = b->flags.muf;
++
++                        mul_instr = a;
++                        add_instr = &add_inst;
++                } else if (a->alu.add.op == V3D_QPU_A_NOP &&
++                           can_do_mul_as_add(devinfo, a->alu.mul.op)) {
++                        add_inst = *a;
++                        qpu_convert_mul_to_add(&add_inst);
++
++                        merge = add_inst;
++                        merge.alu.mul = b->alu.mul;
++
++                        merge.flags.mc = b->flags.mc;
++                        merge.flags.mpf = b->flags.mpf;
++                        merge.flags.muf = b->flags.muf;
++
++                        mul_instr = b;
++                        add_instr = &add_inst;
++                } else {
++                        return false;
++                }
+         }
+ 
+         /* V3D 4.x and earlier use muxes to select the inputs for the ALUs and
+-- 
+2.39.2
+

@@ -1,0 +1,25 @@
+From 7c89d8026fd550282d54933f37ffc2773869326f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Mon, 26 Jul 2021 15:08:11 +0200
+Subject: [PATCH 079/142] v3dvx/cmd_buffer: emit CLEAR_RENDER_TARGETS for v71
+
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index c6307890da5..ae1c21ae00b 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -1219,7 +1219,7 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+          }
+ #endif
+ #if V3D_VERSION >= 71
+-         unreachable("HW generation 71 not supported yet.");
++         cl_emit(rcl, CLEAR_RENDER_TARGETS, clear_rt);
+ #endif
+       }
+       cl_emit(rcl, END_OF_TILE_MARKER, end);
+-- 
+2.39.2
+

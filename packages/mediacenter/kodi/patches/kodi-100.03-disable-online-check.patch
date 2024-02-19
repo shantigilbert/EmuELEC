@@ -3,7 +3,7 @@ Subject: disable online check
 ---
 --- a/xbmc/GUIInfoManager.cpp
 +++ b/xbmc/GUIInfoManager.cpp
-@@ -1840,7 +1840,6 @@ const infomap system_labels[] = {
+@@ -1921,7 +1921,6 @@ const infomap system_labels[] = {
      {"currentcontrol", SYSTEM_CURRENT_CONTROL},
      {"currentcontrolid", SYSTEM_CURRENT_CONTROL_ID},
      {"dvdlabel", SYSTEM_DVD_LABEL},
@@ -34,7 +34,7 @@ Subject: disable online check
  std::string CSysInfo::GetHddSpaceInfo(int drive, bool shortText)
 --- a/xbmc/windows/GUIWindowSystemInfo.cpp
 +++ b/xbmc/windows/GUIWindowSystemInfo.cpp
-@@ -124,7 +124,6 @@ void CGUIWindowSystemInfo::FrameMove()
+@@ -126,7 +126,6 @@ void CGUIWindowSystemInfo::FrameMove()
      SetControlLabel(i++, "{}: {}", 13160, NETWORK_GATEWAY_ADDRESS);
      SetControlLabel(i++, "{}: {}", 13161, NETWORK_DNS1_ADDRESS);
      SetControlLabel(i++, "{}: {}", 20307, NETWORK_DNS2_ADDRESS);

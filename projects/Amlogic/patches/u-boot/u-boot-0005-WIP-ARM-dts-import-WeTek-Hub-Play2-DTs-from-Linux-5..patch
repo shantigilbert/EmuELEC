@@ -1,7 +1,7 @@
 From f72090a5d057a18fa8bceec0400c212012f56126 Mon Sep 17 00:00:00 2001
 From: Christian Hewitt <christianshewitt@gmail.com>
 Date: Tue, 20 Apr 2021 05:19:43 +0000
-Subject: [PATCH 05/15] WIP: ARM: dts: import WeTek Hub/Play2 DTs from Linux
+Subject: [PATCH 05/25] WIP: ARM: dts: import WeTek Hub/Play2 DTs from Linux
  5.19
 
 Import the WeTek common dtsi and Hub/Play2 device-trees.
@@ -550,5 +550,5 @@ index 0000000000..3c3eeb148e
 +	status = "okay";
 +};
 -- 
-2.17.1
+2.34.1
 

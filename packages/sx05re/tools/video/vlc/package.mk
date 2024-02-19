@@ -8,7 +8,7 @@ PKG_REV="20211025"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.videolan.org"
-PKG_URL="https://download.videolan.org/pub/videolan/$PKG_NAME/$PKG_VERSION/$PKG_NAME-$PKG_VERSION.tar.xz"
+PKG_URL="https://download.videolan.org/pub/videolan/${PKG_NAME}/${PKG_VERSION}/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_TARGET="toolchain libdvbpsi gnutls ffmpeg libmpeg2 zlib flac libvorbis libxml2 pulseaudio mpg123-compat x264"
 PKG_SHORTDESC="VideoLAN multimedia player and streamer"
 PKG_LONGDESC="VLC is the VideoLAN project's media player. It plays MPEG, MPEG2, MPEG4, DivX, MOV, WMV, QuickTime, mp3, Ogg/Vorbis files, DVDs, VCDs, and multimedia streams from various network sources."
@@ -175,20 +175,20 @@ DISABLED_FEATURES="--disable-dependency-tracking \
 		DISABLED_FEATURES+=" --disable-pulse"
 	fi 
 
-PKG_CONFIGURE_OPTS_TARGET="$ENABLED_FEATURES $DISABLED_FEATURES"
+PKG_CONFIGURE_OPTS_TARGET="${ENABLED_FEATURES} ${DISABLED_FEATURES}"
 
 
-  export LDFLAGS="$LDFLAGS -lresolv -fopenmp"
+  export LDFLAGS="${LDFLAGS} -lresolv -fopenmp"
 }
 
 post_makeinstall_target() {
-  rm -fr $INSTALL/usr/share/applications
-  rm -fr $INSTALL/usr/share/icons
-  rm -fr $INSTALL/usr/share/kde4
-  rm -f $INSTALL/usr/bin/rvlc
-  rm -f $INSTALL/usr/bin/vlc-wrapper
+  rm -fr ${INSTALL}/usr/share/applications
+  rm -fr ${INSTALL}/usr/share/icons
+  rm -fr ${INSTALL}/usr/share/kde4
+  rm -f ${INSTALL}/usr/bin/rvlc
+  rm -f ${INSTALL}/usr/bin/vlc-wrapper
 
-  mkdir -p $INSTALL/usr/config
-    mv -f $INSTALL/usr/lib/vlc $INSTALL/usr/config
-    ln -sf /storage/.config/vlc $INSTALL/usr/lib/vlc
+  mkdir -p ${INSTALL}/usr/config
+    mv -f ${INSTALL}/usr/lib/vlc ${INSTALL}/usr/config
+    ln -sf /storage/.config/vlc ${INSTALL}/usr/lib/vlc
 }

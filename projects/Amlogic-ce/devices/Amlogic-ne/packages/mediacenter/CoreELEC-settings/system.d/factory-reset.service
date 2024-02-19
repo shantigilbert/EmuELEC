@@ -1,0 +1,10 @@
+[Unit]
+Description=Factory reset
+DefaultDependencies=no
+
+[Service]
+Type=idle
+ExecStart=/usr/lib/coreelec/factory-reset
+StandardInput=tty-force
+StandardOutput=inherit
+StandardError=inherit

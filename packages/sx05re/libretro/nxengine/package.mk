@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="nxengine"
-PKG_VERSION="e271c6262d73f07e5d92d285503f1c049801c51a"
-PKG_SHA256="221873fe0f8eca81100d355eea379de70030fb20c9afec35f7d675bf2840f044"
+PKG_VERSION="1f371e51c7a19049e00f4364cbe9c68ca08b303a"
+PKG_SHA256="f85987a9497339f292df6a34af1c2b1020992465d0dd2c4a9acc9734ea857877"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/nxengine-libretro"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -41,6 +41,6 @@ pre_configure_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp nxengine_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp nxengine_libretro.so ${INSTALL}/usr/lib/libretro/
 }

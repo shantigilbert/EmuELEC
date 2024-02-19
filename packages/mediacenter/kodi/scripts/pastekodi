@@ -84,6 +84,8 @@ fi
 
   journalctl -a -b -0 -o short-precise | cat_data "journalctl -a -b -0"
 
+  kmsprint | cat_data "kmsprint"
+
   if [ "${LIBREELEC_PROJECT}" = "RPi" ]; then
     vcgencmd bootloader_version | cat_data "Bootloader version"
   fi

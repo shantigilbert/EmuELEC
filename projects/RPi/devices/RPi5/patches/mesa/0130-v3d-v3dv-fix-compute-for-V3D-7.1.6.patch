@@ -1,0 +1,141 @@
+From 221d4079c616752b249cefb352268fce5758b578 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Thu, 9 Mar 2023 19:05:19 +0100
+Subject: [PATCH 130/142] v3d,v3dv: fix compute for V3D 7.1.6+
+
+---
+ src/broadcom/vulkan/v3dv_cmd_buffer.c | 25 +++++++++++++++++++++----
+ src/broadcom/vulkan/v3dv_private.h    |  3 ++-
+ src/broadcom/vulkan/v3dv_queue.c      |  2 +-
+ src/gallium/drivers/v3d/v3dx_draw.c   | 14 +++++++++++---
+ 4 files changed, 35 insertions(+), 9 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_cmd_buffer.c b/src/broadcom/vulkan/v3dv_cmd_buffer.c
+index 36bd7960985..609c7acfa8f 100644
+--- a/src/broadcom/vulkan/v3dv_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dv_cmd_buffer.c
+@@ -3816,6 +3816,7 @@ cmd_buffer_emit_pre_dispatch(struct v3dv_cmd_buffer *cmd_buffer)
+ 
+ void
+ v3dv_cmd_buffer_rewrite_indirect_csd_job(
++   struct v3dv_device *device,
+    struct v3dv_csd_indirect_cpu_job_info *info,
+    const uint32_t *wg_counts)
+ {
+@@ -3835,8 +3836,15 @@ v3dv_cmd_buffer_rewrite_indirect_csd_job(
+    submit->cfg[1] = wg_counts[1] << V3D_CSD_CFG012_WG_COUNT_SHIFT;
+    submit->cfg[2] = wg_counts[2] << V3D_CSD_CFG012_WG_COUNT_SHIFT;
+ 
+-   submit->cfg[4] = DIV_ROUND_UP(info->wg_size, 16) *
+-                    (wg_counts[0] * wg_counts[1] * wg_counts[2]) - 1;
++   uint32_t num_batches = DIV_ROUND_UP(info->wg_size, 16) *
++                          (wg_counts[0] * wg_counts[1] * wg_counts[2]);
++   /* V3D 7.1.6 and later don't subtract 1 from the number of batches */
++   if (device->devinfo.ver < 71 ||
++       (device->devinfo.ver == 71 && device->devinfo.rev < 6)) {
++      submit->cfg[4] = num_batches - 1;
++   } else {
++      submit->cfg[4] = num_batches;
++   }
+    assert(submit->cfg[4] != ~0);
+ 
+    if (info->needs_wg_uniform_rewrite) {
+@@ -3869,6 +3877,7 @@ cmd_buffer_create_csd_job(struct v3dv_cmd_buffer *cmd_buffer,
+                           uint32_t **wg_uniform_offsets_out,
+                           uint32_t *wg_size_out)
+ {
++   struct v3dv_device *device = cmd_buffer->device;
+    struct v3dv_pipeline *pipeline = cmd_buffer->state.compute.pipeline;
+    assert(pipeline && pipeline->shared_data->variants[BROADCOM_SHADER_COMPUTE]);
+    struct v3dv_shader_variant *cs_variant =
+@@ -3927,18 +3936,26 @@ cmd_buffer_create_csd_job(struct v3dv_cmd_buffer *cmd_buffer,
+    if (wg_size_out)
+       *wg_size_out = wg_size;
+ 
+-   submit->cfg[4] = num_batches - 1;
++   /* V3D 7.1.6 and later don't subtract 1 from the number of batches */
++   if (device->devinfo.ver < 71 ||
++       (device->devinfo.ver == 71 && device->devinfo.rev < 6)) {
++      submit->cfg[4] = num_batches - 1;
++   } else {
++      submit->cfg[4] = num_batches;
++   }
+    assert(submit->cfg[4] != ~0);
+ 
+    assert(pipeline->shared_data->assembly_bo);
+    struct v3dv_bo *cs_assembly_bo = pipeline->shared_data->assembly_bo;
+ 
+    submit->cfg[5] = cs_assembly_bo->offset + cs_variant->assembly_offset;
+-   submit->cfg[5] |= V3D_CSD_CFG5_PROPAGATE_NANS;
+    if (cs_variant->prog_data.base->single_seg)
+       submit->cfg[5] |= V3D_CSD_CFG5_SINGLE_SEG;
+    if (cs_variant->prog_data.base->threads == 4)
+       submit->cfg[5] |= V3D_CSD_CFG5_THREADING;
++   /* V3D 7.x has made the PROPAGATE_NANS bit in CFG5 reserved  */
++   if (device->devinfo.ver < 71)
++      submit->cfg[5] |= V3D_CSD_CFG5_PROPAGATE_NANS;
+ 
+    if (cs_variant->prog_data.cs->shared_size > 0) {
+       job->csd.shared_memory =
+diff --git a/src/broadcom/vulkan/v3dv_private.h b/src/broadcom/vulkan/v3dv_private.h
+index 8adb8873efd..2f3ef185126 100644
+--- a/src/broadcom/vulkan/v3dv_private.h
++++ b/src/broadcom/vulkan/v3dv_private.h
+@@ -1818,7 +1818,8 @@ void v3dv_cmd_buffer_copy_query_results(struct v3dv_cmd_buffer *cmd_buffer,
+ void v3dv_cmd_buffer_add_tfu_job(struct v3dv_cmd_buffer *cmd_buffer,
+                                  struct drm_v3d_submit_tfu *tfu);
+ 
+-void v3dv_cmd_buffer_rewrite_indirect_csd_job(struct v3dv_csd_indirect_cpu_job_info *info,
++void v3dv_cmd_buffer_rewrite_indirect_csd_job(struct v3dv_device *device,
++                                              struct v3dv_csd_indirect_cpu_job_info *info,
+                                               const uint32_t *wg_counts);
+ 
+ void v3dv_cmd_buffer_add_private_obj(struct v3dv_cmd_buffer *cmd_buffer,
+diff --git a/src/broadcom/vulkan/v3dv_queue.c b/src/broadcom/vulkan/v3dv_queue.c
+index b4aae195180..429d14a9196 100644
+--- a/src/broadcom/vulkan/v3dv_queue.c
++++ b/src/broadcom/vulkan/v3dv_queue.c
+@@ -408,7 +408,7 @@ handle_csd_indirect_cpu_job(struct v3dv_queue *queue,
+ 
+    if (memcmp(group_counts, info->csd_job->csd.wg_count,
+               sizeof(info->csd_job->csd.wg_count)) != 0) {
+-      v3dv_cmd_buffer_rewrite_indirect_csd_job(info, group_counts);
++      v3dv_cmd_buffer_rewrite_indirect_csd_job(queue->device, info, group_counts);
+    }
+ 
+    return VK_SUCCESS;
+diff --git a/src/gallium/drivers/v3d/v3dx_draw.c b/src/gallium/drivers/v3d/v3dx_draw.c
+index e4b414b0676..4e1af41d50e 100644
+--- a/src/gallium/drivers/v3d/v3dx_draw.c
++++ b/src/gallium/drivers/v3d/v3dx_draw.c
+@@ -1473,8 +1473,15 @@ v3d_launch_grid(struct pipe_context *pctx, const struct pipe_grid_info *info)
+         submit.cfg[3] |= (wg_size & 0xff) << V3D_CSD_CFG3_WG_SIZE_SHIFT;
+ 
+ 
+-        /* Number of batches the dispatch will invoke (minus 1). */
+-        submit.cfg[4] = num_batches - 1;
++        /* Number of batches the dispatch will invoke.
++         * V3D 7.1.6 and later don't subtract 1 from the number of batches
++         */
++        if (v3d->screen->devinfo.ver < 71 ||
++            (v3d->screen->devinfo.ver == 71 && v3d->screen->devinfo.rev < 6)) {
++                submit.cfg[4] = num_batches - 1;
++        } else {
++                submit.cfg[4] = num_batches;
++        }
+ 
+         /* Make sure we didn't accidentally underflow. */
+         assert(submit.cfg[4] != ~0);
+@@ -1482,7 +1489,8 @@ v3d_launch_grid(struct pipe_context *pctx, const struct pipe_grid_info *info)
+         v3d_job_add_bo(job, v3d_resource(v3d->prog.compute->resource)->bo);
+         submit.cfg[5] = (v3d_resource(v3d->prog.compute->resource)->bo->offset +
+                          v3d->prog.compute->offset);
+-        submit.cfg[5] |= V3D_CSD_CFG5_PROPAGATE_NANS;
++        if (v3d->screen->devinfo.ver < 71)
++                submit.cfg[5] |= V3D_CSD_CFG5_PROPAGATE_NANS;
+         if (v3d->prog.compute->prog_data.base->single_seg)
+                 submit.cfg[5] |= V3D_CSD_CFG5_SINGLE_SEG;
+         if (v3d->prog.compute->prog_data.base->threads == 4)
+-- 
+2.39.2
+

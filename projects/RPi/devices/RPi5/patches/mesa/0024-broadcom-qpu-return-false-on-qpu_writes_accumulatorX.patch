@@ -1,0 +1,59 @@
+From 7263fa24a3c57b1dcd4d870670cda86ae89aa28c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Wed, 15 Sep 2021 10:55:49 +0200
+Subject: [PATCH 024/142] broadcom/qpu: return false on
+ qpu_writes_accumulatorXX helpers for v71
+
+As for v71 doesn't have accumulators (devinfo->has_accumulators set to
+false), those methods would always return false.
+---
+ src/broadcom/qpu/qpu_instr.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/src/broadcom/qpu/qpu_instr.c b/src/broadcom/qpu/qpu_instr.c
+index 8de99c611d5..7ec3c867260 100644
+--- a/src/broadcom/qpu/qpu_instr.c
++++ b/src/broadcom/qpu/qpu_instr.c
+@@ -854,6 +854,9 @@ bool
+ v3d_qpu_writes_r3(const struct v3d_device_info *devinfo,
+                   const struct v3d_qpu_instr *inst)
+ {
++        if(!devinfo->has_accumulators)
++                return false;
++
+         if (qpu_writes_magic_waddr_explicitly(devinfo, inst, V3D_QPU_WADDR_R3))
+                 return true;
+ 
+@@ -864,6 +867,9 @@ bool
+ v3d_qpu_writes_r4(const struct v3d_device_info *devinfo,
+                   const struct v3d_qpu_instr *inst)
+ {
++        if (!devinfo->has_accumulators)
++                return false;
++
+         if (inst->type == V3D_QPU_INSTR_TYPE_ALU) {
+                 if (inst->alu.add.op != V3D_QPU_A_NOP &&
+                     inst->alu.add.magic_write &&
+@@ -894,6 +900,9 @@ bool
+ v3d_qpu_writes_r5(const struct v3d_device_info *devinfo,
+                   const struct v3d_qpu_instr *inst)
+ {
++        if (!devinfo->has_accumulators)
++                return false;
++
+         if (qpu_writes_magic_waddr_explicitly(devinfo, inst, V3D_QPU_WADDR_R5))
+                 return true;
+ 
+@@ -904,6 +913,9 @@ bool
+ v3d_qpu_writes_accum(const struct v3d_device_info *devinfo,
+                      const struct v3d_qpu_instr *inst)
+ {
++        if (!devinfo->has_accumulators)
++                return false;
++
+         if (v3d_qpu_writes_r5(devinfo, inst))
+                 return true;
+         if (v3d_qpu_writes_r4(devinfo, inst))
+-- 
+2.39.2
+

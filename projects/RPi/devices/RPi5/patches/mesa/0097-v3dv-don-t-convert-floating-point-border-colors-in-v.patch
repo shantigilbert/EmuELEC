@@ -1,0 +1,39 @@
+From 4f6b4f91577ec04aab907d59d836d0c17731a9d0 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Thu, 7 Oct 2021 12:43:49 +0200
+Subject: [PATCH 097/142] v3dv: don't convert floating point border colors in
+ v71
+
+The TMU does this for us now.
+---
+ src/broadcom/vulkan/v3dvx_device.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_device.c b/src/broadcom/vulkan/v3dvx_device.c
+index e235983864c..72daefadb08 100644
+--- a/src/broadcom/vulkan/v3dvx_device.c
++++ b/src/broadcom/vulkan/v3dvx_device.c
+@@ -118,7 +118,11 @@ static union pipe_color_union encode_border_color(
+                              (1 << (desc->channel[i].size - 1)) - 1);
+    }
+ 
+-   /* convert from float to expected format */
++#if V3D_VERSION <= 42
++   /* The TMU in V3D 7.x always takes 32-bit floats and handles conversions
++    * for us. In V3D 4.x we need to manually convert floating point color
++    * values to the expected format.
++    */
+    if (vk_format_is_srgb(bc_info->format) ||
+        vk_format_is_compressed(bc_info->format)) {
+       for (int i = 0; i < 4; i++)
+@@ -170,6 +174,7 @@ static union pipe_color_union encode_border_color(
+          }
+       }
+    }
++#endif
+ 
+    return border;
+ }
+-- 
+2.39.2
+

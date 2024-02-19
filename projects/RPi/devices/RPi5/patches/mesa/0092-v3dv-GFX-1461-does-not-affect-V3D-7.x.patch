@@ -1,0 +1,32 @@
+From 3794f6f08c559c4e442b57e992d501fb7d515b9b Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 28 Sep 2021 08:31:04 +0200
+Subject: [PATCH 092/142] v3dv: GFX-1461 does not affect V3D 7.x
+
+---
+ src/broadcom/vulkan/v3dv_pass.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_pass.c b/src/broadcom/vulkan/v3dv_pass.c
+index 20f5014268d..3e82c15df88 100644
+--- a/src/broadcom/vulkan/v3dv_pass.c
++++ b/src/broadcom/vulkan/v3dv_pass.c
+@@ -236,11 +236,13 @@ v3dv_CreateRenderPass2(VkDevice _device,
+ 
+          /* GFXH-1461: if depth is cleared but stencil is loaded (or vice versa),
+           * the clear might get lost. If a subpass has this then we can't emit
+-          * the clear using the TLB and we have to do it as a draw call.
++          * the clear using the TLB and we have to do it as a draw call. This
++          * issue is fixed since V3D 4.3.18.
+           *
+           * FIXME: separate stencil.
+           */
+-         if (subpass->ds_attachment.attachment != VK_ATTACHMENT_UNUSED) {
++         if (device->devinfo.ver == 42 &&
++             subpass->ds_attachment.attachment != VK_ATTACHMENT_UNUSED) {
+             struct v3dv_render_pass_attachment *att =
+                &pass->attachments[subpass->ds_attachment.attachment];
+             if (att->desc.format == VK_FORMAT_D24_UNORM_S8_UINT) {
+-- 
+2.39.2
+

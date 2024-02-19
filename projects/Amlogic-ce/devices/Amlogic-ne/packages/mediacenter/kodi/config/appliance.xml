@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<settings version="1">
+
+  <section id="games">
+    <category id="gamesgeneral">
+      <group id="1">
+        <setting id="gamesgeneral.enablerewind">
+          <default>false</default>
+        </setting>
+      </group>
+    </category>
+  </section>
+
+  <section id="system">
+    <category id="display">
+      <group id="1">
+        <setting id="videoscreen.screen">
+          <visible>false</visible>
+        </setting>
+      </group>
+      <group id="3">
+        <setting id="videoscreen.noofbuffers">
+          <default>2</default>
+        </setting>
+      </group>
+    </category>
+    <category id="audio">
+      <group id="1">
+        <setting id="audiooutput.volumesteps">
+          <default>20</default>
+        </setting>
+      </group>
+    </category>
+    <category id="logging">
+      <group id="1">
+        <setting id="debug.screenshotpath">
+          <default>/storage/screenshots/</default>
+        </setting>
+      </group>
+    </category>
+  </section>
+
+  <section id="services">
+    <category id="airplay">
+      <group id="1">
+        <setting id="services.airplay">
+          <default>true</default>
+        </setting>
+      </group>
+    </category>
+
+    <category id="smb">
+      <group id="2">
+        <setting id="smb.maxprotocol">
+          <default>0</default>
+        </setting>
+      </group>
+    </category>
+  </section>
+
+  <section id="pvr">
+    <category id="epg">
+      <group id="2">
+        <setting id="epg.preventupdateswhileplayingtv">
+          <default>true</default>
+        </setting>
+        <setting id="epg.ignoredbforclient">
+          <default>true</default>
+        </setting>
+      </group>
+    </category>
+
+    <category id="pvrplayback">
+      <group id="1">
+        <setting id="pvrplayback.signalquality">
+          <default>false</default>
+        </setting>
+      </group>
+    </category>
+
+    <category id="pvrpowermanagement">
+      <group id="1">
+        <setting id="pvrpowermanagement.setwakeupcmd">
+          <default>/usr/bin/setwakeup.sh</default>
+        </setting>
+      </group>
+    </category>
+  </section>
+
+</settings>

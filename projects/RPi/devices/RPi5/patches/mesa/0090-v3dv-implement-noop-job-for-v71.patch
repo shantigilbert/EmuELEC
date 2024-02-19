@@ -1,0 +1,42 @@
+From 45de9f019ee92635de9a505db58439f0f4561281 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 28 Sep 2021 08:14:11 +0200
+Subject: [PATCH 090/142] v3dv: implement noop job for v71
+
+---
+ src/broadcom/vulkan/v3dvx_queue.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_queue.c b/src/broadcom/vulkan/v3dvx_queue.c
+index 1a26d04aef7..f8cee36e3bf 100644
+--- a/src/broadcom/vulkan/v3dvx_queue.c
++++ b/src/broadcom/vulkan/v3dvx_queue.c
+@@ -46,7 +46,8 @@ v3dX(job_emit_noop)(struct v3dv_job *job)
+       config.maximum_bpp_of_all_render_targets = V3D_INTERNAL_BPP_32;
+ #endif
+ #if V3D_VERSION >= 71
+-      unreachable("HW generation 71 not supported yet.");
++      config.log2_tile_width = 3; /* Tile size 64 */
++      config.log2_tile_height = 3; /* Tile size 64 */
+ #endif
+    }
+ 
+@@ -58,10 +59,13 @@ v3dX(job_emit_noop)(struct v3dv_job *job)
+    }
+ #endif
+ #if V3D_VERSION >= 71
+-   unreachable("Hardware generation 71 not supported yet.");
++   cl_emit(rcl, TILE_RENDERING_MODE_CFG_RENDER_TARGET_PART1, rt) {
++      rt.internal_bpp = V3D_INTERNAL_BPP_32;
++      rt.internal_type_and_clamping = V3D_RENDER_TARGET_TYPE_CLAMP_8;
++      rt.stride = 1; /* Unused RT */
++   }
+ #endif
+ 
+-
+    cl_emit(rcl, TILE_RENDERING_MODE_CFG_ZS_CLEAR_VALUES, clear) {
+       clear.z_clear_value = 1.0f;
+       clear.stencil_clear_value = 0;
+-- 
+2.39.2
+

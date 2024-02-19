@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
   <category  label="30100">
-    <setting label="30101" id="autoplay"     type="bool"   default="true"         />
-    <setting label="30102" id="discovery"    type="bool"   default="true"         />
-    <setting label="30103" id="username"     type="text"   default=""             subsetting="true" visible="eq(-1,false)" />
-    <setting label="30104" id="password"     type="text"   default=""             subsetting="true" visible="eq(-2,false)" option="hidden" />
-    <setting label="30105" id="name"         type="text"   default="Librespot@{}" />
-    <setting label="30106" id="rtp_port"     type="number" default="24642"        />
-    <setting label="30107" id="connect_port" type="number" default="0"        />
+    <setting label="30101" id="name"        type="text"   default="Librespot@{}"       />
+    <setting label="30102" id="dnd_kodi"    type="bool"   default="false"              />
+    <setting label="30103" id="options"     type="text"   default=""                   />
+    <setting label="30104" id="backend"     type="select" values="pulseaudio_rtp|alsa" />
+    <setting label="30105" id="alsa_device" type="text"   default="hw:2,0"             subsetting="true" visible="eq(-1,1)" />
   </category>
 </settings>

@@ -1,0 +1,65 @@
+From cbe0a7a06a5fb9b3f28acba8c9cac362a6bc5324 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 6 Oct 2021 13:58:00 +0200
+Subject: [PATCH 031/142] broadcom/compiler: add a
+ v3d71_qpu_writes_waddr_explicitly helper
+
+---
+ src/broadcom/qpu/qpu_instr.c | 28 ++++++++++++++++++++++++++++
+ src/broadcom/qpu/qpu_instr.h |  3 +++
+ 2 files changed, 31 insertions(+)
+
+diff --git a/src/broadcom/qpu/qpu_instr.c b/src/broadcom/qpu/qpu_instr.c
+index e8bbb2141b0..feb6b343c1c 100644
+--- a/src/broadcom/qpu/qpu_instr.c
++++ b/src/broadcom/qpu/qpu_instr.c
+@@ -968,6 +968,34 @@ v3d71_qpu_reads_raddr(const struct v3d_qpu_instr *inst, uint8_t raddr)
+                (mul_nsrc > 1 && inst->alu.mul.b.raddr == raddr);
+ }
+ 
++bool
++v3d71_qpu_writes_waddr_explicitly(const struct v3d_device_info *devinfo,
++                                  const struct v3d_qpu_instr *inst,
++                                  uint8_t waddr)
++{
++        if (inst->type != V3D_QPU_INSTR_TYPE_ALU)
++                return false;
++
++        if (v3d_qpu_add_op_has_dst(inst->alu.add.op) &&
++            !inst->alu.add.magic_write &&
++            inst->alu.add.waddr == waddr) {
++                return true;
++        }
++
++        if (v3d_qpu_mul_op_has_dst(inst->alu.mul.op) &&
++            !inst->alu.mul.magic_write &&
++            inst->alu.mul.waddr == waddr) {
++                return true;
++        }
++
++        if (v3d_qpu_sig_writes_address(devinfo, &inst->sig) &&
++            !inst->sig_magic && inst->sig_addr == waddr) {
++                return true;
++        }
++
++        return false;
++}
++
+ bool
+ v3d_qpu_sig_writes_address(const struct v3d_device_info *devinfo,
+                            const struct v3d_qpu_sig *sig)
+diff --git a/src/broadcom/qpu/qpu_instr.h b/src/broadcom/qpu/qpu_instr.h
+index 9f7582ab06d..50a69ce8c3a 100644
+--- a/src/broadcom/qpu/qpu_instr.h
++++ b/src/broadcom/qpu/qpu_instr.h
+@@ -496,4 +496,7 @@ bool v3d_qpu_unpacks_f16(const struct v3d_qpu_instr *inst) ATTRIBUTE_CONST;
+ bool v3d_qpu_is_nop(struct v3d_qpu_instr *inst) ATTRIBUTE_CONST;
+ 
+ bool v3d71_qpu_reads_raddr(const struct v3d_qpu_instr *inst, uint8_t raddr);
++bool v3d71_qpu_writes_waddr_explicitly(const struct v3d_device_info *devinfo,
++                                       const struct v3d_qpu_instr *inst,
++                                       uint8_t waddr);
+ #endif
+-- 
+2.39.2
+

@@ -15,6 +15,6 @@ PKG_CONFIGURE_OPTS_TARGET+=" --with-ssl=openssl"
 }
 
 makeinstall_target() {
-mkdir -p $INSTALL/usr/bin
-cp $PKG_BUILD/.${TARGET_NAME}/src/wget $INSTALL/usr/bin/wget
+mkdir -p ${INSTALL}/usr/bin
+cp ${PKG_BUILD}/.${TARGET_NAME}/src/wget ${INSTALL}/usr/bin/wget
 }

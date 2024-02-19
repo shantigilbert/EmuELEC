@@ -1,0 +1,45 @@
+From 52ea09792ff8a438ccdecac47b8415657be90098 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Fri, 6 Aug 2021 01:33:32 +0200
+Subject: [PATCH 012/142] broadcom/qpu: add raddr on v3d_qpu_input
+
+On V3D 7.x mux are not used, and raddr_a/b/c/d are used instead
+
+This is not perfect, as for v71, the raddr_a/b defined at qpu_instr
+became superfluous. But the alternative would be to define two
+different structs, or even having them defined based on version
+ifdefs, so this is a reasonable compromise.
+---
+ src/broadcom/qpu/qpu_instr.h | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/src/broadcom/qpu/qpu_instr.h b/src/broadcom/qpu/qpu_instr.h
+index 53a51bfb3e1..9e56e2d6a99 100644
+--- a/src/broadcom/qpu/qpu_instr.h
++++ b/src/broadcom/qpu/qpu_instr.h
+@@ -295,7 +295,10 @@ enum v3d_qpu_mux {
+ };
+ 
+ struct v3d_qpu_input {
+-        enum v3d_qpu_mux mux;
++        union {
++                enum v3d_qpu_mux mux; /* V3D 4.x */
++                uint8_t raddr; /* V3D 7.x */
++        };
+         enum v3d_qpu_input_unpack unpack;
+ };
+ 
+@@ -385,8 +388,8 @@ struct v3d_qpu_instr {
+         struct v3d_qpu_sig sig;
+         uint8_t sig_addr;
+         bool sig_magic; /* If the signal writes to a magic address */
+-        uint8_t raddr_a;
+-        uint8_t raddr_b;
++        uint8_t raddr_a; /* V3D 4.x */
++        uint8_t raddr_b; /* V3D 4.x*/
+         struct v3d_qpu_flags flags;
+ 
+         union {
+-- 
+2.39.2
+

@@ -1,0 +1,11 @@
+diff -ru a/Makefile b/Makefile
+--- a/Makefile	2014-03-21 20:26:36.000000000 +0100
++++ b/Makefile	2022-12-04 20:52:52.827027541 +0100
+@@ -10,7 +10,6 @@
+ 
+ all clean install:
+ 	$(MAKE) -C lib $@
+-	$(MAKE) -C test $@
+ 	$(MAKE) -C util $@
+ 
+ update:

@@ -3,11 +3,11 @@
 # Copyright (C) 2018-present 5schatten (https://github.com/5schatten)
 
 PKG_NAME="SDL2_image"
-PKG_VERSION="2.0.4"
-PKG_SHA256="e74ec49c2402eb242fbfa16f2f43a19582a74c2eabfbfb873f00d4250038ceac"
+PKG_VERSION="2.6.3"
+PKG_SHA256="931c9be5bf1d7c8fae9b7dc157828b7eee874e23c7f24b44ba7eff6b4836312c"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.libsdl.org/"
-PKG_URL="https://www.libsdl.org/projects/SDL_image/release/SDL2_image-$PKG_VERSION.tar.gz"
+PKG_URL="https://www.libsdl.org/projects/SDL_image/release/SDL2_image-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain SDL2"
 PKG_LONGDESC="SDL_image is an image file loading library. "
 

@@ -1,0 +1,52 @@
+From 7d42eca87b6e144697810405308d99d200dca62a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Wed, 15 Sep 2021 10:56:43 +0200
+Subject: [PATCH 015/142] broadcom/qpu: add qpu_writes_rf0_implicitly helper
+
+On v71 rf0 replaces r5 as the register that gets updated implicitly
+with uniform loads, and gets the C coefficient with ldvary. This
+helper return if rf0 gets implicitly updated.
+---
+ src/broadcom/qpu/qpu_instr.c | 12 ++++++++++++
+ src/broadcom/qpu/qpu_instr.h |  2 ++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/src/broadcom/qpu/qpu_instr.c b/src/broadcom/qpu/qpu_instr.c
+index 7ece8b5e570..8de99c611d5 100644
+--- a/src/broadcom/qpu/qpu_instr.c
++++ b/src/broadcom/qpu/qpu_instr.c
+@@ -920,6 +920,18 @@ v3d_qpu_writes_accum(const struct v3d_device_info *devinfo,
+         return false;
+ }
+ 
++bool
++v3d_qpu_writes_rf0_implicitly(const struct v3d_device_info *devinfo,
++                              const struct v3d_qpu_instr *inst)
++{
++        if (devinfo->ver >= 71 &&
++            (inst->sig.ldvary || inst->sig.ldunif || inst->sig.ldunifa)) {
++                return true;
++        }
++
++        return false;
++}
++
+ bool
+ v3d_qpu_uses_mux(const struct v3d_qpu_instr *inst, enum v3d_qpu_mux mux)
+ {
+diff --git a/src/broadcom/qpu/qpu_instr.h b/src/broadcom/qpu/qpu_instr.h
+index 9e56e2d6a99..a25be8e0ee6 100644
+--- a/src/broadcom/qpu/qpu_instr.h
++++ b/src/broadcom/qpu/qpu_instr.h
+@@ -473,6 +473,8 @@ bool v3d_qpu_writes_r4(const struct v3d_device_info *devinfo,
+                        const struct v3d_qpu_instr *instr) ATTRIBUTE_CONST;
+ bool v3d_qpu_writes_r5(const struct v3d_device_info *devinfo,
+                        const struct v3d_qpu_instr *instr) ATTRIBUTE_CONST;
++bool v3d_qpu_writes_rf0_implicitly(const struct v3d_device_info *devinfo,
++                                   const struct v3d_qpu_instr *instr) ATTRIBUTE_CONST;
+ bool v3d_qpu_writes_accum(const struct v3d_device_info *devinfo,
+                           const struct v3d_qpu_instr *inst) ATTRIBUTE_CONST;
+ bool v3d_qpu_waits_on_tmu(const struct v3d_qpu_instr *inst) ATTRIBUTE_CONST;
+-- 
+2.39.2
+

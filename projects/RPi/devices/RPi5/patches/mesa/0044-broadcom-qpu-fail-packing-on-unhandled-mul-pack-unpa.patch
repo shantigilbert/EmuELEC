@@ -1,0 +1,47 @@
+From 2e86dd0c357d7b432ce6794ae22fbfae89ad186b Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 6 Oct 2021 12:01:10 +0200
+Subject: [PATCH 044/142] broadcom/qpu: fail packing on unhandled mul
+ pack/unpack
+
+We are doing this for the ADD alu already and it may be helpful to
+identify cases where we have QPU code with pack/unpack modifiers on
+MUL opcodes that we then are not packing into the actual QPU
+instructions.
+---
+ src/broadcom/qpu/qpu_pack.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/src/broadcom/qpu/qpu_pack.c b/src/broadcom/qpu/qpu_pack.c
+index 4d677894755..180d7ab08a3 100644
+--- a/src/broadcom/qpu/qpu_pack.c
++++ b/src/broadcom/qpu/qpu_pack.c
+@@ -2106,6 +2106,12 @@ v3d33_qpu_mul_pack(const struct v3d_device_info *devinfo,
+         }
+ 
+         default:
++                if (instr->alu.mul.op != V3D_QPU_M_NOP &&
++                    (instr->alu.mul.output_pack != V3D_QPU_PACK_NONE ||
++                     instr->alu.mul.a.unpack != V3D_QPU_UNPACK_NONE ||
++                     instr->alu.mul.b.unpack != V3D_QPU_UNPACK_NONE)) {
++                        return false;
++                }
+                 break;
+         }
+ 
+@@ -2225,6 +2231,12 @@ v3d71_qpu_mul_pack(const struct v3d_device_info *devinfo,
+         }
+ 
+         default:
++                if (instr->alu.mul.op != V3D_QPU_M_NOP &&
++                    (instr->alu.mul.output_pack != V3D_QPU_PACK_NONE ||
++                     instr->alu.mul.a.unpack != V3D_QPU_UNPACK_NONE ||
++                     instr->alu.mul.b.unpack != V3D_QPU_UNPACK_NONE)) {
++                        return false;
++                }
+                 break;
+         }
+ 
+-- 
+2.39.2
+

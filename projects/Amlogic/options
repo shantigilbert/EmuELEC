@@ -63,8 +63,8 @@
   # additional drivers to install:
   # for a list of additional drivers see packages/linux-drivers
   # Space separated list is supported,
-  # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
-    ADDITIONAL_DRIVERS=""
+  # e.g. ADDITIONAL_DRIVERS+=" DRIVER1 DRIVER2"
+    ADDITIONAL_DRIVERS+=""
 
   # build and install driver addons (yes / no)
     DRIVER_ADDONS_SUPPORT="no"
@@ -75,7 +75,7 @@
     DRIVER_ADDONS="crazycat dvb-latest"
 
   # additional packages to install:
-    ADDITIONAL_PACKAGES="dtc ethmactool emmctool flashrom"
+    ADDITIONAL_PACKAGES+=" dtc ethmactool emmctool flashrom pciutils"
 
   # use the kernel CEC framework for libcec (yes / no)
     CEC_FRAMEWORK_SUPPORT="yes"

@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="snes9x2010"
-PKG_VERSION="e86e54624a7910a64a9a744e3734d4067c48d240"
-PKG_SHA256="efa887b420c4c2eafd69fde72bdfd9d76820e14864e3cebd83b4e66e463a5051"
+PKG_VERSION="d8b10c4cd7606ed58f9c562864c986bc960faaaf"
+PKG_SHA256="7faf4243226cfed3a2926ef78d7db74905947ecda8770575a81b1792b2345302"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Non-commercial"
 PKG_SITE="https://github.com/libretro/snes9x2010"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,7 +37,7 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 make_target() {
-if ([ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "OdroidGoAdvance" ]) && [ "$ARCH" == "arm" ]; then
+if ([ "${DEVICE}" == "OdroidGoAdvance" ] || [ "${DEVICE}" == "OdroidGoAdvance" ]) && [ "${ARCH}" == "arm" ]; then
   make -f Makefile.libretro platform=goa_armv8_a35
   else
   make -f Makefile.libretro
@@ -45,6 +45,6 @@ if ([ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "OdroidGoAdvance" ]) &&
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp snes9x2010_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp snes9x2010_libretro.so ${INSTALL}/usr/lib/libretro/
 }

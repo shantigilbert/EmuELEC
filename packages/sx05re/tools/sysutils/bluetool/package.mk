@@ -12,11 +12,11 @@ PKG_LONGDESC="A simple Python API for Bluetooth D-Bus calls. Allows easy pairing
 PKG_TOOLCHAIN="manual"
 
 pre_configure_target() {
-  cd $PKG_BUILD
-  rm -rf .$TARGET_NAME
+  cd ${PKG_BUILD}
+  rm -rf .${TARGET_NAME}
 
-  export PYTHONXCPREFIX="$SYSROOT_PREFIX/usr"
-  export LDSHARED="$CC -shared"
+  export PYTHONXCPREFIX="${SYSROOT_PREFIX}/usr"
+  export LDSHARED="${CC} -shared"
 }
 
 make_target() {
@@ -24,5 +24,5 @@ make_target() {
 }
 
 makeinstall_target() {
-  python setup.py install --root=$INSTALL --prefix=/usr
+  python setup.py install --root=${INSTALL} --prefix=/usr
 }

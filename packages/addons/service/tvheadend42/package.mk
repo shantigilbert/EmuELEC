@@ -5,7 +5,7 @@ PKG_NAME="tvheadend42"
 PKG_VERSION="5bdcfd8ac97b3337e1c7911ae24127df76fa693a"
 PKG_SHA256="b562a26248cdc02dc94cc62038deea172668fa4c079b2ea4e1b4220f3b1d34f5"
 PKG_VERSION_NUMBER="4.2.8-36"
-PKG_REV="126"
+PKG_REV="0"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.tvheadend.org"
@@ -37,12 +37,19 @@ PKG_TVH_TRANSCODING="\
   --enable-libfdkaac \
   --enable-libopus \
   --enable-libvorbis \
-  --enable-libvpx \
-  --enable-libx264 \
-  --enable-libx265"
+  --enable-libx264"
 
-# specific transcoding options
-if [[ "${TARGET_ARCH}" != "x86_64" ]]; then
+# hw specific transcoding options
+if [ "${TARGET_ARCH}" = "x86_64" ]; then
+  PKG_DEPENDS_TARGET+=" libva"
+  # specific transcoding options
+  PKG_TVH_TRANSCODING="${PKG_TVH_TRANSCODING} \
+    --enable-vaapi \
+    --enable-libvpx \
+    --enable-libx265"
+else
+  # for != "x86_64" targets
+  # specific transcoding options
   PKG_TVH_TRANSCODING="${PKG_TVH_TRANSCODING} \
     --disable-libvpx \
     --disable-libx265"
@@ -104,7 +111,7 @@ post_makeinstall_target() {
 }
 
 addon() {
-  mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+  mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/{bin,lib}
 
   cp ${PKG_DIR}/addon.xml ${ADDON_BUILD}/${PKG_ADDON_ID}
 
@@ -115,6 +122,10 @@ addon() {
   cp -P ${PKG_INSTALL}/usr/bin/tvheadend ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
   cp -P ${PKG_INSTALL}/usr/lib/capmt_ca.so ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
   cp -P $(get_install_dir comskip)/usr/bin/comskip ${ADDON_BUILD}/${PKG_ADDON_ID}/bin
+
+  if [ "${TARGET_ARCH}" = "x86_64" ]; then
+    cp -P $(get_install_dir x265)/usr/lib/libx265.so.199 ${ADDON_BUILD}/${PKG_ADDON_ID}/lib
+  fi
 
   # dvb-scan files
   mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/dvb-scan

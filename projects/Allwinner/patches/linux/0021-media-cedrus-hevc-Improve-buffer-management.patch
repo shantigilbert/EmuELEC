@@ -98,19 +98,19 @@ index 4b01d3881214..4d425196d415 100644
  						unsigned int index,
  						bool field_pic,
  						u32 pic_order_cnt[],
--						int buffer_index)
-+						int buffer_index,
+-						struct vb2_buffer *buf)
++						struct vb2_buffer *buf,
 +						const struct v4l2_ctrl_hevc_sps *sps)
  {
  	struct cedrus_dev *dev = ctx->dev;
- 	dma_addr_t dst_luma_addr = cedrus_dst_buf_addr(ctx, buffer_index, 0);
- 	dma_addr_t dst_chroma_addr = cedrus_dst_buf_addr(ctx, buffer_index, 1);
+ 	dma_addr_t dst_luma_addr = cedrus_dst_buf_addr(ctx, buf, 0);
+ 	dma_addr_t dst_chroma_addr = cedrus_dst_buf_addr(ctx, buf, 1);
  	dma_addr_t mv_col_buf_addr[2] = {
--		cedrus_h265_frame_info_mv_col_buf_addr(ctx, buffer_index, 0),
--		cedrus_h265_frame_info_mv_col_buf_addr(ctx, buffer_index,
+-		cedrus_h265_frame_info_mv_col_buf_addr(ctx, buf->index, 0),
+-		cedrus_h265_frame_info_mv_col_buf_addr(ctx, buf->index,
 -						       field_pic ? 1 : 0)
-+		cedrus_h265_frame_info_mv_col_buf_addr(ctx, buffer_index, sps),
-+		cedrus_h265_frame_info_mv_col_buf_addr(ctx, buffer_index, sps)
++		cedrus_h265_frame_info_mv_col_buf_addr(ctx, buf->index, sps),
++		cedrus_h265_frame_info_mv_col_buf_addr(ctx, buf->index, sps)
  	};
  	u32 offset = VE_DEC_H265_SRAM_OFFSET_FRAME_INFO +
  		     VE_DEC_H265_SRAM_OFFSET_FRAME_INFO_UNIT * index;
@@ -128,8 +128,8 @@ index 4b01d3881214..4d425196d415 100644
  
  		cedrus_h265_frame_info_write_single(ctx, i, dpb[i].field_pic,
  						    pic_order_cnt,
--						    buffer_index);
-+						    buffer_index, sps);
+-						    buf);
++						    buf, sps);
  	}
  }
  
@@ -183,8 +183,8 @@ index 4b01d3881214..4d425196d415 100644
  	cedrus_h265_frame_info_write_single(ctx, output_pic_list_index,
  					    slice_params->pic_struct != 0,
  					    pic_order_cnt,
--					    run->dst->vb2_buf.index);
-+					    run->dst->vb2_buf.index, sps);
+-					    &run->dst->vb2_buf);
++					    &run->dst->vb2_buf, sps);
  
  	cedrus_write(dev, VE_DEC_H265_OUTPUT_FRAME_IDX, output_pic_list_index);
  

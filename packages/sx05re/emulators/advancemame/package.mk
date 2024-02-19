@@ -2,8 +2,8 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="advancemame"
-PKG_VERSION="bd0907cdf71306b718a6d800c7db6f4f8d8bcab3"
-PKG_SHA256="c87f1859f874d7311201cbe9609ef362da3297131a3ab05bc66ff1200bfc598d"
+PKG_VERSION="89699f86d658d78bc19083e8dd076e5c4bdfd317"
+PKG_SHA256="45a77fa33b84b00fae56587198afb9ee2d7a3bc86f48dd62bb6df5a1e30b3a28"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MAME"
@@ -25,8 +25,8 @@ sed -i "s|#include <slang.h>|#include <${SYSROOT_PREFIX}/usr/include/slang.h>|" 
 }
 
 pre_make_target() {
-VERSION="EmuELEC-v$(cat $ROOT/packages/sx05re/emuelec/config/EE_VERSION)-${PKG_VERSION:0:7}"
-echo $VERSION > ${PKG_BUILD}/.version
+VERSION="EmuELEC-v$(cat ${ROOT}/packages/sx05re/emuelec/config/EE_VERSION)-${PKG_VERSION:0:7}"
+echo ${VERSION} > ${PKG_BUILD}/.version
 }
 
 make_target() {
@@ -43,7 +43,7 @@ mkdir -p ${INSTALL}/usr/bin
 
 if [ "${DEVICE}" == "OdroidGoAdvance" ]; then
    cp -r ${PKG_DIR}/config/advmame.rc_oga ${INSTALL}/usr/config/emuelec/configs/advmame/advmame.rc
-elif [ "$DEVICE" == "GameForce" ]; then
+elif [ "${DEVICE}" == "GameForce" ]; then
    cp -r ${PKG_DIR}/config/advmame.rc_gf ${INSTALL}/usr/config/emuelec/configs/advmame/advmame.rc
 else
    cp -r ${PKG_DIR}/config/advmame.rc ${INSTALL}/usr/config/emuelec/configs/advmame/advmame.rc

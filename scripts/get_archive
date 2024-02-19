@@ -20,7 +20,11 @@ build_msg "CLR_GET" "GET" "${1} (archive)" "indent"
 
 pkg_lock_status "GETPKG" "${PKG_NAME}" "unpack" "downloading package..."
 
-PACKAGE_MIRROR="${DISTRO_MIRROR}/${PKG_NAME}/${PKG_SOURCE_NAME}"
+PACKAGE_MIRROR=""
+for mirror in ${DISTRO_MIRROR}; do
+  PACKAGE_MIRROR="${PACKAGE_MIRROR} ${mirror}/${PKG_NAME}/${PKG_SOURCE_NAME}"
+done
+
 [ "${VERBOSE}" != "yes" ] && WGET_OPT=-q
 WGET_CMD="wget --output-file=- --timeout=30 --tries=3 --passive-ftp --no-check-certificate -c ${WGET_OPT} --progress=bar:force --show-progress -O ${PACKAGE}"
 
@@ -32,7 +36,7 @@ rm -f "${STAMP_URL}" "${STAMP_SHA}"
 NBWGET=10
 NBCHKS=2
 while [ ${NBWGET} -gt 0 -a ${NBCHKS} -gt 0 ]; do
-  for url in "${PKG_URL}" "${PACKAGE_MIRROR}"; do
+  for url in "${PKG_URL}" ${PACKAGE_MIRROR}; do
     if [[ "$PKG_USETOKEN" == "yes" ]]; then
       if [[ $url == https://github.com/* ]] && [[ -n $COREELEC_GHTOKEN ]]; then
         WGET_HEADER=--header="Authorization: token $COREELEC_GHTOKEN"

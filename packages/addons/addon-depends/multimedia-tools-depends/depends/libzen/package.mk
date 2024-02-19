@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libzen"
-PKG_VERSION="0.4.39"
-PKG_SHA256="cded5d7774294e7d5b42768ceb285243709b6e99eec6e980a3cf7f0890dbb622"
+PKG_VERSION="0.4.41"
+PKG_SHA256="933bad3b7ecd29dc6bdc88a83645c83dfd098c15b0b90d6177a37fa1536704e8"
 PKG_LICENSE="GPL"
 PKG_SITE="https://mediaarea.net/en/MediaInfo/"
 PKG_URL="https://mediaarea.net/download/source/libzen/${PKG_VERSION}/libzen_${PKG_VERSION}.tar.xz"

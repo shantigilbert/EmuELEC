@@ -1,0 +1,87 @@
+From 8464dc8869f3d2eccfecac7b4358cc0ffe05f081 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Wed, 28 Jul 2021 12:05:26 +0200
+Subject: [PATCH 084/142] v3dv/pipeline: default vertex attributes values are
+ not needed for v71
+
+There are not part of the shader state record.
+---
+ src/broadcom/vulkan/v3dv_private.h   | 10 +++++++++-
+ src/broadcom/vulkan/v3dvx_pipeline.c | 10 ++++++++++
+ 2 files changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/src/broadcom/vulkan/v3dv_private.h b/src/broadcom/vulkan/v3dv_private.h
+index a9fab24d19e..300a1ec8ae1 100644
+--- a/src/broadcom/vulkan/v3dv_private.h
++++ b/src/broadcom/vulkan/v3dv_private.h
+@@ -581,6 +581,10 @@ struct v3dv_device {
+     * being float being float, allowing us to reuse the same BO for all
+     * pipelines matching this requirement. Pipelines that need integer
+     * attributes will create their own BO.
++    *
++    * Note that since v71 the default attribute values are not needed, so this
++    * can be NULL.
++    *
+     */
+    struct v3dv_bo *default_attribute_float;
+ 
+@@ -2289,11 +2293,15 @@ struct v3dv_pipeline {
+    unsigned char sha1[20];
+ 
+    /* In general we can reuse v3dv_device->default_attribute_float, so note
+-    * that the following can be NULL.
++    * that the following can be NULL. In 7.x this is not used, so it will be
++    * NULL.
+     *
+     * FIXME: the content of this BO will be small, so it could be improved to
+     * be uploaded to a common BO. But as in most cases it will be NULL, it is
+     * not a priority.
++    *
++    * Note that since v71 the default attribute values are not needed, so this
++    * can be NULL.
+     */
+    struct v3dv_bo *default_attribute_values;
+ 
+diff --git a/src/broadcom/vulkan/v3dvx_pipeline.c b/src/broadcom/vulkan/v3dvx_pipeline.c
+index e235220cb14..4dc6d70efe1 100644
+--- a/src/broadcom/vulkan/v3dvx_pipeline.c
++++ b/src/broadcom/vulkan/v3dvx_pipeline.c
+@@ -665,6 +665,7 @@ v3dX(pipeline_pack_compile_state)(struct v3dv_pipeline *pipeline,
+    }
+ }
+ 
++#if V3D_VERSION == 42
+ static bool
+ pipeline_has_integer_vertex_attrib(struct v3dv_pipeline *pipeline)
+ {
+@@ -674,11 +675,16 @@ pipeline_has_integer_vertex_attrib(struct v3dv_pipeline *pipeline)
+    }
+    return false;
+ }
++#endif
+ 
+ bool
+ v3dX(pipeline_needs_default_attribute_values)(struct v3dv_pipeline *pipeline)
+ {
++#if V3D_VERSION == 42
+    return pipeline_has_integer_vertex_attrib(pipeline);
++#endif
++
++   return false;
+ }
+ 
+ /* @pipeline can be NULL. In that case we assume the most common case. For
+@@ -691,6 +697,10 @@ struct v3dv_bo *
+ v3dX(create_default_attribute_values)(struct v3dv_device *device,
+                                       struct v3dv_pipeline *pipeline)
+ {
++#if V3D_VERSION >= 71
++   return NULL;
++#endif
++
+    uint32_t size = MAX_VERTEX_ATTRIBS * sizeof(float) * 4;
+    struct v3dv_bo *bo;
+ 
+-- 
+2.39.2
+

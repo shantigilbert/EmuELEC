@@ -3,7 +3,7 @@
 
 PKG_NAME="repository.linuxserver.docker"
 PKG_VERSION="9.0"
-PKG_REV="103"
+PKG_REV="0"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://linuxserver.io"

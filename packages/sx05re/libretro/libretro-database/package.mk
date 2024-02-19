@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="libretro-database"
-PKG_VERSION="7383e9587aa372fff7db38f39ca2a95d2f79e484"
-PKG_SHA256="e70f4cd42d2a44bd9d4d73cb754b443c2953e96fb0be84e8035cd7b49bb1f11d"
+PKG_VERSION="4d5109f74e9a5b1050398bcbe84ebcf0bd14ff7c"
+PKG_SHA256="602b116ba12f8900ae247a2e71d72541ef5eab0a33045e55a97377ca0d692c80"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/libretro/libretro-database"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,9 +37,9 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 configure_target() {
-  cd $PKG_BUILD
+  cd ${PKG_BUILD}
 }
 
 makeinstall_target() {
-  make install INSTALLDIR="$INSTALL/usr/share/libretro-database"
+  make install INSTALLDIR="${INSTALL}/usr/share/libretro-database"
 }

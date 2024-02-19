@@ -1,0 +1,155 @@
+From 7c7ab15b3c9def4bc3bb5be492228a933c325f8a Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 6 Oct 2021 13:58:27 +0200
+Subject: [PATCH 052/142] broadcom/compiler: handle rf0 flops storage
+ restriction in v71
+
+---
+ src/broadcom/compiler/qpu_schedule.c | 81 +++++++++++++++++++++++++++-
+ 1 file changed, 79 insertions(+), 2 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index adb501e85ce..7048d9257b6 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -538,6 +538,10 @@ struct choose_scoreboard {
+         int ldvary_count;
+         int pending_ldtmu_count;
+         bool first_ldtmu_after_thrsw;
++
++        /* V3D 7.x */
++        int last_implicit_rf0_write_tick;
++        bool has_rf0_flops_conflict;
+ };
+ 
+ static bool
+@@ -1499,6 +1503,62 @@ update_scoreboard_tmu_tracking(struct choose_scoreboard *scoreboard,
+         }
+ }
+ 
++static void
++set_has_rf0_flops_conflict(struct choose_scoreboard *scoreboard,
++                           const struct v3d_qpu_instr *inst,
++                           const struct v3d_device_info *devinfo)
++{
++        if (scoreboard->last_implicit_rf0_write_tick == scoreboard->tick &&
++            v3d_qpu_sig_writes_address(devinfo, &inst->sig) &&
++            !inst->sig_magic) {
++                scoreboard->has_rf0_flops_conflict = true;
++        }
++}
++
++static void
++update_scoreboard_for_rf0_flops(struct choose_scoreboard *scoreboard,
++                                const struct v3d_qpu_instr *inst,
++                                const struct v3d_device_info *devinfo)
++{
++        if (devinfo->ver < 71)
++                return;
++
++        /* Thread switch restrictions:
++         *
++         * At the point of a thread switch or thread end (when the actual
++         * thread switch or thread end happens, not when the signalling
++         * instruction is processed):
++         *
++         *    - If the most recent write to rf0 was from a ldunif, ldunifa, or
++         *      ldvary instruction in which another signal also wrote to the
++         *      register file, and the final instruction of the thread section
++         *      contained a signal which wrote to the register file, then the
++         *      value of rf0 is undefined at the start of the new section
++         *
++         * Here we use the scoreboard to track if our last rf0 implicit write
++         * happens at the same time that another signal writes the register
++         * file (has_rf0_flops_conflict). We will use that information when
++         * scheduling thrsw instructions to avoid putting anything in their
++         * last delay slot which has a signal that writes to the register file.
++         */
++
++        /* Reset tracking if we have an explicit rf0 write or we are starting
++         * a new thread section.
++         */
++        if (v3d71_qpu_writes_waddr_explicitly(devinfo, inst, 0) ||
++            scoreboard->tick - scoreboard->last_thrsw_tick == 3) {
++                scoreboard->last_implicit_rf0_write_tick = -10;
++                scoreboard->has_rf0_flops_conflict = false;
++        }
++
++        if (v3d_qpu_writes_rf0_implicitly(devinfo, inst)) {
++                scoreboard->last_implicit_rf0_write_tick = inst->sig.ldvary ?
++                        scoreboard->tick + 1 : scoreboard->tick;
++        }
++
++        set_has_rf0_flops_conflict(scoreboard, inst, devinfo);
++}
++
+ static void
+ update_scoreboard_for_chosen(struct choose_scoreboard *scoreboard,
+                              const struct qinst *qinst,
+@@ -1542,6 +1602,8 @@ update_scoreboard_for_chosen(struct choose_scoreboard *scoreboard,
+         if (inst->sig.ldvary)
+                 scoreboard->last_ldvary_tick = scoreboard->tick;
+ 
++        update_scoreboard_for_rf0_flops(scoreboard, inst, devinfo);
++
+         update_scoreboard_tmu_tracking(scoreboard, qinst);
+ }
+ 
+@@ -1812,6 +1874,7 @@ qpu_inst_valid_in_thrend_slot(struct v3d_compile *c,
+  */
+ static bool
+ qpu_inst_before_thrsw_valid_in_delay_slot(struct v3d_compile *c,
++                                          struct choose_scoreboard *scoreboard,
+                                           const struct qinst *qinst,
+                                           uint32_t slot)
+ {
+@@ -1842,6 +1905,17 @@ qpu_inst_before_thrsw_valid_in_delay_slot(struct v3d_compile *c,
+         if (v3d_qpu_writes_unifa(c->devinfo, &qinst->qpu))
+                 return false;
+ 
++        /* See comment when we set has_rf0_flops_conflict for details */
++        if (c->devinfo->ver >= 71 &&
++            slot == 2 &&
++            v3d_qpu_sig_writes_address(c->devinfo, &qinst->qpu.sig) &&
++            !qinst->qpu.sig_magic) {
++                if (scoreboard->has_rf0_flops_conflict)
++                        return false;
++                if (scoreboard->last_implicit_rf0_write_tick == scoreboard->tick)
++                        return false;
++        }
++
+         return true;
+ }
+ 
+@@ -1874,7 +1948,7 @@ qpu_inst_after_thrsw_valid_in_delay_slot(struct v3d_compile *c,
+          * also apply to instructions scheduled after the thrsw that we want
+          * to place in its delay slots.
+          */
+-        if (!qpu_inst_before_thrsw_valid_in_delay_slot(c, qinst, slot))
++        if (!qpu_inst_before_thrsw_valid_in_delay_slot(c, scoreboard, qinst, slot))
+                 return false;
+ 
+         /* TLB access is disallowed until scoreboard wait is executed, which
+@@ -1947,8 +2021,10 @@ valid_thrsw_sequence(struct v3d_compile *c, struct choose_scoreboard *scoreboard
+                      bool is_thrend)
+ {
+         for (int slot = 0; slot < instructions_in_sequence; slot++) {
+-                if (!qpu_inst_before_thrsw_valid_in_delay_slot(c, qinst, slot))
++                if (!qpu_inst_before_thrsw_valid_in_delay_slot(c, scoreboard,
++                                                               qinst, slot)) {
+                         return false;
++                }
+ 
+                 if (is_thrend &&
+                     !qpu_inst_valid_in_thrend_slot(c, qinst, slot)) {
+@@ -2718,6 +2794,7 @@ v3d_qpu_schedule_instructions(struct v3d_compile *c)
+         scoreboard.last_setmsf_tick = -10;
+         scoreboard.last_stallable_sfu_tick = -10;
+         scoreboard.first_ldtmu_after_thrsw = true;
++        scoreboard.last_implicit_rf0_write_tick = - 10;
+ 
+         if (debug) {
+                 fprintf(stderr, "Pre-schedule instructions\n");
+-- 
+2.39.2
+

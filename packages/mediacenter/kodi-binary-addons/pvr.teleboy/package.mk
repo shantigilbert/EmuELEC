@@ -2,14 +2,14 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="pvr.teleboy"
-PKG_VERSION="20.3.0-Nexus"
-PKG_SHA256="4e622b4a270105e82651f96a95dfe5e2749ac05fa19ed8fbb4525fba9f08fb8d"
-PKG_REV="2"
+PKG_VERSION="20.3.4-Nexus"
+PKG_SHA256="199730d6023a39a9227b29b3ac100c06fc40fbb6c0adf65c3a35ea6449ffc5ba"
+PKG_REV="3"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/rbuehlma/pvr.teleboy"
 PKG_URL="https://github.com/rbuehlma/pvr.teleboy/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain kodi-platform"
+PKG_DEPENDS_TARGET="toolchain kodi-platform rapidjson"
 PKG_SECTION=""
 PKG_SHORTDESC="pvr.teleboy"
 PKG_LONGDESC="pvr.teleboy"

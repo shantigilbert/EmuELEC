@@ -2,13 +2,13 @@
 # Copyright (C) 2022-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="augustus"
-PKG_VERSION="482f4ff544148c538460d6592bbff450dc391316"
-PKG_SHA256="ee0cbb543a2a5e26131b26e39dd8f6aaf88223dfcf58aca2b302348fd063cc48"
+PKG_VERSION="8a136244e8edf87e7b061d6da3fb36457e1d6f03"
+PKG_SHA256="49bb5fdd6e2ba11821fe02a4678283d393aab0dff6bc8cb62fd577b5848df345"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/Keriew/augustus"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain SDL2"
 PKG_LONGDESC="An open source re-implementation of Caesar III"
 PKG_TOOLCHAIN="cmake-make"

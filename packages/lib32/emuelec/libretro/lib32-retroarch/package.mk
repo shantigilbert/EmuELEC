@@ -10,14 +10,14 @@ PKG_ARCH="aarch64"
 PKG_SITE="https://github.com/libretro/RetroArch"
 PKG_URL=""
 PKG_LICENSE="GPLv3"
-#PKG_DEPENDS_TARGET="retroarch lib32-zlib lib32-$OPENGLES"
-PKG_DEPENDS_TARGET="retroarch lib32-toolchain lib32-SDL2 lib32-alsa-lib lib32-openssl lib32-freetype lib32-zlib lib32-ffmpeg lib32-libass lib32-$OPENGLES"
+#PKG_DEPENDS_TARGET="retroarch lib32-zlib lib32-${OPENGLES}"
+PKG_DEPENDS_TARGET="retroarch lib32-toolchain lib32-SDL2 lib32-alsa-lib lib32-openssl lib32-freetype lib32-zlib lib32-ffmpeg lib32-libass lib32-${OPENGLES}"
 # samba avahi nss-mdns  openal-soft
 PKG_LONGDESC="Reference frontend for the libretro API."
 PKG_BUILD_FLAGS="lib32"
 
 RA_DIRECTORY="$(get_pkg_directory retroarch)"
-PKG_PATCH_DIRS+=" $RA_DIRECTORY/patches" 
+PKG_PATCH_DIRS+=" ${RA_DIRECTORY}/patches" 
 
 PKG_CONFIGURE_OPTS_TARGET="--disable-qt \
                            --enable-alsa \
@@ -38,7 +38,7 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-qt \
                            --enable-neon"
 
 if [ "${PROJECT}" = "Amlogic-ce" ]; then
-  PKG_PATCH_DIRS+=" $RA_DIRECTORY/patches/Amlogic"
+  PKG_PATCH_DIRS+=" ${RA_DIRECTORY}/patches/Amlogic"
   PKG_CONFIGURE_OPTS_TARGET+=" --disable-kms \
                            --enable-mali_fbdev"
 elif [[ "${DEVICE}" =~ ^(OdroidGoAdvance|GameForce|RK356x|OdroidM1)$ ]]; then
@@ -49,8 +49,10 @@ elif [[ "${DEVICE}" =~ ^(OdroidGoAdvance|GameForce|RK356x|OdroidM1)$ ]]; then
                            --enable-kms \
                            --disable-mali_fbdev"
   if [ "${DEVICE}" = "OdroidGoAdvance" ]; then
-    PKG_PATCH_DIRS+=" $RA_DIRECTORY/patches/OdroidGoAdvance"
+    PKG_PATCH_DIRS+=" ${RA_DIRECTORY}/patches/OdroidGoAdvance"
     PKG_CONFIGURE_OPTS_TARGET+=" --enable-odroidgo2"
+  elif [ "${DEVICE}" = "GameForce" ]; then
+    PKG_PATCH_DIRS+=" ${RA_DIRECTORY}/patches/OdroidGoAdvance"
   fi
 else
   echo "${PKG_NAME}: Unsupported devices ${DEVICE} when only AmlNG, AmlOld, OGA, GF, RK356X, M1 is supported" 1>&2
@@ -69,9 +71,9 @@ unpack() {
 
 pre_configure_target() {
 # Retroarch does not like -O3 for CHD loading with cheevos
-  export CFLAGS="$CFLAGS -O3 -fno-tree-vectorize"
+  export CFLAGS="${CFLAGS} -O3 -fno-tree-vectorize"
   TARGET_CONFIGURE_OPTS=""
-  cd $PKG_BUILD
+  cd ${PKG_BUILD}
 }
 
 make_target() {
@@ -80,7 +82,7 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/bin
-  #patchelf --set-interpreter /usr/lib32/ld-linux-armhf.so.3 $PKG_BUILD/retroarch
-  cp $PKG_BUILD/retroarch $INSTALL/usr/bin/retroarch32
+  mkdir -p ${INSTALL}/usr/bin
+  #patchelf --set-interpreter /usr/lib32/ld-linux-armhf.so.3 ${PKG_BUILD}/retroarch
+  cp ${PKG_BUILD}/retroarch ${INSTALL}/usr/bin/retroarch32
 }

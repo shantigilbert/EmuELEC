@@ -1,0 +1,10 @@
+#!/bin/sh
+case "${1}" in
+  pre)
+    ;;
+  post)
+    connmanctl disable wifi
+    sleep 5
+    connmanctl enable wifi
+    ;;
+esac

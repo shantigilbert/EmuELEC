@@ -1,0 +1,25 @@
+From 6404339d284203199febb7e28dcc53a3d57858ed Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Tue, 16 May 2023 10:47:18 +0200
+Subject: [PATCH 2/3] Linux: arm: fixup statx syscall number missing
+
+---
+ sysdeps/unix/sysv/linux/fstatat64.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sysdeps/unix/sysv/linux/fstatat64.c b/sysdeps/unix/sysv/linux/fstatat64.c
+index 8b1a1a290d..ca66485968 100644
+--- a/sysdeps/unix/sysv/linux/fstatat64.c
++++ b/sysdeps/unix/sysv/linux/fstatat64.c
+@@ -40,7 +40,7 @@ _Static_assert (sizeof (__blkcnt_t) == sizeof (__blkcnt64_t),
+                 "__blkcnt_t and __blkcnt64_t must match");
+ #endif
+ 
+-#if (__WORDSIZE == 32 \
++#if (__WORDSIZE == 32 && defined __NR_statx \
+      && (!defined __SYSCALL_WORDSIZE || __SYSCALL_WORDSIZE == 32)) \
+      || defined STAT_HAS_TIME32 \
+      || (!defined __NR_newfstatat && !defined __NR_fstatat64)
+-- 
+2.41.0
+

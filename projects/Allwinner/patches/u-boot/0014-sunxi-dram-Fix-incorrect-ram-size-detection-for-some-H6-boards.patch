@@ -1,0 +1,46 @@
+From: Gunjan Gupta <viraniac@gmail.com>
+Subject: [PATCH 1/1] sunxi: dram: Fix incorrect ram size detection for some H6
+ boards
+Date: Sun,  1 Oct 2023 21:43:32 +0530
+
+On some H6 boards like Orange Pi 3 LTS, some times U-Boot fails to detect
+ram size correctly. Instead of 2GB thats available, it detects 4GB of ram
+and then SPL just hangs there making board not to boot further.
+
+On debugging, I found that the rows value were being determined correctly,
+but columns were sometimes off by one value. I found that adding some
+delay after the mctl_core_init call along with making use of dsb in the
+start of the mctl_mem_matches solves the issue.
+
+Signed-off-by: Gunjan Gupta <viraniac@gmail.com>
+---
+
+ arch/arm/mach-sunxi/dram_helpers.c   | 1 +
+ arch/arm/mach-sunxi/dram_sun50i_h6.c | 2 ++
+ 2 files changed, 3 insertions(+)
+
+diff --git a/arch/arm/mach-sunxi/dram_helpers.c b/arch/arm/mach-sunxi/dram_helpers.c
+index cdf2750f1c..5758c58e07 100644
+--- a/arch/arm/mach-sunxi/dram_helpers.c
++++ b/arch/arm/mach-sunxi/dram_helpers.c
+@@ -32,6 +32,7 @@ void mctl_await_completion(u32 *reg, u32 mask, u32 val)
+ #ifndef CONFIG_MACH_SUNIV
+ bool mctl_mem_matches(u32 offset)
+ {
++	dsb();
+ 	/* Try to write different values to RAM at two addresses */
+ 	writel(0, CFG_SYS_SDRAM_BASE);
+ 	writel(0xaa55aa55, (ulong)CFG_SYS_SDRAM_BASE + offset);
+diff --git a/arch/arm/mach-sunxi/dram_sun50i_h6.c b/arch/arm/mach-sunxi/dram_sun50i_h6.c
+index bff2e42513..a031a845f5 100644
+--- a/arch/arm/mach-sunxi/dram_sun50i_h6.c
++++ b/arch/arm/mach-sunxi/dram_sun50i_h6.c
+@@ -623,6 +623,8 @@ static void mctl_auto_detect_dram_size(struct dram_para *para)
+ 	para->cols = 11;
+ 	mctl_core_init(para);
+ 
++	udelay(50);
++
+ 	for (para->cols = 8; para->cols < 11; para->cols++) {
+ 		/* 8 bits per byte and 16/32 bit width */
+ 		if (mctl_mem_matches(1 << (para->cols + 1 +

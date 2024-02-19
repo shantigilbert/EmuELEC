@@ -8,25 +8,25 @@ PKG_SITE="http://www.amlogic.com"
 PKG_DEPENDS_TARGET="toolchain usbutils"
 PKG_LONGDESC="amremote - IR remote configuration utility for Amlogic-based devices"
 
-case "$LINUX" in
-  amlogic-3.14)
-    PKG_VERSION="05b85d1f9821ae65dca250ba87b369327dd71df3"
-    PKG_SHA256="895a64efc05cee3148b4c33f5acbffb87da095d8b8f289f78e0cec26d2ed6f9d"
-    PKG_URL="https://github.com/CoreELEC/amremote/archive/$PKG_VERSION.tar.gz"
-    ;;
+case "${LINUX}" in
   amlogic-4.9)
     PKG_VERSION="1db130a0ccd47f6b5c3d1dffab1e89613b796a8c"
     PKG_SHA256="5b96f2a1dd03200909eed749f5d97d1d02ee7fc8ac92d8fce6b5d6772ee642dc"
-    PKG_URL="https://github.com/CoreELEC/amremote/archive/$PKG_VERSION.tar.gz"
+    PKG_URL="https://github.com/CoreELEC/amremote/archive/${PKG_VERSION}.tar.gz"
+    ;;
+  amlogic-5.4)
+    PKG_VERSION="455eb8ef8507acf899d4723c022de1c981bb697e"
+    PKG_SHA256="985bd796995cd756b0edcc34a88e31392a21c04b6c9a4a46e20f4bca19ab1511"
+    PKG_URL="https://github.com/CoreELEC/amremote/archive/${PKG_VERSION}.tar.gz"
     ;;
 esac
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/bin
-    cp remotecfg $INSTALL/usr/bin
+  mkdir -p ${INSTALL}/usr/bin
+    cp remotecfg ${INSTALL}/usr/bin
 
-  mkdir -p $INSTALL/usr/lib/coreelec
-    cp $PKG_DIR/scripts/* $INSTALL/usr/lib/coreelec
+  mkdir -p ${INSTALL}/usr/lib/coreelec
+    cp ${PKG_DIR}/scripts/* ${INSTALL}/usr/lib/coreelec
 }
 
 post_install() {

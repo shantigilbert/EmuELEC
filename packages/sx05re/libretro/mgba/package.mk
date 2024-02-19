@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="mgba"
-PKG_VERSION="ec5ecb26deba8d7ac830fc66ade9fac0eeaeb4ae"
-PKG_SHA256="f84e8e2517352df0dd16beabdad151a66e1c04b00e52d431ca26baede93a5d86"
+PKG_VERSION="314bf7b676f5b820f396209eb0c7d6fbe8103486"
+PKG_SHA256="66d9766d6f129bff9bfacc8a94787daa018b9c4a9a56fd49673c019eba19ae53"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MPLv2.0"
 PKG_SITE="https://github.com/libretro/mgba"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -38,8 +38,8 @@ PKG_AUTORECONF="no"
 PKG_USE_CMAKE="no"
 
 make_target() {
-  cd $PKG_BUILD
-  if [[ "$ARCH" =~ "arm" ]]; then
+  cd ${PKG_BUILD}
+  if [[ "${ARCH}" =~ "arm" ]]; then
     make -f Makefile.libretro platform=unix-armv HAVE_NEON=1
   else
     make -f Makefile.libretro
@@ -47,6 +47,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp mgba_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp mgba_libretro.so ${INSTALL}/usr/lib/libretro/
 }

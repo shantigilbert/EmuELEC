@@ -1,0 +1,105 @@
+From 6c04d7c917da6b38f8b2b4306ab03ed2ab7e6ce0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 9 Sep 2021 00:28:53 +0200
+Subject: [PATCH 020/142] broadcom/vir: implement is_no_op_mov for v71
+
+Did some refactoring/splitting.
+---
+ src/broadcom/compiler/vir_to_qpu.c | 66 ++++++++++++++++++++++++------
+ 1 file changed, 53 insertions(+), 13 deletions(-)
+
+diff --git a/src/broadcom/compiler/vir_to_qpu.c b/src/broadcom/compiler/vir_to_qpu.c
+index c8b6e0a91a0..08970d52954 100644
+--- a/src/broadcom/compiler/vir_to_qpu.c
++++ b/src/broadcom/compiler/vir_to_qpu.c
+@@ -129,19 +129,8 @@ set_src(struct v3d_qpu_instr *instr, enum v3d_qpu_mux *mux, struct qpu_reg src)
+ }
+ 
+ static bool
+-is_no_op_mov(struct qinst *qinst)
++v3d33_mov_src_and_dst_equal(struct qinst *qinst)
+ {
+-        static const struct v3d_qpu_sig no_sig = {0};
+-
+-        /* Make sure it's just a lone MOV. */
+-        if (qinst->qpu.type != V3D_QPU_INSTR_TYPE_ALU ||
+-            qinst->qpu.alu.mul.op != V3D_QPU_M_MOV ||
+-            qinst->qpu.alu.add.op != V3D_QPU_A_NOP ||
+-            memcmp(&qinst->qpu.sig, &no_sig, sizeof(no_sig)) != 0) {
+-                return false;
+-        }
+-
+-        /* Check if it's a MOV from a register to itself. */
+         enum v3d_qpu_waddr waddr = qinst->qpu.alu.mul.waddr;
+         if (qinst->qpu.alu.mul.magic_write) {
+                 if (waddr < V3D_QPU_WADDR_R0 || waddr > V3D_QPU_WADDR_R4)
+@@ -168,6 +157,57 @@ is_no_op_mov(struct qinst *qinst)
+                         return false;
+         }
+ 
++        return true;
++}
++
++static bool
++v3d71_mov_src_and_dst_equal(struct qinst *qinst)
++{
++        if (qinst->qpu.alu.mul.magic_write)
++                return false;
++
++        enum v3d_qpu_waddr waddr = qinst->qpu.alu.mul.waddr;
++        int raddr;
++
++        raddr = qinst->qpu.alu.mul.a.raddr;
++        if (raddr != waddr)
++                return false;
++
++        return true;
++}
++
++static bool
++mov_src_and_dst_equal(struct qinst *qinst,
++                      const struct v3d_device_info *devinfo)
++{
++        if (devinfo->ver < 71)
++                return v3d33_mov_src_and_dst_equal(qinst);
++        else
++                return v3d71_mov_src_and_dst_equal(qinst);
++}
++
++
++static bool
++is_no_op_mov(struct qinst *qinst,
++             const struct v3d_device_info *devinfo)
++{
++        static const struct v3d_qpu_sig no_sig = {0};
++
++        /* Make sure it's just a lone MOV. We only check for M_MOV. Although
++         * for V3D 7.x there is also A_MOV, we don't need to check for it as
++         * we always emit using M_MOV. We could use A_MOV later on the
++         * squedule to improve performance
++         */
++        if (qinst->qpu.type != V3D_QPU_INSTR_TYPE_ALU ||
++            qinst->qpu.alu.mul.op != V3D_QPU_M_MOV ||
++            qinst->qpu.alu.add.op != V3D_QPU_A_NOP ||
++            memcmp(&qinst->qpu.sig, &no_sig, sizeof(no_sig)) != 0) {
++                return false;
++        }
++
++        if (!mov_src_and_dst_equal(qinst, devinfo))
++                return false;
++
+         /* No packing or flags updates, or we need to execute the
+          * instruction.
+          */
+@@ -324,7 +364,7 @@ v3d_generate_code_block(struct v3d_compile *c,
+                                 qinst->qpu.alu.mul.waddr = dst.index;
+                                 qinst->qpu.alu.mul.magic_write = dst.magic;
+ 
+-                                if (is_no_op_mov(qinst)) {
++                                if (is_no_op_mov(qinst, c->devinfo)) {
+                                         vir_remove_instruction(c, qinst);
+                                         continue;
+                                 }
+-- 
+2.39.2
+

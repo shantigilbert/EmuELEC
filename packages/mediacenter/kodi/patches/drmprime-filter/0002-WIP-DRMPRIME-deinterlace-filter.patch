@@ -1,7 +1,7 @@
-From a2f57bbd2c63fc0cf89304805e93f3b57ce55b58 Mon Sep 17 00:00:00 2001
+From da88bb2f1dfbb6745406fab1bbece5b71df39b91 Mon Sep 17 00:00:00 2001
 From: Jernej Skrabec <jernej.skrabec@siol.net>
 Date: Thu, 26 Dec 2019 11:01:51 +0100
-Subject: [PATCH 2/6] WIP: DRMPRIME deinterlace filter
+Subject: [PATCH 2/7] WIP: DRMPRIME deinterlace filter
 
 ---
  .../DVDCodecs/Video/DVDVideoCodecDRMPRIME.cpp | 379 +++++++++++++++---
@@ -517,5 +517,5 @@ index b5cacf1a3c..fab3431d40 100644
    AVFilterContext* m_pFilterIn = nullptr;
    AVFilterContext* m_pFilterOut = nullptr;
 -- 
-2.34.1
+2.39.2
 

@@ -1,0 +1,52 @@
+From e31d8ce8965aef763014ecc5ce00252bb70dd894 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Mon, 22 May 2023 11:23:13 +0200
+Subject: [PATCH 16/21] AMLUtils: add display DV support check
+
+---
+ xbmc/utils/AMLUtils.cpp | 16 ++++++++++++++++
+ xbmc/utils/AMLUtils.h   |  1 +
+ 2 files changed, 17 insertions(+)
+
+diff --git a/xbmc/utils/AMLUtils.cpp b/xbmc/utils/AMLUtils.cpp
+index 33e449408d..2d1c1d78b3 100644
+--- a/xbmc/utils/AMLUtils.cpp
++++ b/xbmc/utils/AMLUtils.cpp
+@@ -56,6 +56,22 @@ int aml_get_cpufamily_id()
+   return aml_cpufamily_id;
+ }
+ 
++bool aml_display_support_dv()
++{
++  int support_dv = 0;
++  CRegExp regexp;
++  regexp.RegComp("The Rx don't support DolbyVision");
++  std::string valstr;
++  CSysfsPath dv_cap{"/sys/devices/virtual/amhdmitx/amhdmitx0/dv_cap"};
++  if (dv_cap.Exists())
++  {
++    valstr = dv_cap.Get<std::string>().value();
++    support_dv = (regexp.RegFind(valstr) >= 0) ? 0 : 1;
++  }
++
++  return support_dv;
++}
++
+ bool aml_dv_support_ll()
+ {
+   int support_ll = 0;
+diff --git a/xbmc/utils/AMLUtils.h b/xbmc/utils/AMLUtils.h
+index a944814642..2f07acbfa1 100644
+--- a/xbmc/utils/AMLUtils.h
++++ b/xbmc/utils/AMLUtils.h
+@@ -49,6 +49,7 @@ enum AML_SUPPORT_H264_4K2K
+ #define AML_SM1     0x2B
+ 
+ int  aml_get_cpufamily_id();
++bool aml_display_support_dv();
+ bool aml_dv_support_ll();
+ bool aml_support_hevc();
+ bool aml_support_hevc_4k2k();
+-- 
+2.43.0
+

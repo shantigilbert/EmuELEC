@@ -1,5 +1,2 @@
-101
-- ccid: update to 1.4.34
-
-100
-- initial addon
+1
+- ccid: update to 1.5.2

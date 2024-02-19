@@ -43,7 +43,7 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
  obj-$(CONFIG_MFD_AXP20X_RSB)	+= axp20x-rsb.o
 --- /dev/null
 +++ b/drivers/mfd/ac200.c
-@@ -0,0 +1,150 @@
+@@ -0,0 +1,148 @@
 +// SPDX-License-Identifier: GPL-2.0-only
 +/*
 + * MFD core driver for X-Powers' AC200 IC
@@ -157,15 +157,13 @@ Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 +	return ret;
 +}
 +
-+static int ac200_i2c_remove(struct i2c_client *i2c)
++void ac200_i2c_remove(struct i2c_client *i2c)
 +{
 +	struct ac200_dev *ac200 = i2c_get_clientdata(i2c);
 +
 +	regmap_write(ac200->regmap, AC200_SYS_CONTROL, 0);
 +
 +	clk_disable_unprepare(ac200->clk);
-+
-+	return 0;
 +}
 +
 +static const struct i2c_device_id ac200_ids[] = {

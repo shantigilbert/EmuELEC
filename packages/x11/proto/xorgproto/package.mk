@@ -10,5 +10,4 @@ PKG_URL="https://xorg.freedesktop.org/archive/individual/proto/${PKG_NAME}-${PKG
 PKG_DEPENDS_TARGET="toolchain util-macros"
 PKG_LONGDESC="combined X.Org X11 Protocol headers"
 
-PKG_MESON_OPTS_TARGET="-Dlegacy=false \
-                       -Dpkgconfigdatadir=/usr/lib/pkgconfig"
+PKG_MESON_OPTS_TARGET="-Dlegacy=false"

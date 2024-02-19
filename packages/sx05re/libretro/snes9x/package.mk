@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="snes9x"
-PKG_VERSION="3c4982edddfdba482204ed48cf0b1d41ccae5493"
-PKG_SHA256="6bbfae0242e6d4c751d81c81026d6278708506d6d4d0a665409c3e245b752ab4"
+PKG_VERSION="68af8fe78349082ef2d01456b112ec0ee230606d"
+PKG_SHA256="7eeed0e51016b93ed1ce715bd4f681f27c8473545d1e3f1f1c97c5b4275a2b11"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Non-commercial"
 PKG_SITE="https://github.com/snes9xgit/snes9x"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,11 +37,11 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 make_target() {
-  if [ "$ARCH" == "arm" ]; then
-    CXXFLAGS="$CXXFLAGS -DARM"
+  if [ "${ARCH}" == "arm" ]; then
+    CXXFLAGS="${CXXFLAGS} -DARM"
   fi
   
-   if ([ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "OdroidGoAdvance" ]) && [ "$ARCH" == "arm" ]; then
+   if ([ "${DEVICE}" == "OdroidGoAdvance" ] || [ "${DEVICE}" == "OdroidGoAdvance" ]) && [ "${ARCH}" == "arm" ]; then
     make -C libretro platform=classic_armv8_a35
    else
    make -C libretro
@@ -49,6 +49,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp libretro/snes9x_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp libretro/snes9x_libretro.so ${INSTALL}/usr/lib/libretro/
 }

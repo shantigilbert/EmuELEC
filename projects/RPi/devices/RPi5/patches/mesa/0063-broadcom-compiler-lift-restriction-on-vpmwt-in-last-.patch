@@ -1,0 +1,26 @@
+From 6cdf01fad49489b5fc66d231b527de5245d5de32 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Mon, 29 Nov 2021 13:23:11 +0100
+Subject: [PATCH 063/142] broadcom/compiler: lift restriction on vpmwt in last
+ instruction for V3D 7.x
+
+---
+ src/broadcom/compiler/qpu_schedule.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index 476eae691ab..77fb6a794e6 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -1934,7 +1934,7 @@ qpu_inst_valid_in_thrend_slot(struct v3d_compile *c,
+         if (slot > 0 && qinst->uniform != ~0)
+                 return false;
+ 
+-        if (v3d_qpu_waits_vpm(inst))
++        if (c->devinfo->ver <= 42 && v3d_qpu_waits_vpm(inst))
+                 return false;
+ 
+         if (inst->sig.ldvary)
+-- 
+2.39.2
+

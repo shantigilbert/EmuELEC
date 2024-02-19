@@ -1,0 +1,4 @@
+<settings version="2">
+    <setting id="waitfor" default="true">5</setting>
+    <setting id="satiprtsp" default="true">554</setting>
+</settings>

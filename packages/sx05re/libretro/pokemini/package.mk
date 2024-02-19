@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="pokemini"
-PKG_VERSION="9ba2c2d98bef98794095f3ef50e22f1a3cbc6166"
-PKG_SHA256="7dd450e5e26c9b66ce0811ec4eac125e71b6752951bdbf3851d0312d268c09c2"
+PKG_VERSION="9bf450887026d9b92d4f9432b5d2a5ed749a35e2"
+PKG_SHA256="7696776f4e41a497ab3a196d3d61f323d2916e5f404556ed2151aaf15e32d869"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/pokemini"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,6 +37,6 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp pokemini_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp pokemini_libretro.so ${INSTALL}/usr/lib/libretro/
 }

@@ -1,0 +1,32 @@
+From c4f957af4fb0e10abf0a7ffad4f7a468633b7d99 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Tue, 20 Jul 2021 14:00:44 +0200
+Subject: [PATCH 076/142] v3dv/cmd_buffer: emit TILE_BINNING_MODE_CFG for v71
+
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index b958e634c82..17b2f46850d 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -94,7 +94,14 @@ v3dX(job_emit_binning_prolog)(struct v3dv_job *job,
+       config.maximum_bpp_of_all_render_targets = tiling->internal_bpp;
+ #endif
+ #if V3D_VERSION >= 71
+-      unreachable("HW generation 71 not supported yet.");
++      config.log2_tile_width = log2_tile_size(tiling->tile_width);
++      config.log2_tile_height = log2_tile_size(tiling->tile_height);
++      /* FIXME: ideally we would like next assert on the packet header (as is
++       * general, so also applies to GL). We would need to expand
++       * gen_pack_header for that.
++       */
++      assert(config.log2_tile_width == config.log2_tile_height ||
++             config.log2_tile_width == config.log2_tile_height + 1);
+ #endif
+    }
+ 
+-- 
+2.39.2
+

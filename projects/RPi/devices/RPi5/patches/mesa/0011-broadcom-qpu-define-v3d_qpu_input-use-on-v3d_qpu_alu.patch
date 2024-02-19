@@ -1,0 +1,778 @@
+From d10e67a396d713ec81fb133f3516e09fe1e067b6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Fri, 6 Aug 2021 01:22:31 +0200
+Subject: [PATCH 011/142] broadcom/qpu: define v3d_qpu_input, use on
+ v3d_qpu_alu_instr
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+At this point it just tidy up a little the alu_instr structure.
+
+But also serves to prepare the structure for new changes, as 7.x uses
+raddr instead of mux, and it is just easier to add the raddr to the
+new input structure.
+
+Signed-off-by: Alejandro Piñeiro <apinheiro@igalia.com>
+Signed-off-by: Iago Toral Quiroga <itoral@igalia.com>
+---
+ src/broadcom/compiler/qpu_schedule.c          | 65 +++++++--------
+ src/broadcom/compiler/vir.c                   | 16 ++--
+ src/broadcom/compiler/vir_dump.c              |  8 +-
+ .../compiler/vir_opt_copy_propagate.c         | 12 +--
+ .../compiler/vir_opt_redundant_flags.c        |  8 +-
+ src/broadcom/compiler/vir_to_qpu.c            | 30 +++----
+ src/broadcom/qpu/qpu_disasm.c                 | 16 ++--
+ src/broadcom/qpu/qpu_instr.c                  |  8 +-
+ src/broadcom/qpu/qpu_instr.h                  | 13 +--
+ src/broadcom/qpu/qpu_pack.c                   | 82 +++++++++----------
+ src/broadcom/qpu/tests/qpu_disasm.c           |  8 +-
+ 11 files changed, 134 insertions(+), 132 deletions(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index a10fa03ed10..455fa3867be 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -306,14 +306,14 @@ calculate_deps(struct schedule_state *state, struct schedule_node *n)
+         /* XXX: LOAD_IMM */
+ 
+         if (v3d_qpu_add_op_num_src(inst->alu.add.op) > 0)
+-                process_mux_deps(state, n, inst->alu.add.a);
++                process_mux_deps(state, n, inst->alu.add.a.mux);
+         if (v3d_qpu_add_op_num_src(inst->alu.add.op) > 1)
+-                process_mux_deps(state, n, inst->alu.add.b);
++                process_mux_deps(state, n, inst->alu.add.b.mux);
+ 
+         if (v3d_qpu_mul_op_num_src(inst->alu.mul.op) > 0)
+-                process_mux_deps(state, n, inst->alu.mul.a);
++                process_mux_deps(state, n, inst->alu.mul.a.mux);
+         if (v3d_qpu_mul_op_num_src(inst->alu.mul.op) > 1)
+-                process_mux_deps(state, n, inst->alu.mul.b);
++                process_mux_deps(state, n, inst->alu.mul.b.mux);
+ 
+         switch (inst->alu.add.op) {
+         case V3D_QPU_A_VPMSETUP:
+@@ -537,22 +537,22 @@ reads_too_soon_after_write(struct choose_scoreboard *scoreboard,
+ 
+         if (inst->alu.add.op != V3D_QPU_A_NOP) {
+                 if (v3d_qpu_add_op_num_src(inst->alu.add.op) > 0 &&
+-                    mux_reads_too_soon(scoreboard, inst, inst->alu.add.a)) {
++                    mux_reads_too_soon(scoreboard, inst, inst->alu.add.a.mux)) {
+                         return true;
+                 }
+                 if (v3d_qpu_add_op_num_src(inst->alu.add.op) > 1 &&
+-                    mux_reads_too_soon(scoreboard, inst, inst->alu.add.b)) {
++                    mux_reads_too_soon(scoreboard, inst, inst->alu.add.b.mux)) {
+                         return true;
+                 }
+         }
+ 
+         if (inst->alu.mul.op != V3D_QPU_M_NOP) {
+                 if (v3d_qpu_mul_op_num_src(inst->alu.mul.op) > 0 &&
+-                    mux_reads_too_soon(scoreboard, inst, inst->alu.mul.a)) {
++                    mux_reads_too_soon(scoreboard, inst, inst->alu.mul.a.mux)) {
+                         return true;
+                 }
+                 if (v3d_qpu_mul_op_num_src(inst->alu.mul.op) > 1 &&
+-                    mux_reads_too_soon(scoreboard, inst, inst->alu.mul.b)) {
++                    mux_reads_too_soon(scoreboard, inst, inst->alu.mul.b.mux)) {
+                         return true;
+                 }
+         }
+@@ -839,20 +839,20 @@ qpu_merge_raddrs(struct v3d_qpu_instr *result,
+         if (!result->sig.small_imm_b) {
+                 if (v3d_qpu_uses_mux(add_instr, V3D_QPU_MUX_B) &&
+                     raddr_a == add_instr->raddr_b) {
+-                        if (add_instr->alu.add.a == V3D_QPU_MUX_B)
+-                                result->alu.add.a = V3D_QPU_MUX_A;
+-                        if (add_instr->alu.add.b == V3D_QPU_MUX_B &&
++                        if (add_instr->alu.add.a.mux == V3D_QPU_MUX_B)
++                                result->alu.add.a.mux = V3D_QPU_MUX_A;
++                        if (add_instr->alu.add.b.mux == V3D_QPU_MUX_B &&
+                             v3d_qpu_add_op_num_src(add_instr->alu.add.op) > 1) {
+-                                result->alu.add.b = V3D_QPU_MUX_A;
++                                result->alu.add.b.mux = V3D_QPU_MUX_A;
+                         }
+                 }
+                 if (v3d_qpu_uses_mux(mul_instr, V3D_QPU_MUX_B) &&
+                     raddr_a == mul_instr->raddr_b) {
+-                        if (mul_instr->alu.mul.a == V3D_QPU_MUX_B)
+-                                result->alu.mul.a = V3D_QPU_MUX_A;
+-                        if (mul_instr->alu.mul.b == V3D_QPU_MUX_B &&
++                        if (mul_instr->alu.mul.a.mux == V3D_QPU_MUX_B)
++                                result->alu.mul.a.mux = V3D_QPU_MUX_A;
++                        if (mul_instr->alu.mul.b.mux == V3D_QPU_MUX_B &&
+                             v3d_qpu_mul_op_num_src(mul_instr->alu.mul.op) > 1) {
+-                                result->alu.mul.b = V3D_QPU_MUX_A;
++                                result->alu.mul.b.mux = V3D_QPU_MUX_A;
+                         }
+                 }
+         }
+@@ -863,20 +863,20 @@ qpu_merge_raddrs(struct v3d_qpu_instr *result,
+         result->raddr_b = raddr_b;
+         if (v3d_qpu_uses_mux(add_instr, V3D_QPU_MUX_A) &&
+             raddr_b == add_instr->raddr_a) {
+-                if (add_instr->alu.add.a == V3D_QPU_MUX_A)
+-                        result->alu.add.a = V3D_QPU_MUX_B;
+-                if (add_instr->alu.add.b == V3D_QPU_MUX_A &&
++                if (add_instr->alu.add.a.mux == V3D_QPU_MUX_A)
++                        result->alu.add.a.mux = V3D_QPU_MUX_B;
++                if (add_instr->alu.add.b.mux == V3D_QPU_MUX_A &&
+                     v3d_qpu_add_op_num_src(add_instr->alu.add.op) > 1) {
+-                        result->alu.add.b = V3D_QPU_MUX_B;
++                        result->alu.add.b.mux = V3D_QPU_MUX_B;
+                 }
+         }
+         if (v3d_qpu_uses_mux(mul_instr, V3D_QPU_MUX_A) &&
+             raddr_b == mul_instr->raddr_a) {
+-                if (mul_instr->alu.mul.a == V3D_QPU_MUX_A)
+-                        result->alu.mul.a = V3D_QPU_MUX_B;
+-                if (mul_instr->alu.mul.b == V3D_QPU_MUX_A &&
++                if (mul_instr->alu.mul.a.mux == V3D_QPU_MUX_A)
++                        result->alu.mul.a.mux = V3D_QPU_MUX_B;
++                if (mul_instr->alu.mul.b.mux == V3D_QPU_MUX_A &&
+                     v3d_qpu_mul_op_num_src(mul_instr->alu.mul.op) > 1) {
+-                        result->alu.mul.b = V3D_QPU_MUX_B;
++                        result->alu.mul.b.mux = V3D_QPU_MUX_B;
+                 }
+         }
+ 
+@@ -927,11 +927,12 @@ qpu_convert_add_to_mul(struct v3d_qpu_instr *inst)
+         inst->flags.auf = V3D_QPU_UF_NONE;
+ 
+         inst->alu.mul.output_pack = inst->alu.add.output_pack;
+-        inst->alu.mul.a_unpack = inst->alu.add.a_unpack;
+-        inst->alu.mul.b_unpack = inst->alu.add.b_unpack;
++
++        inst->alu.mul.a.unpack = inst->alu.add.a.unpack;
++        inst->alu.mul.b.unpack = inst->alu.add.b.unpack;
+         inst->alu.add.output_pack = V3D_QPU_PACK_NONE;
+-        inst->alu.add.a_unpack = V3D_QPU_UNPACK_NONE;
+-        inst->alu.add.b_unpack = V3D_QPU_UNPACK_NONE;
++        inst->alu.add.a.unpack = V3D_QPU_UNPACK_NONE;
++        inst->alu.add.b.unpack = V3D_QPU_UNPACK_NONE;
+ }
+ 
+ static bool
+@@ -2064,12 +2065,12 @@ alu_reads_register(struct v3d_qpu_instr *inst,
+ 
+         if (add) {
+                 num_src = v3d_qpu_add_op_num_src(inst->alu.add.op);
+-                mux_a = inst->alu.add.a;
+-                mux_b = inst->alu.add.b;
++                mux_a = inst->alu.add.a.mux;
++                mux_b = inst->alu.add.b.mux;
+         } else {
+                 num_src = v3d_qpu_mul_op_num_src(inst->alu.mul.op);
+-                mux_a = inst->alu.mul.a;
+-                mux_b = inst->alu.mul.b;
++                mux_a = inst->alu.mul.a.mux;
++                mux_b = inst->alu.mul.b.mux;
+         }
+ 
+         for (int i = 0; i < num_src; i++) {
+diff --git a/src/broadcom/compiler/vir.c b/src/broadcom/compiler/vir.c
+index 660b11b0577..007cb0a941b 100644
+--- a/src/broadcom/compiler/vir.c
++++ b/src/broadcom/compiler/vir.c
+@@ -113,10 +113,10 @@ vir_is_raw_mov(struct qinst *inst)
+                 return false;
+         }
+ 
+-        if (inst->qpu.alu.add.a_unpack != V3D_QPU_UNPACK_NONE ||
+-            inst->qpu.alu.add.b_unpack != V3D_QPU_UNPACK_NONE ||
+-            inst->qpu.alu.mul.a_unpack != V3D_QPU_UNPACK_NONE ||
+-            inst->qpu.alu.mul.b_unpack != V3D_QPU_UNPACK_NONE) {
++        if (inst->qpu.alu.add.a.unpack != V3D_QPU_UNPACK_NONE ||
++            inst->qpu.alu.add.b.unpack != V3D_QPU_UNPACK_NONE ||
++            inst->qpu.alu.mul.a.unpack != V3D_QPU_UNPACK_NONE ||
++            inst->qpu.alu.mul.b.unpack != V3D_QPU_UNPACK_NONE) {
+                 return false;
+         }
+ 
+@@ -209,15 +209,15 @@ vir_set_unpack(struct qinst *inst, int src,
+ 
+         if (vir_is_add(inst)) {
+                 if (src == 0)
+-                        inst->qpu.alu.add.a_unpack = unpack;
++                        inst->qpu.alu.add.a.unpack = unpack;
+                 else
+-                        inst->qpu.alu.add.b_unpack = unpack;
++                        inst->qpu.alu.add.b.unpack = unpack;
+         } else {
+                 assert(vir_is_mul(inst));
+                 if (src == 0)
+-                        inst->qpu.alu.mul.a_unpack = unpack;
++                        inst->qpu.alu.mul.a.unpack = unpack;
+                 else
+-                        inst->qpu.alu.mul.b_unpack = unpack;
++                        inst->qpu.alu.mul.b.unpack = unpack;
+         }
+ }
+ 
+diff --git a/src/broadcom/compiler/vir_dump.c b/src/broadcom/compiler/vir_dump.c
+index 5c47bbdc1b0..ab5d4043039 100644
+--- a/src/broadcom/compiler/vir_dump.c
++++ b/src/broadcom/compiler/vir_dump.c
+@@ -270,8 +270,8 @@ vir_dump_alu(struct v3d_compile *c, struct qinst *inst)
+                 vir_print_reg(c, inst, inst->dst);
+                 fprintf(stderr, "%s", v3d_qpu_pack_name(instr->alu.add.output_pack));
+ 
+-                unpack[0] = instr->alu.add.a_unpack;
+-                unpack[1] = instr->alu.add.b_unpack;
++                unpack[0] = instr->alu.add.a.unpack;
++                unpack[1] = instr->alu.add.b.unpack;
+         } else {
+                 fprintf(stderr, "%s", v3d_qpu_mul_op_name(instr->alu.mul.op));
+                 fprintf(stderr, "%s", v3d_qpu_cond_name(instr->flags.mc));
+@@ -282,8 +282,8 @@ vir_dump_alu(struct v3d_compile *c, struct qinst *inst)
+                 vir_print_reg(c, inst, inst->dst);
+                 fprintf(stderr, "%s", v3d_qpu_pack_name(instr->alu.mul.output_pack));
+ 
+-                unpack[0] = instr->alu.mul.a_unpack;
+-                unpack[1] = instr->alu.mul.b_unpack;
++                unpack[0] = instr->alu.mul.a.unpack;
++                unpack[1] = instr->alu.mul.b.unpack;
+         }
+ 
+         for (int i = 0; i < nsrc; i++) {
+diff --git a/src/broadcom/compiler/vir_opt_copy_propagate.c b/src/broadcom/compiler/vir_opt_copy_propagate.c
+index da121c2a5bd..c4aa7255a17 100644
+--- a/src/broadcom/compiler/vir_opt_copy_propagate.c
++++ b/src/broadcom/compiler/vir_opt_copy_propagate.c
+@@ -104,14 +104,14 @@ vir_has_unpack(struct qinst *inst, int chan)
+ 
+         if (vir_is_add(inst)) {
+                 if (chan == 0)
+-                        return inst->qpu.alu.add.a_unpack != V3D_QPU_UNPACK_NONE;
++                        return inst->qpu.alu.add.a.unpack != V3D_QPU_UNPACK_NONE;
+                 else
+-                        return inst->qpu.alu.add.b_unpack != V3D_QPU_UNPACK_NONE;
++                        return inst->qpu.alu.add.b.unpack != V3D_QPU_UNPACK_NONE;
+         } else {
+                 if (chan == 0)
+-                        return inst->qpu.alu.mul.a_unpack != V3D_QPU_UNPACK_NONE;
++                        return inst->qpu.alu.mul.a.unpack != V3D_QPU_UNPACK_NONE;
+                 else
+-                        return inst->qpu.alu.mul.b_unpack != V3D_QPU_UNPACK_NONE;
++                        return inst->qpu.alu.mul.b.unpack != V3D_QPU_UNPACK_NONE;
+         }
+ }
+ 
+@@ -161,7 +161,7 @@ try_copy_prop(struct v3d_compile *c, struct qinst *inst, struct qinst **movs)
+                                 continue;
+ 
+                         /* these ops can't represent abs. */
+-                        if (mov->qpu.alu.mul.a_unpack == V3D_QPU_UNPACK_ABS) {
++                        if (mov->qpu.alu.mul.a.unpack == V3D_QPU_UNPACK_ABS) {
+                                 switch (inst->qpu.alu.add.op) {
+                                 case V3D_QPU_A_VFPACK:
+                                 case V3D_QPU_A_FROUND:
+@@ -189,7 +189,7 @@ try_copy_prop(struct v3d_compile *c, struct qinst *inst, struct qinst **movs)
+ 
+                 inst->src[i] = mov->src[0];
+                 if (vir_has_unpack(mov, 0)) {
+-                        enum v3d_qpu_input_unpack unpack = mov->qpu.alu.mul.a_unpack;
++                        enum v3d_qpu_input_unpack unpack = mov->qpu.alu.mul.a.unpack;
+ 
+                         vir_set_unpack(inst, i, unpack);
+                 }
+diff --git a/src/broadcom/compiler/vir_opt_redundant_flags.c b/src/broadcom/compiler/vir_opt_redundant_flags.c
+index c7896d57f2b..6b61ed6a39a 100644
+--- a/src/broadcom/compiler/vir_opt_redundant_flags.c
++++ b/src/broadcom/compiler/vir_opt_redundant_flags.c
+@@ -81,11 +81,11 @@ vir_instr_flags_op_equal(struct qinst *a, struct qinst *b)
+             a->qpu.flags.mpf != b->qpu.flags.mpf ||
+             a->qpu.alu.add.op != b->qpu.alu.add.op ||
+             a->qpu.alu.mul.op != b->qpu.alu.mul.op ||
+-            a->qpu.alu.add.a_unpack != b->qpu.alu.add.a_unpack ||
+-            a->qpu.alu.add.b_unpack != b->qpu.alu.add.b_unpack ||
++            a->qpu.alu.add.a.unpack != b->qpu.alu.add.a.unpack ||
++            a->qpu.alu.add.b.unpack != b->qpu.alu.add.b.unpack ||
+             a->qpu.alu.add.output_pack != b->qpu.alu.add.output_pack ||
+-            a->qpu.alu.mul.a_unpack != b->qpu.alu.mul.a_unpack ||
+-            a->qpu.alu.mul.b_unpack != b->qpu.alu.mul.b_unpack ||
++            a->qpu.alu.mul.a.unpack != b->qpu.alu.mul.a.unpack ||
++            a->qpu.alu.mul.b.unpack != b->qpu.alu.mul.b.unpack ||
+             a->qpu.alu.mul.output_pack != b->qpu.alu.mul.output_pack) {
+                 return false;
+         }
+diff --git a/src/broadcom/compiler/vir_to_qpu.c b/src/broadcom/compiler/vir_to_qpu.c
+index 15c2e3674c2..c8b6e0a91a0 100644
+--- a/src/broadcom/compiler/vir_to_qpu.c
++++ b/src/broadcom/compiler/vir_to_qpu.c
+@@ -106,20 +106,20 @@ set_src(struct v3d_qpu_instr *instr, enum v3d_qpu_mux *mux, struct qpu_reg src)
+                 return;
+         }
+ 
+-        if (instr->alu.add.a != V3D_QPU_MUX_A &&
+-            instr->alu.add.b != V3D_QPU_MUX_A &&
+-            instr->alu.mul.a != V3D_QPU_MUX_A &&
+-            instr->alu.mul.b != V3D_QPU_MUX_A) {
++        if (instr->alu.add.a.mux != V3D_QPU_MUX_A &&
++            instr->alu.add.b.mux != V3D_QPU_MUX_A &&
++            instr->alu.mul.a.mux != V3D_QPU_MUX_A &&
++            instr->alu.mul.b.mux != V3D_QPU_MUX_A) {
+                 instr->raddr_a = src.index;
+                 *mux = V3D_QPU_MUX_A;
+         } else {
+                 if (instr->raddr_a == src.index) {
+                         *mux = V3D_QPU_MUX_A;
+                 } else {
+-                        assert(!(instr->alu.add.a == V3D_QPU_MUX_B &&
+-                                 instr->alu.add.b == V3D_QPU_MUX_B &&
+-                                 instr->alu.mul.a == V3D_QPU_MUX_B &&
+-                                 instr->alu.mul.b == V3D_QPU_MUX_B) ||
++                        assert(!(instr->alu.add.a.mux == V3D_QPU_MUX_B &&
++                                 instr->alu.add.b.mux == V3D_QPU_MUX_B &&
++                                 instr->alu.mul.a.mux == V3D_QPU_MUX_B &&
++                                 instr->alu.mul.b.mux == V3D_QPU_MUX_B) ||
+                                src.index == instr->raddr_b);
+ 
+                         instr->raddr_b = src.index;
+@@ -147,14 +147,14 @@ is_no_op_mov(struct qinst *qinst)
+                 if (waddr < V3D_QPU_WADDR_R0 || waddr > V3D_QPU_WADDR_R4)
+                         return false;
+ 
+-                if (qinst->qpu.alu.mul.a !=
++                if (qinst->qpu.alu.mul.a.mux !=
+                     V3D_QPU_MUX_R0 + (waddr - V3D_QPU_WADDR_R0)) {
+                         return false;
+                 }
+         } else {
+                 int raddr;
+ 
+-                switch (qinst->qpu.alu.mul.a) {
++                switch (qinst->qpu.alu.mul.a.mux) {
+                 case V3D_QPU_MUX_A:
+                         raddr = qinst->qpu.raddr_a;
+                         break;
+@@ -171,7 +171,7 @@ is_no_op_mov(struct qinst *qinst)
+         /* No packing or flags updates, or we need to execute the
+          * instruction.
+          */
+-        if (qinst->qpu.alu.mul.a_unpack != V3D_QPU_UNPACK_NONE ||
++        if (qinst->qpu.alu.mul.a.unpack != V3D_QPU_UNPACK_NONE ||
+             qinst->qpu.alu.mul.output_pack != V3D_QPU_PACK_NONE ||
+             qinst->qpu.flags.mc != V3D_QPU_COND_NONE ||
+             qinst->qpu.flags.mpf != V3D_QPU_PF_NONE ||
+@@ -302,11 +302,11 @@ v3d_generate_code_block(struct v3d_compile *c,
+                                 assert(qinst->qpu.alu.mul.op == V3D_QPU_M_NOP);
+                                 if (nsrc >= 1) {
+                                         set_src(&qinst->qpu,
+-                                                &qinst->qpu.alu.add.a, src[0]);
++                                                &qinst->qpu.alu.add.a.mux, src[0]);
+                                 }
+                                 if (nsrc >= 2) {
+                                         set_src(&qinst->qpu,
+-                                                &qinst->qpu.alu.add.b, src[1]);
++                                                &qinst->qpu.alu.add.b.mux, src[1]);
+                                 }
+ 
+                                 qinst->qpu.alu.add.waddr = dst.index;
+@@ -314,11 +314,11 @@ v3d_generate_code_block(struct v3d_compile *c,
+                         } else {
+                                 if (nsrc >= 1) {
+                                         set_src(&qinst->qpu,
+-                                                &qinst->qpu.alu.mul.a, src[0]);
++                                                &qinst->qpu.alu.mul.a.mux, src[0]);
+                                 }
+                                 if (nsrc >= 2) {
+                                         set_src(&qinst->qpu,
+-                                                &qinst->qpu.alu.mul.b, src[1]);
++                                                &qinst->qpu.alu.mul.b.mux, src[1]);
+                                 }
+ 
+                                 qinst->qpu.alu.mul.waddr = dst.index;
+diff --git a/src/broadcom/qpu/qpu_disasm.c b/src/broadcom/qpu/qpu_disasm.c
+index 6aca3c28e78..588a665f770 100644
+--- a/src/broadcom/qpu/qpu_disasm.c
++++ b/src/broadcom/qpu/qpu_disasm.c
+@@ -121,16 +121,16 @@ v3d_qpu_disasm_add(struct disasm_state *disasm,
+         if (num_src >= 1) {
+                 if (has_dst)
+                         append(disasm, ", ");
+-                v3d_qpu_disasm_raddr(disasm, instr, instr->alu.add.a);
++                v3d_qpu_disasm_raddr(disasm, instr, instr->alu.add.a.mux);
+                 append(disasm, "%s",
+-                       v3d_qpu_unpack_name(instr->alu.add.a_unpack));
++                       v3d_qpu_unpack_name(instr->alu.add.a.unpack));
+         }
+ 
+         if (num_src >= 2) {
+                 append(disasm, ", ");
+-                v3d_qpu_disasm_raddr(disasm, instr, instr->alu.add.b);
++                v3d_qpu_disasm_raddr(disasm, instr, instr->alu.add.b.mux);
+                 append(disasm, "%s",
+-                       v3d_qpu_unpack_name(instr->alu.add.b_unpack));
++                       v3d_qpu_unpack_name(instr->alu.add.b.unpack));
+         }
+ }
+ 
+@@ -164,16 +164,16 @@ v3d_qpu_disasm_mul(struct disasm_state *disasm,
+         if (num_src >= 1) {
+                 if (has_dst)
+                         append(disasm, ", ");
+-                v3d_qpu_disasm_raddr(disasm, instr, instr->alu.mul.a);
++                v3d_qpu_disasm_raddr(disasm, instr, instr->alu.mul.a.mux);
+                 append(disasm, "%s",
+-                       v3d_qpu_unpack_name(instr->alu.mul.a_unpack));
++                       v3d_qpu_unpack_name(instr->alu.mul.a.unpack));
+         }
+ 
+         if (num_src >= 2) {
+                 append(disasm, ", ");
+-                v3d_qpu_disasm_raddr(disasm, instr, instr->alu.mul.b);
++                v3d_qpu_disasm_raddr(disasm, instr, instr->alu.mul.b.mux);
+                 append(disasm, "%s",
+-                       v3d_qpu_unpack_name(instr->alu.mul.b_unpack));
++                       v3d_qpu_unpack_name(instr->alu.mul.b.unpack));
+         }
+ }
+ 
+diff --git a/src/broadcom/qpu/qpu_instr.c b/src/broadcom/qpu/qpu_instr.c
+index 7759fb0efdf..7ece8b5e570 100644
+--- a/src/broadcom/qpu/qpu_instr.c
++++ b/src/broadcom/qpu/qpu_instr.c
+@@ -926,10 +926,10 @@ v3d_qpu_uses_mux(const struct v3d_qpu_instr *inst, enum v3d_qpu_mux mux)
+         int add_nsrc = v3d_qpu_add_op_num_src(inst->alu.add.op);
+         int mul_nsrc = v3d_qpu_mul_op_num_src(inst->alu.mul.op);
+ 
+-        return ((add_nsrc > 0 && inst->alu.add.a == mux) ||
+-                (add_nsrc > 1 && inst->alu.add.b == mux) ||
+-                (mul_nsrc > 0 && inst->alu.mul.a == mux) ||
+-                (mul_nsrc > 1 && inst->alu.mul.b == mux));
++        return ((add_nsrc > 0 && inst->alu.add.a.mux == mux) ||
++                (add_nsrc > 1 && inst->alu.add.b.mux == mux) ||
++                (mul_nsrc > 0 && inst->alu.mul.a.mux == mux) ||
++                (mul_nsrc > 1 && inst->alu.mul.b.mux == mux));
+ }
+ 
+ bool
+diff --git a/src/broadcom/qpu/qpu_instr.h b/src/broadcom/qpu/qpu_instr.h
+index 13b3f37d43f..53a51bfb3e1 100644
+--- a/src/broadcom/qpu/qpu_instr.h
++++ b/src/broadcom/qpu/qpu_instr.h
+@@ -294,25 +294,26 @@ enum v3d_qpu_mux {
+         V3D_QPU_MUX_B,
+ };
+ 
++struct v3d_qpu_input {
++        enum v3d_qpu_mux mux;
++        enum v3d_qpu_input_unpack unpack;
++};
++
+ struct v3d_qpu_alu_instr {
+         struct {
+                 enum v3d_qpu_add_op op;
+-                enum v3d_qpu_mux a, b;
++                struct v3d_qpu_input a, b;
+                 uint8_t waddr;
+                 bool magic_write;
+                 enum v3d_qpu_output_pack output_pack;
+-                enum v3d_qpu_input_unpack a_unpack;
+-                enum v3d_qpu_input_unpack b_unpack;
+         } add;
+ 
+         struct {
+                 enum v3d_qpu_mul_op op;
+-                enum v3d_qpu_mux a, b;
++                struct v3d_qpu_input a, b;
+                 uint8_t waddr;
+                 bool magic_write;
+                 enum v3d_qpu_output_pack output_pack;
+-                enum v3d_qpu_input_unpack a_unpack;
+-                enum v3d_qpu_input_unpack b_unpack;
+         } mul;
+ };
+ 
+diff --git a/src/broadcom/qpu/qpu_pack.c b/src/broadcom/qpu/qpu_pack.c
+index 2820d9d4c56..6e975793fc0 100644
+--- a/src/broadcom/qpu/qpu_pack.c
++++ b/src/broadcom/qpu/qpu_pack.c
+@@ -853,12 +853,12 @@ v3d_qpu_add_unpack(const struct v3d_device_info *devinfo, uint64_t packed_inst,
+                         instr->alu.add.output_pack = V3D_QPU_PACK_NONE;
+ 
+                 if (!v3d_qpu_float32_unpack_unpack((op >> 2) & 0x3,
+-                                                   &instr->alu.add.a_unpack)) {
++                                                   &instr->alu.add.a.unpack)) {
+                         return false;
+                 }
+ 
+                 if (!v3d_qpu_float32_unpack_unpack((op >> 0) & 0x3,
+-                                                   &instr->alu.add.b_unpack)) {
++                                                   &instr->alu.add.b.unpack)) {
+                         return false;
+                 }
+                 break;
+@@ -872,7 +872,7 @@ v3d_qpu_add_unpack(const struct v3d_device_info *devinfo, uint64_t packed_inst,
+                 instr->alu.add.output_pack = mux_b & 0x3;
+ 
+                 if (!v3d_qpu_float32_unpack_unpack((op >> 2) & 0x3,
+-                                                   &instr->alu.add.a_unpack)) {
++                                                   &instr->alu.add.a.unpack)) {
+                         return false;
+                 }
+                 break;
+@@ -884,7 +884,7 @@ v3d_qpu_add_unpack(const struct v3d_device_info *devinfo, uint64_t packed_inst,
+                 instr->alu.add.output_pack = V3D_QPU_PACK_NONE;
+ 
+                 if (!v3d_qpu_float32_unpack_unpack((op >> 2) & 0x3,
+-                                                   &instr->alu.add.a_unpack)) {
++                                                   &instr->alu.add.a.unpack)) {
+                         return false;
+                 }
+                 break;
+@@ -892,23 +892,23 @@ v3d_qpu_add_unpack(const struct v3d_device_info *devinfo, uint64_t packed_inst,
+         case V3D_QPU_A_VFMIN:
+         case V3D_QPU_A_VFMAX:
+                 if (!v3d_qpu_float16_unpack_unpack(op & 0x7,
+-                                                   &instr->alu.add.a_unpack)) {
++                                                   &instr->alu.add.a.unpack)) {
+                         return false;
+                 }
+ 
+                 instr->alu.add.output_pack = V3D_QPU_PACK_NONE;
+-                instr->alu.add.b_unpack = V3D_QPU_UNPACK_NONE;
++                instr->alu.add.b.unpack = V3D_QPU_UNPACK_NONE;
+                 break;
+ 
+         default:
+                 instr->alu.add.output_pack = V3D_QPU_PACK_NONE;
+-                instr->alu.add.a_unpack = V3D_QPU_UNPACK_NONE;
+-                instr->alu.add.b_unpack = V3D_QPU_UNPACK_NONE;
++                instr->alu.add.a.unpack = V3D_QPU_UNPACK_NONE;
++                instr->alu.add.b.unpack = V3D_QPU_UNPACK_NONE;
+                 break;
+         }
+ 
+-        instr->alu.add.a = mux_a;
+-        instr->alu.add.b = mux_b;
++        instr->alu.add.a.mux = mux_a;
++        instr->alu.add.b.mux = mux_b;
+         instr->alu.add.waddr = QPU_GET_FIELD(packed_inst, V3D_QPU_WADDR_A);
+ 
+         instr->alu.add.magic_write = false;
+@@ -956,12 +956,12 @@ v3d_qpu_mul_unpack(const struct v3d_device_info *devinfo, uint64_t packed_inst,
+                 instr->alu.mul.output_pack = ((op >> 4) & 0x3) - 1;
+ 
+                 if (!v3d_qpu_float32_unpack_unpack((op >> 2) & 0x3,
+-                                                   &instr->alu.mul.a_unpack)) {
++                                                   &instr->alu.mul.a.unpack)) {
+                         return false;
+                 }
+ 
+                 if (!v3d_qpu_float32_unpack_unpack((op >> 0) & 0x3,
+-                                                   &instr->alu.mul.b_unpack)) {
++                                                   &instr->alu.mul.b.unpack)) {
+                         return false;
+                 }
+ 
+@@ -972,7 +972,7 @@ v3d_qpu_mul_unpack(const struct v3d_device_info *devinfo, uint64_t packed_inst,
+                                               ((mux_b >> 2) & 1));
+ 
+                 if (!v3d_qpu_float32_unpack_unpack(mux_b & 0x3,
+-                                                   &instr->alu.mul.a_unpack)) {
++                                                   &instr->alu.mul.a.unpack)) {
+                         return false;
+                 }
+ 
+@@ -982,23 +982,23 @@ v3d_qpu_mul_unpack(const struct v3d_device_info *devinfo, uint64_t packed_inst,
+                 instr->alu.mul.output_pack = V3D_QPU_PACK_NONE;
+ 
+                 if (!v3d_qpu_float16_unpack_unpack(((op & 0x7) - 4) & 7,
+-                                                   &instr->alu.mul.a_unpack)) {
++                                                   &instr->alu.mul.a.unpack)) {
+                         return false;
+                 }
+ 
+-                instr->alu.mul.b_unpack = V3D_QPU_UNPACK_NONE;
++                instr->alu.mul.b.unpack = V3D_QPU_UNPACK_NONE;
+ 
+                 break;
+ 
+         default:
+                 instr->alu.mul.output_pack = V3D_QPU_PACK_NONE;
+-                instr->alu.mul.a_unpack = V3D_QPU_UNPACK_NONE;
+-                instr->alu.mul.b_unpack = V3D_QPU_UNPACK_NONE;
++                instr->alu.mul.a.unpack = V3D_QPU_UNPACK_NONE;
++                instr->alu.mul.b.unpack = V3D_QPU_UNPACK_NONE;
+                 break;
+         }
+ 
+-        instr->alu.mul.a = mux_a;
+-        instr->alu.mul.b = mux_b;
++        instr->alu.mul.a.mux = mux_a;
++        instr->alu.mul.b.mux = mux_b;
+         instr->alu.mul.waddr = QPU_GET_FIELD(packed_inst, V3D_QPU_WADDR_M);
+         instr->alu.mul.magic_write = packed_inst & V3D_QPU_MM;
+ 
+@@ -1030,8 +1030,8 @@ v3d_qpu_add_pack(const struct v3d_device_info *devinfo,
+                  const struct v3d_qpu_instr *instr, uint64_t *packed_instr)
+ {
+         uint32_t waddr = instr->alu.add.waddr;
+-        uint32_t mux_a = instr->alu.add.a;
+-        uint32_t mux_b = instr->alu.add.b;
++        uint32_t mux_a = instr->alu.add.a.mux;
++        uint32_t mux_b = instr->alu.add.b.mux;
+         int nsrc = v3d_qpu_add_op_num_src(instr->alu.add.op);
+         const struct opcode_desc *desc =
+                 lookup_opcode_from_instr(devinfo, add_ops, ARRAY_SIZE(add_ops),
+@@ -1102,12 +1102,12 @@ v3d_qpu_add_pack(const struct v3d_device_info *devinfo,
+                 }
+                 opcode |= output_pack << 4;
+ 
+-                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.a_unpack,
++                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.a.unpack,
+                                                  &a_unpack)) {
+                         return false;
+                 }
+ 
+-                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.b_unpack,
++                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.b.unpack,
+                                                  &b_unpack)) {
+                         return false;
+                 }
+@@ -1141,17 +1141,17 @@ v3d_qpu_add_pack(const struct v3d_device_info *devinfo,
+                 uint32_t a_unpack;
+                 uint32_t b_unpack;
+ 
+-                if (instr->alu.add.a_unpack == V3D_QPU_UNPACK_ABS ||
+-                    instr->alu.add.b_unpack == V3D_QPU_UNPACK_ABS) {
++                if (instr->alu.add.a.unpack == V3D_QPU_UNPACK_ABS ||
++                    instr->alu.add.b.unpack == V3D_QPU_UNPACK_ABS) {
+                         return false;
+                 }
+ 
+-                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.a_unpack,
++                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.a.unpack,
+                                                  &a_unpack)) {
+                         return false;
+                 }
+ 
+-                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.b_unpack,
++                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.b.unpack,
+                                                  &b_unpack)) {
+                         return false;
+                 }
+@@ -1176,7 +1176,7 @@ v3d_qpu_add_pack(const struct v3d_device_info *devinfo,
+                 }
+                 mux_b |= packed;
+ 
+-                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.a_unpack,
++                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.a.unpack,
+                                                  &packed)) {
+                         return false;
+                 }
+@@ -1194,7 +1194,7 @@ v3d_qpu_add_pack(const struct v3d_device_info *devinfo,
+                         return false;
+ 
+                 uint32_t packed;
+-                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.a_unpack,
++                if (!v3d_qpu_float32_unpack_pack(instr->alu.add.a.unpack,
+                                                  &packed)) {
+                         return false;
+                 }
+@@ -1207,11 +1207,11 @@ v3d_qpu_add_pack(const struct v3d_device_info *devinfo,
+         case V3D_QPU_A_VFMIN:
+         case V3D_QPU_A_VFMAX:
+                 if (instr->alu.add.output_pack != V3D_QPU_PACK_NONE ||
+-                    instr->alu.add.b_unpack != V3D_QPU_UNPACK_NONE) {
++                    instr->alu.add.b.unpack != V3D_QPU_UNPACK_NONE) {
+                         return false;
+                 }
+ 
+-                if (!v3d_qpu_float16_unpack_pack(instr->alu.add.a_unpack,
++                if (!v3d_qpu_float16_unpack_pack(instr->alu.add.a.unpack,
+                                                  &packed)) {
+                         return false;
+                 }
+@@ -1221,8 +1221,8 @@ v3d_qpu_add_pack(const struct v3d_device_info *devinfo,
+         default:
+                 if (instr->alu.add.op != V3D_QPU_A_NOP &&
+                     (instr->alu.add.output_pack != V3D_QPU_PACK_NONE ||
+-                     instr->alu.add.a_unpack != V3D_QPU_UNPACK_NONE ||
+-                     instr->alu.add.b_unpack != V3D_QPU_UNPACK_NONE)) {
++                     instr->alu.add.a.unpack != V3D_QPU_UNPACK_NONE ||
++                     instr->alu.add.b.unpack != V3D_QPU_UNPACK_NONE)) {
+                         return false;
+                 }
+                 break;
+@@ -1242,8 +1242,8 @@ static bool
+ v3d_qpu_mul_pack(const struct v3d_device_info *devinfo,
+                  const struct v3d_qpu_instr *instr, uint64_t *packed_instr)
+ {
+-        uint32_t mux_a = instr->alu.mul.a;
+-        uint32_t mux_b = instr->alu.mul.b;
++        uint32_t mux_a = instr->alu.mul.a.mux;
++        uint32_t mux_b = instr->alu.mul.b.mux;
+         int nsrc = v3d_qpu_mul_op_num_src(instr->alu.mul.op);
+ 
+         const struct opcode_desc *desc =
+@@ -1277,13 +1277,13 @@ v3d_qpu_mul_pack(const struct v3d_device_info *devinfo,
+                  */
+                 opcode += packed << 4;
+ 
+-                if (!v3d_qpu_float32_unpack_pack(instr->alu.mul.a_unpack,
++                if (!v3d_qpu_float32_unpack_pack(instr->alu.mul.a.unpack,
+                                                  &packed)) {
+                         return false;
+                 }
+                 opcode |= packed << 2;
+ 
+-                if (!v3d_qpu_float32_unpack_pack(instr->alu.mul.b_unpack,
++                if (!v3d_qpu_float32_unpack_pack(instr->alu.mul.b.unpack,
+                                                  &packed)) {
+                         return false;
+                 }
+@@ -1301,7 +1301,7 @@ v3d_qpu_mul_pack(const struct v3d_device_info *devinfo,
+                 opcode |= (packed >> 1) & 1;
+                 mux_b = (packed & 1) << 2;
+ 
+-                if (!v3d_qpu_float32_unpack_pack(instr->alu.mul.a_unpack,
++                if (!v3d_qpu_float32_unpack_pack(instr->alu.mul.a.unpack,
+                                                  &packed)) {
+                         return false;
+                 }
+@@ -1315,16 +1315,16 @@ v3d_qpu_mul_pack(const struct v3d_device_info *devinfo,
+                 if (instr->alu.mul.output_pack != V3D_QPU_PACK_NONE)
+                         return false;
+ 
+-                if (!v3d_qpu_float16_unpack_pack(instr->alu.mul.a_unpack,
++                if (!v3d_qpu_float16_unpack_pack(instr->alu.mul.a.unpack,
+                                                  &packed)) {
+                         return false;
+                 }
+-                if (instr->alu.mul.a_unpack == V3D_QPU_UNPACK_SWAP_16)
++                if (instr->alu.mul.a.unpack == V3D_QPU_UNPACK_SWAP_16)
+                         opcode = 8;
+                 else
+                         opcode |= (packed + 4) & 7;
+ 
+-                if (instr->alu.mul.b_unpack != V3D_QPU_UNPACK_NONE)
++                if (instr->alu.mul.b.unpack != V3D_QPU_UNPACK_NONE)
+                         return false;
+ 
+                 break;
+diff --git a/src/broadcom/qpu/tests/qpu_disasm.c b/src/broadcom/qpu/tests/qpu_disasm.c
+index 2f8e19c73fe..be7b78d5ef0 100644
+--- a/src/broadcom/qpu/tests/qpu_disasm.c
++++ b/src/broadcom/qpu/tests/qpu_disasm.c
+@@ -160,10 +160,10 @@ main(int argc, char **argv)
+                                 /* Swap the operands to be sure that we test
+                                  * how the QPUs distinguish between these ops.
+                                  */
+-                                swap_mux(&instr.alu.add.a,
+-                                         &instr.alu.add.b);
+-                                swap_pack(&instr.alu.add.a_unpack,
+-                                          &instr.alu.add.b_unpack);
++                                swap_mux(&instr.alu.add.a.mux,
++                                         &instr.alu.add.b.mux);
++                                swap_pack(&instr.alu.add.a.unpack,
++                                          &instr.alu.add.b.unpack);
+                                 break;
+                         default:
+                                 break;
+-- 
+2.39.2
+

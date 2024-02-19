@@ -1,90 +1,20 @@
-124
-- Drop ASP.NET Core Runtime 3.1
-  .NET Core 3.1 is End of Support - 2022-12-13
-  Current addons using .NET (Emby4, Jellyfin, NextPVR)
-    are now all using .NET 6.0
+7
+- aspnet6-runtime: update to 6.0.24
 
-123
-- Update ASP.NET Core Runtime 6.0.10
+6
+- aspnet6-runtime: update to 6.0.21
 
-122
-- Update ASP.NET Core Runtime 6.0.9
+5
+- aspnet6-runtime: update to 6.0.20
 
-121
-- Update ASP.NET Core Runtime 6.0.8
+4
+- aspnet6-runtime: update to 6.0.19
 
-120
-- Update ASP.NET Core Runtime 6.0.7
+3
+- aspnet6-runtime: update to 6.0.18
 
-119
-- Update ASP.NET Core Runtime 6.0.6
+2
+- aspnet6-runtime: update to 6.0.16
 
-118
-- Repackaged to only include ASP.NET 6 (as .NET 6 Runtime is included within ASP.NET.)
-- LibreELEC now only includes OpenSSL 3 and not OpenSSL 1.x.
-  - .NET 6 is the first .NET version to support OpenSSL 3.
-  - If your .NET Core 3.1 application requires OpenSSL - it will not work with
-    this release of LibreELEC.
-
-117
-- Update .NET Runtime 6.0.5
-- Update ASP.NET Core Runtime 6.0.5
-
-116
-- Update .NET Runtime 6.0.4
-- Update ASP.NET Core Runtime 6.0.4
-
-115
-- Add .NET Runtime 6.0.1
-- Add ASP.NET Core Runtime 6.0.1
-- Drop .NET Runtime 5.0.7
-- Drop ASP.NET Core Runtime 5.0.7
-
-114
-- Add .NET Runtime 5.0.7
-- Add ASP.NET Core Runtime 5.0.7
-
-113
-- Update to ASP.NET Core Runtime 3.1.16
-
-112
-- Update to ASP.NET Core Runtime 3.1.10
-
-111
-- Update to ASP.NET Core Runtime 3.1.9
-- Download source to architecture specific file
-- Add icu4c libraries
-- Remove superfluous libraries
-
-110
-- Update to 3.1.5
-
-109
-- Fix x86_64 url
-
-108
-- Update to 3.1.3
-
-107
-- Update to 2.2.6
-
-106
-- Update to 2.2.4
-
-105
-- Update to 2.2.3
-
-104
-- Update to 2.2.0
-
-103
-- Update to 2.1.6
-
-102
-- Update to 2.1.4
-
-101
-- Update to 2.1.3
-
-100
-- Initial release
+1
+- aspnet6-runtime: update to 6.0.15

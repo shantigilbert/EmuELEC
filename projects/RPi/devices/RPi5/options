@@ -1,0 +1,43 @@
+################################################################################
+# Device defaults
+################################################################################
+
+  # NOOBS supported hex versions (legacy) is not relevant for RPi4
+    unset NOOBS_HEX
+
+  # NOOBS supported model versions
+    NOOBS_SUPPORTED_MODELS='"Pi 5"'
+
+  # additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware)
+    FIRMWARE="${FIRMWARE} rpi-eeprom flashrom"
+
+  # set the addon project
+    ADDON_PROJECT="ARMv8"
+
+  # The TARGET_CPU variable controls which processor should be targeted for
+  # generated code.
+    case $TARGET_ARCH in
+      aarch64)
+        TARGET_CPU="cortex-a76"
+        TARGET_CPU_FLAGS="+crc+crypto"
+        ;;
+      arm)
+        TARGET_KERNEL_ARCH="arm64"
+        TARGET_KERNEL_PATCH_ARCH="aarch64"
+        TARGET_FLOAT="hard"
+        # cortex-a72 caused issues in the past, so use a53
+        TARGET_CPU="cortex-a53"
+        TARGET_CPU_FLAGS="+crc+crypto"
+        TARGET_FPU="neon-fp-armv8"
+        ;;
+    esac
+
+  # Kernel target
+    KERNEL_TARGET="Image"
+
+  # debug tty path
+    DEBUG_TTY="/dev/ttyAMA10"
+
+  # serial console
+    EXTRA_CMDLINE="console=ttyAMA10,115200 console=tty0"
+

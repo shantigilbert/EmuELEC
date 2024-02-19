@@ -7,12 +7,12 @@ if [[ "${DEVICE}" == "Amlogic-old" ]]; then
 PKG_VERSION="286e859e08b60a04c0b4c2bc952432122c957a9c"
 PKG_SHA256="1a44710e38b05f67e76da74f46bbea4bb8b73ed4a28044575dfa24765bc65d7c"
 else
-PKG_VERSION="55ca16fbf7101fce71f4220bd749990633bf924f"
-PKG_SHA256="98180f55b267ab1cdff795ee26ad3e52929cca4d315a1d54039b061b9927c982"
+PKG_VERSION="ffc3519c0844d674489456ddbd62fc0268e689d9"
+PKG_SHA256="404bb367a3285317a155077a84316886bdd414925bd1c6a7f4f8187880498210"
 fi
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/joncampbell123/dosbox-x"
-PKG_URL="$PKG_SITE/archive/${PKG_VERSION}.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain linux glibc glib systemd dbus alsa-lib SDL2 SDL2_net SDL_sound libpng zlib libvorbis flac libogg fluidsynth-git munt"
 PKG_LONGDESC="DOSBox-X fork of the DOSBox project."
 PKG_TOOLCHAIN="autotools"
@@ -37,7 +37,7 @@ pre_make_target() {
   sed -e "s/SVN/SDL2/" -i ${PKG_BUILD}/config.h
 
 if [[ "${DEVICE}" == "GameForce" ]] || [[ "${DEVICE}" == "OdroidGoAdvance" ]] ; then
-		cp $PKG_DIR/include/gpio.h ${SYSROOT_PREFIX}/usr/include/linux
+		cp ${PKG_DIR}/include/gpio.h ${SYSROOT_PREFIX}/usr/include/linux
 fi
  	
 }

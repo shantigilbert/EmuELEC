@@ -4,6 +4,13 @@
 
 if grep -q "sc2" /proc/device-tree/compatible; then
   SOC="S905X4"
+elif grep -q "s4" /proc/device-tree/compatible; then
+  DT_ID=$(dtname)
+  if echo "${DT_ID}" | grep -q "s905y4"; then
+    SOC="S905Y4"
+  elif echo "${DT_ID}" | grep -q "s905w2"; then
+    SOC="S905W2"
+  fi
 elif grep -q "t7" /proc/device-tree/compatible; then
   SOC="A311D2"
 fi

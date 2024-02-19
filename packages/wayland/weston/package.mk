@@ -2,11 +2,11 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="weston"
-PKG_VERSION="11.0.0"
-PKG_SHA256="a6138d4dc9554560ac304312df456019f4be025ec79130f05fb5f2e41c091e1d"
+PKG_VERSION="11.0.1"
+PKG_SHA256="a413f68c252957fc3191c3650823ec356ae8c124ccc0cb440da5cdc4e2cb9e57"
 PKG_LICENSE="MIT"
 PKG_SITE="https://wayland.freedesktop.org/"
-PKG_URL="https://gitlab.freedesktop.org/wayland/weston/-/releases/${PKG_VERSION}/downloads/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+PKG_URL="https://gitlab.freedesktop.org/wayland/weston/uploads/f5648c818fba5432edc3ea63c4db4813/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_TARGET="toolchain wayland wayland-protocols libdrm libxkbcommon libinput cairo pango libjpeg-turbo dbus seatd"
 PKG_LONGDESC="Reference implementation of a Wayland compositor"
 

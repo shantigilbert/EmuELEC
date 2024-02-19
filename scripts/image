@@ -212,7 +212,7 @@ ln -sf /etc/issue ${INSTALL}/etc/motd
 
 # Copy PROJECT related files to filesystem
 if [ -d "${PROJECT_DIR}/${PROJECT}/filesystem" ]; then
-  cp -PR ${PROJECT_DIR}/${PROJECT}/filesystem/* ${INSTALL}
+  cp -PR --remove-destination ${PROJECT_DIR}/${PROJECT}/filesystem/* ${INSTALL}
   # Install project specific systemd services
   for service in ${PROJECT_DIR}/${PROJECT}/filesystem/usr/lib/systemd/system/*.service; do
     if [ -f "${service}" ]; then
@@ -223,7 +223,7 @@ fi
 
 # Copy DEVICE related files to filesystem
 if [ -n "${DEVICE}" -a -d "${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/filesystem" ]; then
-  cp -PR ${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/filesystem/* ${INSTALL}
+  cp -PR --remove-destination ${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/filesystem/* ${INSTALL}
   # Install device specific systemd services
   for service in ${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/filesystem/usr/lib/systemd/system/*.service; do
     if [ -f "${service}" ]; then
@@ -441,16 +441,25 @@ if [ "${1}" = "release" -o "${1}" = "mkimage" -o "${1}" = "noobs" ]; then
         -e "s%@SYSTEM_SIZE@%${SYSTEM_SIZE}%g" \
         -i ${RELEASE_DIR}/${NOOBS_DISTRO}/partitions.json
 
+    sed -e "s%@EXTRA_CMDLINE@%${EXTRA_CMDLINE}%g" \
+        -i ${RELEASE_DIR}/${NOOBS_DISTRO}/partition_setup.sh
+
     # Create System dir
     mkdir -p ${RELEASE_DIR}/${NOOBS_DISTRO}/System
 
     # Copy Bootloader
     cp -PR ${INSTALL}/usr/share/bootloader/config.txt ${RELEASE_DIR}/${NOOBS_DISTRO}/System/
-    cp -PR ${INSTALL}/usr/share/bootloader/distroconfig.txt ${RELEASE_DIR}/${NOOBS_DISTRO}/System/
+    for distro in "${INSTALL}/usr/share/bootloader/distroconfig"*.txt ; do
+      if [ -f "${distro}" ]; then
+        cp -PR "${distro}" ${RELEASE_DIR}/${NOOBS_DISTRO}/System/
+      fi
+    done
     cp -PR ${INSTALL}/usr/share/bootloader/LICENCE* ${RELEASE_DIR}/${NOOBS_DISTRO}/System/
-    cp -PR ${INSTALL}/usr/share/bootloader/bootcode.bin ${RELEASE_DIR}/${NOOBS_DISTRO}/System/
-    cp -PR ${INSTALL}/usr/share/bootloader/fixup.dat ${RELEASE_DIR}/${NOOBS_DISTRO}/System/
-    cp -PR ${INSTALL}/usr/share/bootloader/start.elf ${RELEASE_DIR}/${NOOBS_DISTRO}/System/
+    for f in bootcode.bin fixup.dat start.elf ; do
+      if [ -f "${INSTALL}/usr/share/bootloader/$f" ]; then
+        cp -PR "${INSTALL}/usr/share/bootloader/$f" "${RELEASE_DIR}/${NOOBS_DISTRO}/System/"
+      fi
+    done
 
     # Copy system files
     cp ${TARGET_IMG}/${IMAGE_NAME}.system ${RELEASE_DIR}/${NOOBS_DISTRO}/System/SYSTEM

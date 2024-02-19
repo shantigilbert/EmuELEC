@@ -1,0 +1,36 @@
+From 637cad8794e1f6820b93ef14c8d28ebc06f44862 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Tue, 7 Mar 2023 19:47:25 +0100
+Subject: [PATCH] Fix missing Include 'std::numeric_limits' do need '#include
+ <limits>'
+
+---
+ CHANGELOG.md                                   | 1 +
+ libsrc/utils/jsonschema/QJsonSchemaChecker.cpp | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index f0daa08c..ce4dead4 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
+ ### Changed
+ 
+ ### Fixed
++- Fixed missing Include limits in QJsonSchemaChecker
+ 
+ ## Removed
+ 
+diff --git a/libsrc/utils/jsonschema/QJsonSchemaChecker.cpp b/libsrc/utils/jsonschema/QJsonSchemaChecker.cpp
+index 5cec2ec3..685ab4c7 100644
+--- a/libsrc/utils/jsonschema/QJsonSchemaChecker.cpp
++++ b/libsrc/utils/jsonschema/QJsonSchemaChecker.cpp
+@@ -1,4 +1,5 @@
+ // stdlib includes
++#include <limits>
+ #include <iterator>
+ #include <algorithm>
+ #include <cmath>
+-- 
+2.39.1
+

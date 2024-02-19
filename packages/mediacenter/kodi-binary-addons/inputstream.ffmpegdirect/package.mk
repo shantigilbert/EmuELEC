@@ -4,7 +4,7 @@
 PKG_NAME="inputstream.ffmpegdirect"
 PKG_VERSION="20.5.0-Nexus"
 PKG_SHA256="a849b6b4d5ce740ec3552d244acc4c7a4d64792358428f5154236052473d5734"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL2+"
 PKG_SITE="https://github.com/xbmc/inputstream.ffmpegdirect"

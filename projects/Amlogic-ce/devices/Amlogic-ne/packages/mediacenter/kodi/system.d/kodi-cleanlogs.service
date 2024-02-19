@@ -1,0 +1,13 @@
+[Unit]
+Description=Kodi clean debug logs
+ConditionKernelCommandLine=!debugging
+ConditionPathExists=!/storage/.cache/debug.libreelec
+Before=kodi.service
+
+[Service]
+Type=oneshot
+ExecStart=-/bin/sh -c 'rm -rf /storage/.kodi/userdata/addon_data/*/*.log /storage/.kodi/userdata/addon_data/*/log/*'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=kodi.service

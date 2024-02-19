@@ -1,0 +1,37 @@
+From 3e5ad0881c2789619cdf65f40a44d5481e28e800 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Thu, 12 Aug 2021 02:24:02 +0200
+Subject: [PATCH 013/142] broadcom/qpu: defining shift/mask for raddr_c/d
+
+On V3D 7.x it replaces mul_a/b and add_a/b
+---
+ src/broadcom/qpu/qpu_pack.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/broadcom/qpu/qpu_pack.c b/src/broadcom/qpu/qpu_pack.c
+index 6e975793fc0..4f106909729 100644
+--- a/src/broadcom/qpu/qpu_pack.c
++++ b/src/broadcom/qpu/qpu_pack.c
+@@ -84,6 +84,9 @@
+ #define V3D_QPU_MUL_A_SHIFT                 18
+ #define V3D_QPU_MUL_A_MASK                  QPU_MASK(20, 18)
+ 
++#define V3D_QPU_RADDR_C_SHIFT               18
++#define V3D_QPU_RADDR_C_MASK                QPU_MASK(23, 18)
++
+ #define V3D_QPU_ADD_B_SHIFT                 15
+ #define V3D_QPU_ADD_B_MASK                  QPU_MASK(17, 15)
+ 
+@@ -98,6 +101,9 @@
+ #define V3D_QPU_BRANCH_BDI_SHIFT            12
+ #define V3D_QPU_BRANCH_BDI_MASK             QPU_MASK(13, 12)
+ 
++#define V3D_QPU_RADDR_D_SHIFT               12
++#define V3D_QPU_RADDR_D_MASK                QPU_MASK(17, 12)
++
+ #define V3D_QPU_RADDR_A_SHIFT               6
+ #define V3D_QPU_RADDR_A_MASK                QPU_MASK(11, 6)
+ 
+-- 
+2.39.2
+

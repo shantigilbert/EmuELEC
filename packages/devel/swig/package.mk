@@ -3,13 +3,14 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="swig"
-PKG_VERSION="4.0.2"
-PKG_SHA256="d53be9730d8d58a16bf0cbd1f8ac0c0c3e1090573168bfa151b01eb47fa906fc"
+PKG_VERSION="4.1.1"
+PKG_SHA256="2af08aced8fcd65cdb5cc62426768914bedc735b1c250325203716f78e39ac9b"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.swig.org"
 PKG_URL="${SOURCEFORGE_SRC}/swig/${PKG_NAME}-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_HOST="ccache:host"
 PKG_LONGDESC="SWIG is a software development tool that connects programs written in C and C++ with a variety of high-level programming languages."
+PKG_TOOLCHAIN="configure"
 
 PKG_CONFIGURE_OPTS_HOST="--program-suffix=4.0 \
                          --with-pcre-prefix=${TOOLCHAIN} \

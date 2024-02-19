@@ -2,9 +2,9 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="rsyslog"
-PKG_VERSION="8.2210.0"
-PKG_SHA256="643ee279139d694a07c9ff3ff10dc5213bdf874983d27d373525e95e05fa094d"
-PKG_REV="113"
+PKG_VERSION="8.2308.0"
+PKG_SHA256="02086b9121e872cea69e5d0f6c8e2d8ebff33234b3cad5503665378d3af2e3c9"
+PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/rsyslog"

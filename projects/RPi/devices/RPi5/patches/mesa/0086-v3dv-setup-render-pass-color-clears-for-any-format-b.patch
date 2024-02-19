@@ -1,0 +1,89 @@
+From 5b1342eb1e255d17619b1a7b33eaf7b31f5e50a5 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Wed, 22 Sep 2021 12:03:58 +0200
+Subject: [PATCH 086/142] v3dv: setup render pass color clears for any format
+ bpp in v71
+
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c | 33 ++++++++++++++++----------
+ 1 file changed, 20 insertions(+), 13 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index fe9f7e43596..1b39e230580 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -1064,7 +1064,7 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+       UNUSED const uint32_t *clear_color =
+          &state->attachments[attachment_idx].clear_value.color[0];
+ 
+-      uint32_t clear_pad = 0;
++      UNUSED uint32_t clear_pad = 0;
+       if (slice->tiling == V3D_TILING_UIF_NO_XOR ||
+           slice->tiling == V3D_TILING_UIF_XOR) {
+          int uif_block_height = v3d_utile_height(image->planes[plane].cpp) * 2;
+@@ -1084,10 +1084,8 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+          clear.clear_color_next_24_bits = clear_color[1] & 0xffffff;
+          clear.render_target_number = i;
+       };
+-#endif
+ 
+       if (iview->planes[0].internal_bpp >= V3D_INTERNAL_BPP_64) {
+-#if V3D_VERSION == 42
+          cl_emit(rcl, TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART2, clear) {
+             clear.clear_color_mid_low_32_bits =
+                ((clear_color[1] >> 24) | (clear_color[2] << 8));
+@@ -1095,25 +1093,16 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+                ((clear_color[2] >> 24) | ((clear_color[3] & 0xffff) << 8));
+             clear.render_target_number = i;
+          };
+-#endif
+-#if V3D_VERSION >= 71
+-         unreachable("HW generation 71 not supported yet.");
+-#endif
+-
+       }
+ 
+       if (iview->planes[0].internal_bpp >= V3D_INTERNAL_BPP_128 || clear_pad) {
+-#if V3D_VERSION == 42
+          cl_emit(rcl, TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART3, clear) {
+             clear.uif_padded_height_in_uif_blocks = clear_pad;
+             clear.clear_color_high_16_bits = clear_color[3] >> 16;
+             clear.render_target_number = i;
+          };
+-#endif
+-#if V3D_VERSION >= 71
+-         unreachable("HW generation 71 not supported yet.");
+-#endif
+       }
++#endif
+ 
+ #if V3D_VERSION >= 71
+       cl_emit(rcl, TILE_RENDERING_MODE_CFG_RENDER_TARGET_PART1, rt) {
+@@ -1133,6 +1122,24 @@ v3dX(cmd_buffer_emit_render_pass_rcl)(struct v3dv_cmd_buffer *cmd_buffer)
+           */
+          base_addr += (tiling->tile_height * rt.stride) / 8;
+       }
++
++      if (iview->planes[0].internal_bpp >= V3D_INTERNAL_BPP_64) {
++         cl_emit(rcl, TILE_RENDERING_MODE_CFG_RENDER_TARGET_PART2, rt) {
++            rt.clear_color_mid_bits = /* 40 bits (32 + 8)  */
++               ((uint64_t) clear_color[1]) |
++               (((uint64_t) (clear_color[2] & 0xff)) << 32);
++            rt.render_target_number = i;
++         }
++      }
++
++      if (iview->planes[0].internal_bpp >= V3D_INTERNAL_BPP_128) {
++         cl_emit(rcl, TILE_RENDERING_MODE_CFG_RENDER_TARGET_PART3, rt) {
++            rt.clear_color_top_bits = /* 56 bits (24 + 32) */
++               (((uint64_t) (clear_color[2] & 0xffffff00)) >> 8) |
++               (((uint64_t) (clear_color[3])) << 24);
++            rt.render_target_number = i;
++         }
++      }
+ #endif
+    }
+ 
+-- 
+2.39.2
+

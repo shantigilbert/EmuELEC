@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="gme"
-PKG_VERSION="635b1e9124195eeb44d8a865f258cc2c92846694"
-PKG_SHA256="d1183d5d054d24bb43428d38b6addefc4cb69582a112197979a799fd8c30ed51"
+PKG_VERSION="40d8b3bf4f0bd4f713f65e08c62d30b1ae8b2282"
+PKG_SHA256="4175993d5825c605ef906e1d6d3b6183bb195f36bc32e28778bd6b1835357f22"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/libretro-gme"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -37,7 +37,7 @@ PKG_TOOLCHAIN="make"
 PKG_AUTORECONF="no"
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp gme_libretro.so $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp gme_libretro.so ${INSTALL}/usr/lib/libretro/
 }
 

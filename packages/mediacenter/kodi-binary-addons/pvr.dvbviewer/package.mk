@@ -5,7 +5,7 @@
 PKG_NAME="pvr.dvbviewer"
 PKG_VERSION="20.4.0-Nexus"
 PKG_SHA256="dc79db0486c7ef75b4b23c4dfe94115cb12e1903c3700ef4eef04fc517fcd039"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.dvbviewer"

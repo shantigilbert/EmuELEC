@@ -4,7 +4,7 @@
 PKG_NAME="imagedecoder.mpo"
 PKG_VERSION="20.1.0-Nexus"
 PKG_SHA256="a6f38f95e5e844f75365ae083ca0a78c012bb4dc670770b3dd5d99160a64187f"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/imagedecoder.mpo"

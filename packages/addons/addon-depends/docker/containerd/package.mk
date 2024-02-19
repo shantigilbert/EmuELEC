@@ -3,8 +3,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="containerd"
-PKG_VERSION="1.6.8"
-PKG_SHA256="f5f938513c28377f64f85e84f2750d39f26b01262f3a062b7e8ce35b560ca407"
+PKG_VERSION="1.7.1"
+PKG_SHA256="fd844af82afda7242d8eba5e0086c5a0d54ddc3041c1bbdd4d3c62bfee844e3a"
 PKG_LICENSE="APL"
 PKG_SITE="https://containerd.io"
 PKG_URL="https://github.com/containerd/containerd/archive/v${PKG_VERSION}.tar.gz"
@@ -13,15 +13,15 @@ PKG_LONGDESC="A daemon to control runC, built for performance and density."
 PKG_TOOLCHAIN="manual"
 
 # Git commit of the matching release https://github.com/containerd/containerd/releases
-PKG_GIT_COMMIT="10c12954828e7c7c9b6e0ea9b0c02b01407d3ae1"
+PKG_GIT_COMMIT="78f51771157abb6c9ed224c22013cdf09962315d"
 
 pre_make_target() {
 
   go_configure
 
-  export CONTAINERD_VERSION=${PKG_VERSION}
-  export CONTAINERD_REVISION=${PKG_GIT_COMMIT}
-  export CONTAINERD_PKG=github.com/containerd/containerd
+  export CONTAINERD_VERSION="${PKG_VERSION}"
+  export CONTAINERD_REVISION="${PKG_GIT_COMMIT}"
+  export CONTAINERD_PKG="github.com/containerd/containerd"
   export LDFLAGS="-w -extldflags -static -X ${CONTAINERD_PKG}/version.Version=${CONTAINERD_VERSION} -X ${CONTAINERD_PKG}/version.Revision=${CONTAINERD_REVISION} -X ${CONTAINERD_PKG}/version.Package=${CONTAINERD_PKG} -extld ${CC}"
   export GO111MODULE=off
 

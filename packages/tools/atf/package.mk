@@ -2,8 +2,8 @@
 # Copyright (C) 2018-present Team LibreELEC
 
 PKG_NAME="atf"
-PKG_VERSION="2.7"
-PKG_SHA256="327c65b1bc231608a7a808b068b00c1a22310e9fc86158813cd10a9711d5725e"
+PKG_VERSION="2.8"
+PKG_SHA256="42256fa354f32b09972e72e0570a0f73698785927f93163b1d1308c485fcb4a6"
 PKG_ARCH="arm aarch64"
 PKG_LICENSE="BSD-3c"
 PKG_SITE="https://github.com/ARM-software/arm-trusted-firmware"
@@ -14,13 +14,13 @@ PKG_TOOLCHAIN="manual"
 
 [ -n "${KERNEL_TOOLCHAIN}" ] && PKG_DEPENDS_TARGET+=" gcc-${KERNEL_TOOLCHAIN}:host"
 
-if [ "${PROJECT}" = "Rockchip" -a "${DEVICE}" = "RK3399" ]; then
+if [ "${ATF_PLATFORM}" = "rk3399" ]; then
   PKG_DEPENDS_TARGET+=" gcc-arm-none-eabi:host"
   export M0_CROSS_COMPILE="${TOOLCHAIN}/bin/arm-none-eabi-"
 fi
 
 make_target() {
-  if [ "${DEVICE}" = "iMX8" ]; then
+  if [ "${ATF_PLATFORM}" = "imx8mq" ]; then
     CROSS_COMPILE="${TARGET_KERNEL_PREFIX}" LDFLAGS="--no-warn-rwx-segments" CFLAGS="--param=min-pagesize=0" make PLAT=${ATF_PLATFORM} bl31
   else
     CROSS_COMPILE="${TARGET_KERNEL_PREFIX}" LDFLAGS="--no-warn-rwx-segments" CFLAGS="" make PLAT=${ATF_PLATFORM} bl31

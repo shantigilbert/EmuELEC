@@ -5,7 +5,7 @@
 PKG_NAME="audiodecoder.vgmstream"
 PKG_VERSION="20.2.0-Nexus"
 PKG_SHA256="72367d7196f8049ef1fae426d32d3de1eac56bd4cb5a8fc38a6ba0c3da1b23d8"
-PKG_REV="2"
+PKG_REV="5"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/audiodecoder.vgmstream"

@@ -7,7 +7,7 @@ Environment=HOME=/storage
 EnvironmentFile=/storage/.config/emulationstation/scripts/es_env.sh
 ExecStartPre=emustation-config
 ExecStartPre=/usr/bin/killes.sh
-ExecStart=emulationstation --log-path /storage/.config/emuelec/logs
+ExecStart=emulationstation
 KillMode=process
 TimeoutStopSec=3
 Restart=always

@@ -1,0 +1,11 @@
+--- a/server/streamreader/airplay_stream.cpp	2021-12-22 17:40:36.000000000 +0000
++++ b/server/streamreader/airplay_stream.cpp	2022-10-03 12:05:31.690039620 +0000
+@@ -58,7 +58,7 @@
+     string devicename = uri_.getQuery("devicename", "Snapcast");
+     string password = uri_.getQuery("password", "");
+ 
+-    params_wo_port_ = "\"--name=" + devicename + "\" --output=stdout --use-stderr --get-coverart";
++    params_wo_port_ = "\"--name=" + devicename + "\" --output=stdout --use-stderr --get-coverart --mdns=avahi";
+     if (!password.empty())
+         params_wo_port_ += " --password \"" + password + "\"";
+     if (!params_.empty())

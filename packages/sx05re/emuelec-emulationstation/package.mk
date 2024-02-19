@@ -2,25 +2,33 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="emuelec-emulationstation"
-PKG_VERSION="a70313633ef29b57e287efaeb6dfa7967684969b"
+PKG_VERSION="a28697fc21b729ddc620f29afead80e5391d67fa"
 PKG_GIT_CLONE_BRANCH="EmuELEC"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/EmuELEC/emuelec-emulationstation"
-PKG_URL="$PKG_SITE.git"
-PKG_DEPENDS_TARGET="toolchain SDL2 freetype curl freeimage vlc bash rapidjson ${OPENGLES} SDL2_mixer fping p7zip"
+PKG_URL="${PKG_SITE}.git"
+PKG_DEPENDS_TARGET="toolchain SDL2 freetype freeimage vlc rapidjson ${OPENGLES} SDL2_mixer fping p7zip espeak"
 PKG_SECTION="emuelec"
-PKG_NEED_UNPACK="$(get_pkg_directory busybox) $(get_pkg_directory bash)"
 PKG_SHORTDESC="Emulationstation emulator frontend"
 PKG_BUILD_FLAGS="-gold"
 GET_HANDLER_SUPPORT="git"
 
+
+if [[ ${DEVICE} == "OdroidGoAdvance"  ]] || [[ ${DEVICE} == "GameForce"  ]]; then 
+	PKG_PATCH_DIRS="Rockchip/HH"
+fi
+
+if [[ ${DEVICE} == "OdroidM1"  ]] || [[ ${DEVICE} == "RK356x"  ]]; then 
+	PKG_PATCH_DIRS="Rockchip"
+fi
+
 # themes for Emulationstation
-PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET Crystal"
+PKG_DEPENDS_TARGET="${PKG_DEPENDS_TARGET} Crystal"
 
 pre_configure_target() {
-PKG_CMAKE_OPTS_TARGET=" -DENABLE_EMUELEC=1 -DDISABLE_KODI=1 -DENABLE_FILEMANAGER=1 -DGLES2=1"
+PKG_CMAKE_OPTS_TARGET=" -DENABLE_EMUELEC=1 -DDISABLE_KODI=1 -DENABLE_FILEMANAGER=1 -DGLES2=1 -DENABLE_TTS=1"
 
 # Read api_keys.txt if it exist to add the required keys for cheevos, thegamesdb and screenscrapper. You need to get your own API keys. 
 # File should be in this format
@@ -30,9 +38,9 @@ PKG_CMAKE_OPTS_TARGET=" -DENABLE_EMUELEC=1 -DDISABLE_KODI=1 -DENABLE_FILEMANAGER
 # and it should be placed next to this file
 
 if [ -f ${PKG_DIR}/api_keys.txt ]; then
-while IFS="" read -r p || [ -n "$p" ]
+while IFS="" read -r p || [ -n "${p}" ]
 do
-  PKG_CMAKE_OPTS_TARGET+=" $p"
+  PKG_CMAKE_OPTS_TARGET+=" ${p}"
 done < ${PKG_DIR}/api_keys.txt
 fi
 
@@ -48,22 +56,19 @@ fi
 
 makeinstall_target() {
 	mkdir -p ${INSTALL}/usr/config/emuelec/configs/locale/i18n/charmaps
-	cp -rf $PKG_BUILD/locale/lang/* ${INSTALL}/usr/config/emuelec/configs/locale/
+	cp -rf ${PKG_BUILD}/locale/lang/* ${INSTALL}/usr/config/emuelec/configs/locale/
 	cp -PR "$(get_build_dir glibc)/localedata/charmaps/UTF-8" ${INSTALL}/usr/config/emuelec/configs/locale/i18n/charmaps/UTF-8
 	
 	mkdir -p ${INSTALL}/usr/lib
 	ln -sf /storage/.config/emuelec/configs/locale ${INSTALL}/usr/lib/locale
 	
 	mkdir -p ${INSTALL}/usr/config/emulationstation/resources
-    cp -rf $PKG_BUILD/resources/* ${INSTALL}/usr/config/emulationstation/resources/
+    cp -rf ${PKG_BUILD}/resources/* ${INSTALL}/usr/config/emulationstation/resources/
     
-	mkdir -p ${INSTALL}/usr/lib/${PKG_PYTHON_VERSION}
-	cp -rf ${PKG_DIR}/bluez/* ${INSTALL}/usr/lib/${PKG_PYTHON_VERSION}
-	
     mkdir -p ${INSTALL}/usr/bin
     ln -sf /storage/.config/emulationstation/resources ${INSTALL}/usr/bin/resources
-    cp -rf $PKG_BUILD/emulationstation ${INSTALL}/usr/bin
-    cp -PR "$(get_build_dir glibc)/.$TARGET_NAME/locale/localedef" ${INSTALL}/usr/bin
+    cp -rf ${PKG_BUILD}/emulationstation ${INSTALL}/usr/bin
+    cp -PR "$(get_build_dir glibc)/.${TARGET_NAME}/locale/localedef" ${INSTALL}/usr/bin
 
 	mkdir -p ${INSTALL}/etc/emulationstation/
 	ln -sf /storage/.config/emulationstation/themes ${INSTALL}/etc/emulationstation/
@@ -101,7 +106,7 @@ makeinstall_target() {
 CORESFILE="${INSTALL}/usr/config/emulationstation/es_systems.cfg"
 
 if [ "${DEVICE}" != "Amlogic-ng" ]; then
-    if [[ ${DEVICE} == "OdroidGoAdvance" || "$DEVICE" == "GameForce" ]]; then
+    if [[ ${DEVICE} == "OdroidGoAdvance" || "${DEVICE}" == "GameForce" ]]; then
         remove_cores="mesen-s quicknes mame2016 mesen"
     elif [ "${DEVICE}" == "Amlogic-old" ]; then
         remove_cores="mesen-s quicknes mame2016 mesen yabasanshiroSA yabasanshiro"
@@ -111,7 +116,7 @@ if [ "${DEVICE}" != "Amlogic-ng" ]; then
     fi
     
     for discore in ${remove_cores}; do
-        sed -i "s|<core>$discore</core>||g" ${CORESFILE}
+        sed -i "s|<core>${discore}</core>||g" ${CORESFILE}
         sed -i '/^[[:space:]]*$/d' ${CORESFILE}
     done
 fi
@@ -136,5 +141,4 @@ post_install() {
 	ln -sf /storage/.config/emuelec/configs/locale ${INSTALL}/usr/share/locale
 	mkdir -p ${INSTALL}/usr/bin/batocera/
 	ln -sf /usr/bin/7zr ${INSTALL}/usr/bin/batocera/7zr
-	ln -sf /usr/bin/bash ${INSTALL}/usr/bin/sh
 }

@@ -1,0 +1,47 @@
+From 979f3c936539d2944585c27d0b79642c1bdbb38f Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Mon, 15 Jan 2024 09:59:43 +0100
+Subject: [PATCH 19/21] AMLCodec: set also dolby_vision_ll_policy when force
+ player led 4.9 kernel does require the policy set as well
+
+---
+ xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+index 3962cb904d..7d702cd1c4 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+@@ -292,6 +292,8 @@ typedef struct hdr_buf {
+ } hdr_buf_t;
+ 
+ #define FLAG_FORCE_DV_LL        (unsigned int)(0x4000)
++#define DOLBY_VISION_LL_DISABLE (unsigned int)(0)
++#define DOLBY_VISION_LL_YUV422  (unsigned int)(1)
+ 
+ typedef struct am_packet {
+     AVPacket      avpkt;
+@@ -2013,12 +2015,19 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
+ 
+     // force player led mode when enabled
+     CSysfsPath dolby_vision_flags{"/sys/module/amdolby_vision/parameters/dolby_vision_flags"};
+-    if (dolby_vision_flags.Exists())
++    CSysfsPath dolby_vision_ll_policy{"/sys/module/amdolby_vision/parameters/dolby_vision_ll_policy"};
++    if (dolby_vision_flags.Exists() && dolby_vision_ll_policy.Exists())
+     {
+       if (CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_COREELEC_AMLOGIC_USE_PLAYERLED))
++      {
+         dolby_vision_flags.Set(dolby_vision_flags.Get<unsigned int>().value() | FLAG_FORCE_DV_LL);
++        dolby_vision_ll_policy.Set(DOLBY_VISION_LL_YUV422);
++      }
+       else
++      {
+         dolby_vision_flags.Set(dolby_vision_flags.Get<unsigned int>().value() & ~(FLAG_FORCE_DV_LL));
++        dolby_vision_ll_policy.Set(DOLBY_VISION_LL_DISABLE);
++      }
+     }
+ 
+     am_private->gcodec.dv_enable = 1;
+-- 
+2.43.0
+

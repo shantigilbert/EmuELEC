@@ -2,8 +2,8 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="nfs-utils"
-PKG_VERSION="2.6.1"
-PKG_SHA256="6571635e1e79087be799723ce3bd480ca88d0162749c28171b0db7506314a66f"
+PKG_VERSION="2.6.4"
+PKG_SHA256="c0ae376ac056011ed0954deba2362d7d8193c653b500b68a543aec512cd2ecfa"
 PKG_LICENSE="GPL-2.0+"
 PKG_SITE="http://nfs.sourceforge.net/"
 PKG_URL="${SOURCEFORGE_SRC}/nfs/nfs-utils/$PKG_VERSION/$PKG_NAME-$PKG_VERSION.tar.bz2"
@@ -31,9 +31,16 @@ pre_configure_host() {
   cd $PKG_BUILD
   rm -rf .$HOST_NAME
 
+[ -f /etc/lsb-release ] && ( grep -q "22.04" /etc/lsb-release ) && CFLAGS+=" -I/usr/include/tirpc"
+
   PKG_CONFIGURE_OPTS_HOST=" \
     --with-statedir=/run/nfs \
     --with-rpcgen=internal \
+    libsqlite3_cv_is_recent=unknown \
+    ac_cv_header_rpc_rpc_h=yes \
+    ac_cv_header_event2_event_h=yes \
+    ac_cv_lib_event_core_event_base_dispatch=yes \
+    --disable-nfsdcld \
     --disable-nfsv4 \
     --disable-nfsv41 \
     --disable-gss \

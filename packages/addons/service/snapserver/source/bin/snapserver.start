@@ -48,6 +48,8 @@ else
   enable_http=0
 fi
 
+nqptp &
+
 HOME="$ADDON_HOME" \
 nice -n "$ss_ni" \
 snapserver \

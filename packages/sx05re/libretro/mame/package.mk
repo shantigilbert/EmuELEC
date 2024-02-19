@@ -2,12 +2,12 @@
 # Copyright (C) 2019 Trond Haugland (trondah@gmail.com)
 
 PKG_NAME="mame"
-PKG_VERSION="57622367cb780013690d6ef23b2066b500f6ce92"
-PKG_SHA256="9ede7cb09cb48f721b1803a7363f79e10a87d4e7ed25b085bf1ed6c7a02bb519"
+PKG_VERSION="68520cf9defd1c2762bca7f266f13ad593b7b3f3"
+PKG_SHA256="29418bb2b9564cfaacc895021a73cf048e032aac88fa76148681b643e3eb46fc"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/mame"
-PKG_URL="https://github.com/libretro/mame/archive/$PKG_VERSION.tar.gz"
+PKG_URL="https://github.com/libretro/mame/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain zlib flac sqlite expat"
 PKG_SECTION="libretro"
 PKG_SHORTDESC="MAME - Multiple Arcade Machine Emulator"
@@ -56,12 +56,12 @@ unset PROJECT
 }
 
 make_target() {
-  make $PKG_MAKE_OPTS_TARGET OVERRIDE_CC=$CC OVERRIDE_CXX=$CXX OVERRIDE_LD=$LD AR=$AR $MAKEFLAGS -j4
+  make ${PKG_MAKE_OPTS_TARGET} OVERRIDE_CC=${CC} OVERRIDE_CXX=${CXX} OVERRIDE_LD=${LD} AR=${AR} ${MAKEFLAGS} -j$(nproc)
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp *.so $INSTALL/usr/lib/libretro/
-  mkdir -p $INSTALL/usr/config/retroarch/savefiles/mame/hi
-  cp plugins/hiscore/hiscore.dat $INSTALL/usr/config/retroarch/savefiles/mame/hi
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp *.so ${INSTALL}/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/config/retroarch/savefiles/mame/hi
+  cp plugins/hiscore/hiscore.dat ${INSTALL}/usr/config/retroarch/savefiles/mame/hi
 }

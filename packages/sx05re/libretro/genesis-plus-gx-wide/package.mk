@@ -19,13 +19,13 @@
 ################################################################################
 
 PKG_NAME="genesis-plus-gx-wide"
-PKG_VERSION="f634cc53fd8dd8c09a24aac5314d147635857e62"
-PKG_SHA256="93ae52d407df51908f0b9cae28d29a9652e7a6b0ac4577b8051a5c262dba012a"
+PKG_VERSION="d5531ca58d628a2ba6f791804aa01e2fb2cb0e13"
+PKG_SHA256="6071f49037ed3123cbc5895c3e6a98e13c26123ca2193e7d35378b399ee26fb0"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Non-commercial"
 PKG_SITE="https://github.com/libretro/Genesis-Plus-GX-Wide"
-PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="libretro"
@@ -34,13 +34,13 @@ PKG_LONGDESC="Genesis Plus GX is an open-source & portable Sega Mega Drive / Gen
 PKG_TOOLCHAIN="make"
 
 make_target() {
-  if [ "$ARCH" == "arm" ]; then
-    CFLAGS="$CFLAGS -DALIGN_LONG"
+  if [ "${ARCH}" == "arm" ]; then
+    CFLAGS="${CFLAGS} -DALIGN_LONG"
   fi
   make -f Makefile.libretro
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp genesis_plus_gx_wide_libretro.so $INSTALL/usr/lib/libretro/genesis_plus_gx_wide_libretro.so
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp genesis_plus_gx_wide_libretro.so ${INSTALL}/usr/lib/libretro/genesis_plus_gx_wide_libretro.so
 }

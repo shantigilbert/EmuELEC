@@ -3,7 +3,7 @@
 
 PKG_NAME="emby4"
 PKG_VERSION="bootstrap"
-PKG_REV="109"
+PKG_REV="0"
 PKG_ARCH="any"
 PKG_LICENSE="prop."
 PKG_SITE="http://emby.media"

@@ -3,8 +3,8 @@
 
 PKG_NAME="Python3"
 # When changing PKG_VERSION remember to sync PKG_PYTHON_VERSION!
-PKG_VERSION="3.9.15"
-PKG_SHA256="12daff6809528d9f6154216950423c9e30f0e47336cb57c6aa0b4387dd5eb4b2"
+PKG_VERSION="3.11.2"
+PKG_SHA256="29e4b8f5f1658542a8c13e2dd277358c9c48f2b2f7318652ef1675e402b9d2af"
 PKG_LICENSE="OSS"
 PKG_SITE="https://www.python.org/"
 PKG_URL="https://www.python.org/ftp/python/${PKG_VERSION}/${PKG_NAME::-1}-${PKG_VERSION}.tar.xz"
@@ -13,7 +13,7 @@ PKG_DEPENDS_TARGET="toolchain Python3:host sqlite expat zlib bzip2 xz openssl li
 PKG_LONGDESC="Python3 is an interpreted object-oriented programming language."
 PKG_TOOLCHAIN="autotools"
 
-PKG_PYTHON_VERSION="python3.9"
+PKG_PYTHON_VERSION="python3.11"
 
 PKG_PY_DISABLED_MODULES="_tkinter nis gdbm bsddb ossaudiodev"
 
@@ -34,7 +34,7 @@ PKG_CONFIGURE_OPTS_HOST="ac_cv_prog_HAS_HG=/bin/false
                          --disable-curses
                          --disable-pydoc
                          --disable-test-modules
-                         --enable-lib2to3
+                         --disable-lib2to3
                          --disable-idle3
                          --without-cxx-main
                          --with-expat=builtin
@@ -72,7 +72,7 @@ PKG_CONFIGURE_OPTS_TARGET="ac_cv_prog_HAS_HG=/bin/false
                            --enable-curses
                            --disable-pydoc
                            --disable-test-modules
-                           --enable-lib2to3
+                           --disable-lib2to3
                            --disable-idle3
                            --without-cxx-main
                            --with-expat=system
@@ -82,6 +82,7 @@ PKG_CONFIGURE_OPTS_TARGET="ac_cv_prog_HAS_HG=/bin/false
                            --without-pymalloc
                            --without-ensurepip
                            --enable-ipv6
+                           --with-build-python=${TOOLCHAIN}/bin/python
 "
 
 pre_configure_host() {

@@ -1,0 +1,31 @@
+From 697e6cf01b781b244404872f331a778b6d4e67da Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Alejandro=20Pi=C3=B1eiro?= <apinheiro@igalia.com>
+Date: Tue, 19 Oct 2021 11:16:43 +0200
+Subject: [PATCH 047/142] broadcom/compiler: update one TMUWT restriction for
+ v71
+
+TMUWT not allowed in the final instruction restriction doesn't apply
+for v71.
+---
+ src/broadcom/compiler/qpu_schedule.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/broadcom/compiler/qpu_schedule.c b/src/broadcom/compiler/qpu_schedule.c
+index ff544fb3c1c..25f79aa6f46 100644
+--- a/src/broadcom/compiler/qpu_schedule.c
++++ b/src/broadcom/compiler/qpu_schedule.c
+@@ -1700,8 +1700,10 @@ qpu_inst_valid_in_thrend_slot(struct v3d_compile *c,
+ 
+         if (inst->type == V3D_QPU_INSTR_TYPE_ALU) {
+                 /* GFXH-1625: TMUWT not allowed in the final instruction. */
+-                if (slot == 2 && inst->alu.add.op == V3D_QPU_A_TMUWT)
++                if (c->devinfo->ver <= 42 && slot == 2 &&
++                    inst->alu.add.op == V3D_QPU_A_TMUWT) {
+                         return false;
++                }
+ 
+                 /* No writing physical registers at the end. */
+                 bool add_is_nop = inst->alu.add.op == V3D_QPU_A_NOP;
+-- 
+2.39.2
+

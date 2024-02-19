@@ -2,8 +2,8 @@
 # Copyright (C) 2020 present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="splash-image"
-PKG_VERSION="918f0cf9f35ef67e4d340c7ad28d4bba7e442d7d"
-PKG_SHA256="bf32728be517584cfeeb59877d4366978878c67c2f582d6dc2e4a788cd6d24cd"
+PKG_VERSION="82aaea90d1845e0988371791b5e568b8122ca294"
+PKG_SHA256="febccc1e6b6a7d5b79ca7e283a1c09ed965001373ce6956e7d3057aca4c92a65"
 PKG_LICENSE="GPL"
 PKG_SITE="https://coreelec.org"
 PKG_URL="https://github.com/CoreELEC/splash-image/archive/${PKG_VERSION}.tar.gz"
@@ -15,6 +15,6 @@ makeinstall_init() {
     cp splash-image $INSTALL/usr/bin
 
   mkdir -p $INSTALL/splash/progress
-    find_file_path "splash/splash-*.png" && cp ${FOUND_PATH} $INSTALL/splash || :
-    find_file_path "splash/progress/splash-*" && cp ${FOUND_PATH} $INSTALL/splash/progress || :
+    find_file_path "splash/${DEVICE}/splash-*.png" && cp ${FOUND_PATH} $INSTALL/splash || :
+    find_file_path "splash/${DEVICE}/progress/splash-*" && cp ${FOUND_PATH} $INSTALL/splash/progress || :
 }

@@ -1,0 +1,26 @@
+From 9a8e71e3e66503f1cc8d3143afe1a8db7a3b0fcc Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Fri, 14 Apr 2023 09:54:08 +0200
+Subject: [PATCH 12/18] hdmitx: fix display of current hdmi config with colour
+ space 422
+
+---
+ drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+index b8a18129638f..f7d5612727da 100644
+--- a/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
++++ b/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c
+@@ -2580,7 +2580,7 @@ static ssize_t show_config(struct device *dev,
+ 		para = hdev->para;
+ 
+ 		// YUV422
+-		if (cs == 1)
++		if (cs == COLORSPACE_YUV422)
+ 			cd = (~cd & 0x3);
+ 
+ 		pos += snprintf(buf+pos, PAGE_SIZE, "VIC: %d %s\n",
+-- 
+2.25.1
+

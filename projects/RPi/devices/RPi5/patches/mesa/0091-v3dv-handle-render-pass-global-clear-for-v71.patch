@@ -1,0 +1,117 @@
+From 3e607bb28056bb52242be6878281efae84026813 Mon Sep 17 00:00:00 2001
+From: Iago Toral Quiroga <itoral@igalia.com>
+Date: Tue, 28 Sep 2021 08:23:48 +0200
+Subject: [PATCH 091/142] v3dv: handle render pass global clear for v71
+
+---
+ src/broadcom/vulkan/v3dvx_cmd_buffer.c | 66 ++++++++++++++++----------
+ 1 file changed, 41 insertions(+), 25 deletions(-)
+
+diff --git a/src/broadcom/vulkan/v3dvx_cmd_buffer.c b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+index 1b39e230580..48b2e319e51 100644
+--- a/src/broadcom/vulkan/v3dvx_cmd_buffer.c
++++ b/src/broadcom/vulkan/v3dvx_cmd_buffer.c
+@@ -362,6 +362,11 @@ cmd_buffer_render_pass_emit_store(struct v3dv_cmd_buffer *cmd_buffer,
+                                              iview->vk.base_array_layer + layer,
+                                              image_plane);
+ 
++   /* The Clear Buffer bit is not supported for Z/Stencil stores in 7.x and it
++    * is broken in earlier V3D versions.
++    */
++   assert((buffer != Z && buffer != STENCIL && buffer != ZSTENCIL) || !clear);
++
+    cl_emit(cl, STORE_TILE_BUFFER_GENERAL, store) {
+       store.buffer_to_store = buffer;
+       store.address = v3dv_cl_address(image->planes[image_plane].mem->bo, layer_offset);
+@@ -484,6 +489,30 @@ cmd_buffer_render_pass_emit_stores(struct v3dv_cmd_buffer *cmd_buffer,
+       const VkImageAspectFlags aspects =
+          vk_format_aspects(ds_attachment->desc.format);
+ 
++#if V3D_VERSION <= 42
++      /* GFXH-1689: The per-buffer store command's clear buffer bit is broken
++       * for depth/stencil.
++       *
++       * There used to be some confusion regarding the Clear Tile Buffers
++       * Z/S bit also being broken, but we confirmed with Broadcom that this
++       * is not the case, it was just that some other hardware bugs (that we
++       * need to work around, such as GFXH-1461) could cause this bit to behave
++       * incorrectly.
++       *
++       * There used to be another issue where the RTs bit in the Clear Tile
++       * Buffers packet also cleared Z/S, but Broadcom confirmed this is
++       * fixed since V3D 4.1.
++       *
++       * So if we have to emit a clear of depth or stencil we don't use
++       * the per-buffer store clear bit, even if we need to store the buffers,
++       * instead we always have to use the Clear Tile Buffers Z/S bit.
++       * If we have configured the job to do early Z/S clearing, then we
++       * don't want to emit any Clear Tile Buffers command at all here.
++       *
++       * Note that GFXH-1689 is not reproduced in the simulator, where
++       * using the clear buffer bit in depth/stencil stores works fine.
++       */
++
+       /* Only clear once on the first subpass that uses the attachment */
+       uint32_t ds_first_subpass = !state->pass->multiview_enabled ?
+          ds_attachment->first_subpass :
+@@ -503,6 +532,17 @@ cmd_buffer_render_pass_emit_stores(struct v3dv_cmd_buffer *cmd_buffer,
+                            ds_attachment->desc.stencilLoadOp,
+                            subpass->do_stencil_clear_with_draw);
+ 
++      use_global_zs_clear = !state->job->early_zs_clear &&
++         (needs_depth_clear || needs_stencil_clear);
++#endif
++#if V3D_VERSION >= 71
++      /* The store command's clear buffer bit cannot be used for Z/S stencil:
++       * since V3D 4.5.6 Z/S buffers are automatically cleared between tiles,
++       * so we don't want to emit redundant clears here.
++       */
++      use_global_zs_clear = false;
++#endif
++
+       /* Skip the last store if it is not required */
+       uint32_t ds_last_subpass = !pass->multiview_enabled ?
+          ds_attachment->last_subpass :
+@@ -545,30 +585,6 @@ cmd_buffer_render_pass_emit_stores(struct v3dv_cmd_buffer *cmd_buffer,
+          needs_stencil_store = subpass->resolve_stencil;
+       }
+ 
+-      /* GFXH-1689: The per-buffer store command's clear buffer bit is broken
+-       * for depth/stencil.
+-       *
+-       * There used to be some confusion regarding the Clear Tile Buffers
+-       * Z/S bit also being broken, but we confirmed with Broadcom that this
+-       * is not the case, it was just that some other hardware bugs (that we
+-       * need to work around, such as GFXH-1461) could cause this bit to behave
+-       * incorrectly.
+-       *
+-       * There used to be another issue where the RTs bit in the Clear Tile
+-       * Buffers packet also cleared Z/S, but Broadcom confirmed this is
+-       * fixed since V3D 4.1.
+-       *
+-       * So if we have to emit a clear of depth or stencil we don't use
+-       * the per-buffer store clear bit, even if we need to store the buffers,
+-       * instead we always have to use the Clear Tile Buffers Z/S bit.
+-       * If we have configured the job to do early Z/S clearing, then we
+-       * don't want to emit any Clear Tile Buffers command at all here.
+-       *
+-       * Note that GFXH-1689 is not reproduced in the simulator, where
+-       * using the clear buffer bit in depth/stencil stores works fine.
+-       */
+-      use_global_zs_clear = !state->job->early_zs_clear &&
+-         (needs_depth_clear || needs_stencil_clear);
+       if (needs_depth_store || needs_stencil_store) {
+          const uint32_t zs_buffer =
+             v3dv_zs_buffer(needs_depth_store, needs_stencil_store);
+@@ -673,7 +689,7 @@ cmd_buffer_render_pass_emit_stores(struct v3dv_cmd_buffer *cmd_buffer,
+       }
+ #endif
+ #if V3D_VERSION >= 71
+-      unreachable("Hardware generation 71 not supported yet.");
++      cl_emit(cl, CLEAR_RENDER_TARGETS, clear);
+ #endif
+    }
+ }
+-- 
+2.39.2
+

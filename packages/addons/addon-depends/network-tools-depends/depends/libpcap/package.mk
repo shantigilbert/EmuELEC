@@ -2,11 +2,11 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libpcap"
-PKG_VERSION="1.10.1"
-PKG_SHA256="ed285f4accaf05344f90975757b3dbfe772ba41d1c401c2648b7fa45b711bdd4"
+PKG_VERSION="1.10.3"
+PKG_SHA256="2a8885c403516cf7b0933ed4b14d6caa30e02052489ebd414dc75ac52e7559e6"
 PKG_LICENSE="GPL"
-PKG_SITE="http://www.tcpdump.org/"
-PKG_URL="http://www.tcpdump.org/release/libpcap-${PKG_VERSION}.tar.gz"
+PKG_SITE="https://www.tcpdump.org/"
+PKG_URL="https://www.tcpdump.org/release/libpcap-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="A portable framework for low-level network monitoring."
 # use configure, not cmake. review cmake in future release.

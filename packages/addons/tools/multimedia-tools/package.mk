@@ -3,7 +3,7 @@
 
 PKG_NAME="multimedia-tools"
 PKG_VERSION="1.0"
-PKG_REV="117"
+PKG_REV="2"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://libreelec.tv"

@@ -2,8 +2,8 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libretro-yabause"
-PKG_VERSION="17dfcd8de4700341d972993501d3a043925675ce"
-PKG_SHA256="591764666cd780b2367423d31cee4a30a9971ccecf5c17901f568a4ef4c2e49a"
+PKG_VERSION="4c96b96f7fbe07223627c469ff33376b2a634748"
+PKG_SHA256="76f50b21d81507ac29e80bbcfbfc8dbf71d6bf051f1267973eabed99a6681654"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/yabause"
 PKG_URL="https://github.com/libretro/yabause/archive/${PKG_VERSION}.tar.gz"
@@ -24,6 +24,9 @@ pre_configure_target() {
       PKG_MAKE_OPTS_TARGET+="-neon"
     fi
     PKG_MAKE_OPTS_TARGET+="-${TARGET_FLOAT}float-${TARGET_CPU}"
+  elif [ "${TARGET_ARCH}" = "aarch64" ]; then
+    sed -i "s|FLAGS += -marm||" ${PKG_BUILD}/yabause/src/libretro/Makefile
+    PKG_MAKE_OPTS_TARGET+=" platform=armv"
   fi
 }
 
@@ -36,4 +39,3 @@ makeinstall_target() {
   cp ${PKG_LIBPATH} ${SYSROOT_PREFIX}/usr/lib/${PKG_LIBNAME}
   echo "set(${PKG_LIBVAR} ${SYSROOT_PREFIX}/usr/lib/${PKG_LIBNAME})" > ${SYSROOT_PREFIX}/usr/lib/cmake/${PKG_NAME}/${PKG_NAME}-config.cmake
 }
-

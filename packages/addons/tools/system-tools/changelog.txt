@@ -1,209 +1,32 @@
-132
-- vim: update to 9.0.0453
+4
+- bottom: update to 0.9.4
+- libmtp: update to 1.1.21
+- mc: update to 4.8.30
+- screen: update to 4.9.1
+- smartmontools: update to 7.4
+- stress-ng: update to 0.16.04
 
-131
-- Add kmsxx (kmsprint, kmstest)
+3
+- file: update to 5.45
+- libssh2: dont build shared library
+  - fix build of mc
+- pv: update to 1.7.24
+- unrar: update to 6.2.10
 
-130
-- bottom: update to 0.6.8
-- efivar: update to 38
-- evtest: update to 1.35
-- htop: update to 3.2.1
-- inotify-tools: update to 3.22.1.0
-- mc: update to 4.8.28
-- oniguruma: update to 6.9.8
-- screen: update to 4.9.0
-- sdparm: initial package
-- smartmontools: update to 7.3
-- st: update to 0.8.5
-- system-tools: 7z permissions
-- system-tools: add sdparm
-- unrar: update to 6.1.7
-- vim: update to 8.2.5052
+2
+- replace dstat with dool
+- bottom: update to 0.9.3
+- diffutils: update to 3.10
+- libssh2: update to 1.11.0
+- stress-ng: update to 0.16.02
+- unrar: update to 6.2.8
 
-129
-- Fix (set) 7z/7za executable flag
-
-128
-- Add mmc-utils
-
-127
-- Update bottom to 0.6.6
-- Update efibootmgr to githash 2021-11-05
-- Update efivar to githash 2021-12-10
-- Update file to 5.41
-- Update htop to 3.1.2
-- Add libgpiod (1.6.3)
-- Update nmon to 16n
-- Update unrar to 6.1.3
-- Update vim to 8.2.3878
-
-126
-- Update bottom to 0.6.4
-- Update diffutils to 3.8
-- Update htop to 3.1.1
-- Update i2c-tools to 4.3 and fix build prefix
-- Update inotify-tools to 3.21.9.6
-- Update libmtp to 1.1.19
-- Update libssh2 to 1.10.0
-- Update pv to 1.6.20
-- Update stress-ng to 0.13.05 and the PKG_URL
-
-
-125
-- Update mc to 4.8.27
-
-124
-- Include bottom (btm) in Generic
-
-123
-- Update stress-ng to 0.12.11
-- Update unrar to 6.0.7
-- Update vim to 8.2.2879
-
-122
-- Added bottom (btm) (successor to ytop) - all arch except Generic
-- Update file to 5.40
-- Update mc to 4.8.26
-- Update mtpfs to 2021-05-14
-- Update oniguruma to 6.9.7.1
-- Update stress-ng to 0.12.09
-- Update unrar to 6.0.6
-- Update vim to 8.2.2879
-
-121
-- remove strace
-
-120
-- htop: update to 3.0.5
-- i2c-tools: fix runtime libraries
-- strace: fix compile on Generic due to mpers
-- stress-ng: update to 0.12.02
-
-119
-- dstat: update to 2020-06-19
-- efibootmgr: update version details
-- efivar: update to 2020-10-16
-- hddtemp: add patch to support nvme drives
-- nmon: update to 16m
-
-118
-- i2c-tools: update to 4.2
-- lm_sensors: update to 3.6.0
-
-117
-- fdupes: update to 2.1.2
-- htop: update to 3.0.4
-- i2c-tools: update to 3.1.2+patches
-- inotify-tools: update to 3.20.11.0
-- libmtp: update to 1.1.18
-- libssh2: update to 1.9.0
-- oniguruma: update to 6.9.6
-- smartmontools: update to 7.2
-- strace: update to 5.10
-- stress-ng: update to 0.12.01
-- usb-modeswitch: update to 2.6.1
-- vim: update to 8.2.2293
-
-116
-- added st (Generic only)
-- updated unrar to 6.0.3
-- updated mc to 4.8.25
-- removed ytop
-
-115
-- updated strace to 5.9
-
-114
-- added ytop
-- fixed 7z
-- updated diffutils to 3.7
-- updated efibootmgr to 2020-04-27
-- updated evtest to 1.34
-- updated fdupes to 2.0.0
-- updated file to 5.39
-- updated lshw to 2.19.2
-- updated screen to 4.8.0
-- updated strace to 5.7
-- updated stress-ng to 0.11.14
-- updated unrar to 5.9.3
-- dropped mrxvt
-
-113
-- update strace to 5.4
-
-112
-- added vim runtime files
-- updated vim
-
-111
-- updated autossh to 1.4g
-- updated file to d1ff3af
-- updated htop to 3.0.0 Beta5
-- updated jq to 1.6
-- updated lm_sensors to e8afbda
-- updated patch to 2.7.6
-- updated pv to 1.6.6
-- updated smartmontools to 7.0
-- updated strace to 4.26
-- updated stress-ng to 0.09.50
-- updated unrar to 5.6.8
-
-110
-- updated and improved mc (4.8.21)
-- using more compatible "xterm" TERM definition
-- updated efibootmgr to 17
-- fixed screen
-
-109
-- added stress-ng
-
-108
-- added encfs and smartmontools
-- updated autossh to 1.4f
-- updated file to 5.33
-- updated htop to 3.0.0 Beta4
-- updated inotify-tools to 3.20.1
-- updated lm_sensors to 1c48b19
-- updated mc to 4.8.20
-- updated screen to 4.6.2
-- updated strace to 4.22
-- updated unrar to 5.6.3
-
-107
-- added dstat, htop and vim
-- updated difftools to 3.6
-- updated dtach to 0.9
-- updated fdupes to 1.6.1
-- updated file to 5.31
-- updated hd-idle to 1.05
-- updated hddtemp to 0.3-beta16
-- updated hid_mapper to 2.1.0
-- updated libmtp to 1.1.13
-- updated lm_sensors to 0d5ccf6
-- updated lshw to 2.18
-- updated mc to 4.8.19
-- updated mtpfs to fd3864d
-- updated p7zip to 16.02
-- updated strace to 4.17
-- updated unrar to 5.5.5
-
-106
-- updated screen, fix colors issue
-
-104
-- updated file package
-
-103
-- added nmon
-
-102
-- added inotify-tools, mc
-
-101
-- mrxvt can be started from KODI
-- correct mrxvt terminal type
-- make hddtemp work
-
-100
-- Initial Release
+1
+- bottom: update to 0.8.0
+- diffutils: update to 3.9
+- htop: update to 3.2.2
+- lshw: fix lshw -version display
+- mc: update to 4.8.29
+- stress-ng: update to 0.15.06
+- unrar: update to 6.2.6
+- vim: update to 9.0.1417

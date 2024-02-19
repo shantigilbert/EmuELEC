@@ -1,5 +1,13 @@
-101
-- Clean up after dtv scan table download
-- Update to new NextPVR version
-100
-- Initial release
+5
+- download NextPVR 6.1.5
+
+4
+- download NextPVR 6.1.4
+
+3
+- download NextPVR 6.1.3
+
+2
+Fix nextpvr-downloader script
+
+initial release

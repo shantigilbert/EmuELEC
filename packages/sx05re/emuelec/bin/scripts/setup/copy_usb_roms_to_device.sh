@@ -15,10 +15,10 @@ if [[ -z "${FULLPATHTOROMS}" ]]; then
 	ROMSNOTFOUND="yes"
 else
 	ROMSNOTFOUND="no"
-	PATHTOROMS="${FULLPATHTOROMS%$ROMFILE}"
+	PATHTOROMS="${FULLPATHTOROMS%${ROMFILE}}"
 fi 
 
-echo $PATHTOROMS
+echo ${PATHTOROMS}
 }
 
 ROMFOLDER="$(copy_from_where)"
@@ -52,7 +52,7 @@ function copy_roms() {
 	[[ -f /storage/roms/emuelecroms ]] && rm /storage/roms/emuelecroms
     echo -en "Copy finished!\n\n" >> /tmp/display
 	echo -en "Remove the USB media from the device and press YES to restart ES\n\nPressing NO will return to ES without restarting!" >> /tmp/display
-    echo -en "\n\n\n$COPY" >> /tmp/display
+    echo -en "\n\n\n${COPY}" >> /tmp/display
     text_viewer -y -w -t "Copy roms from USB to SD" -f 24 /tmp/display
 	if [[ $? == 21 ]]; then
         rm /tmp/display
