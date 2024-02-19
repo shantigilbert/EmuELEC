@@ -11,7 +11,7 @@ ExecStart=emulationstation
 ExecStop=/usr/bin/emuelec-utils ee_shutdown
 KillMode=process
 TimeoutStopSec=3
-Restart=on-failure
+Restart=always
 RestartSec=2
 StartLimitInterval=0
 

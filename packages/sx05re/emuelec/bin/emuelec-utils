@@ -7,7 +7,7 @@
 . /etc/profile
 
 function ee_shutdown() {
-	[[ -f "/tmp/shutdown.please" ]] && shutdown -h now
+	[[ -f "/tmp/shutdown.please" ]] && systemctl poweroff
 }
 
 function es_shutdown() {
