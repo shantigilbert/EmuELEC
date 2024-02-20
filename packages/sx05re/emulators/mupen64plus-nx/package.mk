@@ -19,6 +19,8 @@ PKG_BUILD_FLAGS="-lto"
 pre_configure_target() {
   sed -e "s|^GIT_VERSION ?.*$|GIT_VERSION := \" ${PKG_VERSION:0:7}\"|" -i Makefile
 
+PKG_MAKE_OPTS_TARGET+=" HAVE_PARALLEL_RDP=1 HAVE_PARALLEL_RSP=1 HAVE_THR_AL=1 LLE=1"
+
 if [ ${ARCH} == "arm" ]; then
 	if [ "${DEVICE}" = "Amlogic-old" ]; then
 		PKG_MAKE_OPTS_TARGET+=" platform=emuelec BOARD=OLD32BIT"
