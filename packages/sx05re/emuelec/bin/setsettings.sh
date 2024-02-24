@@ -159,6 +159,7 @@ case ${1} in
         if [ "${2}" == "false" ] || [ "${2}" == "none" ] || [ "${2}" == "0" ]; then 
             echo 'savestate_auto_save = "false"' >> ${RACONF}
             echo 'savestate_auto_load = "false"' >> ${RACONF}
+						AUTOLOAD="false"
         else
             echo 'savestate_auto_save = "true"' >> ${RACONF}
             echo 'savestate_auto_load = "true"' >> ${RACONF}
@@ -170,10 +171,10 @@ case ${1} in
     sed -i "/state_slot =/d" ${RACONF}
 
 if [[ ! -z ${SNAPSHOT} ]]; then    
-        sed -i "/savestate_auto_load =/d" ${RACONF}
-        sed -i "/savestate_auto_save =/d" ${RACONF}
-        echo 'savestate_auto_save = "true"' >> ${RACONF}
-        echo 'savestate_auto_load = "true"' >> ${RACONF}
+#        sed -i "/savestate_auto_load =/d" ${RACONF}
+#        sed -i "/savestate_auto_save =/d" ${RACONF}
+#        echo 'savestate_auto_save = "true"' >> ${RACONF}
+#        echo 'savestate_auto_load = "true"' >> ${RACONF}
         echo "state_slot = \"${SNAPSHOT}\"" >> ${RACONF}
 else
     if [[ ${AUTOLOAD} == "false" ]]; then
