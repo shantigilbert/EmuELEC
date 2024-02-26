@@ -35,8 +35,18 @@ SNAPSHOT="${SNAPSHOT#*--snapshot=*}"
 # For the new snapshot save state manager we need to set the path to be /storage/roms/savestates/[PLATFORM]
 mkdir -p "/storage/roms/savestates/${PLATFORM}"
 sed -i '/savestates_in_content_dir =/d' ${RACONF}
+sed -i '/sort_savefiles_by_content_enable =/d' ${RACONF}
+sed -i '/sort_savefiles_enable =/d' ${RACONF}
+sed -i '/sort_savestates_by_content_enable =/d' ${RACONF}
+sed -i '/sort_savestates_enable =/d' ${RACONF}
 sed -i '/savestate_directory =/d' ${RACONF}
-echo "savestates_in_content_dir = false" >> ${RACONF}
+echo 'savestates_in_content_dir = "false"' >> ${RACONF}
+echo 'sort_savefiles_by_content_enable = false"' >> ${RACONF}
+echo 'sort_savefiles_enable = "false"' >> ${RACONF}
+echo 'sort_savestates_by_content_enable = "false"' >> ${RACONF}
+echo 'sort_savestates_enable = "false"' >> ${RACONF}
+
+
 echo "savestate_directory = \"/storage/roms/savestates/${PLATFORM}\"" >> ${RACONF}
 
 
