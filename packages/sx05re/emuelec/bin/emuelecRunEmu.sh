@@ -291,6 +291,10 @@ case ${PLATFORM} in
 	    set_kill_keys "lzdoom"
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
             RUNTHIS='${TBASH} lzdoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
+	elif [ "${EMU}" = "GZDoom" ]; then
+            set_kill_keys "gzdoom"
+            CONTROLLERCONFIG="${arguments#*--controllers=*}"
+            RUNTHIS='${TBASH} gzdoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
         fi
         ;;
 	"ecwolf")
