@@ -235,9 +235,9 @@ class BluetoothCTL:
         )
 
 
-# returns true if a game is running via the emuelecRunEmu script
-def is_in_game():
-    return ShellIO.execute_lookup(["ps", "-ef"], "emuelecRunEmu.sh", debug=False)
+# returns true if a game is running via the init_app_video call (includes ports)
+def is_in_game() -> bool:
+    return "yes" in ShellIO.execute_lookup(["emuelec-utils", "ee_game_running"], "yes", debug=False)
 
 
 # returns true if another process (not current) is running infinite scan
