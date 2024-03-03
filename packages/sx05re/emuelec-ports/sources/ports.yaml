@@ -37,7 +37,7 @@ Bermuda Syndrome:
     - ${PORT} --datapath=/storage/roms/ports/bermuda/ --fullscreen --widescreen=4:3 >> $EE_LOG 2>&1
 
 Blake Stone:
-  description: Blake Stone: Aliens of Gold is a first-person shooter for DOS created by JAM Productions and published by Apogee Software in 1993.
+  description: "Blake Stone: Aliens of Gold is a first-person shooter for DOS created by JAM Productions and published by Apogee Software in 1993."
   rating: 1.0
   release_date: 1993
   developer: Apogee
@@ -50,7 +50,7 @@ Blake Stone:
     - bstone.sh >> $EE_LOG 2>&1
 
 Blake Stone Planet Strike:
-  description: Blake Stone: Planet Strike is a first-person shooter video game, the sequel to Blake Stone: Aliens of Gold, made by JAM Productions and released for DOS on October 28, 1994, by Apogee Software.
+  description: "Blake Stone: Planet Strike is a first-person shooter video game, the sequel to Blake Stone: Aliens of Gold, made by JAM Productions and released for DOS on October 28, 1994, by Apogee Software."
   rating: 1.0
   release_date: 1994
   developer: Apogee
@@ -63,7 +63,7 @@ Blake Stone Planet Strike:
     - bstone.sh ps >> $EE_LOG 2>&1
 
 Cannonball:
-  description: This is an arcade-perfect port of SEGA's seminal arcade racer. Features include: Pixel-perfect 240p video. 60 FPS gameplay. Continuous mode (play all 15 tracks in one go).
+  description: "This is an arcade-perfect port of SEGA's seminal arcade racer. Features include: Pixel-perfect 240p video. 60 FPS gameplay. Continuous mode (play all 15 tracks in one go)."
   rating: 0.8
   release_date: 20140101T000000
   developer: Chris White, Yu Suzuki
@@ -216,7 +216,7 @@ Duke Nukem:
     - eduke.sh >> $EE_LOG 2>&1
 
 Fallout:
-  description: Fallout A Post Nuclear Role Playing Game. In a mid-22nd century post-apocalyptic and retro-futuristic world, decades after a global nuclear war between the United States and China, the Vault Dweller, inhabits the underground nuclear shelter Vault 13.
+  description: "Fallout: A Post Nuclear Role Playing Game. In a mid-22nd century post-apocalyptic and retro-futuristic world, decades after a global nuclear war between the United States and China, the Vault Dweller, inhabits the underground nuclear shelter Vault 13."
   rating: 0.9
   release_date: 19971007T000000
   developer: Interplay Productions
@@ -283,7 +283,7 @@ Heart of Darkness:
     - ${PORT} --datapath=/storage/roms/ports/hode/ --savepath=/storage/roms/ports/hode/ >> $EE_LOG 2>&1
 
 Heroes of Might and Magic II:
-  description: Heroes of Might and Magic II: The Succession Wars is a turn-based strategy video game developed by Jon Van Caneghem through New World Computing and published in 1996 by the 3DO Company.
+  description: "Heroes of Might and Magic II: The Succession Wars is a turn-based strategy video game developed by Jon Van Caneghem through New World Computing and published in 1996 by the 3DO Company."
   rating: 1.0
   release_date: 1996
   developer: New World Computing
@@ -554,7 +554,7 @@ SuperTuxKart:
     - run_supertuxkart.sh >> $EE_LOG 2>&1
 
 TMNTSR:
-  description: Teenage Mutant Ninja Turtles: Shredder's Revenge is a beat'em up game developed by Tribute Games and published by Dotemu.
+  description: "Teenage Mutant Ninja Turtles: Shredder's Revenge is a beat'em up game developed by Tribute Games and published by Dotemu."
   rating: 1.0
   release_date: 2022
   developer: Tribute Games
