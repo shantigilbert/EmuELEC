@@ -31,7 +31,12 @@ event_start() {
 
 event_game_start() {
     echo "Started game rom: ${1} basename ${2} name ${3}"
-    }
+		touch /tmp/game.running
+}
+
+event_game_end () {
+		rm /tmp/game.running
+}
 
 event_screensaver_start() {
     echo "Starting Screen saver ${1}"
@@ -55,21 +60,24 @@ event_quit(){
 }
 
 case "${EVENT}" in
-    "start")
-	event_start
-	;;
-    "game-start")
-	event_game_start ${1} ${2} ${3}
-	;;
-    "screensaver-start")
-    event_screensaver_start ${1}
-	;;
-    "quit")
-    event_quit ${1} ${2} ${3}
-	;;
-    # and so and and so fort
-    *)
-	exit 1
+	"start")
+		event_start
+		;;
+	"game-start")
+		event_game_start "${1}" "${2}" "${3}" "${4}"
+		;;
+	"game-end")
+		event_game_end
+		;;
+	"screensaver-start")
+		event_screensaver_start ${1}
+		;;
+	"quit")
+		event_quit ${1} ${2} ${3}
+		;;
+	# and so and and so fort
+	*)
+		exit 1
 esac
 
 ## You could also do something like this:

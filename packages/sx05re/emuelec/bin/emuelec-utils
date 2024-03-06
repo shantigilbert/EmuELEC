@@ -381,8 +381,6 @@ function init_app_video() {
 
 	# Set the display video to that of the emulator setting.
 	[ ! -z "${VIDEO_EMU}" ] && ${TBASH} setres.sh ${VIDEO_EMU} ${PLATFORM} # set display
-
-	touch /tmp/game.running
 }
 
 function end_app_video() {
@@ -393,8 +391,6 @@ function end_app_video() {
 
 	# Show exit splash
 	${TBASH} show_splash.sh exit
-
-	rm /tmp/game.running
 }
 
 function ee_game_running() {

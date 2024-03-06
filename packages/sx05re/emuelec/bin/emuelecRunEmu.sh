@@ -17,12 +17,12 @@ if [ -f "/usr/bin/odroidgoa_utils.sh" ]; then
     echo "screen_brightness = \"${DEFBRIGHT}\"" >> ${RACONF}
 fi
 
-BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
+# BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 
-if [[ "${BTENABLED}" == "1" ]]; then
+# if [[ "${BTENABLED}" == "1" ]]; then
 	# We don't need the BT agent while running games
-    systemctl stop bluetooth-agent
-fi
+#    systemctl stop bluetooth-agent
+# fi
 
 # clear terminal window
 	clear > /dev/tty < /dev/null 2>&1
