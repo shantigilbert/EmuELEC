@@ -64,7 +64,7 @@ case "${EVENT}" in
 		event_start
 		;;
 	"game-start")
-		event_game_start "${1}" "${2}" "${3}" "${4}"
+		event_game_start "${1}" "${2}" "${3}"
 		;;
 	"game-end")
 		event_game_end
