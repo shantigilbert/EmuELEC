@@ -11,11 +11,11 @@ systems = {
 
     # Atari
     "atari5200": { "name": "Atari 5200", "biosFiles": [ { "md5": "281f20ea4320404ec820fb7ec0693b38", "file": "bios/5200.rom"          } ] },
+	  "atari7800": { "name": "Atari 7800", "biosFiles": [ { "md5": "0763f1ffb006ddbe32e52d497ee848ae", "file": "bios/7800 BIOS (U).rom" } ] },
 	  "atari800":  { "name": "Atari 800", "biosFiles":   [ { "md5": "06daac977823773a3eea3422fd26a703", "file": "bios/ATARIXL.ROM"      },
 										                { "md5": "0bac0c6a50104045d902df4503a4c30b", "file": "bios/ATARIBAS.ROM"      },
                                                         { "md5": "eb1f32f5d9f382db1bbfb8d7f9cb343a", "file": "bios/ATARIOSA.ROM"      },
                                                         { "md5": "a3e8d617c95d08031fe1b20d541434b2", "file": "bios/ATARIOSB.ROM"      } ] },
-	  "atari7800": { "name": "Atari 7800", "biosFiles": [ { "md5": "0763f1ffb006ddbe32e52d497ee848ae", "file": "bios/7800 BIOS (U).rom" } ] },
     "atarist":   { "name": "Atari ST", "biosFiles":   [ { "md5": "b2a8570de2e850c5acf81cb80512d9f6", "file": "bios/tos.img"           } ] },
     "atarilynx": { "name": "Lynx", "biosFiles":       [ { "md5": "fcd403db69f54290b51035d82f835e7b", "file": "bios/lynxboot.img"	  } ] },
 
