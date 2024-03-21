@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2021-present AmberELEC (https://github.com/AmberELEC)
 # Copyright (C) 2024-present EmuELEC (https://github.com/EmuELEC)
 
 PKG_NAME="gzdoom"
