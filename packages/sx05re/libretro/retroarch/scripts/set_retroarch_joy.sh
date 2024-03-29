@@ -73,11 +73,13 @@ set_pad() {
 	  [rightshoulder]="input_player${P_INDEX}_r_btn"
 	  [lefttrigger]="input_player${P_INDEX}_l2_btn"
 	  [righttrigger]="input_player${P_INDEX}_r2_btn"
-	  [select]="input_player${P_INDEX}_select_btn"
+    [back]="input_player${P_INDEX}_select_btn"
 		[start]="input_player${P_INDEX}_start_btn"
 	)
 
-	declare -A GC_RA_STICKS=(
+	declare -A GC_RA_AXIS=(
+	  [lefttrigger,a]="input_player${P_INDEX}_l2_axis"
+	  [righttrigger,a]="input_player${P_INDEX}_r2_axis"
 	  ["leftx,0"]="input_player${P_INDEX}_l_x_minus_axis"
 	  ["leftx,1"]="input_player${P_INDEX}_l_x_plus_axis"
 	  ["lefty,0"]="input_player${P_INDEX}_l_y_minus_axis"
@@ -123,12 +125,13 @@ set_pad() {
         lefttrigger|righttrigger)
           if [[ "${BTN_TYPE}" == "a" ]]; then
             VAL=${BUTTON_VAL}
+            GC_INDEX="${GC_RA_AXIS[${BUTTON_INDEX},a]}"
 						sed -i "s/${GC_INDEX}.*/${GC_INDEX} = \"+${VAL}\"/" ${CONFIG}
           fi
           ;;
         leftx|lefty|rightx|righty)
 					VAL=${BUTTON_VAL}
-          GC_INDEX="${GC_RA_STICKS[${BUTTON_INDEX},0]}"
+          GC_INDEX="${GC_RA_AXIS[${BUTTON_INDEX},0]}"
 					sed -i "s/${GC_INDEX}.*/${GC_INDEX} = \"-${VAL}\"/" ${CONFIG}
           GC_INDEX="${GC_RA_STICKS[${BUTTON_INDEX},1]}"
 					sed -i "s/${GC_INDEX}.*/${GC_INDEX} = \"+${VAL}\"/" ${CONFIG}
