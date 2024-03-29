@@ -115,9 +115,6 @@ set_pad() {
         if [[ "${BTN_TYPE}" == "b"  || "${BTN_TYPE}" == "h" ]]; then
 					sed -i "s/${GC_INDEX}.*/${GC_INDEX} = \"${VAL}\"/" ${CONFIG}
         fi
-        if [[ "${BTN_TYPE}" == "a" ]]; then
-					sed -i "s/${GC_INDEX}.*/${GC_INDEX} = \"+${VAL}\"/" ${CONFIG}
-        fi
       fi
 
       # Create Axis Maps
@@ -133,7 +130,7 @@ set_pad() {
 					VAL=${BUTTON_VAL}
           GC_INDEX="${GC_RA_AXIS[${BUTTON_INDEX},0]}"
 					sed -i "s/${GC_INDEX}.*/${GC_INDEX} = \"-${VAL}\"/" ${CONFIG}
-          GC_INDEX="${GC_RA_STICKS[${BUTTON_INDEX},1]}"
+          GC_INDEX="${GC_RA_AXIS[${BUTTON_INDEX},1]}"
 					sed -i "s/${GC_INDEX}.*/${GC_INDEX} = \"+${VAL}\"/" ${CONFIG}
           ;;
       esac
