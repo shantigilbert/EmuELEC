@@ -13,10 +13,10 @@ CONFIG=${CONFIG_DIR}/retroarch.cfg
 source joy_common.sh "retroarch"
 
 declare -A GC_RA_VALUES=(
-[h0.1]="12"
-[h0.4]="13"
-[h0.8]="14"
-[h0.2]="15"
+[h0.1]="h0up"
+[h0.4]="h0down"
+[h0.8]="h0left"
+[h0.2]="h0right"
 [b0]="0"
 [b1]="1"
 [b2]="2"
@@ -44,7 +44,46 @@ declare -A GC_RA_VALUES=(
 
 # Cleans all the inputs for the gamepad with name ${GAMEPAD} and player ${1}
 clean_pad() {
-	return
+	local P_INDEX=$1
+
+	local GC_RA_CLEAN=(
+		"input_player${P_INDEX}_left_btn"
+		"input_player${P_INDEX}_right_btn"
+		"input_player${P_INDEX}_up_btn"
+		"input_player${P_INDEX}_down_btn"
+		"input_player${P_INDEX}_x_btn"
+		"input_player${P_INDEX}_y_btn"
+		"input_player${P_INDEX}_a_btn"
+		"input_player${P_INDEX}_b_btn"
+		"input_player${P_INDEX}_l_btn"
+		"input_player${P_INDEX}_r_btn"
+		"input_player${P_INDEX}_l2_btn"
+		"input_player${P_INDEX}_r2_btn"
+		"input_player${P_INDEX}_l3_btn"
+		"input_player${P_INDEX}_r3_btn"
+		"input_player${P_INDEX}_select_btn"
+		"input_player${P_INDEX}_start_btn"
+		"input_player${P_INDEX}_l2_axis"
+		"input_player${P_INDEX}_r2_axis"
+		"input_player${P_INDEX}_up_axis"
+		"input_player${P_INDEX}_down_axis"
+		"input_player${P_INDEX}_left_axis"
+		"input_player${P_INDEX}_right_axis"
+		"input_player${P_INDEX}_l_x_minus_axis"
+		"input_player${P_INDEX}_l_x_plus_axis"
+		"input_player${P_INDEX}_l_y_minus_axis"
+		"input_player${P_INDEX}_l_y_plus_axis"
+		"input_player${P_INDEX}_r_x_minus_axis"
+		"input_player${P_INDEX}_r_x_plus_axis"
+		"input_player${P_INDEX}_r_y_minus_axis"
+		"input_player${P_INDEX}_r_y_plus_axis"
+	)
+
+	for key in "${GC_RA_CLEAN[@]}"
+	do
+		echo $key
+		sed -i "s/${key}.*/${key} = \"nul\"/" ${CONFIG}
+	done
 }
 
 # Sets pad depending on parameters.
@@ -73,21 +112,20 @@ set_pad() {
 	  [rightshoulder]="input_player${P_INDEX}_r_btn"
 	  [lefttrigger]="input_player${P_INDEX}_l2_btn"
 	  [righttrigger]="input_player${P_INDEX}_r2_btn"
+		[leftstick]="input_player${P_INDEX}_l3_btn"
+		[rightstick]="input_player${P_INDEX}_r3_btn"
     [back]="input_player${P_INDEX}_select_btn"
 		[start]="input_player${P_INDEX}_start_btn"
-	)
-
-	declare -A GC_RA_AXIS=(
-	  [lefttrigger,a]="input_player${P_INDEX}_l2_axis"
+		[lefttrigger,a]="input_player${P_INDEX}_l2_axis"
 	  [righttrigger,a]="input_player${P_INDEX}_r2_axis"
-	  ["leftx,0"]="input_player${P_INDEX}_l_x_minus_axis"
-	  ["leftx,1"]="input_player${P_INDEX}_l_x_plus_axis"
-	  ["lefty,0"]="input_player${P_INDEX}_l_y_minus_axis"
-	  ["lefty,1"]="input_player${P_INDEX}_l_y_plus_axis"
-	  ["rightx,0"]="input_player${P_INDEX}_r_x_minus_axis"
-	  ["rightx,1"]="input_player${P_INDEX}_r_x_plus_axis"
-	  ["righty,0"]="input_player${P_INDEX}_r_y_minus_axis"
-	  ["righty,1"]="input_player${P_INDEX}_r_y_plus_axis"
+	  [leftx,0]="input_player${P_INDEX}_l_x_minus_axis"
+	  [leftx,1]="input_player${P_INDEX}_l_x_plus_axis"
+	  [lefty,0]="input_player${P_INDEX}_l_y_minus_axis"
+	  [lefty,1]="input_player${P_INDEX}_l_y_plus_axis"
+	  [rightx,0]="input_player${P_INDEX}_r_x_minus_axis"
+	  [rightx,1]="input_player${P_INDEX}_r_x_plus_axis"
+	  [righty,0]="input_player${P_INDEX}_r_y_minus_axis"
+	  [righty,1]="input_player${P_INDEX}_r_y_plus_axis"
 	)
 
   echo "DEVICE_GUID=${DEVICE_GUID}"
@@ -122,15 +160,15 @@ set_pad() {
         lefttrigger|righttrigger)
           if [[ "${BTN_TYPE}" == "a" ]]; then
             VAL=${BUTTON_VAL}
-            GC_INDEX="${GC_RA_AXIS[${BUTTON_INDEX},a]}"
+            GC_INDEX="${GC_RA_BUTTONS[${BUTTON_INDEX},a]}"
 						sed -i "s/${GC_INDEX}.*/${GC_INDEX} = \"+${VAL}\"/" ${CONFIG}
           fi
           ;;
         leftx|lefty|rightx|righty)
 					VAL=${BUTTON_VAL}
-          GC_INDEX="${GC_RA_AXIS[${BUTTON_INDEX},0]}"
+          GC_INDEX="${GC_RA_BUTTONS[${BUTTON_INDEX},0]}"
 					sed -i "s/${GC_INDEX}.*/${GC_INDEX} = \"-${VAL}\"/" ${CONFIG}
-          GC_INDEX="${GC_RA_AXIS[${BUTTON_INDEX},1]}"
+          GC_INDEX="${GC_RA_BUTTONS[${BUTTON_INDEX},1]}"
 					sed -i "s/${GC_INDEX}.*/${GC_INDEX} = \"+${VAL}\"/" ${CONFIG}
           ;;
       esac
