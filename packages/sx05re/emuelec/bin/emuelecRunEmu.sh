@@ -122,7 +122,7 @@ export PATH
 fi
 
 # Ports that use this file are all Libretro, so lets set it
-[[ ${PLATFORM} = "ports" ]] && ="yes"
+[[ ${PLATFORM} = "ports" ]] && LIBRETRO="yes"
 
 # if there wasn't a --NOLOG included in the arguments, enable the emulator log output. TODO: this should be handled in ES menu
 if [[ ${arguments} != *"--NOLOG"* ]]; then
