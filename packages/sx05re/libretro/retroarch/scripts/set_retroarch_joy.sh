@@ -58,7 +58,7 @@ set_pad() {
   local DEVICE_GUID=${3}
   local JOY_NAME="${4}"
 
-	[[ "${P_INDEX}" == "1" ]] && return
+#	[[ "${P_INDEX}" == "1" ]] && return
 
 	declare -A GC_RA_BUTTONS=(
 	  [dpleft]="input_player${P_INDEX}_left_btn"
