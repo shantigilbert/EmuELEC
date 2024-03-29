@@ -122,7 +122,7 @@ export PATH
 fi
 
 # Ports that use this file are all Libretro, so lets set it
-[[ ${PLATFORM} = "ports" ]] && LIBRETRO="yes"
+[[ ${PLATFORM} = "ports" ]] && ="yes"
 
 # if there wasn't a --NOLOG included in the arguments, enable the emulator log output. TODO: this should be handled in ES menu
 if [[ ${arguments} != *"--NOLOG"* ]]; then
@@ -324,6 +324,11 @@ case ${PLATFORM} in
 	esac
 elif [ ${LIBRETRO} == "yes" ]; then
 # We are running a Libretro emulator set all the settings that we chose on ES
+
+AUTOGP=$(get_ee_setting retroarch_auto_gamepad)
+if [[ "${AUTOGP}" != "0" ]]; then
+	set_retroarch_joy.sh
+fi
 
 if [[ ${PLATFORM} == "ports" ]]; then
 	PORTCORE="${arguments##*-C}"  # read from -C onwards
