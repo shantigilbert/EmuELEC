@@ -216,7 +216,7 @@ fi
 
   mkdir -p ${INSTALL}/usr/config/retroarch/
   mv ${INSTALL}/etc/retroarch.cfg ${INSTALL}/usr/config/retroarch/
-  
+  cp -rf ${PKG_DIR}/scripts/set_retroarch_joy.sh ${INSTALL}/usr/bin
 }
 
 post_install() {  
