@@ -3,7 +3,7 @@
 # Copyright (C) 2024-present EmuELEC (https://github.com/EmuELEC)
 
 PKG_NAME="zmusic"
-PKG_VERSION="5ce525efc75a97d1391b46cca4def41a13ff1619"
+PKG_VERSION="7476a189755d2665b24a58182640752b82b3a66d"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/ZDoom/ZMusic"
 PKG_URL="${PKG_SITE}.git"
