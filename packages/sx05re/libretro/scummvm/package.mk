@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="scummvm"
-PKG_VERSION="6118a0d92907ae68c38d444a680aa4a1610099c8"
+PKG_VERSION="ce9974133edc270fa92d55465b7551505cc2ef51"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/scummvm"
@@ -43,4 +43,6 @@ make_target() {
 makeinstall_target() {
   mkdir -p ${INSTALL}/usr/lib/libretro
   cp "${PKG_BUILD}/backends/platform/libretro/scummvm_libretro."{so,info} ${INSTALL}/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/config/emuelec/configs/scummvm
+  cp ${PKG_BUILD}/backends/platform/libretro/scummvm.zip ${INSTALL}/usr/config/emuelec/configs/scummvm
 }

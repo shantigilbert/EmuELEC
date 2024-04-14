@@ -2,7 +2,7 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="soniccd"
-PKG_VERSION="c8bb7574ed4d2e732e0358e7e715d3daf609de2f"
+PKG_VERSION="7a23c39b9e4132640b32b15bb7c43f22a7188bab"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/Rubberduckycooly/Sonic-CD-11-Decompilation"
 PKG_URL="${PKG_SITE}.git"
