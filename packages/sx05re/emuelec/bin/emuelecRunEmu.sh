@@ -20,15 +20,15 @@ fi
 BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 
 if [[ "${BTENABLED}" == "1" ]]; then
-	# We don't need the BT agent while running games
+        # We don't need the BT agent while running games
     systemctl stop bluetooth-agent
 fi
 
 # clear terminal window
-	clear > /dev/tty < /dev/null 2>&1
-	clear > /dev/tty0 < /dev/null 2>&1
-	clear > /dev/tty1 < /dev/null 2>&1
-	clear > /dev/console < /dev/null 2>&1
+        clear > /dev/tty < /dev/null 2>&1
+        clear > /dev/tty0 < /dev/null 2>&1
+        clear > /dev/tty1 < /dev/null 2>&1
+        clear > /dev/console < /dev/null 2>&1
 
 arguments="$@"
 
@@ -52,7 +52,7 @@ if [[ ! -d "${LOGSDIR}" ]]; then
     mkdir -p "${LOGSDIR}"
 fi
 
-if [ "$(get_es_setting string LogLevel)" == "minimal" ]; then 
+if [ "$(get_es_setting string LogLevel)" == "minimal" ]; then
     EMUELECLOG="/dev/null"
     cat /etc/motd > "${LOGSDIR}/emuelec.log"
     echo "Logging has been dissabled, enable it in Main Menu > System Settings > Developer > Log Level" >> "${LOGSDIR}/emuelec.log"
@@ -61,7 +61,7 @@ else
 fi
 
 set_kill_keys() {
-    # If gptokeyb is running we kill it first. 
+    # If gptokeyb is running we kill it first.
     kill_video_controls
     KILLTHIS=${1}
     KILLSIGNAL=${2}
@@ -98,13 +98,13 @@ if [[ "${EMULATOR}" = "libretro" ]]; then
     LIBRETRO="yes"
     RETRORUN=""
 else
-	EMU="${CORE}"
+        EMU="${CORE}"
 fi
 
 if [[ "${EMULATOR}" = "retrorun" ]]; then
-		RR_EXE="retrorun"
-		[[ "${BIT32}" == "yes" ]] && RR_EXE="retrorun32"
-		set_kill_keys "${RR_EXE}"
+                RR_EXE="retrorun"
+                [[ "${BIT32}" == "yes" ]] && RR_EXE="retrorun32"
+                set_kill_keys "${RR_EXE}"
     EMU="${CORE}_libretro"
     RETRORUN="yes"
     LIBRETRO=""
@@ -147,188 +147,188 @@ VIRTUAL_KB=
 
 # Read the first argument in order to set the right emulator
 case ${PLATFORM} in
-	"atari2600")
-		if [ "${EMU}" = "STELLASA" ]; then
+        "atari2600")
+                if [ "${EMU}" = "STELLASA" ]; then
             set_kill_keys "stella"
             RUNTHIS='${TBASH} stella.sh "${ROMNAME}"'
-		fi
-		;;
-	"atarist")
-		if [ "${EMU}" = "HATARISA" ]; then
+                fi
+                ;;
+        "atarist")
+                if [ "${EMU}" = "HATARISA" ]; then
             set_kill_keys "hatari"
             RUNTHIS='${TBASH} hatari.start "${ROMNAME}"'
-		fi
-		;;
-	"openbor")
-		VIRTUAL_KB=$(emuelec-utils set_gptokeyb "${PLATFORM}" "${GPTOKEYB}")
-		set_kill_keys "${EMU}"
-		RUNTHIS='${TBASH} openbor.sh "${ROMNAME}" "${EMU}"'
-		;;
-	"setup")
-        if [ "${EE_DEVICE}" == "OdroidGoAdvance" ] || [ "${EE_DEVICE}" == "GameForce" ]; then 
-            set_kill_keys "kmscon" 
+                fi
+                ;;
+        "openbor")
+                VIRTUAL_KB=$(emuelec-utils set_gptokeyb "${PLATFORM}" "${GPTOKEYB}")
+                set_kill_keys "${EMU}"
+                RUNTHIS='${TBASH} openbor.sh "${ROMNAME}" "${EMU}"'
+                ;;
+        "setup")
+        if [ "${EE_DEVICE}" == "OdroidGoAdvance" ] || [ "${EE_DEVICE}" == "GameForce" ]; then
+            set_kill_keys "kmscon"
         else
             set_kill_keys "fbterm"
         fi
-		RUNTHIS='${TBASH} fbterm.sh "${ROMNAME}"'
-		EMUELECLOG="${LOGSDIR}/ee_script.log"
-		;;
-	"dreamcast"|"naomi"|"atomiswave")
-		if [ "${EMU}" = "flycastsa" ]; then
+                RUNTHIS='${TBASH} fbterm.sh "${ROMNAME}"'
+                EMUELECLOG="${LOGSDIR}/ee_script.log"
+                ;;
+        "dreamcast"|"naomi"|"atomiswave")
+                if [ "${EMU}" = "flycastsa" ]; then
             set_kill_keys "flycast"
             RUNTHIS='${TBASH} flycast.sh "${ROMNAME}"'
         fi
-		;;
-	"psx")
-		if [ "${EMU}" = "duckstation" ]; then
+                ;;
+        "psx")
+                if [ "${EMU}" = "duckstation" ]; then
             set_kill_keys "duckstation-nogui"
             RUNTHIS='${TBASH} duckstation.sh "${ROMNAME}"'
         fi
-		;;
-	"mame"|"arcade"|"cps1"|"cps2"|"cps3")
-		if [ "${EMU}" = "AdvanceMame" ]; then
+                ;;
+        "mame"|"arcade"|"cps1"|"cps2"|"cps3")
+                if [ "${EMU}" = "AdvanceMame" ]; then
             set_kill_keys "advmame" 3
             RUNTHIS='${TBASH} advmame.sh "${PLATFORM}" "${ROMNAME}"'
-		elif [ "${EMU}" = "FbneoSA" ]; then
+                elif [ "${EMU}" = "FbneoSA" ]; then
             set_kill_keys "fbneo"
             RUNTHIS='fbneo.sh "${ROMNAME}"'
-		fi
-		;;
-	"fbn"|"neogeo")
+                fi
+                ;;
+        "fbn"|"neogeo")
         if [ "${EMU}" = "FbneoSA" ]; then
             set_kill_keys "fbneo"
             RUNTHIS='fbneo.sh "${ROMNAME}"'
-		fi
-		;;
-	"nds")
-		set_kill_keys "drastic"
-		RUNTHIS='${TBASH} /storage/.emulationstation/scripts/drastic.sh "${ROMNAME}"'
-		;;
-	"n64")
-		if [ "${EMU}" = "rice" ]; then
+                fi
+                ;;
+        "nds")
+                set_kill_keys "drastic"
+                RUNTHIS='${TBASH} /storage/.emulationstation/scripts/drastic.sh "${ROMNAME}"'
+                ;;
+        "n64")
+                if [ "${EMU}" = "rice" ]; then
             set_kill_keys "mupen64plus"
             RUNTHIS='${TBASH} m64p.sh "${ROMNAME}"'
-		elif [ "${EMU}" = "glide64mk2" ]; then
+                elif [ "${EMU}" = "glide64mk2" ]; then
             set_kill_keys "mupen64plus"
             RUNTHIS='${TBASH} m64p.sh "${ROMNAME}" m64p_gl64mk2'
         fi
-		;;
-	"amiga"|"amigacd32")
-		if [ "${EMU}" = "AMIBERRY" ]; then
+                ;;
+        "amiga"|"amigacd32")
+                if [ "${EMU}" = "AMIBERRY" ]; then
             RUNTHIS='${TBASH} amiberry.start "${ROMNAME}"'
-		fi
-		;;
-	"scummvm")
-		if [[ "${ROMNAME}" == *".sh" ]]; then
+                fi
+                ;;
+        "scummvm")
+                if [[ "${ROMNAME}" == *".sh" ]]; then
             set_kill_keys "fbterm"
             RUNTHIS='${TBASH} fbterm.sh "${ROMNAME}"'
             EMUELECLOG="${LOGSDIR}/ee_script.log"
-		else
-		if [ "${EMU}" = "SCUMMVMSA" ]; then
+                else
+                if [ "${EMU}" = "SCUMMVMSA" ]; then
             set_kill_keys "scummvm"
             RUNTHIS='${TBASH} scummvm.start sa "${ROMNAME}"'
-		else
+                else
             RUNTHIS='${TBASH} scummvm.start libretro'
-		fi
-		fi
-		;;
-	"solarus")
-		set_kill_keys "solarus-run"
-		RUNTHIS='${TBASH} solarus.sh "${ROMNAME}"'
-			;;
-	"daphne")
-		if [ "${EMU}" = "HYPSEUS" ]; then
+                fi
+                fi
+                ;;
+        "solarus")
+                set_kill_keys "solarus-run"
+                RUNTHIS='${TBASH} solarus.sh "${ROMNAME}"'
+                        ;;
+        "daphne")
+                if [ "${EMU}" = "HYPSEUS" ]; then
             set_kill_keys "hypseus"
             RUNTHIS='${TBASH} hypseus.start.sh "${ROMNAME}"'
-		fi
-		;;
-	"wii"|"gamecube")
-		if [ "${EMU}" = "dolphin" ]; then
+                fi
+                ;;
+        "wii"|"gamecube")
+                if [ "${EMU}" = "dolphin" ]; then
             set_kill_keys "dolphin-emu-nogui"
             RUNTHIS='${TBASH} dolphin.sh "${ROMNAME}"'
-		fi
-		;;
-	"pc")
-		if [ "${EMU}" = "DOSBOXSDL2" ]; then
+                fi
+                ;;
+        "pc")
+                if [ "${EMU}" = "DOSBOXSDL2" ]; then
             set_kill_keys "dosbox"
             RUNTHIS='${TBASH} dosbox.start "${ROMNAME}"'
             #RUNTHIS='${TBASH} dosbox.start -conf "${GAMEFOLDER}dosbox-SDL2.conf"'
-		fi
-		if [ "${EMU}" = "DOSBOX-X" ]; then
+                fi
+                if [ "${EMU}" = "DOSBOX-X" ]; then
             set_kill_keys "dosbox-x"
             RUNTHIS='${TBASH} dosbox-x.start "${ROMNAME}"'
             #RUNTHIS='${TBASH} dosbox-x.start -conf "${GAMEFOLDER}dosbox-SDL2.conf"'
-		fi
-		;;		
-	"psp"|"pspminis")
-		if [ "${EMU}" = "PPSSPPSDL" ]; then
+                fi
+                ;;
+        "psp"|"pspminis")
+                if [ "${EMU}" = "PPSSPPSDL" ]; then
             set_kill_keys "PPSSPPSDL"
             RUNTHIS='${TBASH} ppsspp.sh "${ROMNAME}"'
-		fi
-		;;
-	"neocd")
-		if [ "${EMU}" = "fbneo" ]; then
+                fi
+                ;;
+        "neocd")
+                if [ "${EMU}" = "fbneo" ]; then
             RUNTHIS='${RABIN} ${VERBOSE} -L /tmp/cores/fbneo_libretro.so --subsystem neocd --config ${RACONF} "${ROMNAME}"'
-		elif [ "${EMU}" = "FbneoSA" ]; then
+                elif [ "${EMU}" = "FbneoSA" ]; then
             set_kill_keys "fbneo"
             RUNTHIS='fbneo.sh "${ROMNAME}" NCD'
-		fi
-		;;
-	"mplayer")
-		set_kill_keys "${EMU}"
-		RUNTHIS='${TBASH} fbterm.sh mplayer_video "${ROMNAME}" "${EMU}"'
-		;;
-	"pico8")
-		set_kill_keys "pico8_dyn"
-		RUNTHIS='${TBASH} pico8.sh "${ROMNAME}"'
-			;;
-	"prboom")
+                fi
+                ;;
+        "mplayer")
+                set_kill_keys "${EMU}"
+                RUNTHIS='${TBASH} fbterm.sh mplayer_video "${ROMNAME}" "${EMU}"'
+                ;;
+        "pico8")
+                set_kill_keys "pico8_dyn"
+                RUNTHIS='${TBASH} pico8.sh "${ROMNAME}"'
+                        ;;
+        "prboom")
         if [ "${EMU}" = "Chocolate-Doom" ]; then
             set_kill_keys "chocolate-doom"
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
             RUNTHIS='${TBASH} chocodoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
         elif [ "${EMU}" = "LZDoom" ]; then
-	    set_kill_keys "lzdoom"
+            set_kill_keys "lzdoom"
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
             RUNTHIS='${TBASH} lzdoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
-	elif [ "${EMU}" = "GZDoom" ]; then
+        elif [ "${EMU}" = "GZDoom" ]; then
             set_kill_keys "gzdoom"
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
             RUNTHIS='${TBASH} gzdoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
         fi
         ;;
-	"ecwolf")
+        "ecwolf")
         if [ "${EMU}" = "ecwolf" ]; then
             set_kill_keys "ecwolf"
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
             RUNTHIS='${TBASH} ecwolf.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
         fi
         ;;
-	"gmloader")
+        "gmloader")
             set_kill_keys "gmloader"
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
             RUNTHIS='${TBASH} gmloader.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
         ;;
-	"intellivision")
+        "intellivision")
         if [ "${EMU}" = "jzintv" ]; then
             set_kill_keys "jzintv"
             RUNTHIS='jzintv.sh "${ROMNAME}"'
         fi
         ;;
-	"saturn")
+        "saturn")
         if [ "${EMU}" = "yabasanshiroSA" ]; then
             set_kill_keys "yabasanshiro"
             RUNTHIS='yabasanshiro.sh "${ROMNAME}"'
         fi
         ;;
-	esac
+        esac
 elif [ ${LIBRETRO} == "yes" ]; then
 # We are running a Libretro emulator set all the settings that we chose on ES
 
 if [[ ${PLATFORM} == "ports" ]]; then
-	PORTCORE="${arguments##*-C}"  # read from -C onwards
-	EMU="${PORTCORE%% *}_libretro"  # until a space is found
-	PORTSCRIPT="${arguments##*-SC}"  # read from -SC onwards
+        PORTCORE="${arguments##*-C}"  # read from -C onwards
+        EMU="${PORTCORE%% *}_libretro"  # until a space is found
+        PORTSCRIPT="${arguments##*-SC}"  # read from -SC onwards
     ROMNAME_SHADER=${PORTSCRIPT}
 else
     ROMNAME_SHADER=${ROMNAME}
@@ -339,26 +339,33 @@ CONTROLLERCONFIG="${arguments#*--controllers=*}"
 
 case ${PLATFORM} in
 "fmtmarty")
-		if [ "$EMU" = "multiemu_libretro" ]; then
+                if [ "$EMU" = "multiemu_libretro" ]; then
             set_kill_keys "multiemu_libretro"
             RUNTHIS='${TBASH} multiemu.sh && ${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
-		fi
-		;;
+                fi
+                ;;
 "pgm2")
-		if [ "$EMU" = "multiemu_libretro" ]; then
+                if [ "$EMU" = "multiemu_libretro" ]; then
             set_kill_keys "multiemu_libretro"
             RUNTHIS='${TBASH} multiemu.sh && ${RABIN} $VERBOSE -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
-		fi
-		;;
+                fi
+                ;;
 esac
 
-if [[ "${arguments}" == *"-state_slot"* ]] && [[ "${arguments}" == *"-autosave"* ]]; then
-    CONTROLLERCONFIG="${CONTROLLERCONFIG%% -state_slot*}"  # until -state is found
-    SNAPSHOT="${arguments#*-state_slot *}" # -state_slot x -autosave 1
-    SNAPSHOT="${SNAPSHOT%% -*}"  # we don't need -autosave 1 we asume its always 1 if a state is loaded
+if [[ "${arguments}" == *"-state_slot"* ]]; then
+    CONTROLLERCONFIG="${CONTROLLERCONFIG%% -state_slot*}"  # until -state_slot is found
+    SNAPSHOT="${arguments#*-state_slot *}" # -state_slot x ...
+    SNAPSHOT="${SNAPSHOT%% -*}"  # we only need the state_slot
 else
-    CONTROLLERCONFIG="${CONTROLLERCONFIG%% --*}"  # until a -- is found
-    SNAPSHOT=""
+   SNAPSHOT=""
+fi
+
+if [[ "${arguments}" == *"-autosave"* ]]; then
+    CONTROLLERCONFIG="${CONTROLLERCONFIG%% -autosave*}"  # until -autosave is found
+    AUTOSAVE="${arguments#*-autosave *}" # -autosave x ...
+    AUTOSAVE="${AUTOSAVE%% -*}" # we only need autosave
+else
+    AUTOSAVE="0"
 fi
 
 CORE=${EMU%%_*}
@@ -407,7 +414,7 @@ if [[ ${NETPLAY} != "No" ]]; then
 fi
 # End netplay
 
-SHADERSET=$(setsettings.sh "${PLATFORM}" "${ROMNAME_SHADER}" "${CORE}" --controllers="${CONTROLLERCONFIG}" --snapshot="${SNAPSHOT}")
+SHADERSET=$(setsettings.sh "${PLATFORM}" "${ROMNAME_SHADER}" "${CORE}" --controllers="${CONTROLLERCONFIG}" --autosave="${AUTOSAVE}" --snapshot="${SNAPSHOT}")
 #echo ${SHADERSET} # Only needed for debug
 
 if [[ ${SHADERSET} != 0 ]]; then
@@ -429,17 +436,17 @@ fi
 else # Retrorun was selected
 # Retrotun does not support settings
     RUNTHIS="retrorun"
-    if [ "${BIT32}" == "yes" ]; then 
+    if [ "${BIT32}" == "yes" ]; then
         RUNTHIS+="32"
     fi
 
-		if [[ "$EE_DEVICE" == "GameForce" ]]; then
-			JOY_FILE="/dev/input/by-path/platform-gameforce-gamepad-event-joystick"
-			if [[ -f "${JOY_FILE}" ]]; then
-				ln -s /dev/input/event2 ${JOY_FILE}
-			fi
-			GPIO_JOYPAD="-g"
-		fi
+                if [[ "$EE_DEVICE" == "GameForce" ]]; then
+                        JOY_FILE="/dev/input/by-path/platform-gameforce-gamepad-event-joystick"
+                        if [[ -f "${JOY_FILE}" ]]; then
+                                ln -s /dev/input/event2 ${JOY_FILE}
+                        fi
+                        GPIO_JOYPAD="-g"
+                fi
 
     RUNTHIS+=' --triggers -n ${GPIO_JOYPAD} -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
 
@@ -457,12 +464,12 @@ if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do al
     echo "ROM NAME: ${ROMNAME}" >> ${EMUELECLOG}
     echo "BASE ROM NAME: ${ROMNAME##*/}" >> ${EMUELECLOG}
     echo "USING CONFIG: ${RACONF}" >> ${EMUELECLOG}
-    echo "1st Argument: ${1}" >> ${EMUELECLOG} 
+    echo "1st Argument: ${1}" >> ${EMUELECLOG}
     echo "2nd Argument: ${2}" >> ${EMUELECLOG}
-    echo "3rd Argument: ${3}" >> ${EMUELECLOG} 
-    echo "4th Argument: ${4}" >> ${EMUELECLOG} 
-    echo "Full arguments: ${arguments}" >> ${EMUELECLOG} 
-    echo "Run Command is:" >> ${EMUELECLOG} 
+    echo "3rd Argument: ${3}" >> ${EMUELECLOG}
+    echo "4th Argument: ${4}" >> ${EMUELECLOG}
+    echo "Full arguments: ${arguments}" >> ${EMUELECLOG}
+    echo "Run Command is:" >> ${EMUELECLOG}
     eval echo ${RUNTHIS} >> ${EMUELECLOG}
 fi
 
@@ -484,10 +491,10 @@ fi
 #blank_buffer
 
 # clear terminal window
-	reset > /dev/tty < /dev/null 2>&1
-	reset > /dev/tty0 < /dev/null 2>&1
-	reset > /dev/tty1 < /dev/null 2>&1
-	reset > /dev/console < /dev/null 2>&1
+        reset > /dev/tty < /dev/null 2>&1
+        reset > /dev/tty0 < /dev/null 2>&1
+        reset > /dev/tty1 < /dev/null 2>&1
+        reset > /dev/console < /dev/null 2>&1
 
 emuelec-utils end_app_video
 
@@ -498,7 +505,7 @@ kill_video_controls
 
 # Just for good measure lets make a symlink to Retroarch logs if it exists
 if [[ -f "/storage/.config/retroarch/retroarch.log" ]] && [[ ! -e "${LOGSDIR}/retroarch.log" ]]; then
-	ln -sf /storage/.config/retroarch/retroarch.log ${LOGSDIR}/retroarch.log
+        ln -sf /storage/.config/retroarch/retroarch.log ${LOGSDIR}/retroarch.log
 fi
 
 #{log_addon}#
@@ -507,7 +514,7 @@ fi
 set_audio default
 
 if [[ "${BTENABLED}" == "1" ]]; then
-	# Restart the bluetooth agent
+        # Restart the bluetooth agent
     systemctl start bluetooth-agent
 fi
 
@@ -557,7 +564,7 @@ if [[ "${ret_error}" != "0" ]]; then
     # Check for missing bios if needed
     REQUIRESBIOS=(atari5200 atari800 atari7800 atarilynx colecovision amiga amigacd32 o2em intellivision pcengine pcenginecd pcfx fds segacd saturn dreamcast naomi atomiswave x68000 neogeo neogeocd msx msx2 sc-3000)
 
-    (for e in "${REQUIRESBIOS[@]}"; do [[ "${e}" == "${PLATFORM}" ]] && exit 0; done) && RB=0 || RB=1	
+    (for e in "${REQUIRESBIOS[@]}"; do [[ "${e}" == "${PLATFORM}" ]] && exit 0; done) && RB=0 || RB=1
         if [ ${RB} == 0 ]; then
             CBPLATFORM="${PLATFORM}"
             [[ "${CBPLATFORM}" == "msx2" ]] && CBPLATFORM="msx"
