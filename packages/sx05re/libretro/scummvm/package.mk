@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="scummvm"
-PKG_VERSION="ce9974133edc270fa92d55465b7551505cc2ef51"
+PKG_VERSION="8ce898dcc55e56b75b12ba2a5023bb062e918198"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/scummvm"
