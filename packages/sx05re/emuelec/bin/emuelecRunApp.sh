@@ -19,9 +19,6 @@ GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
 emuelec-utils init_app_video "${PLATFORM}" "${ROMNAME}"
 
-RUN_CMD="$1"
-shift
-
-"$RUN_CMD" "$@"
+"$@"
 
 emuelec-utils end_app_video
