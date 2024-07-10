@@ -14,8 +14,6 @@ PLATFORM="${arguments##*-P}"  # read from -P onwards
 PLATFORM="${PLATFORM%% *}"  # until a space is found
 
 ROMNAME="${1}"
-BASEROMNAME=${ROMNAME##*/}
-GAMEFOLDER="${ROMNAME//${BASEROMNAME}}"
 
 emuelec-utils init_app_video "${PLATFORM}" "${ROMNAME}"
 
