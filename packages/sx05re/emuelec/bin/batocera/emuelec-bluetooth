@@ -1,4 +1,4 @@
-​#!/usr/bin/python -u
+#!/usr/bin/python -u
 
 ################################################################################
 # SPDX-License-Identifier: GPL-2.0-or-later
@@ -322,12 +322,16 @@ def safe_exit():
     stop_agent()
     sys.exit(0)
 
+def exit_handler(signum, frame):
+    safe_exit()
+
+
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         SCAN_TIME = int(sys.argv[1])
 
-    signal.signal(signal.SIGINT, safe_exit)
-    signal.signal(signal.SIGTERM, safe_exit)
+    signal.signal(signal.SIGINT, exit_handler)
+    signal.signal(signal.SIGTERM, exit_handler)
 
     print("running scan for " + str(SCAN_TIME) + " seconds.")
     bt = BluetoothCTL()
@@ -370,4 +374,3 @@ if __name__ == "__main__":
             bt.scan_stop()
 
         time.sleep(UPDATE_INTERVAL)
-
