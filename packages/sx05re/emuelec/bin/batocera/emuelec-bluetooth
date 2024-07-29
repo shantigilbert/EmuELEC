@@ -149,7 +149,7 @@ class BluetoothCTL:
         ShellIO.execute(["bluetoothctl", "--timeout", str(timeout), "scan", "on"])
 
     def scan_async(self, timeout=10):
-        run_agent
+        run_agent()
         # using stdbuf to flush buffer and get output immediately (bluetoothctl issue)
         cmd = (
             "stdbuf -oL bluetoothctl --timeout " + str(timeout) + " scan on"
@@ -311,7 +311,7 @@ BT_THREAD: Process = None
 # Run agent only when the scan occurs. If it runs when the scan is not occuring it can cause automatic connecting of devices.
 # when they haven't been properly trusted for bluetooth.
 def run_agent():
-        bt_agent = Popen(['emuelec-bluetooth-agent'])
+    bt_agent = Popen(['emuelec-bluetooth-agent'])
 
 def stop_agent():
     # We have to force kill process as it's run method is bugged and does not gracefully terminate.
