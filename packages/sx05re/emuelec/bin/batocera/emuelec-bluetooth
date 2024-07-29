@@ -1,4 +1,4 @@
-#!/usr/bin/python -u
+​#!/usr/bin/python -u
 
 ################################################################################
 # SPDX-License-Identifier: GPL-2.0-or-later
@@ -16,6 +16,7 @@ from dataclasses import dataclass
 import time
 import sys
 import os
+import signal
 from multiprocessing import Process
 
 DEBUG = False
@@ -148,6 +149,7 @@ class BluetoothCTL:
         ShellIO.execute(["bluetoothctl", "--timeout", str(timeout), "scan", "on"])
 
     def scan_async(self, timeout=10):
+        run_agent
         # using stdbuf to flush buffer and get output immediately (bluetoothctl issue)
         cmd = (
             "stdbuf -oL bluetoothctl --timeout " + str(timeout) + " scan on"
@@ -189,6 +191,7 @@ class BluetoothCTL:
 
     def scan_stop(self):
         ShellIO.execute_async(["pkill", "-f", "bluetoothctl"])
+        stop_agent()
 
     @property
     def scanning(self) -> bool:
@@ -305,20 +308,37 @@ UPDATE_INTERVAL = 1
 BEEN_IN_GAME = False
 BT_THREAD: Process = None
 
+# Run agent only when the scan occurs. If it runs when the scan is not occuring it can cause automatic connecting of devices.
+# when they haven't been properly trusted for bluetooth.
+def run_agent():
+        bt_agent = Popen(['emuelec-bluetooth-agent'])
+
+def stop_agent():
+    # We have to force kill process as it's run method is bugged and does not gracefully terminate.
+    ShellIO.execute_async(["pkill", "-9", "-f", "emuelec-bluetooth-agent"])
+
+def safe_exit():
+    ShellIO.execute_async(["pkill", "-f", "bluetoothctl"])
+    stop_agent()
+    sys.exit(0)
+
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         SCAN_TIME = int(sys.argv[1])
+
+    signal.signal(signal.SIGINT, safe_exit)
+    signal.signal(signal.SIGTERM, safe_exit)
 
     print("running scan for " + str(SCAN_TIME) + " seconds.")
     bt = BluetoothCTL()
 
     if is_bluetooth_running():
         print("bluetooth is already running, exiting.")
-        exit()
+        safe_exit()
 
     if len(bt.controllers) == 0:
         print("no controller found, exiting.")
-        exit()
+        safe_exit()
 
     bt.power = True
     bt.agent = True
@@ -328,11 +348,8 @@ if __name__ == "__main__":
     start_time = time.perf_counter()
     while True:
         diff_time = time.perf_counter() - start_time
-#        if SCAN_TIME >= 0:
-#            if ELAPSED_TIME > SCAN_TIME:
-#        print(diff_time)
         if SCAN_TIME != -1 and diff_time > SCAN_TIME:
-                exit()
+                safe_exit()
 
         if not BEEN_IN_GAME:
             BEEN_IN_GAME = is_in_game()
@@ -353,4 +370,4 @@ if __name__ == "__main__":
             bt.scan_stop()
 
         time.sleep(UPDATE_INTERVAL)
-#        ELAPSED_TIME += UPDATE_INTERVAL
+
