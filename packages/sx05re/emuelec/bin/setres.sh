@@ -129,6 +129,12 @@ if [[ $# == 2 ]]; then
 	PLATFORM=${2}
 fi
 
+if [[ $# == 3 ]]; then
+	MODE=${1}
+	PLATFORM=${2}
+	ROMNAME=${3}
+fi
+
 FBW=0
 FBH=0
 
@@ -166,7 +172,7 @@ if [[ "${MODE}" == *"cvbs" ]]; then
   fi
 fi
 
-CUSTOM_RES=$(get_ee_setting ${ES_MODE}framebuffer.${MODE} ${PLATFORM})
+CUSTOM_RES=$(get_ee_setting ${ES_MODE}framebuffer.${MODE} "${PLATFORM}" "${ROMNAME}")
 #[[ -z "${CUSTOM_RES}" ]] && CUSTOM_RES=$(get_ee_setting ee_framebuffer.${MODE})
 if [[ ! -z "${CUSTOM_RES}" ]]; then
   declare -a RES=($(echo "${CUSTOM_RES}"))
@@ -214,7 +220,7 @@ if [[ -f "/storage/.config/${MODE}_offsets" ]]; then
   CUSTOM_OFFSETS=( $( cat "/storage/.config/${MODE}_offsets" ) )
 fi
 
-OFFSET_SETTING="$(get_ee_setting ${ES_MODE}framebuffer_border.${MODE} ${PLATFORM})"
+OFFSET_SETTING=$(get_ee_setting ${ES_MODE}framebuffer_border.${MODE} "${PLATFORM}" "${ROMNAME}")
 #[[ -z "${OFFSET_SETTING}" ]] && OFFSET_SETTING="$(get_ee_setting ${MODE}.ee_offsets)"
 if [[ ! -z "${OFFSET_SETTING}" ]]; then
   CUSTOM_OFFSETS=( ${OFFSET_SETTING} )
