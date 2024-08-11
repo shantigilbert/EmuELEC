@@ -482,6 +482,11 @@ fi
 
 gptokeyb 1 ${KILLTHIS} ${VIRTUAL_KB} -killsignal ${KILLSIGNAL} &
 
+# Kill MIDI Processes
+pkill -9 timidity
+pkill -9 mt32d
+pkill -9 fluidsynth
+
 [[ "${CLOUD_SYNC}" == "1" ]] && wait ${CLOUD_PID}
 
 # Execute the command and try to output the results to the log file if it was not disabled.
