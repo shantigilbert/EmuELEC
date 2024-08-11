@@ -20,7 +20,7 @@ function set_midi_source()
   case $midi_source in
     fluidsynth)
       fluidsynth -is /storage/roms/bios/sc/SC-55.sf2
-      MIDI_OUTPUT=$(cat /proc/asound/seq/clients | grep "Port   0 : \"S") | cut -d'"' -f2)
+      MIDI_OUTPUT=$(cat /proc/asound/seq/clients | grep "Port   0 : \"S" | cut -d'"' -f2)
       ;;
     timidity)
       timidity -iA --module 1 &
