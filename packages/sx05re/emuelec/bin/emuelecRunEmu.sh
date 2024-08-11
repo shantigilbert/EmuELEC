@@ -97,6 +97,7 @@ if [[ "${EMULATOR}" = "libretro" ]]; then
     EMU="${CORE}_libretro"
     LIBRETRO="yes"
     RETRORUN=""
+		RETROARCH="yes"
 else
         EMU="${CORE}"
 fi
@@ -108,6 +109,16 @@ if [[ "${EMULATOR}" = "retrorun" ]]; then
     EMU="${CORE}_libretro"
     RETRORUN="yes"
     LIBRETRO=""
+		RETROARCH="yes"
+fi
+
+if [[ "${RETROARCH}" = "yes" ]]; then
+	MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${ROMNAME}")
+	if [[ ! -z "${MIDI_OUTPUT}" ]]; then
+		emuelec-utils set_midi_source "${MIDI_OUTPUT}"
+	else
+	  emuelec-utils set_midi_source "None"
+	fi
 fi
 
 # freej2me needs the JDK to be downloaded on the first run
@@ -334,13 +345,6 @@ else
     ROMNAME_SHADER=${ROMNAME}
 fi
 
-MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${ROMNAME}")
-if [[ ! -z "${MIDI_OUTPUT}" ]]; then
-	emuelec-utils set_midi_source "${MIDI_OUTPUT}"
-else
-  emuelec-utils set_midi_source "None"
-fi
-
 RUNTHIS='${RABIN} ${VERBOSE} -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
 CONTROLLERCONFIG="${arguments#*--controllers=*}"
 
@@ -482,11 +486,6 @@ fi
 
 gptokeyb 1 ${KILLTHIS} ${VIRTUAL_KB} -killsignal ${KILLSIGNAL} &
 
-# Kill MIDI Processes
-pkill -9 timidity
-pkill -9 mt32d
-pkill -9 fluidsynth
-
 [[ "${CLOUD_SYNC}" == "1" ]] && wait ${CLOUD_PID}
 
 # Execute the command and try to output the results to the log file if it was not disabled.
@@ -509,6 +508,9 @@ fi
         reset > /dev/console < /dev/null 2>&1
 
 emuelec-utils end_app_video
+
+# Kill MIDI Processes
+emuelec-utils killall_midi
 
 [[ "${CLOUD_SYNC}" == "1" ]] && ra_rclone.sh set "${PLATFORM}" "${ROMNAME}" &
 

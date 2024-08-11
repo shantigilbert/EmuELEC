@@ -6,14 +6,19 @@
 # Source predefined functions and variables
 . /etc/profile
 
+function killall_midi()
+{
+	pkill -9 timidity
+  pkill -9 mt32d
+  pkill -9 fluidsynth
+	
+}
 
 function set_midi_source()
 {
   local midi_source=$1
 
-  pkill -9 timidity
-  pkill -9 mt32d
-  pkill -9 fluidsynth
+  killall_midi
 
   local MIDI_OUTPUT=OFF
   
