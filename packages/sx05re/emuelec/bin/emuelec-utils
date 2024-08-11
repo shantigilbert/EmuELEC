@@ -6,6 +6,34 @@
 # Source predefined functions and variables
 . /etc/profile
 
+
+function set_midi_source()
+{
+  local midi_source=$1
+
+  pkill -9 timidity
+  pkill -9 mt32d
+  pkill -9 fluidsynth
+
+  local MIDI_OUTPUT=OFF
+  
+  case $midi_source in
+    fluidsynth)
+      fluidsynth -is /storage/roms/bios/sc/SC-55.sf2
+      MIDI_OUTPUT=$(cat /proc/asound/seq/clients | grep "Port   0 : \"S") | cut -d'"' -f2)
+      ;;
+    timidity)
+      timidity -iA --module 1 &
+      MIDI_OUTPUT=TiMidity port 0
+			;;
+    mt32d)
+      mt32d -o 1 -i 24 -f /roms/bios &
+      MIDI_OUTPUT=Standard
+			;;
+  esac
+  sed -ie "s|midi_output *= *\".*\"|midi_output = \"${MIDI_OUTPUT}\"|" ${RA_CONF}
+}
+
 function get_filenames_no_ext() {
 	local FN=($( ls -1 $1 | sed -e 's/\.[^.]*$//' ))
 	IFS=","

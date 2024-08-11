@@ -334,6 +334,11 @@ else
     ROMNAME_SHADER=${ROMNAME}
 fi
 
+MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${ROMNAME}")
+if [[ ! -z "${MIDI_OUTPUT}" ]]; then
+		emuelec-utils set_midi_source "${MIDI_OUTPUT}"
+fi
+
 RUNTHIS='${RABIN} ${VERBOSE} -L /tmp/cores/${EMU}.so --config ${RACONF} "${ROMNAME}"'
 CONTROLLERCONFIG="${arguments#*--controllers=*}"
 
