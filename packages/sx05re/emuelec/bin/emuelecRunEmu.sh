@@ -97,7 +97,6 @@ if [[ "${EMULATOR}" = "libretro" ]]; then
     EMU="${CORE}_libretro"
     LIBRETRO="yes"
     RETRORUN=""
-		LIBRETRO_BASED="yes"
 else
         EMU="${CORE}"
 fi
@@ -109,11 +108,10 @@ if [[ "${EMULATOR}" = "retrorun" ]]; then
     EMU="${CORE}_libretro"
     RETRORUN="yes"
     LIBRETRO=""
-		LIBRETRO_BASED="yes"
 fi
 
 MIDI_OUTPUT="$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${ROMNAME}")"
-if [[ ! -z "$MIDI_OUTPUT" ]] && [[ "${LIBRETRO_BASED}" == "yes" ]]; then
+if [[ ! -z "$MIDI_OUTPUT" ]]; then
 		emuelec-utils set_midi_source "${MIDI_OUTPUT}"
 fi
 
