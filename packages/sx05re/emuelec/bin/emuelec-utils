@@ -21,27 +21,27 @@ function set_midi_source()
 
   killall_midi
 
-  local MIDI_OUTPUT=OFF
+  local midi_output=OFF
   
-  case $midi_source in
+  case ${midi_source} in
     fluidsynth)
       fluidsynth -is /storage/roms/bios/sc/SC-55.sf2 &
       sleep 3
-      MIDI_OUTPUT=$(cat /proc/asound/seq/clients | grep "Port   0 : \"S" | cut -d'"' -f2)
-      [[ -z "${MIDI_OUTPUT}" ]] && MIDI_OUTPUT=OFF
+      midi_output=$(cat /proc/asound/seq/clients | grep "Port   0 : \"S" | cut -d'"' -f2)
+      [[ -z "${MIDI_OUTPUT}" ]] && midi_output=OFF
       ;;
     timidity)
       timidity -iA --module 1 &
-      MIDI_OUTPUT="TiMidity port 0"
+      midi_output="TiMidity port 0"
 			;;
     mt32d)
       mt32d -o 1 -i 24 -f /roms/bios &
-      MIDI_OUTPUT=Standard
+      midi_output=Standard
 			;;
   esac
 
   if [[ "${midi_config}" == "RETROARCH" ]]; then
-    sed -ie "s|midi_output *= *\".*\"|midi_output = \"${MIDI_OUTPUT}\"|" ${RA_CONF}
+    sed -ie "s|midi_output *= *\".*\"|midi_output = \"${midi_output}\"|" ${RA_CONF}
   fi
 }
 
