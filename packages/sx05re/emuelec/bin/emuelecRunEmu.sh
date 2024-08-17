@@ -112,13 +112,9 @@ if [[ "${EMULATOR}" = "retrorun" ]]; then
 		LIBRETRO_BASED="yes"
 fi
 
-if [[ "${LIBRETRO_BASED}" = "yes" ]]; then
-	MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${ROMNAME}")
-	if [[ ! -z "${MIDI_OUTPUT}" ]]; then
+MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${ROMNAME}")
+if [[ ! -z "$MIDI_OUTPUT" ]] && [[ "${LIBRETRO_BASED}" = "yes" ]]; then
 		emuelec-utils set_midi_source "${MIDI_OUTPUT}"
-	else
-	  emuelec-utils set_midi_source "None"
-	fi
 fi
 
 # freej2me needs the JDK to be downloaded on the first run
