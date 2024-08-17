@@ -21,6 +21,8 @@ function set_midi_source()
 
   killall_midi
 
+  [[ "${midi_config}" == "retrorun" ]] && return
+
   local midi_output=OFF
   
   case ${midi_source} in
@@ -40,7 +42,7 @@ function set_midi_source()
 			;;
   esac
 
-  if [[ "${midi_config}" == "RETROARCH" ]]; then
+  if [[ "${midi_config}" == "retroarch" ]]; then
     sed -ie "s|midi_output *= *\".*\"|midi_output = \"${midi_output}\"|" ${RA_CONF}
   fi
 }
