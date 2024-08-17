@@ -274,7 +274,7 @@ function midi_output() {
 		echo "mt32d"
 		return
 	fi
-	echo "timidity,mt32d,fluidsynth"
+	echo "fluidsynth,mt32d,timidity"
 }
 
 function resolutions() {
