@@ -266,6 +266,17 @@ function dimensions() {
 	echo "${DIMENSIONS[*]}"
 }
 
+function midi_output() {
+	local emulator=$1
+	local core=$2
+
+	if [[ "${emulator}" == "SCUMMVMSA" ]] || [[ "${core}" == "scummvm" ]];
+		echo "mt32d"
+		return
+	fi
+	echo "timidity,mt32d,fluidsynth"
+}
+
 function resolutions() {
 # Returns a list of supported resolutions depending on device
 	RESOLUTIONS=()
