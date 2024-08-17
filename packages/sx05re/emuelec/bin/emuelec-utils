@@ -17,6 +17,7 @@ function killall_midi()
 function set_midi_source()
 {
   local midi_source=$1
+  local midi_config=$2
 
   killall_midi
 
@@ -38,7 +39,10 @@ function set_midi_source()
       MIDI_OUTPUT=Standard
 			;;
   esac
-  sed -ie "s|midi_output *= *\".*\"|midi_output = \"${MIDI_OUTPUT}\"|" ${RA_CONF}
+
+  if [[ "${midi_config}" == "RETROARCH" ]]; then
+    sed -ie "s|midi_output *= *\".*\"|midi_output = \"${MIDI_OUTPUT}\"|" ${RA_CONF}
+  fi
 }
 
 function get_filenames_no_ext() {
