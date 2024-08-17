@@ -112,7 +112,7 @@ if [[ "${EMULATOR}" = "retrorun" ]]; then
 		LIBRETRO_BASED="yes"
 fi
 
-MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${ROMNAME}")
+MIDI_OUTPUT="$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${ROMNAME}")"
 if [[ ! -z "$MIDI_OUTPUT" ]] && [[ "${LIBRETRO_BASED}" == "yes" ]]; then
 		emuelec-utils set_midi_source "${MIDI_OUTPUT}"
 fi
