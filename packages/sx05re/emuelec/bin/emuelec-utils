@@ -406,6 +406,8 @@ function init_app_video() {
 
 	blank_buffer
 
+	[[ -f "/tmp/EE_LASTVIDEO" ]] && return
+
 	echo "$(cat /sys/class/display/mode)" > /tmp/EE_LASTVIDEO
 	local VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
 	[[ -z "$VIDEO_EMU" ]] && VIDEO_EMU=$LAST_VIDEO
@@ -421,11 +423,15 @@ function init_app_video() {
 function end_app_video() {
 	local LAST_VIDEO="$(cat /tmp/EE_LASTVIDEO)"
 
+	[[ ! -f "/tmp/EE_LASTVIDEO" ]] && return
+
 	# Return to default mode
 	${TBASH} setres.sh ${LAST_VIDEO}
 
 	# Show exit splash
 	${TBASH} show_splash.sh exit
+
+	rm /tmp/EE_LASTVIDEO
 }
 
 function set_gptokeyb() {
