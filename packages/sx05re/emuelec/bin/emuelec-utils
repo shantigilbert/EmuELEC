@@ -17,11 +17,11 @@ function killall_midi()
 function set_midi_source()
 {
   local midi_source=$1
-  local midi_config=$2
+  local midi_emulator=$2
 
   killall_midi
 
-  [[ "${midi_config}" == "retrorun" ]] && return
+  [[ "${midi_emulator}" == "retrorun" ]] && return
 
   local midi_output=OFF
   
@@ -42,7 +42,7 @@ function set_midi_source()
 			;;
   esac
 
-  if [[ "${midi_config}" == "retroarch" ]]; then
+  if [[ "${midi_emulator}" == "libretro" ]]; then
     sed -ie "s|midi_output *= *\".*\"|midi_output = \"${midi_output}\"|" ${RA_CONF}
   fi
 }
