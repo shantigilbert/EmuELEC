@@ -29,7 +29,7 @@ function set_midi_source()
     fluidsynth)
       fluidsynth -is /storage/roms/bios/sc/SC-55.sf2 &
       sleep 3
-      midi_output=$(cat /proc/asound/seq/clients | grep "Port   0 : \"S" | cut -d'"' -f2)
+      =$(cat /proc/asound/seq/clients | grep "Port   0 : \"S" | cut -d'"' -f2)
       [[ -z "${MIDI_OUTPUT}" ]] && midi_output=OFF
       ;;
     timidity)
@@ -270,7 +270,7 @@ function midi_output() {
 	local emulator=$1
 	local core=$2
 
-	if [[ "${emulator}" == "SCUMMVMSA" ]] || [[ "${core}" == "scummvm" ]];
+	if [[ "${emulator}" == "SCUMMVMSA" ]] || [[ "${core}" == "scummvm" ]]; then
 		echo "mt32d"
 		return
 	fi
