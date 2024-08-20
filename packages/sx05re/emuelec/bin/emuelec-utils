@@ -35,11 +35,15 @@ function set_midi_source()
       timidity -iA --module 1 &
       midi_output="TiMidity port 0"
 			;;
-    mt32d)
+    cm32l)
       mt32d -o 1 -i 24 -f /roms/bios &
       midi_output=Standard
+      ;;
+    mt32)
+      mt32d -o 2 -i 24 -f /roms/bios &
+      midi_output=Standard
 			;;
-  esac
+esac
 
   if [[ "${midi_emulator}" == "libretro" ]]; then
     sed -ie "s|midi_output *= *\".*\"|midi_output = \"${midi_output}\"|" ${RA_CONF}
@@ -270,10 +274,10 @@ function midi_output() {
 	local core=$2
 
 	if [[ "${emulator}" == "SCUMMVMSA" ]] || [[ "${core}" == "scummvm" ]]; then
-		echo "mt32d"
+		echo "mt32,cm32l"
 		return
 	fi
-	echo "fluidsynth,mt32d,timidity"
+	echo "fluidsynth,mt32,cm32l,timidity"
 }
 
 function resolutions() {
