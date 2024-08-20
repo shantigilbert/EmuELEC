@@ -110,7 +110,7 @@ if [[ "${EMULATOR}" = "retrorun" ]]; then
     LIBRETRO=""
 fi
 
-MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${ROMNAME##*/}")
+MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${BASEROMNAME}")
 if [[ ! -z "${MIDI_OUTPUT}" ]]; then
 		emuelec-utils set_midi_source "${MIDI_OUTPUT}" "${EMULATOR}"
 fi
@@ -147,7 +147,7 @@ echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
-GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
+GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${BASEROMNAME}")
 VIRTUAL_KB=
 
 # Read the first argument in order to set the right emulator
@@ -431,7 +431,7 @@ OGAOC=$(get_ee_setting ee_oga_oc)
 [ -z "${OGAOC}" ] && OGAOC="Off"
 
 if [[ "${OGAOC}" == "Off" ]]; then
-    if [ $(get_ee_setting "maxperf" "${PLATFORM}" "${ROMNAME##*/}") == "0" ]; then
+    if [ $(get_ee_setting "maxperf" "${PLATFORM}" "${BASEROMNAME}") == "0" ]; then
         normperf
     else
         maxperf
