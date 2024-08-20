@@ -110,7 +110,7 @@ if [[ "${EMULATOR}" = "retrorun" ]]; then
     LIBRETRO=""
 fi
 
-MIDI_OUTPUT="$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${ROMNAME}")"
+MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${ROMNAME##*/}")
 if [[ ! -z "${MIDI_OUTPUT}" ]]; then
 		emuelec-utils set_midi_source "${MIDI_OUTPUT}" "${EMULATOR}"
 fi
@@ -504,7 +504,7 @@ fi
 emuelec-utils end_app_video
 
 # Kill MIDI Processes
-emuelec-utils killall_midi
+emuelec-utils set_midi_source "None" "${EMULATOR}"
 
 [[ "${CLOUD_SYNC}" == "1" ]] && ra_rclone.sh set "${PLATFORM}" "${ROMNAME}" &
 
