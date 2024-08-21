@@ -51,10 +51,14 @@ declare -A ADVMAME_VALUES=(
   ["a0,2"]="stick,y,down"
   ["a1,1"]="stick,x,left"
   ["a1,2"]="stick,x,right"
-  ["a2,1"]="1,0,0"
-  ["a2,2"]="1,0,1"
-  ["a5,1"]="2,1,0"
-  ["a5,2"]="2,1,1"
+  ["a2,1"]="stick2,x,left"
+  ["a2,2"]="stick2,x,right"
+  ["a3,1"]="stick3,y,up"
+  ["a3,2"]="stick3,y,down"
+  ["a4,1"]="stick2,x,left"
+  ["a4,2"]="stick2,x,right"
+  ["a5,1"]="stick3,y,up"
+  ["a5,2"]="stick3,y,down"
 )
 
 declare GC_ORDER=(
@@ -280,7 +284,7 @@ local INVERT_AXIS=$(get_ee_setting "advmame_invert_axis")
   fi
 }
 
-ADVMAME_REGEX="<emulator.*name\=\"AdvanceMame\" +features\=.*[ ,\"]joybtnremap[ ,\"].*/>"
+ADVMAME_REGEX="<emulator.*name=\"AdvanceMame\" +features=.*[ ,\"]joybtnremap[ ,\"].*/>"
 ADVMAME_REMAP=$(cat "${ES_FEATURES}" | grep -E "${ADVMAME_REGEX}")
 [[ ! -z "${ADVMAME_REMAP}" ]] && BTN_CFG=$(get_button_cfg)
 echo "BTN_CFG=${BTN_CFG}"
