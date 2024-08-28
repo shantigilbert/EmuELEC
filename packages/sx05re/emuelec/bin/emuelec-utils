@@ -273,10 +273,6 @@ function midi_output() {
 	local emulator=$1
 	local core=$2
 
-	if [[ "${emulator}" == "SCUMMVMSA" ]] || [[ "${core}" == "scummvm" ]]; then
-		echo "mt32,cm32l"
-		return
-	fi
 	echo "fluidsynth,mt32,cm32l,timidity"
 }
 
