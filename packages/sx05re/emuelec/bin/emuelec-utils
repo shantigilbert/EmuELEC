@@ -6,6 +6,50 @@
 # Source predefined functions and variables
 . /etc/profile
 
+function killall_midi()
+{
+	pkill -9 timidity
+  pkill -9 mt32d
+  pkill -9 fluidsynth
+	
+}
+
+function set_midi_source()
+{
+  local midi_source=$1
+  local midi_emulator=$2
+
+  killall_midi
+
+  [[ "${midi_emulator}" == "retrorun" ]] && return
+
+  local midi_output=OFF
+  
+  case ${midi_source} in
+    fluidsynth)
+      fluidsynth -is /storage/roms/bios/sc/SC-55.sf2 &
+      sleep 6
+      midi_output=$(cat /proc/asound/seq/clients | grep "Port   0 : \"S" | cut -d'"' -f2)
+      ;;
+    timidity)
+      timidity -iA --module 1 &
+      midi_output="TiMidity port 0"
+			;;
+    cm32l)
+      mt32d -o 1 -i 24 -f /roms/bios &
+      midi_output=Standard
+      ;;
+    mt32)
+      mt32d -o 2 -i 24 -f /roms/bios &
+      midi_output=Standard
+			;;
+esac
+
+  if [[ "${midi_emulator}" == "libretro" ]]; then
+    sed -ie "s|midi_output *= *\".*\"|midi_output = \"${midi_output}\"|" ${RA_CONF}
+  fi
+}
+
 function get_filenames_no_ext() {
 	local FN=($( ls -1 $1 | sed -e 's/\.[^.]*$//' ))
 	IFS=","
@@ -223,6 +267,13 @@ function dimensions() {
 
 	IFS=","
 	echo "${DIMENSIONS[*]}"
+}
+
+function midi_output() {
+	local emulator=$1
+	local core=$2
+
+	echo "fluidsynth,mt32,cm32l,timidity"
 }
 
 function resolutions() {
