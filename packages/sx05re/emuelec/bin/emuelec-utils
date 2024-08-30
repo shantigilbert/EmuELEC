@@ -14,6 +14,18 @@ function killall_midi()
 	
 }
 
+function set_rotation()
+{
+  local rotate_output=$1
+  local emulator=$2
+
+  [[ "${midi_emulator}" == "retrorun" ]] && return
+
+  if [[ "${emulator}" == "libretro" ]]; then
+    sed -ie "s|video_rotation *= *\".*\"|video_rotation = \"${rotate_output}\"|" ${RA_CONF}
+  fi
+}
+
 function set_midi_source()
 {
   local midi_source=$1
@@ -267,6 +279,13 @@ function dimensions() {
 
 	IFS=","
 	echo "${DIMENSIONS[*]}"
+}
+
+function rotation_output() {
+	local emulator=$1
+	local core=$2
+
+	echo "90 Degrees,180 Degrees,270 Degrees"
 }
 
 function midi_output() {

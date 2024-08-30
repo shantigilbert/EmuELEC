@@ -110,6 +110,11 @@ if [[ "${EMULATOR}" = "retrorun" ]]; then
     LIBRETRO=""
 fi
 
+ROTATION_OUTPUT=$(get_ee_setting "rotation_output" "${PLATFORM}" "${BASEROMNAME}")
+if [[ ! -z "${ROTATION_OUTPUT}" ]]; then
+		emuelec-utils set_rotation "${ROTATION_OUTPUT}" "${EMULATOR}"
+fi
+
 MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${BASEROMNAME}")
 if [[ ! -z "${MIDI_OUTPUT}" ]]; then
 		emuelec-utils set_midi_source "${MIDI_OUTPUT}" "${EMULATOR}"
@@ -502,6 +507,8 @@ fi
         reset > /dev/console < /dev/null 2>&1
 
 emuelec-utils end_app_video
+
+emuelec-utils set_rotation "0" "${EMULATOR}"
 
 # Kill MIDI Processes
 emuelec-utils set_midi_source "None" "${EMULATOR}"
