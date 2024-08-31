@@ -110,6 +110,11 @@ if [[ "${EMULATOR}" = "retrorun" ]]; then
     LIBRETRO=""
 fi
 
+MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${BASEROMNAME}")
+if [[ ! -z "${MIDI_OUTPUT}" ]]; then
+		emuelec-utils set_midi_source "${MIDI_OUTPUT}" "${EMULATOR}"
+fi
+
 # freej2me needs the JDK to be downloaded on the first run
 if [ ${EMU} == "freej2me_libretro" ]; then
 freej2me.sh
@@ -142,7 +147,7 @@ echo "${CONTROLLERCONFIG}" | tr -d '"' > "/tmp/controllerconfig.txt"
 
 if [ -z ${LIBRETRO} ] && [ -z ${RETRORUN} ]; then
 
-GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${ROMNAME}")
+GPTOKEYB=$(get_ee_setting "gptokeyb" "${PLATFORM}" "${BASEROMNAME}")
 VIRTUAL_KB=
 
 # Read the first argument in order to set the right emulator
@@ -426,7 +431,7 @@ OGAOC=$(get_ee_setting ee_oga_oc)
 [ -z "${OGAOC}" ] && OGAOC="Off"
 
 if [[ "${OGAOC}" == "Off" ]]; then
-    if [ $(get_ee_setting "maxperf" "${PLATFORM}" "${ROMNAME##*/}") == "0" ]; then
+    if [ $(get_ee_setting "maxperf" "${PLATFORM}" "${BASEROMNAME}") == "0" ]; then
         normperf
     else
         maxperf
@@ -497,6 +502,9 @@ fi
         reset > /dev/console < /dev/null 2>&1
 
 emuelec-utils end_app_video
+
+# Kill MIDI Processes
+emuelec-utils set_midi_source "None" "${EMULATOR}"
 
 [[ "${CLOUD_SYNC}" == "1" ]] && ra_rclone.sh set "${PLATFORM}" "${ROMNAME}" &
 
