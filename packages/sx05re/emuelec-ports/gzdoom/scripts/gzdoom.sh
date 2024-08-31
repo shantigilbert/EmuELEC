@@ -9,8 +9,12 @@ RUN_DIR="/storage/roms/ports/doom"
 CONFIG_DIR="/emuelec/configs/gzdoom"
 HOMECONFIG="/storage/.config/gzdoom"
 
-if [ /usr/config/emuelec/configs/gzdoom/gzdoom.pk3 -nt ${CONFIG_DIR}/gzdoom.pk3 ]; then
-    cp /usr/config/emuelec/configs/gzdoom/*.pk3 ${CONFIG_DIR}
+# Check for newer pk3 files
+SHASUMSRC=$(sha256sum "/usr/config/emuelec/configs/gzdoom/gzdoom.pk3" | awk '{print $1}')
+SHASUMDST=$(sha256sum "${CONFIG_DIR}/gzdoom.pk3" | awk '{print $1}')
+
+if [ $SHASUMSRC != $SHASUMDST ]; then
+  cp /usr/config/emuelec/configs/gzdoom/*.pk3 ${CONFIG_DIR}
 fi
 
 if [ ! -L "${HOMECONFIG}" ]; then
