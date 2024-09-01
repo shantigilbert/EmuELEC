@@ -19,7 +19,7 @@ function set_rotation()
   local rotate_output=$1
   local emulator=$2
 
-  [[ "${midi_emulator}" == "retrorun" ]] && return
+  [[ "${emulator}" == "retrorun" ]] && return
 
   if [[ "${emulator}" == "libretro" ]]; then
     sed -ie "s|video_rotation *= *\".*\"|video_rotation = \"${rotate_output}\"|" ${RA_CONF}
