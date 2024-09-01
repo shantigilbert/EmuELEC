@@ -450,9 +450,11 @@ else # Retrorun was selected
         RUNTHIS+="32"
     fi
 
+		set_rr_setting "retrorun_tate_mode" "disabled"
 		ROTATION_OUTPUT=$(get_ee_setting "rotation_output" "${PLATFORM}" "${BASEROMNAME}")
 		if [[ ! -z "${ROTATION_OUTPUT}" ]]; then
 					RUNTHIS+=" -z "
+					set_rr_setting "retrorun_tate_mode" "enabled"
 		fi
 
     if [[ "$EE_DEVICE" == "GameForce" ]]; then
