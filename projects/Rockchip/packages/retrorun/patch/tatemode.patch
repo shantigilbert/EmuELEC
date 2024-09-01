@@ -1,5 +1,5 @@
 diff --git a/src/main.cpp b/src/main.cpp
-index 0cbbfe2..c4c6bf2 100644
+index 0cbbfe2..e795221 100644
 --- a/src/main.cpp
 +++ b/src/main.cpp
 @@ -76,6 +76,7 @@ const char *opt_systemdir = ".";
@@ -10,7 +10,24 @@ index 0cbbfe2..c4c6bf2 100644
  const char *arg_core = "";
  const char *arg_rom = "";
  
-@@ -929,7 +930,9 @@ int main(int argc, char *argv[])
+@@ -98,6 +99,7 @@ struct option longopts[] = {
+     {"triggers", no_argument, NULL, 't'},
+     {"analog", no_argument, NULL, 'n'},
+     {"fps", no_argument, NULL, 'f'},
++		{"tatemode", no_argument, NULL, 'z'},
+     {0, 0, 0, 0}};
+ 
+ static struct
+@@ -883,7 +885,7 @@ int main(int argc, char *argv[])
+     int c;
+     int option_index = 0;
+ 
+-    while ((c = getopt_long(argc, argv, "s:d:a:b:v:grtnfc:", longopts, &option_index)) != -1)
++    while ((c = getopt_long(argc, argv, "s:d:a:b:v:grtnfcz:", longopts, &option_index)) != -1)
+     {
+         switch (c)
+         {
+@@ -929,7 +931,9 @@ int main(int argc, char *argv[])
          case 'c':
              opt_setting_file = optarg;
              break;
