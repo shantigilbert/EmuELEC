@@ -450,13 +450,18 @@ else # Retrorun was selected
         RUNTHIS+="32"
     fi
 
-                if [[ "$EE_DEVICE" == "GameForce" ]]; then
-                        JOY_FILE="/dev/input/by-path/platform-gameforce-gamepad-event-joystick"
-                        if [[ -f "${JOY_FILE}" ]]; then
-                                ln -s /dev/input/event2 ${JOY_FILE}
-                        fi
-                        GPIO_JOYPAD="-g"
-                fi
+		ROTATION_OUTPUT=$(get_ee_setting "rotation_output" "${PLATFORM}" "${BASEROMNAME}")
+		if [[ ! -z "${ROTATION_OUTPUT}" ]]; then
+					RUNTHIS+=" -z "
+		fi
+
+    if [[ "$EE_DEVICE" == "GameForce" ]]; then
+            JOY_FILE="/dev/input/by-path/platform-gameforce-gamepad-event-joystick"
+            if [[ -f "${JOY_FILE}" ]]; then
+                    ln -s /dev/input/event2 ${JOY_FILE}
+            fi
+            GPIO_JOYPAD="-g"
+    fi
 
     RUNTHIS+=' --triggers -n ${GPIO_JOYPAD} -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
 

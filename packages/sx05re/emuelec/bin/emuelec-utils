@@ -285,7 +285,13 @@ function rotation_output() {
 	local emulator=$1
 	local core=$2
 
-	echo "90 Degrees,180 Degrees,270 Degrees"
+	if [[ "${emulator}" == "libretro" ]]; then
+		echo "90 Degrees,180 Degrees,270 Degrees"
+	fi
+	
+	if [[ "${emulator}" == "retrorun" ]]; then
+		echo "Tate Mode"
+	fi
 }
 
 function midi_output() {

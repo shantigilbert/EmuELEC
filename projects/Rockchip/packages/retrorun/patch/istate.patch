@@ -1,0 +1,53 @@
+diff --git a/src/main.cpp b/src/main.cpp
+index 0cbbfe2..c4c6bf2 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -76,6 +76,7 @@ const char *opt_systemdir = ".";
+ int opt_backlight = -1;
+ int opt_volume = -1;
+ bool opt_restart = false;
++bool opt_is_tate = false;
+ const char *arg_core = "";
+ const char *arg_rom = "";
+ 
+@@ -929,7 +930,9 @@ int main(int argc, char *argv[])
+         case 'c':
+             opt_setting_file = optarg;
+             break;
+-
++				case 'z':
++						opt_is_tate = true;
++						break;
+         default:
+             printf("Unknown option. '%s'\n", longopts[option_index].name);
+             exit(EXIT_FAILURE);
+diff --git a/src/video.cpp b/src/video.cpp
+index d168eda..8ce7f15 100755
+--- a/src/video.cpp
++++ b/src/video.cpp
+@@ -57,6 +57,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ 
+ //extern float opt_aspect;
+ extern int opt_backlight;
++extern bool opt_is_tate;
+ 
+ go2_display_t *display;
+ go2_surface_t *surface;
+@@ -641,7 +642,7 @@ void prepareScreen(int width, int height)
+         y = 0;
+         h = go2_display_height_get(display);
+         w = go2_display_width_get(display);
+-        isTate = (Retrorun_Core == RETRORUN_CORE_FLYCAST); // we rotate the screen (Tate) for some arcade games when apsect ratio < 0
++        isTate = opt_is_tate; //(Retrorun_Core == RETRORUN_CORE_FLYCAST); // we rotate the screen (Tate) for some arcade games when apsect ratio < 0
+     }
+ }
+ 
+@@ -763,7 +764,7 @@ void core_video_refresh(const void *data, unsigned width, unsigned height, size_
+ 
+         real_aspect_ratio = aspect_ratio;
+         _351BlitRotation = isTate ? GO2_ROTATION_DEGREES_270 : GO2_ROTATION_DEGREES_0;
+-        _351Rotation = isTate ? GO2_ROTATION_DEGREES_180 : GO2_ROTATION_DEGREES_270;
++        _351Rotation = isTate ? GO2_ROTATION_DEGREES_270 : GO2_ROTATION_DEGREES_0;
+         first_video_refresh = false;
+     }
+     if (height != currentHeight || width != currentWidth)
