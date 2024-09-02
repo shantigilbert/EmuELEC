@@ -29,15 +29,6 @@ diff --git a/src/main.cpp b/src/main.cpp
 index 0cbbfe2..2d7a799 100644
 --- a/src/main.cpp
 +++ b/src/main.cpp
-@@ -82,7 +82,7 @@ const char *arg_rom = "";
- typedef std::map<std::string, std::string> varmap_t;
- varmap_t variables;
- int exitFlag = -1;
--const char *opt_setting_file = "/storage/.config/distribution/configs/retrorun.cfg";
-+const char *opt_setting_file = "/emuelec/configs/retrorun.cfg";
- std::map<std::string, std::string> conf_map;
- bool opt_show_fps = false;
- bool auto_save = false;
 @@ -98,6 +98,7 @@ struct option longopts[] = {
      {"triggers", no_argument, NULL, 't'},
      {"analog", no_argument, NULL, 'n'},
