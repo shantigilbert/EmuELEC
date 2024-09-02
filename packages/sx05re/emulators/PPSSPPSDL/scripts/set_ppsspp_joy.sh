@@ -43,6 +43,8 @@ declare -A GC_PPSSPP_VALUES=(
   [a1-0]="10-4003"
   [a1-1]="10-4002"
   [a2]="10-4010" #lefttrigger
+	[a3]="10-4011" #righttrigger
+	[a4]="10-4010" #lefttrigger
   [a5]="10-4011" #righttrigger
 )
 

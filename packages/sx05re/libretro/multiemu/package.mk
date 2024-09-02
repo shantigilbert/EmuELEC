@@ -2,15 +2,15 @@
 # Copyright (C) 2019 Trond Haugland (trondah@gmail.com)
 
 PKG_NAME="multiemu"
-PKG_VERSION="68520cf9defd1c2762bca7f266f13ad593b7b3f3"
-PKG_SHA256="3814f361fb0893269707dfd8223bcb1fb62ffcdf2baa060ee068f9d5db8164c6"
+PKG_VERSION="e1fa727f7c3f6363e50c71ae9b24d3d6c6b8b8ea"
+PKG_SHA256="29dc6152b623954ba5ffc4321a47bb1bb19d19e14d325896995a01fbd4a80148"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/mame"
 PKG_URL="https://github.com/libretro/mame/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain zlib flac sqlite expat"
 PKG_SECTION="libretro"
-PKG_SHORTDESC="Fmtowns and pgm2 MAME -  Multiple Arcade Machine Emulator"
+PKG_SHORTDESC="Apple 2, Fmtowns and pgm2 MAME -  Multiple Arcade Machine Emulator"
 PKG_TOOLCHAIN="make"
 
 pre_configure_target() {
@@ -39,7 +39,7 @@ PKG_MAKE_OPTS_TARGET="REGENIE=1 \
 		      ARCH= \
 		      TARGET=mame \
 		      SUBTARGET=multiemu \
-		      SOURCES=fujitsu/fmtowns.cpp,igs/pgm2.cpp,igs/pgm.cpp,igs/pgm3.cpp \
+		      SOURCES=fujitsu/fmtowns.cpp,igs/pgm2.cpp,igs/pgm.cpp,igs/pgm3.cpp, apple/apple2gs.cpp,apple/apple2.cpp,apple/apple2common.cpp,apple/apple2video.cpp,apple/apple2e.cpp \
 		      OSD=retro \
 		      USE_SYSTEM_LIB_EXPAT=1 \
 		      USE_SYSTEM_LIB_ZLIB=1 \
