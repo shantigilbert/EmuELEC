@@ -442,13 +442,13 @@ else # Retrorun was selected
 					set_rr_setting "retrorun_tate_mode" "enabled"
 		fi
 
-    if [[ "$EE_DEVICE" == "GameForce" ]]; then
-            JOY_FILE="/dev/input/by-path/platform-gameforce-gamepad-event-joystick"
-            if [[ -f "${JOY_FILE}" ]]; then
-                    ln -s /dev/input/event2 ${JOY_FILE}
-            fi
-            GPIO_JOYPAD="-g"
-    fi
+                if [[ "$EE_DEVICE" == "GameForce" ]]; then
+                        JOY_FILE="/dev/input/by-path/platform-gameforce-gamepad-event-joystick"
+                        if [[ -f "${JOY_FILE}" ]]; then
+                                ln -s /dev/input/event2 ${JOY_FILE}
+                        fi
+                        GPIO_JOYPAD="-g"
+                fi
 
     RUNTHIS+=' --triggers -n ${GPIO_JOYPAD} -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
 
