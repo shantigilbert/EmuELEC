@@ -6,6 +6,31 @@
 # Source predefined functions and variables
 . /etc/profile
 
+function set_rotation()
+{
+  local rotate_output=$1
+  local emulator=$2
+
+  [[ "${emulator}" == "retrorun" ]] && return
+
+  if [[ "${emulator}" == "libretro" ]]; then
+    set_ra_setting "video_rotation" "${rotate_output}"
+  fi
+}
+
+function rotation_output() {
+    local emulator=$1
+    local core=$2
+
+    if [[ "${emulator}" == "libretro" ]]; then
+        echo "90 Degrees,180 Degrees,270 Degrees"
+    fi
+
+    if [[ "${emulator}" == "retrorun" ]]; then
+        echo "Tate Mode"
+    fi
+}
+
 function killall_midi()
 {
 	pkill -9 timidity
