@@ -15,8 +15,10 @@ PLATFORM="${PLATFORM%% *}"  # until a space is found
 
 ROMNAME="${1}"
 
+echo 1 > /tmp/game.running
 emuelec-utils init_app_video "${PLATFORM}" "${ROMNAME}"
 
 "$@"
 
 emuelec-utils end_app_video
+rm /tmp/game.running
