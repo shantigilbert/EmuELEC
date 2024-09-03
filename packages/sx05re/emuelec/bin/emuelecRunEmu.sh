@@ -110,10 +110,9 @@ if [[ "${EMULATOR}" = "retrorun" ]]; then
     LIBRETRO=""
 fi
 
-ROTATION_OUTPUT=$(get_ee_setting "rotation_output" "${PLATFORM}" "${BASEROMNAME}")
-if [[ ! -z "${ROTATION_OUTPUT}" ]]; then
-		emuelec-utils set_rotation "${ROTATION_OUTPUT}" "${EMULATOR}"
-fi
+ROTATION_OUTPUT=$(get_ee_setting "${EMULATOR}.rotation_output" "${PLATFORM}" "${BASEROMNAME}")
+[[ -z "${ROTATION_OUTPUT}" ]] && ROTATION_OUTPUT=0
+CMD_ROTATE=$(emuelec-utils set_rotation "${ROTATION_OUTPUT}" "${EMULATOR}")
 
 MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${BASEROMNAME}")
 if [[ ! -z "${MIDI_OUTPUT}" ]]; then
@@ -435,21 +434,12 @@ else # Retrorun was selected
         RUNTHIS+="32"
     fi
 
-		set_rr_setting "retrorun_tate_mode" "disabled"
-		set_rr_setting "retrorun_swap_sticks" "false"
-		ROTATION_OUTPUT=$(get_ee_setting "rotation_output" "${PLATFORM}" "${BASEROMNAME}")
-		if [[ ! -z "${ROTATION_OUTPUT}" ]]; then
-					set_rr_setting "retrorun_tate_mode" "enabled"
-					set_rr_setting "retrorun_swap_sticks" "true"
-					RUNTHIS+=" -z "
-		fi
-
 		JOY_FILE=$(ls "/dev/input/by-path/*-event-joystick" )
     if [[ -f "${JOY_FILE}" ]]; then
             ln -s /dev/input/event2 ${JOY_FILE}
     fi
 
-    RUNTHIS+=' --triggers -g -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
+    RUNTHIS+=' ${CMD_ROTATE} --triggers -g -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
 
 fi # end Libretro/retrorun or standalone emu logic
 
