@@ -44,7 +44,7 @@ class ShellIO:
         if debug:
             print("> " + " ".join(x for x in cmd))
         out: list[str] = []
-        with Popen(cmd, stdout=PIPE, bufsize=1, universal_newlines=True, encoding='latin-1') as p:
+        with Popen(cmd, stdout=PIPE, bufsize=1, universal_newlines=True, encoding='UTF-8') as p:
             for line in p.stdout:
                 out.append(line)
                 if debug:
@@ -61,7 +61,7 @@ class ShellIO:
 
     @staticmethod
     def execute_async(cmd: list[str]):
-        Popen(cmd, stdout=PIPE, bufsize=1, universal_newlines=True, encoding='latin-1')
+        Popen(cmd, stdout=PIPE, bufsize=1, universal_newlines=True, encoding='UTF-8')
 
 
 class BluetoothCTL:
