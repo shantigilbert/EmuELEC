@@ -47,6 +47,8 @@ RACONF="/storage/.config/retroarch/retroarch.cfg"
 NETPLAY="No"
 RABIN="retroarch"
 
+init_game
+
 # Make sure the /emuelec/logs directory exists
 if [[ ! -d "${LOGSDIR}" ]]; then
     mkdir -p "${LOGSDIR}"
@@ -549,6 +551,8 @@ fi
 [[ "${EMU}" == *"scummvm_libretro"* ]] && ret_error=0
 
 [[ "${CLOUD_SYNC}" == "1" ]] && wait ${CLOUD_PID}
+
+end_game
 
 if [[ "${ret_error}" != "0" ]]; then
     echo "exit ${ret_error}" >> ${EMUELECLOG}
