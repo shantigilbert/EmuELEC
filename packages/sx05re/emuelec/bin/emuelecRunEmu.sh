@@ -52,9 +52,9 @@ if [[ ! -d "${LOGSDIR}" ]]; then
     mkdir -p "${LOGSDIR}"
 fi
 
-LOGENABLE="0"
-if [[ ${arguments} != *"--NOLOG"* ]] && [[ "$(get_es_setting string LogLevel)" != "disabled" ]]; then
-  LOGENABLE="1"
+LOGENABLE="1"
+if [[ ${arguments} == *"--NOLOG"* ]] || [[ "$(get_es_setting string LogLevel)" == "disabled" ]]; then
+  LOGENABLE="0"
 fi
 
 if [ "${LOGENABLE}" == "0" ]; then
