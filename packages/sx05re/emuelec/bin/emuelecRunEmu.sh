@@ -130,7 +130,7 @@ fi
 [[ ${PLATFORM} = "ports" ]] && LIBRETRO="yes"
 
 # if there wasn't a --NOLOG included in the arguments, enable the emulator log output. TODO: this should be handled in ES menu
-if [[ ${arguments} != *"--NOLOG"* ]]; then
+if [[ ${arguments} != *"--NOLOG"* ]] && [[ "$(get_es_setting string LogLevel)" != "disabled" ]]; then
     LOGEMU="Yes"
     VERBOSE="-v"
 fi
