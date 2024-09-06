@@ -3,7 +3,7 @@
 
 PKG_NAME="multiemu"
 PKG_VERSION="e1fa727f7c3f6363e50c71ae9b24d3d6c6b8b8ea"
-PKG_SHA256="29dc6152b623954ba5ffc4321a47bb1bb19d19e14d325896995a01fbd4a80148"
+PKG_SHA256="54d1e83b878a7d2e3e92e7570a2564fc84c715efd0a728468bf7992b2beb3fd8"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/mame"
@@ -39,7 +39,7 @@ PKG_MAKE_OPTS_TARGET="REGENIE=1 \
 		      ARCH= \
 		      TARGET=mame \
 		      SUBTARGET=multiemu \
-		      SOURCES=fujitsu/fmtowns.cpp,igs/pgm2.cpp,igs/pgm.cpp,igs/pgm3.cpp, apple/apple2gs.cpp,apple/apple2.cpp,apple/apple2common.cpp,apple/apple2video.cpp,apple/apple2e.cpp \
+		      SOURCES=fujitsu/fmtowns.cpp,igs/pgm2.cpp,igs/pgm.cpp,igs/pgm3.cpp,apple/apple2gs.cpp,apple/apple2.cpp,apple/apple2common.cpp,apple/apple2video.cpp,apple/apple2e.cpp \
 		      OSD=retro \
 		      USE_SYSTEM_LIB_EXPAT=1 \
 		      USE_SYSTEM_LIB_ZLIB=1 \
