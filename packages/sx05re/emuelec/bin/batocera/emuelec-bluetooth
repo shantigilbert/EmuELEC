@@ -331,17 +331,16 @@ if __name__ == "__main__":
                 exit()
 
         IS_IN_GAME = is_in_game()
-#        print("IS_IN_GAME:"+str(IS_IN_GAME))
 
         connected_devs = [dev for dev in bt.devices if dev.connected]
         if not bt.scanning and (
-            not IS_IN_GAME or len(connected_devs) == 0 or SCAN_TIME > 0
+            not IS_IN_GAME or len(connected_devs) == 0
         ):
             print("resuming scan")
             BT_THREAD = Process(target=bt.scan_async, args=(SCAN_TIME,))
             BT_THREAD.start()
         elif (
-            bt.scanning and IS_IN_GAME and (len(connected_devs) > 0 or SCAN_TIME < 0)
+            bt.scanning and IS_IN_GAME and (len(connected_devs) > 0)
         ):
             print("stopping scan")
             if BT_THREAD is not None:
