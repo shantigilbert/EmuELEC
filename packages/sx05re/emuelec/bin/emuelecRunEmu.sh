@@ -511,7 +511,7 @@ fi
 
 emuelec-utils end_app_video
 
-
+# Revert retroarch logging to its defaults.
 set_ra_setting "log_verbosity" true
 set_ra_setting "frontend_log_level" 1
 set_ra_setting "libretro_log_level" 1
