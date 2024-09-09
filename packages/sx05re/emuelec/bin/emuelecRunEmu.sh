@@ -58,13 +58,10 @@ if [[ ${arguments} == *"--NOLOG"* ]] || [[ "${LOGLEVEL}" == "minimal" ]]; then
   USELOG="0"
 fi
 
+# Set the config options for retroarch logging.
 if [ "${USELOG}" == "0" ]; then
-    EMUELECLOG="/dev/null"
-    cat /etc/motd > "${LOGSDIR}/emuelec.log"
-    echo "Logging has been disabled, enable it in Main Menu > System Settings > Developer > Log Level" >> "${LOGSDIR}/emuelec.log"
     set_ra_setting "log_verbosity" false
 else
-    EMUELECLOG="${LOGSDIR}/emuelec.log"
     set_ra_setting "log_verbosity" true
     set_ra_setting "frontend_log_level" 1
     set_ra_setting "libretro_log_level" 1
@@ -76,7 +73,14 @@ else
       set_ra_setting "frontend_log_level" 3
       set_ra_setting "libretro_log_level" 3
     fi
+fi
 
+if [ "${USELOG}" == "0" ]; then
+    EMUELECLOG="/dev/null"
+    cat /etc/motd > "${LOGSDIR}/emuelec.log"
+    echo "Logging has been disabled, enable it in Main Menu > System Settings > Developer > Log Level" >> "${LOGSDIR}/emuelec.log"
+else
+    EMUELECLOG="${LOGSDIR}/emuelec.log"
 fi
 
 set_kill_keys() {
