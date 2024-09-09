@@ -97,13 +97,16 @@ else
     BIT32="No"
 fi
 
-if [[ "${EMULATOR}" == "libretro" ]]; then
-    if [ "${USELOG}" == "0" ]; then
-        set_ra_setting "log_verbosity" 0
-        set_ra_setting "frontend_log_level" 3
-        set_ra_setting "libretro_log_level" 3
+if [[ "${EMULATOR}" = "libretro" ]]; then
+    [[ -f "/storage/.config/RA_KILL_KEYS" ]] && set_kill_keys "${RABIN}"
+    EMU="${CORE}_libretro"
+    LIBRETRO="yes"
+    RETRORUN=""
+
+    if [[ "${USELOG}" == "0" ]]; then
+        set_ra_setting "log_verbosity" false
     else
-        set_ra_setting "log_verbosity" 1
+        set_ra_setting "log_verbosity" true
         set_ra_setting "frontend_log_level" 1
         set_ra_setting "libretro_log_level" 1
         LOGLEVEL=$(get_es_setting string LogLevel)
@@ -116,13 +119,6 @@ if [[ "${EMULATOR}" == "libretro" ]]; then
           set_ra_setting "libretro_log_level" 3
         fi
     fi
-fi
-
-if [[ "${EMULATOR}" = "libretro" ]]; then
-    [[ -f "/storage/.config/RA_KILL_KEYS" ]] && set_kill_keys "${RABIN}"
-    EMU="${CORE}_libretro"
-    LIBRETRO="yes"
-    RETRORUN=""
 else
         EMU="${CORE}"
 fi
