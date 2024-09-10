@@ -52,10 +52,38 @@ if [[ ! -d "${LOGSDIR}" ]]; then
     mkdir -p "${LOGSDIR}"
 fi
 
-if [ "$(get_es_setting string LogLevel)" == "minimal" ]; then
+USELOG="1"
+LOGLEVEL=$(get_es_setting string LogLevel)
+if [[ ${arguments} == *"--NOLOG"* ]] || [[ "${LOGLEVEL}" == "minimal" ]]; then
+  USELOG="0"
+fi
+
+set_retroarch_logs() {
+    set_ra_setting "frontend_log_level" ${1}
+    set_ra_setting "libretro_log_level" ${2}
+}
+
+# Set the config options for retroarch logging.
+if [ "${USELOG}" == "0" ]; then
+    set_ra_setting "log_verbosity" false
+else
+    set_ra_setting "log_verbosity" true
+    set_retroarch_logs 1 2
+    if [[ "${LOGLEVEL}" == "debug" ]]; then
+        set_retroarch_logs 1 1
+    fi
+    if [[ "${LOGLEVEL}" == "warning" ]]; then
+        set_retroarch_logs 2 2
+    fi
+    if [[ "${LOGLEVEL}" == "error" ]]; then
+        set_retroarch_logs 3 3
+    fi
+fi
+
+if [ "${USELOG}" == "0" ]; then
     EMUELECLOG="/dev/null"
     cat /etc/motd > "${LOGSDIR}/emuelec.log"
-    echo "Logging has been dissabled, enable it in Main Menu > System Settings > Developer > Log Level" >> "${LOGSDIR}/emuelec.log"
+    echo "Logging has been disabled, enable it in Main Menu > System Settings > Developer > Log Level" >> "${LOGSDIR}/emuelec.log"
 else
     EMUELECLOG="${LOGSDIR}/emuelec.log"
 fi
@@ -130,7 +158,7 @@ fi
 [[ ${PLATFORM} = "ports" ]] && LIBRETRO="yes"
 
 # if there wasn't a --NOLOG included in the arguments, enable the emulator log output. TODO: this should be handled in ES menu
-if [[ ${arguments} != *"--NOLOG"* ]]; then
+if [ "${USELOG}" == "1" ]; then
     LOGEMU="Yes"
     VERBOSE="-v"
 fi
@@ -442,7 +470,7 @@ else # Retrorun was selected
 
 fi # end Libretro/retrorun or standalone emu logic
 
-if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do all this if log is disabled
+if [ "${USELOG}" == "1" ]; then # No need to do all this if log is disabled
     # Clear the log file
     echo "EmuELEC Run Log" > ${EMUELECLOG}
     cat /etc/motd >> ${EMUELECLOG}
@@ -487,6 +515,10 @@ fi
         reset > /dev/console < /dev/null 2>&1
 
 emuelec-utils end_app_video
+
+# Revert retroarch logging to its defaults.
+set_ra_setting "log_verbosity" true
+set_retroarch_logs 1 2
 
 # Kill MIDI Processes
 emuelec-utils set_midi_source "None" "${EMULATOR}"
