@@ -58,24 +58,25 @@ if [[ ${arguments} == *"--NOLOG"* ]] || [[ "${LOGLEVEL}" == "minimal" ]]; then
   USELOG="0"
 fi
 
+set_retroarch_logs() {
+    set_ra_setting "frontend_log_level" ${1}
+    set_ra_setting "libretro_log_level" ${2}
+}
+
 # Set the config options for retroarch logging.
 if [ "${USELOG}" == "0" ]; then
     set_ra_setting "log_verbosity" false
 else
     set_ra_setting "log_verbosity" true
-    set_ra_setting "frontend_log_level" 1
-    set_ra_setting "libretro_log_level" 2
+    set_retroarch_logs 1 2
     if [[ "${LOGLEVEL}" == "debug" ]]; then
-      set_ra_setting "frontend_log_level" 1
-      set_ra_setting "libretro_log_level" 1
+      set_retroarch_logs 1 1
     fi
     if [[ "${LOGLEVEL}" == "warning" ]]; then
-      set_ra_setting "frontend_log_level" 2
-      set_ra_setting "libretro_log_level" 2
+    set_retroarch_logs 2 2
     fi
     if [[ "${LOGLEVEL}" == "error" ]]; then
-      set_ra_setting "frontend_log_level" 3
-      set_ra_setting "libretro_log_level" 3
+      set_retroarch_logs 3 3
     fi
 fi
 
@@ -517,9 +518,7 @@ emuelec-utils end_app_video
 
 # Revert retroarch logging to its defaults.
 set_ra_setting "log_verbosity" true
-set_ra_setting "frontend_log_level" 1
-set_ra_setting "libretro_log_level" 2
-
+set_retroarch_logs 1 2
 
 # Kill MIDI Processes
 emuelec-utils set_midi_source "None" "${EMULATOR}"
