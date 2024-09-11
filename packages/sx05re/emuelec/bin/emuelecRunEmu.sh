@@ -70,6 +70,9 @@ else
     set_ra_setting "log_verbosity" true
     set_retroarch_logs 1 2
     if [[ "${LOGLEVEL}" == "debug" ]]; then
+        set_retroarch_logs 0 0
+    fi
+    if [[ "${LOGLEVEL}" == "info" ]]; then
         set_retroarch_logs 1 1
     fi
     if [[ "${LOGLEVEL}" == "warning" ]]; then
