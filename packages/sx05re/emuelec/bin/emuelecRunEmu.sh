@@ -112,6 +112,10 @@ if [[ "${EMULATOR}" = "retrorun" ]]; then
     LIBRETRO=""
 fi
 
+ROTATION_OUTPUT=$(get_ee_setting "${EMULATOR}.rotation_output" "${PLATFORM}" "${BASEROMNAME}")
+[[ -z "${ROTATION_OUTPUT}" ]] && ROTATION_OUTPUT=0
+CMD_ROTATE=$(emuelec-utils set_rotation "${ROTATION_OUTPUT}" "${EMULATOR}")
+
 MIDI_OUTPUT=$(get_ee_setting "ra_midi_output" "${PLATFORM}" "${BASEROMNAME}")
 if [[ ! -z "${MIDI_OUTPUT}" ]]; then
 		emuelec-utils set_midi_source "${MIDI_OUTPUT}" "${EMULATOR}"
@@ -432,15 +436,12 @@ else # Retrorun was selected
         RUNTHIS+="32"
     fi
 
-                if [[ "$EE_DEVICE" == "GameForce" ]]; then
-                        JOY_FILE="/dev/input/by-path/platform-gameforce-gamepad-event-joystick"
-                        if [[ -f "${JOY_FILE}" ]]; then
-                                ln -s /dev/input/event2 ${JOY_FILE}
-                        fi
-                        GPIO_JOYPAD="-g"
-                fi
+		JOY_FILE=$(ls "/dev/input/by-path/*-event-joystick" )
+    if [[ -f "${JOY_FILE}" ]]; then
+            ln -s /dev/input/event2 ${JOY_FILE}
+    fi
 
-    RUNTHIS+=' --triggers -n ${GPIO_JOYPAD} -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
+    RUNTHIS+=' ${CMD_ROTATE} --triggers -g -d /storage/roms/bios /tmp/cores/${EMU}.so "${ROMNAME}"'
 
 fi # end Libretro/retrorun or standalone emu logic
 
@@ -489,6 +490,8 @@ fi
         reset > /dev/console < /dev/null 2>&1
 
 emuelec-utils end_app_video
+
+emuelec-utils set_rotation "0" "${EMULATOR}"
 
 # Kill MIDI Processes
 emuelec-utils set_midi_source "None" "${EMULATOR}"
