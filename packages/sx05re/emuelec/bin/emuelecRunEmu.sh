@@ -52,10 +52,16 @@ if [[ ! -d "${LOGSDIR}" ]]; then
     mkdir -p "${LOGSDIR}"
 fi
 
-if [ "$(get_es_setting string LogLevel)" == "minimal" ]; then
+USELOG="1"
+LOGLEVEL=$(get_ee_setting "retroarchLogging" "global")
+if [[ ${arguments} == *"--NOLOG"* ]] || [[ -z "${LOGLEVEL}" ]]; then
+  USELOG="0"
+fi
+
+if [ "${USELOG}" == "0" ]; then
     EMUELECLOG="/dev/null"
     cat /etc/motd > "${LOGSDIR}/emuelec.log"
-    echo "Logging has been dissabled, enable it in Main Menu > System Settings > Developer > Log Level" >> "${LOGSDIR}/emuelec.log"
+    echo "Logging has been disabled, enable it in Main Menu > System Settings > Developer > Log Level" >> "${LOGSDIR}/emuelec.log"
 else
     EMUELECLOG="${LOGSDIR}/emuelec.log"
 fi
@@ -130,7 +136,7 @@ fi
 [[ ${PLATFORM} = "ports" ]] && LIBRETRO="yes"
 
 # if there wasn't a --NOLOG included in the arguments, enable the emulator log output. TODO: this should be handled in ES menu
-if [[ ${arguments} != *"--NOLOG"* ]]; then
+if [ "${USELOG}" == "1" ]; then
     LOGEMU="Yes"
     VERBOSE="-v"
 fi
@@ -442,7 +448,7 @@ else # Retrorun was selected
 
 fi # end Libretro/retrorun or standalone emu logic
 
-if [ "$(get_es_setting string LogLevel)" != "minimal" ]; then # No need to do all this if log is disabled
+if [ "${USELOG}" == "1" ]; then # No need to do all this if log is disabled
     # Clear the log file
     echo "EmuELEC Run Log" > ${EMUELECLOG}
     cat /etc/motd >> ${EMUELECLOG}
