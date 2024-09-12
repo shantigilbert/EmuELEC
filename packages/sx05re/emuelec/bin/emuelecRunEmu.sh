@@ -54,7 +54,7 @@ fi
 
 USELOG="1"
 LOGLEVEL=$(get_ee_setting "retroarchLogging" "global")
-if [[ ${arguments} == *"--NOLOG"* ]] || [[ -z "${LOGLEVEL}" ]]; then
+if [[ ${arguments} == *"--NOLOG"* ]] || [[ "${LOGLEVEL}" == "0" ]]; then
   USELOG="0"
 fi
 
