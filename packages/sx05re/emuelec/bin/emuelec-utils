@@ -83,7 +83,7 @@ function set_midi_source()
 esac
 
   if [[ "${midi_emulator}" == "libretro" ]]; then
-    sed -ie "s|midi_output *= *\".*\"|midi_output = \"${midi_output}\"|" ${RA_CONF}
+    set_ra_setting "midi_output" "${midi_output}"
   fi
 }
 
