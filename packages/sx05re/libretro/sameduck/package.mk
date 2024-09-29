@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="sameduck"
-PKG_VERSION="1fac8870d4d92033f5d73eef2f7b92a2226707a8"
+PKG_VERSION="5619abdb01cee6bedb47599cdb5532c318443b52"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/LIJI32/SameBoy"
