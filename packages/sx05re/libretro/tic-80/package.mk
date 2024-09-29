@@ -21,5 +21,5 @@ PKG_CMAKE_OPTS_TARGET="-DBUILD_LIBRETRO=ON \
 
 makeinstall_target() {
   mkdir -p ${INSTALL}/usr/lib/libretro
-  cp ${PKG_BUILD}/.${TARGET_NAME}/lib/tic80_libretro.so ${INSTALL}/usr/lib/libretro/tic80_libretro.so
+  cp ${PKG_BUILD}/.${TARGET_NAME}/bin/tic80_libretro.so ${INSTALL}/usr/lib/libretro/tic80_libretro.so
 }
