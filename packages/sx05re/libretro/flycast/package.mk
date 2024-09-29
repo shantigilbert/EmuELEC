@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="flycast"
-PKG_VERSION="$(get_pkg_version flycastsa)"
+PKG_VERSION="343021a8c507f4723b3f56a3bb817206912fcb36"
 PKG_NEED_UNPACK="$(get_pkg_directory flycastsa)"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
