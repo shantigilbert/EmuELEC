@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="gearsystem"
-PKG_VERSION="4b446ade9f990a57ef591f159fab1c717be88b2d"
-PKG_SHA256=""
+PKG_VERSION="1b344d7c4adc17484f53352ceef73e5a968ed8c2"
+PKG_SHA256="b930097d9efee54f8dd1d6c9151be3f6efb134b0ac3abc0d554ea7ede4f01bb4"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"

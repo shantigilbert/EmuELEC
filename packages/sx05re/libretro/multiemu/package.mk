@@ -2,8 +2,8 @@
 # Copyright (C) 2019 Trond Haugland (trondah@gmail.com)
 
 PKG_NAME="multiemu"
-PKG_VERSION="e1fa727f7c3f6363e50c71ae9b24d3d6c6b8b8ea"
-PKG_SHA256="54d1e83b878a7d2e3e92e7570a2564fc84c715efd0a728468bf7992b2beb3fd8"
+PKG_VERSION="231b5e6d621ed93168ad19eed6c0e3390d4e81ff"
+PKG_SHA256="c5ad4c8d6f4c13a75dfa49b67a63f017aa60c8cb01a62348503c382586d326bb"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/mame"
