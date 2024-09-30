@@ -384,6 +384,11 @@ function onend_retroarch_joystick() {
         mv "${file}" "${file}.bak" > /dev/null 2>&1
     done < <(grep -Fl "\"${DEVICE_NAME}\"" "${dir}/"*.cfg 2>/dev/null)
 
+		for file in /tmp/joypads/*.*; do
+			txt=$( cat "$file" | grep -E -c "^input_vendor_id = \"${input_vendor}\"$|^input_product_id = \"${input_product}\"$" )
+			[[ "${txt}" == "2" ]] && mv "${file}" "${file}.bak" > /dev/null 2>&1
+		done
+
     # sanitise filename
     file="${DEVICE_NAME//[\?\<\>\\\/:\*\|]/}.cfg"
 
