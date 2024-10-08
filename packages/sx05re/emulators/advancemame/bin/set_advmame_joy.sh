@@ -115,7 +115,7 @@ set_pad(){
     | sed 's|/||' | sed "s|(||" | sed "s|)||" | sed -e 's/[^A-Za-z0-9._-]/ /g' | sed 's/[[:blank:]]*$//' \
     | sed 's/-//' | sed -e 's/[^A-Za-z0-9._-]/_/g' |tr '[:upper:]' '[:lower:]' | tr -d '.')"
 
-  BTN_H0=$(advj | grep -B 1 -E "^joy [0-9] '${GAMEPAD}' .*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
+  BTN_H0=$(advj | grep -B 1 -E "^joy ${P_INDEX}.*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
   ADVMAME_VALUES["h0.1"]="stick${BTN_H0},y,up"
   ADVMAME_VALUES["h0.4"]="stick${BTN_H0},y,down"
   ADVMAME_VALUES["h0.8"]="stick${BTN_H0},x,left"
