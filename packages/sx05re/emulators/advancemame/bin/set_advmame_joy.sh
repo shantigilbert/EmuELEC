@@ -111,7 +111,7 @@ set_pad(){
   JOY_NAME="$(cat "/tmp/JOYPAD_NAMES/JOYPAD${1}.txt" | cut -d'"' -f2 )"
   [[ -z "${JOY_NAME}" ]] && return
 
-  local GAMEPAD="$(advj | grep "'${JOY_NAME}'" | cut -d"'" -f2 )"
+  local GAMEPAD="$(advj | grep "'${JOY_NAME}'" | cut -d"'" -f2 | head -n 1 )"
   [[ -z "${GAMEPAD}" ]] && return
 
   BTN_H0=$(advj | grep -B 1 -E "^joy ${P_INDEX}.*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
