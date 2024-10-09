@@ -108,10 +108,10 @@ set_pad(){
   echo "GC_CONFIG=${GC_CONFIG}"
   [[ -z ${GC_CONFIG} ]] && return
 
-  [[ -z "${JOY_NAME}" ]] && JOY_NAME=$(echo ${GC_CONFIG} | cut -d',' -f2)
+  JOY_NAME="$(cat "/tmp/JOYPAD_NAMES/JOYPAD${1}.txt" | cut -d'"' -f2 )"
   [[ -z "${JOY_NAME}" ]] && return
 
-  local GAMEPAD="$(advj | grep -E "^joy ${P_INDEX}.*" | cut -d"'" -f2 )"
+  local GAMEPAD="$(advj | grep "'${JOY_NAME}'" | cut -d"'" -f2 )"
   [[ -z "${GAMEPAD}" ]] && return
 
   BTN_H0=$(advj | grep -B 1 -E "^joy ${P_INDEX}.*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
