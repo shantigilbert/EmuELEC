@@ -112,6 +112,7 @@ set_pad(){
   [[ -z "${JOY_NAME}" ]] && return
 
   local GAMEPAD="$(advj | grep -E "^joy ${P_INDEX}.*" | cut -d"'" -f2 )"
+  [[ -z "${GAMEPAD}" ]] && return
 
   BTN_H0=$(advj | grep -B 1 -E "^joy ${P_INDEX}.*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
   ADVMAME_VALUES["h0.1"]="stick${BTN_H0},y,up"
