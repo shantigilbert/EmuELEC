@@ -10,6 +10,8 @@ if [[ "${AUTOGP}" == "1" ]]; then
 	set_ppsspp_joy.sh
 fi
 
+ppssppcheevos.sh
+
 ARG=${1//[\\]/}
 export SDL_AUDIODRIVER=alsa          
 PPSSPPSDL --fullscreen "${ARG}"
