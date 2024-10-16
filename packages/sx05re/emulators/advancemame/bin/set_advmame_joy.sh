@@ -108,14 +108,13 @@ set_pad(){
   echo "GC_CONFIG=${GC_CONFIG}"
   [[ -z ${GC_CONFIG} ]] && return
 
-  [[ -z "${JOY_NAME}" ]] && JOY_NAME=$(echo ${GC_CONFIG} | cut -d',' -f2)
+  JOY_NAME="$(cat "/tmp/JOYPAD_NAMES/JOYPAD${1}.txt" | cut -d'"' -f2 )"
   [[ -z "${JOY_NAME}" ]] && return
 
-  local GAMEPAD="$(cat "/tmp/JOYPAD_NAMES/JOYPAD${1}.txt" | sed "s|,||g" | sed "s|_||g" | cut -d'"' -f 2 \
-    | sed "s|(||" | sed "s|)||" | sed -e 's/[^A-Za-z0-9._-]/ /g' | sed 's/[[:blank:]]*$//' \
-    | sed 's/-//' | sed -e 's/[^A-Za-z0-9._-]/_/g' |tr '[:upper:]' '[:lower:]' | tr -d '.')"
+  local GAMEPAD="$(advj | grep "'${JOY_NAME}'" | cut -d"'" -f2 | head -n 1 )"
+  [[ -z "${GAMEPAD}" ]] && return
 
-  BTN_H0=$(advj | grep -B 1 -E "^joy [0-9] '${GAMEPAD}' .*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
+  BTN_H0=$(advj | grep -B 1 -E "^joy ${P_INDEX}.*" | grep sticks: | sed "s|sticks:\ ||" | tr -d ' ')
   ADVMAME_VALUES["h0.1"]="stick${BTN_H0},y,up"
   ADVMAME_VALUES["h0.4"]="stick${BTN_H0},y,down"
   ADVMAME_VALUES["h0.8"]="stick${BTN_H0},x,left"
