@@ -295,4 +295,10 @@ if [[ ! -f "$REMAP_VERSION" ]]; then
 	echo "2" > "${REMAP_VERSION}"
 fi
 
+FRAMEBUFFER_VERSION="/emuelec/configs/FRAMEBUFFER_VERSION"
+if [[ ! -f "$FRAMEBUFFER_VERSION" ]]; then
+	grep -Ev "^.*\framebuffer.*=.*$" /emuelec/configs/emuelec.conf > /tmp/emuelec.conf.bak && mv /tmp/emuelec.conf.bak /emuelec/configs/emuelec.conf
+	echo "2" > "${FRAMEBUFFER_VERSION}"
+fi
+
 exit 0
