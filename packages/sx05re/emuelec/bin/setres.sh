@@ -51,7 +51,7 @@ get_resolution_size()
 
   case ${MODE} in
     480cvbs)
-      PSW=640
+      PSW=720
       PSH=480
       [[ -z "${FBW}" ]] && FBW=1024
       [[ -z "${FBH}" ]] && FBH=768
