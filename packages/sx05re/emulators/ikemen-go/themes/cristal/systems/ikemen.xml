@@ -1,0 +1,27 @@
+<theme>
+	<formatVersion>4</formatVersion>
+
+	<view name="system">	
+
+        <image name="art" extra="true">
+         <origin>0 0</origin>
+         <pos>0 0</pos>
+         <size>1 1</size>
+      </image>	
+
+    <image name="background" extra="true">
+      </image> 
+
+	<image name="console" extra="true">
+    </image>
+
+
+	  <text name="shortdescription" extra="true">
+   <text>Software</text>
+  </text>
+		<text name="description" extra="true">
+			<text>${ikemen}</text>
+		</text>
+		
+	</view>
+</theme>
