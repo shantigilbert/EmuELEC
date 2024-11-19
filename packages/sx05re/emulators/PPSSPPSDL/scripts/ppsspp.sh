@@ -10,6 +10,10 @@ if [[ "${AUTOGP}" == "1" ]]; then
 	set_ppsspp_joy.sh
 fi
 
+ppssppcheevos.sh
+
+cp -Rf /usr/config/ppsspp/PSP/Cheats/. /storage/roms/savestates/PPSSPPSDL/PSP/Cheats
+
 ARG=${1//[\\]/}
 export SDL_AUDIODRIVER=alsa          
 PPSSPPSDL --fullscreen "${ARG}"
