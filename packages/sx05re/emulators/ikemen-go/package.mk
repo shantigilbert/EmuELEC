@@ -51,7 +51,6 @@ makeinstall_target() {
     
     mkdir -p "$INSTALL/usr/bin"
     mkdir -p "$INSTALL/usr/share/ikemen_go"
-    mkdir -p "${INSTALL}/usr/config/emulationstation/themes/Crystal"
 
     cp -f "$PKG_DIR/src/Ikemen_Go.sh" "$INSTALL/usr/bin/Ikemen_Go.sh"
     cp "$PKG_BUILD/bin/Ikemen_Go_"* "$INSTALL/usr/bin/Ikemen_Go"
@@ -64,7 +63,5 @@ makeinstall_target() {
     chmod +x "$INSTALL/usr/bin/Ikemen_Go.sh"
     chmod +x "$INSTALL/usr/bin/Ikemen_Go"
     
-    # Copiar tema / Copy theme
-    cp -rf "$PKG_DIR/themes/cristal/"* "${INSTALL}/usr/config/emulationstation/themes/Crystal"
 }
 
