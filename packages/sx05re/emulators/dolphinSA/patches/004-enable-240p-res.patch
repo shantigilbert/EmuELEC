@@ -1,0 +1,149 @@
+diff -rupN dolphin.orig/Source/Core/VideoCommon/FramebufferManager.cpp dolphin/Source/Core/VideoCommon/FramebufferManager.cpp
+--- dolphin.orig/Source/Core/VideoCommon/FramebufferManager.cpp	2024-06-17 15:48:10.120157247 +0000
++++ dolphin/Source/Core/VideoCommon/FramebufferManager.cpp	2024-06-17 17:17:45.953589800 +0000
+@@ -185,19 +185,24 @@ FramebufferManager::ConvertEFBRectangle(
+   return result;
+ }
+ 
+-unsigned int FramebufferManager::GetEFBScale() const
++bool FramebufferManager::IsUnscaled() const
+ {
+-  return m_efb_scale;
++  return m_efb_scale == 2;
++}
++
++float FramebufferManager::GetEFBScalef() const
++{
++  return m_efb_scale / 2.0f;
+ }
+ 
+ int FramebufferManager::EFBToScaledX(int x) const
+ {
+-  return x * static_cast<int>(m_efb_scale);
++  return x * static_cast<int>(m_efb_scale) / 2;
+ }
+ 
+ int FramebufferManager::EFBToScaledY(int y) const
+ {
+-  return y * static_cast<int>(m_efb_scale);
++  return y * static_cast<int>(m_efb_scale) / 2;;
+ }
+ 
+ float FramebufferManager::EFBToScaledXf(float x) const
+@@ -221,8 +226,8 @@ std::tuple<u32, u32> FramebufferManager:
+   if (max_size < EFB_WIDTH * m_efb_scale)
+     m_efb_scale = max_size / EFB_WIDTH;
+ 
+-  u32 new_efb_width = std::max(EFB_WIDTH * static_cast<int>(m_efb_scale), 1u);
+-  u32 new_efb_height = std::max(EFB_HEIGHT * static_cast<int>(m_efb_scale), 1u);
++  u32 new_efb_width = std::max(EFB_WIDTH * static_cast<int>(m_efb_scale) / 2, 1u);
++  u32 new_efb_height = std::max(EFB_HEIGHT * static_cast<int>(m_efb_scale) / 2, 1u);
+ 
+   return std::make_tuple(new_efb_width, new_efb_height);
+ }
+@@ -695,7 +700,8 @@ void FramebufferManager::DestroyReadback
+ 
+ bool FramebufferManager::CreateReadbackFramebuffer()
+ {
+-  if (GetEFBScale() != 1)
++  //if (GetEFBScale() != 1)
++  if (IsUnscaled())
+   {
+     const TextureConfig color_config(IsUsingTiledEFBCache() ? m_efb_cache_tile_size : EFB_WIDTH,
+                                      IsUsingTiledEFBCache() ? m_efb_cache_tile_size : EFB_HEIGHT, 1,
+@@ -717,7 +723,8 @@ bool FramebufferManager::CreateReadbackF
+       (IsUsingTiledEFBCache() && !g_ActiveConfig.backend_info.bSupportsPartialDepthCopies) ||
+       !AbstractTexture::IsCompatibleDepthAndColorFormats(m_efb_depth_texture->GetFormat(),
+                                                          GetEFBDepthCopyFormat()) ||
+-      GetEFBScale() != 1)
++      //GetEFBScale() != 1)
++      IsUnscaled())
+   {
+     const TextureConfig depth_config(IsUsingTiledEFBCache() ? m_efb_cache_tile_size : EFB_WIDTH,
+                                      IsUsingTiledEFBCache() ? m_efb_cache_tile_size : EFB_HEIGHT, 1,
+@@ -800,7 +807,8 @@ void FramebufferManager::PopulateEFBCach
+   const MathUtil::Rectangle<int> native_rect = ConvertEFBRectangle(rect);
+   AbstractTexture* src_texture =
+       depth ? ResolveEFBDepthTexture(native_rect) : ResolveEFBColorTexture(native_rect);
+-  if (GetEFBScale() != 1 || force_intermediate_copy)
++  //if (GetEFBScale() != 1 || force_intermediate_copy)
++  if (IsUnscaled() || force_intermediate_copy)
+   {
+     // Downsample from internal resolution to 1x.
+     // TODO: This won't produce correct results at IRs above 2x. More samples are required.
+@@ -989,7 +997,7 @@ void FramebufferManager::CreatePokeVerti
+     // GPU will expand the point to a quad.
+     const float cs_x = (static_cast<float>(x) + 0.5f) * cs_pixel_width - 1.0f;
+     const float cs_y = 1.0f - (static_cast<float>(y) + 0.5f) * cs_pixel_height;
+-    const float point_size = static_cast<float>(GetEFBScale());
++    const float point_size = GetEFBScalef();
+     destination_list->push_back({{cs_x, cs_y, z, point_size}, color});
+     return;
+   }
+diff -rupN dolphin.orig/Source/Core/VideoCommon/FramebufferManager.h dolphin/Source/Core/VideoCommon/FramebufferManager.h
+--- dolphin.orig/Source/Core/VideoCommon/FramebufferManager.h	2024-06-17 15:48:10.120157247 +0000
++++ dolphin/Source/Core/VideoCommon/FramebufferManager.h	2024-06-17 17:14:56.241373087 +0000
+@@ -74,7 +74,8 @@ public:
+   // Use this to convert a whole native EFB rect to backbuffer coordinates
+   MathUtil::Rectangle<int> ConvertEFBRectangle(const MathUtil::Rectangle<int>& rc) const;
+ 
+-  unsigned int GetEFBScale() const;
++  bool IsUnscaled() const;
++  float GetEFBScalef() const;
+ 
+   // Use this to upscale native EFB coordinates to IDEAL internal resolution
+   int EFBToScaledX(int x) const;
+@@ -194,7 +195,8 @@ protected:
+   void DoLoadState(PointerWrap& p);
+   void DoSaveState(PointerWrap& p);
+ 
+-  float m_efb_scale = 0.0f;
++  //float m_efb_scale = 1.0f;
++  float m_efb_scale = 2.0f;
+   PixelFormat m_prev_efb_format;
+ 
+   std::unique_ptr<AbstractTexture> m_efb_color_texture;
+diff -rupN dolphin.orig/Source/Core/VideoCommon/TextureCacheBase.cpp dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp
+--- dolphin.orig/Source/Core/VideoCommon/TextureCacheBase.cpp	2024-06-17 15:48:10.120157247 +0000
++++ dolphin/Source/Core/VideoCommon/TextureCacheBase.cpp	2024-06-17 17:01:12.572725778 +0000
+@@ -1066,7 +1066,8 @@ SamplerState TextureCacheBase::GetSample
+     // that have arbitrary contents, eg. are used for fog effects where the
+     // distance they kick in at is important to preserve at any resolution.
+     // Correct this with the upscaling factor of custom textures.
+-    s32 lod_offset = std::log2(g_framebuffer_manager->GetEFBScale() / custom_tex_scale) * 256.f;
++    //s32 lod_offset = std::log2(g_framebuffer_manager->GetEFBScale() / custom_tex_scale) * 256.f;
++    s64 lod_offset = std::log2(g_framebuffer_manager->GetEFBScalef() / custom_tex_scale) * (s64) 256.f;
+     state.tm0.lod_bias = std::clamp<s32>(state.tm0.lod_bias + lod_offset, -32768, 32767);
+ 
+     // Anisotropic also pushes mips farther away so it cannot be used either
+@@ -2349,7 +2350,8 @@ void TextureCacheBase::CopyRenderTargetT
+   //       complex down filtering to average all pixels and produce the correct result.
+   const bool linear_filter =
+       !is_depth_copy &&
+-      (scaleByHalf || g_framebuffer_manager->GetEFBScale() != 1 || y_scale > 1.0f);
++      //(scaleByHalf || g_framebuffer_manager->GetEFBScale() != 1 || y_scale > 1.0f);
++      (scaleByHalf || g_framebuffer_manager->IsUnscaled() || y_scale > 1.0f);
+ 
+   RcTcacheEntry entry;
+   if (copy_to_vram)
+diff -rupN dolphin.orig/Source/Core/VideoCommon/VideoConfig.cpp dolphin/Source/Core/VideoCommon/VideoConfig.cpp
+--- dolphin.orig/Source/Core/VideoCommon/VideoConfig.cpp	2024-06-17 15:48:10.120157247 +0000
++++ dolphin/Source/Core/VideoCommon/VideoConfig.cpp	2024-06-17 17:20:19.009387860 +0000
+@@ -355,7 +355,7 @@ void CheckForConfigChanges()
+   if (changed_bits == 0)
+     return;
+ 
+-  float old_scale = g_framebuffer_manager->GetEFBScale();
++  float old_scale = g_framebuffer_manager->GetEFBScalef();
+ 
+   // Framebuffer changed?
+   if (changed_bits & (CONFIG_CHANGE_BIT_MULTISAMPLES | CONFIG_CHANGE_BIT_STEREO_MODE |
+@@ -364,7 +364,7 @@ void CheckForConfigChanges()
+     g_framebuffer_manager->RecreateEFBFramebuffer();
+   }
+ 
+-  if (old_scale != g_framebuffer_manager->GetEFBScale())
++  if (old_scale != g_framebuffer_manager->GetEFBScalef())
+   {
+     auto& system = Core::System::GetInstance();
+     auto& pixel_shader_manager = system.GetPixelShaderManager();
