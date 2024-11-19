@@ -4,12 +4,14 @@
 # Copyright (C) 2022-present Hector Calvarro (https://github.com/kelvfimer)
 #Script for setting up cheevos on duckstation emuelec. it extracts the data from emuelec.conf and it constructs the entries in seetings.ini if [Cheevos] or Enabled = True or Enable = False are not presented
 
-#Extract username and password from emuelec.conf
-username=$(grep "global.retroachievements.username" /storage/.config/emuelec/configs/emuelec.conf|sed s/"global.retroachievements.username="//)
-password=$(grep "global.retroachievements.password" /storage/.config/emuelec/configs/emuelec.conf|sed s/"global.retroachievements.password="//)
+. /etc/profile
 
-#Parse token from reply retroachievements
-token=$(curl -s "http://retroachievements.org/dorequest.php?r=login&u=${username}&p=${password}"|sed -E 's/.*"Token":"?([^,"]*)"?.*/\1/')
+#Extract username and password from emuelec.conf
+username=$(get_ee_setting "global.retroachievements.username")
+password=$(get_ee_setting "global.retroachievements.password")
+token=$(grep "cheevos_token" /storage/.config/retroarch/retroarch.cfg | cut -d'"' -f2)
+
+DUCK_INI="/storage/.config/emuelec/configs/duckstation/settings.ini"
 
 #Test the token if empty exit 1.
 if [ -z "${token}" ]
@@ -19,33 +21,31 @@ then
 fi
 
 #Variables for checking if [Cheevos] or enabled true or false are presente.
-zcheevos=$(grep -Fx "[Cheevos]" /storage/.config/emuelec/configs/duckstation/settings.ini)
-zenabledtrue=$(grep -Fx "Enabled = true" /storage/.config/emuelec/configs/duckstation/settings.ini)
-zenabledfalse=$(grep -Fx "Enabled = false" /storage/.config/emuelec/configs/duckstation/settings.ini)
+zcheevos=$(grep -Fx "[Cheevos]" ${DUCK_INI})
 datets=$(date +%s%N | cut -b1-13)
 
 #Variables for do not duplicate the entries
-zusername=$(grep "Username =" /storage/.config/emuelec/configs/duckstation/settings.ini)
-ztoken=$(grep "Token =" /storage/.config/emuelec/configs/duckstation/settings.ini)
-zdts=$(grep "LoginTimestamp =" /storage/.config/emuelec/configs/duckstation/settings.ini)
+zusername=$(grep "Username =" ${DUCK_INI})
+ztoken=$(grep "Token =" ${DUCK_INI})
+zdts=$(grep "LoginTimestamp =" ${DUCK_INI})
 
+if ([ -z "${zcheevos}" ])
+then
+    # Add the [Cheevos] section and the corresponding lines if it does not exist
+    sed -i "$ a [Cheevos]\nEnabled = true\nUsername = ${username}\nToken = ${token}\nLoginTimestamp = ${datets}" ${DUCK_INI}
+else
+    # Replace existing values if the [Cheevos] section is already present, without modifying Enabled
+    if ! grep -q "^Username = " ${DUCK_INI}; then
+        sed -i "/^\[Cheevos\]/a Username = ${username}" ${DUCK_INI}
+    else
+        sed -i "/^\[Cheevos\]/,/^\[/{s/^Username = .*/Username = ${username}/;}" ${DUCK_INI}
+    fi
 
-if ([ -z "${zcheevos}" ] && [ -z "${zenabledtrue}" ] && [ -z "${zenabledfalse}" ])
-then
-     sed -i "$ a [Cheevos]\nEnabled = true\nUsername = ${username}\nToken = ${token}\nLoginTimestamp = ${datets}" /storage/.config/emuelec/configs/duckstation/settings.ini
-elif ([ -z "${zenabledtrue}" ] && [ -z "${zenabledfalse}" ])
-then
-     sed -i "/^\[Cheevos\].*/a Enabled = true\nUsername = ${username}\nToken = ${token}\nLoginTimestamp = ${datets}" /storage/.config/emuelec/configs/duckstation/settings.ini
-elif [ -n "${zenabledtrue}" ]
-then 
-     if ([ -z "${zusername}" ] && [ -z "${ztoken}" ] && [ -z "${zdts}" ])
-     then
-          sed -i "/^Enabled = true.*/a Username = ${username}\nToken = ${token}\nLoginTimestamp = ${datets}" /storage/.config/emuelec/configs/duckstation/settings.ini
-     fi
-elif [ -n "${zenabledfalse}" ]
-then
-     if ([ -z "${zusername}" ] && [ -z "${ztoken}" ] && [ -z "${zdts}" ])
-     then
-          sed -i "/^Enabled = false.*/a Username = ${username}\nToken = ${token}\nLoginTimestamp = ${datets}" /storage/.config/emuelec/configs/duckstation/settings.ini
-     fi
+    if ! grep -q "^Token = " ${DUCK_INI}; then
+        sed -i "/^\[Cheevos\]/a Token = ${token}" ${DUCK_INI}
+    else
+        sed -i "/^\[Cheevos\]/,/^\[/{s/^Token = .*/Token = ${token}/;}" ${DUCK_INI}
+    fi
+
+    sed -i "/^\[Cheevos\]/,/^\[/{s/^LoginTimestamp = .*/LoginTimestamp = ${datets}/;}" ${DUCK_INI}
 fi
