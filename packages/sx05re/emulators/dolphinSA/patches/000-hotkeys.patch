@@ -1,8 +1,8 @@
 diff --git a/Source/Core/Core/HW/GCPadEmu.cpp b/Source/Core/Core/HW/GCPadEmu.cpp
-index efcab4fa7a..0b6a27a2bd 100644
+index fbbcbc630e..9dc3641bfc 100644
 --- a/Source/Core/Core/HW/GCPadEmu.cpp
 +++ b/Source/Core/Core/HW/GCPadEmu.cpp
-@@ -25,6 +25,7 @@ static const u16 button_bitmasks[] = {
+@@ -26,6 +26,7 @@ static const u16 button_bitmasks[] = {
      PAD_BUTTON_Y,
      PAD_TRIGGER_Z,
      PAD_BUTTON_START,
@@ -10,21 +10,21 @@ index efcab4fa7a..0b6a27a2bd 100644
      0  // MIC HAX
  };
  
-@@ -47,6 +48,9 @@ GCPad::GCPad(const unsigned int index) : m_index(index)
+@@ -50,6 +51,9 @@ GCPad::GCPad(const unsigned int index) : m_index(index)
    // i18n: The START/PAUSE button on GameCube controllers
-   m_buttons->AddInput(ControllerEmu::Translate, START_BUTTON, _trans("START"));
+   m_buttons->AddInput(Translatability::Translate, START_BUTTON, _trans("START"));
  
 +  // Hotkey Button
-+  m_buttons->AddInput(ControllerEmu::Translate, HOTKEY_BUTTON, _trans("HOTKEY"));
++  m_buttons->AddInput(Translatability::Translate, HOTKEY_BUTTON, _trans("HOTKEY"));
 +
    // sticks
    groups.emplace_back(m_main_stick = new ControllerEmu::OctagonAnalogStick(
                            MAIN_STICK_GROUP, _trans("Control Stick"), MAIN_STICK_GATE_RADIUS));
 diff --git a/Source/Core/Core/HW/GCPadEmu.h b/Source/Core/Core/HW/GCPadEmu.h
-index 66a1aee4e4..250aabea37 100644
+index 2555ee05b1..c2230a606a 100644
 --- a/Source/Core/Core/HW/GCPadEmu.h
 +++ b/Source/Core/Core/HW/GCPadEmu.h
-@@ -66,6 +66,7 @@ public:
+@@ -68,6 +68,7 @@ public:
    static constexpr const char* Y_BUTTON = "Y";
    static constexpr const char* Z_BUTTON = "Z";
    static constexpr const char* START_BUTTON = "Start";
@@ -33,25 +33,25 @@ index 66a1aee4e4..250aabea37 100644
    // i18n: The left trigger button (labeled L on real controllers)
    static constexpr const char* L_DIGITAL = _trans("L");
 diff --git a/Source/Core/DolphinNoGUI/PlatformFBDev.cpp b/Source/Core/DolphinNoGUI/PlatformFBDev.cpp
-index 552a2aa9c4..e1989c2be5 100644
+index 53312bfa08..c166c06c40 100644
 --- a/Source/Core/DolphinNoGUI/PlatformFBDev.cpp
 +++ b/Source/Core/DolphinNoGUI/PlatformFBDev.cpp
-@@ -9,6 +9,14 @@
- #include "Core/ConfigManager.h"
- #include "Core/Core.h"
+@@ -11,6 +11,14 @@
  #include "Core/State.h"
-+#include "Core/System.h"
-+
+ #include "Core/System.h"
+ 
 +#include "Core/HW/GCPad.h"
 +#include "InputCommon/GCPadStatus.h"
 +#include <fmt/format.h>
 +#include "Core/Config/GraphicsSettings.h"
++#include "Core/Config/MainSettings.h"
 +#include "VideoCommon/VideoConfig.h"
 +#include "VideoCommon/OnScreenDisplay.h"
- 
++
  #include <climits>
  #include <cstdio>
-@@ -77,9 +85,116 @@ void PlatformFBDev::MainLoop()
+ #include <thread>
+@@ -78,9 +85,111 @@ void PlatformFBDev::MainLoop()
  {
    while (IsRunning())
    {
@@ -61,9 +61,9 @@ index 552a2aa9c4..e1989c2be5 100644
 +		static int aspect = 0;
 +		static int fforward = 0;
 +		static int ires = 0;
-+				
++
      UpdateRunningFlag();
-     Core::HostDispatchJobs();
+     Core::HostDispatchJobs(Core::System::GetInstance());
  
 +		if(Pad::IsInitialized()) {
 +		  GCPadStatus x = Pad::GetStatus(0);
@@ -83,11 +83,11 @@ index 552a2aa9c4..e1989c2be5 100644
 +		   }
 +
 +		   if( (x.button & PAD_TRIGGER_L) == PAD_TRIGGER_L) {
-+		     State::Load(slot);
++		     State::Load(Core::System::GetInstance(), slot);
 +		     hotkey = 0;
 +		   }
 +		   if( (x.button & PAD_TRIGGER_R) == PAD_TRIGGER_R) {
-+		     State::Save(slot);
++		     State::Save(Core::System::GetInstance(), slot);
 +		     hotkey = 0;
 +		   }
 +		   if( (x.button & PAD_BUTTON_DOWN) == PAD_BUTTON_DOWN) {
@@ -125,12 +125,7 @@ index 552a2aa9c4..e1989c2be5 100644
 +		     hotkey = 0;
 +		   }
 +		   if( (x.button & PAD_BUTTON_B) == PAD_BUTTON_B) {
-+		     if(ires == 0) {
-+		       Config::SetCurrent(Config::GFX_EFB_SCALE, 2);
-+		       OSD::AddMessage("Internal Resolution: 480P");
-+		       ires = 2;
-+		     }
-+		     else if(ires == 2) {
++		     if(ires == 2) {
 +		       Config::SetCurrent(Config::GFX_EFB_SCALE, 4);
 +		       OSD::AddMessage("Internal Resolution: 720P");
 +		       ires = 4;
@@ -140,13 +135,13 @@ index 552a2aa9c4..e1989c2be5 100644
 +		       OSD::AddMessage("Internal Resolution: 1080P");
 +		       ires = 6;
 +		     } else {
-+		       Config::SetCurrent(Config::GFX_EFB_SCALE, 1);
-+		       OSD::AddMessage("Internal Resolution: 240P");
-+		       ires = 0;
++		       Config::SetCurrent(Config::GFX_EFB_SCALE, 2);
++		       OSD::AddMessage("Internal Resolution: 480P");
++		       ires = 2;
 +		     }
 +		     hotkey = 0;
 +		   }
-+		   /*if( (x.button & PAD_TRIGGER_Z) == PAD_TRIGGER_Z) {
++		   if( (x.button & PAD_TRIGGER_Z) == PAD_TRIGGER_Z) {
 +		    if(fforward == 0) {
 +		      auto speed = Config::Get(Config::MAIN_EMULATION_SPEED) + 1.0;
 +		      speed = (speed >= 0.95 && speed <= 1.05) ? 1.0 : speed;
@@ -161,7 +156,7 @@ index 552a2aa9c4..e1989c2be5 100644
 +		      fforward = 0;
 +		    }
 +		    hotkey = 0;
-+			 }*/
++			 }
 +		 }
 +		}
 +
