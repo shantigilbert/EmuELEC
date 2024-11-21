@@ -29,8 +29,8 @@ if [ ! -e "${DATAFOLDER}/worlds/Big JM_Mixed River.txt" ]; then
             wget "${DATA}" -q --show-progress > /dev/tty0 2>&1
             unzip "${DATAFILE}" > /dev/tty0
             mv "${DATAFOLDER}/supermariowar-data-${DATANAME}"/* "${DATAFOLDER}/" > /dev/tty0
-            rm -rf "${DATANAME}" > /dev/tty0 2>&1
-            rm "supermariowar-data-${DATANAME}" > /dev/tty0 2>&1
+            rm -rf "${DATAFOLDER}/supermariowar-data-${DATANAME}" > /dev/tty0 2>&1
+            rm "${DATAFOLDER}/${DATAFILE}" > /dev/tty0 2>&1
             rm "imgui.ini" > /dev/tty0 2>&1
             ee_console disable
             cd "${DATAFOLDER}/.."
