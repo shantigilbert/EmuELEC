@@ -38,6 +38,51 @@ SNAPSHOT="$@"
 SNAPSHOT="${SNAPSHOT#*--snapshot=*}"
 SNAPSHOT="${SNAPSHOT% --*}"
 
+#Self language retroarch
+LANGEMUELEC=$(get_ee_setting system.language)
+
+if [ "$LANGEMUELEC" == "pt_BR" ] || [ "$LANGEMUELEC" == "pt_PT" ]; then
+    LANGEMUELEC="7"
+elif [ "$LANGEMUELEC" == "en_US" ] || [ "$LANGEMUELEC" == "en_GB" ]; then
+    LANGEMUELEC="0"
+elif [ "$LANGEMUELEC" == "fr_FR" ]; then
+    LANGEMUELEC="2"
+elif [ "$LANGEMUELEC" == "es_ES" ] || [ "$LANGEMUELEC" == "es_MX" ]; then
+    LANGEMUELEC="3"
+elif [ "$LANGEMUELEC" == "de_DE" ]; then
+    LANGEMUELEC="4"
+elif [ "$LANGEMUELEC" == "it_IT" ]; then
+    LANGEMUELEC="5"
+elif [ "$LANGEMUELEC" == "eu_ES" ]; then
+    LANGEMUELEC="21"
+elif [ "$LANGEMUELEC" == "tr_TR" ]; then
+    LANGEMUELEC="17"
+elif [ "$LANGEMUELEC" == "zh_CN" ]; then
+    LANGEMUELEC="11"
+elif [ "$LANGEMUELEC" == "zh_TW" ]; then
+    LANGEMUELEC="12"
+elif [ "$LANGEMUELEC" == "ko_KR" ]; then
+    LANGEMUELEC="8"
+elif [ "$LANGEMUELEC" == "ja_JP" ]; then
+    LANGEMUELEC="9"
+elif [ "$LANGEMUELEC" == "ru_RU" ]; then
+    LANGEMUELEC="14"
+elif [ "$LANGEMUELEC" == "nl_NL" ]; then
+    LANGEMUELEC="10"
+elif [ "$LANGEMUELEC" == "pl_PL" ]; then
+    LANGEMUELEC="15"
+elif [ "$LANGEMUELEC" == "sv_SE" ]; then
+    LANGEMUELEC="16"
+elif [ "$LANGEMUELEC" == "hu_HU" ]; then
+    LANGEMUELEC="19"
+elif [ "$LANGEMUELEC" == "cs_CZ" ]; then
+    LANGEMUELEC="20"
+else
+    LANGEMUELEC="0"
+fi
+
+sed -i "s/user_language = \"[^\"]*\"/user_language = \"$LANGEMUELEC\"/" ${RACONF}
+
 # For the new snapshot save state manager we need to set the path to be /storage/roms/savestates/[PLATFORM]
 mkdir -p "/storage/roms/savestates/${PLATFORM}"
 sed -i '/savestates_in_content_dir =/d' ${RACONF}

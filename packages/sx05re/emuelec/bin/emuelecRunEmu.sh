@@ -181,6 +181,12 @@ case ${PLATFORM} in
                 set_kill_keys "${EMU}"
                 RUNTHIS='${TBASH} openbor.sh "${ROMNAME}" "${EMU}"'
                 ;;
+        "ikemen")
+		if [ "$EMU" = "ikemen" ]; then
+            set_kill_keys "Ikemen_Go"
+            RUNTHIS='${TBASH} Ikemen_Go.sh "${ROMNAME}"'
+        fi
+               ;;
         "setup")
         if [ "${EE_DEVICE}" == "OdroidGoAdvance" ] || [ "${EE_DEVICE}" == "GameForce" ]; then
             set_kill_keys "kmscon"

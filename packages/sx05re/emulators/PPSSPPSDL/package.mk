@@ -2,7 +2,8 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="PPSSPPSDL"
-PKG_VERSION="cfcca0ed13ca86eb6e1ee7bb4161aabee6c2af06"
+PKG_VERSION="288f3291811cdbe8937190b87c68f680e58522f3"
+CHEAT_DB_VERSION="276b6a64a47bca99e0e8922c699df1e15846f975"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MAME"
@@ -13,6 +14,7 @@ PKG_SHORTDESC="PPSSPPDL"
 PKG_LONGDESC="PPSSPP Standalone"
 GET_HANDLER_SUPPORT="git"
 PKG_BUILD_FLAGS="-lto"
+
 
 PKG_CMAKE_OPTS_TARGET+="-DUSE_SYSTEM_FFMPEG=ON \
                         -DUSING_FBDEV=ON \
@@ -51,4 +53,5 @@ makeinstall_target() {
     cp -rf ${PKG_DIR}/config/* ${INSTALL}/usr/config/ppsspp/
     rm ${INSTALL}/usr/config/ppsspp/assets/gamecontrollerdb.txt
     ln -sf /storage/.config/SDL-GameControllerDB/gamecontrollerdb.txt ${INSTALL}/usr/config/ppsspp/assets/gamecontrollerdb.txt
+    curl -Lo ${INSTALL}/usr/config/ppsspp/PSP/Cheats/cheat.db https://raw.githubusercontent.com/Saramagrean/CWCheat-Database-Plus-/${CHEAT_DB_VERSION}/cheat.db
 } 

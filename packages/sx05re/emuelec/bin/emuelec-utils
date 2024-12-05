@@ -463,8 +463,8 @@ function init_app_video() {
 
 	echo "$(cat /sys/class/display/mode)" > /tmp/EE_LASTVIDEO
 	local VIDEO_EMU=$(get_ee_setting nativevideo "${PLATFORM}" "${BASEROMNAME}")
-	[[ -z "$VIDEO_EMU" ]] && VIDEO_EMU=$LAST_VIDEO
-	
+	[[ -z "$VIDEO_EMU" ]] && VIDEO_EMU=$(cat /tmp/EE_LASTVIDEO)
+
 	# Show splash screen if enabled
 	local SPL=$(get_ee_setting ee_splash.enabled)
 	[ "${SPL}" -eq "1" ] && ${TBASH} show_splash.sh gameloading "${PLATFORM}" "${ROMNAME}"
