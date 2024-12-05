@@ -59,6 +59,7 @@ declare -A GC_DOLPHIN_BUTTONS=(
   [righttrigger]="Triggers/R"
   [start]="Buttons/Start"
   [rightshoulder]="Buttons/Z"
+  [guide]="Buttons/Hotkey"
 )
 
 BTN_SWAP_XY=$(get_ee_setting dolphin_joy_swap_xy)

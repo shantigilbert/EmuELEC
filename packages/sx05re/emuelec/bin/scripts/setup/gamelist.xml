@@ -55,6 +55,15 @@
 		<image>./setup_images/pixelcade.png</image>
 	</game>
 	<game>
+		<path>./install_cheats.sh</path>
+		<name>Install Libretro Cheats</name>
+		<desc>Download and install Libretro Cheats</desc>
+		<developer>Hector Calvarro</developer>
+		<publisher>Emuelec</publisher>
+		<genre>script</genre>
+		<image>./setup_images/cheats.png</image>
+	</game>
+	<game>
 		<path>./sselphs_scraper.sh</path>
 		<name>Sselphs scraper</name>
 		<desc>Alternative ROM Scraper. Configuration is required!</desc>
