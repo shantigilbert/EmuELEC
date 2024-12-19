@@ -3,7 +3,7 @@
 
 PKG_NAME="kernel-firmware"
 PKG_VERSION="20240811"
-PKG_SHA256="d845252e0b0ce2f5dfabc22926cd70a939993329dc1b0c33ffc0c802f27c4e10"
+PKG_SHA256="58f1a14b800e3d1967986197d83c81f1ad14b7898a557133c58df0c02c538082"
 PKG_LICENSE="other"
 PKG_SITE="https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/"
 PKG_URL="https://cdn.kernel.org/pub/linux/kernel/firmware/linux-firmware-${PKG_VERSION}.tar.xz"
