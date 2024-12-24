@@ -36,10 +36,16 @@ declare -A GC_VALUES=(
 [b14]="Button14"
 [a0]="Axis0"
 [a1]="Axis1"
-[a2]="+Axis4"
-[a3]="Axis2"
-[a4]="Axis3"
-[a5]="+Axis5"
+[a2]="Axis2"
+[a3]="Axis3"
+[a4]="Axis4"
+[a5]="Axis5"
+[a0+]="+Axis4"
+[a1+]="+Axis5"
+[a2+]="+Axis4"
+[a3+]="+Axis5"
+[a4+]="+Axis4"
+[a5+]="+Axis5"
 )
 
 declare -A GC_BUTTONS=(
@@ -139,7 +145,10 @@ set_pad() {
             [[ ! -z "${VAL}" ]] && echo "${GC_INDEX} = Controller${JOY_INDEX}/${VAL}" >> ${CONFIG_TMP}
           fi
           if [[ "${BTN_TYPE}" == "a" ]]; then
-            [[ ! -z "${VAL}" ]] && echo "${GC_INDEX} = Controller${JOY_INDEX}/${VAL}" >> ${CONFIG_TMP}
+              if [[ "${BUTTON_INDEX}" == *trigger ]]; then
+                  VAL="${GC_VALUES[${TVAL}+]}"
+              fi
+              [[ ! -z "${VAL}" ]] && echo "${GC_INDEX} = Controller${JOY_INDEX}/${VAL}" >> ${CONFIG_TMP}
           fi
         fi
       fi
