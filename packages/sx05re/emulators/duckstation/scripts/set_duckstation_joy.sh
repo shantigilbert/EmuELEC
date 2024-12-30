@@ -34,12 +34,12 @@ declare -A GC_VALUES=(
 [b12]="Button12"
 [b13]="Button13"
 [b14]="Button14"
-[a0]="Axis0"
-[a1]="Axis1"
-[a2]="+Axis4"
-[a3]="Axis2"
-[a4]="Axis3"
-[a5]="+Axis5"
+[leftx]="Axis0"
+[lefty]="Axis1"
+[rightx]="Axis2"
+[righty]="Axis3"
+[lefttrigger]="+Axis4"
+[righttrigger]="+Axis5"
 )
 
 declare -A GC_BUTTONS=(
@@ -47,10 +47,10 @@ declare -A GC_BUTTONS=(
   [dpright]="ButtonRight"
   [dpup]="ButtonUp"
   [dpdown]="ButtonDown"
-  [x]="ButtonTriangle"
-  [y]="ButtonSquare"
-  [a]="ButtonCircle"
-  [b]="ButtonCross"
+  [y]="ButtonTriangle"
+  [x]="ButtonSquare"
+  [b]="ButtonCircle"
+  [a]="ButtonCross"
   [leftshoulder]="ButtonL1"
   [rightshoulder]="ButtonR1"
   [lefttrigger]="ButtonL2"
@@ -117,6 +117,7 @@ set_pad() {
   declare -i JOY_INDEX=$(( ${1} - 1 ))
   echo "Type = AnalogController" >> ${CONFIG}
 
+  local ANALOG_MODE=0
   local LINE_INSERT=
   set -f
   local GC_ARRAY=(${GC_MAP//,/ })
@@ -139,11 +140,17 @@ set_pad() {
             [[ ! -z "${VAL}" ]] && echo "${GC_INDEX} = Controller${JOY_INDEX}/${VAL}" >> ${CONFIG_TMP}
           fi
           if [[ "${BTN_TYPE}" == "a" ]]; then
-            [[ ! -z "${VAL}" ]] && echo "${GC_INDEX} = Controller${JOY_INDEX}/${VAL}" >> ${CONFIG_TMP}
+              ANALOG_MODE=1
+              VAL="${GC_VALUES[${BUTTON_INDEX}]}"
+              [[ ! -z "${VAL}" ]] && echo "${GC_INDEX} = Controller${JOY_INDEX}/${VAL}" >> ${CONFIG_TMP}
           fi
         fi
       fi
   done
+
+  if [[ "${ANALOG_MODE}" == "1" ]]; then
+    echo "AnalogDPadInDigitalMode = true" >> ${CONFIG_TMP}
+  fi
 
   cat "${CONFIG_TMP}" | sort >> ${CONFIG}
 
