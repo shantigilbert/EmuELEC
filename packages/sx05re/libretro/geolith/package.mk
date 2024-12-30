@@ -2,8 +2,8 @@
 # Copyright (C) 2024-present EmuELEC (https://github.com/emuelec)
 
 PKG_NAME="geolith"
-PKG_VERSION="d8f7a87376ab614d464d46ee408d29b2dec163ff"
-PKG_SHA256="b84ea1e150e36375266c21b605c8ac82f1d04d95a0017507464d58ce20d63822"
+PKG_VERSION="38f749148b196531b36e7096c0609d9c00429168"
+PKG_SHA256="75257b8c7f6e7655ca57cae9b30f851323011368aea6af898ce57e9170ef2f82"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/libretro/geolith-libretro"
 PKG_URL="${PKG_SITE}/archive/${PKG_VERSION}.tar.gz"

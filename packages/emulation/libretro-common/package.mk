@@ -2,8 +2,8 @@
 # Copyright (C) 2022-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libretro-common"
-PKG_VERSION="50c15a88eb741cbe675743a282d8cc4c89421e3f"
-PKG_SHA256="042986fad22dc37188df7a186d17a258edfe8e552353f9b509a47418e8dfa623"
+PKG_VERSION="bf52f8b95392e5149f27f31b001c79b8f1f7f579"
+PKG_SHA256="bf7b8bdec8b35b33ab1d069d94087e9bc648db2e896789590878cd278458ceb7"
 PKG_LICENSE="Public domain"
 PKG_SITE="https://github.com/libretro/libretro-common"
 PKG_URL="https://github.com/libretro/libretro-common/archive/${PKG_VERSION}.tar.gz"

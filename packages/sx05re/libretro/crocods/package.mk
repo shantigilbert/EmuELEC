@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="crocods"
-PKG_VERSION="e80f49c21c6788617e57ab86e9442a162d24f38a"
-PKG_SHA256="7f48c33a90476569e70516e166c9bb6a47bb40fe2ddc8eb70799d179d5131820"
+PKG_VERSION="a320f6e38af49af84a63f81329a1bdb9322022b4"
+PKG_SHA256="b2fb689f0a2d3d0496ee11330ed0d086d09dcd8cde1bce34f46f8a1db89aabbf"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MIT"
