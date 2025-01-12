@@ -1,0 +1,11 @@
+--- a/yabause/src/threads.h	2022-01-05 15:41:03.685887385 -0600
++++ b/yabause/src/threads.h	2022-01-05 15:43:05.404177636 -0600
+@@ -115,6 +115,8 @@
+ 
+ int YabCopyFile(const char * src, const char * dst);
+ int YabMakeCleanDir( const char * dirname );
++
++#include <core.h>
+ int YabNanosleep(u64 ns);
+ 
+ ///////////////////////////////////////////////////////////////////////////

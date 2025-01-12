@@ -1,0 +1,20 @@
+--- a/yabause/src/ygl.h
++++ b/yabause/src/ygl.h
+@@ -50,7 +50,6 @@
+     #include <glsm/glsm.h>
+ #elif defined(__ANDROID__)
+     #include <GLES3/gl31.h>
+-    #include <GLES3/gl3ext.h>
+     #include <EGL/egl.h>
+ 
+ 
+--- a/yabause/src/nanovg/nanovg_osdcore.c
++++ b/yabause/src/nanovg/nanovg_osdcore.c
+@@ -36,7 +36,6 @@
+ 
+ #if defined(_OGLES3_)
+ #include <GLES3/gl3.h>
+-#include <GLES3/gl3ext.h>
+ #else
+ #include "ygl.h"
+ #endif

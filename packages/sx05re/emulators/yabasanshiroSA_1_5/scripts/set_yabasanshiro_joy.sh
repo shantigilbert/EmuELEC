@@ -7,7 +7,7 @@
 . /etc/profile
 
 # Configure ADVMAME players based on ES settings
-CONFIG_DIR="/storage/roms/saturn/yabasanshiro"
+CONFIG_DIR="/storage/roms/saturn/yabasanshiro1_5"
 CONFIG="${CONFIG_DIR}/keymapv2.json"
 
 CONFIG_TMP=/tmp/jc/yabasan.tmp
@@ -87,10 +87,10 @@ declare -A GC_BUTTONS=(
   [y]="x"
   [a]="b"
   [b]="a"
-  [leftshoulder]="l"
-  [rightshoulder]="r"
-  [lefttrigger]="z"
-  [righttrigger]="c"
+  [leftshoulder]="z"
+  [rightshoulder]="c"
+  [lefttrigger]="l"
+  [righttrigger]="r"
   #[leftstick]=""
   #[rightstick]=""
   [back]="select"
@@ -98,10 +98,8 @@ declare -A GC_BUTTONS=(
   #[guide]=""
   [leftx0]="analogx"
   [leftx1]="analogy"
-  [leftx2]="analogleft"
   [lefty0]="analogl"
   [lefty1]="analogr"
-  [lefty2]="analogright"
 )
 
 # Cleans all the inputs for the gamepad with name ${GAMEPAD} and player ${1}
@@ -162,7 +160,8 @@ set_pad() {
         fi
         if [[ "${BTN_TYPE}" == "a" ]]; then
           case ${BUTTON_INDEX} in
-            leftx|lefty|rightx|righty)
+            leftx|rightx|lefty|righty)
+              continue
               ;;
           esac
           [[ ! -z "${VAL}" ]] && echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": 1 }," >> ${CONFIG_TMP}
@@ -176,12 +175,18 @@ set_pad() {
             echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": -1 }," >> ${CONFIG_TMP}
             GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}1]}"
             echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": 1 }," >> ${CONFIG_TMP}
-            GC_INDEX="${GC_BUTTONS[${BUTTON_INDEX}2]}"
-            echo -e "\t\t\"${GC_INDEX}\": { \"id\": ${VAL}, \"type\": \"${TYPE}\", \"value\": 1 }," >> ${CONFIG_TMP}
             ;;
         esac
       fi      
   done
+
+  local AXIS="$( cat /tmp/sdljoytest.txt | grep "Joystick ${JOY_INDEX} Axes" | cut -d' ' -f4 | sed 's/^0*//' )"
+  if [[ ! -z "${AXIS}" ]]; then
+    local AXIS_LEFT=$(( AXIS - 2 ))
+    local AXIS_RIGHT=$(( AXIS - 1 ))
+    echo -e "\t\t\"analogleft\": { \"id\": ${AXIS_LEFT}, \"type\": \"axis\", \"value\": 0 }," >> ${CONFIG_TMP}
+    echo -e "\t\t\"analogright\": { \"id\": ${AXIS_RIGHT}, \"type\": \"axis\", \"value\": 0 }," >> ${CONFIG_TMP}
+  fi
 
   # remove last character
   sed -i '$ s/.$//' ${CONFIG_TMP}
@@ -207,3 +212,4 @@ echo "{" >> ${CONFIG}
 jc_get_players
 
 echo "}" >> ${CONFIG}
+

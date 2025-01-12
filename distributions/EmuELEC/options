@@ -300,6 +300,7 @@ fuse-libretro \
 gambatte \
 gearboy \
 gearcoleco \
+geargrafx \
 gearsystem \
 genesis-plus-gx \
 genesis-plus-gx-wide \
@@ -361,7 +362,8 @@ melonds \
 snes9x2005 \
 yabause"
 
-LIBRETRO_S922X_CORES="mesen \
+LIBRETRO_S922X_CORES="beetle-saturn \
+mesen \
 multiemu \
 mesen-s \
 quicknes \
@@ -509,4 +511,5 @@ virtualjaguar"
 "/tmp/cores/pcsx_rearmed_libretro.so;"\
 "/tmp/cores/theodore_libretro.so;"\
 "/tmp/cores/tic80_libretro.so;"\
-"/tmp/cores/4do_libretro.so"
+"/tmp/cores/4do_libretro.so;"\
+"/tmp/cores/mednafen_saturn_libretro.so"
