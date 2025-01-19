@@ -1,4 +1,4 @@
-################################################################################
+#############################################################################
 #      This file is part of OpenELEC - http://www.openelec.tv
 #      Copyright (C) 2009-2012 Stephan Raue (stephan@openelec.tv)
 #
@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="retroarch"
-PKG_VERSION="1e1b24c35996436e6cf0fe50ec046e2e03a0dbfa"
+PKG_VERSION="a0bcf7945d4e46e4088ca36ba2fe9c2877036c6d"
 PKG_SITE="https://github.com/libretro/RetroArch"
 PKG_URL="${PKG_SITE}.git"
 PKG_LICENSE="GPLv3"
@@ -85,7 +85,7 @@ cd ${PKG_BUILD}
 }
 
 make_target() {
-	make HAVE_ACCESSIBILITY=1 HAVE_UPDATE_ASSETS=1 HAVE_LIBRETRODB=1 HAVE_BLUETOOTH=1 HAVE_NETWORKING=1 HAVE_LAKKA=1 HAVE_ZARCH=1 HAVE_QT=0 HAVE_LANGEXTRA=1 HAVE_LAKKA_PROJECT=0 HAVE_LAKKA_SERVER=0
+  make HAVE_ONLINE_UPDATER=1 HAVE_UPDATE_CORES=1 HAVE_UPDATE_CORE_INFO=1 HAVE_COMPRESSION=1 HAVE_ACCESSIBILITY=1 HAVE_UPDATE_ASSETS=1 HAVE_LIBRETRODB=1 HAVE_BLUETOOTH=1 HAVE_NETWORKING=1 HAVE_LAKKA=1 HAVE_ZARCH=1 HAVE_QT=0 HAVE_LANGEXTRA=1 HAVE_LAKKA_PROJECT=odroidn2+.aarch64 HAVE_LAKKA_SERVER="https://www.lakka.tv"
   [ $? -eq 0 ] && echo "(retroarch ok)" || { echo "(retroarch failed)" ; exit 1 ; }
   make -C gfx/video_filters compiler=${CC} extra_flags="${CFLAGS}"
 [ $? -eq 0 ] && echo "(video filters ok)" || { echo "(video filters failed)" ; exit 1 ; }

@@ -1,8 +1,6 @@
-diff --git a/core/sdl/sdl.cpp b/core/sdl/sdl.cpp
-index 62467d08..cb167b4f 100644
---- a/core/sdl/sdl.cpp
-+++ b/core/sdl/sdl.cpp
-@@ -160,6 +160,11 @@ void input_sdl_init()
+--- a/core/sdl/sdl.cpp	2024-06-02 19:45:15.598400200 +0200
++++ b/core/sdl/sdl.cpp	2024-06-02 19:49:41.074683700 +0200
+@@ -200,6 +200,11 @@
  #endif
  		std::string db = get_readonly_data_path("gamecontrollerdb.txt");
  		int rv = SDL_GameControllerAddMappingsFromFile(db.c_str());
@@ -13,4 +11,4 @@ index 62467d08..cb167b4f 100644
 +		}
  		if (rv < 0)
  		{
-			db = get_readonly_config_path("gamecontrollerdb.txt");
+ 			db = get_readonly_config_path("gamecontrollerdb.txt");
