@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="geargrafx"
-PKG_VERSION="9680f44b01c796c7d7e03dbb5a974869c29f5681"
+PKG_VERSION="fc93f716994670d37d510343b86cf2c6ab3aeeee"
 #PKG_SHA256="7918b813b74573e2d91c1d8ea511097897e1c5a3b429008ba48f50fd44630980"
 PKG_REV="1"
 PKG_ARCH="any"
