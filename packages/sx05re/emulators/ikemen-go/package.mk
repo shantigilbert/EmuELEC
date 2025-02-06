@@ -10,12 +10,15 @@ PKG_REV="1"
 PKG_ARCH="any" 
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/leonkasovan/Ikemen-GO"
-PKG_URL="https://github.com/leonkasovan/Ikemen-GO.git"
+PKG_URL="$PKG_SITE.git"
+PKG_GIT_CLONE_BRANCH="Batch_SDL2"
 PKG_DEPENDS_TARGET="toolchain go:host go SDL2 ${OPENGLES}"
 PKG_TOOLCHAIN="manual"
 PKG_SHORTDESC="Open-source fighting game engine"
 PKG_LONGDESC="Ikemen GO is an open-source fighting game engine."
 PKG_IS_TARGET=y
+PKG_GIT_CLONE_DEPTH="1"
+GET_HANDLER_SUPPORT="git"
 
 pre_configure_target() {
    

@@ -2,8 +2,8 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="pcsx_rearmed"
-PKG_VERSION="2b455e2ec087079cf2d84571e38ec49e963fb777"
-PKG_SHA256="3a7a4be9117b4f3bf91e5df25919cf31cf8ebf630293c324ad8089bd57b970c1"
+PKG_VERSION="b7027dbf9b020077be29014680d96b19c97f7d20"
+PKG_SHA256="2f9393259fe8de5fda0b25103b3f45e0896e4b317a310d8854f695bcf3a59a81"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
