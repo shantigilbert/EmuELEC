@@ -3,7 +3,7 @@
 # Copyright (C) 2022-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="hlsdk-portable"
-PKG_VERSION="8ad563dd4251185326520bd50b08a7b6d28b0ae5"
+PKG_VERSION="46e12d2f8466b48a7ed9cfe51c7c10ec6e3e54b8"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/FWGS/hlsdk-portable"
 PKG_URL="${PKG_SITE}.git"
