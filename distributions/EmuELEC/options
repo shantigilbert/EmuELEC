@@ -268,7 +268,7 @@
   ADDITIONAL_PACKAGES="u-boot-script dtc CoreELEC-Debug-Scripts inject_bl301
                        nfs-utils dtb-xml megatools"
 
-# start SX05RE added options multiemu \
+# start SX05RE added options
 
 LIBRETRO_CORES="2048 \
 81 \
@@ -318,6 +318,7 @@ mupen64plus \
 neocd_libretro \
 nestopia \
 nxengine \
+multiemu \
 o2em \
 opera \
 parallel-n64 \
