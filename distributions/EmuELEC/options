@@ -318,7 +318,6 @@ mupen64plus \
 neocd_libretro \
 nestopia \
 nxengine \
-multiemu \
 o2em \
 opera \
 parallel-n64 \
@@ -364,6 +363,7 @@ yabause"
 
 LIBRETRO_S922X_CORES="beetle-saturn \
 mesen \
+multiemu \
 mesen-s \
 quicknes \
 virtualjaguar"
