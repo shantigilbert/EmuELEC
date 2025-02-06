@@ -10,14 +10,17 @@ PKG_SECTION="emuelec"
 PKG_LONGDESC="EmuELEC Meta Package"
 PKG_TOOLCHAIN="manual"
 
-PKG_EXPERIMENTAL="nestopiaCV quasi88 xmil np2kai hypseus-singe yabasanshiroSA fbneoSA same_cdi ikemen-go"
+PKG_EXPERIMENTAL="nestopiaCV quasi88 xmil np2kai hypseus-singe yabasanshiroSA_1_11 yabasanshiroSA_1_5 fbneoSA same_cdi ikemen-go"
 PKG_EMUS="${LIBRETRO_CORES} advancemame PPSSPPSDL amiberry hatarisa openbor dosbox-staging mupen64plus-nx mupen64plus-nx-alt scummvmsa stellasa solarus dosbox-pure pcsx_rearmed ecwolf potator freej2me duckstation flycastsa fmsx-libretro jzintv mupen64plussa"
 PKG_DEPENDS_TARGET+=" emuelec-tools ${PKG_EMUS} ${PKG_EXPERIMENTAL} emuelec-ports"
 
 # These packages are only meant for S922x, S905x2 and A311D devices as they run poorly on S905" 
-if [ "${DEVICE}" == "Amlogic-ng" ] || [ "${DEVICE}" == "RK356x" ] || [ "${DEVICE}" == "OdroidM1" ]; then
-	PKG_DEPENDS_TARGET+=" ${LIBRETRO_S922X_CORES} mame2016 xow"
-fi
+#identifier Amlogic-ng Amlogic-ne Amlogic-no
+case "${DEVICE}" in
+    Amlogic-n*|RK356x|OdroidM1)
+        PKG_DEPENDS_TARGET+=" ${LIBRETRO_S922X_CORES} mame2016 xow"
+        ;;
+esac
 
 if [ "${DEVICE}" == "OdroidGoAdvance" ] || [ "${DEVICE}" == "GameForce" ]; then
 	PKG_DEPENDS_TARGET+=" kmscon odroidgoa-utils"
@@ -37,8 +40,9 @@ if [ "${ARCH}" == "aarch64" ]; then
 		PKG_DEPENDS_TARGET=$(echo ${PKG_DEPENDS_TARGET} | sed "s|${discore}| |")
 	done
 
-  PKG_DEPENDS_TARGET+=" swanstation \
-                        lib32-essential \
+  PKG_DEPENDS_TARGET+=" swanstation "
+                        
+  PKG_DEPENDS_TARGET+=" lib32-essential \
                         lib32-retroarch \
                         emuelec-32bit-info \
                         lib32-flycast \
@@ -50,14 +54,17 @@ if [ "${ARCH}" == "aarch64" ]; then
                         lib32-droidports \
                         lib32-box86
                         lib32-libusb"
+                        
+#identifier Amlogic-ng Amlogic-ne Amlogic-no
+case "${DEVICE}" in
+    Amlogic-n*|RK356x|OdroidM1)
+        PKG_DEPENDS_TARGET+=" dolphinSA"
+        ;;
+esac
 
-  if [ "${DEVICE}" == "Amlogic-ng" ] || [ "${DEVICE}" == "RK356x" ] || [ "${DEVICE}" == "OdroidM1" ]; then
-    PKG_DEPENDS_TARGET+=" dolphinSA"
-  fi
-
-  if [ "${DEVICE}" == "Amlogic-old" ]; then
+if [ "${DEVICE}" == "Amlogic-old" ]; then
     #we disable some cores that are not working or work poorly on Amlogic-old
-    for discore in yabasanshiroSA yabasanshiro same_cdi duckstation; do
+    for discore in yabasanshiroSA_1_11 yabasanshiroSA_1_5 yabasanshiro same_cdi duckstation; do
       PKG_DEPENDS_TARGET=$(echo ${PKG_DEPENDS_TARGET} | sed "s|${discore} | |")
     done
   fi
@@ -86,7 +93,6 @@ makeinstall_target() {
     echo "s905" > ${INSTALL}/ee_s905
   fi
 
-
   echo "${DEVICE}" > ${INSTALL}/ee_arch
   
   mkdir -p ${INSTALL}/usr/share/retroarch-overlays
@@ -97,6 +103,12 @@ makeinstall_target() {
     
   mkdir -p ${INSTALL}/usr/share/libretro-database
   touch ${INSTALL}/usr/share/libretro-database/dummy
+  
+  # set audio for NE
+  if [[ "${DEVICE}" == "Amlogic-ne" || "${DEVICE}" == "Amlogic-no" ]]; then
+            sed -i 's/#ee_audio_device=auto/ee_audio_device=0,2/' "${INSTALL}/usr/config/emuelec/configs/emuelec.conf"
+  fi
+  
 }
 
 post_install() {

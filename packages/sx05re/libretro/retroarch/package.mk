@@ -19,7 +19,7 @@
 ################################################################################
 
 PKG_NAME="retroarch"
-PKG_VERSION="a0bcf7945d4e46e4088ca36ba2fe9c2877036c6d"
+PKG_VERSION="62a85ae73790735edc9670f1568a4dae420bb43e"
 PKG_SITE="https://github.com/libretro/RetroArch"
 PKG_URL="${PKG_SITE}.git"
 PKG_LICENSE="GPLv3"
@@ -27,7 +27,7 @@ PKG_DEPENDS_TARGET="toolchain SDL2 alsa-lib openssl freetype zlib retroarch-asse
 PKG_LONGDESC="Reference frontend for the libretro API."
 GET_HANDLER_SUPPORT="git"
 
-if [ "${DEVICE}" = "Amlogic-ng" ] || [ "${DEVICE}" = "Amlogic-old" ]; then
+if [[ "${DEVICE}" == "Amlogic-ng" || "${DEVICE}" == "Amlogic-ne" || "${DEVICE}" == "Amlogic-no" || "${DEVICE}" = "Amlogic-old" ]]; then
   PKG_PATCH_DIRS="${DEVICE}"
 fi
 
@@ -65,7 +65,6 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-qt \
 
 if [ "${DEVICE}" == "OdroidGoAdvance" ] || [ "${DEVICE}" == "GameForce" ] || [ "${DEVICE}" == "RK356x" ] || [ "${DEVICE}" == "OdroidM1" ]; then
 PKG_CONFIGURE_OPTS_TARGET+=" --enable-opengles3 \
-                           --enable-opengles3_2 \
                            --enable-kms \
                            --disable-mali_fbdev"
 else
@@ -80,6 +79,13 @@ fi
 if [ ${ARCH} == "arm" ]; then
 PKG_CONFIGURE_OPTS_TARGET+=" --enable-neon"
 fi
+
+#identifier Amlogic-ng Amlogic-ne Amlogic-no
+case "${DEVICE}" in
+    Amlogic-n*)
+        PKG_CONFIGURE_OPTS_TARGET+=" --enable-opengles3 --enable-mali_fbdev"
+        ;;
+esac
 
 cd ${PKG_BUILD}
 }

@@ -35,9 +35,9 @@ PKG_LONGDESC="A port of the Fuse Unix Spectrum Emulator to libretro "
 PKG_TOOLCHAIN="make"
 
 make_target() {
-if [ "${DEVICE}" == "Amlogic-ng" ] || [ "${DEVICE}" == "Amlogic-ogu" ]; then
+if [[ "${DEVICE}" == "Amlogic-ng" || "${DEVICE}" == "Amlogic-ne" || "${DEVICE}" == "Amlogic-no" ]]; then
   make -f Makefile.libretro platform=rpi4_64
- else
+else
   make -f Makefile.libretro platform=rpi3_64 
 fi
 }

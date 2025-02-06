@@ -57,9 +57,8 @@
 # for a list of additional drivers see packages/linux-drivers
 # Space separated list is supported,
 # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
-  ADDITIONAL_DRIVERS="gpu-aml openvfd-driver media_modules-aml wifi_dummy-aml ap6xxx-aml
-                     uwe5631-aml RTL8812AU RTL8822BU-aml RTL8822CS-aml RTL8822CU-aml
-                     RTL8852BS-aml RTL8152-aml w1-aml"
+  ADDITIONAL_DRIVERS="gpu-aml openvfd-driver media_modules-aml 
+                      wifi_dummy-aml ap6xxx-aml w1-aml " #mt7668-wifi-bt
 
 # Default size of system partition, in MB, eg. 512
   SYSTEM_SIZE=2048
@@ -269,7 +268,7 @@
   ADDITIONAL_PACKAGES="u-boot-script dtc CoreELEC-Debug-Scripts inject_bl301
                        nfs-utils dtb-xml megatools"
 
-# start SX05RE added options
+# start SX05RE added options multiemu \
 
 LIBRETRO_CORES="2048 \
 81 \
@@ -300,6 +299,7 @@ fuse-libretro \
 gambatte \
 gearboy \
 gearcoleco \
+geargrafx \
 gearsystem \
 genesis-plus-gx \
 genesis-plus-gx-wide \
@@ -361,8 +361,8 @@ melonds \
 snes9x2005 \
 yabause"
 
-LIBRETRO_S922X_CORES="mesen \
-multiemu \
+LIBRETRO_S922X_CORES="beetle-saturn \
+mesen \
 mesen-s \
 quicknes \
 virtualjaguar"
@@ -509,4 +509,5 @@ virtualjaguar"
 "/tmp/cores/pcsx_rearmed_libretro.so;"\
 "/tmp/cores/theodore_libretro.so;"\
 "/tmp/cores/tic80_libretro.so;"\
-"/tmp/cores/4do_libretro.so"
+"/tmp/cores/4do_libretro.so;"\
+"/tmp/cores/mednafen_saturn_libretro.so"
