@@ -43,7 +43,7 @@ index bd806736..c32af4a7 100644
  {
    std::string path = getenv("HOME");
 -  path += "/.emulationstation/es_temporaryinput.cfg";
-+  path = "/storage/.config/yabasanshiro/input.cfg";
++  path = "/storage/roms/saturn/yabasanshiro/input.cfg";
    return path;
  }
  
@@ -69,7 +69,7 @@ index 3b3b581c..dacfee8e 100644
    // Inisialize home directory
    std::string home_dir = getenv("HOME");
 -  home_dir += "/.yabasanshiro/";
-+  home_dir = "/storage/.config/yabasanshiro/";
++  home_dir = "/storage/roms/saturn/yabasanshiro/";
    struct stat st = {0};
    if (stat(home_dir.c_str(), &st) == -1) {
      mkdir(home_dir.c_str(), 0700);
@@ -78,7 +78,7 @@ index 3b3b581c..dacfee8e 100644
 +  std::string bckup_dir = "/storage/roms/bios/yabasanshiro/backup.bin";
    strcpy( buppath, bckup_dir.c_str() );
 -  strcpy( s_savepath, home_dir.c_str() );
-+  strcpy( s_savepath, "/storage/roms/savestates/saturn/yabasanshiro/" );
++  strcpy( s_savepath, "/storage/roms/savestates/saturn" );
    g_keymap_filename = home_dir + "keymapv2.json";
  
    std::string current_exec_name = argv[0]; // Name of the current exec program

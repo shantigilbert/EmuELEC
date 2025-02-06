@@ -3,7 +3,7 @@
 # Copyright (C) 2022-present 351ELEC
 # Copyright (C) 2023 JELOS (https://github.com/JustEnoughLinuxOS)
 
-PKG_NAME="yabasanshiroSA"
+PKG_NAME="yabasanshiroSA_1_11"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/sydarn/yabause"
 PKG_URL="${PKG_SITE}.git"
@@ -11,18 +11,10 @@ PKG_VERSION="a40dace1ae0af3ebd45848549fdf396f40e3930f"
 PKG_GIT_CLONE_BRANCH="pi4-update"
 PKG_ARCH="aarch64"
 PKG_DEPENDS_TARGET="toolchain SDL2 boost openal-soft zlib"
-PKG_LONGDESC="Yabause is a Sega Saturn emulator and took over as  Yaba Sanshiro"
+PKG_LONGDESC="Yabause   is a Sega Saturn emulator and took over as  Yaba Sanshiro"
 PKG_TOOLCHAIN="cmake-make"
 GET_HANDLER_SUPPORT="git"
 PKG_BUILD_FLAGS="+speed"
-
-#if [ ! "${OPENGL}" = "no" ]; then
-#PKG_DEPENDS_TARGET+=" ${OPENGL} glu libglvnd"
-#fi
-
-#if [ "${OPENGLES_SUPPORT}" = yes ]; then
-  #PKG_DEPENDS_TARGET+=" ${OPENGLES}"
-#fi
 
 post_unpack() {
   # use host versions
@@ -39,13 +31,8 @@ pre_make_target() {
 pre_configure_target() {
   PKG_CMAKE_OPTS_TARGET="${PKG_BUILD}/yabause "
 
-  #if [ ! "${OPENGL}" = "no" ]; then
-  #PKG_CMAKE_OPTS_TARGET+=" -DUSE_EGL=ON -DUSE_OPENGL=ON"
-  #fi
-
- # if [ "${OPENGLES_SUPPORT}" = yes ]; then
-    PKG_CMAKE_OPTS_TARGET+=" -DUSE_EGL=OFF -DUSE_OPENGL=ON"
- # fi
+  #PKG_CMAKE_OPTS_TARGET+=" -DUSE_EGL=OFF -DUSE_OPENGL=ON"
+ 
 
   case ${ARCH} in
     aarch64)
@@ -56,15 +43,14 @@ pre_configure_target() {
     ;;
   esac
 
-  PKG_CMAKE_OPTS_TARGET+=" -DCMAKE_SYSTEM_PROCESSOR=x86_64"
+  #PKG_CMAKE_OPTS_TARGET+=" -DCMAKE_SYSTEM_PROCESSOR=x86_64"
 
   PKG_CMAKE_OPTS_TARGET+=" -DOPENGL_INCLUDE_DIR=${SYSROOT_PREFIX}/usr/include \
                            -DOPENGL_opengl_LIBRARY=${SYSROOT_PREFIX}/usr/lib \
                            -DOPENGL_glx_LIBRARY=${SYSROOT_PREFIX}/usr/lib \
                            -DLIBPNG_LIB_DIR=${SYSROOT_PREFIX}/usr/lib \
                            -Dpng_STATIC_LIBRARIES=${SYSROOT_PREFIX}/usr/lib/libpng16.so \
-                           -DCMAKE_BUILD_TYPE=Release \
-						               -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+                           -DCMAKE_BUILD_TYPE=Release"
 }
 
 makeinstall_target() {

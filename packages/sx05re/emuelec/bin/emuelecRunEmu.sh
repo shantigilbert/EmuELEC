@@ -342,6 +342,9 @@ case ${PLATFORM} in
         if [ "${EMU}" = "yabasanshiroSA" ]; then
             set_kill_keys "yabasanshiro"
             RUNTHIS='yabasanshiro.sh "${ROMNAME}"'
+        elif [ "${EMU}" = "yabasanshiroSA1_5" ]; then
+		        set_kill_keys "yabasanshiro1_5"
+            	RUNTHIS='yabasanshiro1_5.sh "${ROMNAME}"'
         fi
         ;;
         esac
@@ -561,6 +564,8 @@ fi
 
 # YabasanshiroSA does not like to be killed?
 [[ "${EMU}" = "yabasanshiroSA" ]] && ret_error="0"
+
+[[ "${EMU}" = "yabasanshiroSA1_5" ]] && ret_error="0"
 
 # Temp fix for retrorun always erroing out on exit
 [[ "${RETRORUN}" == "yes" ]] && ret_error=0
